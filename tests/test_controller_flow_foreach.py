@@ -125,3 +125,28 @@ class ForeachTests(unittest.TestCase):
             self.assertEqual(len(waits),2)
             self.assertEqual(done['steps']['each']['status'],'failed')
             self.assertEqual([i['result']['execution'] for i in done['steps']['each']['items']],['failed','completed'])
+
+    def test_parallel_cancel_requests_all_active_owned_siblings_once(self):
+        from codex_wake.controller_flows import ControllerFlows
+        with tempfile.TemporaryDirectory() as directory:
+            submitted=[];cancelled=[]
+            def invoke(operation,arguments,**kwargs):
+                if operation=='sessions.capabilities':return {'result':{'modes':['new_session']}}
+                if operation=='sessions.create':return {'result':{'operation':{'result':{'target':dict(arguments['expected_target'],conversation_id=kwargs['request']['operation_id'])}}}}
+                if operation=='sessions.prompt':
+                    submitted.append(kwargs['request']['operation_id'])
+                    return {'result':{'operation':{'operation_id':submitted[-1],'operation':'sessions.prompt','result':{'status':'submitted'}}}}
+                if operation=='sessions.wait':return {'result':{'wait':{'status':'timeout'},'operation':{'operation_id':arguments['operation_id'],'execution':'running'}}}
+                if operation=='sessions.cancel':
+                    cancelled.append(arguments['operation_id'])
+                    return {'result':{'operation':{'cancellation':'confirmed'}}}
+                raise AssertionError(operation)
+            source=dict(id='example',version=1,entry='each',nodes=[dict(id='each',type='foreach',items=['one','two'],parallelism=2,
+                mode='new_session',profile='fixture',expected_target={'host':'host','environment':'test'},prompt={'ref':'item'})])
+            owner=ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=lambda:actor(),now=lambda:100)
+            owner.publish(actor(),source)
+            run=owner.start(actor(),'example',1,inputs={},intent='one',binding='caller')
+            self.assertEqual(owner.advance(actor(),run['run_id'])['phase'],'waiting')
+            self.assertEqual(owner.cancel(actor(),run['run_id'])['phase'],'cancelled')
+            owner.cancel(actor(),run['run_id'])
+            self.assertEqual(sorted(cancelled),sorted(submitted))

@@ -57,7 +57,7 @@ class FlowDefinition:
                 flow_error('invalid_flow', 'node IDs must be unique')
             kind = node.get('type')
             fields = {
-                'call': {'id', 'type', 'operation', 'arguments', 'next'},
+                'call': {'id', 'type', 'operation', 'arguments', 'next', 'retry'},
                 'branch': {'id', 'type', 'condition', 'then', 'else', 'unknown'},
                 'wait': {'id', 'type', 'operation_id', 'timeout', 'next', 'operation'},
                 'foreach': {'id', 'type', 'items', 'mode', 'profile', 'expected_target', 'prompt', 'parallelism', 'join', 'next'},
@@ -65,6 +65,9 @@ class FlowDefinition:
             }
             if kind not in fields or set(node) - fields[kind]:
                 flow_error('unsupported_flow_node', 'node type or fields are unsupported')
+            if kind == 'call':
+                from .controller_flow_retry import policy
+                policy(node)
             if kind == 'foreach':
                 from .controller_flow_foreach import validate
                 validate(node)
@@ -231,7 +234,7 @@ class ControllerFlows:
         state = dict(schema_version=1, run_id='flowrun_' + uuid4().hex, flow_id=flow_id, version=version,
             definition_sha256=compiled.digest, target=self.target(flow_id), owner=identity(actor), inputs=inputs,
             binding=binding, created_at=self.now(), phase='ready', cursor=definition['entry'],
-            steps={}, result=None, reason=None, cancellation=False, completed_steps=0)
+            steps={}, attempt_counts={}, attempt_history={}, result=None, reason=None, cancellation=False, completed_steps=0)
         for node in definition['nodes']:
             if node['type'] == 'foreach':
                 capabilities = self.invoke('sessions.capabilities',
@@ -312,34 +315,106 @@ class ControllerFlows:
     def cancel(self, actor, run_id):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
-            state = self._owned(actor, self._load(run_id, db), 'control')
-            if state['phase'] in ('completed', 'cancelled'):
+            state = self._owned(actor,self._load(run_id,db),'control')
+            if state['phase'] in ('completed','cancelled','failed'):
                 return self.projection(state)
-            active = state['phase'] in ('executing', 'uncertain', 'waiting')
-            child_id = state.get('waiting_on') if state['phase'] == 'waiting' else state.get('child_operation_id')
-            state.update(cancellation=True, phase='uncertain' if active else 'cancelled',
-                reason='child_cancellation_requested' if active else 'caller_cancelled')
-            self._write(db, state)
-        if active and child_id:
+            if not state['cancellation']:
+                plan = state.get('execution_definition') or self._definition(state['flow_id'],state['version']).as_dict()
+                nodes = {node['id']:node for node in plan['nodes']}
+                finished = set()
+                for key,value in state['steps'].items():
+                    child = value.get('result',{}).get('operation',{}) if isinstance(value,dict) else {}
+                    if nodes[key]['type']=='wait' and child.get('execution') in ('completed','cancelled','failed'):
+                        finished.add(child.get('operation_id'))
+                targets = {}
+                for key,value in state['steps'].items():
+                    operation = nodes[key].get('operation')
+                    child = value.get('result',{}).get('operation',{}) if isinstance(value,dict) else {}
+                    identifier = child.get('operation_id')
+                    if identifier and identifier not in finished and operation in ('sessions.prompt','operations.send'):
+                        targets[identifier] = 'sessions.cancel' if operation=='sessions.prompt' else 'operations.cancel'
+                if state['phase']=='waiting' and state.get('waiting_on') not in finished:
+                    targets[state['waiting_on']] = 'sessions.cancel' if state.get('waiting_operation')=='sessions.wait' else 'operations.cancel'
+                from .controller_flow_retry import READ_OPERATIONS
+                current = nodes.get(state.get('executing_node'),{})
+                inflight = state['phase'] in ('executing','uncertain') and current.get('type')=='call' and current.get('operation') not in READ_OPERATIONS
+                if inflight and state.get('child_operation_id'):
+                    node = nodes[state['executing_node']]
+                    if node['type']=='call':
+                        targets.setdefault(state['child_operation_id'],'sessions.cancel' if node.get('operation')=='sessions.prompt' else 'operations.cancel')
+                state.update(cancellation=True,cancel_inflight_unknown=inflight,
+                    cancellations={key:dict(operation=value,status='not_requested') for key,value in targets.items()},
+                    phase='uncertain',reason='child_cancellation_requested')
+                self._write(db,state)
+        # At most8 owner requests per call. Remaining or interrupted requests stay
+        # visible; a later cancel call can request remaining, never replay ambiguous.
+        for unused in range(8):
+            with self.connect() as db:
+                db.execute('BEGIN IMMEDIATE')
+                state = self._owned(actor,self._load(run_id,db),'control')
+                pending = [(key,value) for key,value in state.get('cancellations',{}).items() if value['status']=='not_requested']
+                if not pending:break
+                identifier,entry = pending[0]
+                entry['status']='in_progress'
+                self._write(db,state)
             try:
-                cancel_operation = 'sessions.cancel' if state.get('waiting_operation') == 'sessions.wait' else 'operations.cancel'
-                value = self.invoke(cancel_operation, {'operation_id': child_id},
-                    authorize=lambda: self._owned(actor, self._load(run_id), 'control') and actor)
-                child = value.get('result', {}).get('operation', {})
-                if child.get('cancellation') == 'confirmed':
-                    with self.connect() as db:
-                        db.execute('BEGIN IMMEDIATE')
-                        state = self._owned(actor, self._load(run_id, db), 'control')
-                        state.update(phase='cancelled', reason='child_cancellation_confirmed')
-                        state.pop('attempt', None)
-                        self._write(db, state)
+                value = self.invoke(entry['operation'],dict(operation_id=identifier),
+                    authorize=lambda: self._owned(actor,self._load(run_id),'control') and actor)
+                child = value.get('result',{}).get('operation',{})
+                status = 'confirmed' if child.get('cancellation')=='confirmed' else 'requested' if child.get('cancellation')=='requested' else 'uncertain'
             except Exception:
-                # Cancellation cannot establish that an unknown effect stopped.
-                pass
-        return self.projection(state)
+                status='uncertain'
+            with self.connect() as db:
+                db.execute('BEGIN IMMEDIATE')
+                state = self._owned(actor,self._load(run_id,db),'control')
+                state['cancellations'][identifier]['status']=status
+                self._write(db,state)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            state = self._owned(actor,self._load(run_id,db),'control')
+            statuses = [item['status'] for item in state.get('cancellations',{}).values()]
+            confirmed = all(status=='confirmed' for status in statuses) and not state.get('cancel_inflight_unknown')
+            state.update(phase='cancelled' if confirmed else 'uncertain',
+                reason='child_cancellation_confirmed' if confirmed else 'child_cancellation_pending_or_uncertain',
+                cancellation_remaining=statuses.count('not_requested'))
+            if confirmed:state.pop('attempt',None)
+            self._write(db,state)
+            return self.projection(state)
+
+    def _reconcile_cancellation(self,actor,run_id,state):
+        pending=[(key,value) for key,value in state.get('cancellations',{}).items() if value['status']!='confirmed']
+        for identifier,entry in pending[:8]:
+            method='sessions.wait' if entry['operation']=='sessions.cancel' else 'operations.result'
+            arguments=dict(operation_id=identifier)
+            if method=='sessions.wait':arguments['timeout']=0
+            try:
+                value=self.invoke(method,arguments,authorize=lambda:self._owned(actor,self._load(run_id),'control') and actor)
+                child=value.get('result',{}).get('operation',{})
+                terminal=child.get('phase')=='terminal' and child.get('execution') in ('completed','cancelled','failed')
+            except Exception:
+                terminal=False
+            if terminal:
+                with self.connect() as db:
+                    db.execute('BEGIN IMMEDIATE')
+                    latest=self._owned(actor,self._load(run_id,db),'control')
+                    latest['cancellations'][identifier].update(status='confirmed',outcome=child)
+                    if identifier==latest.get('child_operation_id'):
+                        latest['cancel_inflight_unknown']=False
+                    self._write(db,latest)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            latest=self._owned(actor,self._load(run_id,db),'control')
+            confirmed=all(item['status']=='confirmed' for item in latest.get('cancellations',{}).values()) and not latest.get('cancel_inflight_unknown')
+            latest.update(phase='cancelled' if confirmed else 'uncertain',reason='child_cancellation_confirmed' if confirmed else 'child_cancellation_pending_or_uncertain')
+            latest['cancellation_remaining']=sum(item['status']=='not_requested' for item in latest.get('cancellations',{}).values())
+            if confirmed:latest.pop('attempt',None)
+            self._write(db,latest)
+            return self.projection(latest)
 
     def reconcile(self, actor, run_id):
         state = self._owned(actor, self._load(run_id), 'control')
+        if state['cancellation']:
+            return self._reconcile_cancellation(actor,run_id,state)
         if state['phase'] not in ('executing', 'uncertain') or not state.get('child_operation_id'):
             return self.projection(state)
         attempt = state.get('attempt')
@@ -431,8 +506,12 @@ class ControllerFlows:
                     state.update(phase='held', reason='input_unknown')
                     self._write(db, state)
                     return self.projection(state)
+                count = state.setdefault('attempt_counts',{}).get(node['id'],0)+1
+                state['attempt_counts'][node['id']] = count
                 attempt = uuid4().hex
                 child_id = state['run_id'] + '.' + node['id']
+                if node.get('retry'):
+                    child_id += '.try' + str(count)
                 request = dict(operation_id=child_id, idempotency_key=child_id, correlation_id=child_id,
                     binding=state['binding'], target=arguments.get('expected_target', state['target']))
                 state.update(phase='executing', attempt=attempt, executing_node=node['id'], child_operation_id=child_id)
@@ -447,7 +526,16 @@ class ControllerFlows:
                 with self.connect() as db:
                     latest = self._load(run_id, db)
                     if latest.get('attempt') == attempt:
-                        latest.update(phase='uncertain', reason=getattr(error, 'code', 'step_effect_uncertain'))
+                        from .controller_flow_retry import should_retry, error_code
+                        code = error_code(error)
+                        retry = node['type']=='call' and not latest['cancellation'] and should_retry(node,code,count)
+                        latest.setdefault('attempt_history',{}).setdefault(node['id'],[]).append(dict(attempt=count,error=code,operation_id=child_id))
+                        exhausted=bool(node.get('retry')) and not retry and code in node['retry']['when']
+                        latest.update(phase='ready' if retry else 'held' if exhausted else 'uncertain',
+                            reason='retry_scheduled' if retry else 'retry_exhausted' if exhausted else code)
+                        if retry:
+                            latest.pop('attempt',None)
+                            latest.pop('executing_node',None)
                         self._write(db, latest)
                     return self.projection(latest)
             with self.connect() as db:
@@ -455,8 +543,18 @@ class ControllerFlows:
                 latest = self._load(run_id, db)
                 if latest.get('attempt') != attempt:
                     return self.projection(latest)
+                child = value.get('result',{}).get('operation',{})
+                if child.get('phase') in ('uncertain','executing'):
+                    latest['steps'][node['id']] = value
+                    latest.update(phase='uncertain',reason='child_effect_uncertain')
+                    self._write(db,latest)
+                    return self.projection(latest)
                 if value.get('status') in ('failed', 'held'):
-                    latest.update(phase='held', reason=value.get('error', {}).get('code', 'child_not_completed'))
+                    from .controller_flow_retry import should_retry
+                    code=value.get('error',{}).get('code','child_not_completed')
+                    retry=node['type']=='call' and not latest['cancellation'] and should_retry(node,code,count)
+                    latest.update(phase='ready' if retry else 'held',reason='retry_scheduled' if retry else code)
+                    latest.setdefault('attempt_history',{}).setdefault(node['id'],[]).append(dict(attempt=count,error=code,operation_id=child_id))
                     latest['steps'][node['id']] = value
                     latest.pop('attempt', None)
                     self._write(db, latest)

@@ -92,3 +92,11 @@ class ControllerEffects:
     def cancel_owned(self, record):
         from types import SimpleNamespace
         return self.cancel(SimpleNamespace(**record['principal']),record)
+
+    def cancel_native_owned(self, record):
+        from .controller_flow_sessions import ControllerFlowSessions
+        return ControllerFlowSessions(self.root).cancel_native_owned(record)
+
+    def observe_native_owned(self, record):
+        from .controller_flow_sessions import ControllerFlowSessions
+        return ControllerFlowSessions(self.root).observe_native_owned(record)

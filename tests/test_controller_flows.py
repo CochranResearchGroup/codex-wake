@@ -200,3 +200,92 @@ class FlowTests(unittest.TestCase):
                 owner.publish(actor(), source)
             self.assertEqual(caught.exception.code, 'invalid_condition')
             self.assertEqual(effects, [])
+
+    def test_opt_in_read_retry_is_bounded_and_survives_caller_restart(self):
+        from codex_wake.controller_flows import ControllerFlows
+        with tempfile.TemporaryDirectory() as directory:
+            calls=[]
+            def invoke(operation,arguments,**kw):
+                calls.append(operation)
+                if len(calls)==1:raise InventoryError('timeout','temporary readonly source timeout')
+                return {'result': {'value':'retained'}}
+            source=dict(id='example',version=1,entry='read',nodes=[
+                dict(id='read',type='call',operation='inventory.list',arguments={},retry=dict(max_attempts=2,when=['timeout']),next='done'),
+                dict(id='done',type='end',value={'ref':'steps.read.result.value'})])
+            owner=ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=lambda:actor(),now=lambda:100)
+            owner.publish(actor(),source)
+            run=owner.start(actor(),'example',1,inputs={},intent='one',binding='caller')
+            first=owner.advance(actor(),run['run_id'])
+            self.assertEqual((first['phase'],first['reason']),('ready','retry_scheduled'))
+            restarted=ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=lambda:actor(),now=lambda:100)
+            done=restarted.advance(actor(),run['run_id'])
+            self.assertEqual(done['result'],'retained')
+            self.assertEqual(done['attempt_counts']['read'],2)
+            self.assertEqual(restarted.advance(actor(),run['run_id']),done)
+            self.assertEqual(calls,['inventory.list','inventory.list'])
+
+    def test_uncertain_effect_blocks_dependents_and_reconciles_without_replay(self):
+        from codex_wake.controller_flows import ControllerFlows
+        with tempfile.TemporaryDirectory() as directory:
+            effects=[];lookups=[]
+            def invoke(operation,arguments,**kw):
+                if operation=='operations.result':
+                    lookups.append(arguments['operation_id'])
+                    return {'result':{'operation':{'phase':'uncertain','execution':'unknown'}}}
+                effects.append(operation)
+                return {'result':{'operation':{'operation_id':kw['request']['operation_id'],'phase':'uncertain','execution':'unknown'}}}
+            source=dict(id='example',version=1,entry='effect',nodes=[dict(id='effect',type='call',operation='fixture.effect',arguments={},next='dependent'),
+                dict(id='dependent',type='call',operation='fixture.dependent',arguments={})])
+            owner=ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=lambda:actor(),now=lambda:100)
+            owner.publish(actor(),source)
+            run=owner.start(actor(),'example',1,inputs={},intent='one',binding='caller')
+            uncertain=owner.advance(actor(),run['run_id'])
+            self.assertEqual(uncertain['phase'],'uncertain')
+            owner.advance(actor(),run['run_id'])
+            self.assertEqual(owner.reconcile(actor(),run['run_id'])['phase'],'uncertain')
+            self.assertEqual(effects,['fixture.effect'])
+            self.assertEqual(len(lookups),1)
+
+    def test_read_retry_exhaustion_stops_at_its_declared_total(self):
+        from codex_wake.controller_flows import ControllerFlows
+        with tempfile.TemporaryDirectory() as directory:
+            calls=[]
+            def invoke(operation,arguments,**kw):
+                calls.append(operation)
+                raise TimeoutError('owned readonly transport timed out')
+            source=dict(id='example',version=1,entry='read',nodes=[dict(id='read',type='call',operation='inventory.list',arguments={},retry=dict(max_attempts=2,when=['timeout']))])
+            owner=ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=lambda:actor(),now=lambda:100)
+            owner.publish(actor(),source)
+            run=owner.start(actor(),'example',1,inputs={},intent='one',binding='caller')
+            owner.advance(actor(),run['run_id'])
+            stopped=owner.advance(actor(),run['run_id'])
+            self.assertEqual((stopped['phase'],stopped['reason']),('held','retry_exhausted'))
+            owner.advance(actor(),run['run_id'])
+            self.assertEqual(len(calls),2)
+
+    def test_effectful_operations_cannot_claim_read_retry_safety(self):
+        from codex_wake.controller_flows import FlowDefinition
+        source=definition()
+        source['nodes'][1].update(operation='operations.send',retry=dict(max_attempts=3,when=['timeout']))
+        with self.assertRaises(InventoryError) as caught:
+            FlowDefinition.compile(source)
+        self.assertEqual(caught.exception.code,'unsafe_retry')
+
+    def test_requested_cancellation_reconciles_owner_outcome_without_resending(self):
+        from codex_wake.controller_flows import ControllerFlows
+        with tempfile.TemporaryDirectory() as directory:
+            cancellations=[]
+            def invoke(operation,arguments,**kw):
+                if operation=='operations.wait':return {'result':{'wait':{'status':'timeout'}}}
+                if operation=='operations.cancel':
+                    cancellations.append(arguments['operation_id'])
+                    return {'result':{'operation':{'cancellation':'requested'}}}
+                if operation=='operations.result':return {'result':{'operation':{'phase':'terminal','execution':'cancelled'}}}
+                raise AssertionError(operation)
+            owner=ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=lambda:actor(),now=lambda:100)
+            owner.publish(actor(),dict(id='example',version=1,entry='wait',nodes=[dict(id='wait',type='wait',operation_id='owned',timeout=0)]))
+            run=owner.start(actor(),'example',1,inputs={},intent='one',binding='caller')
+            owner.advance(actor(),run['run_id'])
+            self.assertEqual(owner.cancel(actor(),run['run_id'])['phase'],'uncertain')
+            self.assertEqual(owner.reconcile(actor(),run['run_id'])['phase'],'cancelled')
+            self.assertEqual(cancellations,['owned'])

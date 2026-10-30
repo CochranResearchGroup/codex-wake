@@ -25,6 +25,7 @@ class SessionOperationsTests(unittest.TestCase):
             config.write_text(json.dumps(dict(version=1, profiles={'fixture': profile})));config.chmod(0o600)
             effects = []
             completed = [False]
+            interrupted = [False]
             def request(endpoint, codex, method, params, timeout):
                 if method == 'thread/start':
                     effects.append(method)
@@ -34,8 +35,12 @@ class SessionOperationsTests(unittest.TestCase):
                     return {'turn': {'id': 'turn-one', 'status': 'inProgress'}}
                 if method == 'thread/read':
                     return {'thread': {'id': 'created', 'cwd': str(root), 'modelProvider': 'codex',
-                        'turns': [{'id': 'turn-one', 'status': 'completed' if completed[0] else 'inProgress',
+                        'turns': [{'id': 'turn-one', 'status': 'interrupted' if interrupted[0] else 'completed' if completed[0] else 'inProgress',
                             'items': [{'type': 'agentMessage', 'text': 'native final'}]}]}}
+                if method == 'turn/interrupt':
+                    effects.append('interrupt')
+                    interrupted[0] = True
+                    return {}
                 raise AssertionError(method)
             owner = ControllerFlowSessions(root, resolve_build=lambda target: base, request=request, metadata=lambda profile: {'codexHome': str(root), 'peer_pid': os.getpid()})
             target = owner.target('fixture')
@@ -51,6 +56,8 @@ class SessionOperationsTests(unittest.TestCase):
             self.assertEqual(invoke('wait',dict(operation_id='prompt',timeout=0))['result']['wait']['status'],'timeout')
             completed[0] = True
             restarted = ControllerFlowSessions(root, resolve_build=lambda target: base, request=request, metadata=lambda profile: {'codexHome': str(root), 'peer_pid': os.getpid()})
+            generic=restarted.runtime.operation(actor,'operations.result',dict(operation_id='prompt'),authorize=lambda:actor)
+            self.assertEqual(generic['result']['operation']['answer']['text'],'native final')
             answer = restarted.execute(actor,'sessions.wait',dict(operation_id='prompt',timeout=0),authorize=lambda: actor)
             self.assertEqual(answer['result']['operation']['answer']['text'],'native final')
             self.assertEqual(answer['result']['operation']['target'],child)
@@ -62,3 +69,8 @@ class SessionOperationsTests(unittest.TestCase):
             with self.assertRaises(WakeError):
                 invoke('create',dict(profile='fixture',expected_target=target,_request=metadata('paused',target)))
             self.assertEqual(len(effects),2)
+            change_control(root,'resume')
+            completed[0] = False
+            invoke('prompt',dict(profile='fixture',expected_target=child,prompt='owned active work',_request=metadata('revoked-prompt',child)))
+            owner.runtime.revoke_grant('grant',issuer='local://test',resource='wake:controller')
+            self.assertEqual(effects[-1],'interrupt')

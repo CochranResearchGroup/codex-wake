@@ -261,7 +261,9 @@ class RuntimeTests(unittest.TestCase):
             briefs.propose('revocation-task',dict(objective='Synthetic grant cancellation',phase='test',non_goals=['No providers'],acceptance=['Only owned job cancelled'],context=[],workspace=str(work),allocation_ref='fixture',permission_ref='fixture'),authority=authority)
             briefs.approve('revocation-task',1,authority=authority);briefs.admit('revocation-task','revocation-assignment',authority=authority)
             jobs=BackgroundJobs(runtime.root)
-            profile=jobs.approve_command('revoke',[sys.executable,'-c',"import time;time.sleep(1);print('unrevoked peer survived')"],work,principal=operator,task_pin=briefs.assignment_pin('revocation-task','revocation-assignment'),owner='native-worker',max_seconds=3,max_log_bytes=1024)
+            release=Path(directory)/'release-peer'
+            command="import time;from pathlib import Path;p=Path("+repr(str(release))+");\nwhile not p.exists():time.sleep(.01)\nprint('unrevoked peer survived')"
+            profile=jobs.approve_command('revoke',[sys.executable,'-c',command],work,principal=operator,task_pin=briefs.assignment_pin('revocation-task','revocation-assignment'),owner='native-worker',max_seconds=15,max_log_bytes=1024)
             target=dict(host='fixture',environment='linux',namespace='jobs',conversation_id='revoke',configuration_revision=profile['sha256'])
             actor=replace(actor,targets=[target]);peer=replace(actor,grant_id='unrevoked-job-peer')
             path=runtime.root/'controller-messaging.json';config=json.loads(path.read_text());config['job_bindings']={'job':dict(subject=actor.subject,client_id=actor.client_id,native_subject='native-worker',tasks=['revocation-task'],profile='revoke',target=target)};path.write_text(json.dumps(config))
@@ -273,6 +275,7 @@ class RuntimeTests(unittest.TestCase):
             self.assertIn(receipt['operations'][0]['cancellation'],('requested','confirmed'))
             deadline=time.monotonic()+3
             while jobs.inspect(owned['result']['job_id'])['status'] not in ('cancelled','completed','failed','timed_out') and time.monotonic()<deadline:time.sleep(.02)
+            release.touch()
             self.assertEqual(jobs.inspect(owned['result']['job_id'])['status'],'cancelled')
             result=runtime.operation(peer,'operations.wait',dict(operation_id='peer-job',timeout=5),authorize=lambda:peer)
             self.assertEqual(result['result']['operation']['answer']['text'],'unrevoked peer survived\n')

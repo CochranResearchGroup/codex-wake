@@ -176,7 +176,19 @@ class ControllerRuntime:
         return self.envelope(operation, record)
 
     def _refresh(self, actor, record, authorize):
-        if self.adapter is None or record['operation'] != 'operations.send' or record['phase'] == 'terminal': return record
+        if self.adapter is None or record['phase']=='terminal':return record
+        if record['operation']=='sessions.prompt' and hasattr(self.adapter,'observe_native_owned'):
+            self._owned(actor,record,authorize)
+            try:
+                self.adapter.observe_native_owned(record)
+            except (ValueError,OSError) as error:
+                record.update(phase='uncertain',execution='unknown',reason=getattr(error,'code','native_owner_unavailable'))
+            self._save(record)
+            if record['phase']=='terminal' and record.get('answer') is not None:
+                self._event(record,'native_terminal',dict(kind='answer',**record['answer']))
+            self._owned(actor,record,authorize)
+            return record
+        if record['operation']!='operations.send':return record
         self._owned(actor, record, authorize)
         if record['result'] is None:
             handle = self.adapter.reconcile(actor, record)
@@ -204,7 +216,7 @@ class ControllerRuntime:
             if time.monotonic() >= deadline: return record, 'timeout'
             time.sleep(min(.05, max(0, deadline - time.monotonic())))
 
-    def operation(self, actor, operation, arguments, *, authorize):
+    def operation(self, actor, operation, arguments, *, authorize, expected_operation=None):
         if not isinstance(arguments, dict): raise InventoryError('invalid_argument', 'object arguments required')
         if operation == 'operations.send':
             if self.adapter is None: raise InventoryError('unsupported_operation', 'host send adapter unavailable')
@@ -244,9 +256,15 @@ class ControllerRuntime:
             raise InventoryError('invalid_argument', 'unsupported operation arguments')
         capability = 'control' if operation in ('operations.cancel', 'operations.rebind') else 'observe'
         record = self._owned(actor, self._load(arguments['operation_id']), authorize, capability=capability)
+        if expected_operation is not None and record['operation']!=expected_operation:
+            raise InventoryError('unsupported_operation','original operation belongs to another effect owner')
         if operation == 'operations.cancel':
             if record['phase'] == 'terminal': return self.envelope(operation, record)
-            if self.adapter is None or record['operation'] != 'operations.send' or record['result'] is None:
+            if record['operation']=='sessions.prompt' and self.adapter is not None and hasattr(self.adapter,'cancel_native_owned'):
+                record['cancellation']=self.adapter.cancel_native_owned(record)
+                if record['cancellation']=='confirmed' and record['phase']!='terminal':
+                    record.update(execution='cancelled',phase='terminal',delivery='retained',acceptance='cancelled')
+            elif self.adapter is None or record['operation'] != 'operations.send' or record['result'] is None:
                 record['cancellation'] = 'uncertain'
             else:
                 record['cancellation'] = self.adapter.cancel(actor, record)
@@ -312,7 +330,9 @@ class ControllerRuntime:
             if record['cancellation'] in ('confirmed','requested'):
                 outcomes.append(dict(operation_id=record['operation_id'],cancellation=record['cancellation']));continue
             try:
-                if self.adapter is None or record['operation']!='operations.send':
+                if record['operation']=='sessions.prompt' and self.adapter is not None and hasattr(self.adapter,'cancel_native_owned'):
+                    cancellation=self.adapter.cancel_native_owned(record)
+                elif self.adapter is None or record['operation']!='operations.send':
                     cancellation='uncertain'
                 else:
                     if record['result'] is None:
@@ -321,7 +341,7 @@ class ControllerRuntime:
                     cancellation=self.adapter.cancel_owned(record) if record['result'] is not None else 'uncertain'
                 record['cancellation']=cancellation
                 record['revocation']=dict(grant_id=grant_id,status='cancellation_'+cancellation)
-                if cancellation=='confirmed':record.update(execution='cancelled',phase='terminal',delivery='retained',acceptance='cancelled')
+                if cancellation=='confirmed' and record['phase']!='terminal':record.update(execution='cancelled',phase='terminal',delivery='retained',acceptance='cancelled')
             except (ValueError,OSError,KeyError) as error:
                 record['cancellation']='uncertain';record['revocation']=dict(grant_id=grant_id,status='cancellation_uncertain',reason=getattr(error,'code','owner_unavailable'))
             self._save(record,update_owner=True)

@@ -21,6 +21,10 @@ from websockets.sync.server import unix_serve
 
 
 def main():
+    import argparse
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--join-and-retry',action='store_true')
+    options=parser.parse_args()
     import codex_wake
     from codex_wake.build_commands import owner_from_root
     from codex_wake.controller_flow_sessions import ControllerFlowSessions
@@ -36,12 +40,15 @@ def main():
             sha256=hashlib.sha256(Path(sys.executable).read_bytes()).hexdigest(),upstream_version='0.164.0+fixture',revision='protocol-fixture',source='disposable Python protocol fixture')})))
         (root/'controller-accounts.toml').write_text(f'''[profiles]\nstate_root="{root/'homes'}"\nknown_profiles=["alice"]\n[builds]\nmanifest="{manifest}"\n''')
         base=next(row['target'] for row in owner_from_root(root).execute('builds.list',dict(account='alice'))['builds'] if row['name']=='modded')
-        threads={};effects=[];auto=[False]
+        threads={};effects=[];auto=[False];fail_initializations=[0];failed_prompts=set();defer_interrupt=[False]
         def handler(ws):
             for raw in ws:
                 message=json.loads(raw)
                 if 'id' not in message:continue
                 method,params=message['method'],message.get('params',{})
+                if method=='initialize' and fail_initializations[0]:
+                    fail_initializations[0]-=1
+                    ws.send(json.dumps(dict(id=message['id'],error=dict(code=-32000,message='temporary fixture source unavailable'))));continue
                 if method=='initialize':value=dict(codexHome=str(home))
                 elif method=='thread/start':
                     identifier='fixture-thread-'+str(len(threads))
@@ -50,12 +57,14 @@ def main():
                 elif method=='thread/read':value=dict(thread=threads[params['threadId']])
                 elif method=='turn/start':
                     thread=threads[params['threadId']]
-                    turn=dict(id='turn-'+str(len(thread['turns'])),status='completed' if auto[0] else 'inProgress',
+                    turn=dict(id='turn-'+str(len(thread['turns'])),status=('failed' if params['input'][0]['text'] in failed_prompts else 'completed') if auto[0] else 'inProgress',
                         items=[dict(type='agentMessage',text='answer:'+params['input'][0]['text'])])
                     thread['turns'].append(turn);effects.append(('prompt',thread['id'],params['input'][0]['text']));value=dict(turn=turn)
                 elif method=='turn/interrupt':
                     turn=next(t for t in threads[params['threadId']]['turns'] if t['id']==params['turnId'])
-                    turn['status']='interrupted';value={}
+                    if defer_interrupt[0]:turn['interruptRequested']=True
+                    else:turn['status']='interrupted'
+                    effects.append(('interrupt',params['threadId'],params['turnId']));value={}
                 else:raise AssertionError(method)
                 ws.send(json.dumps(dict(id=message['id'],result=value)))
         endpoint=root/'native.sock';server=unix_serve(handler,str(endpoint))
@@ -84,6 +93,7 @@ def main():
         http=None;http_worker=None
         try:
             source=definition(1,'new_session',target,['one','two'])
+            if options.join_and_retry:source['nodes'][0]['parallelism']=2
             cli('flows','publish',dict(definition=source))
             run=cli('flows','start',dict(flow_id='fixture',version=1,inputs={'members':['one','two']},intent='new',binding='original-cli'))
             for unused in range(4):
@@ -95,7 +105,8 @@ def main():
             assert len(threads)==2 and len(effects)==4,effects
             assert cli('flows','advance',dict(run_id=run['run_id']))==state
             sequential_target=state['result']['items'][0]['target']
-            auth=OAuthAuthority(root/'oauth.sqlite',issuer='https://wake.test',resource='https://wake.test/controller')
+            from codex_wake.operation_commands import owner as operation_owner
+            auth=OAuthAuthority(root/'oauth.sqlite',issuer='https://wake.test',resource='https://wake.test/controller',on_revoke=operation_owner(root).revoke_grant)
             client=auth.register(dict(redirect_uris=['http://localhost/callback']))
             verifier='v'*43;challenge=base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
             code=auth.authorize(subject='service',principal_kind='service',client_id=client['client_id'],redirect_uri='http://localhost/callback',resource=auth.resource,
@@ -142,11 +153,83 @@ def main():
                         done=await call('advance',dict(run_id=started['run_id']))
                         assert done['phase']=='completed' and done['result']['items'][0]['result']['answer']['text']=='answer:native',done
             asyncio.run(native_mcp())
+            if options.join_and_retry:
+                auto[0]=True;failed_prompts.add('failed-item')
+                failed=definition(4,'new_session',target,[]);failed['nodes'][0]['parallelism']=2
+                cli('flows','publish',dict(definition=failed))
+                started=cli('flows','start',dict(flow_id='fixture',version=4,inputs={'members':['failed-item','sibling']},intent='join-failure',binding='join-caller'))
+                joined=cli('flows','advance',dict(run_id=started['run_id']))
+                assert joined['phase']=='failed' and joined['steps']['each']['status']=='failed',joined
+                assert [item['result']['execution'] for item in joined['steps']['each']['items']]==['failed','completed']
+                released=definition(5,'new_session',target,[]);released['nodes'][0].update(parallelism=2,join='all_complete')
+                cli('flows','publish',dict(definition=released))
+                started=cli('flows','start',dict(flow_id='fixture',version=5,inputs={'members':['failed-item','sibling']},intent='explicit-release',binding='join-caller'))
+                joined=cli('flows','advance',dict(run_id=started['run_id']))
+                assert joined['phase']=='completed' and joined['result']['status']=='failed',joined
+                auto[0]=False
+                cancel_source=definition(6,'new_session',target,[]);cancel_source['nodes'][0]['parallelism']=2
+                cli('flows','publish',dict(definition=cancel_source))
+                started=cli('flows','start',dict(flow_id='fixture',version=6,inputs={'members':['cancel-one','cancel-two']},intent='cancel-both',binding='cancel-caller'))
+                pending=cli('flows','advance',dict(run_id=started['run_id']))
+                assert pending['phase']=='waiting'
+                cancelled=cli('flows','cancel',dict(run_id=started['run_id']))
+                assert cancelled['phase']=='cancelled' and len(cancelled['cancellations'])==2,cancelled
+                interrupt_count=len([effect for effect in effects if effect[0]=='interrupt'])
+                cli('flows','cancel',dict(run_id=started['run_id']))
+                assert len([effect for effect in effects if effect[0]=='interrupt'])==interrupt_count
+                async_source=definition(12,'new_session',target,[])
+                cli('flows','publish',dict(definition=async_source))
+                started=cli('flows','start',dict(flow_id='fixture',version=12,inputs={'members':['async-cancel']},intent='async-cancel',binding='cancel-caller'))
+                cli('flows','advance',dict(run_id=started['run_id']))
+                defer_interrupt[0]=True
+                requested=cli('flows','cancel',dict(run_id=started['run_id']))
+                assert requested['phase']=='uncertain',requested
+                defer_interrupt[0]=False
+                for thread in threads.values():
+                    for turn in thread['turns']:
+                        if turn.get('interruptRequested'):turn['status']='interrupted'
+                interrupt_count=len([effect for effect in effects if effect[0]=='interrupt'])
+                reconciled=cli('flows','reconcile',dict(run_id=started['run_id']))
+                assert reconciled['phase']=='cancelled',reconciled
+                assert len([effect for effect in effects if effect[0]=='interrupt'])==interrupt_count
+                peer_source=definition(7,'new_session',target,[])
+                cli('flows','publish',dict(definition=peer_source))
+                peer=cli('flows','start',dict(flow_id='fixture',version=7,inputs={'members':['peer']},intent='peer-active',binding='peer'))
+                peer=cli('flows','advance',dict(run_id=peer['run_id']))
+                peer_target=next(value['result']['operation']['result']['target'] for key,value in peer['steps'].items() if key.endswith('_create'))
+                original_source=definition(8,'new_session',target,[]);original_source['nodes'][0]['parallelism']=2
+                api('publish',dict(definition=original_source),True)
+                original=api('start',dict(flow_id='fixture',version=8,inputs={'members':['owned-one','owned-two']},intent='revoke-owned',binding='oauth-origin'))
+                original=api('advance',dict(run_id=original['run_id']))
+                owned_targets=[value['result']['operation']['result']['target'] for key,value in original['steps'].items() if key.endswith('_create')]
+                revoked=auth.revoke_grant(auth.authenticate(token).grant_id)
+                assert revoked['cancellation']=='reconciled',revoked
+                assert all(threads[item['conversation_id']]['turns'][-1]['status']=='interrupted' for item in owned_targets)
+                assert threads[peer_target['conversation_id']]['turns'][-1]['status']=='inProgress'
+                cli('flows','cancel',dict(run_id=peer['run_id']))
+                retry_source=dict(id='fixture',version=9,entry='read',nodes=[dict(id='read',type='call',operation='sessions.capabilities',
+                    arguments=dict(profile='fixture',expected_target=target),retry=dict(max_attempts=2,when=['source_unavailable']),next='done'),
+                    dict(id='done',type='end',value={'ref':'steps.read.result.modes'})])
+                cli('flows','publish',dict(definition=retry_source))
+                started=cli('flows','start',dict(flow_id='fixture',version=9,inputs={},intent='read-retry',binding='read-caller'))
+                fail_initializations[0]=1
+                first=cli('flows','advance',dict(run_id=started['run_id']))
+                assert first['phase']=='ready' and first['reason']=='retry_scheduled',first
+                final=cli('flows','advance',dict(run_id=started['run_id']))
+                assert final['phase']=='completed' and final['attempt_counts']['read']==2,final
+                exhausted=dict(retry_source,version=10)
+                cli('flows','publish',dict(definition=exhausted))
+                started=cli('flows','start',dict(flow_id='fixture',version=10,inputs={},intent='read-exhaustion',binding='read-caller'))
+                fail_initializations[0]=2
+                cli('flows','advance',dict(run_id=started['run_id']))
+                held=cli('flows','advance',dict(run_id=started['run_id']))
+                assert held['phase']=='held' and held['reason']=='retry_exhausted' and held['attempt_counts']['read']==2,held
+                count=len(effects);cli('flows','advance',dict(run_id=started['run_id']));assert len(effects)==count
             print(json.dumps(dict(status='passed',package=codex_wake.__file__,checks=[
                 'actual existing Unix socket with kernel peer PID/account/build pins','installed CLI new session per snapshotted member',
                 'late native-shaped result across caller process exit with no resubmission','real OAuth API/MCP and remote CLI sequential prompts wait in same conversation',
                 'actual stdio MCP inherited native grant starts structured foreach'],
-                boundary='deterministic disposable Python protocol server; no actual model/provider call or packaged Codex qualification'),sort_keys=True))
+                join_and_retry=options.join_and_retry, join_and_retry_checks=(['bounded concurrent siblings', 'wait-all aggregate failure and explicit all-complete release', 'all active siblings cancelled once', 'asynchronous cancellation reconciles without repeat interrupt', 'revocation cancels only grant-owned native turns and preserves peer', 'readonly transient retry and exhaustion persist across caller restart'] if options.join_and_retry else []), boundary='deterministic disposable Python protocol server; no actual model/provider call or packaged Codex qualification'),sort_keys=True))
         finally:
             if http:http.shutdown();http.server_close();http_worker.join(timeout=2)
             server.shutdown();worker.join(timeout=2)

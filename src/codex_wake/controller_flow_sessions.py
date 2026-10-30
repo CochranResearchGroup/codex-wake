@@ -24,7 +24,7 @@ _ACCOUNT_FIELDS = {'host','environment','provider','account','home','home_genera
 class ControllerFlowSessions:
     def __init__(self, root, *, resolve_build=None, request=native_request, metadata=None):
         self.root = Path(root)
-        self.runtime = ControllerRuntime(root)
+        self.runtime = ControllerRuntime(root,adapter=self)
         self.resolve_build = resolve_build or self._build
         self.request = request
         self.metadata = metadata or self._metadata
@@ -159,14 +159,15 @@ class ControllerFlowSessions:
                     authority='inherited',allocation_created=False)
             thread = self.request(profile['endpoint'],profile['target']['executable'],'thread/read',
                 dict(threadId=target['conversation_id'],includeTurns=False),5)['thread']
-            self._identity(profile,thread)
+            if self._identity(profile,thread).thread_id!=target['conversation_id']:
+                raise InventoryError('stale_target','native response changed the exact conversation')
             guard()
             turn = self.request(profile['endpoint'],profile['target']['executable'],'turn/start',
                 dict(threadId=target['conversation_id'],input=[dict(type='text',text=payload['prompt'])],cwd=profile['cwd']),5)['turn']
             if not isinstance(turn.get('id'),str) or not turn['id']:
                 raise InventoryError('uncertain_effect','native turn ID unavailable after submission')
-            return dict(target=target,turn_id=turn['id'],profile=name,profile_revision=profile['revision'],
-                status='submitted',answer=None,allocation_created=False)
+            return dict(_pending=True,handle=dict(kind='native_turn',target=target,turn_id=turn['id'],profile=name,profile_revision=profile['revision'],
+                status='submitted',answer=None,allocation_created=False))
         from .wake_control import delivery_guard
         with delivery_guard(self.root):
             return self.runtime.execute(actor,operation,arguments,authorize=guard,dispatch=dispatch)
@@ -175,34 +176,57 @@ class ControllerFlowSessions:
         allowed = {'operation_id','timeout'} if operation == 'sessions.wait' else {'operation_id'}
         if not isinstance(arguments,dict) or set(arguments)-allowed or 'operation_id' not in arguments:
             raise InventoryError('invalid_argument','owned native operation handle required')
-        record = self.runtime.operation(actor,'operations.result',dict(operation_id=arguments['operation_id']),authorize=authorize)['result']['operation']
-        if record['operation'] != 'sessions.prompt' or not isinstance(record.get('result'),dict):
-            raise InventoryError('unsupported_operation','retained session prompt required')
-        result = record['result']
-        target,name = result['target'],result['profile']
-        profile = self._context(actor,name,target,authorize,'control' if operation == 'sessions.cancel' else 'observe')
-        if operation == 'sessions.cancel':
-            self.request(profile['endpoint'],profile['target']['executable'],'turn/interrupt',
-                dict(threadId=target['conversation_id'],turnId=result['turn_id']),5)
-            record.update(cancellation='requested')
-            return self.runtime.envelope(operation,record)
-        timeout = arguments.get('timeout',0)
-        if type(timeout) not in (int,float) or not 0 <= timeout <= 30:
-            raise InventoryError('invalid_argument','bounded wait timeout required')
-        deadline = time.monotonic()+timeout
-        while True:
-            self._context(actor,name,target,authorize,'observe')
-            thread = self.request(profile['endpoint'],profile['target']['executable'],'thread/read',
-                dict(threadId=target['conversation_id'],includeTurns=True),5)['thread']
-            self._identity(profile,thread)
-            turns = [turn for turn in thread.get('turns',[]) if turn.get('id') == result['turn_id']]
-            if len(turns) == 1 and turns[0].get('status') in ('completed','failed','interrupted'):
-                turn = turns[0]
-                texts = [item['text'] for item in turn.get('items',[]) if item.get('type') == 'agentMessage' and isinstance(item.get('text'),str)]
-                record.update(execution='completed' if turn['status']=='completed' else 'cancelled' if turn['status']=='interrupted' else 'failed',
-                    answer=dict(text='\n'.join(texts),source='native_turn',turn_id=result['turn_id']),phase='terminal')
-                return self.runtime.envelope(operation,record,wait=dict(status='completed',ends_work=False))
-            if time.monotonic() >= deadline:
-                record.update(execution='running',phase='pending',answer=None)
-                return self.runtime.envelope(operation,record,wait=dict(status='timeout',ends_work=False))
-            time.sleep(min(.05,max(0,deadline-time.monotonic())))
+        verb='operations.cancel' if operation=='sessions.cancel' else 'operations.wait'
+        value=self.runtime.operation(actor,verb,arguments,authorize=authorize,expected_operation='sessions.prompt')
+        if operation=='sessions.cancel' and value['result']['operation']['phase']=='terminal':
+            value['result']['operation']['cancellation']='confirmed'
+        value['operation']=operation
+        return value
+
+    def _owned_native_context(self, record):
+        result=record.get('result')
+        if record.get('operation')!='sessions.prompt' or not isinstance(result,dict) or result.get('kind')!='native_turn':
+            raise InventoryError('native_handle_unavailable','original native turn handle unavailable')
+        profile=self.profile(result['profile'])
+        target=result['target']
+        if (target!=record['target'] or result['profile_revision']!=profile['revision']
+                or {key:value for key,value in target.items() if key!='conversation_id'}!=self.target(result['profile'])):
+            raise InventoryError('stale_target','original native profile generation changed')
+        metadata=self.metadata(profile)
+        if metadata.get('codexHome')!=profile['target']['home'] or metadata.get('peer_pid')!=profile['process']['pid']:
+            raise InventoryError('stale_target','original native endpoint owner changed')
+        return profile,target,result
+
+    def observe_native_owned(self,record):
+        profile,target,result=self._owned_native_context(record)
+        thread=self.request(profile['endpoint'],profile['target']['executable'],'thread/read',
+            dict(threadId=target['conversation_id'],includeTurns=True),5)['thread']
+        if self._identity(profile,thread).thread_id!=target['conversation_id']:
+            raise InventoryError('stale_target','native response changed the exact conversation')
+        turns=[turn for turn in thread.get('turns',[]) if turn.get('id')==result['turn_id']]
+        if len(turns)!=1:
+            raise InventoryError('native_turn_unavailable','original native turn unavailable')
+        turn=turns[0]
+        if turn.get('status') in ('completed','failed','interrupted'):
+            text='\n'.join(item['text'] for item in turn.get('items',[]) if item.get('type')=='agentMessage' and isinstance(item.get('text'),str))
+            raw=text.encode()
+            record.update(phase='terminal',execution='completed' if turn['status']=='completed' else 'cancelled' if turn['status']=='interrupted' else 'failed',
+                answer=dict(text=raw[:32768].decode(errors='replace'),truncated=len(raw)>32768,source='native_turn',turn_id=result['turn_id']),
+                delivery='retained',acceptance='owner_observed',reason=None)
+        else:
+            record.update(phase='waiting',execution='running',reason=None)
+        return record
+
+    def cancel_native_owned(self, record):
+        """Cancel only the original native owner reference, including after revocation.
+
+        This does not mint an Actor or grant. It cannot start work or change a
+        target; the private journal and current host profile fence the exact turn.
+        """
+        self.observe_native_owned(record)
+        if record['phase']=='terminal':return 'confirmed'
+        profile,target,result=self._owned_native_context(record)
+        self.request(profile['endpoint'],profile['target']['executable'],'turn/interrupt',
+            dict(threadId=target['conversation_id'],turnId=result['turn_id']),5)
+        self.observe_native_owned(record)
+        return 'confirmed' if record['phase']=='terminal' else 'requested'
