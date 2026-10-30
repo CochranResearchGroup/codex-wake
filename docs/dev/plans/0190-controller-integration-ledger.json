@@ -8,7 +8,7 @@
     "394": {
       "title": "Resolve and inspect exact controller targets across CLI/API/MCP",
       "state": "validated",
-      "tracker_state": "closure_pending",
+      "tracker_state": "closed",
       "blockers": [],
       "worker": "/root",
       "owned_paths": [
@@ -41,16 +41,16 @@
     },
     "395": {
       "title": "Select accounts and explain effective configuration through Wake",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         394,
         372,
         374
       ],
-      "worker": null,
+      "worker": "/root/accounts395",
       "owned_paths": [],
-      "base_sha": null,
+      "base_sha": "2a53cbc192e3df3a5b294ac2554956da8f60b318",
       "result_sha": null,
       "validation": []
     },
@@ -101,14 +101,14 @@
     },
     "399": {
       "title": "Authorize direct API and OAuth MCP operations with scoped principals",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         394
       ],
-      "worker": null,
+      "worker": "/root/oauth399",
       "owned_paths": [],
-      "base_sha": null,
+      "base_sha": "2a53cbc192e3df3a5b294ac2554956da8f60b318",
       "result_sha": null,
       "validation": []
     },
