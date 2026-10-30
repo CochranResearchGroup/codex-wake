@@ -141,7 +141,10 @@ class ControllerFlowSessions:
                 or not 0 < len(arguments['prompt'].encode()) <= 32768):
             raise InventoryError('invalid_argument','existing exact conversation and bounded prompt required')
         def guard():
-            self._context(actor,name,target,authorize,'control')
+            current = self._context(actor,name,target,authorize,'control')
+            if operation == 'sessions.fork':
+                from .controller_flow_fork import fork_capability
+                fork_capability(current,self.metadata(current))
             return authorize()
         def dispatch(unused,payload):
             guard()
