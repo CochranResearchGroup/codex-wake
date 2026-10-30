@@ -30,6 +30,8 @@ class BuildAuthorization:
             raise AuthError('insufficient_scope')
         if not isinstance(arguments, dict):
             raise InventoryError('invalid_argument', 'object arguments required')
+        if operation == 'builds.launch' and arguments.get('args', ['--version']) not in ([], ['--version'], ['--help']):
+            raise InventoryError('unsupported_launch_arguments', 'remote launch uses the pinned host configuration; arbitrary native arguments require a host-owned profile')
         if operation == 'builds.stage':
             target = self.recipe_targets.get(arguments.get('recipe'))
             fields = {'host', 'environment', 'recipe', 'recipe_sha256'}

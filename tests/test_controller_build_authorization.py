@@ -80,3 +80,11 @@ class BuildAuthorizationTests(unittest.TestCase):
         for operation in ('builds.select', 'builds.rollback'):
             with self.subTest(operation=operation), self.assertRaises(AuthError):
                 self.service({'control'}, [target]).execute('token', operation, {'expected_target': target})
+
+    def test_remote_launch_cannot_override_pinned_runtime_configuration(self):
+        target = {key: 'fixture' for key in BuildAuthorization.ACCOUNT_FIELDS}
+        for argv in (['--config', 'foreign.toml'], ['-c', 'sandbox_mode="danger-full-access"'], ['--remote=other-host']):
+            with self.subTest(argv=argv), self.assertRaises(InventoryError) as caught:
+                self.service({'control'}, [target]).execute('token', 'builds.launch',
+                    {'expected_target': target, 'args': argv})
+            self.assertEqual(caught.exception.code, 'unsupported_launch_arguments')
