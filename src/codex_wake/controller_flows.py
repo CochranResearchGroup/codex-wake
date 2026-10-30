@@ -76,11 +76,8 @@ class FlowDefinition:
             if kind == 'branch' and not {'condition', 'then', 'else'} <= node.keys():
                 flow_error('invalid_flow', 'branch requires typed condition and explicit paths')
             if kind == 'branch':
-                condition = node['condition']
-                if type(condition) is not bool and (not isinstance(condition, dict)
-                        or set(condition) != {'op', 'left', 'right'}
-                        or condition['op'] not in ('eq', 'ne', 'lt', 'lte', 'gt', 'gte')):
-                    flow_error('invalid_condition', 'supported typed deterministic condition required')
+                from .controller_conditions import validate_condition
+                validate_condition(node['condition'])
             if kind == 'wait' and (type(node.get('timeout', 0)) not in (int, float) or not 0 <= node.get('timeout', 0) <= 30):
                 flow_error('invalid_flow', 'wait timeout must be between zero and 30 seconds')
             by_id[identifier] = node
@@ -227,13 +224,19 @@ class ControllerFlows:
             flow_error('invalid_argument', 'bounded object flow inputs required')
         compiled = self._definition(flow_id, version)
         definition = compiled.as_dict()
-        if definition.get('limits'):
-            flow_error('unsupported_flow_limits', 'qualified usage/limit owner is required before executing limited flows')
+        from .controller_conditions import Conditions,limits
+        configured_limits=limits(definition.get('limits',{}))
+        if definition.get('limits',{}).get('max_tokens') is not None and any(node['type'] in ('call','foreach') for node in definition['nodes']):
+            flow_error('unsupported_flow_limits','exact token bounds for arbitrary child operations are unqualified; rejected before effects')
+        def named(value):
+            return isinstance(value,dict) and ('function' in value or any(named(v) for v in value.values())) or isinstance(value,list) and any(named(v) for v in value)
+        registry=Conditions(self.root) if any(named(node.get('condition')) for node in definition['nodes']) else Conditions(self.root,registry={})
         fingerprint = hashlib.sha256(encoded(dict(definition=compiled.digest, inputs=inputs, binding=binding)).encode()).hexdigest()
         key = hashlib.sha256(encoded(dict(owner=identity(actor), intent=intent)).encode()).hexdigest()
         state = dict(schema_version=1, run_id='flowrun_' + uuid4().hex, flow_id=flow_id, version=version,
             definition_sha256=compiled.digest, target=self.target(flow_id), owner=identity(actor), inputs=inputs,
             binding=binding, created_at=self.now(), phase='ready', cursor=definition['entry'],
+            condition_registry_revision=registry.revision,condition_limits=configured_limits,condition_usage=dict(calls=0,tokens=0),condition_trace=[],
             steps={}, attempt_counts={}, attempt_history={}, result=None, reason=None, cancellation=False, completed_steps=0)
         for node in definition['nodes']:
             if node['type'] == 'foreach':
@@ -417,6 +420,8 @@ class ControllerFlows:
             return self._reconcile_cancellation(actor,run_id,state)
         if state['phase'] not in ('executing', 'uncertain') or not state.get('child_operation_id'):
             return self.projection(state)
+        if state.get('condition_attempt'):
+            return self.projection(dict(state,reason='condition_interrupted_or_uncertain_no_replay'))
         attempt = state.get('attempt')
         value = self.invoke('operations.result', {'operation_id': state['child_operation_id']},
             authorize=lambda: self._step_guard(actor, run_id, attempt))
@@ -439,9 +444,62 @@ class ControllerFlows:
             self._write(db, latest)
             return self.projection(latest)
 
+    def _advance_condition(self,actor,run_id):
+        from uuid import uuid4
+        from .controller_conditions import Conditions
+        state=self._owned(actor,self._load(run_id),'control')
+        if state['phase']!='ready':return None
+        definition=state.get('execution_definition') or self._definition(state['flow_id'],state['version']).as_dict()
+        node=next(item for item in definition['nodes'] if item['id']==state['cursor'])
+        condition=node.get('condition')
+        if node['type']!='branch' or type(condition) is bool or ('function' not in condition and condition.get('op') not in ('and','or')):return None
+        registry=Conditions(self.root) if (self.root/'controller-conditions.json').exists() else Conditions(self.root,registry={})
+        if registry.revision!=state.get('condition_registry_revision'):
+            flow_error('stale_condition_registry','pinned function registry revision changed')
+        attempt=uuid4().hex
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            latest=self._owned(actor,self._load(run_id,db),'control')
+            if latest['phase']!='ready' or latest['cursor']!=node['id']:return self.projection(latest)
+            latest.update(phase='executing',attempt=attempt,executing_node=node['id'],condition_attempt=True)
+            self._write(db,latest);state=latest
+        def save():
+            with self.connect() as db:
+                db.execute('BEGIN IMMEDIATE')
+                latest=self._owned(actor,self._load(run_id,db),'control')
+                if latest.get('attempt')!=attempt or latest['cancellation']:
+                    flow_error('stale_flow_attempt','condition ownership or authority changed')
+                latest['condition_usage']=state['condition_usage'];latest['condition_trace']=state['condition_trace']
+                self._write(db,latest)
+        def semantic(function,args,bounds,tokens,receipt):
+            from .controller_condition_native import invoke
+            identifier=run_id+'.'+node['id']+'.function'+str(state['condition_usage']['calls'])
+            return invoke(self.root,actor,function,args,bounds,tokens,receipt,
+                authorize=lambda:self._step_guard(actor,run_id,attempt),request_id=identifier,binding=state['binding'])
+        outcome=registry.evaluate(condition,state,resolve=lambda value:self._resolve(value,state),
+            compare=lambda value:self._condition(value,state),save=save,now=self.now,semantic=semantic)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            latest=self._owned(actor,self._load(run_id,db),'control')
+            if latest.get('attempt')!=attempt:return self.projection(latest)
+            latest['condition_usage']=state['condition_usage'];latest['condition_trace']=state['condition_trace']
+            latest['steps'][node['id']]=outcome
+            value=outcome['value'] if outcome['status']=='known' else None
+            selected=node.get('unknown') if value is None else node['then'] if value else node['else']
+            latest.update(cursor=selected,phase='held' if value is None and selected is None else 'ready' if selected is not None else 'completed',
+                          reason='condition_'+outcome['status'] if value is None else None)
+            latest['completed_steps']+=1
+            for key in ('attempt','executing_node','condition_attempt'):latest.pop(key,None)
+            self._write(db,latest)
+            return self.projection(latest)
+
     def advance(self, actor, run_id):
         from uuid import uuid4
         for unused in range(16):
+            condition_state=self._advance_condition(actor,run_id)
+            if condition_state is not None:
+                if condition_state['phase']!='ready':return condition_state
+                continue
             with self.connect() as db:
                 db.execute('BEGIN IMMEDIATE')
                 state = self._owned(actor, self._load(run_id, db), 'control')
@@ -506,6 +564,12 @@ class ControllerFlows:
                     state.update(phase='held', reason='input_unknown')
                     self._write(db, state)
                     return self.projection(state)
+                bounds=state.get('condition_limits')
+                if bounds:
+                    usage=state.setdefault('condition_usage',dict(calls=0,tokens=0))
+                    if usage['calls']>=bounds['max_calls'] or self.now()-state['created_at']>=bounds['max_seconds']:
+                        state.update(phase='held',reason='flow_nested_limit');self._write(db,state);return self.projection(state)
+                    usage['calls']+=1
                 count = state.setdefault('attempt_counts',{}).get(node['id'],0)+1
                 state['attempt_counts'][node['id']] = count
                 attempt = uuid4().hex

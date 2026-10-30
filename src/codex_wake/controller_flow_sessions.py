@@ -58,11 +58,11 @@ class ControllerFlowSessions:
             if config['version'] != 1 or not isinstance(profile, dict):
                 raise ValueError()
             required = {'target','endpoint','process','modes','cwd','methods','native_provider'}
-            if set(profile) != required or not _ACCOUNT_FIELDS <= profile['target'].keys():
+            if set(profile)-{'condition_policy'} != required or not _ACCOUNT_FIELDS <= profile['target'].keys():
                 raise ValueError()
             if not profile['endpoint'].startswith('unix:///') or not Path(profile['cwd']).is_dir():
                 raise ValueError()
-            if not isinstance(profile['modes'], list) or set(profile['modes']) - {'new_session','sequential','fork'}:
+            if not isinstance(profile['modes'], list) or set(profile['modes']) - {'new_session','sequential','fork','semantic'}:
                 raise ValueError()
             if not {'thread/start','turn/start','thread/read','turn/interrupt'} <= set(profile['methods']):
                 raise ValueError()
@@ -76,6 +76,8 @@ class ControllerFlowSessions:
             from .controller_health import _image_hash
             if _image_hash(expected['pid']) != observed['build_sha256']:
                 raise InventoryError('stale_target', 'native process image differs from pinned build')
+            if 'condition_policy' in profile and profile['condition_policy'] != dict(approvalPolicy='never',sandboxPolicy={'type':'readOnly'}):
+                raise ValueError()
             profile = dict(profile)
             profile['revision'] = hashlib.sha256(json.dumps(config['profiles'][name],sort_keys=True).encode()).hexdigest()
             return profile
@@ -163,7 +165,7 @@ class ControllerFlowSessions:
                 raise InventoryError('stale_target','native response changed the exact conversation')
             guard()
             turn = self.request(profile['endpoint'],profile['target']['executable'],'turn/start',
-                dict(threadId=target['conversation_id'],input=[dict(type='text',text=payload['prompt'])],cwd=profile['cwd']),5)['turn']
+                dict(threadId=target['conversation_id'],input=[dict(type='text',text=payload['prompt'])],cwd=profile['cwd'],**profile.get('condition_policy',{})),5)['turn']
             if not isinstance(turn.get('id'),str) or not turn['id']:
                 raise InventoryError('uncertain_effect','native turn ID unavailable after submission')
             return dict(_pending=True,handle=dict(kind='native_turn',target=target,turn_id=turn['id'],profile=name,profile_revision=profile['revision'],
