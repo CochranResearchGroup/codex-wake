@@ -169,7 +169,7 @@ legacy_config="{self.legacy}"
         try:
             self.assertEqual(process.stdout.readline().strip(), 'ready')
             result = probe_writers((self.source, self.accounts))
-            self.assertTrue(any(row['pid'] == process.pid for row in result['writers']))
+            self.assertTrue(any(row['pid'] == process.pid for row in result['writers']), result)
             held = self.owner(writer_probe=lambda unused: result).execute('migration.preview', {})
             self.assertIn('competing_writer', held['holds'])
             self.assertEqual(held['history']['qualified_sessions'], 1)
@@ -186,3 +186,20 @@ legacy_config="{self.legacy}"
         self.assertIn('indirect_dependency_unqualified', preview['holds'])
         self.assertTrue(any(link['scope'] == 'unknown' for link in preview['links']))
         self.assertEqual(self.pointer.resolve(), self.legacy)
+
+    def test_native_wal_history_preview_never_creates_or_checkpoints_sidecars(self):
+        database = self.home / 'state_5.sqlite'
+        connection = sqlite3.connect(database)
+        try:
+            connection.execute('pragma journal_mode=WAL')
+        finally:
+            connection.close()
+        # The native SQLite owner closes; preview must not recreate sidecars.
+        for suffix in ('-wal', '-shm'):
+            path = database.with_name(database.name + suffix)
+            if path.exists():
+                path.unlink()
+        preview = self.owner().execute('migration.preview', {})
+        self.assertIn('native_wal_history_requires_quiescent_owner', preview['holds'])
+        self.assertFalse(database.with_name(database.name + '-wal').exists())
+        self.assertFalse(database.with_name(database.name + '-shm').exists())

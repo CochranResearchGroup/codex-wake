@@ -61,7 +61,7 @@ def _tree(root, fixture, *, limit=4096):
             continue
         info = path.lstat()
         row = dict(mode=stat.S_IMODE(info.st_mode), device=info.st_dev, inode=info.st_ino,
-                   size=info.st_size, mtime_ns=info.st_mtime_ns)
+                   size=info.st_size, mtime_ns=info.st_mtime_ns, ctime_ns=info.st_ctime_ns)
         if stat.S_ISLNK(info.st_mode):
             row.update(kind='link', target=os.readlink(path))
             try:
@@ -76,13 +76,9 @@ def _tree(root, fixture, *, limit=4096):
             pending.extend(sorted(path.iterdir(), reverse=True))
         elif stat.S_ISREG(info.st_mode):
             row['kind'] = 'file'
-            if not _secret_name(path):
-                if info.st_size > 16 * 1024 * 1024:
-                    row['contents'] = 'metadata_only_large_file'
-                else:
-                    row['sha256'] = hashlib.sha256(path.read_bytes()).hexdigest()
-            else:
-                row['contents'] = 'native_owner_not_opened'
+            # Inventory generations, not arbitrary contents. Native credential
+            # stores may use unrecognized names; only their own owner opens them.
+            row['contents'] = 'native_owner_not_opened' if _secret_name(path) else 'metadata_only'
         else:
             raise InventoryError('unsupported_target', 'fixture contains unsupported special file')
         entries[str(path)] = row
@@ -95,7 +91,17 @@ def probe_writers(roots):
     """Bounded same-user open-write-FD census; uncertainty never means idle."""
     writers, unknown = [], False
     try:
-        processes = [path for path in Path('/proc').iterdir() if path.name.isdigit() and path.stat().st_uid == os.getuid()]
+        processes = []
+        for path in Path('/proc').iterdir():
+            if not path.name.isdigit():
+                continue
+            try:
+                if path.stat().st_uid == os.getuid():
+                    processes.append(path)
+            except FileNotFoundError:
+                continue
+            except OSError:
+                unknown = True
         if len(processes) > 4096:
             return dict(status='unknown', writers=[], reason='process census exceeds bounded capacity')
         for process in processes:
@@ -124,7 +130,24 @@ def probe_writers(roots):
                 unknown = True
         return dict(status='unknown' if unknown else 'complete', writers=writers)
     except (OSError, AttributeError):
-        return dict(status='unknown', writers=[], reason='host writer census is unavailable')
+        return dict(status='unknown', writers=writers, reason='host writer census is unavailable')
+
+
+def _history_is_quiescent(accounts):
+    # SQLite read-only WAL connections can create shared-memory sidecars. A
+    # migration preview must not do that; WAL qualification belongs to its
+    # quiescent native owner, never an implicit checkpoint or mode conversion.
+    for account in accounts:
+        database = Path(account['home']) / 'state_5.sqlite'
+        if not database.is_file():
+            continue
+        if database.with_name(database.name + '-wal').exists() or database.with_name(database.name + '-shm').exists():
+            return False
+        with database.open('rb') as source:
+            header = source.read(20)
+        if len(header) >= 20 and (header[18] == 2 or header[19] == 2):
+            return False
+    return True
 
 
 class ControllerMigration:
@@ -220,6 +243,8 @@ class ControllerMigration:
         def credential_field(value, trail=()):
             if isinstance(value, dict):
                 return any(credential_field(child, (*trail, key)) for key, child in value.items())
+            if trail and trail[-1] in ('mcp_oauth_credentials_store', 'cli_auth_credentials_store') and value in ('auto', 'file', 'keyring'):
+                return False
             return any(key.lower() == 'env' or _secret_name(Path(key)) for key in trail)
         if credential_field(before):
             raise InventoryError('unsupported_target', 'embedded credential settings require the native credential owner; registry is not copied')
@@ -287,6 +312,8 @@ class ControllerMigration:
             config.chmod(0o600)
             # Qualify the candidate through the reused account/history owners.
             selected = ControllerAccounts(config, host=self.host, environment=self.environment).execute('accounts.list', {})['accounts']
+            if not _history_is_quiescent(selected):
+                raise InventoryError('migration_held', 'candidate WAL history requires its quiescent native owner')
             native = discover(load_settings(config), [row['id'] for row in selected])
             if native['holds']:
                 raise InventoryError('migration_held', 'candidate native ownership is unqualified')
@@ -369,8 +396,6 @@ class ControllerMigration:
             entries.update(found)
             links.extend(discovered)
         holds = []
-        if any(row.get('contents') == 'metadata_only_large_file' for row in entries.values()):
-            holds.append('large_file_content_unqualified')
         if any(path != path.resolve() for key, path in paths.items() if key != 'pointer'):
             holds.append('indirect_root_requires_qualification')
         if any(link['scope'] != 'internal' or not link['exists'] for link in links):
@@ -395,7 +420,10 @@ class ControllerMigration:
         if not any(reason in holds for reason in ('indirect_root_requires_qualification', 'indirect_dependency_unqualified', 'migration_roots_overlap')):
             try:
                 accounts = ControllerAccounts(effective_path, host=self.host, environment=self.environment).execute('accounts.list', {})['accounts']
-                history = discover(settings, [row['id'] for row in accounts])
+                if not _history_is_quiescent(accounts):
+                    holds.append('native_wal_history_requires_quiescent_owner')
+                else:
+                    history = discover(settings, [row['id'] for row in accounts])
                 if history['holds']:
                     holds.append('native_history_unqualified')
                 for row in history['sessions']:
