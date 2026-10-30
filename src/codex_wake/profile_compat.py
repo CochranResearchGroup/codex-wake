@@ -3,7 +3,6 @@
 Explicit legacy --config and CODEX_PROFILES_CONFIG are migration inputs. They
 select the same owner; no state or credential migration occurs automatically.
 """
-import json
 import os
 from pathlib import Path
 import socket
@@ -19,7 +18,7 @@ def default_config():
 def main(argv=None):
     from codex_profiles.cli import build_parser, main as profiles_main, split_run_profile_and_args
     from codex_profiles.config import load_settings
-    from .controller_accounts import ControllerAccounts
+    from .controller_accounts import ControllerAccounts, launch_overrides
     from .managed_inventory import InventoryError
     arguments = list(sys.argv[1:] if argv is None else argv)
     if not any(arg == '--config' or arg.startswith('--config=') for arg in arguments):
@@ -46,17 +45,7 @@ def main(argv=None):
             owner = ControllerAccounts(parsed.config, host=socket.gethostname(),
                 environment=os.environ.get('WSL_DISTRO_NAME') or os.name)
             view = owner.execute('configuration.explain', {'selector': profile})
-            overrides = []
-            for key, source in view['provenance'].items():
-                if source.startswith('native:'):
-                    continue
-                value = view['effective'][key]
-                if value == '[redacted]':
-                    raise InventoryError('unsupported_target', 'secret configuration overrides require the native credential owner')
-                # JSON scalar/array syntax is valid TOML for supported native
-                # setting values. Quoted dotted segments preserve native keys.
-                native_key = '.'.join(json.dumps(segment) for segment in key.split('.'))
-                overrides += ['-c', native_key + '=' + json.dumps(value, separators=(',', ':'))]
+            overrides = launch_overrides(view)
             # Native parser has already separated profile/build options. Keep
             # their exact arguments and prepend the configuration flags after
             # the profile, before the caller's explicit native overrides.

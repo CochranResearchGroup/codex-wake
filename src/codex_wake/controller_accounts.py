@@ -6,6 +6,7 @@ credential files, changes the selected account, or launches provider work.
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 from pathlib import Path
 import re
@@ -16,6 +17,20 @@ from .managed_inventory import InventoryError
 
 _NAME = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,127}\Z')
 _PRIVATE = {'auth.json', 'sessions', 'history.jsonl', 'memories', 'cache', 'log'}
+
+
+def launch_overrides(view):
+    """Materialize explained scoped settings without changing the native home."""
+    result = []
+    for key, source in view['provenance'].items():
+        if source.startswith('native:'):
+            continue
+        value = view['effective'][key]
+        if value == '[redacted]':
+            raise InventoryError('unsupported_target', 'secret configuration overrides require the native credential owner')
+        native_key = '.'.join(json.dumps(segment) for segment in key.split('.'))
+        result += ['-c', native_key + '=' + json.dumps(value, separators=(',', ':'))]
+    return result
 
 
 def _safe_name(value):

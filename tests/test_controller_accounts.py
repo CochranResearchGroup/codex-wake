@@ -71,7 +71,7 @@ work = "alice"
             self.assertTrue(failed)
             self.assertEqual(stale['error']['code'], 'stale_target')
 
-    def test_wake_profiles_alias_applies_same_effective_configuration_to_launch(self):
+    def test_effective_configuration_matches_compatibility_and_controller_launches(self):
         import hashlib
         from codex_wake.profile_compat import main
         with tempfile.TemporaryDirectory() as directory:
@@ -104,6 +104,17 @@ model = "account"
             launch = (state / 'codex-alice' / 'launch.txt').read_text()
             self.assertIn('codex-alice', launch)
             self.assertIn('"model"="account"', launch)
+            from codex_wake.controller_accounts import ControllerAccounts
+            from codex_wake.controller_builds import ControllerBuilds
+            owner = ControllerBuilds(manifest, ControllerAccounts(config, host='fixture-host', environment='test'))
+            target = next(row['target'] for row in owner.execute('builds.list', {'account': 'work'})['builds']
+                          if row['name'] == 'stock')
+            result = owner.execute('builds.launch', dict(account='work', channel='stock', expected_target=target,
+                args=['-c', '"model"="explicit"', 'hello']))
+            self.assertEqual(result['exit_code'], 0)
+            launch = (state / 'codex-alice' / 'launch.txt').read_text()
+            self.assertIn('"model"="account"', launch)
+            self.assertLess(launch.index('"model"="account"'), launch.index('"model"="explicit"'))
             self.assertEqual((state / 'codex-alice' / 'auth.json').read_text(), '{"fixture": "private"}')
 
     def test_configuration_never_exposes_mcp_environment_secrets(self):

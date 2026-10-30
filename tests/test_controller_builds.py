@@ -16,7 +16,8 @@ def test_named_pinned_build_launch_preserves_identity(tmp_path):
         'upstream_version': '1', 'revision': 'fixture', 'source': 'local fixture'}}}))
     class Accounts:
         def execute(self, operation, arguments):
-            return {'account': {'id': 'fixture', 'home': str(home), 'target': {'provider': 'codex'}}}
+            return {'account': {'id': 'fixture', 'home': str(home), 'target': {'provider': 'codex'}},
+                    'effective': {}, 'provenance': {}}
     owner = ControllerBuilds(manifest, Accounts())
     listed = owner.execute('builds.list', {'account': 'fixture'})
     target = next(row['target'] for row in listed['builds'] if row['name'] == 'modded')

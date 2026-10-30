@@ -63,6 +63,10 @@ class ControllerBuilds:
             args = arguments.get('args', ['--version'])
             if not isinstance(args, list) or any(not isinstance(arg, str) for arg in args):
                 raise InventoryError('invalid_argument', 'build arguments must be strings')
+            from .controller_accounts import launch_overrides
+            view = self.accounts.execute('configuration.explain',
+                dict(selector=account['id'], expected_target=account['target']))
+            args = launch_overrides(view) + args
             output = io.StringIO()
             code = run_build(build, home, account['id'], args, output=output)
             return {'target': target, 'exit_code': code, 'identity': output.getvalue(),
