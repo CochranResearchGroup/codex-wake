@@ -186,7 +186,7 @@ class ControllerRecovery:
         observation=record['last_observation']
         if record['clock']['last_observation_elapsed'] is None or not 0<=elapsed-record['clock']['last_observation_elapsed']<=definition['interval_seconds']:return self._outcome(record,'held','health evidence is stale')
         if record['attempts']>=definition['max_attempts']:
-            self._edit(record['policy_id'],lambda value:value.update(action_status='exhausted'))
+            record=self._edit(record['policy_id'],lambda value:value.update(action_status='exhausted',mode='held',held_reason='attempt_ceiling'))
             return self._outcome(record,'attempt_ceiling','cumulative recovery attempt ceiling reached; escalation stopped')
         if record['clock']['last_action_elapsed'] is not None and elapsed-record['clock']['last_action_elapsed']<definition['cooldown_seconds']:
             return self._outcome(record,'cooldown','recovery cooldown has not elapsed')
@@ -216,13 +216,14 @@ class ControllerRecovery:
                     if current['in_flight'] is not None:
                         current['action_status']='uncertain';current['in_flight']['phase']='uncertain'
                         current['in_flight']['reason']=error_code
+                        if current['mode']=='automatic':current.update(mode='held',held_reason='effect_uncertain')
                 self._edit(record['policy_id'],uncertain)
                 return self._outcome(self._load(record['policy_id']),'uncertain','action outcome uncertain or policy deactivated; never replay automatically')
             def finish_step(current):
                 current['in_flight']['actions'].append(result);current['in_flight']['phase']='observed'
             self._edit(record['policy_id'],finish_step)
             if result.get('status') not in ('completed','confirmed'):
-                self._edit(record['policy_id'],lambda value:value.update(action_status='uncertain'))
+                self._edit(record['policy_id'],lambda value:value.update(action_status='uncertain',mode='held',held_reason='effect_uncertain'))
                 return self._outcome(self._load(record['policy_id']),'uncertain','original action remains pending or unsupported; escalation held')
         def finish(current):
             current['history'].append(current['in_flight']);current['in_flight']=None;current['action_status']='completed'
@@ -279,7 +280,7 @@ class ControllerRecovery:
         if not isinstance(selected,dict) or selected.get('target')!=record['target']:raise InventoryError('stale_target','refresh host profile differs from exact policy target')
         profile=selected.get('refresh')
         _validate_profile(profile)
-        if profile['refresh_mode']!='thread_mcp_idle' or not profile['resources']:raise InventoryError('unsupported_operation','only exact thread MCP refresh with resource proof is supported')
+        if profile['refresh_mode']!='thread_mcp_idle' or not 1<=len(profile['resources'])<=32 or any(check.get('kind') not in ('mcp','mcp_catalog') for check in profile['resources'].values()):raise InventoryError('unsupported_operation','only exact thread MCP refresh with resource proof is supported')
         binding=ControllerNotices(self.root)._binding(record['target'])
         if profile['app_server']!=binding['endpoint']:raise InventoryError('stale_target','refresh endpoint differs from exact private binding')
         directory=self.root/'controller-recovery'/'refresh';directory.mkdir(mode=0o700,exist_ok=True)

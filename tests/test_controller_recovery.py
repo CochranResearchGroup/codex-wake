@@ -79,6 +79,11 @@ class RecoveryTests(unittest.TestCase):
             self.assertEqual(after['attempts'],2)
             self.assertEqual(after['checks'],6)
             self.assertEqual(after['action_status'],'exhausted')
+            self.assertEqual(after['mode'],'held')
+            previous_notice_count=len(notices)
+            clock[0]+=30
+            owner.execute(actor,'recovery.tick',args('after-exhaustion'),authorize=lambda:actor)
+            self.assertEqual(len(notices),previous_notice_count)
 
     def test_deactivation_prevents_later_actions_and_reconciles_only_original_effect(self):
         with tempfile.TemporaryDirectory() as directory:
