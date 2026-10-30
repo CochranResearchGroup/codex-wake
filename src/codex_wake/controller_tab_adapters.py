@@ -63,3 +63,28 @@ class OwnedStdioBroker:
     def relinquish(self):
         with self.lock:
             self.closed = True
+
+
+class OwnedTerminalBroker:
+    """Explicit literal-line fallback, installed only after host input custody.
+
+    Caller must still pass privacy admission, exact pane generation and control
+    grant. Never selected as recovery for failed structured submission.
+    """
+    def __init__(self, transport, *, panes, owner_id):
+        self.transport, self.panes = transport, frozenset(panes)
+        self.custody = dict(available=True,transport='terminal',owner_id=owner_id,generation=uuid.uuid4().hex)
+        self.lock = threading.Lock()
+
+    def inspect(self):
+        return dict(self.custody)
+
+    def send(self, pane, text, *, expected_custody):
+        import time
+        with self.lock:
+            if expected_custody != self.custody or pane not in self.panes:
+                raise InventoryError('input_custody_required', 'terminal custody changed')
+            deadline = time.monotonic() + 5
+            self.transport.command(deadline,'send-keys','-t',pane,'-l','--',text)
+            self.transport.command(deadline,'send-keys','-t',pane,'Enter')
+            return dict(status='submitted',acceptance='unverified',transport='terminal')

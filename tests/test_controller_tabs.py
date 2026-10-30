@@ -30,7 +30,7 @@ class ControllerTabsTests(unittest.TestCase):
                 return dict(thread=thread, text=text)
         with tempfile.TemporaryDirectory() as directory:
             broker = OwnedStdioBroker(Client(), bindings={'%1':'thread'}, owner_id='host-owner')
-            owner = ControllerTabs(directory, workspaces={'fixture': dict(transport=Transport(), kind='stdio', broker=broker)}, host='h', environment='fixture')
+            owner = ControllerTabs(directory, workspaces={'fixture': dict(transport=Transport(), kind='stdio', broker=broker, privacy=lambda pane:'safe')}, host='h', environment='fixture')
             row = owner.execute('tabs.show', {'workspace':'fixture'})['resources'][0]
             args = dict(workspace='fixture', expected_target=row['target'], pane='%1', input='fixture', custody=row['input_custody'], transport='structured')
             self.assertEqual(owner.execute('tabs.input', args)['result']['thread'], 'thread')
@@ -51,15 +51,16 @@ class ControllerTabsTests(unittest.TestCase):
                     subprocess.run(['tmux','-S',socket,'new-window','-d','-n',name,'sleep 60'], check=True)
                 from codex_wake.process import process_identity
                 import time
+                subprocess.run(['git','init','-q',directory], check=True)
                 initial = transport.snapshot(time.monotonic()+5)
                 evidence = {}
                 for window in initial['windows']:
                     for pane in window['panes']:
                         identity = process_identity(pane['pid'])
                         evidence[pane['pane_id']] = dict(fresh=True, conversation_id=pane['pane_id'],
-                            namespace='fixture', root=str(Path.cwd()), state='working' if window['name']=='working' else 'ready',
+                            namespace='fixture', root=directory, state='working' if window['name']=='working' else 'ready',
                             process=dict(pid=pane['pid'],start_ticks=identity['start_time_ticks'],boot_id=identity['boot_id']))
-                owner = ControllerTabs(directory, workspaces={'fixture':dict(transport=transport,kind='byobu',observer=lambda timeout:evidence)}, host='h', environment='fixture')
+                owner = ControllerTabs(directory, workspaces={'fixture':dict(transport=transport,kind='byobu',privacy=lambda pane:'safe',observer=lambda timeout:evidence)}, host='h', environment='fixture')
                 row = owner.execute('tabs.list', {})['resources'][0]
                 base = dict(workspace='fixture', expected_target=row['target'])
                 capture = owner.execute('tabs.capture', dict(base,pane=row['window']['panes'][0]['pane_id'], lines=5))
@@ -84,10 +85,84 @@ class ControllerTabsTests(unittest.TestCase):
             return dict(generation=generation[0],result=Transport().snapshot(deadline) if action=='snapshot' else 'fixture output')
         transport = PsmuxAttachmentTransport(bridge,generation='fixture-1')
         with tempfile.TemporaryDirectory() as directory:
-            owner = ControllerTabs(directory, workspaces={'fixture':dict(transport=transport,kind='psmux')},host='h',environment='fixture')
+            owner = ControllerTabs(directory, workspaces={'fixture':dict(transport=transport,kind='psmux',privacy=lambda pane:'safe')},host='h',environment='fixture')
             row = owner.execute('tabs.list', {})['resources'][0]
             result = owner.execute('tabs.capture', dict(workspace='fixture',expected_target=row['target'],pane='%1',lines=2))
             self.assertEqual(result['text'],'fixture output')
             self.assertEqual(calls[-1],('capture',{'pane':'%1','lines':2}))
             generation[0] = 'replacement'
             with self.assertRaises(InventoryError): owner.execute('tabs.list',{})
+
+    def test_authorized_uncertain_stdio_input_is_not_replayed(self):
+        import time
+        from types import SimpleNamespace
+        from codex_wake.controller_auth import Actor, AuthError
+        from codex_wake.controller_runtime import ControllerRuntime
+        from codex_wake.controller_tabs import AuthorizedTabs
+        from codex_wake.controller_tab_adapters import OwnedStdioBroker
+        calls = []
+        class Client:
+            def start_turn(self, thread, text):
+                calls.append((thread,text))
+                raise BrokenPipeError('fixture disconnected after submission')
+        with tempfile.TemporaryDirectory() as directory:
+            broker = OwnedStdioBroker(Client(),bindings={'%1':'thread'},owner_id='fixture')
+            owner = ControllerTabs(directory,workspaces={'fixture':dict(transport=Transport(),kind='stdio',broker=broker,privacy=lambda pane:'safe')},host='h',environment='fixture')
+            row = owner.execute('tabs.show',{'workspace':'fixture'})['resources'][0]
+            target = row['target']
+            actor = Actor('owner','human','client','grant','https://issuer','https://resource',frozenset({'control'}),[target],time.time()+600)
+            authority = SimpleNamespace(authenticate=lambda token:actor)
+            facade = AuthorizedTabs(authority,owner,ControllerRuntime(directory))
+            args = dict(workspace='fixture',expected_target=target,pane='%1',input='fixture',custody=row['input_custody'],transport='structured',
+                _request=dict(operation_id='one',idempotency_key='one',correlation_id='one',binding='first',target=target))
+            result = facade.execute('token','tabs.input',args)
+            self.assertEqual(result['result']['operation']['phase'],'uncertain')
+            reconnect = AuthorizedTabs(authority,owner,ControllerRuntime(directory))
+            reconnect.execute('token','tabs.input',args)
+            self.assertEqual(len(calls),1)
+            denied = Actor('owner','human','client','grant','https://issuer','https://resource',frozenset({'observe'}),[target],time.time()+600)
+            with self.assertRaises(AuthError):
+                AuthorizedTabs(SimpleNamespace(authenticate=lambda token:denied),owner,ControllerRuntime(directory)).execute('token','tabs.input',args)
+            self.assertEqual(len(calls),1)
+
+    def test_private_and_unknown_privacy_prevents_read_and_input_effects(self):
+        class PrivateTransport(Transport):
+            def capture(self, *args):
+                raise AssertionError('private terminal was read')
+        for state in (None, 'private_input', 'draft', 'working'):
+            with tempfile.TemporaryDirectory() as directory:
+                config = dict(transport=PrivateTransport(),kind='psmux')
+                if state is not None: config['privacy'] = lambda pane:state
+                owner = ControllerTabs(directory,workspaces={'fixture':config},host='h',environment='fixture')
+                target = owner.execute('tabs.list',{})['resources'][0]['target']
+                with self.assertRaises(InventoryError) as caught:
+                    owner.execute('tabs.capture',dict(workspace='fixture',expected_target=target,pane='%1'))
+                self.assertEqual(caught.exception.code,'presentation_privacy_unknown')
+                with self.assertRaises(InventoryError) as input_error:
+                    owner.execute('tabs.input',dict(workspace='fixture',expected_target=target,pane='%1',input='fixture',transport='terminal',custody={}))
+                self.assertEqual(input_error.exception.code,'presentation_privacy_unknown')
+
+    def test_real_explicit_terminal_fallback(self):
+        import shutil
+        import subprocess
+        import time
+        from codex_wake.controller_tab_adapters import TmuxAttachmentTransport, OwnedTerminalBroker
+        if not shutil.which('tmux'): self.skipTest('tmux unavailable')
+        with tempfile.TemporaryDirectory() as directory:
+            socket = str(Path(directory)/'fallback.sock')
+            subprocess.run(['tmux','-S',socket,'new-session','-d','-s','fixture','cat'],check=True)
+            try:
+                transport = TmuxAttachmentTransport(socket,'$0')
+                broker = OwnedTerminalBroker(transport,panes=['%0'],owner_id='fixture')
+                owner = ControllerTabs(directory,workspaces={'fixture':dict(transport=transport,kind='byobu',broker=broker,privacy=lambda pane:'safe')},host='h',environment='fixture')
+                row = owner.execute('tabs.list',{})['resources'][0]
+                args = dict(workspace='fixture',expected_target=row['target'],pane='%0',input='fixture line',custody=row['input_custody'],transport='terminal')
+                result = owner.execute('tabs.input',args)
+                self.assertTrue(result['fallback'])
+                self.assertEqual(result['result']['acceptance'],'unverified')
+                deadline = time.monotonic()+2
+                while 'fixture line' not in transport.capture('%0',5,deadline):
+                    time.sleep(.01)
+                with self.assertRaises(InventoryError): owner.execute('tabs.input',dict(args,input='unsafe\nsecond'))
+            finally:
+                subprocess.run(['tmux','-S',socket,'kill-server'],check=False)

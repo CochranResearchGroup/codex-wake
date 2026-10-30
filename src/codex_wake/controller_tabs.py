@@ -3,7 +3,6 @@
 No terminal discovery grants stdin ownership. Brokers are host-owned structured
 connections; fallback is visible and separately selected for each request.
 """
-import math
 import time
 
 from .managed_inventory import InventoryError
@@ -41,6 +40,11 @@ class ControllerTabs:
             transport = config['transport']
             try:
                 snapshot = transport.snapshot(deadline)
+                if config['kind'] in ('tmux', 'byobu'):
+                    from .process import process_identity
+                    for window in snapshot['windows']:
+                        for pane in window['panes']:
+                            pane['process_generation'] = process_identity(pane['pid'])
             except Exception as error:
                 raise InventoryError('attachment_unavailable', 'host presentation observation failed') from error
             target = dict(host=self.host, environment=self.environment, workspace=name,
@@ -59,6 +63,10 @@ class ControllerTabs:
                 resources.extend(dict(target=target, window=w, input_custody=custody,
                                       runtime_identity='unverified', fallback='explicit_only') for w in windows)
                 continue
+            if operation in ('tabs.input', 'tabs.capture'):
+                privacy = config.get('privacy')
+                if privacy is None or privacy(arguments.get('pane')) != 'safe':
+                    raise InventoryError('presentation_privacy_unknown', 'private input, draft or unqualified privacy prevents content access')
             if operation == 'tabs.input':
                 if not broker or not custody.get('available') or arguments.get('custody') != custody:
                     raise InventoryError('input_custody_required', 'host broker ownership generation required')
