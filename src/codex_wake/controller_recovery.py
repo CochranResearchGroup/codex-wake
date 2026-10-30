@@ -319,6 +319,19 @@ class ControllerRecovery:
         return dict(kind='thread_mcp_refresh',status='completed' if receipt['state']=='completed' else 'uncertain',
             receipt_id=key,native_scope='thread_mcp_connections',goal_continuity=receipt.get('goal_continuity_verified',False),reason=receipt.get('reason'))
 
+    def _scheduler(self):
+        path=self.root/'controller-recovery'/'scheduler-status.json'
+        if not path.exists() and not path.is_symlink():return dict(status='not_running',reason='no_scheduler_heartbeat',updated_at=None)
+        unknown=dict(status='unknown',reason='private_scheduler_heartbeat_unavailable',updated_at=None)
+        try:
+            if path.is_symlink() or not path.is_file() or path.stat().st_uid!=os.geteuid() or path.stat().st_mode&0o077 or path.stat().st_size>4096:return unknown
+            value=json.loads(path.read_text())
+            if not isinstance(value,dict) or set(value)!={'schema_version','status','reason','updated_at'} or value['schema_version']!=1 or value['status'] not in ('running','idle','held') or value['reason'] not in (None,'scheduler_owner_unavailable') or type(value['updated_at']) not in (int,float):return unknown
+            age=self.now()-value['updated_at']
+            if not 0<=age<=30:return dict(status='unknown',reason='scheduler_heartbeat_stale_or_clock_uncertain',updated_at=value['updated_at'])
+            return value
+        except (ValueError,OSError):return unknown
+
     def execute(self,actor,operation,args,*,authorize):
         allowed={'recovery.configure':{'policy_id','expected_target','policy','_request'},
             **{'recovery.'+verb:{'policy_id','expected_target','_request'} for verb in ('enable','disable','check','tick','apply')},
@@ -329,11 +342,11 @@ class ControllerRecovery:
         self._authorize(actor,target,capability,authorize)
         if operation=='recovery.list':
             with self._db() as db:records=[json.loads(row[0]) for row in db.execute('SELECT record FROM policies')]
-            return dict(schema_version=1,operation=operation,status='completed',result=dict(policies=[self._public(row) for row in records if row['target']==target and row['principal']==identity(actor)]))
+            return dict(schema_version=1,operation=operation,status='completed',result=dict(policies=[self._public(row) for row in records if row['target']==target and row['principal']==identity(actor)],scheduler=self._scheduler()))
         bounded_id(args.get('policy_id'))
         if operation=='recovery.configure':self._definition(args.get('policy'))
         if operation=='recovery.show':
-            return dict(schema_version=1,operation=operation,status='completed',result=dict(policy=self._public(self._owned(actor,args['policy_id'],target,'observe',authorize))))
+            return dict(schema_version=1,operation=operation,status='completed',result=dict(policy=self._public(self._owned(actor,args['policy_id'],target,'observe',authorize)),scheduler=self._scheduler()))
         if operation=='recovery.reconcile':return self._reconcile(actor,args,authorize)
         def dispatch(unused,payload):
             self._authorize(actor,target,capability,authorize)

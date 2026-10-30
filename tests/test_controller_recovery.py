@@ -217,3 +217,18 @@ class RecoveryTests(unittest.TestCase):
             self.assertEqual(state['checks'],0)
             self.assertEqual(state['scheduler_status'],'authority_unavailable')
             self.assertEqual(state['clock']['authorization_expires_elapsed'],1000.0)
+
+    def test_scheduler_heartbeat_is_model_readable_and_missing_is_not_running(self):
+        import json
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);owner,actor,target,args,policy,clock,probes,notices,status=self.fixture(root)
+            owner.execute(actor,'recovery.configure',args('configure',policy=policy),authorize=lambda:actor)
+            show=lambda:owner.execute(actor,'recovery.show',dict(policy_id='policy',expected_target=target),authorize=lambda:actor)['result']
+            self.assertEqual(show()['scheduler']['status'],'not_running')
+            path=root/'controller-recovery'/'scheduler-status.json'
+            path.write_text(json.dumps(dict(schema_version=1,status='held',reason='scheduler_owner_unavailable',updated_at=100.0)));path.chmod(0o600)
+            self.assertEqual(show()['scheduler']['reason'],'scheduler_owner_unavailable')
+            listed=owner.execute(actor,'recovery.list',dict(expected_target=target),authorize=lambda:actor)['result']
+            self.assertEqual(listed['scheduler']['status'],'held')
+            path.chmod(0o644)
+            self.assertEqual(show()['scheduler']['status'],'unknown')
