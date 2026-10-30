@@ -2,7 +2,7 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "6a009f0",
+  "tip_sha": "e37bc8f",
   "state": "running",
   "tickets": {
     "394": {
@@ -49,10 +49,19 @@
         374
       ],
       "worker": "/root/accounts395",
-      "owned_paths": [],
+      "owned_paths": [
+        "src/codex_wake/controller_accounts.py",
+        "src/codex_wake/account_commands.py",
+        "src/codex_profiles",
+        "account/config tests",
+        "CLI/MCP account registration",
+        "packaging ownership"
+      ],
       "base_sha": "2a53cbc192e3df3a5b294ac2554956da8f60b318",
       "result_sha": null,
-      "validation": []
+      "validation": [],
+      "worker_branch": "feat/controller-accounts395",
+      "worker_worktree": "/tmp/codex-wake-accounts395"
     },
     "396": {
       "title": "Search permitted history and resume its owning conversation",
@@ -107,10 +116,18 @@
         394
       ],
       "worker": "/root/oauth399",
-      "owned_paths": [],
+      "owned_paths": [
+        "src/codex_wake/controller_auth.py",
+        "src/codex_wake/controller_http.py",
+        "src/codex_wake/controller_remote_commands.py",
+        "remote bootstrap registration",
+        "admission tests"
+      ],
       "base_sha": "2a53cbc192e3df3a5b294ac2554956da8f60b318",
       "result_sha": null,
-      "validation": []
+      "validation": [],
+      "worker_branch": "feat/controller-399",
+      "worker_worktree": "/tmp/codex-wake-399"
     },
     "400": {
       "title": "Route pinned operations through SSH and registered host environments",
