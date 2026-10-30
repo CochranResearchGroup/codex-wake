@@ -7,6 +7,7 @@ admission, retries, authority, accounting, or provider/runtime activation.
 """
 from __future__ import annotations
 
+from dataclasses import replace
 import hashlib
 import json
 import os
@@ -16,7 +17,7 @@ import shutil
 import tomllib
 from uuid import UUID
 
-from codex_profiles.config import Settings, load_settings
+from codex_profiles.config import load_settings
 from codex_profiles.history import discover, select_session
 from codex_profiles.layout import plan_migration, apply_migration
 from .controller_accounts import ControllerAccounts
@@ -293,8 +294,7 @@ class ControllerMigration:
             if self._preview()['target'] != preview['target']:
                 raise InventoryError('stale_target', 'migration source changed before the first effect')
             candidate.mkdir(mode=0o700)
-            candidate_settings = Settings(state_root=candidate / 'accounts', source_root=settings.source_root,
-                known_profiles=tuple(preview['accounts']), aliases=settings.aliases)
+            candidate_settings = replace(settings, state_root=candidate / 'accounts')
             apply_migration(candidate_settings, plan_migration(candidate_settings))
             if preview.get('selected_account') is not None:
                 self._authorize(authorize, receipt['policy_sha'])
@@ -443,11 +443,16 @@ class ControllerMigration:
             self._candidate_configuration(paths['candidate_root'])
         except InventoryError:
             holds.append('registry_rewrite_unqualified')
-        selected_account = settings.current_profile_resolved()
+        shared_name = Path(settings.shared_dir_name)
+        safe_shared = not shared_name.is_absolute() and '..' not in shared_name.parts and bool(shared_name.parts)
+        if not safe_shared:
+            holds.append('shared_root_requires_qualification')
+        if any(Path(row['home']).name != row['id'] for row in accounts):
+            holds.append('noncanonical_account_alias_unqualified')
+        selected_account = settings.current_profile_resolved() if safe_shared else None
         if selected_account is not None and selected_account not in {row['id'] for row in accounts}:
             holds.append('selected_account_unqualified')
-        candidate = Settings(state_root=paths['candidate_root'] / 'accounts', source_root=settings.source_root,
-            known_profiles=tuple(row['id'] for row in accounts), aliases=settings.aliases)
+        candidate = replace(settings, state_root=paths['candidate_root'] / 'accounts')
         plan = [dict(kind=action.kind, source=str(action.source) if action.source else None,
                      destination=str(action.destination), status=action.status) for action in plan_migration(candidate)]
         if selected_account is not None:
