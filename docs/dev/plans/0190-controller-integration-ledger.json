@@ -2,7 +2,7 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "03e79e1",
+  "tip_sha": "393c87b",
   "state": "running",
   "tickets": {
     "394": {
@@ -290,7 +290,7 @@
     },
     "403": {
       "title": "Display Wake controller notifications and model-readable intervention state",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         397,
@@ -298,9 +298,14 @@
         400,
         390
       ],
-      "worker": null,
-      "owned_paths": [],
-      "base_sha": null,
+      "worker": "/root",
+      "owned_paths": [
+        "controller_notices.py",
+        "notice commands/tests/acceptance",
+        "shared CLI/API/MCP registration",
+        "controller_runtime.py trusted notice access"
+      ],
+      "base_sha": "393c87b",
       "result_sha": null,
       "validation": []
     },
@@ -389,8 +394,8 @@
     },
     "408": {
       "title": "Fork foreach sessions from a pinned common checkpoint",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         407
       ],
@@ -401,7 +406,7 @@
         "fork tests and installed acceptance"
       ],
       "base_sha": "03e79e1",
-      "result_sha": "399c574ed945f84b4e5dd054adb1493ff50c5f75",
+      "result_sha": "393c87b",
       "validation": [
         {
           "evidence": "docs/dev/evidence/plan0190/fork408-installed.json",
@@ -410,6 +415,10 @@
         {
           "finding": "Adapter qualification used a provisional native extension absent from the supported native build; existing lastTurnId is source-verified and must replace it before feature closure",
           "source": "/tmp/codex-native-390 at d1325aeb: ThreadForkParams.last_turn_id; request processor ThroughTurn; paginated/legacy truncation"
+        },
+        {
+          "evidence": "docs/dev/evidence/plan0190/fork408-native-correction.json",
+          "result": "actual native lastTurnId commonprefix;5 installed surfaces;goal-present/unknown denied;30 primary flowchecks"
         }
       ]
     },
@@ -438,8 +447,8 @@
     },
     "410": {
       "title": "Evaluate composable semantic Boolean functions under nested limits",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         406,
         409
@@ -447,7 +456,7 @@
       "worker": "/root/builds397",
       "owned_paths": [],
       "base_sha": null,
-      "result_sha": "fad7252",
+      "result_sha": "ccfc088",
       "validation": [
         {
           "evidence": "docs/dev/evidence/plan0190/conditions410-installed.json",
@@ -455,21 +464,29 @@
         },
         {
           "integration_gap": "Limit reached stops scheduling but must request owned cancellation on semantic timeout and active sibling call/time exhaustion; bounded followup assigned, original qualification retained"
+        },
+        {
+          "evidence": "docs/dev/evidence/plan0190/conditions410-limit-stop-installed.json",
+          "result": "owned limit cleanup confirmed/uncertain under original authority; estimates retained; peer preserved; primary public-ownercheck"
         }
       ]
     },
     "411": {
       "title": "Qualify durable flows across handoff, limits and caller recovery",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         408,
         409,
         410
       ],
-      "worker": null,
-      "owned_paths": [],
-      "base_sha": null,
+      "worker": "/root/accounts395",
+      "owned_paths": [
+        "flow aggregate acceptance",
+        "controller_flows.py continuation",
+        "condition/session fixes ifneeded; Runtime/shared changes by proposal only"
+      ],
+      "base_sha": "393c87b",
       "result_sha": null,
       "validation": []
     },
@@ -488,8 +505,8 @@
       "validation": []
     },
     "390": {
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "existing_consumer": true,
       "blockers": [
         388,
@@ -499,7 +516,14 @@
         400
       ],
       "worker": "/root/oauth399",
-      "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292"
+      "base_sha": "c8c483cf24da8e235a33e3e015096309e5e56292",
+      "result_sha": "670dea9",
+      "validation": [
+        {
+          "evidence": "docs/dev/notes/controller-390-qualification.json",
+          "result": "actual packaged UI loop-only stall and5 frontdoors;0 owned processes;7 primary healthchecks"
+        }
+      ]
     }
   },
   "validation": {
@@ -511,5 +535,11 @@
   },
   "review_rounds": 0,
   "remediation_rounds": 0,
-  "review_fixed_point": "9538354ce2d8ec9f097664946ea4847079fba9c3"
+  "review_fixed_point": "9538354ce2d8ec9f097664946ea4847079fba9c3",
+  "whole_python_ci": {
+    "source_baseline": "211d89b; product source frozen throughout run; docs7994114 followed",
+    "result": "1861 tests passed with1skip in578.147s",
+    "private_log": "/tmp/wake-controller393-ci-39s10ny8/unittest.log",
+    "ruff": "F821,F822,F823 passed after integrated source packets"
+  }
 }
