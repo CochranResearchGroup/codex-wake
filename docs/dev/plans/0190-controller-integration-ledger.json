@@ -438,8 +438,8 @@
     },
     "410": {
       "title": "Evaluate composable semantic Boolean functions under nested limits",
-      "state": "validated",
-      "tracker_state": "closed",
+      "state": "running",
+      "tracker_state": "open",
       "blockers": [
         406,
         409
@@ -452,6 +452,9 @@
         {
           "evidence": "docs/dev/evidence/plan0190/conditions410-installed.json",
           "result": "7installedconditiontests/14flowregressions/all5 installed public surfaces delegated; primary7conditiontests reproduced and3modulehashes match"
+        },
+        {
+          "integration_gap": "Limit reached stops scheduling but must request owned cancellation on semantic timeout and active sibling call/time exhaustion; bounded followup assigned, original qualification retained"
         }
       ]
     },
