@@ -1,6 +1,6 @@
 {
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
-  "integration_branch": "feat/controller-393",
+  "integration_branch": "feat/controller-393-resumed",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
   "tip_sha": "393c87b",
   "state": "running",
@@ -290,8 +290,8 @@
     },
     "403": {
       "title": "Display Wake controller notifications and model-readable intervention state",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         397,
         399,
@@ -306,8 +306,13 @@
         "controller_runtime.py trusted notice access"
       ],
       "base_sha": "393c87b",
-      "result_sha": null,
-      "validation": []
+      "result_sha": "pending notice qualification commit",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/notices403-installed.json",
+          "result": "all5 installed interfaces; actual native TUI render and model context; 2focused/10runtime/6health checks passed; lost acknowledgement readback/no replay; unsupported explicit"
+        }
+      ]
     },
     "404": {
       "title": "Apply and deactivate bounded recovery policies visibly",

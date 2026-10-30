@@ -70,8 +70,13 @@ class ControllerNotices:
         if any(not isinstance(v,str) or len(v)>4096 for v in fields.values()):
             raise InventoryError('source_unavailable', 'source action notice fields exceed bounds')
         # JSON quoting makes embedded control characters visible instead of terminal commands.
+        event_id = 'notice_' + hashlib.sha256(encoded([target, source_id]).encode()).hexdigest()
+        suffix = ' [External supervision event ' + event_id + ']'
         text = 'Codex Wake controller: ' + encoded(fields)
-        event_id = 'controller_' + hashlib.sha256(encoded([target, source_id]).encode()).hexdigest()
+        budget = 768 - len(suffix.encode())
+        if len(text.encode()) > budget:
+            text = text.encode()[:budget-3].decode('utf-8',errors='ignore') + '...'
+        text += suffix
         return dict(event_id=event_id,text=text,source=fields,source_operation_id=source_id)
 
     def _native(self, target, event, *, read=False):

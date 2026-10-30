@@ -1,0 +1,13 @@
+# Controller action notices (#403)
+
+Controller notices derive policy/action/reason/outcome from a completed caller-owned same-target controller operation. Clients cannot supply arbitrary notice prose or claim that a governor was activated. Notices reuse the existing native append/read protocol, operation journal, account endpoint and exact process/build grants. No extra bus, goal, allowance or health probe is introduced.
+
+`codex-wake notices list|publish|reconcile --arguments JSON` shares schemas and protected admission with API, OAuth MCP, native MCP and remote CLI. An uncertain append stays uncertain until original event readback; repeat intent never appends again. Unsupported stock native methods are explicit. Readback confirms retained text/model context but cannot prove a past notification was displayed. Actual TUI rendering is separately qualified by the installed acceptance script.
+
+Seams: protected owner and journal test retained original action, caller isolation, lost acknowledgement and unsupported runtime; CLI/schema tests catch missing registration; installed native acceptance exercises all five interfaces and captures the owned TUI. The native adapter checks private endpoint bindings, process birth/image, kernel peer ownership/image and initialized account home on the effect connection.
+
+Validation: `PYTHONPATH=src repository-venv/python -m unittest discover -s tests -p test_controller_notices.py -v` first failed for missing module, missing CLI, then unsupported native incorrectly uncertain; now 2 tests pass. Runtime regression: 10 passed. Health regression: 6 passed. Installed command and module hashes are in `docs/dev/evidence/plan0190/notices403-installed.json`; source renderer was corrected after the real native protocol rejected missing marker/oversized text. The native protocol caps rendered text at768 bytes, with full source fields retained in journal/model-readable listings.
+
+Installed positive: all five frontdoors append distinct original actions; actual native TUI renders identified notices; retained model context confirmed. No model task_started event, governor receipt, resource renewal, health challenge or shared restart. Four startup network CONNECT requests were rejected by a local non-forwarding proxy. Private native/controller/TUI processes were cleaned up. Failed fixture runs are retained. Linux GNU/owned Unix qualifies; this is not Windows/remote acceptance or production activation. Policy scheduling/deactivation integration belongs to #404.
+
+GitHub hosted checks are skipped per operator policy. Local checks are the qualification authority; no billing changes or paid runs were requested.

@@ -8,7 +8,7 @@ import argparse
 import asyncio
 import base64
 import hashlib
-import http.server
+import http.server as http_server
 import json
 import os
 from pathlib import Path
@@ -40,12 +40,12 @@ def main():
     binary=args.package.resolve()/'bin/codex'; digest=hashlib.sha256(binary.read_bytes()).hexdigest()
     cli=args.bin_dir.resolve()/'codex-wake'
     traffic=[]
-    class Trap(http.server.BaseHTTPRequestHandler):
+    class Trap(http_server.BaseHTTPRequestHandler):
         def reject(self):
             traffic.append(self.command+' '+self.path);self.send_response(503);self.end_headers()
         do_GET=do_POST=do_CONNECT=reject
         def log_message(self,*unused): pass
-    trap=http.server.ThreadingHTTPServer(('127.0.0.1',0),Trap)
+    trap=http_server.ThreadingHTTPServer(('127.0.0.1',0),Trap)
     threading.Thread(target=trap.serve_forever,daemon=True).start()
     proxy='http://127.0.0.1:'+str(trap.server_port)
     (home/'config.toml').write_text(f'''model = "mock-model"
@@ -90,6 +90,7 @@ trust_level = "trusted"
         endpoint='unix://'+str(Path(endpoint[7:]).resolve())
         thread=rpc('thread/start',cwd=str(work))['thread']['id']
         # No goal setter or governor enrollment; an ordinary synthetic empty thread.
+        rpc('thread/notice/read',threadId=thread,eventId='controller_setup_probe')
         before=rpc('thread/read',threadId=thread,includeTurns=True)['thread']['turns']
         command='exec '+shlex.join(['env','CODEX_HOME='+str(home),'TERM=xterm-256color',str(binary),'--remote',endpoint,'--no-alt-screen','resume',thread])
         tmux('new-session','-d','-s','notice','-x','180','-y','55',command)
@@ -169,14 +170,17 @@ trust_level = "trusted"
                     assert not result.is_error,result
                     return recorded(json.loads(result.content[0].text))
         receipts['native_mcp']=asyncio.run(native_mcp())
-        frame=wait_for(lambda: text if 'Codex Wake controller' in (text:=capture()) else None)
+        frame=wait_for(lambda: text if all(event['event_id'] in (text:=capture()) for event in receipts.values()) else None)
         (root/'rendered.txt').write_text(frame)
         for event in receipts.values():
             retained=rpc('thread/notice/read',threadId=thread,eventId=event['event_id'])
             assert retained['notice']==dict(eventId=event['event_id'],text=event['text'])
             assert retained['modelContextAvailable'] is True
         after=rpc('thread/read',threadId=thread,includeTurns=True)['thread']['turns']
-        assert after==before,'notice created a model turn or changed history turns'
+        assert [turn for turn in after if turn['id'] not in {event['event_id'] for event in receipts.values()}]==before
+        records=[json.loads(line) for path in home.glob('sessions/**/*.jsonl') for line in path.read_text().splitlines()]
+        assert not any(row.get('payload',{}).get('type')=='task_started' for row in records),'model turn started'
+        assert 'Codex Wake controller' in frame and 'fixture-policy' in frame and 'disabled' in frame
         assert not (wake/'goal-supervision').exists()
         assert http('/revoke',dict(token=token,client_id=client['client_id']),form=True)[0]==200
         assert http('/operations',dict(operation='notices.list',arguments=dict(expected_target=target)),token)[0]==401
