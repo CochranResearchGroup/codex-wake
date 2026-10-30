@@ -110,7 +110,7 @@ class ControllerNotices:
         if operation not in allowed or set(arguments)-allowed[operation]:
             raise InventoryError('invalid_argument', 'unsupported notice operation/arguments')
         target = arguments.get('expected_target')
-        self._authorize(actor,target,'observe' if operation=='notices.list' else 'control',authorize)
+        self._authorize(actor,target,'observe',authorize)
         if operation == 'notices.list':
             records, cursor = self.runtime.owned_operations(actor,target,'notices.publish',
                 authorize=authorize,cursor=arguments.get('cursor',0))
@@ -119,21 +119,30 @@ class ControllerNotices:
                     **(r['result'] or dict(delivery=dict(status='uncertain')))) for r in records], next_cursor=cursor))
         if operation == 'notices.publish':
             event = self._event(actor,target,arguments.get('source_operation_id'),authorize)
+            capability = 'recovery' if event['source']['action'].startswith('recovery.') else 'control'
+            self._authorize(actor,target,capability,authorize)
             def dispatch(unused, payload):
-                self._authorize(actor,target,'control',authorize)
+                self._authorize(actor,target,capability,authorize)
                 try:
                     return self._native(target,event)
                 except NativeCapabilityUnavailable:
                     return dict(event,delivery=dict(status='unsupported',transcript=False,
                         model_context=False,notification_published=False))
-            return self.runtime.execute(actor,operation,arguments,authorize=authorize,dispatch=dispatch)
+            return self.runtime.execute(actor,operation,arguments,authorize=authorize,dispatch=dispatch,
+                required_capability=capability)
+        original = self.runtime.operation(actor,'operations.result',dict(operation_id=arguments.get('operation_id')),
+            authorize=authorize)['result']['operation']
+        if original['operation'] != 'notices.publish' or original['target'] != target:
+            raise InventoryError('stale_target','original notice owner/target differs')
+        payload = self.runtime._load(original['operation_id'])['payload']
+        event = self._event(actor,target,payload['source_operation_id'],authorize)
+        capability = 'recovery' if event['source']['action'].startswith('recovery.') else 'control'
+        self._authorize(actor,target,capability,authorize)
         def observe(record):
             if record['target'] != target:
                 raise InventoryError('stale_target','notice belongs to another target')
             # The journal owns immutable source inputs; callers cannot substitute text.
-            original = self.runtime._load(record['operation_id'])['payload']
-            event = self._event(actor,target,original['source_operation_id'],authorize)
-            self._authorize(actor,target,'control',authorize)
+            self._authorize(actor,target,capability,authorize)
             return self._native(target,event,read=True)
         return self.runtime.reconcile_result(actor,arguments.get('operation_id'),
-            expected_operation='notices.publish',authorize=authorize,observe=observe)
+            expected_operation='notices.publish',authorize=authorize,observe=observe,capability=capability)

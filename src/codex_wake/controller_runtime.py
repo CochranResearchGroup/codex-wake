@@ -91,19 +91,19 @@ class ControllerRuntime:
         self._authorize(actor, target, 'observe', authorize)
         return result, cursor + len(rows) if len(rows) == 100 else None
 
-    def reconcile_result(self, actor, operation_id, *, expected_operation, authorize, observe):
+    def reconcile_result(self, actor, operation_id, *, expected_operation, authorize, observe, capability='control'):
         """Trusted effect owner's read-only reconciliation of an uncertain result.
 
         No public generic result-writing operation exists. The owner must observe
         original retained proof, and cannot redispatch through this hook.
         """
-        record = self._owned(actor, self._load(operation_id), authorize, capability='control')
+        record = self._owned(actor, self._load(operation_id), authorize, capability=capability)
         if record['operation'] != expected_operation:
             raise InventoryError('unsupported_operation', 'original operation belongs to another effect owner')
         if record['phase'] == 'terminal':
             return self.envelope(expected_operation, record)
         value = observe(self.projection(record))
-        self._owned(actor, record, authorize, capability='control')
+        self._owned(actor, record, authorize, capability=capability)
         if value is not None:
             if len(encoded(value).encode()) > 262144:
                 raise InventoryError('capacity', 'reconciled result exceeds retained bound')
@@ -158,7 +158,7 @@ class ControllerRuntime:
         return dict(schema_version=1, operation=operation, status='completed',
             result=dict(operation=self.projection(record), **extra))
 
-    def execute(self, actor, operation, arguments, *, authorize, dispatch):
+    def execute(self, actor, operation, arguments, *, authorize, dispatch, required_capability=None):
         if not isinstance(arguments, dict) or not isinstance(arguments.get('_request'), dict):
             raise InventoryError('intent_required', 'explicit _request operation/idempotency/correlation/binding/target metadata required')
         meta = arguments['_request']
@@ -169,7 +169,8 @@ class ControllerRuntime:
         target = meta['target']
         if 'expected_target' in payload and payload['expected_target'] != target:
             raise InventoryError('stale_target', 'request target differs from pinned owner target')
-        capability = 'admin' if operation in ('builds.stage', 'builds.select', 'builds.rollback', 'migration.apply', 'migration.rollback') else 'control'
+        capability = required_capability or ('recovery' if operation.startswith('recovery.') else
+            'admin' if operation in ('builds.stage', 'builds.select', 'builds.rollback', 'migration.apply', 'migration.rollback') else 'control')
         self._authorize(actor, target, capability, authorize)
         intent = dict(operation=operation, payload=payload, correlation_id=meta['correlation_id'], binding=meta['binding'], target=target)
         raw = encoded(intent)

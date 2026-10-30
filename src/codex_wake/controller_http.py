@@ -116,7 +116,7 @@ class ProtectedOperations:
         **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait','checkpoint') else 'control', None, None)
             for verb in ('capabilities','create','prompt','wait','cancel','checkpoint','fork')},
         'health.observe': ('observe', None, None),
-        **{'notices.'+verb: ('observe' if verb=='list' else 'control',None,None)
+        **{'notices.'+verb: ('observe',None,None)
             for verb in ('list','publish','reconcile')},
         **{'tabs.'+verb: ('observe' if verb in ('list','show') else 'control', 'resources' if verb in ('list','show') else None, None) for verb in ('list','show','preview','apply','undo','capture','input')},
         **{'flows.' + verb: ('observe' if verb in ('propose', 'definition', 'inspect') else 'control', None, None)

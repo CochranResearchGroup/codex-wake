@@ -18,7 +18,7 @@ class ControllerNoticeTests(unittest.TestCase):
                 provider='fixture', build_sha256='a'*64, backend_id='native', channel='tui',
                 connection_generation='one', process_pid='123', process_start_ticks='456', process_boot_id='boot')
             actor = Actor('operator','service','client','grant','issuer','resource',
-                frozenset({'observe','control'}),[target],time.time()+600)
+                frozenset({'observe','recovery'}),[target],time.time()+600)
             runtime = ControllerRuntime(root)
             def meta(name):
                 return dict(operation_id=name,idempotency_key=name,correlation_id=name,binding='sender',target=target)
