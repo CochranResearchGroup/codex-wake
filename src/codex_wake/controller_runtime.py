@@ -297,11 +297,14 @@ class ControllerRuntime:
         bounded_id(grant_id)
         with self.connect() as db:
             db.execute('INSERT OR IGNORE INTO revoked_grants VALUES(?,?,?,?)',(issuer,resource,grant_id,self.now()))
-            records = [json.loads(row[0]) for row in db.execute('SELECT record FROM operations')]
-        owned = [r for r in records if (r['principal']['issuer'],r['principal']['resource'],r['principal']['grant_id'])==(issuer,resource,grant_id) and r['phase']!='terminal']
-        pending=[r for r in owned if r['cancellation'] not in ('confirmed','requested')]
+            pending=[];remaining=0
+            for row in db.execute('SELECT record FROM operations'):
+                record=json.loads(row[0])
+                if (record['principal']['issuer'],record['principal']['resource'],record['principal']['grant_id'])!=(issuer,resource,grant_id) or record['phase']=='terminal' or record['cancellation'] in ('confirmed','requested'):continue
+                if len(pending)<100:pending.append(record)
+                else:remaining+=1
         outcomes=[]
-        for record in pending[:100]:
+        for record in pending:
             if record['cancellation'] in ('confirmed','requested'):
                 outcomes.append(dict(operation_id=record['operation_id'],cancellation=record['cancellation']));continue
             try:
@@ -321,4 +324,4 @@ class ControllerRuntime:
             self._event(record,'grant_revoked',{'kind':'grant_revoked','cancellation':record['cancellation']})
             outcomes.append(dict(operation_id=record['operation_id'],cancellation=record['cancellation']))
         return dict(grant_id=grant_id,status='revoked',cancellation='reconciled' if outcomes else 'no_owned_active_work',
-            operations=outcomes,remaining=max(0,len(pending)-100),uncertain_effects=[r['operation_id'] for r in outcomes if r['cancellation']=='uncertain'])
+            operations=outcomes,remaining=remaining,uncertain_effects=[r['operation_id'] for r in outcomes if r['cancellation']=='uncertain'])
