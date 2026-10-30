@@ -40,6 +40,10 @@ class ConditionsTests(unittest.TestCase):
             self.assertEqual(done['condition_usage'],dict(calls=2,tokens=0))
             self.assertEqual(owner().advance(actor,started['run_id']),done)
             self.assertEqual(len(done['condition_trace']),2)
+            plain=dict(definition,version=2,nodes=[dict(definition['nodes'][0],condition=dict(op='and',operands=[True,False])),*definition['nodes'][1:]])
+            owner().publish(actor,plain)
+            plain_run=owner().start(actor,'fixture',2,inputs={},intent='plain',binding='caller')
+            self.assertIs(owner().advance(actor,plain_run['run_id'])['result'],False)
             changed=json.loads(registry.read_text())
             changed['functions']['positive@1']['expression']=False
             registry.write_text(json.dumps(changed))

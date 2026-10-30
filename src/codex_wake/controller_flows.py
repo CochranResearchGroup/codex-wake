@@ -233,7 +233,8 @@ class ControllerFlows:
             flow_error('unsupported_flow_limits','exact token bounds for arbitrary child operations are unqualified; rejected before effects')
         def named(value):
             return isinstance(value,dict) and ('function' in value or any(named(v) for v in value.values())) or isinstance(value,list) and any(named(v) for v in value)
-        registry=Conditions(self.root) if any(named(node.get('condition')) for node in definition['nodes']) else Conditions(self.root,registry={})
+        uses_registry=any(named(node.get('condition')) for node in definition['nodes'])
+        registry=Conditions(self.root) if uses_registry else Conditions(self.root,registry={})
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             for function_key,function in registry.registry.items():
@@ -250,7 +251,7 @@ class ControllerFlows:
             definition_sha256=compiled.digest, target=self.target(flow_id), owner=identity(actor), inputs=inputs,
             binding=binding, created_at=self.now(), phase='ready', cursor=definition['entry'],
             condition_enforcement='host_admission_bounds_only; native_exact_tokens_and_time_unqualified',
-            condition_registry_revision=registry.revision,condition_limits=configured_limits,condition_usage=dict(calls=0,tokens=0),condition_trace=[],
+            condition_registry_used=uses_registry,condition_registry_revision=registry.revision,condition_limits=configured_limits,condition_usage=dict(calls=0,tokens=0),condition_trace=[],
             steps={}, attempt_counts={}, attempt_history={}, result=None, reason=None, cancellation=False, completed_steps=0)
         for node in definition['nodes']:
             if node['type'] == 'foreach':
@@ -471,7 +472,7 @@ class ControllerFlows:
         node=next(item for item in definition['nodes'] if item['id']==state['cursor'])
         condition=node.get('condition')
         if node['type']!='branch' or type(condition) is bool or ('function' not in condition and condition.get('op') not in ('and','or')):return None
-        registry=Conditions(self.root) if (self.root/'controller-conditions.json').exists() else Conditions(self.root,registry={})
+        registry=Conditions(self.root) if state.get('condition_registry_used') else Conditions(self.root,registry={})
         if registry.revision!=state.get('condition_registry_revision'):
             flow_error('stale_condition_registry','pinned function registry revision changed')
         attempt=uuid4().hex
