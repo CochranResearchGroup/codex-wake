@@ -62,7 +62,7 @@ class ControllerFlowSessions:
                 raise ValueError()
             if not profile['endpoint'].startswith('unix:///') or not Path(profile['cwd']).is_dir():
                 raise ValueError()
-            if not isinstance(profile['modes'], list) or set(profile['modes']) - {'new_session','sequential'}:
+            if not isinstance(profile['modes'], list) or set(profile['modes']) - {'new_session','sequential','fork'}:
                 raise ValueError()
             if not {'thread/start','turn/start','thread/read','turn/interrupt'} <= set(profile['methods']):
                 raise ValueError()
@@ -113,16 +113,28 @@ class ControllerFlowSessions:
             return self._existing(actor,operation,arguments,authorize)
         fields = {'sessions.create':{'profile','expected_target','_request'},
             'sessions.prompt':{'profile','expected_target','prompt','_request'},
-            'sessions.capabilities':{'profile','expected_target'}}
+            'sessions.capabilities':{'profile','expected_target'},
+            'sessions.checkpoint':{'profile','expected_target'},
+            'sessions.fork':{'profile','expected_target','checkpoint','_request'}}
         if operation not in fields or not isinstance(arguments,dict) or set(arguments) != fields[operation]:
             raise InventoryError('invalid_argument','exact structured session arguments required')
         name,target = arguments['profile'],arguments['expected_target']
         if not isinstance(target,dict):
             raise InventoryError('invalid_argument','pinned session target required')
-        capability = 'observe' if operation == 'sessions.capabilities' else 'control'
+        capability = 'observe' if operation in ('sessions.capabilities','sessions.checkpoint') else 'control'
         profile = self._context(actor,name,target,authorize,capability)
+        if operation in ('sessions.checkpoint','sessions.fork'):
+            from .controller_flow_fork import fork_capability, checkpoint
+            fork_capability(profile,self.metadata(profile))
+            if operation == 'sessions.checkpoint':
+                return dict(schema_version=1,operation=operation,status='completed',result=dict(checkpoint=checkpoint(self,profile,target)))
         if operation == 'sessions.capabilities':
-            return dict(schema_version=1,operation=operation,status='completed',result=dict(target=target,modes=profile['modes']))
+            modes = list(profile['modes'])
+            if 'fork' in modes:
+                from .controller_flow_fork import fork_capability
+                try: fork_capability(profile,self.metadata(profile))
+                except InventoryError: modes.remove('fork')
+            return dict(schema_version=1,operation=operation,status='completed',result=dict(target=target,modes=modes))
         if operation == 'sessions.create' and ('new_session' not in profile['modes'] or 'conversation_id' in target):
             raise InventoryError('unsupported_session_mode','new sessions unavailable for this profile')
         if operation == 'sessions.prompt' and (not target.get('conversation_id') or not isinstance(arguments['prompt'],str)
@@ -133,6 +145,9 @@ class ControllerFlowSessions:
             return authorize()
         def dispatch(unused,payload):
             guard()
+            if operation == 'sessions.fork':
+                from .controller_flow_fork import fork
+                return fork(self,profile,target,payload['checkpoint'])
             if operation == 'sessions.create':
                 thread = self.request(profile['endpoint'],profile['target']['executable'],'thread/start',
                     dict(cwd=profile['cwd'],ephemeral=False),5)['thread']
