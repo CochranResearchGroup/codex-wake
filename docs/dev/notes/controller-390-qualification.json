@@ -1,0 +1,158 @@
+{
+  "activation": false,
+  "cleanup": {
+    "observed_at": 1793372150.2043862,
+    "observer_excluded": true,
+    "owned_process_count": 0,
+    "owned_processes": []
+  },
+  "core": {
+    "actual_os_loop_tid": 3863306,
+    "all_other_ui_tasks_not_stopped": true,
+    "background_rpc_alive": true,
+    "fresh_post_resume_ack": true,
+    "native_ack_seconds": 0.32763814699137583,
+    "only_loop_stopped": true,
+    "stalled_result": "unknown",
+    "ui_pid": 3863285
+  },
+  "expanded": {
+    "active_native_shell_work_preserved": true,
+    "actual_os_loop_tid": 4001335,
+    "broad_grant_error": "insufficient_scope",
+    "broad_grant_status": 403,
+    "current_thread_native_queue_preserved": true,
+    "distinct_fresh_public_challenges": 5,
+    "draft_cursor_preserved": true,
+    "fixture_queue_deleted_before_shell_finish": true,
+    "history_unchanged_during_health": true,
+    "initial_ui_resume_is_setup_only": true,
+    "model_turns_created_by_health": 0,
+    "notices_appended_by_health": 0,
+    "public_frontdoors": [
+      "local operator CLI",
+      "direct OAuth API",
+      "OAuth MCP",
+      "host-mapped native MCP",
+      "OAuth remote CLI"
+    ],
+    "revoked_token_status": 401,
+    "stalled_queue_overflow_refused": true,
+    "stalled_unknown_results": 9,
+    "ui_pid": 4001327,
+    "wrong_target_generation_replay_peer_denied": true
+  },
+  "focused_wake_health_tests": {
+    "passed": 7
+  },
+  "installed_source_sha256": {
+    "cli.py": "f25394644f2f485995576bc3d0734d9190125ed8d35e9e6941f5362c791eae9c",
+    "controller_auth.py": "375ba4536b43320a74d5e311b6a462d06a43cf7ef305f184a6bde5610e21ad86",
+    "controller_health.py": "8f3c6c7db9f963ae083b5bb7084d182b58a0f20c19b676fe72d63def708f7d47",
+    "controller_http.py": "029b2af6835474f34aad9ea5ed18970afaee0109d9b3a52115a1c56b4086d962",
+    "controller_operations.py": "daa319895dc5d8fab286e34e1239696f27b0b5a2f3cb3f1ad10e63021b67c539",
+    "health_commands.py": "aea884d9113f889b841ef11ace6bac3e975b8f9522322c66082d48ecabadb752",
+    "mcp_server.py": "c77ca7e509b2c3a3fc63f48c8f7ae9b7e89247ee4eee7c4d6a33cba2ecd22148"
+  },
+  "limitations": [
+    "Private Linux GNU qualification only; Windows/macOS health are explicitly unsupported.",
+    "Network-only native WebSocket peer identity is unsupported.",
+    "Bots/cross-platform combined matrix belongs to ticket405.",
+    "No production package activation, shared restart, provider credentials, or external provider turn."
+  ],
+  "native_cli_sha256": "f1775c5dd0a1c450a6eec2c76b2f35c5197b0d3df7e9eb2cfb156bdfb403d448",
+  "native_helper_sha256": "3394385db8d7016d56570e4acb7e7223062204cc32574672960febb20441be14",
+  "native_protocol_tests": {
+    "ignored": 1,
+    "passed": 317
+  },
+  "native_routing_tests": {
+    "note": "Routing/bounds core qualified before final runtime-only home binding refinement; final binary covered by actual UI matrix.",
+    "passed": 3,
+    "seconds": 0.47
+  },
+  "native_source": "95cd89dd5f3cddeb241a9de75a3cc255a9484606",
+  "native_tree": "7cdb7769fc5f1a207263a5c763daaffbf534f9e6",
+  "network": {
+    "blocked_startup_connect_attempts": 5,
+    "health_added_requests": 0,
+    "live_provider_turns": 0,
+    "note": "Private child proxy/base URL is loopback trap. Native startup attempted GitHub/ChatGPT metadata connections; all were blocked before TLS and excluded from health effects, never silently reported as zero.",
+    "trap_returns": 503
+  },
+  "patch_sha256": "a2ff05ede23f8d3aa69f3e0a6a50209fc86e4c7fa9377a9d1921599621d034c0",
+  "raw_receipts": {
+    "cleanup": {
+      "path": "/tmp/health390-cleanup-readback.json",
+      "sha256": "ac1400f7e2a5a3b9a2753f548d6f8d57972bb772ee64e0708e52b531bd48cd5e"
+    },
+    "core": {
+      "path": "/tmp/health390-core-ui-5/receipt.json",
+      "sha256": "634d6aa73639de34523d31bc81b170bbf8a3a9a909be6c40cf2badf2796175e3"
+    },
+    "expanded": {
+      "path": "/tmp/health390-expanded-ui-3/receipt.json",
+      "sha256": "d606ad2bb39253cb97c6d8e6a469a620201bf8aa3702cb84d1adccf2c390ca5c"
+    },
+    "native_build": {
+      "path": "/tmp/health390-native-package-owner-binaries-green.log",
+      "sha256": "9ed72184973b331114f125ebdddcc7f3209847a64fef25efc15fbd0040723520"
+    },
+    "native_package_stage": {
+      "path": "/tmp/health390-native-package-stage.log",
+      "sha256": "0f2cc79c226ef109b019298a20c6590e1e78a30d4d3f669ebfe0b28c9b290235"
+    },
+    "protocol_tests": {
+      "path": "/tmp/health390-native-protocol-tests.log",
+      "sha256": "ab85749e5ecdaee5d7c9f03288f1212dc116e6dcd9ef69030a0a58be6a55f097"
+    },
+    "public": {
+      "path": "/tmp/health390-expanded-ui-3/public-receipt.json",
+      "sha256": "c9c2649817568dfdccc7f993dc2b844944532e584ada63d93e7fa35d929e0dc0"
+    },
+    "routing_tests": {
+      "path": "/tmp/health390-native-routing-tests-green.log",
+      "sha256": "4770e8929437882120d7a3a41171a1e69a67034c6c0ebd6b1d705803e7e59341"
+    }
+  },
+  "result": "passed_disposable_linux_package",
+  "retained_failure_logs": [
+    {
+      "path": "/tmp/health390-native-package-binaries.log",
+      "sha256": "f21b3e6df85d5446a449d31210c50a21b5467ca22ea316f70312e69359c34100"
+    },
+    {
+      "path": "/tmp/health390-native-package-owner-binaries.log",
+      "sha256": "fd1e1903b05f0a133642ab2ce66be1287b9fe2f02a7d71316418ec38f3066e01"
+    },
+    {
+      "path": "/tmp/health390-core-ui-1.log",
+      "sha256": "7ab3501daa465cd09a9485e9a5a448e7da7acb7be3681b7e78d5dc6ce24f0a35"
+    },
+    {
+      "path": "/tmp/health390-core-ui-2.log",
+      "sha256": "b584a0577a0b128d2d5d073aa0d529f7576a0ce05559dc240b3a5c0fe4fdd21b"
+    },
+    {
+      "path": "/tmp/health390-core-ui-3.log",
+      "sha256": "c0b64f50b3294e18937b96196f087532d011453777df7864693dab81cf3f5c8d"
+    },
+    {
+      "path": "/tmp/health390-core-ui-4.log",
+      "sha256": "e7f5d6495a0038cf52afef826f61c497caec1cf30404196a6c98707741c96b7f"
+    },
+    {
+      "path": "/tmp/health390-expanded-ui-1.log",
+      "sha256": "1b25756f94fea197db556cc292d5a886a7a423f32fef3e781e9db581596a7252"
+    },
+    {
+      "path": "/tmp/health390-expanded-ui-2.log",
+      "sha256": "c5b469d2dd6273813f35baa1d837ee71e8460f1213eb2772bcc88fa8a62e9101"
+    }
+  ],
+  "schema_version": 1,
+  "specification": 393,
+  "ticket": 390,
+  "wake_health_fix": "31fbb81",
+  "wake_installed_base": "c20132a14c97f4de8ba6a98b242668762c7b9a6c"
+}

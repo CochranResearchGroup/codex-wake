@@ -58,3 +58,31 @@ class HealthTests(unittest.TestCase):
             result=service.execute('health.observe',dict(expected_target=target))
             self.assertEqual(result['observation']['status'],'unsupported')
             self.assertEqual(calls,[])
+
+    def test_transport_disconnect_is_nonpositive_without_reconnect(self):
+        calls=[]
+        def disconnected(*args):
+            from websockets.exceptions import InvalidHandshake
+            calls.append(args)
+            raise InvalidHandshake('synthetic closed peer')
+        with tempfile.TemporaryDirectory() as directory:
+            service,target=self.fixture(directory,disconnected)
+            result=service.execute('health.observe',dict(expected_target=target,timeout=.2))
+            self.assertFalse(result['observation']['responsive'])
+            self.assertEqual(len(calls),1)
+
+    def test_native_decimal_generation_is_compared_without_losing_identity(self):
+        calls=[]
+        def unsupported(*args):
+            from codex_wake.native_protocol import NativeCapabilityUnavailable
+            calls.append(args)
+            raise NativeCapabilityUnavailable('synthetic unsupported capability')
+        with tempfile.TemporaryDirectory() as directory:
+            service,target=self.fixture(directory,unsupported)
+            target['process']['start_ticks']=str(target['process']['start_ticks'])
+            path=Path(directory)/'controller-health.json'
+            value=json.loads(path.read_text());value['bindings'][0]['target']=target;path.write_text(json.dumps(value))
+            result=service.execute('health.observe',dict(expected_target=target,timeout=.2))
+            self.assertEqual(result['observation']['status'],'unsupported')
+            self.assertEqual(len(calls),1)
+            self.assertEqual(calls[0][3]['binding']['startTicks'],target['process']['start_ticks'])
