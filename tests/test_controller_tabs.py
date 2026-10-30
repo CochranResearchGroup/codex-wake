@@ -166,3 +166,27 @@ class ControllerTabsTests(unittest.TestCase):
                 with self.assertRaises(InventoryError): owner.execute('tabs.input',dict(args,input='unsafe\nsecond'))
             finally:
                 subprocess.run(['tmux','-S',socket,'kill-server'],check=False)
+
+    def test_actual_disposable_stdio_process_uses_existing_client(self):
+        import sys
+        from codex_wake.app_server import StdioAppServerClient
+        from codex_wake.controller_tab_adapters import OwnedStdioBroker
+        program = '''import json,sys
+for line in sys.stdin:
+    row=json.loads(line)
+    result={'fixture':True,'method':row['method'],'params':row['params']}
+    print(json.dumps({'id':row['id'],'result':result}),flush=True)
+'''
+        client = StdioAppServerClient(command=[sys.executable,'-u','-c',program],timeout_seconds=2)
+        try:
+            client.initialize()
+            broker = OwnedStdioBroker(client,bindings={'%1':'fixture-thread'},owner_id='fixture-process')
+            with tempfile.TemporaryDirectory() as directory:
+                owner = ControllerTabs(directory,workspaces={'fixture':dict(transport=Transport(),kind='stdio',broker=broker,privacy=lambda pane:'safe')},host='h',environment='fixture')
+                row = owner.execute('tabs.list',{})['resources'][0]
+                result = owner.execute('tabs.input',dict(workspace='fixture',expected_target=row['target'],pane='%1',input='fixture only',transport='structured',custody=row['input_custody']))
+                self.assertEqual(result['result']['method'],'turn/start')
+                self.assertEqual(result['result']['params']['threadId'],'fixture-thread')
+                self.assertIs(broker.client,client)
+        finally:
+            client.close()
