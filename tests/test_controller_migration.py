@@ -229,3 +229,23 @@ legacy_config="{self.legacy}"
         self.assertIn('registry_rewrite_unqualified', preview['holds'])
         self.assertNotIn('synthetic-never-copy', json.dumps(preview))
         self.assertFalse((self.lab / 'candidate').exists())
+
+    def test_normal_consumers_refuse_unattributable_or_redirected_cutover(self):
+        from codex_wake.controller_accounts import ControllerAccounts
+        from codex_wake.managed_inventory import InventoryError
+        owner = self.owner()
+        applied = owner.execute('migration.apply', {'expected_target': owner.execute('migration.preview', {})['target']})
+        consumer = ControllerAccounts(self.path, host='fixture-host', environment='fixture-env')
+        self.assertEqual(consumer.execute('accounts.list', {})['accounts'][0]['home'],
+                         str(self.lab / 'candidate' / 'accounts' / 'codex-alice'))
+        receipt = self.root / 'controller-migration' / (applied['receipt_id'] + '.json')
+        receipt.chmod(0o644)
+        with self.assertRaises(InventoryError) as error:
+            consumer.execute('accounts.list', {})
+        self.assertEqual(error.exception.code, 'stale_target')
+        receipt.chmod(0o600)
+        self.pointer.unlink()
+        self.pointer.symlink_to(self.root / 'untrusted-registry.toml')
+        with self.assertRaises(InventoryError) as error:
+            consumer.execute('accounts.list', {})
+        self.assertEqual(error.exception.code, 'stale_target')
