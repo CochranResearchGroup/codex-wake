@@ -2,7 +2,7 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "399c574",
+  "tip_sha": "299b6c2",
   "state": "running",
   "tickets": {
     "394": {
@@ -406,8 +406,8 @@
     },
     "409": {
       "title": "Join parallel iterations with safe retry and uncertain-effect reconciliation",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         407
       ],
@@ -419,8 +419,13 @@
         "shared registrations"
       ],
       "base_sha": "aec16f7",
-      "result_sha": null,
-      "validation": []
+      "result_sha": "299b6c2",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/join409-installed.json",
+          "result": "102broader controller checks;14focused flow checks after final reconciliation;all5 installed surfaces with join/retry/native revocation/peer survival passed"
+        }
+      ]
     },
     "410": {
       "title": "Evaluate composable semantic Boolean functions under nested limits",
