@@ -35,6 +35,11 @@ class RuntimeTests(unittest.TestCase):
 
     def fixture(self, directory, *, fault=None, observed_at=None, sender_id="sender"):
         import json,time
+        initial_wall, initial_elapsed = time.time(), time.monotonic()
+        # This fixture tests custody, not host clock discontinuities. Keep every
+        # mailbox instance on the same injected elapsed clock; production's
+        # wall-clock anomaly refusal remains independently covered.
+        clock = lambda: initial_wall + time.monotonic() - initial_elapsed
         from codex_wake.a2a_bus import BusStore
         from codex_wake.a2a_identity import RuntimeIdentity
         from codex_wake.a2a_mailbox import Mailbox
@@ -60,10 +65,10 @@ class RuntimeTests(unittest.TestCase):
         actor = Actor('caller', 'service', 'client', 'grant', 'https://wake.test', 'https://wake.test/controller', frozenset({'control', 'observe'}), [{k:v for k,v in target.items() if k != 'process'}], time.time()+600)
         config = dict(version=1, host='fixture', environment='linux', bindings={'native-sender': dict(subject='caller', client_id='client', bus_root=str(bus.root), capability=str(caps[0]), identity=natives[0].__dict__)}, recipients=[dict(target=target, identity=natives[1].__dict__)])
         path = root / 'controller-messaging.json'; path.write_text(json.dumps(config)); path.chmod(0o600)
-        adapter = ControllerMailbox(root, mailbox_factory=lambda bus: Mailbox(bus, fault=fault))
+        adapter = ControllerMailbox(root, mailbox_factory=lambda bus: Mailbox(bus, clock=clock, fault=fault))
         runtime = ControllerRuntime(root, adapter=adapter)
         args = dict(_request=dict(operation_id='mail-operation', idempotency_key='mail-intent', correlation_id='mail-correlation', binding='opaque-caller-context', target=target), expected_target=target, sender_binding='native-sender', body='Synthetic question', delivery='inbox', queue=True, response_requested=False)
-        return runtime, actor, args, Mailbox(bus), actors
+        return runtime, actor, args, Mailbox(bus, clock=clock), actors
 
     def test_timeout_is_not_cancellation_and_only_real_correlated_reply_is_answer(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -95,7 +100,7 @@ class RuntimeTests(unittest.TestCase):
             runtime, actor, args, mailbox, natives = self.fixture(directory, fault=fault)
             uncertain = runtime.operation(actor, 'operations.send', args, authorize=lambda: actor)
             self.assertEqual(uncertain['result']['operation']['execution'], 'unknown')
-            runtime.adapter.mailbox_factory = type(mailbox)
+            runtime.adapter.mailbox_factory = lambda bus: type(mailbox)(bus, clock=mailbox.clock)
             reconciled = runtime.operation(actor, 'operations.result', {'operation_id':'mail-operation'}, authorize=lambda: actor)
             self.assertEqual(reconciled['result']['operation']['execution'], 'queued')
             self.assertEqual(len(mailbox.list(natives[0], outbox=True)['messages']), 1)
