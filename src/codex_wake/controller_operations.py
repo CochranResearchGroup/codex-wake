@@ -9,7 +9,8 @@ from .managed_inventory import InventoryError
 
 
 class ControllerOperations:
-    def __init__(self, inventory, *, host, environment, accounts=None, builds=None, hosts=None, history_runtime=None, history_now=None):
+    def __init__(self, inventory, *, host, environment, accounts=None, builds=None, hosts=None, history_runtime=None, history_now=None, migration=None, migration_writer_probe=None):
+        self.migration, self.migration_writer_probe = migration, migration_writer_probe
         self.history_runtime, self.history_now = history_runtime, history_now
         self.hosts = hosts
         self.builds = builds
@@ -19,6 +20,11 @@ class ControllerOperations:
         self.environment = environment
 
     def execute(self, operation, arguments, *, actor=None, authorize=None):
+        if operation.startswith('migration.'):
+            if self.migration is None:
+                raise InventoryError('configuration_unavailable', 'host migration owner is unavailable')
+            return dict(schema_version=1, operation=operation, status='completed',
+                result=self.migration.execute(operation, arguments, authorize=authorize))
         if operation.startswith('hosts.'):
             if self.hosts is None:
                 raise InventoryError('configuration_unavailable', 'host routing owner is unavailable')

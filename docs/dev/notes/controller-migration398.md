@@ -154,3 +154,25 @@ output-token limits and native credential-store mode settings from embedded
 credential values. Valid policy survives exactly; actual env/API-key credential
 fields, including nested lists, remain held rather than being copied. Thirteen
 focused migration tests now pass in 3.015s.
+
+## Shared registration and candidate use
+
+The shared CLI/native-MCP/HTTP/OAuth-MCP/remote-CLI registration now dispatches
+through MigrationAuthorization and the existing durable administrative runtime.
+The trusted native runner can inject migration_writer_probe only as host context,
+never a tool argument. Default census behavior is preserved.
+
+Normal account/profile/history/build entrypoints now resolve the configured
+candidate only through controller_registry: exact declared pointer and candidate,
+valid disposable marker, one private applied receipt, unchanged routing policy,
+and qualified owning compatibility links. Arbitrary pointer targets or missing/
+changed receipts are refused. Original host routing policy remains untouched;
+active policy is read from the qualified candidate. Cached service account owners
+resolve again per operation, so cutover is actually consumed rather than leaving
+clients on stale legacy paths. The public account/history test first failed on
+the old compatibility link, then passed for both newly constructed and cached
+owners after this loader. Rollback returns normal consumers to the original root.
+
+Validation of this shared checkpoint: 73 existing controller tests pass in
+30.999s, including the expanded migration/native history behavior. No Flow406
+untracked work or other lane source is imported or changed.

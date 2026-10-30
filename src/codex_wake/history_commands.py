@@ -31,7 +31,9 @@ def execute(operation, arguments, root, *, authorized_accounts=(), principal=Non
 
 def policy(root):
     try:
-        return tomllib.loads((Path(root) / 'controller-accounts.toml').read_text()).get('history', {})
+        from .controller_registry import resolve_registry
+        path = resolve_registry(Path(root) / 'controller-accounts.toml', root=root)
+        return tomllib.loads(path.read_text()).get('history', {})
     except (OSError, ValueError, TypeError):
         raise InventoryError('configuration_unavailable', 'host history policy is unavailable') from None
 

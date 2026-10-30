@@ -45,12 +45,14 @@ class ControllerAccounts:
         allowed = set() if operation == 'accounts.list' else {'selector', 'expected_target'}
         if not isinstance(arguments, dict) or set(arguments) - allowed:
             raise InventoryError('invalid_argument', 'unsupported account arguments')
-        if not self.path.is_file():
+        from .controller_registry import resolve_registry
+        path = resolve_registry(self.path, host=self.host, environment=self.environment)
+        if not path.is_file():
             raise InventoryError('configuration_unavailable', 'host account configuration is unavailable')
         try:
-            raw = self.path.read_bytes()
+            raw = path.read_bytes()
             data = tomllib.loads(raw.decode())
-            settings = load_settings(self.path)
+            settings = load_settings(path)
             # Profiles defaults are useful for legacy commands, but controller
             # inventory must never silently discover the operator home.
             if not data.get('profiles', {}).get('state_root'):

@@ -55,7 +55,7 @@ legacy_config="{self.legacy}"
 
     def owner(self, **kwargs):
         from codex_wake.controller_migration import ControllerMigration
-        return ControllerMigration(self.path, root=self.root / 'wake', host='fixture-host', environment='fixture-env',
+        return ControllerMigration(self.path, root=self.root, host='fixture-host', environment='fixture-env',
                                    writer_probe=kwargs.pop('writer_probe', lambda unused: dict(status='complete', writers=[])), **kwargs)
 
     def test_preview_inventories_indirect_links_and_unassigned_history_without_effect(self):
@@ -73,7 +73,7 @@ legacy_config="{self.legacy}"
 
     def test_apply_and_rollback_preserve_native_credential_inode_and_original_shared_store(self):
         owner = self.owner()
-        self.path.write_text(self.path.read_text() + '\n[configuration.base]\nmodel="shared-policy"\nmodel_max_output_tokens=8000\nmcp_oauth_credentials_store="keyring"\n')
+        self.path.write_text(self.path.read_text() + '\n[configuration.base]\nmodel="shared-policy"\nmodel_max_output_tokens=8000\nmcp_oauth_credentials_store="keyring"\n[history]\nreadable_accounts=["alice"]\n')
         ledger = self.home / 'wake' / 'objective-ledgers' / 'prior.json'
         ledger.parent.mkdir(parents=True)
         ledger.write_bytes(b'{"used":93,"deadline":1800000010,"uncertain":true}')
@@ -81,6 +81,9 @@ legacy_config="{self.legacy}"
         before_auth = (self.home / 'auth.json').stat().st_ino
         source_before = (self.source / 'config.toml').read_bytes()
         history_before = (self.source / 'sessions' / 'unassigned.jsonl').read_bytes()
+        from codex_wake.controller_accounts import ControllerAccounts
+        cached_accounts = ControllerAccounts(self.path, host='fixture-host', environment='fixture-env')
+        cached_accounts.execute('accounts.list', {})
         target = owner.execute('migration.preview', {})['target']
         applied = owner.execute('migration.apply', {'expected_target': target})
         self.assertEqual(applied['status'], 'applied')
@@ -94,6 +97,14 @@ legacy_config="{self.legacy}"
         self.assertEqual(candidate_policy['configuration']['base']['model_max_output_tokens'], 8000)
         self.assertEqual(candidate_policy['configuration']['base']['mcp_oauth_credentials_store'], 'keyring')
         self.assertEqual(self.pointer.resolve(), self.lab / 'candidate' / 'controller-accounts.toml')
+        from codex_wake.controller_accounts import ControllerAccounts
+        from codex_wake.controller_history import ControllerHistory
+        public_accounts = ControllerAccounts(self.path, host='fixture-host', environment='fixture-env').execute('accounts.list', {})
+        self.assertEqual(public_accounts['accounts'][0]['home'], str(candidate_home))
+        self.assertEqual(cached_accounts.execute('accounts.list', {})['accounts'][0]['home'], str(candidate_home))
+        public_history = ControllerHistory(self.path, root=self.root, host='fixture-host', environment='fixture-env',
+            authorized_accounts=['alice']).execute('history.read', {'owner': 'alice', 'thread_id': THREAD})
+        self.assertEqual(public_history['session']['target']['home'], str(candidate_home))
         self.assertEqual((self.source / 'config.toml').read_bytes(), source_before)
         self.assertEqual((self.source / 'sessions' / 'unassigned.jsonl').read_bytes(), history_before)
         rolled = owner.execute('migration.rollback', {'receipt_id': applied['receipt_id'], 'expected_target': applied['target']})
