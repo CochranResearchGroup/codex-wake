@@ -1,6 +1,6 @@
 # Cross-host controller specification
 
-Status: SPECIFICATION_PUBLISHED; implementation not started. Canonical specification: https://github.com/CochranResearchGroup/codex-wake/issues/393
+Status: IMPLEMENTING; specification accepted and implementation ledger authoritative for child delivery. Canonical specification: https://github.com/CochranResearchGroup/codex-wake/issues/393
 
 Owner: controller coordinator. Scope and acceptance are below; done means accepted specification and reviewed implementation-ticket graph, not production deployment.
 

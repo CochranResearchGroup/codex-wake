@@ -316,8 +316,8 @@
     },
     "404": {
       "title": "Apply and deactivate bounded recovery policies visibly",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         402,
         403
@@ -329,12 +329,17 @@
         "recovery tests/acceptance"
       ],
       "base_sha": "607f1f7",
-      "result_sha": null,
-      "validation": []
+      "result_sha": "aec3495",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/recovery404-installed.json",
+          "result": "all5 installed scheduled without publictick/apply;9primaryrecovery/2originalauthority-server tests;11modulehashes matched;fresh0ownedprocesses"
+        }
+      ]
     },
     "405": {
       "title": "Qualify the packaged cross-host milestone with Codex Bots",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         398,
@@ -343,11 +348,16 @@
         404,
         378
       ],
-      "worker": null,
-      "owned_paths": [],
-      "base_sha": null,
+      "worker": "/root/flow411_resume",
+      "owned_paths": [
+        "crosshost405 acceptance",
+        "portableWindowsclient",
+        "nativeartifactrebuild"
+      ],
+      "base_sha": "f23fd08",
       "result_sha": null,
-      "validation": []
+      "validation": [],
+      "remaining_gate": "actualdistributedmatrix and immutableBotsconsumer packet; Windows native owner unsupported explicit"
     },
     "406": {
       "title": "Run a versioned branch-and-wait flow durably",
