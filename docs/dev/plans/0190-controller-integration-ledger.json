@@ -79,31 +79,31 @@
     },
     "396": {
       "title": "Search permitted history and resume its owning conversation",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         395,
         375,
         376
       ],
-      "worker": null,
+      "worker": "/root/accounts395",
       "owned_paths": [],
-      "base_sha": null,
+      "base_sha": "519beebc54931ada96a3f8cafb267bb407f54c14",
       "result_sha": null,
       "validation": []
     },
     "397": {
       "title": "Launch visibly identified stock and modded immutable builds",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         395,
         373,
         377
       ],
-      "worker": null,
+      "worker": "/root/builds397",
       "owned_paths": [],
-      "base_sha": null,
+      "base_sha": "519beebc54931ada96a3f8cafb267bb407f54c14",
       "result_sha": null,
       "validation": []
     },
