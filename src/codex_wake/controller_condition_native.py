@@ -7,6 +7,7 @@ import json
 import time
 from .controller_flow_sessions import ControllerFlowSessions
 from .managed_inventory import InventoryError
+from .controller_conditions import ConditionPending
 
 
 def invoke(root,actor,function,arguments,bounds,tokens,receipt,*,authorize,request_id,binding):
@@ -52,7 +53,7 @@ def invoke(root,actor,function,arguments,bounds,tokens,receipt,*,authorize,reque
         receipt['native_phase']=operation['phase']
         receipt['native_reason']=operation.get('reason')
         if operation['phase'] not in ('terminal','waiting') or not isinstance(operation.get('result'),dict):
-            raise InventoryError('semantic_effect_uncertain','native predicate turn submission uncertain; do not replay')
+            raise ConditionPending('native predicate turn submission uncertain; observe original operation only')
         waited=owner.execute(actor,'sessions.wait',dict(operation_id=request_id,timeout=max(0,min(30,deadline-time.monotonic()))),authorize=authorize)
         record=waited['result']['operation']
         receipt['native_execution']=record.get('execution','unknown')
@@ -60,6 +61,8 @@ def invoke(root,actor,function,arguments,bounds,tokens,receipt,*,authorize,reque
         return stop_timeout()
     if waited['result'].get('wait',{}).get('status')=='timeout':
         return stop_timeout()
+    if record.get('phase')!='terminal' or record.get('execution') not in ('completed','failed','cancelled'):
+        raise ConditionPending('native predicate turn result uncertain; observe original operation only')
     return _outcome(record,usage,request_id)
 
 
