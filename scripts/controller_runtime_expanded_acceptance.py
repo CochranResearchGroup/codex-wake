@@ -10,6 +10,8 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import shutil
+from contextlib import contextmanager
 import time
 from urllib.request import Request,urlopen
 from urllib.error import HTTPError
@@ -44,13 +46,28 @@ def prepare(root):
     return dict(target=target,config=config,bus=bus,operator=operator,natives=natives,caps=caps,actors=actors,work=work,inventory=inventory,enrolled=enrolled)
 
 
-def main(shared=False):
+@contextmanager
+def fixture_directory(retain_on_failure):
+    path = Path(tempfile.mkdtemp(prefix='wake-runtime401-'))
+    try:
+        yield str(path)
+    except BaseException:
+        if retain_on_failure:
+            print('retained_private_disposable_fixture=' + str(path), file=sys.stderr)
+        else:
+            shutil.rmtree(path)
+        raise
+    else:
+        shutil.rmtree(path)
+
+
+def main(shared=False, retain_on_failure=False):
     import codex_wake
     from codex_wake.a2a_mailbox import Mailbox
     env = dict(os.environ); env.pop('PYTHONPATH', None)
     executable = str(Path(sys.executable).parent / 'codex-wake')
     prefix = [executable] if shared else [sys.executable,'-m','codex_wake.operation_commands']
-    with tempfile.TemporaryDirectory(prefix='wake-runtime401-') as directory:
+    with fixture_directory(retain_on_failure) as directory:
         base = Path(directory); root = base / 'wake'
         fixture = prepare(root); target = fixture['target']
         def command(*args, expected=0):
@@ -271,4 +288,4 @@ def qualify_public(root,fixture,job_target,env,base):
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--shared-cli',action='store_true');args=parser.parse_args();main(args.shared_cli)
+    parser=argparse.ArgumentParser();parser.add_argument('--shared-cli',action='store_true');parser.add_argument('--retain-on-failure',action='store_true');args=parser.parse_args();main(args.shared_cli, args.retain_on_failure)

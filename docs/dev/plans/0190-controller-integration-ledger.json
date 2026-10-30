@@ -107,8 +107,8 @@
     },
     "397": {
       "title": "Launch visibly identified stock and modded immutable builds",
-      "state": "blocked",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         395,
         373,
@@ -126,18 +126,18 @@
       "result_sha": "6a0b2b9",
       "validation": [
         {
-          "command": "source unittest test_controller_builds.py",
-          "result": "4 passed including added CLI/MCP envelope regression"
+          "command": "installed python -m unittest discover -s tests -p test_controller_builds.py",
+          "result": "5 passed including API/OAuthMCP/remoteCLI/nativeMCP one durable intent plus installed staging/select/rollback"
         },
         {
-          "command": "source unittest test_controller*.py",
-          "result": "19 passed"
+          "command": "source unittest test_controller_build_authorization.py",
+          "result": "8 passed: scopes, recipe pin, target metadata and configuration preservation"
         }
       ],
       "worker_branch": "feat/controller-397",
       "worker_worktree": "/tmp/codex-wake-397",
       "integrated_sha": "f4ea22b",
-      "remaining_gate": "Durable operation runtime401 for protected mutations; inspection and existing operator owner installed checks pass",
+      "remaining_gate": null,
       "coordinator_owned_remaining": "Protected mutation plugin/shared registration integration after401validation"
     },
     "398": {
@@ -220,8 +220,8 @@
     },
     "401": {
       "title": "Return correlated answers durably through caller disconnect",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         399,
         400
@@ -234,9 +234,20 @@
         "tests/scripts"
       ],
       "base_sha": "538694c",
-      "result_sha": null,
-      "validation": [],
-      "worker_branch": "pending worker allocation"
+      "result_sha": "754b43f044efc3ebd83bcadf86df3a0aafc55f33",
+      "validation": [
+        {
+          "command": "source unittest discover -s tests -p test_controller*.py",
+          "result": "51 passed"
+        },
+        {
+          "command": "reinstall integration; installed python scripts/controller_runtime_expanded_acceptance.py --shared-cli --retain-on-failure",
+          "result": "passed full public send/wait/result matrix, real nativeMailbox and supervisedjobs, peer-safe revocation; eight installed module hashes match"
+        }
+      ],
+      "worker_branch": "pending worker allocation",
+      "integrated_sha": "4c6ee49",
+      "known_boundary": "One prior expanded fixture clock_anomaly remains unattributed; failed checkpoint was cleaned. Diagnostics and uninstrumented fresh fixture passed; no clock reset or policy bypass. Failed receipt retained."
     },
     "402": {
       "title": "Organize Byobu and psmux attachments without changing session identity",

@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "command": "env -u PYTHONPATH /tmp/codex-wake-accounts395-installed/bin/python scripts/controller_runtime_expanded_acceptance.py --shared-cli --retain-on-failure",
+  "installed_module_hashes_match_integration": {
+    "cli.py": "6f62ebdd88df8170c11504bbd303e758a132e1d52cbd3ccd97644151f76df08c",
+    "controller_auth.py": "6d4303d3bb9edc7c360eaa84e42a676f240f999738c18b4754c3c2f29ad4d41c",
+    "controller_http.py": "e1d2f6dd57aee4a901696c1881d70bcec17e8a960caa06b782c1a0d2e23adf9c",
+    "controller_job_adapter.py": "ee9cbb5f3a8d584f5a5dd8e658983779574f1e083556150d7dac6dac4564b208",
+    "controller_mailbox.py": "cf343a8fbfab414a7cd5dd4042a113317835e6aba76d4aad1b8925a5e632d911",
+    "controller_runtime.py": "6c3572b43f5137cc085234b7c50dcc266584626893cd68921cbf0df44e5dd98e",
+    "mcp_server.py": "c1bdb6e21c94694510d18a1c3b98aeade67024e7d0045d615fdf0d0b08497dd3",
+    "operation_commands.py": "b8bb8f99612a7c12367abe08ad7b1c64b03684ae7477365896afd48eea4fca2a"
+  },
+  "clock_instrumentation": false,
+  "clock_reset": false,
+  "provider_calls": 0,
+  "checks": [
+    "native CLI/stdout answers and stderr progress",
+    "native MCP sender metadata",
+    "OAuth API/MCP/remote CLI send wait result",
+    "mailbox actual correlated reply bodies",
+    "caller loss and late answer",
+    "one original message per intent",
+    "supervised command results",
+    "grant-specific queue/job cancellation and peer preservation"
+  ],
+  "prior_clock_hold": {
+    "status": "unattributed_not_reproduced",
+    "original_checkpoint": "unavailable; original TemporaryDirectory was cleaned",
+    "diagnostic_fresh_fixture": "passed with observation logging outside Git",
+    "unmodified_product_fresh_fixture": "passed",
+    "policy_bypass": false,
+    "evidence": "docs/dev/evidence/plan0190/runtime401-expanded-failure.md"
+  }
+}
