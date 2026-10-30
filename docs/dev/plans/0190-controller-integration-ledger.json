@@ -2,13 +2,13 @@
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
   "integration_branch": "feat/controller-393",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "tip_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
+  "tip_sha": "6a009f0",
   "state": "running",
   "tickets": {
     "394": {
       "title": "Resolve and inspect exact controller targets across CLI/API/MCP",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closure_pending",
       "blockers": [],
       "worker": "/root",
       "owned_paths": [
@@ -18,7 +18,7 @@
         "controller operation tests"
       ],
       "base_sha": "9538354ce2d8ec9f097664946ea4847079fba9c3",
-      "result_sha": null,
+      "result_sha": "6a009f0",
       "validation": [
         {
           "command": "PYTHONPATH=src python -m unittest discover -s tests -p test_controller_operations.py",
@@ -28,6 +28,14 @@
         {
           "command": "PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -p test_managed_inventory.py",
           "result": "9 passed"
+        },
+        {
+          "command": "repository venv unittest discover -s tests -p *mcp.py",
+          "result": "19 passed"
+        },
+        {
+          "command": "uv pip install --target /tmp/controller394-installed --no-deps .; installed CLI/MCP fixture",
+          "result": "passed; import path verified; isolated empty inventory; no live discovery"
         }
       ]
     },
