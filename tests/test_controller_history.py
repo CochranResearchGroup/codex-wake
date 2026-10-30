@@ -95,6 +95,53 @@ profiles="{fixture.profiles}"
             'expires_at': '2027-01-16T09:00:00+00:00'})
         self.assertEqual(replay['resume']['status'], 'resumed')
         self.assertEqual(len([command for command in fixture.commands if command[0] == 'new-window']), 1)
+        from codex_wake.managed_inventory import InventoryError
+        unauthorized_owner = self.owner(resume_owner=ManagedHistoryResume(fixture.root,
+            Principal('untrusted-controller', 'controller'), runtime=fixture.runtime, now=lambda: fixture.inv.now()))
+        with self.assertRaises(InventoryError) as denied:
+            unauthorized_owner.execute('history.resume', {'owner': 'alice', 'thread_id': THREAD,
+                'expected_target': session['target'], 'intent': 'intruder', 'expires_at': '2027-01-16T09:00:00+00:00'})
+        self.assertEqual(denied.exception.code, 'resume_recovery_authority_required')
+        ledger_dir = fixture.root / 'objective-ledgers'
+        ledger_dir.mkdir(exist_ok=True)
+        ledger = ledger_dir / 'existing.json'
+        ledger.write_bytes(b'{"used":93,"original_deadline":1800000010,"unknown":true}')
+        preserved = ledger.read_bytes()
+        fixture.current = False
+        fixture.lost = True
+        uncertain_args = dict(owner='alice', thread_id=THREAD, expected_target=session['target'],
+            intent='lost-response', expires_at='2027-01-16T09:00:00+00:00')
+        uncertain = owner.execute('history.resume', uncertain_args)
+        self.assertEqual(uncertain['resume']['status'], 'uncertain')
+        self.assertEqual(uncertain['resume']['effects_attempted'], 1)
+        reconciled = owner.execute('history.resume', uncertain_args)
+        self.assertEqual(reconciled['resume']['status'], 'resumed')
+        self.assertEqual(len([command for command in fixture.commands if command[0] == 'new-window']), 2)
+        self.assertEqual(ledger.read_bytes(), preserved)
+        import argparse
+        import contextlib
+        import io
+        from codex_wake.a2a_bus import BusStore
+        from codex_wake.history_commands import command, execute, mcp_call, register_parser
+        (fixture.root / 'controller-accounts.toml').write_text(data + f'\n[history.callers]\n"{THREAD}"=["alice"]\n')
+        public = execute('history.read', {'owner': 'alice', 'thread_id': THREAD}, fixture.root,
+                         authorized_accounts=['alice'])['result']['session']
+        bus, capability = BusStore.configure(fixture.base / 'history-bus')
+        parser = argparse.ArgumentParser()
+        register_parser(parser.add_subparsers(dest='command', required=True))
+        args = parser.parse_args(['history', 'resume', THREAD, '--owner', 'alice', '--intent', 'cli-history',
+            '--expires-at', '2027-01-16T09:00:00+00:00', '--expected-target', json.dumps(public['target']),
+            '--bus-root', str(bus.root), '--operator-capability', str(capability)])
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(command(args, fixture.root, runtime=fixture.runtime, now=lambda: fixture.inv.now()), 0)
+        self.assertEqual(json.loads(output.getvalue())['result']['resume']['status'], 'resumed')
+        mcp, failed = mcp_call(type('Runner', (), {'wake_root': fixture.root})(),
+            dict(owner='alice', thread_id=THREAD, caller_thread_id=THREAD, intent='mcp-history',
+                 expires_at='2027-01-16T09:00:00+00:00', expected_target=public['target']),
+            fixture.context, 'resume', runtime=fixture.runtime, now=lambda: fixture.inv.now())
+        self.assertFalse(failed, mcp)
+        self.assertEqual(mcp['result']['resume']['status'], 'resumed')
 
     def test_unauthorized_stale_and_compressed_targets_refuse_before_resume(self):
         from codex_wake.managed_inventory import InventoryError
@@ -147,3 +194,17 @@ profiles="{fixture.profiles}"
             {'caller_thread_id': caller, 'owner': 'bob', 'thread_id': THREAD}, context, 'read')
         self.assertTrue(failed)
         self.assertEqual(unauthorized['error']['code'], 'unauthorized_target')
+
+    def test_trusted_authorization_guard_can_revoke_before_native_source_access(self):
+        from codex_wake.managed_inventory import InventoryError
+        calls = []
+        def revoked(operation, arguments):
+            calls.append(operation)
+            raise InventoryError('unauthorized_target', 'grant revoked')
+        owner = self.owner(authorization_guard=revoked)
+        # Even an unusable source must produce authorization denial first.
+        (self.root / 'homes' / 'codex-alice' / 'state_5.sqlite').write_bytes(b'invalid')
+        with self.assertRaises(InventoryError) as error:
+            owner.execute('history.search', {'owners': ['alice']})
+        self.assertEqual(error.exception.code, 'unauthorized_target')
+        self.assertEqual(calls, ['history.search'])

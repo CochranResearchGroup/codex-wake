@@ -16,11 +16,12 @@ from .records import WakeError
 
 class ControllerHistory:
     def __init__(self, config_path, *, root, host, environment, authorized_accounts,
-                 resume_owner=None):
+                 resume_owner=None, authorization_guard=None):
         self.path = Path(config_path)
         self.root, self.host, self.environment = Path(root), host, environment
         self.authorized_accounts = tuple(authorized_accounts)
         self.resume_owner = resume_owner
+        self.authorization_guard = authorization_guard
 
     def execute(self, operation, arguments):
         schemas = {'history.search': {'owners', 'query'},
@@ -31,6 +32,8 @@ class ControllerHistory:
         if not isinstance(arguments, dict) or set(arguments) - schemas[operation]:
             raise InventoryError('invalid_argument', 'unsupported history arguments')
         try:
+            if self.authorization_guard is not None:
+                self.authorization_guard(operation, arguments)
             if not self.path.is_file():
                 raise InventoryError('configuration_unavailable', 'host history policy is unavailable')
             data = tomllib.loads(self.path.read_text())
@@ -64,12 +67,15 @@ class ControllerHistory:
                     raise InventoryError('invalid_argument', 'history query must be bounded text')
                 result = discover(settings, owners)
                 sessions = []
+                remaining = 8 * 1024 * 1024
                 for row in result['sessions']:
                     if query and not any(query.casefold() in str(row.get(key, '')).casefold()
                                          for key in ('thread_id', 'cwd', 'title')):
                         continue
                     try:
-                        sessions.append(self._session(row, accounts[row['profile']]))
+                        session = self._session(row, accounts[row['profile']], max_bytes=remaining)
+                        remaining -= session['provenance']['byte_length']
+                        sessions.append(session)
                     except InventoryError as error:
                         result['holds'].append(dict(profile=row['profile'], reason=error.code))
                 return dict(status='partial' if result['holds'] else 'complete', sessions=sessions, holds=result['holds'])
@@ -89,7 +95,11 @@ class ControllerHistory:
             if history.get('resume_enabled') is not True or self.resume_owner is None:
                 raise InventoryError('unsupported_target', 'qualified owner attachment executor is unavailable')
             def revalidate():
-                current = self.execute('history.read', {key: arguments[key] for key in ('owner', 'thread_id', 'expected_target')})
+                if self.authorization_guard is not None:
+                    self.authorization_guard(operation, arguments)
+                reader = ControllerHistory(self.path, root=self.root, host=self.host, environment=self.environment,
+                    authorized_accounts=self.authorized_accounts)
+                current = reader.execute('history.read', {key: arguments[key] for key in ('owner', 'thread_id', 'expected_target')})
                 if current['session']['target'] != session['target']:
                     raise InventoryError('stale_target', 'history binding changed before resume')
             return self.resume_owner.resume(session, arguments, history, revalidate)
@@ -100,22 +110,22 @@ class ControllerHistory:
         except (OSError, ValueError, KeyError, TypeError, AttributeError):
             raise InventoryError('history_unavailable', 'native history or host policy cannot be qualified') from None
 
-    def _rollout(self, path, home):
+    def _rollout(self, path, home, max_bytes=8 * 1024 * 1024):
         if path.suffix != '.jsonl':
             raise InventoryError('unsupported_target', 'compressed/native lineage reads require their native owner')
-        if not path.is_file() or not path.resolve().is_relative_to(home.resolve()) or path.stat().st_size > 8 * 1024 * 1024:
+        if not path.is_file() or not path.resolve().is_relative_to(home.resolve()) or path.stat().st_size > max_bytes:
             raise InventoryError('history_unavailable', 'bounded history is unavailable in its owning namespace')
         return path.read_bytes()
 
-    def _session(self, row, account):
+    def _session(self, row, account, *, max_bytes=8 * 1024 * 1024):
         path = Path(row['rollout_path'])
-        content = self._rollout(path, Path(row['namespace']))
+        content = self._rollout(path, Path(row['namespace']), max_bytes)
         target = dict(account['target'], conversation_id=row['thread_id'],
                       rollout_revision=hashlib.sha256(content).hexdigest())
         return dict(owner=row['profile'], thread_id=row['thread_id'], cwd=row['cwd'], title=row['title'],
                     rollout_path=str(path), target=target,
                     provenance=dict(native_schema=5, namespace=row['namespace'],
-                                    source='codex_profiles.history', rollout_sha256=target['rollout_revision']))
+                                    source='codex_profiles.history', rollout_sha256=target['rollout_revision'], byte_length=len(content)))
 
 
 class ManagedHistoryResume:
