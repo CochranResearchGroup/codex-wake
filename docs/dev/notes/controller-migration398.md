@@ -127,3 +127,24 @@ asserted through public filesystem outcomes.
 Auth-scope and administrative runtime schema commits supplied by the coordinator
 are separate dependencies, not worker changes. Eleven focused migration tests
 pass; shared registration and full installed acceptance remain the next gate.
+
+## Read-only inventory hardening checkpoint
+
+Inventory fingerprints now use file type/device/inode/size/mtime/ctime and link
+chains, not arbitrary file contents. Native credential stores can have unknown
+names; metadata inventory never opens those files. Only the configured policy,
+disposable marker and native history owners/header qualification are read.
+Native WAL history is reported as requiring its quiescent owner before opening
+SQLite connections, so preview never recreates WAL shared-memory sidecars,
+checkpoints or converts a native database. This remains an explicit dependency,
+not a migration fallback.
+
+A real writer-positive test exposed a process-enumeration race: a process that
+vanished during /proc stat caused an unknown scan to discard all positive
+observations. Vanished entries are now ignored as gone, permission failures stay
+unknown, and observed writer evidence is preserved. The original failed positive
+assertion is retained in the session evidence, followed by focused repaired
+writer detection and the full migration selection. Twelve focused tests pass in
+3.795s; the native WAL test also verifies no sidecars appear. Production writer
+qualification still remains issue380; a changed or unobservable process is never
+silently described as idle.
