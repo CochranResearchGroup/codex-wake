@@ -62,8 +62,22 @@ class ControllerRuntime:
                 raise AuthError()
         return actor
 
-    def _save(self, record):
+    def _save(self, record, *, update_owner=False):
         with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row = db.execute('SELECT record FROM operations WHERE id=?', (record['operation_id'],)).fetchone()
+            current = json.loads(row[0])
+            if current.get('_revision', 0) > record.get('_revision', 0):
+                if update_owner:
+                    successors = current.get('successors', []) + record.get('successors', [])
+                    record['successors'] = [item for index,item in enumerate(successors) if item not in successors[:index]]
+                else:
+                    for key in ('binding', 'successors', 'cancellation'):
+                        if key in current: record[key] = current[key]
+                if current['phase'] == 'terminal':
+                    for key in ('execution', 'delivery', 'acceptance', 'phase', 'reason', 'result', 'answer'):
+                        if key in current: record[key] = current[key]
+            record['_revision'] = current.get('_revision', 0) + 1
             db.execute('UPDATE operations SET record=? WHERE id=?', (encoded(record), record['operation_id']))
 
     def _event(self, record, key, value):
@@ -87,7 +101,7 @@ class ControllerRuntime:
 
     @staticmethod
     def projection(record):
-        return {k: v for k, v in record.items() if k not in ('payload', 'principal', 'successors', 'authorization', 'fingerprint')}
+        return {k: v for k, v in record.items() if k not in ('payload', 'principal', 'successors', 'authorization', 'fingerprint', '_revision')}
 
     def envelope(self, operation, record, **extra):
         return dict(schema_version=1, operation=operation, status='completed',
@@ -104,7 +118,7 @@ class ControllerRuntime:
         target = meta['target']
         if 'expected_target' in payload and payload['expected_target'] != target:
             raise InventoryError('stale_target', 'request target differs from pinned owner target')
-        capability = 'admin' if operation == 'builds.stage' else 'control'
+        capability = 'admin' if operation in ('builds.stage', 'builds.select', 'builds.rollback') else 'control'
         self._authorize(actor, target, capability, authorize)
         intent = dict(operation=operation, payload=payload, correlation_id=meta['correlation_id'], binding=meta['binding'], target=target)
         raw = encoded(intent)
@@ -148,9 +162,118 @@ class ControllerRuntime:
         self._authorize(actor, target, capability, authorize)
         return self.envelope(operation, record)
 
+    def _refresh(self, actor, record, authorize):
+        if self.adapter is None or record['operation'] != 'operations.send' or record['phase'] == 'terminal': return record
+        self._owned(actor, record, authorize)
+        if record['result'] is None:
+            handle = self.adapter.reconcile(actor, record)
+            if handle is None: return record
+            record.update(result=handle, phase='waiting', execution='queued', delivery='submitted', acceptance='pending', reason=None)
+        for reply in self.adapter.poll(actor, record):
+            key = 'reply:' + reply['reply_id']
+            final = reply['kind'] == 'result'
+            self._event(record, key, dict(kind='answer' if final else 'progress', **{k: v for k, v in reply.items() if k != 'kind'}))
+            if final:
+                record.update(execution=reply.get('execution', 'completed'), delivery='retained', acceptance='answer_received', phase='terminal',
+                    answer=reply, reason=None)
+                break
+        self._save(record)
+        self._owned(actor, record, authorize)
+        return record
+
+    def _wait(self, actor, record, authorize, timeout):
+        if type(timeout) not in (int, float) or not 0 <= timeout <= 30:
+            raise InventoryError('invalid_argument', 'caller wait timeout must be zero to thirty seconds')
+        deadline = time.monotonic() + timeout
+        while True:
+            record = self._refresh(actor, self._owned(actor, self._load(record['operation_id']), authorize), authorize)
+            if record['phase'] == 'terminal': return record, 'completed'
+            if time.monotonic() >= deadline: return record, 'timeout'
+            time.sleep(min(.05, max(0, deadline - time.monotonic())))
+
     def operation(self, actor, operation, arguments, *, authorize):
-        if operation not in ('operations.result',): raise InventoryError('unsupported_operation', 'unsupported runtime operation')
-        if not isinstance(arguments, dict) or set(arguments) != {'operation_id'}:
-            raise InventoryError('invalid_argument', 'operation ID required')
-        record = self._owned(actor, self._load(arguments['operation_id']), authorize)
+        if not isinstance(arguments, dict): raise InventoryError('invalid_argument', 'object arguments required')
+        if operation == 'operations.send':
+            if self.adapter is None: raise InventoryError('unsupported_operation', 'host send adapter unavailable')
+            allowed = {'_request', 'sender_binding', 'expected_target', 'body', 'delivery', 'queue', 'ttl',
+                       'response_requested', 'wait_timeout', 'backend', 'job_profile'}
+            if set(arguments) - allowed: raise InventoryError('invalid_argument', 'unsupported send arguments; native identity is host-authenticated')
+            response = arguments.get('response_requested', True)
+            if type(response) is not bool: raise InventoryError('invalid_argument', 'response_requested must be Boolean')
+            meta = arguments.get('_request')
+            if not isinstance(meta, dict): raise InventoryError('intent_required', 'explicit _request metadata required')
+            self._authorize(actor, meta.get('target'), 'control', authorize)
+            payload = {k: v for k, v in arguments.items() if k not in ('_request', 'response_requested', 'wait_timeout')}
+            payload.setdefault('backend', 'mailbox')
+            if payload['backend'] == 'mailbox':
+                payload.setdefault('delivery', 'notify'); payload.setdefault('queue', False); payload.setdefault('ttl', 86400)
+                if type(payload['queue']) is not bool or payload['delivery'] not in ('inbox', 'notify') or (payload['delivery'] == 'inbox') != payload['queue']:
+                    raise InventoryError('invalid_argument', 'inbox queueing requires explicit queue=true; notifications never imply offline queue permission')
+                if not isinstance(payload.get('body'), str) or not 0 < len(payload['body'].encode()) <= 32768:
+                    raise InventoryError('invalid_argument', 'message body must contain one to32768 UTF8 bytes')
+                if type(payload['ttl']) not in (int, float) or not 0 < payload['ttl'] <= 604800:
+                    raise InventoryError('invalid_argument', 'explicit queue TTL must be positive and at most seven days')
+            elif payload['backend'] != 'job': raise InventoryError('unsupported_operation', 'unsupported effect owner backend')
+            prepared = self.adapter.prepare(actor, payload)
+            submitted = self.execute(actor, operation, dict(prepared, _request=meta), authorize=authorize,
+                dispatch=lambda _operation, inputs: self.adapter.send(actor, inputs, meta['operation_id'], meta['correlation_id']))
+            record = self._load(submitted['result']['operation']['operation_id'])
+            if response:
+                record, wait_status = self._wait(actor, record, authorize, arguments.get('wait_timeout', 30))
+                return self.envelope(operation, record, wait=dict(status=wait_status, ends_work=False))
+            return self.envelope(operation, record)
+        allowed = {
+            'operations.result': {'operation_id'}, 'operations.wait': {'operation_id', 'timeout'},
+            'operations.stream': {'operation_id', 'cursor', 'limit', 'timeout'},
+            'operations.cancel': {'operation_id'}, 'operations.rebind': {'operation_id', 'successor', 'binding'}}
+        if operation not in allowed: raise InventoryError('unsupported_operation', 'unsupported runtime operation')
+        if set(arguments) - allowed[operation] or 'operation_id' not in arguments:
+            raise InventoryError('invalid_argument', 'unsupported operation arguments')
+        capability = 'control' if operation in ('operations.cancel', 'operations.rebind') else 'observe'
+        record = self._owned(actor, self._load(arguments['operation_id']), authorize, capability=capability)
+        if operation == 'operations.cancel':
+            if record['phase'] == 'terminal': return self.envelope(operation, record)
+            if self.adapter is None or record['operation'] != 'operations.send' or record['result'] is None:
+                record['cancellation'] = 'uncertain'
+            else:
+                record['cancellation'] = self.adapter.cancel(actor, record)
+                if record['cancellation'] == 'confirmed':
+                    record.update(execution='cancelled', phase='terminal', delivery='retained', acceptance='cancelled')
+            self._save(record, update_owner=True)
+            self._event(record, 'cancel', {'kind': 'cancellation', 'status': record['cancellation']})
+            self._owned(actor, record, authorize, capability='control')
+            return self.envelope(operation, record)
+        if operation == 'operations.rebind':
+            successor = arguments.get('successor')
+            if not isinstance(successor, dict) or set(successor) != set(record['principal']):
+                raise InventoryError('invalid_argument', 'explicit authenticated successor identity reference required')
+            if any(successor[k] != record['principal'][k] for k in ('issuer', 'resource', 'subject', 'client_id')):
+                raise AuthError('insufficient_scope')
+            bounded_id(successor['grant_id']); bounded_id(arguments.get('binding'))
+            if successor not in record.get('successors', []):
+                record.setdefault('successors', []).append(successor)
+                if len(record['successors']) > 8: raise InventoryError('capacity', 'explicit successor bound reached')
+            record['binding'] = arguments['binding']
+            self._save(record, update_owner=True)
+            self._event(record, 'rebind:' + successor['grant_id'], {'kind': 'rebound', 'binding': record['binding']})
+            return self.envelope(operation, record)
+        if operation == 'operations.wait':
+            record, status = self._wait(actor, record, authorize, arguments.get('timeout', 30))
+            return self.envelope(operation, record, wait=dict(status=status, ends_work=False))
+        record = self._refresh(actor, record, authorize)
+        if operation == 'operations.stream':
+            cursor, limit, timeout = arguments.get('cursor', 0), arguments.get('limit', 100), arguments.get('timeout', 0)
+            if type(cursor) is not int or cursor < 0 or type(limit) is not int or not 1 <= limit <= 100 or type(timeout) not in (int, float) or not 0 <= timeout <= 30:
+                raise InventoryError('invalid_argument', 'bounded nonnegative stream cursor/limit/timeout required')
+            deadline = time.monotonic() + timeout
+            while True:
+                with self.connect() as db:
+                    rows = db.execute('SELECT payload FROM events WHERE operation_id=? AND sequence>? ORDER BY sequence LIMIT ?', (record['operation_id'], cursor, limit)).fetchall()
+                events = [json.loads(row[0]) for row in rows]
+                if events or record['phase'] == 'terminal' or time.monotonic() >= deadline: break
+                time.sleep(min(.05, max(0, deadline - time.monotonic())))
+                record = self._refresh(actor, self._owned(actor, self._load(record['operation_id']), authorize), authorize)
+            self._owned(actor, record, authorize)
+            return self.envelope(operation, record, events=events, next_cursor=events[-1]['sequence'] if events else cursor,
+                stream=dict(mode='bounded_correlated_events', token_stream=False))
         return self.envelope(operation, record)
