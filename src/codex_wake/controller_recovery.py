@@ -124,7 +124,8 @@ class ControllerRecovery:
             mode='observe',generation=1,created_at=self.now(),checks=0,unknown_streak=0,attempts=0,
             health_status='unobserved',last_observation=None,next_due=self.now(),last_action_at=None,
             action_status='not_started',in_flight=None,notifications={},history=[],
-            clock=dict(boot_id=self.boot(),last_elapsed=self.elapsed(),next_due_elapsed=self.elapsed(),last_observation_elapsed=None,last_action_elapsed=None))
+            clock=dict(boot_id=self.boot(),last_elapsed=self.elapsed(),next_due_elapsed=self.elapsed(),last_observation_elapsed=None,last_action_elapsed=None,
+                authorization_expires_elapsed=self.elapsed()+max(0,actor.expires_at-self.now())))
         with self._db() as db:
             db.execute('BEGIN IMMEDIATE')
             if db.execute('SELECT 1 FROM policies WHERE id=?',(policy_id,)).fetchone():raise InventoryError('idempotency_conflict','policy ID is immutable; choose an explicit new policy ID')
@@ -171,12 +172,14 @@ class ControllerRecovery:
 
     def _guard(self,actor,policy_id,target,generation,authorize):
         current=self._owned(actor,policy_id,target,'recovery',authorize)
+        if self._clock(current)>=current['clock']['authorization_expires_elapsed']:raise AuthError()
         if current['mode']!='automatic' or current['generation']!=generation:raise InventoryError('policy_deactivated','policy was deactivated or superseded before the next automatic step')
         return actor
 
     def _apply(self,actor,args,authorize):
         record=self._owned(actor,args['policy_id'],args['expected_target'],'recovery',authorize)
         now=self.now();definition=record['definition'];elapsed=self._clock(record)
+        if elapsed>=record['clock']['authorization_expires_elapsed']:return self._outcome(record,'held','original scheduled authority expired; no renewal inferred')
         if record['mode']!='automatic':return self._outcome(record,'held','scoped automatic recovery is inactive')
         if record['in_flight'] is not None:return self._outcome(record,'uncertain','original in-flight effect must be reconciled before any further action')
         if record['health_status']!='suspected_unresponsive':return self._outcome(record,'held','required repeated unknown evidence is absent')
@@ -377,6 +380,7 @@ class ControllerRecovery:
             if not record.get('monitor_enabled'):continue
             try:
                 elapsed=self._clock(record)
+                if elapsed>=record['clock']['authorization_expires_elapsed']:raise AuthError()
                 if elapsed<record['clock']['next_due_elapsed']:continue
                 original=record.get('authorization')
                 if not isinstance(original,dict):raise AuthError()
