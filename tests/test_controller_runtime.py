@@ -33,7 +33,7 @@ class RuntimeTests(unittest.TestCase):
             with self.assertRaises(AuthError): runtime.operation(Actor('other', *tuple(actor.__dict__.values())[1:]), 'operations.result', {'operation_id': 'operation-one'}, authorize=lambda: actor)
             self.assertEqual(effect.read_text(), 'one effect')
 
-    def fixture(self, directory, *, fault=None):
+    def fixture(self, directory, *, fault=None, observed_at=None, sender_id="sender"):
         import json,time
         from codex_wake.a2a_bus import BusStore
         from codex_wake.a2a_identity import RuntimeIdentity
@@ -46,14 +46,15 @@ class RuntimeTests(unittest.TestCase):
         bus, operator = BusStore.configure(Path(directory) / 'bus')
         bus.enroll(work, operator)
         natives, actors, caps = [], [], []
-        for who in ('sender', 'recipient'):
-            native = RuntimeIdentity('account:' + who, who, str(work))
+        for who, thread_id in (('sender', sender_id), ('recipient', 'recipient')):
+            native = RuntimeIdentity('account:' + who, thread_id, str(work))
             cap, _ = bus.issue_actor(native, work, operator)
             natives.append(native); caps.append(cap)
             actors.append(bus.authenticate(cap, native, invoking_cwd=work))
         Mailbox.migrate(bus, operator)
-        inventory = ManagedInventory(root)
-        inventory.enroll(Observation('codex', 'account:recipient', 'recipient', str(work), 'ready', time.time(), 'native_metadata', {'pid': 123, 'start_ticks': 42, 'boot_id': 'fixture'}, [], {}), operator=True)
+        observed_at = time.time() if observed_at is None else observed_at
+        inventory = ManagedInventory(root, now=lambda:observed_at)
+        inventory.enroll(Observation('codex', 'account:recipient', 'recipient', str(work), 'ready', observed_at, 'native_metadata', {'pid': 123, 'start_ticks': 42, 'boot_id': 'fixture'}, [], {}), operator=True)
         from codex_wake.controller_operations import ControllerOperations
         target = ControllerOperations(inventory, host='fixture', environment='linux').execute('inventory.resolve', {'selector': 'recipient'})['result']['resource']['target']
         actor = Actor('caller', 'service', 'client', 'grant', 'https://wake.test', 'https://wake.test/controller', frozenset({'control', 'observe'}), [{k:v for k,v in target.items() if k != 'process'}], time.time()+600)
@@ -150,3 +151,80 @@ class RuntimeTests(unittest.TestCase):
             result = runtime.operation(successor,'operations.result',{'operation_id':'concurrent'},authorize=lambda:successor)
             self.assertEqual(result['result']['operation']['binding'],'successor-opaque')
             self.assertEqual(result['result']['operation']['result'],{'actual_result':'retained'})
+
+    def test_queue_cancel_consumption_uncertainty_and_explicit_successor_rotation(self):
+        from dataclasses import replace
+        from codex_wake.controller_runtime import identity
+        with tempfile.TemporaryDirectory() as directory:
+            runtime, actor, args, mailbox, natives = self.fixture(directory)
+            rejected = dict(args, queue=False)
+            with self.assertRaises(InventoryError): runtime.operation(actor,'operations.send',rejected,authorize=lambda:actor)
+            with self.assertRaises(InventoryError): runtime.operation(replace(actor,client_id='unmapped-client'),'operations.send',args,authorize=lambda:replace(actor,client_id='unmapped-client'))
+            self.assertEqual(mailbox.list(natives[0],outbox=True)['messages'],[])
+            sent = runtime.operation(actor,'operations.send',args,authorize=lambda:actor)
+            message = sent['result']['operation']['result']['message_id']
+            cancelled = runtime.operation(actor,'operations.cancel',{'operation_id':'mail-operation'},authorize=lambda:actor)
+            self.assertEqual(cancelled['result']['operation']['cancellation'],'confirmed')
+            self.assertEqual(mailbox.show(natives[0],message)['state']['admission'],'cancelled')
+        with tempfile.TemporaryDirectory() as directory:
+            runtime, actor, args, mailbox, natives = self.fixture(directory)
+            message = runtime.operation(actor,'operations.send',args,authorize=lambda:actor)['result']['operation']['result']['message_id']
+            mailbox.read(natives[1],message); mailbox.ack(natives[1],message,outcome='accepted')
+            uncertain = runtime.operation(actor,'operations.cancel',{'operation_id':'mail-operation'},authorize=lambda:actor)
+            self.assertEqual(uncertain['result']['operation']['cancellation'],'uncertain')
+            mailbox.reply(natives[1],message,body='Late answer after consumption',idempotency_key='late',kind='result',delivery='inbox')
+            rotated = replace(actor,expires_at=actor.expires_at+300)
+            retained = runtime.operation(rotated,'operations.result',{'operation_id':'mail-operation'},authorize=lambda:rotated)
+            self.assertEqual(retained['result']['operation']['answer']['text'],'Late answer after consumption')
+            successor = replace(rotated,grant_id='successor')
+            with self.assertRaises(AuthError): runtime.operation(successor,'operations.result',{'operation_id':'mail-operation'},authorize=lambda:successor)
+            with self.assertRaises(AuthError): runtime.operation(actor,'operations.rebind',dict(operation_id='mail-operation',successor=identity(replace(successor,client_id='other')),binding='spoofed-native'),authorize=lambda:actor)
+            runtime.operation(actor,'operations.rebind',dict(operation_id='mail-operation',successor=identity(successor),binding='explicit-successor-correlation'),authorize=lambda:actor)
+            final = runtime.operation(successor,'operations.result',{'operation_id':'mail-operation'},authorize=lambda:successor)['result']['operation']
+            self.assertEqual(final['binding'],'explicit-successor-correlation')
+            self.assertEqual(final['original_binding'],'opaque-caller-context')
+            self.assertEqual(final['answer']['text'],'Late answer after consumption')
+            self.assertEqual(mailbox.replies(natives[0],message)[0]['recipient']['thread_id'],'sender')
+
+    def test_explicit_queue_reaches_retained_stale_identity_but_never_reenables_suppression(self):
+        import time
+        from codex_wake.managed_inventory import ManagedInventory
+        with tempfile.TemporaryDirectory() as directory:
+            runtime, actor, args, mailbox, natives = self.fixture(directory, observed_at=time.time()-60)
+            with self.assertRaises(InventoryError): runtime.operation(actor,'operations.send',dict(args,delivery='notify',queue=False),authorize=lambda:actor)
+            queued = runtime.operation(actor,'operations.send',args,authorize=lambda:actor)['result']['operation']
+            message = mailbox.show(natives[0],queued['result']['message_id'])
+            self.assertEqual(message['state']['notification'],'suppressed')
+            self.assertEqual(message['state']['recipient'],'unread')
+            self.assertEqual(message['selector_observation']['target'],args['expected_target'])
+            inventory=ManagedInventory(runtime.root)
+            identifier=inventory.inspect()['agents'][0]['managed_agent_id']
+            inventory.set_enrollment(identifier,enabled=False)
+            changed=dict(args,_request=dict(args['_request'],operation_id='suppressed-op',idempotency_key='suppressed-intent'))
+            with self.assertRaises(InventoryError): runtime.operation(actor,'operations.send',changed,authorize=lambda:actor)
+            self.assertEqual(inventory.inspect(identifier)['agent']['enrollment'],'suppressed')
+            self.assertEqual(len(mailbox.list(natives[0],outbox=True)['messages']),1)
+
+    def test_native_mcp_cannot_choose_other_sender_or_claim_identity_in_request_binding(self):
+        import json
+        from types import SimpleNamespace
+        from codex_wake.operation_commands import mcp_call
+        with tempfile.TemporaryDirectory() as directory:
+            sender='11111111-1111-4111-8111-111111111111'
+            runtime, actor, args, mailbox, natives = self.fixture(directory, sender_id=sender)
+            config_path=runtime.root/'controller-messaging.json';config=json.loads(config_path.read_text())
+            config['local_caller']=dict(subject=actor.subject,client_id=actor.client_id,grant_id=actor.grant_id,issuer=actor.issuer,resource=actor.resource,scopes=list(actor.scopes),targets=actor.targets,expires_at=actor.expires_at)
+            config_path.write_text(json.dumps(config))
+            context=dict(threadId=sender,sessionId=sender,callId='native-call',**{'x-codex-turn-metadata':dict(thread_id=sender,session_id=sender,turn_id='native-turn')})
+            runner=SimpleNamespace(wake_root=runtime.root)
+            with self.assertRaises(InventoryError): mcp_call(runner,'send',args,None)
+            other='22222222-2222-4222-8222-222222222222'
+            wrong=dict(context,threadId=other,sessionId=other)
+            wrong['x-codex-turn-metadata']=dict(thread_id=other,session_id=other,turn_id='wrong-turn')
+            spoof=dict(args,_request=dict(args['_request'],binding=sender))
+            with self.assertRaises(InventoryError): mcp_call(runner,'send',spoof,wrong)
+            self.assertEqual(mailbox.list(natives[0],outbox=True)['messages'],[])
+            accepted=mcp_call(runner,'send',args,context)
+            self.assertEqual(accepted['result']['operation']['execution'],'queued')
+            message=mailbox.show(natives[0],accepted['result']['operation']['result']['message_id'])
+            self.assertEqual(message['sender']['thread_id'],sender)
