@@ -1,0 +1,71 @@
+{
+  "review_round": 1,
+  "fixed_point": "9538354ce2d8ec9f097664946ea4847079fba9c3",
+  "frozen_tip": "415607bd6eda7a0bbff0161eec4917988ed02c91",
+  "bots_fixed_point": "864a93967",
+  "bots_tip": "0614856ec340da6d2d84f1b5cb5104fd26528403",
+  "axes": {
+    "standards": {
+      "candidates": 2,
+      "accepted": 2,
+      "highest_priority": "scheduler heartbeat visibility"
+    },
+    "spec": {
+      "candidates": 4,
+      "accepted": 4,
+      "highest_priority": "P1 launch configuration, pinned versions and deadline continuity"
+    }
+  },
+  "findings": [
+    {
+      "id": "SPEC1",
+      "axis": "spec",
+      "disposition": "blocking",
+      "title": "Controller build launches omit configuration overrides reported by the account owner",
+      "reason": "Primary reproduced: effective model account, native argv only --no-daemon; shared configuration promise requires actual launch parity",
+      "state": "remediation_pending"
+    },
+    {
+      "id": "SPEC2",
+      "axis": "spec",
+      "disposition": "blocking",
+      "title": "Adding an unused function version invalidates existing flow runs",
+      "reason": "Primary reproduced stale_condition_registry after adding predicate@2 to a run pinned to predicate@1; future-only editing contract violated",
+      "state": "remediation_pending"
+    },
+    {
+      "id": "SPEC3",
+      "axis": "spec",
+      "disposition": "blocking",
+      "title": "Wall-clock rollback extends cumulative flow deadlines",
+      "reason": "Primary reproduced a max_seconds1 flow dispatching after100 to99 rollback; original cumulative budgets require continuity or explicit hold",
+      "state": "remediation_pending"
+    },
+    {
+      "id": "SPEC4",
+      "axis": "spec",
+      "disposition": "blocking",
+      "title": "Foreach per-iteration time/token limits are rejected and unaccounted",
+      "reason": "Primary compile reproduction unsupported_flow_node; spec requires independent child bounds tightening parents",
+      "state": "remediation_pending"
+    },
+    {
+      "id": "STD1",
+      "axis": "standards",
+      "disposition": "blocking",
+      "title": "SQLite owner failures leave a misleading fresh running scheduler heartbeat",
+      "reason": "Reviewer constructor-failure seam reproduced twice; operational visibility requirement applies to scheduled recovery as well as wakes; regression must use real corrupt/locked private store",
+      "state": "remediation_pending"
+    },
+    {
+      "id": "STD2",
+      "axis": "standards",
+      "disposition": "blocking",
+      "title": "Duplicated Linux transport accepts oversized unbounded JSON responses",
+      "reason": "Concrete divergence from bounded portable client; accept a bounded shared transport fix, not speculative architecture rewrite; smell classification remains judgement",
+      "state": "remediation_pending"
+    }
+  ],
+  "remediation_round": 1,
+  "source_publication_only": true
+}

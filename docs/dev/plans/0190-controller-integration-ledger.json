@@ -3,7 +3,7 @@
   "integration_branch": "feat/controller-393-resumed",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
   "tip_sha": "d2181d1",
-  "state": "reviewing",
+  "state": "remediating",
   "tickets": {
     "394": {
       "title": "Resolve and inspect exact controller targets across CLI/API/MCP",
@@ -583,7 +583,7 @@
     "frontier": []
   },
   "review_rounds": 1,
-  "remediation_rounds": 0,
+  "remediation_rounds": 1,
   "review_fixed_point": "9538354ce2d8ec9f097664946ea4847079fba9c3",
   "whole_python_ci": {
     "source_baseline": "211d89b; product source frozen throughout run; docs7994114 followed",
@@ -600,7 +600,8 @@
       "standards": "/root/review393_standards_once",
       "spec": "/root/review393_spec_once"
     },
-    "state": "running",
-    "remediation": "pending bounded TDD pass"
+    "state": "adjudicated",
+    "remediation": "pending bounded TDD pass",
+    "adjudication": "docs/dev/evidence/plan0190/review393-adjudication.json"
   }
 }
