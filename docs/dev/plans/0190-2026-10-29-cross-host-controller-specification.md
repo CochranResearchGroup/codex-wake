@@ -94,3 +94,12 @@ Production migration/activation without separate authorization; credential repli
 Authority: [closed architecture map](https://github.com/CochranResearchGroup/codex-wake/issues/381) and its ten linked decision tickets, including both flow resolution comments and Bots consumer input. Source research branches remain evidence and are not merged. This spec freezes product decisions; implementation tickets must resolve concrete schemas/defaults under these constraints and report conflicts rather than silently weaken requirements.
 
 <!-- idempotency:controller-spec-20261030 -->
+
+
+### Grok structured transport qualification decision (2026-10-30, #412)
+
+The installed Grok Build 1.0.70 binary negotiates ACPv1 over `agent --no-leader stdio` in an isolated metadata-only probe. Its advertised native WebSocket serve mode has not established a listener in bounded probes; retain that path as unqualified rather than infer an authentication requirement.
+
+An explicit foreground `codex-wake grok stdio-host` setup command may own one persistent selected native stdio child and expose its ACP through an authenticated loopback transport bridge. This is an adapter within the host-local execution authority, not an additional work queue or autonomous workflow. It issues no grants, creates no resource allowance, installs no service and starts no model turn during negotiation. Native process/build identity remains the selected Grok child; bridge process identity, parent/pipe custody and listener ownership are additional transport checks. One active native RPC is allowed; competing calls must be refused before native I/O. Reconnection may use cached genuine initialization metadata, but must never resend an original operation or invent native durable result lookup. Lost results remain explicitly uncertain under the original controller receipt.
+
+Public CLI/API/MCP operation semantics remain shared. Unsupported exact turn cancellation, exact TUI health, fork, exact metering and observation-only tool isolation remain explicit; terminal input is not a fallback for structured control. Actual installed-native evidence is metadata-only with no provider experiment. Synthetic ACP fixture effect and flow matrices are separately labelled from that native compatibility evidence. Production account activation remains separate authorization.
