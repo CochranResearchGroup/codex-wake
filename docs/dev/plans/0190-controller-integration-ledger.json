@@ -41,8 +41,8 @@
     },
     "395": {
       "title": "Select accounts and explain effective configuration through Wake",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         394,
         372,
@@ -58,10 +58,24 @@
         "packaging ownership"
       ],
       "base_sha": "2a53cbc192e3df3a5b294ac2554956da8f60b318",
-      "result_sha": null,
-      "validation": [],
+      "result_sha": "38c97833f178fcb2f7004f8456feb8be41f6adf6",
+      "validation": [
+        {
+          "command": "PYTHONPATH=src repository-venv/python -m unittest discover -s tests -p *controller*py",
+          "result": "11 passed on integrated tip"
+        },
+        {
+          "command": "repository-venv unittest test_absorbed_profiles_concurrency.py",
+          "result": "7 passed"
+        },
+        {
+          "command": "uv pip install --python disposable/bin/python --no-deps --reinstall .; disposable/bin/python scripts/controller_accounts_acceptance.py --bin-dir disposable/bin",
+          "result": "integrated package passes CLI/MCP, concurrent accounts, peer-preserving restart, synthetic credential invariance; 0 providers"
+        }
+      ],
       "worker_branch": "feat/controller-accounts395",
-      "worker_worktree": "/tmp/codex-wake-accounts395"
+      "worker_worktree": "/tmp/codex-wake-accounts395",
+      "integrated_sha": "226ff0b"
     },
     "396": {
       "title": "Search permitted history and resume its owning conversation",
