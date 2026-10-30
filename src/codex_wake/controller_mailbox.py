@@ -46,10 +46,17 @@ class ControllerMailbox:
         target = payload.get('expected_target')
         candidates = [row for row in config.get('recipients', []) if row.get('target') == target]
         if len(candidates) != 1: raise InventoryError('stale_target', 'recipient is not an exact host-approved binding')
+        native = candidates[0]['identity']
+        if native.get('namespace') != target.get('namespace') or native.get('thread_id') != target.get('conversation_id'):
+            raise InventoryError('unauthorized_target', 'host mapping native recipient differs from pinned conversation')
         if target.get('host') != config['host'] or target.get('environment') != config['environment']:
             raise InventoryError('unauthorized_target', 'recipient execution environment differs from host authority')
-        current = ControllerOperations(ManagedInventory(self.root), host=config['host'], environment=config['environment']).execute('inventory.list', {})['result']['resources']
-        matches = [row for row in current if row['target'] == target and row['binding_current']]
+        inventory = ManagedInventory(self.root)
+        current = ControllerOperations(inventory, host=config['host'], environment=config['environment']).execute('inventory.list', {})['result']['resources']
+        enrolled = {row['managed_agent_id']: row for row in inventory.inspect()['agents']}
+        matches = [row for row in current if row['target'] == target
+            and enrolled[row['id']]['enrollment'] == 'enrolled'
+            and (row['binding_current'] or (payload['queue'] and enrolled[row['id']]['state'] == 'stale'))]
         if len(matches) != 1: raise InventoryError('stale_target', 'recipient generation is absent or replaced')
         if matches[0]['observation']['freshness'] != 'current' and not payload['queue']:
             raise InventoryError('stale_target', 'offline/stale send requires explicit inbox queue policy')

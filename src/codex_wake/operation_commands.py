@@ -97,4 +97,29 @@ def main(argv=None):
     return command(parser.parse_args(argv))
 
 
+def mcp_call(runner, verb, arguments, native_context):
+    """Pin native sends to private transport metadata, never model identity claims.
+
+    CLI/OAuth service clients may select explicit host-approved bindings. Native
+    MCP callers additionally prove the selected sender is their invoking session.
+    The existing verifier owns the native metadata trust boundary.
+    """
+    operation = verb if verb.startswith('operations.') else 'operations.' + verb
+    root = runner.wake_root
+    if operation == 'operations.send':
+        from .goal_supervision import verified_native_caller
+        config = ControllerMailbox(root).config()
+        key = arguments.get('sender_binding')
+        if not isinstance(key, str): raise InventoryError('native_caller_unverified', 'host native sender binding required')
+        if arguments.get('backend', 'mailbox') == 'job':
+            mapping = config.get('job_bindings', {}).get(key, {})
+            claimed = mapping.get('native_thread_id', mapping.get('native_subject'))
+        else:
+            mapping = config.get('bindings', {}).get(key, {})
+            claimed = mapping.get('identity', {}).get('thread_id')
+        try: verified_native_caller(native_context, claimed)
+        except ValueError: raise InventoryError('native_caller_unverified', 'selected sender differs from verified invoking native session') from None
+    return execute(operation, arguments, root)
+
+
 if __name__ == '__main__': raise SystemExit(main())
