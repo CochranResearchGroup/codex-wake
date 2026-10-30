@@ -1,0 +1,33 @@
+import unittest
+from types import SimpleNamespace
+from codex_wake.controller_build_authorization import BuildAuthorization
+from codex_wake.controller_auth import AuthError
+from codex_wake.managed_inventory import InventoryError
+
+
+class BuildAuthorizationTests(unittest.TestCase):
+    def service(self, scopes, targets):
+        actor = SimpleNamespace(scopes=scopes, targets=targets)
+        authority = SimpleNamespace(authenticate=lambda token: actor)
+        builds = SimpleNamespace(execute=lambda *args: self.fail('effect dispatched without runtime'))
+        return BuildAuthorization(authority, builds)
+
+    def test_observe_and_unscoped_deny_before_effect(self):
+        for scopes in (set(), {'observe'}, {'account.observe'}):
+            with self.assertRaises(AuthError):
+                self.service(scopes, [{}]).execute('token', 'builds.launch', {})
+
+    def test_exact_control_target_requires_durable_runtime(self):
+        target = {key: 'fixture' for key in BuildAuthorization.ACCOUNT_FIELDS}
+        with self.assertRaises(InventoryError) as caught:
+            self.service({'control'}, [target]).execute('token', 'builds.launch', {'expected_target': target})
+        self.assertEqual(caught.exception.code, 'operation_runtime_required')
+
+    def test_broad_control_does_not_authorize_account(self):
+        target = {key: 'fixture' for key in BuildAuthorization.ACCOUNT_FIELDS}
+        with self.assertRaises(AuthError):
+            self.service({'control'}, [{}]).execute('token', 'builds.launch', {'expected_target': target})
+
+    def test_stage_requires_admin_and_host_pinned_recipe(self):
+        with self.assertRaises(AuthError):
+            self.service({'admin'}, [{}]).execute('token', 'builds.stage', {'recipe': '/tmp/untrusted'})
