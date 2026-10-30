@@ -826,7 +826,10 @@ class ControllerFlows:
                     usage['calls']+=1
                 frame=state.get('iteration_frames',{}).get(node.get('iteration_id'))
                 if frame is not None:
-                    if frame['phase']=='pending':frame.update(phase='active',started_at=budget_now)
+                    if frame['phase']=='pending':
+                        if frame['token_estimate'] and frame['limits']['max_tokens']<=0:raise _IterationLimitReached(node['iteration_id'],'iteration_token_limit')
+                        if frame['token_estimate'] and frame['limits']['max_tokens']>bounds['max_tokens']-usage['tokens']:raise _FlowLimitReached('flow_token_limit')
+                        frame.update(phase='active',started_at=budget_now)
                     if frame['usage']['calls']>=frame['limits']['max_calls'] or budget_now-frame['started_at']>=frame['limits']['max_seconds']:
                         raise _IterationLimitReached(node['iteration_id'],'iteration_call_limit' if frame['usage']['calls']>=frame['limits']['max_calls'] else 'iteration_time_limit')
                     cost=frame['limits']['max_tokens'] if frame['token_estimate'] and operation=='sessions.prompt' else 0
