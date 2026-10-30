@@ -176,3 +176,10 @@ owners after this loader. Rollback returns normal consumers to the original root
 Validation of this shared checkpoint: 73 existing controller tests pass in
 30.999s, including the expanded migration/native history behavior. No Flow406
 untracked work or other lane source is imported or changed.
+
+Final no-argument profile usability red/green qualification found that the saved
+current-account selector also needs preservation. Only its qualified canonical
+account ID is seeded into the candidate (an explicit preview selection action),
+never credential contents or shared histories. An unknown selected account holds
+qualification. The original selector remains untouched and rollback preserves
+normal no-argument selection as well as explicit account entrypoints.
