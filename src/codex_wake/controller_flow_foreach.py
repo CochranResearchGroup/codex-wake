@@ -4,6 +4,8 @@ from .managed_inventory import InventoryError
 
 
 def validate(node):
+    from .controller_conditions import limits
+    if 'limits' in node:limits(node['limits'])
     if node.get('mode') not in ('new_session', 'sequential', 'fork'):
         raise InventoryError('unsupported_session_mode', 'explicit qualified foreach session mode required')
     if not isinstance(node.get('profile'), str) or not node['profile'] or not isinstance(node.get('expected_target'), dict):
@@ -64,6 +66,17 @@ def expand(definition, state, resolve, unknown):
                     operation_id=ref(base+'_prompt.result.operation.operation_id')))
                 results.append(dict(index=index,member=member,target=target,result=ref(base+'_wait.result.operation')))
             generated.extend(waits)
+        if 'limits' in node or 'max_tokens' in definition.get('limits',{}):
+            from .controller_conditions import limits
+            bounds=limits(node.get('limits',{}),state['condition_limits'])
+            if (set(node.get('limits',{})) & {'max_tokens','max_seconds'} or 'max_tokens' in definition.get('limits',{})) and bounds['metering']!='estimate_opt_in':
+                raise InventoryError('unsupported_iteration_limits','native exact per-iteration bounds are unqualified; explicit estimate opt-in required')
+            for index in range(len(members)):
+                identifier=node['id']+'.'+str(index)
+                state.setdefault('iteration_frames',{})[identifier]=dict(foreach=node['id'],index=index,limits=bounds,
+                    phase='pending',started_at=None,usage=dict(calls=0,tokens=0),token_estimate='max_tokens' in node.get('limits',{}) or 'max_tokens' in definition.get('limits',{}),enforcement='host_admission_and_owned_cancellation; native_exact_unqualified')
+                for item in generated:
+                    if item['id'].startswith(prefix+'_'+str(index)+'_'):item['iteration_id']=identifier
         starts[node['id']] = generated[0]['id'] if generated else node['id']
         for index,item in enumerate(generated):
             item['next'] = generated[index+1]['id'] if index+1<len(generated) else node['id']

@@ -23,6 +23,10 @@ class _FlowLimitReached(Exception):
     pass
 
 
+class _IterationLimitReached(Exception):
+    def __init__(self,identifier,reason):self.identifier,self.reason=identifier,reason
+
+
 _NAME = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,127}\Z')
 
 
@@ -65,7 +69,7 @@ class FlowDefinition:
                 'call': {'id', 'type', 'operation', 'arguments', 'next', 'retry'},
                 'branch': {'id', 'type', 'condition', 'then', 'else', 'unknown'},
                 'wait': {'id', 'type', 'operation_id', 'timeout', 'next', 'operation'},
-                'foreach': {'id', 'type', 'items', 'mode', 'profile', 'expected_target', 'prompt', 'parallelism', 'join', 'next'},
+                'foreach': {'id', 'type', 'items', 'mode', 'profile', 'expected_target', 'prompt', 'parallelism', 'join', 'next', 'limits'},
                 'end': {'id', 'type', 'value'},
             }
             if kind not in fields or set(node) - fields[kind]:
@@ -267,8 +271,10 @@ class ControllerFlows:
         from .controller_conditions import Conditions,limits
         configured_limits=limits(definition.get('limits',{}))
         arbitrary=any(node['type'] in ('call','foreach') for node in definition['nodes'])
-        if arbitrary and ('max_tokens' in definition.get('limits',{}) or ('max_seconds' in definition.get('limits',{}) and configured_limits['metering']!='estimate_opt_in')):
-            flow_error('unsupported_flow_limits','exact token bounds for arbitrary child operations are unqualified; rejected before effects')
+        from .controller_flow_retry import READ_OPERATIONS
+        unmetered=any(node['type']=='call' and node['operation'] not in READ_OPERATIONS for node in definition['nodes'])
+        if arbitrary and (('max_tokens' in definition.get('limits',{}) and (configured_limits['metering']!='estimate_opt_in' or unmetered)) or ('max_seconds' in definition.get('limits',{}) and configured_limits['metering']!='estimate_opt_in')):
+            flow_error('unsupported_flow_limits','native exact or unestimated arbitrary-operation token bounds are unqualified; rejected before effects')
         def named(value):
             return isinstance(value,dict) and ('function' in value or any(named(v) for v in value.values())) or isinstance(value,list) and any(named(v) for v in value)
         uses_registry=any(named(node.get('condition')) for node in definition['nodes'])
@@ -479,8 +485,93 @@ class ControllerFlows:
             self._write(db,latest)
             return self.projection(latest)
 
+    def _finish_iteration_stop(self,db,state,identifier):
+        frame=state['iteration_frames'][identifier]
+        confirmed=all(item['status']=='confirmed' for item in frame['cancellations'].values())
+        if confirmed:
+            frame.update(phase='failed',cancellation='confirmed')
+            state.update(phase='ready',reason=None)
+            state.pop('iteration_pending',None)
+            state.pop('attempt',None)
+            state.pop('executing_node',None)
+        else:
+            frame.update(phase='cancelling',cancellation='uncertain')
+            state.update(phase='uncertain',reason='iteration_limit_cleanup_pending',iteration_pending=identifier)
+        self._write(db,state)
+        return self.projection(state)
+
+    def _stop_iteration(self,actor,run_id,identifier,reason):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            state=self._owned(actor,self._load(run_id,db),'control');frame=state['iteration_frames'][identifier]
+            if frame['phase']!='cancelling':
+                nodes={node['id']:node for node in state['execution_definition']['nodes']}
+                finished={}
+                for key,value in state['steps'].items():
+                    node=nodes[key]
+                    if node.get('iteration_id')!=identifier or node['type']!='wait':continue
+                    child=value.get('result',{}).get('operation',{})
+                    if child.get('phase')=='terminal' and child.get('execution') in ('completed','failed','cancelled'):
+                        operation_id=self._resolve(node['operation_id'],state)
+                        if isinstance(operation_id,str):finished[operation_id]=child
+                targets={};outcomes=[]
+                for key,value in state['steps'].items():
+                    node=nodes[key]
+                    if node.get('iteration_id')!=identifier:continue
+                    child=value.get('result',{}).get('operation',{});operation_id=child.get('operation_id')
+                    if operation_id in finished:outcomes.append(finished[operation_id]);continue
+                    if child.get('phase')=='terminal':outcomes.append(child);continue
+                    if node.get('operation')=='sessions.prompt' and operation_id:
+                        targets[operation_id]=dict(method='sessions.cancel',status='not_requested')
+                current=nodes.get(state.get('executing_node'),{})
+                if current.get('iteration_id')==identifier and state.get('child_operation_id') and state['phase'] in ('executing','uncertain'):
+                    targets.setdefault(state['child_operation_id'],dict(method='sessions.cancel' if current.get('operation')=='sessions.prompt' else 'operations.cancel',status='not_requested'))
+                frame.update(phase='cancelling',reason=reason,cancellations=targets,owner_outcomes=outcomes)
+                state.update(phase='uncertain',reason='iteration_limit_cleanup_pending',iteration_pending=identifier)
+                self._write(db,state)
+        for unused in range(8):
+            with self.connect() as db:
+                db.execute('BEGIN IMMEDIATE');state=self._owned(actor,self._load(run_id,db),'control');frame=state['iteration_frames'][identifier]
+                pending=next(((key,value) for key,value in frame['cancellations'].items() if value['status']=='not_requested'),None)
+                if not pending:break
+                operation_id,entry=pending;entry['status']='in_progress';self._write(db,state)
+            try:
+                value=self.invoke(entry['method'],dict(operation_id=operation_id),authorize=lambda:self._owned(actor,self._load(run_id),'control') and actor)
+                child=value.get('result',{}).get('operation',{})
+                status='confirmed' if child.get('phase')=='terminal' and child.get('execution') in ('completed','failed','cancelled') else 'requested' if child.get('cancellation')=='requested' else 'uncertain'
+            except Exception:status='uncertain';child={}
+            with self.connect() as db:
+                db.execute('BEGIN IMMEDIATE');state=self._owned(actor,self._load(run_id,db),'control')
+                state['iteration_frames'][identifier]['cancellations'][operation_id].update(status=status,outcome=child)
+                self._write(db,state)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE');state=self._owned(actor,self._load(run_id,db),'control')
+            return self._finish_iteration_stop(db,state,identifier)
+
+    def _reconcile_iteration(self,actor,run_id,state):
+        identifier=state['iteration_pending'];frame=state['iteration_frames'][identifier]
+        for operation_id,entry in list(frame['cancellations'].items())[:8]:
+            if entry['status']=='confirmed':continue
+            method='sessions.wait' if entry['method']=='sessions.cancel' else 'operations.result'
+            arguments=dict(operation_id=operation_id)
+            if method=='sessions.wait':arguments['timeout']=0
+            try:
+                value=self.invoke(method,arguments,authorize=lambda:self._owned(actor,self._load(run_id),'control') and actor)
+                child=value.get('result',{}).get('operation',{})
+            except Exception:child={}
+            if child.get('phase')=='terminal' and child.get('execution') in ('completed','failed','cancelled'):
+                with self.connect() as db:
+                    db.execute('BEGIN IMMEDIATE');latest=self._owned(actor,self._load(run_id,db),'control')
+                    latest['iteration_frames'][identifier]['cancellations'][operation_id].update(status='confirmed',outcome=child)
+                    self._write(db,latest)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE');state=self._owned(actor,self._load(run_id,db),'control')
+            return self._finish_iteration_stop(db,state,identifier)
+
     def reconcile(self, actor, run_id):
         state = self._owned(actor, self._load(run_id), 'control')
+        if state.get('iteration_pending'):
+            return self._reconcile_iteration(actor,run_id,state)
         if state['cancellation']:
             return self._reconcile_cancellation(actor,run_id,state)
         if state['phase'] in ('executing','uncertain') and state.get('condition_attempt'):
@@ -625,8 +716,13 @@ class ControllerFlows:
             return self.projection(latest)
 
     def advance(self, actor, run_id):
-        try:return self._advance(actor,run_id)
-        except _FlowLimitReached as stopped:return self._stop_at_limit(actor,run_id,str(stopped))
+        for unused in range(32):
+            try:return self._advance(actor,run_id)
+            except _FlowLimitReached as stopped:return self._stop_at_limit(actor,run_id,str(stopped))
+            except _IterationLimitReached as stopped:
+                state=self._stop_iteration(actor,run_id,stopped.identifier,stopped.reason)
+                if state['phase']!='ready':return state
+        return self.inspect(actor,run_id)
 
     def _advance(self, actor, run_id):
         from uuid import uuid4
@@ -654,6 +750,21 @@ class ControllerFlows:
                     flow_error('flow_store_invalid', 'run definition pin changed')
                 definition = state.get('execution_definition') or definition
                 node = next(item for item in definition['nodes'] if item['id'] == state['cursor'])
+                from .controller_conditions import ConditionPending
+                try:iteration_now=self._clock_value(state)
+                except ConditionPending:
+                    state.update(phase='held',reason='flow_clock_uncertain');self._write(db,state);return self.projection(state)
+                active=[(key,value) for key,value in state.get('iteration_frames',{}).items() if value['phase']=='active']
+                if active and iteration_now-state['created_at']>=state['condition_limits']['max_seconds']:raise _FlowLimitReached('flow_time_limit')
+                for identifier,frame in active:
+                    if iteration_now-frame['started_at']>=frame['limits']['max_seconds']:raise _IterationLimitReached(identifier,'iteration_time_limit')
+                frame=state.get('iteration_frames',{}).get(node.get('iteration_id'))
+                if frame and frame['phase']=='failed':
+                    state['steps'][node['id']]=dict(result=dict(operation=dict(phase='terminal',execution='failed',source='iteration_limit',reason=frame['reason'],owner_outcomes=frame['owner_outcomes'],result=dict(target=None))))
+                    selected=node.get('next');state.update(cursor=selected,phase='ready' if selected else 'completed',reason=None)
+                    state['completed_steps']+=1
+                    state.pop('waiting_on',None);state.pop('waiting_operation',None)
+                    self._write(db,state);continue
                 if node['type'] == 'branch':
                     value = self._condition(node['condition'], state)
                     state['steps'][node['id']] = dict(type='boolean', value=value, status='unknown' if value is None else 'known')
@@ -713,6 +824,15 @@ class ControllerFlows:
                     if usage['calls']>=bounds['max_calls'] or budget_now-state['created_at']>=bounds['max_seconds']:
                         raise _FlowLimitReached('flow_nested_limit')
                     usage['calls']+=1
+                frame=state.get('iteration_frames',{}).get(node.get('iteration_id'))
+                if frame is not None:
+                    if frame['phase']=='pending':frame.update(phase='active',started_at=budget_now)
+                    if frame['usage']['calls']>=frame['limits']['max_calls'] or budget_now-frame['started_at']>=frame['limits']['max_seconds']:
+                        raise _IterationLimitReached(node['iteration_id'],'iteration_call_limit' if frame['usage']['calls']>=frame['limits']['max_calls'] else 'iteration_time_limit')
+                    cost=frame['limits']['max_tokens'] if frame['token_estimate'] and operation=='sessions.prompt' else 0
+                    if cost>bounds['max_tokens']-usage['tokens']:raise _FlowLimitReached('flow_token_limit')
+                    if frame['token_estimate'] and operation=='sessions.prompt' and (cost<=0 or cost>frame['limits']['max_tokens']-frame['usage']['tokens']):raise _IterationLimitReached(node['iteration_id'],'iteration_token_limit')
+                    frame['usage']['calls']+=1;frame['usage']['tokens']+=cost;usage['tokens']+=cost
                 count = state.setdefault('attempt_counts',{}).get(node['id'],0)+1
                 state['attempt_counts'][node['id']] = count
                 attempt = uuid4().hex
@@ -773,6 +893,12 @@ class ControllerFlows:
                     self._write(db, latest)
                     return self.projection(latest)
                 latest['steps'][node['id']] = value
+                if node.get('iteration_id') and node['type']=='wait':
+                    frame=latest['iteration_frames'][node['iteration_id']]
+                    try:finished=self._clock_value(latest)
+                    except ConditionPending:
+                        latest.update(phase='held',reason='flow_clock_uncertain');self._write(db,latest);return self.projection(latest)
+                    if finished-frame['started_at']<frame['limits']['max_seconds']:frame.update(phase='completed',finished_at=finished)
                 selected = node.get('next')
                 latest.update(cursor=selected, phase='ready' if selected is not None else 'completed', reason=None)
                 latest['completed_steps'] += 1

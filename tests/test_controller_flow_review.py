@@ -57,3 +57,68 @@ class FlowReviewTests(unittest.TestCase):
                 self.assertEqual(held['created_at'],100)
                 if mode=='elapsed':self.assertEqual(held['limit_stop']['cancellation'],'confirmed')
                 else:self.assertEqual((held['phase'],held['reason']),('held','flow_clock_uncertain'))
+
+    def test_foreach_iteration_estimates_and_frames_survive_handoff(self):
+        with tempfile.TemporaryDirectory() as directory:
+            effects=[]
+            def invoke(operation,args,**kwargs):
+                kwargs['authorize']()
+                if operation=='sessions.capabilities':return dict(result=dict(modes=['sequential']))
+                effects.append(operation)
+                if operation=='sessions.prompt':return dict(result=dict(operation=dict(operation_id=kwargs['request']['operation_id'],phase='waiting',execution='queued')))
+                if operation=='sessions.wait':return dict(result=dict(wait=dict(status='completed'),operation=dict(phase='terminal',execution='completed',answer={'text':'fixture result'})))
+                self.fail(operation)
+            def owner():return ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=actor,now=lambda:100)
+            source=dict(id='example',version=1,entry='each',limits=dict(max_calls=10,max_tokens=8,max_seconds=10,metering='estimate_opt_in'),nodes=[
+                dict(id='each',type='foreach',items=['one','two'],mode='sequential',profile='fixture',expected_target={'conversation_id':'existing'},prompt={'ref':'item'},limits=dict(max_calls=4,max_tokens=4,max_seconds=5),next='end'),
+                dict(id='end',type='end',value={'ref':'steps.each'})])
+            owner().publish(actor(),source);run=owner().start(actor(),'example',1,inputs={},intent='iterations',binding='caller')
+            done=owner().advance(actor(),run['run_id'])
+            self.assertEqual(done['phase'],'completed')
+            self.assertEqual(done['condition_usage'],dict(calls=4,tokens=8))
+            self.assertEqual([item['usage'] for item in done['iteration_frames'].values()],[dict(calls=2,tokens=4),dict(calls=2,tokens=4)])
+            self.assertTrue(all(item['phase']=='completed' for item in done['iteration_frames'].values()))
+            self.assertEqual(owner().advance(actor(),run['run_id']),done)
+            self.assertEqual(effects,['sessions.prompt','sessions.wait','sessions.prompt','sessions.wait'])
+
+    def test_expired_iteration_cancels_only_original_item_and_reconciles_without_replay(self):
+        with tempfile.TemporaryDirectory() as directory:
+            wall=[100];prompts=[];cancellations=[];late=[False];created=[0]
+            def invoke(operation,args,**kwargs):
+                kwargs['authorize']()
+                if operation=='sessions.capabilities':return dict(result=dict(modes=['new_session']))
+                if operation=='sessions.create':
+                    created[0]+=1
+                    return dict(result=dict(operation=dict(phase='terminal',execution='completed',result=dict(target={'conversation_id':'child-'+str(created[0])}))))
+                if operation=='sessions.prompt':
+                    prompts.append(kwargs['request']['operation_id'])
+                    if len(prompts)==1:wall[0]=101
+                    return dict(result=dict(operation=dict(operation_id=kwargs['request']['operation_id'],phase='waiting',execution='queued')))
+                if operation=='sessions.cancel':
+                    cancellations.append(args['operation_id'])
+                    return dict(result=dict(operation=dict(phase='waiting',execution='running',cancellation='requested')))
+                if operation=='sessions.wait':
+                    if args['operation_id']==prompts[0]:
+                        return dict(result=dict(wait=dict(status='answered' if late[0] else 'timeout'),operation=dict(phase='terminal' if late[0] else 'waiting',execution='cancelled' if late[0] else 'running')))
+                    return dict(result=dict(wait=dict(status='answered'),operation=dict(phase='terminal',execution='completed',answer={'text':'peer preserved'})))
+                self.fail(operation)
+            def owner():return ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=actor,now=lambda:wall[0],clock=lambda:dict(boot_id='fixture-scope-only',seconds=wall[0]))
+            source=dict(id='example',version=1,entry='each',limits=dict(max_calls=20,max_tokens=8,max_seconds=20,metering='estimate_opt_in'),nodes=[
+                dict(id='each',type='foreach',items=['one','two'],mode='new_session',parallelism=2,profile='fixture',expected_target={},prompt={'ref':'item'},limits=dict(max_seconds=2,max_tokens=3),next='end'),dict(id='end',type='end',value={'ref':'steps.each'})])
+            owner().publish(actor(),source);run=owner().start(actor(),'example',1,inputs={},intent='scope',binding='caller')
+            waiting=owner().advance(actor(),run['run_id']);self.assertEqual(waiting['phase'],'waiting')
+            wall[0]=102
+            stopped=owner().advance(actor(),run['run_id'])
+            self.assertEqual(stopped['phase'],'uncertain')
+            self.assertEqual(cancellations,[prompts[0]])
+            self.assertEqual(stopped['iteration_frames']['each.0']['phase'],'cancelling')
+            self.assertEqual(stopped['iteration_frames']['each.1']['phase'],'active')
+            wall[0]=102.5;late[0]=True
+            restored=owner().reconcile(actor(),run['run_id']);self.assertEqual(restored['phase'],'ready')
+            done=owner().advance(actor(),run['run_id'])
+            self.assertEqual(done['phase'],'failed')
+            self.assertEqual([item['result']['execution'] for item in done['result']['items']],['failed','completed'])
+            self.assertEqual(done['result']['items'][1]['result']['answer']['text'],'peer preserved')
+            self.assertEqual(done['condition_usage'],dict(calls=6,tokens=6))
+            self.assertEqual(cancellations,[prompts[0]])
+            self.assertEqual(len(prompts),2)
