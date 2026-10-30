@@ -1,0 +1,51 @@
+{
+  "blocked_startup_metadata_connects": 4,
+  "boundary": "existing goals including terminal state and unknown/disabled observation rejected; no goal inheritance/accounting qualification, provider turn, live session, production deployment, native rebuild or aggregate411 acceptance",
+  "correction": "existing native thread/fork.lastTurnId; supersedes provisional protocol evidence",
+  "fixture_status": "passed",
+  "installed_prefix": "/tmp/codex-wake-fork408-installed",
+  "issue": 408,
+  "native_cli_sha256": "f1775c5dd0a1c450a6eec2c76b2f35c5197b0d3df7e9eb2cfb156bdfb403d448",
+  "native_distinct_children": 2,
+  "native_goal_absence_readbacks": 7,
+  "native_goal_calls_set_clear_resume_defer": 0,
+  "native_package_manifest": {
+    "entrypoint": "bin/codex",
+    "layoutVersion": 1,
+    "pathDir": "codex-path",
+    "resourcesDir": "codex-resources",
+    "target": "x86_64-unknown-linux-gnu",
+    "variant": "codex",
+    "version": "0.164.0"
+  },
+  "native_retained_ids_order_items_verified": true,
+  "native_retained_turns_per_child": 2,
+  "native_source_bytes_unchanged": true,
+  "native_source_revision": "95cd89dd5f3cddeb241a9de75a3cc255a9484606",
+  "native_source_turns": 3,
+  "native_status": "passed",
+  "owned_daemon_exitcode": 0,
+  "owned_daemon_pid_absent": true,
+  "provider_model_turns": 0,
+  "public_surfaces": [
+    "installed CLI executable",
+    "OAuth HTTP operation",
+    "OAuth HTTP MCP",
+    "installed remote CLI executable",
+    "installed stdio MCP"
+  ],
+  "raw_evidence": [
+    "/tmp/fork408-native-goal-final/receipt.json",
+    "/tmp/fork408-native-goal-final/rpc.jsonl",
+    "/tmp/fork408-goal-final-entrypoints.json",
+    "/tmp/fork408-guard-red.txt",
+    "/tmp/fork408-goal-red.txt"
+  ],
+  "source_commit": "a31fe79",
+  "unit_tests": {
+    "flow": 30,
+    "shared_app_server": 10
+  },
+  "wheel": "/tmp/fork408-goal-final-wheels/codex_wake-0.22.0.dev2-py3-none-any.whl",
+  "wheel_sha256": "e840dfd06d6f806a97870252dbcb1e927549a9ca44a5e146e66bf1e154e2d47a"
+}
