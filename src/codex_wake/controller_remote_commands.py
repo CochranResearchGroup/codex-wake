@@ -35,7 +35,7 @@ def register(commands):
     remote = commands.add_parser('remote', help='perform authenticated direct controller operation')
     remote.add_argument('--endpoint', required=True)
     remote.add_argument('--token-file', type=Path, required=True)
-    remote.add_argument('operation', choices=['inventory.list', 'inventory.resolve', 'accounts.list', 'accounts.resolve', 'configuration.explain', 'builds.list', 'hosts.list', 'hosts.resolve', 'hosts.route', 'history.search', 'history.read', 'history.resume'])
+    remote.add_argument('operation', choices=['inventory.list', 'inventory.resolve', 'accounts.list', 'accounts.resolve', 'configuration.explain', 'builds.list', 'builds.launch', 'builds.stage', 'builds.select', 'builds.rollback', 'hosts.list', 'hosts.resolve', 'hosts.route', 'history.search', 'history.read', 'history.resume', 'operations.send', 'operations.result', 'operations.wait', 'operations.stream', 'operations.cancel', 'operations.rebind'])
     remote.add_argument('--arguments', type=json.loads, default={})
 
 
@@ -59,7 +59,7 @@ def command(args):
         class NoRedirect(HTTPRedirectHandler):
             def redirect_request(self, *a, **kw): return None
         try:
-            with build_opener(NoRedirect).open(request, timeout=30) as response: value = json.load(response)
+            with build_opener(NoRedirect).open(request, timeout=35) as response: value = json.load(response)
         except HTTPError as error:
             value = json.load(error)
             print(json.dumps(value, sort_keys=True)); return 2

@@ -38,6 +38,42 @@ TOOLS.update({
 })
 
 
+for verb in ('launch', 'stage', 'select', 'rollback'):
+    properties = {'_request': {'type': 'object'}}
+    if verb == 'stage':
+        properties['recipe'] = {'type': 'string'}
+        required = ['recipe', '_request']
+    else:
+        properties.update(account={'type': 'string'}, channel={'enum': ['stock', 'modded']}, expected_target={'type': 'object'})
+        required = ['account', 'channel', 'expected_target', '_request']
+        if verb == 'launch': properties['args'] = {'type': 'array', 'items': {'type': 'string'}}
+        if verb == 'select':
+            properties['identifier'] = {'type': 'string'}
+            required.append('identifier')
+    TOOLS['wake_builds_' + verb] = ('builds.' + verb, {'type': 'object', 'properties': properties,
+        'required': required, 'additionalProperties': False})
+
+
+for verb in ('send', 'result', 'wait', 'stream', 'cancel', 'rebind'):
+    if verb == 'send':
+        properties = {'_request': {'type': 'object'}, 'sender_binding': {'type': 'string'},
+            'expected_target': {'type': 'object'}, 'backend': {'enum': ['mailbox', 'job']},
+            'body': {'type': 'string', 'maxLength': 32768}, 'delivery': {'enum': ['inbox', 'notify']},
+            'queue': {'type': 'boolean'}, 'ttl': {'type': 'number'}, 'job_profile': {'type': 'string'},
+            'response_requested': {'type': 'boolean'}, 'wait_timeout': {'type': 'number', 'minimum': 0, 'maximum': 30}}
+        required = ['_request', 'sender_binding', 'expected_target']
+    else:
+        properties = {'operation_id': {'type': 'string'}}
+        required = ['operation_id']
+        if verb in ('wait', 'stream'): properties['timeout'] = {'type': 'number', 'minimum': 0, 'maximum': 30}
+        if verb == 'stream': properties.update(cursor={'type': 'integer', 'minimum': 0}, limit={'type': 'integer', 'minimum': 1, 'maximum': 100})
+        if verb == 'rebind':
+            properties.update(successor={'type': 'object'}, binding={'type': 'string'})
+            required += ['successor', 'binding']
+    TOOLS['wake_operations_' + verb] = ('operations.' + verb, {'type': 'object', 'properties': properties,
+        'required': required, 'additionalProperties': False})
+
+
 def operation_failure(operation, error):
     return {'schema_version': 1, 'operation': operation, 'status': 'failed',
             'error': {'code': error.code, 'message': str(error)}}
@@ -53,12 +89,22 @@ class ProtectedOperations:
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
+        'operations.send': ('control', None, None),
+        'operations.result': ('observe', None, None),
+        'operations.wait': ('observe', None, None),
+        'operations.stream': ('observe', None, None),
+        'operations.cancel': ('control', None, None),
+        'operations.rebind': ('control', None, None),
         'hosts.list': ('observe', 'environments', None),
         'hosts.resolve': ('observe', None, 'environment'),
         'hosts.route': ('observe', None, None),
         'history.search': ('history.observe', None, None),
         'history.read': ('history.observe', None, None),
         'history.resume': ('history.resume', None, None),
+        'builds.launch': ('control', None, None),
+        'builds.stage': ('admin', None, None),
+        'builds.select': ('admin', None, None),
+        'builds.rollback': ('admin', None, None),
         'builds.list': ('account.observe', 'builds', None),
         'inventory.list': ('observe', 'resources', None),
         'inventory.resolve': ('observe', None, 'resource'),
@@ -79,7 +125,34 @@ class ProtectedOperations:
             raise InventoryError('unsupported_operation', 'operation is unsupported')
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
-        if operation.startswith('history.'):
+        if operation.startswith('operations.'):
+            from .operation_commands import execute
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host operation owner is unavailable')
+            result = execute(operation, arguments, self.operations.inventory.root, actor=actor,
+                authorize=lambda: self.authority.authenticate(token))
+        elif operation.startswith('builds.') and operation != 'builds.list':
+            from .controller_build_authorization import BuildAuthorization
+            from .controller_runtime import ControllerRuntime
+            import hashlib
+            from pathlib import Path
+            if self.operations.builds is None or self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host build owner is unavailable')
+            recipes = {}
+            selected_recipe = arguments.get('recipe')
+            selected = self.operations.builds.recipes
+            entries = [(selected_recipe, selected[selected_recipe])] if operation == 'builds.stage' and isinstance(selected_recipe, str) and selected_recipe in selected else []
+            for name, path in entries:
+                with Path(path).open('rb') as source:
+                    raw = source.read(1048577)
+                if len(raw) > 1048576:
+                    raise InventoryError('configuration_unavailable', 'host recipe exceeds its bound')
+                recipes[name] = dict(host=self.operations.host, environment=self.operations.environment,
+                    recipe=name, recipe_sha256=hashlib.sha256(raw).hexdigest())
+            result = BuildAuthorization(self.authority, self.operations.builds, recipe_targets=recipes,
+                runtime=ControllerRuntime(self.operations.inventory.root)).execute(token, operation, arguments)
+        elif operation.startswith('history.'):
+
             from .controller_history_authorization import HistoryAuthorization
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host history owner is unavailable')
@@ -246,6 +319,7 @@ class ControllerHandler(BaseHTTPRequestHandler):
                 for name, (operation, schema) in TOOLS.items()
                 if ProtectedOperations.READ_POLICIES[operation][0] in actor.scopes
                 and (operation.startswith('inventory.')
+                     or (operation.startswith('operations.') and self.server.operations.operations.inventory is not None)
                      or (operation.startswith('hosts.') and self.server.operations.operations.hosts is not None)
                      or (operation.startswith('builds.') and self.server.operations.operations.builds is not None)
                      or (not operation.startswith(('hosts.', 'builds.')) and self.server.operations.operations.accounts is not None))]}

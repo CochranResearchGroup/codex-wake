@@ -139,3 +139,69 @@ class PublicBuildAdapterTests(unittest.TestCase):
             self.assertFalse(failed)
             self.assertEqual(code, 0)
             self.assertEqual(json.loads(output.getvalue()), mcp)
+
+    def test_protected_build_launch_is_durable_across_api_and_mcp_retries(self):
+        import base64
+        import socket
+        import os
+        import threading
+        from pathlib import Path
+        from urllib.request import Request, urlopen
+        from codex_wake.controller_auth import OAuthAuthority
+        from codex_wake.controller_http import ControllerHTTPServer
+        from codex_wake.controller_operations import ControllerOperations
+        from codex_wake.managed_inventory import ManagedInventory
+        from codex_wake.build_commands import owner_from_root
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            homes = root / 'homes'
+            home = homes / 'codex-alice'
+            home.mkdir(parents=True)
+            native = root / 'native'
+            native.write_text('#!/bin/sh\nprintf "effect\\n" >> "$CODEX_HOME/effects"\n')
+            native.chmod(0o700)
+            manifest = root / 'builds.json'
+            manifest.write_text(json.dumps({'schema_version': 1, 'builds': {'modded': {
+                'executable': str(native), 'sha256': hashlib.sha256(native.read_bytes()).hexdigest(),
+                'upstream_version': '1', 'revision': 'fixture', 'source': 'local fixture'}}}))
+            (root / 'controller-accounts.toml').write_text('[profiles]\nstate_root = "' + str(homes) + '"\nknown_profiles = ["alice"]\n[builds]\nmanifest = "' + str(manifest) + '"\n')
+            owner = owner_from_root(root)
+            target = next(row['target'] for row in owner.execute('builds.list', {'account': 'alice'})['builds'] if row['name'] == 'modded')
+            authority = OAuthAuthority(root / 'oauth.sqlite', issuer='https://wake.test', resource='https://wake.test/mcp')
+            client = authority.register({'redirect_uris': ['http://localhost/callback']})
+            verifier = 'x' * 43
+            challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+            code = authority.authorize(subject='operator', principal_kind='owner', client_id=client['client_id'], redirect_uri=client['redirect_uris'][0], resource=authority.resource, scopes=['observe', 'control'], targets=[target], code_challenge=challenge)
+            token = authority.token(dict(grant_type='authorization_code', client_id=client['client_id'], code=code, redirect_uri=client['redirect_uris'][0], code_verifier=verifier, resource=authority.resource))['access_token']
+            operations = ControllerOperations(ManagedInventory(root), host=owner.accounts.host,
+                environment=owner.accounts.environment, accounts=owner.accounts, builds=owner)
+            server = ControllerHTTPServer(('127.0.0.1', 0), authority, operations)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            def post(path, data):
+                request = Request('http://127.0.0.1:' + str(server.server_port) + path,
+                    data=json.dumps(data).encode(), headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token})
+                with urlopen(request, timeout=5) as response:
+                    return json.load(response)
+            arguments = {'account': 'alice', 'channel': 'modded', 'expected_target': target,
+                'args': ['--version'], '_request': {'operation_id': 'launch-one', 'idempotency_key': 'intent-one',
+                'correlation_id': 'answer-one', 'binding': 'caller-one', 'target': target}}
+            try:
+                first = post('/operations', {'operation': 'builds.launch', 'arguments': arguments})
+                second = post('/mcp', {'jsonrpc': '2.0', 'id': 1, 'method': 'tools/call',
+                    'params': {'name': 'wake_builds_launch', 'arguments': arguments}})
+                self.assertEqual(first['result']['operation']['execution'], 'completed')
+                self.assertEqual(second['result']['structuredContent']['result'], first['result'])
+                import subprocess
+                import sys
+                token_file = root / 'caller-token'
+                token_file.write_text(token)
+                token_file.chmod(0o600)
+                cli = subprocess.run([str(Path(sys.executable).with_name('codex-wake')), 'controller', 'remote',
+                    '--endpoint', 'http://127.0.0.1:' + str(server.server_port), '--token-file', str(token_file),
+                    'builds.launch', '--arguments', json.dumps(arguments)], capture_output=True, text=True, timeout=5)
+                self.assertEqual(cli.returncode, 0, cli.stderr)
+                self.assertEqual(json.loads(cli.stdout)['result'], first['result'])
+                self.assertEqual((home / 'effects').read_text(), 'effect\n')
+            finally:
+                server.shutdown(); server.server_close(); thread.join()

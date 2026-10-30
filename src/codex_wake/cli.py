@@ -112,6 +112,8 @@ def build_parser() -> argparse.ArgumentParser:
     register_history(subparsers)
     from .host_commands import register_parser as register_hosts
     register_hosts(subparsers)
+    from .operation_commands import register_parser as register_operations
+    register_operations(subparsers)
     profiles = subparsers.add_parser("profiles", help="Profiles compatibility commands owned by Wake")
     profiles.add_argument("--config", type=Path, dest="profile_config")
     profiles.add_argument("profile_arguments", nargs=argparse.REMAINDER)
@@ -2932,6 +2934,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     if args.command in ("accounts", "configuration"):
         from .account_commands import command
         return command(args, root)
+    if args.command == "operations":
+        from .operation_commands import command
+        return command(args, args.wake_root)
     if args.command == "hosts":
         from .host_commands import command
         return command(args, args.wake_root)
