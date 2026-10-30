@@ -121,3 +121,11 @@ class ControllerMailbox:
         except BusError as error:
             if error.code in ('too_late', 'effect_uncertain', 'not_processable'): return 'uncertain'
             raise
+
+    def reconcile_owned(self, record):
+        from types import SimpleNamespace
+        return self.reconcile(SimpleNamespace(**record['principal']), record)
+
+    def cancel_owned(self, record):
+        from types import SimpleNamespace
+        return self.cancel(SimpleNamespace(**record['principal']), record)

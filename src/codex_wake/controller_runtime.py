@@ -44,12 +44,18 @@ class ControllerRuntime:
             db.executescript('''CREATE TABLE IF NOT EXISTS operations (
                 id TEXT PRIMARY KEY, intent_key TEXT UNIQUE, fingerprint TEXT, record TEXT);
                 CREATE TABLE IF NOT EXISTS events (operation_id TEXT, sequence INTEGER,
-                event_key TEXT, payload TEXT, PRIMARY KEY(operation_id,event_key));''')
+                event_key TEXT, payload TEXT, PRIMARY KEY(operation_id,event_key));
+                CREATE TABLE IF NOT EXISTS revoked_grants (issuer TEXT, resource TEXT, grant_id TEXT,
+                revoked_at REAL, PRIMARY KEY(issuer,resource,grant_id));''')
 
     def connect(self):
         return sqlite3.connect(self.path, timeout=5)
 
     def _authorize(self, actor, target, capability, authorize=None):
+        if isinstance(actor, Actor):
+            with self.connect() as db:
+                revoked = db.execute('SELECT 1 FROM revoked_grants WHERE issuer=? AND resource=? AND grant_id=?', (actor.issuer,actor.resource,actor.grant_id)).fetchone()
+            if revoked: raise AuthError()
         if not isinstance(actor, Actor) or actor.expires_at <= self.now() or capability not in actor.scopes:
             raise AuthError('insufficient_scope')
         if not isinstance(target, dict) or not {'host', 'environment'} <= target.keys():
@@ -72,7 +78,7 @@ class ControllerRuntime:
                     successors = current.get('successors', []) + record.get('successors', [])
                     record['successors'] = [item for index,item in enumerate(successors) if item not in successors[:index]]
                 else:
-                    for key in ('binding', 'successors', 'cancellation'):
+                    for key in ('binding', 'successors', 'cancellation', 'revocation'):
                         if key in current: record[key] = current[key]
                 if current['phase'] == 'terminal':
                     for key in ('execution', 'delivery', 'acceptance', 'phase', 'reason', 'result', 'answer'):
@@ -158,6 +164,9 @@ class ControllerRuntime:
             record.update(execution='unknown' if dispatched else 'not_started', delivery='uncertain' if dispatched else 'not_submitted',
                 reason=getattr(error, 'code', 'effect_uncertain'), phase='uncertain' if dispatched else 'terminal')
         self._save(record)
+        if record.get('revocation') and record['phase'] != 'terminal':
+            self.revoke_grant(record['principal']['grant_id'], issuer=record['principal']['issuer'], resource=record['principal']['resource'])
+            record = self._load(record['operation_id'])
         # Grant loss can prevent delivery, never erase effect admission/result custody.
         self._authorize(actor, target, capability, authorize)
         return self.envelope(operation, record)
@@ -277,3 +286,39 @@ class ControllerRuntime:
             return self.envelope(operation, record, events=events, next_cursor=events[-1]['sequence'] if events else cursor,
                 stream=dict(mode='bounded_correlated_events', token_stream=False))
         return self.envelope(operation, record)
+
+
+    def revoke_grant(self, grant_id, *, issuer, resource):
+        """Private authority hook; never exposed as a caller-selected operation.
+
+        The authority has already revoked access. Use only original host/native
+        cancellation ownership; no replacement OAuth principal or work is minted.
+        """
+        bounded_id(grant_id)
+        with self.connect() as db:
+            db.execute('INSERT OR IGNORE INTO revoked_grants VALUES(?,?,?,?)',(issuer,resource,grant_id,self.now()))
+            records = [json.loads(row[0]) for row in db.execute('SELECT record FROM operations')]
+        owned = [r for r in records if (r['principal']['issuer'],r['principal']['resource'],r['principal']['grant_id'])==(issuer,resource,grant_id) and r['phase']!='terminal']
+        pending=[r for r in owned if r['cancellation'] not in ('confirmed','requested')]
+        outcomes=[]
+        for record in pending[:100]:
+            if record['cancellation'] in ('confirmed','requested'):
+                outcomes.append(dict(operation_id=record['operation_id'],cancellation=record['cancellation']));continue
+            try:
+                if self.adapter is None or record['operation']!='operations.send':
+                    cancellation='uncertain'
+                else:
+                    if record['result'] is None:
+                        handle=self.adapter.reconcile_owned(record)
+                        if handle is not None: record['result']=handle
+                    cancellation=self.adapter.cancel_owned(record) if record['result'] is not None else 'uncertain'
+                record['cancellation']=cancellation
+                record['revocation']=dict(grant_id=grant_id,status='cancellation_'+cancellation)
+                if cancellation=='confirmed':record.update(execution='cancelled',phase='terminal',delivery='retained',acceptance='cancelled')
+            except (ValueError,OSError,KeyError) as error:
+                record['cancellation']='uncertain';record['revocation']=dict(grant_id=grant_id,status='cancellation_uncertain',reason=getattr(error,'code','owner_unavailable'))
+            self._save(record,update_owner=True)
+            self._event(record,'grant_revoked',{'kind':'grant_revoked','cancellation':record['cancellation']})
+            outcomes.append(dict(operation_id=record['operation_id'],cancellation=record['cancellation']))
+        return dict(grant_id=grant_id,status='revoked',cancellation='reconciled' if outcomes else 'no_owned_active_work',
+            operations=outcomes,remaining=max(0,len(pending)-100),uncertain_effects=[r['operation_id'] for r in outcomes if r['cancellation']=='uncertain'])

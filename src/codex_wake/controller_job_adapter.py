@@ -58,7 +58,7 @@ class ControllerJobs:
     def poll(self, actor, record):
         state, principal = self.state(actor, record)
         if state['status'] not in ('completed', 'cancelled', 'failed', 'timed_out'): return []
-        stdout = Path(state['stdout_path']).read_bytes()[:32768].decode('utf-8', errors='replace')
+        with Path(state['stdout_path']).open('rb') as stream: stdout = stream.read(32768).decode('utf-8', errors='replace')
         return [dict(reply_id=state['job_id'] + ':terminal', kind='result', text=stdout,
             execution='completed' if state['status'] == 'completed' else 'cancelled' if state['status'] == 'cancelled' else 'failed',
             correlation_id=record['correlation_id'], sender={'owner': state['intent']['owner']},
@@ -84,3 +84,11 @@ class ControllerEffects:
     def reconcile(self, actor, record): return self.backend(record['payload']).reconcile(actor, record)
     def poll(self, actor, record): return self.backend(record['payload']).poll(actor, record)
     def cancel(self, actor, record): return self.backend(record['payload']).cancel(actor, record)
+
+    def reconcile_owned(self, record):
+        from types import SimpleNamespace
+        return self.reconcile(SimpleNamespace(**record['principal']),record)
+
+    def cancel_owned(self, record):
+        from types import SimpleNamespace
+        return self.cancel(SimpleNamespace(**record['principal']),record)
