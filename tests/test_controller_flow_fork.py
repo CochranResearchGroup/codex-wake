@@ -71,3 +71,26 @@ class ForkTests(unittest.TestCase):
                 owner.execute(actor,'sessions.checkpoint',dict(profile='fixture',expected_target=target),authorize=lambda:actor)
             self.assertEqual(caught.exception.code,'unsupported_fork_variant')
             self.assertEqual(effects,[])
+
+    def test_advertised_but_unknown_native_method_stays_uncertain_without_fallback(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as directory:
+            owner,target,actor,source,effects=self.fixture(Path(directory))
+            pinned=owner.execute(actor,'sessions.checkpoint',dict(profile='fixture',expected_target=target),authorize=lambda:actor)['result']['checkpoint']
+            original=owner.request
+            calls=[]
+            def unsupported(endpoint,executable,method,params,timeout):
+                if method=='thread/fork':
+                    calls.append(method)
+                    raise ValueError('native unknown method thread/fork')
+                return original(endpoint,executable,method,params,timeout)
+            owner.request=unsupported
+            args=dict(profile='fixture',expected_target=target,checkpoint=pinned,
+                _request=dict(operation_id='unknown',idempotency_key='unknown',correlation_id='unknown',binding='fixture',target=target))
+            result=owner.execute(actor,'sessions.fork',args,authorize=lambda:actor)
+            self.assertEqual(result['result']['operation']['phase'],'uncertain')
+            self.assertIsNone(result['result']['operation']['result'])
+            self.assertEqual(owner.execute(actor,'sessions.fork',args,authorize=lambda:actor),result)
+            self.assertEqual(calls,['thread/fork'])
+            self.assertEqual(effects,[])
