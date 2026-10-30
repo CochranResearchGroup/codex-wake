@@ -33,9 +33,12 @@ def raw_target(target):
 
 
 class ControllerRecovery:
-    def __init__(self,root,*,now=time.time,probe=None,notice=None,action=None,request=None):
-        self.root,self.now=Path(root),now
-        self.runtime=ControllerRuntime(root,now=now)
+    def __init__(self,root,*,now=None,probe=None,notice=None,action=None,request=None,elapsed=None,boot=None):
+        from .process import boot_id_value
+        self.root,self.now=Path(root),now or time.time
+        self.elapsed=elapsed or (now if now is not None else lambda:time.clock_gettime(time.CLOCK_BOOTTIME))
+        self.boot=boot or boot_id_value
+        self.runtime=ControllerRuntime(root,now=self.now)
         self.probe=probe or (lambda target,timeout:ControllerHealth(root).execute('health.observe',dict(expected_target=target,timeout=timeout)))
         self.notice=notice or self._native_notice
         self.action=action or self._action
@@ -103,13 +106,21 @@ class ControllerRecovery:
             if kind=='thread_mcp_refresh':bounded_id(action['profile'])
         return json.loads(encoded(value))
 
+    def _clock(self,record):
+        clock=record.get('clock')
+        if not isinstance(clock,dict) or clock.get('boot_id')!=self.boot():raise InventoryError('time_uncertain','boot continuity lost; original policy clock retained')
+        elapsed=self.elapsed()
+        if type(elapsed) not in (int,float) or not elapsed>=clock['last_elapsed']:raise InventoryError('time_uncertain','elapsed continuity lost; original policy clock retained')
+        return elapsed
+
     def _configure(self,actor,args):
         declaration=self._definition(args.get('policy'));policy_id=args['policy_id']
         record=dict(schema_version=1,policy_id=policy_id,principal=identity(actor),target=args['expected_target'],
             definition=declaration,definition_sha256=hashlib.sha256(encoded(declaration).encode()).hexdigest(),
             mode='observe',generation=1,created_at=self.now(),checks=0,unknown_streak=0,attempts=0,
             health_status='unobserved',last_observation=None,next_due=self.now(),last_action_at=None,
-            action_status='not_started',in_flight=None,notifications={},history=[])
+            action_status='not_started',in_flight=None,notifications={},history=[],
+            clock=dict(boot_id=self.boot(),last_elapsed=self.elapsed(),next_due_elapsed=self.elapsed(),last_observation_elapsed=None,last_action_elapsed=None))
         with self._db() as db:
             db.execute('BEGIN IMMEDIATE')
             if db.execute('SELECT 1 FROM policies WHERE id=?',(policy_id,)).fetchone():raise InventoryError('idempotency_conflict','policy ID is immutable; choose an explicit new policy ID')
@@ -136,17 +147,19 @@ class ControllerRecovery:
     def _check(self,actor,args,authorize,*,due_only):
         record=self._owned(actor,args['policy_id'],args['expected_target'],'observe',authorize)
         now=self.now();definition=record['definition']
-        if now<record['created_at'] or (record['last_observation'] and now<record['last_observation']['observed_at']):raise InventoryError('time_uncertain','clock continuity lost; original schedule retained')
-        if due_only and now<record['next_due']:return self._outcome(record,'not_due','scheduled check deadline has not arrived')
+        elapsed=self._clock(record)
+        if due_only and elapsed<record['clock']['next_due_elapsed']:return self._outcome(record,'not_due','scheduled check deadline has not arrived')
         observed=self.probe(raw_target(record['target']),definition['probe_timeout'])
         self._authorize(actor,record['target'],'observe',authorize)
         observation=observed.get('observation',{}) if isinstance(observed,dict) else {}
-        if observed.get('target')!=raw_target(record['target']) or type(observation.get('observed_at')) not in (int,float) or not now<=observation['observed_at']<=self.now()+definition['probe_timeout']:
+        if observed.get('target')!=raw_target(record['target']) or type(observation.get('observed_at')) not in (int,float) or not min(now,self.now())<=observation['observed_at']<=max(now,self.now())+definition['probe_timeout']:
             observation=dict(status='unknown',responsive=False,evidence='none',observed_at=self.now(),reason='invalid_or_stale_probe')
         if observation.get('status')=='responsive' and (observation.get('responsive') is not True or observation.get('evidence')!='tui_main_loop_ack'):
             observation=dict(status='unknown',responsive=False,evidence='none',observed_at=self.now(),reason='not_exact_tui_loop_evidence')
         def change(current):
+            finished=self._clock(current)
             current['checks']+=1;current['next_due']=self.now()+definition['interval_seconds'];current['last_observation']=observation
+            current['clock'].update(last_elapsed=finished,last_observation_elapsed=finished,next_due_elapsed=finished+definition['interval_seconds'])
             current['unknown_streak']=0 if observation.get('status')=='responsive' else current['unknown_streak']+1
             current['health_status']='responsive' if observation.get('status')=='responsive' else ('suspected_unresponsive' if current['unknown_streak']>=definition['unknown_threshold'] else 'unknown')
         record=self._edit(record['policy_id'],change)
@@ -159,23 +172,26 @@ class ControllerRecovery:
 
     def _apply(self,actor,args,authorize):
         record=self._owned(actor,args['policy_id'],args['expected_target'],'recovery',authorize)
-        now=self.now();definition=record['definition']
+        now=self.now();definition=record['definition'];elapsed=self._clock(record)
         if record['mode']!='automatic':return self._outcome(record,'held','scoped automatic recovery is inactive')
         if record['in_flight'] is not None:return self._outcome(record,'uncertain','original in-flight effect must be reconciled before any further action')
         if record['health_status']!='suspected_unresponsive':return self._outcome(record,'held','required repeated unknown evidence is absent')
         observation=record['last_observation']
-        if not 0<=now-observation['observed_at']<=definition['interval_seconds']:return self._outcome(record,'held','health evidence is stale')
+        if record['clock']['last_observation_elapsed'] is None or not 0<=elapsed-record['clock']['last_observation_elapsed']<=definition['interval_seconds']:return self._outcome(record,'held','health evidence is stale')
         if record['attempts']>=definition['max_attempts']:
             self._edit(record['policy_id'],lambda value:value.update(action_status='exhausted'))
             return self._outcome(record,'attempt_ceiling','cumulative recovery attempt ceiling reached; escalation stopped')
-        if record['last_action_at'] is not None and now-record['last_action_at']<definition['cooldown_seconds']:
+        if record['clock']['last_action_elapsed'] is not None and elapsed-record['clock']['last_action_elapsed']<definition['cooldown_seconds']:
             return self._outcome(record,'cooldown','recovery cooldown has not elapsed')
         generation=record['generation'];operation_id=args['_request']['operation_id']
         def reserve(current):
             if current['mode']!='automatic' or current['generation']!=generation or current['in_flight'] is not None or current['health_status']!='suspected_unresponsive':raise InventoryError('policy_deactivated','policy changed before effect admission')
             if current['attempts']>=definition['max_attempts']:raise InventoryError('attempt_ceiling','cumulative attempt ceiling reached')
-            if current['last_action_at'] is not None and now-current['last_action_at']<definition['cooldown_seconds']:raise InventoryError('cooldown','policy cooldown has not elapsed')
+            reserved_elapsed=self._clock(current)
+            if current['clock']['last_observation_elapsed'] is None or not 0<=reserved_elapsed-current['clock']['last_observation_elapsed']<=definition['interval_seconds']:raise InventoryError('stale_evidence','exact-loop evidence changed before admission')
+            if current['clock']['last_action_elapsed'] is not None and reserved_elapsed-current['clock']['last_action_elapsed']<definition['cooldown_seconds']:raise InventoryError('cooldown','policy cooldown has not elapsed')
             current['attempts']+=1;current['last_action_at']=now;current['action_status']='executing'
+            current['clock'].update(last_elapsed=reserved_elapsed,last_action_elapsed=reserved_elapsed)
             current['in_flight']=dict(operation_id=operation_id,generation=generation,step=0,phase='admitted',actions=[])
         self._edit(record['policy_id'],reserve)
         guard=lambda:self._guard(actor,record['policy_id'],record['target'],generation,authorize)
@@ -188,10 +204,11 @@ class ControllerRecovery:
                 result=self.action(actor,record,action,operation_id,index,guard)
                 guard()
             except Exception as error:
+                error_code=getattr(error,'code','effect_uncertain')
                 def uncertain(current):
                     if current['in_flight'] is not None:
                         current['action_status']='uncertain';current['in_flight']['phase']='uncertain'
-                        current['in_flight']['reason']=getattr(error,'code','effect_uncertain')
+                        current['in_flight']['reason']=error_code
                 self._edit(record['policy_id'],uncertain)
                 return self._outcome(self._load(record['policy_id']),'uncertain','action outcome uncertain or policy deactivated; never replay automatically')
             def finish_step(current):
