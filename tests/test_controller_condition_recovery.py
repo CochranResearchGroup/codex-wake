@@ -117,3 +117,30 @@ class ConditionRecoveryTests(unittest.TestCase):
             self.assertEqual(held['reason'],'legacy_condition_interrupted_no_replay')
             self.assertEqual(held['condition_usage'],dict(calls=1,tokens=8))
             self.assertEqual(owner().inspect(actor,run['run_id']),held)
+
+    def test_uncertain_native_submission_keeps_original_condition_recoverable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            function=dict(kind='semantic',inputs={},effects='action',tools='inherited',profile='fixture',
+                          expected_target=dict(conversation_id='source'),prompt='provider-free fixture',estimated_tokens=4)
+            path=root/'controller-conditions.json';path.write_text(json.dumps(dict(version=1,functions={'one@1':function})));path.chmod(0o600)
+            actor=Actor('author','service','client','grant','local://test','wake:controller',frozenset({'observe','control'}),
+                        [dict(host='host',environment='test',flow_id='fixture')],10000)
+            def owner():return ControllerFlows(root,host='host',environment='test',invoke=lambda *a,**k:self.fail('unexpected effect'),authorize=lambda:actor,now=lambda:100)
+            definition=dict(id='fixture',version=1,entry='choose',limits=dict(max_tokens=4,metering='estimate_opt_in'),nodes=[
+                dict(id='choose',type='branch',condition=dict(function='one',version=1,arguments={}),then='yes',**{'else':'no'}),
+                dict(id='yes',type='end',value=True),dict(id='no',type='end',value=False)])
+            first=owner();first.publish(actor,definition);run=first.start(actor,'fixture',1,inputs={},intent='uncertain',binding='caller')
+            def uncertain(actor,operation,args,**kwargs):
+                kwargs['authorize']();self.assertEqual(operation,'sessions.prompt')
+                return dict(result=dict(operation=dict(phase='uncertain',execution='unknown',result={})))
+            with patch('codex_wake.controller_condition_native.ControllerFlowSessions._context',return_value={}),patch('codex_wake.controller_condition_native.ControllerFlowSessions.execute',side_effect=uncertain):
+                held=owner().advance(actor,run['run_id'])
+            self.assertEqual(held['phase'],'uncertain')
+            self.assertTrue(held['condition_attempt'])
+            self.assertEqual(held['condition_usage'],dict(calls=1,tokens=4))
+            with patch('codex_wake.controller_condition_native.ControllerFlowSessions.execute',return_value=dict(result=dict(operation=dict(phase='terminal',execution='completed',answer={'text':'{"value":true}'})))) as observed:
+                resumed=owner().reconcile(actor,run['run_id'])
+            self.assertEqual(resumed['cursor'],'yes')
+            self.assertEqual(observed.call_args.args[1],'sessions.wait')
+            self.assertIs(owner().advance(actor,run['run_id'])['result'],True)
