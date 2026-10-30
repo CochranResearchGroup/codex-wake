@@ -1,0 +1,39 @@
+{
+  "ticket": 410,
+  "source_commit": "0ee7f5b82032cbe7d57f83963796097daa212338",
+  "base": "4f7da2e",
+  "installed_python": "/tmp/codex-wake-410-installed/bin/python",
+  "installed_package": "/tmp/codex-wake-410-installed/lib/python3.12/site-packages/codex_wake",
+  "source_and_installed_sha256": {
+    "controller_conditions.py": "eb37b02ce422518ae5d092161d66136ed58004b0e878f0f301cf2e91fc036c14",
+    "controller_condition_native.py": "b4285b145b3c699d8d38ed0a1292fe9cdb689df17d6c29417eda607df4ef7ecc",
+    "controller_flows.py": "b3ad91c58068ad0ddc0724c9e5f0082c27d8a10c38324062e8df27cbfa5d71c4"
+  },
+  "red": "PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p test_controller_conditions.py -v: missing controller_conditions module",
+  "installed_tests": "7 passed in 1.082s, cwd /tmp, no PYTHONPATH",
+  "existing_flow_regression": "14 passed in 7.291s",
+  "installed_public_command": "/tmp/codex-wake-410-installed/bin/python /tmp/codex-wake-410/scripts/controller_conditions_acceptance.py",
+  "installed_public_result": "passed: local CLI, remote CLI, OAuth API, OAuth MCP and actual stdio MCP; semantic-to-semantic positive and short-circuit negative over existing native-shaped turn/start and thread/read",
+  "qualified_positive": [
+    "Immutable named/versioned host functions with typed arguments",
+    "Deterministic observation functions and ordered AND/OR with unevaluated markers",
+    "Explicit action semantic functions use inherited native tools and the original actor",
+    "Strict Boolean/unknown parsing and bounded host-allowlisted semantic callee requests",
+    "Cumulative nested call/depth/time admission bounds and explicit conservative token estimates retained in existing flow state through restart",
+    "Native effect/result custody and cancellation use the existing session and operation owners"
+  ],
+  "unsupported_before_effect": [
+    "Native observation-only semantic tool restriction: readonly sandbox alone cannot deny external MCP/app tools",
+    "Exact native token/time enforcement: requires explicit estimate_opt_in instead",
+    "Narrower per-turn tool allowlists beyond explicit inherited tools",
+    "Parallel condition evaluation without a qualified condition scheduler"
+  ],
+  "native_source_evidence": {
+    "checkout": "/tmp/codex-native-390",
+    "commit": "d1325aebac3391def857cfefd80a95e5283266d0",
+    "turn_start": "codex-rs/app-server-protocol/src/protocol/v2/turn.rs:170; existing approvalPolicy, sandboxPolicy and outputSchema fields",
+    "sandbox": "codex-rs/app-server-protocol/src/protocol/v2/permissions.rs:541; readOnly defaults networkAccess false",
+    "boundary": "Read-only source verification; no changes, Cargo builds, provider calls or packaged-native semantic experiment"
+  },
+  "authority": "No new allocation, governor activation, allowance renewal, new native broker or second usage journal. Estimates disclose no_native_stop and do not claim native hard enforcement."
+}
