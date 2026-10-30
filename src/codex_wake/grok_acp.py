@@ -54,7 +54,9 @@ class GrokACPConnection:
                 open_timeout=min(5,self.profile['timeout']),close_timeout=1,compression=None,max_size=1048576)
         except Exception:
             raise InventoryError('native_unavailable','fixed native Grok ACP connection unavailable') from None
-        self.guard();owned_listener(self.profile)
+        try:self.guard();owned_listener(self.profile)
+        except BaseException:
+            self.connection.close();raise
         return self
 
     def __exit__(self,*unused):

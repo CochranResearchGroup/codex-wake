@@ -102,7 +102,8 @@ class ControllerGrok:
             fork=unsupported('no qualified common-prefix fork contract negotiated'),checkpoint=unsupported('no qualified immutable checkpoint contract negotiated'),
             exact_tui_health=unsupported('Grok ACP metadata is not exact controlling TUI-loop evidence'),
             exact_metering=unsupported('no qualified exact token/time enforcement'),observation_tool_isolation=unsupported('not negotiated'),parallel_sessions=unsupported('not qualified')),
-            authority=dict(account_identity='host-approved process/home binding; native account ownership unverified',provider_credentials='native_store_only',client_capabilities='none'))
+            native_identity=dict(agent_id=value['_meta']['agentId'],agent_instance_id=value['_meta']['agentInstanceId'],agent_version=value['_meta']['agentVersion']),
+            authority=dict(native_account_verified=False,account_identity='host-approved process/home binding; native account ownership unverified',provider_credentials='native_store_only',client_capabilities='none'))
 
     def execute(self,actor,operation,args,*,authorize):
         allowed={**{'grok.'+verb:{'profile','expected_target'} for verb in ('capabilities','health','checkpoint')},
@@ -122,7 +123,7 @@ class ControllerGrok:
         with self._connection(profile,guard) as connection:
             negotiation=self._negotiation(connection,profile)
             if operation in ('grok.capabilities','grok.health','grok.fork','grok.checkpoint'):guard()
-            if operation=='grok.capabilities':return dict(schema_version=1,operation=operation,status='completed',result=self._capabilities(negotiation))
+            if operation=='grok.capabilities':return dict(schema_version=1,operation=operation,status='completed',result=dict(self._capabilities(negotiation),target=args['expected_target']))
             if operation=='grok.health':return dict(schema_version=1,operation=operation,status='completed',result=dict(status='unsupported',responsive=False,reason='structured ACP metadata cannot establish exact controlling TUI-loop health',grants_recovery=False))
             if operation in ('grok.fork','grok.checkpoint'):raise InventoryError('unsupported_operation','Grok immutable common-prefix fork/checkpoint capability is not qualified')
             if operation=='grok.load' and negotiation['agentCapabilities'].get('loadSession') is not True:raise InventoryError('unsupported_operation','Grok loadSession capability was not negotiated')
