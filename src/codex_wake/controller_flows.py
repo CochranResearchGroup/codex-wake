@@ -441,10 +441,11 @@ class ControllerFlows:
         state = self._owned(actor, self._load(run_id), 'control')
         if state['cancellation']:
             return self._reconcile_cancellation(actor,run_id,state)
+        if state['phase'] in ('executing','uncertain') and state.get('condition_attempt'):
+            try:return self._advance_condition(actor,run_id,resume=True)
+            except _FlowLimitReached as stopped:return self._stop_at_limit(actor,run_id,str(stopped))
         if state['phase'] not in ('executing', 'uncertain') or not state.get('child_operation_id'):
             return self.projection(state)
-        if state.get('condition_attempt'):
-            return self.projection(dict(state,reason='condition_interrupted_or_uncertain_no_replay'))
         attempt = state.get('attempt')
         value = self.invoke('operations.result', {'operation_id': state['child_operation_id']},
             authorize=lambda: self._step_guard(actor, run_id, attempt))
@@ -467,11 +468,26 @@ class ControllerFlows:
             self._write(db, latest)
             return self.projection(latest)
 
-    def _advance_condition(self,actor,run_id):
+    def _advance_condition(self,actor,run_id,*,resume=False):
+        # Process-scoped lock disappears on exit, so recovery needs no resource
+        # reset and cannot race a still-running condition into another effect.
+        import fcntl
+        state=self._owned(actor,self._load(run_id),'control')
+        if not resume and state['phase']!='ready':return None
+        path=self.path.parent/('.condition-'+run_id+'.lock')
+        descriptor=os.open(path,os.O_CREAT|os.O_RDWR|os.O_NOFOLLOW,0o600)
+        try:
+            private_path(path)
+            try:fcntl.flock(descriptor,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            except BlockingIOError:return self.projection(dict(state,reason='condition_in_progress'))
+            return self._evaluate_condition(actor,run_id,resume=resume)
+        finally:os.close(descriptor)
+
+    def _evaluate_condition(self,actor,run_id,*,resume=False):
         from uuid import uuid4
         from .controller_conditions import Conditions
         state=self._owned(actor,self._load(run_id),'control')
-        if state['phase']!='ready':return None
+        if state['phase']!='ready' and not (resume and state['phase'] in ('executing','uncertain') and state.get('condition_attempt')):return self.projection(state) if resume else None
         definition=state.get('execution_definition') or self._definition(state['flow_id'],state['version']).as_dict()
         node=next(item for item in definition['nodes'] if item['id']==state['cursor'])
         condition=node.get('condition')
@@ -483,7 +499,7 @@ class ControllerFlows:
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             latest=self._owned(actor,self._load(run_id,db),'control')
-            if latest['phase']!='ready' or latest['cursor']!=node['id']:return self.projection(latest)
+            if latest.get('attempt')!=state.get('attempt') or latest['cursor']!=node['id'] or latest['cancellation']:return self.projection(latest)
             latest.update(phase='executing',attempt=attempt,executing_node=node['id'],condition_attempt=True)
             self._write(db,latest);state=latest
         def save():
@@ -495,15 +511,30 @@ class ControllerFlows:
                 latest['condition_usage']=state['condition_usage'];latest['condition_trace']=state['condition_trace']
                 self._write(db,latest)
         def semantic(function,args,bounds,tokens,receipt):
-            from .controller_condition_native import invoke
+            from .controller_condition_native import invoke,recover
+            if receipt.get('native_operation_id'):
+                return recover(self.root,actor,receipt,authorize=lambda:self._step_guard(actor,run_id,attempt))
             identifier=run_id+'.'+node['id']+'.function'+str(state['condition_usage']['calls'])
             receipt['native_operation_id']=identifier
             receipt['native_execution']='unknown'
             save()
             return invoke(self.root,actor,function,args,bounds,tokens,receipt,
                 authorize=lambda:self._step_guard(actor,run_id,attempt),request_id=identifier,binding=state['binding'])
-        outcome=registry.evaluate(condition,state,resolve=lambda value:self._resolve(value,state),
-            compare=lambda value:self._condition(value,state),save=save,now=self.now,semantic=semantic)
+        from .controller_conditions import ConditionPending
+        if resume and any(item.get('status')=='admitted' and 'evaluation_id' not in item for item in state.get('condition_trace',[])):
+            return self.projection(dict(state,reason='legacy_condition_interrupted_no_replay'))
+        try:
+            outcome=registry.evaluate(condition,state,resolve=lambda value:self._resolve(value,state),
+                compare=lambda value:self._condition(value,state),save=save,now=self.now,semantic=semantic,
+                evaluation_id=node['id'],resume=resume)
+        except ConditionPending as pending:
+            with self.connect() as db:
+                db.execute('BEGIN IMMEDIATE')
+                latest=self._owned(actor,self._load(run_id,db),'control')
+                if latest.get('attempt')==attempt:
+                    latest.update(phase='uncertain',reason=str(pending),condition_usage=state['condition_usage'],condition_trace=state['condition_trace'])
+                    self._write(db,latest)
+                return self.projection(latest)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             latest=self._owned(actor,self._load(run_id,db),'control')

@@ -11,6 +11,10 @@ from pathlib import Path
 from .a2a_bus import private_path
 from .managed_inventory import InventoryError
 
+class ConditionPending(Exception):
+    """An existing semantic turn needs another observation, never a resubmission."""
+
+
 DEFAULTS=dict(max_calls=64,max_depth=8,max_seconds=300,max_tokens=1024,metering='exact')
 
 
@@ -63,10 +67,11 @@ class Conditions:
         self.registry=registry
         self.revision=hashlib.sha256(json.dumps(registry,sort_keys=True,separators=(',',':')).encode()).hexdigest()
 
-    def evaluate(self,expression,state,*,resolve,compare,save,now,semantic=None):
+    def evaluate(self,expression,state,*,resolve,compare,save,now,semantic=None,evaluation_id=None,resume=False):
         overall=limits(state.get('condition_limits',{}))
         usage=state.setdefault('condition_usage',dict(calls=0,tokens=0))
-        start=now()
+        retained={tuple(item['path']):item for item in state.get('condition_trace',[])
+                  if resume and item.get('evaluation_id')==evaluation_id and isinstance(item.get('path'),list)}
         frames=[(overall,0,0,state['created_at'])]
         def result(status,value=None,**extra):return dict(type='boolean',status=status,value=value,**extra)
         def local(value,arguments):
@@ -75,14 +80,16 @@ class Conditions:
             if isinstance(value,dict):return {k:local(v,arguments) for k,v in value.items()}
             if isinstance(value,list):return [local(v,arguments) for v in value]
             return value
-        def run(value,parent,depth=0):
-            if any(now()-began>=bounds['max_seconds'] for bounds,calls,tokens,began in frames):
+        def run(value,parent,depth=0,path=()):
+            previous=retained.get(path)
+            if previous and 'outcome' in previous:return dict(previous['outcome'],function=previous['function'])
+            if not previous and any(now()-began>=bounds['max_seconds'] for bounds,calls,tokens,began in frames):
                 return result('timeout',reason='condition_time_limit')
             if type(value) is bool:return result('known',value)
             if value.get('op') in ('and','or'):
                 trace=[];answer=True if value['op']=='and' else False
                 for index,child in enumerate(value['operands']):
-                    item=run(child,parent,depth)
+                    item=run(child,parent,depth,path+(index,))
                     trace.append(item)
                     stop=item['status']!='known' or (value['op']=='and' and item['value'] is False) or (value['op']=='or' and item['value'] is True)
                     answer=item['value']
@@ -94,13 +101,13 @@ class Conditions:
                 answer=compare(value)
                 return result('unknown' if answer is None else 'known',answer)
             nested=limits(value.get('limits',{}),parent)
-            if depth>=nested['max_depth'] or any(usage['calls']-calls>=bounds['max_calls'] for bounds,calls,tokens,began in frames):
+            if not previous and (depth>=nested['max_depth'] or any(usage['calls']-calls>=bounds['max_calls'] for bounds,calls,tokens,began in frames)):
                 return result('error',reason='condition_call_limit')
             key=value['function']+'@'+str(value['version'])
             function=self.registry.get(key)
             if not isinstance(function,dict):return result('error',reason='function_version_not_found',function=key)
             nested=limits(function.get('limits',{}),nested)
-            if depth>=nested['max_depth'] or nested['max_calls']<=0 or any(usage['calls']-calls>=bounds['max_calls'] for bounds,calls,tokens,began in frames):
+            if not previous and (depth>=nested['max_depth'] or nested['max_calls']<=0 or any(usage['calls']-calls>=bounds['max_calls'] for bounds,calls,tokens,began in frames)):
                 return result('error',reason='condition_call_limit')
             args=resolve(value['arguments'])
             types={'string':str,'boolean':bool,'integer':int,'number':(int,float),'object':dict,'array':list}
@@ -109,35 +116,53 @@ class Conditions:
                 return result('error',reason='function_argument_type',function=key)
             if function.get('effects','observe') not in ('observe','action'):
                 return result('error',reason='function_effect_declaration',function=key)
-            frames.append((nested,usage['calls'],usage['tokens'],now()))
-            usage['calls']+=1
-            receipt=dict(function=key,depth=depth+1,effects=function.get('effects','observe'),status='admitted',value=None)
-            state.setdefault('condition_trace',[]).append(receipt)
-            save()  # durable admission before nested calls, including failures
+            if previous:
+                receipt=previous
+                if receipt.get('function')!=key or receipt.get('arguments')!=args or receipt.get('limits')!=nested:
+                    raise InventoryError('condition_continuation_invalid','retained function admission differs from pinned evaluation')
+                frame=receipt['frame']
+                frames.append((nested,frame['calls'],frame['tokens'],frame['began']))
+            else:
+                frame=dict(calls=usage['calls'],tokens=usage['tokens'],began=now())
+                frames.append((nested,frame['calls'],frame['tokens'],frame['began']))
+                usage['calls']+=1
+                receipt=dict(function=key,depth=depth+1,effects=function.get('effects','observe'),status='admitted',value=None,
+                             evaluation_id=evaluation_id,path=list(path),arguments=args,limits=nested,frame=frame)
+                state.setdefault('condition_trace',[]).append(receipt)
+                save()  # durable admission before nested calls, including failures
             if function.get('kind')=='deterministic':
                 expression=local(function['expression'],args)
                 validate_condition(expression)
-                outcome=run(expression,nested,depth+1)
+                outcome=run(expression,nested,depth+1,path+(-1,))
             elif function.get('kind')=='semantic' and semantic:
-                remaining=min(bounds['max_tokens']-(usage['tokens']-tokens) for bounds,calls,tokens,began in frames)
-                estimate=function.get('estimated_tokens',remaining)
-                if type(estimate) is not int or estimate<=0:remaining=0
-                else:remaining=min(remaining,estimate)
-                if remaining<=0:outcome=result('error',reason='condition_token_limit')
+                if 'semantic_outcome' in receipt:
+                    outcome=receipt['semantic_outcome']
                 else:
-                    # Reservation remains charged if submission/usage is uncertain.
-                    usage['tokens']+=remaining;receipt['reserved_tokens']=remaining;save()
-                    try:
-                        bounded=dict(nested,max_seconds=min(bounds['max_seconds']-(now()-began) for bounds,calls,tokens,began in frames))
-                        outcome=semantic(function,args,bounded,remaining,receipt)
-                        consumed=outcome.get('usage',{}).get('tokens')
-                        if type(consumed) is not int or not 0<=consumed<=remaining:
-                            outcome=result('error',reason='semantic_usage_unavailable')
-                        else:
-                            usage['tokens']-=remaining-consumed
-                            receipt['charged_tokens']=consumed
-                    except Exception as error:
-                        outcome=result('timeout' if isinstance(error,TimeoutError) else 'error',reason=getattr(error,'code','semantic_effect_uncertain'))
+                    if previous and not receipt.get('native_operation_id'):
+                        raise ConditionPending('original semantic operation handle unavailable')
+                    remaining=receipt.get('reserved_tokens')
+                    if remaining is None:
+                        remaining=min(bounds['max_tokens']-(usage['tokens']-tokens) for bounds,calls,tokens,began in frames)
+                        estimate=function.get('estimated_tokens',remaining)
+                        remaining=min(remaining,estimate) if type(estimate) is int and estimate>0 else 0
+                        if remaining>0:
+                            usage['tokens']+=remaining;receipt['reserved_tokens']=remaining;save()
+                    if remaining<=0:outcome=result('error',reason='condition_token_limit')
+                    else:
+                        try:
+                            bounded=dict(nested,max_seconds=max(0,min(bounds['max_seconds']-(now()-began) for bounds,calls,tokens,began in frames)))
+                            outcome=semantic(function,args,bounded,remaining,receipt)
+                            consumed=outcome.get('usage',{}).get('tokens')
+                            if type(consumed) is not int or not 0<=consumed<=remaining:
+                                outcome=result('error',reason='semantic_usage_unavailable')
+                            else:
+                                usage['tokens']-=remaining-consumed
+                                receipt['charged_tokens']=consumed
+                        except ConditionPending:
+                            raise
+                        except Exception as error:
+                            outcome=result('timeout' if isinstance(error,TimeoutError) else 'error',reason=getattr(error,'code','semantic_effect_uncertain'))
+                    receipt['semantic_outcome']=outcome;save()
             else:outcome=result('error',reason='unsupported_function_kind')
             if outcome.get('status')=='delegate':
                 call=outcome.get('call')
@@ -147,10 +172,10 @@ class Conditions:
                 else:
                     validate_condition(call)
                     receipt['delegation']=call
-                    outcome=run(call,nested,depth+1)
+                    outcome=run(call,nested,depth+1,path+(-1,))
             if outcome.get('status') not in ('known','unknown','error','timeout') or (outcome.get('status')=='known' and type(outcome.get('value')) is not bool):
                 outcome=result('error',reason='semantic_boolean_type')
             frames.pop()
-            receipt.update(outcome);save()
+            receipt.update({key:value for key,value in outcome.items() if key!='function'});receipt['outcome']=outcome;save()
             return dict(outcome,function=key)
         return run(expression,overall)
