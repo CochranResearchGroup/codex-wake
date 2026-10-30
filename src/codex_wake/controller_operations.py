@@ -9,7 +9,8 @@ from .managed_inventory import InventoryError
 
 
 class ControllerOperations:
-    def __init__(self, inventory, *, host, environment, accounts=None, builds=None, hosts=None):
+    def __init__(self, inventory, *, host, environment, accounts=None, builds=None, hosts=None, history_runtime=None, history_now=None):
+        self.history_runtime, self.history_now = history_runtime, history_now
         self.hosts = hosts
         self.builds = builds
         self.accounts = accounts
