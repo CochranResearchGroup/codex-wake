@@ -176,6 +176,8 @@ SPECS.update(flow_session_specs())
 
 from .health_commands import tool_specs as health_tool_specs
 SPECS.update(health_tool_specs())
+from .notice_commands import tool_specs as notice_tool_specs
+SPECS.update(notice_tool_specs())
 
 from .flow_commands import tool_specs as flow_tool_specs
 for _name, _spec in flow_tool_specs().items():
@@ -335,6 +337,13 @@ class CommandRunner:
                 return value, value['status'] != 'completed'
             except (ValueError, OSError, KeyError) as error:
                 return {'error': {'code': getattr(error, 'code', 'session_held'), 'message': str(error)}}, True
+        if group == 'controller-notices':
+            from .notice_commands import protected_execute
+            try:
+                value = protected_execute(verb, arguments, self.wake_root)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'notice_held'), 'message': str(error)}}, True
         if group == 'controller-health':
             from .health_commands import protected_execute
             try:

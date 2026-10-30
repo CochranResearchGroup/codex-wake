@@ -116,6 +116,8 @@ def build_parser() -> argparse.ArgumentParser:
     register_hosts(subparsers)
     from .health_commands import register_parser as register_health
     register_health(subparsers)
+    from .notice_commands import register_parser as register_notices
+    register_notices(subparsers)
     from .flow_session_commands import register_parser as register_flow_sessions
     register_flow_sessions(subparsers)
     from .flow_commands import register_parser as register_flows
@@ -2944,6 +2946,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         return command(args, root)
     if args.command == "health":
         from .health_commands import command
+        return command(args, args.wake_root)
+    if args.command == "notices":
+        from .notice_commands import command
         return command(args, args.wake_root)
     if args.command == "flow-sessions":
         from .flow_session_commands import command

@@ -72,6 +72,47 @@ class ControllerRuntime:
         """Authorize composed host workflows without admitting a new effect."""
         return self._authorize(actor, target, capability, authorize)
 
+    def owned_operations(self, actor, target, operation, *, authorize, cursor=0):
+        """Bounded caller-owned journal projection; never broadens target grants."""
+        self._authorize(actor, target, 'observe', authorize)
+        if type(cursor) is not int or not 0 <= cursor <= 10000:
+            raise InventoryError('invalid_argument', 'bounded journal cursor required')
+        with self.connect() as db:
+            rows = db.execute('SELECT record FROM operations ORDER BY rowid LIMIT 100 OFFSET ?', (cursor,)).fetchall()
+        result = []
+        for row in rows:
+            record = json.loads(row[0])
+            if record['target'] != target or record['operation'] != operation:
+                continue
+            if identity(actor) not in [record['principal'], *record.get('successors', [])]:
+                continue
+            self._owned(actor, record, authorize)
+            result.append(self.projection(record))
+        self._authorize(actor, target, 'observe', authorize)
+        return result, cursor + len(rows) if len(rows) == 100 else None
+
+    def reconcile_result(self, actor, operation_id, *, expected_operation, authorize, observe):
+        """Trusted effect owner's read-only reconciliation of an uncertain result.
+
+        No public generic result-writing operation exists. The owner must observe
+        original retained proof, and cannot redispatch through this hook.
+        """
+        record = self._owned(actor, self._load(operation_id), authorize, capability='control')
+        if record['operation'] != expected_operation:
+            raise InventoryError('unsupported_operation', 'original operation belongs to another effect owner')
+        if record['phase'] == 'terminal':
+            return self.envelope(expected_operation, record)
+        value = observe(self.projection(record))
+        self._owned(actor, record, authorize, capability='control')
+        if value is not None:
+            if len(encoded(value).encode()) > 262144:
+                raise InventoryError('capacity', 'reconciled result exceeds retained bound')
+            record.update(result=value, phase='terminal', execution='completed', delivery='retained',
+                acceptance='owner_observed', reason=None)
+            self._save(record)
+            self._event(record, 'reconciled', dict(kind='reconciled', operation_id=operation_id))
+        return self.envelope(expected_operation, record)
+
     def _save(self, record, *, update_owner=False):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')

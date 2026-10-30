@@ -93,6 +93,9 @@ for name, spec in flow_session_specs().items():
 
 from .health_commands import INPUT_SCHEMA as health_schema
 TOOLS['wake_controller_health'] = ('health.observe', health_schema)
+from .notice_commands import tool_specs as notice_specs
+for name, spec in notice_specs().items():
+    TOOLS[name] = (spec[1], dict(type='object',properties=spec[3],required=spec[4],additionalProperties=False))
 
 
 def operation_failure(operation, error):
@@ -113,6 +116,8 @@ class ProtectedOperations:
         **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait','checkpoint') else 'control', None, None)
             for verb in ('capabilities','create','prompt','wait','cancel','checkpoint','fork')},
         'health.observe': ('observe', None, None),
+        **{'notices.'+verb: ('observe' if verb=='list' else 'control',None,None)
+            for verb in ('list','publish','reconcile')},
         **{'tabs.'+verb: ('observe' if verb in ('list','show') else 'control', 'resources' if verb in ('list','show') else None, None) for verb in ('list','show','preview','apply','undo','capture','input')},
         **{'flows.' + verb: ('observe' if verb in ('propose', 'definition', 'inspect') else 'control', None, None)
             for verb in ('propose', 'publish', 'definition', 'start', 'inspect', 'advance', 'reconcile', 'cancel')},
@@ -155,7 +160,13 @@ class ProtectedOperations:
             raise InventoryError('unsupported_operation', 'operation is unsupported')
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
-        if operation.startswith('sessions.'):
+        if operation.startswith('notices.'):
+            from .controller_notices import ControllerNotices
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host notice owner unavailable')
+            result = ControllerNotices(self.operations.inventory.root).execute(actor,operation,arguments,
+                authorize=lambda: self.authority.authenticate(token))
+        elif operation.startswith('sessions.'):
             from .flow_session_commands import execute
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host session owner unavailable')
