@@ -247,7 +247,8 @@ class ControllerHandler(BaseHTTPRequestHandler):
                 and (operation.startswith('inventory.')
                      or (operation.startswith('hosts.') and self.server.operations.operations.hosts is not None)
                      or (operation.startswith('builds.') and self.server.operations.operations.builds is not None)
-                     or (not operation.startswith(('hosts.', 'builds.')) and self.server.operations.operations.accounts is not None))]}        elif method == 'tools/call':
+                     or (not operation.startswith(('hosts.', 'builds.')) and self.server.operations.operations.accounts is not None))]}
+        elif method == 'tools/call':
             name = params.get('name')
             if name not in TOOLS:
                 return self.reply(200, dict(jsonrpc='2.0', id=identifier, error={'code': -32602, 'message': 'unsupported tool'}))
