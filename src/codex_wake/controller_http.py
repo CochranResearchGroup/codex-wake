@@ -110,8 +110,8 @@ class ProtectedOperations:
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
-        **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait') else 'control', None, None)
-            for verb in ('capabilities','create','prompt','wait','cancel')},
+        **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait','checkpoint') else 'control', None, None)
+            for verb in ('capabilities','create','prompt','wait','cancel','checkpoint','fork')},
         'health.observe': ('observe', None, None),
         **{'tabs.'+verb: ('observe' if verb in ('list','show') else 'control', 'resources' if verb in ('list','show') else None, None) for verb in ('list','show','preview','apply','undo','capture','input')},
         **{'flows.' + verb: ('observe' if verb in ('propose', 'definition', 'inspect') else 'control', None, None)

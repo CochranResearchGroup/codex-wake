@@ -5,7 +5,7 @@ import json
 def tool_specs():
     text = {'type': 'string', 'minLength': 1, 'maxLength': 200}
     result = {}
-    for verb in ('capabilities','create','prompt','wait','cancel'):
+    for verb in ('capabilities','create','prompt','wait','cancel','checkpoint','fork'):
         if verb in ('wait','cancel'):
             properties = {'operation_id': text}
             required = ['operation_id']
@@ -14,15 +14,18 @@ def tool_specs():
         else:
             properties = {'profile': text, 'expected_target': {'type':'object'}}
             required = list(properties)
-            if verb in ('create','prompt'):
+            if verb in ('create','prompt','fork'):
                 properties['_request'] = {'type':'object'}
                 required.append('_request')
+            if verb == 'fork':
+                properties['checkpoint'] = {'type':'object'}
+                required.append('checkpoint')
             if verb == 'prompt':
                 properties['prompt'] = {'type':'string','minLength':1,'maxLength':32768}
                 required.append('prompt')
         result['wake_flow_sessions_' + verb] = ('controller-flow-sessions','sessions.' + verb,
             'Use an exact host-owned native session profile under inherited authority; no new allowance or fallback executor.',
-            properties,required,verb in ('capabilities','wait'))
+            properties,required,verb in ('capabilities','wait','checkpoint'))
     return result
 
 

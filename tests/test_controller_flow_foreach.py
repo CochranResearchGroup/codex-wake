@@ -21,7 +21,7 @@ class ForeachTests(unittest.TestCase):
                     effects.append(('prompt', arguments['expected_target']['conversation_id'], arguments['prompt']))
                     result = {'accepted': True}
                 elif operation == 'sessions.wait':
-                    return {'result': {'wait': {'status': 'completed'}, 'operation': {'answer': {'text': 'actual answer'}}}}
+                    return {'result': {'wait': {'status': 'completed'}, 'operation': {'execution':'completed','answer': {'text': 'actual answer'}}}}
                 else:
                     raise AssertionError(operation)
                 return {'result': {'operation': {'operation_id': kwargs['request']['operation_id'], 'result': result}}}
@@ -78,7 +78,7 @@ class ForeachTests(unittest.TestCase):
                     return {'result': {'operation': {'operation_id': kwargs['request']['operation_id']}}}
                 if operation == 'sessions.wait':
                     return {'result': {'wait': {'status': 'completed' if completed[0] else 'timeout'},
-                        'operation': {'answer': {'text': 'retained'}}}}
+                        'operation': {'execution':'completed','answer': {'text': 'retained'}}}}
                 raise AssertionError(operation)
             source = dict(id='example',version=1,entry='each',nodes=[dict(id='each',type='foreach',items=['one','two'],
                 mode='sequential',profile='fixture',expected_target={'host':'host','environment':'test','conversation_id':'same'},
@@ -94,3 +94,34 @@ class ForeachTests(unittest.TestCase):
             self.assertEqual(done['phase'],'completed')
             self.assertEqual(prompts,[('same','one'),('same','two')])
             self.assertEqual([item['target']['conversation_id'] for item in done['result']['items']],['same','same'])
+
+    def test_parallel_default_join_waits_for_siblings_and_reports_aggregate_failure(self):
+        from codex_wake.controller_flows import ControllerFlows
+        with tempfile.TemporaryDirectory() as directory:
+            effects = []
+            waits = []
+            def invoke(operation,arguments,**kwargs):
+                if operation == 'sessions.capabilities':return {'result': {'modes':['new_session']}}
+                if operation == 'sessions.create':
+                    thread='thread-'+str(len(effects))
+                    effects.append(('create',thread))
+                    return {'result': {'operation': {'result': {'target':dict(arguments['expected_target'],conversation_id=thread)}}}}
+                if operation == 'sessions.prompt':
+                    effects.append(('prompt',arguments['prompt']))
+                    return {'result': {'operation': {'operation_id':kwargs['request']['operation_id']}}}
+                if operation == 'sessions.wait':
+                    self.assertEqual(len([e for e in effects if e[0]=='prompt']),2)
+                    waits.append(arguments['operation_id'])
+                    return {'result': {'wait': {'status':'completed'},'operation': {'execution':'failed' if len(waits)==1 else 'completed','answer':{'text':'retained'}}}}
+                raise AssertionError(operation)
+            source=dict(id='example',version=1,entry='each',nodes=[dict(id='each',type='foreach',items=['one','two'],parallelism=2,
+                mode='new_session',profile='fixture',expected_target={'host':'host','environment':'test'},prompt={'ref':'item'},next='dependent'),
+                dict(id='dependent',type='end',value='must not release')])
+            owner=ControllerFlows(Path(directory),host='host',environment='test',invoke=invoke,authorize=lambda:actor(),now=lambda:100)
+            owner.publish(actor(),source)
+            run=owner.start(actor(),'example',1,inputs={},intent='one',binding='caller')
+            done=owner.advance(actor(),run['run_id'])
+            self.assertEqual(done['phase'],'failed')
+            self.assertEqual(len(waits),2)
+            self.assertEqual(done['steps']['each']['status'],'failed')
+            self.assertEqual([i['result']['execution'] for i in done['steps']['each']['items']],['failed','completed'])

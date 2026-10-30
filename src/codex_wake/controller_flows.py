@@ -60,7 +60,7 @@ class FlowDefinition:
                 'call': {'id', 'type', 'operation', 'arguments', 'next'},
                 'branch': {'id', 'type', 'condition', 'then', 'else', 'unknown'},
                 'wait': {'id', 'type', 'operation_id', 'timeout', 'next', 'operation'},
-                'foreach': {'id', 'type', 'items', 'mode', 'profile', 'expected_target', 'prompt', 'parallelism', 'next'},
+                'foreach': {'id', 'type', 'items', 'mode', 'profile', 'expected_target', 'prompt', 'parallelism', 'join', 'next'},
                 'end': {'id', 'type', 'value'},
             }
             if kind not in fields or set(node) - fields[kind]:
@@ -370,7 +370,7 @@ class ControllerFlows:
             with self.connect() as db:
                 db.execute('BEGIN IMMEDIATE')
                 state = self._owned(actor, self._load(run_id, db), 'control')
-                if state['phase'] in ('completed', 'cancelled', 'held', 'uncertain'):
+                if state['phase'] in ('completed', 'cancelled', 'failed', 'held', 'uncertain'):
                     return self.projection(state)
                 if state['phase'] == 'executing':
                     # Never retry an effect merely because another caller resumed.
@@ -400,7 +400,13 @@ class ControllerFlows:
                     if value is _UNKNOWN:
                         state.update(phase='held', reason='output_unknown')
                     else:
+                        statuses = [item['result'].get('execution','unknown') for item in value['items']]
+                        value['status'] = 'completed' if all(status=='completed' for status in statuses) else 'failed' if all(status in ('completed','failed','cancelled') for status in statuses) else 'unknown'
                         state['steps'][node['id']] = value
+                        if value['status']=='unknown' or (value['status']=='failed' and node['join']=='all_success'):
+                            state.update(phase='held' if value['status']=='unknown' else 'failed',reason='aggregate_'+value['status'],result=value)
+                            self._write(db,state)
+                            return self.projection(state)
                         selected = node.get('next')
                         state.update(cursor=selected, phase='ready' if selected is not None else 'completed')
                     state['completed_steps'] += 1
