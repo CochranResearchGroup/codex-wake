@@ -3,18 +3,33 @@
   "integration_branch": "feat/controller-393",
   "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
   "tip_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
-  "state": "tickets_published_and_reconciled",
+  "state": "running",
   "tickets": {
     "394": {
       "title": "Resolve and inspect exact controller targets across CLI/API/MCP",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [],
-      "worker": null,
-      "owned_paths": [],
-      "base_sha": null,
+      "worker": "/root",
+      "owned_paths": [
+        "controller_operations",
+        "controller_commands",
+        "CLI/MCP registration",
+        "controller operation tests"
+      ],
+      "base_sha": "9538354ce2d8ec9f097664946ea4847079fba9c3",
       "result_sha": null,
-      "validation": []
+      "validation": [
+        {
+          "command": "PYTHONPATH=src python -m unittest discover -s tests -p test_controller_operations.py",
+          "red": "missing module, unsupported resolve, missing CLI command, missing freshness",
+          "green": "4 tests passed using repository venv; default interpreter lacks jsonschema"
+        },
+        {
+          "command": "PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -p test_managed_inventory.py",
+          "result": "9 passed"
+        }
+      ]
     },
     "395": {
       "title": "Select accounts and explain effective configuration through Wake",
@@ -294,5 +309,6 @@
     ]
   },
   "review_rounds": 0,
-  "remediation_rounds": 0
+  "remediation_rounds": 0,
+  "review_fixed_point": "9538354ce2d8ec9f097664946ea4847079fba9c3"
 }

@@ -102,6 +102,8 @@ def build_parser() -> argparse.ArgumentParser:
     add_time_parser(subparsers)
     from .sessions_cli import add_sessions_parser
     add_sessions_parser(subparsers)
+    from .controller_commands import register_parser as register_controller
+    register_controller(subparsers)
     from .native_delivery import add_native_parser
     add_native_parser(subparsers)
     from .runtime_wakes import add_grok_parser
@@ -2908,6 +2910,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         return cleanup(args, root)
     if args.command == "support":
         return support_command(args, root)
+    if args.command == "controller":
+        from .controller_commands import command
+        return command(args)
     if args.command == "schema":
         return schema_command(args)
     if args.command == "service":

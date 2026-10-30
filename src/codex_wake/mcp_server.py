@@ -29,6 +29,8 @@ TARGET = {"on_missing": {"enum": ["error", "tab_only", "fresh", "resume"]},
           "profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "expires_at": TEXT}
 # name: (CLI group, verb, description, properties, required, read-only)
 SPECS = {
+    "wake_controller_list": ("controller", "list", "Read scoped controller inventory; observation grants no control authority.", {"query": TEXT}, [], True),
+    "wake_controller_resolve": ("controller", "resolve", "Pin an exact current controller target; reject ambiguous or replaced generations.", {"selector": TEXT, "expected_target": {"type": "object"}}, ["selector"], True),
     "wake_sessions_target": ("sessions", "target", "Resolve an informal Byobu descriptor (tab 18, 18:policies, typo). Return canonical identity or structured missing/inactive/ambiguous conditions. Default policies error; explicitly select tab_only, fresh or CWD-scoped resume with approved profile, stable intent and expiry. Starting is not readiness or delivery. Reuse the same intent to inspect startup; never enumerate tabs or repair spelling in the caller.",
         {"selector": TEXT, **TARGET}, ["selector"], False),
     "wake_sessions_configuration": ("sessions", "configuration", "For existing-session token/time resource limits use wake_goal_limits_set and wake_goal_limits_show. For dedicated containment, inspect host-approved limits before work. strict_execution identifies dedicated executor containment for time, memory, swap, CPU and tasks, with sampled cumulative token stops. Compare effective caps, original deadline, objective_budget and objective_execution with the request; configured limits alone do not prove running enforcement. Missing setup requires the operator; defaults do not renew authority.",
@@ -273,6 +275,14 @@ class CommandRunner:
             from .agent_resume_commands import mcp_call
             result = mcp_call(self, arguments, native_context)
             return result, result.get('status') != 'resumed'
+        if group == 'controller':
+            from .controller_commands import execute
+            try:
+                result = execute(verb, arguments, self.wake_root)
+                return result, result['status'] != 'completed'
+            except (ValueError, OSError, RuntimeError) as error:
+                return {'error': {'code': getattr(error, 'code', 'inventory_unavailable'),
+                                  'message': str(error)}}, True
         if group == 'permissions':
             if self.wake_root is None:
                 return {'error': {'code':'permission_host_root_required'}},True
