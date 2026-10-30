@@ -36,7 +36,7 @@ class ControllerGrok:
         except (ValueError,OSError):raise InventoryError('configuration_unavailable','Grok profile registry unavailable') from None
         if value.get('version')!=1 or not isinstance(value.get('profiles'),dict) or len(value['profiles'])>256:raise InventoryError('configuration_unavailable','unsupported Grok registry version/capacity')
         profile=value['profiles'].get(name)
-        if not isinstance(profile,dict) or set(profile)!={'target','endpoint','secret_file','cwd','agent_version','timeout'}:
+        if not isinstance(profile,dict) or not {'target','endpoint','secret_file','cwd','agent_version','timeout'}<=profile.keys() or set(profile)-{'target','endpoint','secret_file','cwd','agent_version','timeout','transport_owner'}:
             raise InventoryError('unsupported_target','Grok structured profile unavailable')
         target=profile['target']
         if not isinstance(target,dict) or not BASE_FIELDS<=target.keys() or any(not isinstance(v,str) or not v or len(v)>4096 for v in target.values()) or target['runtime']!='grok' or target['provider']!='grok' or target['channel']!='acp-websocket':
@@ -55,6 +55,9 @@ class ControllerGrok:
         raw=dict(process=dict(pid=pid,start_ticks=target['process_start_ticks'],boot_id=target['process_boot_id']))
         if not _process_matches(raw) or (Path('/proc')/str(pid)).stat().st_uid!=os.geteuid() or _image_hash(pid)!=target['build_sha256']:
             raise InventoryError('stale_target','Grok native process generation or immutable image changed')
+        if 'transport_owner' in profile:
+            from .grok_acp import pin_transport_owner
+            pin_transport_owner(profile)
 
     def _context(self,actor,args,capability,authorize,*,conversation=False):
         profile=self.profile(args.get('profile'));target=args.get('expected_target')
