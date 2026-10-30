@@ -122,7 +122,7 @@ def main():
             return dict(id='grok-fixture',version=version,entry='each',nodes=[dict(id='each',type='foreach',items=['one','two'],mode=mode,profile='grok:fixture',expected_target=base_target if mode=='new_session' else target,prompt={'ref':'item'},parallelism=1,next='done'),dict(id='done',type='end',value={'ref':'steps.each'})])
         outcomes={};version=0
         for name,driver in drivers.items():
-            caps=driver('grok.capabilities',dict(profile='fixture',expected_target=base_target))['result'];assert caps['protocol_version']==1 and caps['capabilities']['fork']['status']=='unsupported'
+            caps=driver('grok.capabilities',dict(profile='fixture',expected_target=base_target))['result'];assert caps['protocol_version']==1 and caps['capabilities']['fork']['status']=='unsupported' and caps['native_identity']['agent_instance_id']=='fixture-instance' and caps['target']==base_target and caps['authority']['native_account_verified'] is False
             before=len(state['effects']);first=driver('grok.prompt',request('prompt-'+name));result=first['result']['operation'];assert result['phase']=='terminal' and result['answer']['text']=='fixture-answer',first
             driver('grok.prompt',request('prompt-'+name));assert len(state['effects'])==before+1
             waited=driver('grok.wait',dict(operation_id='prompt-'+name,timeout=0));assert waited['result']['operation']['answer']['text']=='fixture-answer'
