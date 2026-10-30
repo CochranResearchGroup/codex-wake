@@ -24,6 +24,8 @@ def execute(verb, arguments, root):
 def register_parser(subparsers):
     parser = subparsers.add_parser('controller', help='inspect scoped controller resources')
     commands = parser.add_subparsers(dest='controller_command', required=True)
+    from .controller_remote_commands import register
+    register(commands)
     for verb in ('list', 'resolve'):
         command = commands.add_parser(verb)
         command.add_argument('--json', dest='as_json', action='store_true')
@@ -35,6 +37,9 @@ def register_parser(subparsers):
 
 
 def command(args):
+    if args.controller_command not in ('list', 'resolve'):
+        from .controller_remote_commands import command as remote_command
+        return remote_command(args)
     arguments = ({'query': args.query} if args.controller_command == 'list'
                  else {'selector': args.selector})
     if getattr(args, 'expected_target', None) is not None:
