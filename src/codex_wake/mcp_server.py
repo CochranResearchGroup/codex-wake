@@ -161,6 +161,10 @@ for _name, _spec in tuple(SPECS.items()):
         SPECS[_name] = (*_spec[:3], {**_spec[3], **WAKE_POLICY_PROPERTIES}, *_spec[4:])
 
 
+from .history_commands import tool_specs as history_tool_specs
+SPECS.update(history_tool_specs())
+
+
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
@@ -287,6 +291,9 @@ class CommandRunner:
                 return result, result['status'] != 'completed'
             except InventoryError as error:
                 return {'error': {'code': error.code, 'message': str(error)}}, True
+        if group == 'controller-history':
+            from .history_commands import mcp_call
+            return mcp_call(self, arguments, native_context, verb)
         if group == 'builds':
             from .build_commands import owner_from_root
             try:
