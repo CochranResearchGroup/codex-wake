@@ -33,6 +33,37 @@ class ScheduledAuthorityTests(unittest.TestCase):
             auth.revoke_grant(actor.grant_id)
             with self.assertRaises(AuthError):auth.revalidate_original(principal,snapshot)
 
+    def test_corrupt_owner_database_publishes_held_status_on_repeated_scheduled_checks(self):
+        import sqlite3
+        import time
+        from codex_wake.controller_auth import Actor
+        from codex_wake.controller_recovery import ControllerRecovery
+        from codex_wake.controller_schedule import maintain
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            owner=ControllerRecovery(root)
+            target=dict(host='fixture',environment='linux',runtime='codex',namespace='one',build_sha256='a'*64,
+                conversation_id='thread',home='/fixture/home',provider='fixture',backend_id='daemon',channel='tui',
+                connection_generation='one',process_pid='123',process_start_ticks='456',process_boot_id='boot')
+            actor=Actor('service','service','client','grant','https://wake.test','https://wake.test/controller',
+                frozenset({'observe','recovery'}),[target],time.time()+60)
+            database=root/'controller-operations'/'operations.sqlite'
+            original=database.read_bytes()
+            try:
+                for unused in range(2):
+                    database.write_bytes(b'corrupt SQLite owner store')
+                    try:
+                        maintain(None,root)
+                    except sqlite3.DatabaseError:
+                        pass  # Inspect the public status even when the scheduler failed.
+                    database.write_bytes(original)
+                    result=owner.execute(actor,'recovery.list',dict(expected_target=target),authorize=lambda:actor)
+                    self.assertEqual(result['result']['scheduler']['status'],'held')
+                    self.assertEqual(result['result']['scheduler']['reason'],'scheduler_owner_unavailable')
+                    self.assertEqual(result['result']['policies'],[])
+            finally:
+                database.write_bytes(original)
+
     def test_existing_controller_server_drives_enabled_policy_without_a_client_tick(self):
         import threading
         import time
