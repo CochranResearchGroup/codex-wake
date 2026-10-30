@@ -1,0 +1,298 @@
+{
+  "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/393",
+  "integration_branch": "feat/controller-393",
+  "base_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
+  "tip_sha": "69377bf2d41ef32462d7f919deb64e1407ca9c6b",
+  "state": "tickets_published_and_reconciled",
+  "tickets": {
+    "394": {
+      "title": "Resolve and inspect exact controller targets across CLI/API/MCP",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "395": {
+      "title": "Select accounts and explain effective configuration through Wake",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        394,
+        372,
+        374
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "396": {
+      "title": "Search permitted history and resume its owning conversation",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        395,
+        375,
+        376
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "397": {
+      "title": "Launch visibly identified stock and modded immutable builds",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        395,
+        373,
+        377
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "398": {
+      "title": "Preview and qualify legacy migration with reversible cutover",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        396,
+        397,
+        378
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "399": {
+      "title": "Authorize direct API and OAuth MCP operations with scoped principals",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        394
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "400": {
+      "title": "Route pinned operations through SSH and registered host environments",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        394,
+        399
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "401": {
+      "title": "Return correlated answers durably through caller disconnect",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        399,
+        400
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "402": {
+      "title": "Organize Byobu and psmux attachments without changing session identity",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        397,
+        400
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "403": {
+      "title": "Display Wake controller notifications and model-readable intervention state",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        397,
+        399,
+        400,
+        390
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "404": {
+      "title": "Apply and deactivate bounded recovery policies visibly",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        402,
+        403
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "405": {
+      "title": "Qualify the packaged cross-host milestone with Codex Bots",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        398,
+        401,
+        402,
+        404,
+        378
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "406": {
+      "title": "Run a versioned branch-and-wait flow durably",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        401
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "407": {
+      "title": "Execute foreach in new sessions and ordered same-session prompts",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        406
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "408": {
+      "title": "Fork foreach sessions from a pinned common checkpoint",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        407
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "409": {
+      "title": "Join parallel iterations with safe retry and uncertain-effect reconciliation",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        407
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "410": {
+      "title": "Evaluate composable semantic Boolean functions under nested limits",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        406,
+        409
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "411": {
+      "title": "Qualify durable flows across handoff, limits and caller recovery",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        408,
+        409,
+        410
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "412": {
+      "title": "Control Grok through an honest structured-runtime adapter",
+      "state": "pending",
+      "tracker_state": "open",
+      "blockers": [
+        405,
+        411
+      ],
+      "worker": null,
+      "owned_paths": [],
+      "base_sha": null,
+      "result_sha": null,
+      "validation": []
+    },
+    "390": {
+      "state": "pending",
+      "tracker_state": "open",
+      "existing_consumer": true,
+      "blockers": [
+        388,
+        389,
+        397,
+        399,
+        400
+      ]
+    }
+  },
+  "validation": {
+    "dependency_cycle_check": "passed",
+    "native_children_count": 20,
+    "frontier": [
+      394
+    ]
+  },
+  "review_rounds": 0,
+  "remediation_rounds": 0
+}
