@@ -60,3 +60,53 @@ class ConditionsTests(unittest.TestCase):
                 with self.assertRaises(InventoryError) as caught:
                     invoke(Path(directory),None,function,{},bounds,20,{},authorize=lambda:self.fail('unqualified native dispatch'),request_id='one',binding='fixture')
                 self.assertEqual(caught.exception.code,code)
+
+    def test_semantic_nested_calls_share_frames_and_allowlist(self):
+        registry={
+            'parent@1':dict(kind='semantic',inputs={},effects='action',callees=['child@1'],estimated_tokens=4),
+            'child@1':dict(kind='semantic',inputs={},effects='action',estimated_tokens=4)}
+        with tempfile.TemporaryDirectory() as directory:
+            engine=Conditions(Path(directory),registry=registry)
+            state=dict(created_at=0,condition_limits=dict(max_calls=3,max_depth=3,max_tokens=8,metering='estimate_opt_in'))
+            calls=[]
+            def semantic(function,args,bounds,tokens,receipt):
+                calls.append(function)
+                if function is registry['parent@1']:
+                    return dict(status='delegate',value=None,call=dict(function='child',version=1,arguments={}),usage={'tokens':4})
+                return dict(status='known',value=True,usage={'tokens':4})
+            outcome=engine.evaluate(dict(function='parent',version=1,arguments={}),state,resolve=lambda value:value,
+                compare=lambda value:None,save=lambda:None,now=lambda:0,semantic=semantic)
+            self.assertIs(outcome['value'],True)
+            self.assertEqual(state['condition_usage'],dict(calls=2,tokens=8))
+            self.assertEqual(len(calls),2)
+            self.assertEqual(len(state['condition_trace']),2)
+
+    def test_semantic_unknown_error_timeout_never_become_false(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for status in ('unknown','error','timeout'):
+                engine=Conditions(Path(directory),registry={'one@1':dict(kind='semantic',inputs={},estimated_tokens=1)})
+                state=dict(created_at=0,condition_limits=dict(max_tokens=2,metering='estimate_opt_in'))
+                outcome=engine.evaluate(dict(op='or',operands=[dict(function='one',version=1,arguments={}),True]),state,
+                    resolve=lambda value:value,compare=lambda value:None,save=lambda:None,now=lambda:0,
+                    semantic=lambda *args:dict(status=status,value=None,usage={'tokens':1}))
+                self.assertEqual(outcome['status'],status)
+                self.assertIsNone(outcome['value'])
+                self.assertEqual(outcome['trace'][1]['status'],'unevaluated')
+                self.assertEqual(state['condition_usage'],dict(calls=1,tokens=1))
+
+    def test_semantic_callee_allowlist_and_subtree_budget_prevent_child_effect(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for callees,limit,reason in (([],8,'semantic_callee_not_allowed'),(['child@1'],4,'condition_token_limit')):
+                registry={'parent@1':dict(kind='semantic',inputs={},callees=callees,estimated_tokens=4,limits={'max_tokens':limit}),
+                          'child@1':dict(kind='semantic',inputs={},estimated_tokens=4)}
+                engine=Conditions(Path(directory),registry=registry)
+                state=dict(created_at=0,condition_limits=dict(max_tokens=16,metering='estimate_opt_in'))
+                calls=[]
+                def semantic(*args):
+                    calls.append('parent')
+                    return dict(status='delegate',value=None,call=dict(function='child',version=1,arguments={}),usage={'tokens':4})
+                outcome=engine.evaluate(dict(function='parent',version=1,arguments={}),state,resolve=lambda value:value,
+                    compare=lambda value:None,save=lambda:None,now=lambda:0,semantic=semantic)
+                self.assertEqual(outcome['reason'],reason)
+                self.assertEqual(calls,['parent'])
+                self.assertEqual(state['condition_usage']['tokens'],4)

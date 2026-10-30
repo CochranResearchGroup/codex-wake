@@ -226,7 +226,8 @@ class ControllerFlows:
         definition = compiled.as_dict()
         from .controller_conditions import Conditions,limits
         configured_limits=limits(definition.get('limits',{}))
-        if definition.get('limits',{}).get('max_tokens') is not None and any(node['type'] in ('call','foreach') for node in definition['nodes']):
+        arbitrary=any(node['type'] in ('call','foreach') for node in definition['nodes'])
+        if arbitrary and ('max_tokens' in definition.get('limits',{}) or ('max_seconds' in definition.get('limits',{}) and configured_limits['metering']!='estimate_opt_in')):
             flow_error('unsupported_flow_limits','exact token bounds for arbitrary child operations are unqualified; rejected before effects')
         def named(value):
             return isinstance(value,dict) and ('function' in value or any(named(v) for v in value.values())) or isinstance(value,list) and any(named(v) for v in value)
@@ -236,6 +237,7 @@ class ControllerFlows:
         state = dict(schema_version=1, run_id='flowrun_' + uuid4().hex, flow_id=flow_id, version=version,
             definition_sha256=compiled.digest, target=self.target(flow_id), owner=identity(actor), inputs=inputs,
             binding=binding, created_at=self.now(), phase='ready', cursor=definition['entry'],
+            condition_enforcement='host_admission_bounds_only; native_exact_tokens_and_time_unqualified',
             condition_registry_revision=registry.revision,condition_limits=configured_limits,condition_usage=dict(calls=0,tokens=0),condition_trace=[],
             steps={}, attempt_counts={}, attempt_history={}, result=None, reason=None, cancellation=False, completed_steps=0)
         for node in definition['nodes']:
@@ -336,6 +338,10 @@ class ControllerFlows:
                     identifier = child.get('operation_id')
                     if identifier and identifier not in finished and operation in ('sessions.prompt','operations.send'):
                         targets[identifier] = 'sessions.cancel' if operation=='sessions.prompt' else 'operations.cancel'
+                for receipt in state.get('condition_trace',[]):
+                    identifier=receipt.get('native_operation_id')
+                    if identifier and receipt.get('native_execution') not in ('completed','cancelled','failed'):
+                        targets[identifier]='sessions.cancel'
                 if state['phase']=='waiting' and state.get('waiting_on') not in finished:
                     targets[state['waiting_on']] = 'sessions.cancel' if state.get('waiting_operation')=='sessions.wait' else 'operations.cancel'
                 from .controller_flow_retry import READ_OPERATIONS
@@ -474,6 +480,9 @@ class ControllerFlows:
         def semantic(function,args,bounds,tokens,receipt):
             from .controller_condition_native import invoke
             identifier=run_id+'.'+node['id']+'.function'+str(state['condition_usage']['calls'])
+            receipt['native_operation_id']=identifier
+            receipt['native_execution']='unknown'
+            save()
             return invoke(self.root,actor,function,args,bounds,tokens,receipt,
                 authorize=lambda:self._step_guard(actor,run_id,attempt),request_id=identifier,binding=state['binding'])
         outcome=registry.evaluate(condition,state,resolve=lambda value:self._resolve(value,state),
