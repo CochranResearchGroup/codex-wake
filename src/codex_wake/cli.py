@@ -114,6 +114,8 @@ def build_parser() -> argparse.ArgumentParser:
     register_migration(subparsers)
     from .host_commands import register_parser as register_hosts
     register_hosts(subparsers)
+    from .health_commands import register_parser as register_health
+    register_health(subparsers)
     from .flow_commands import register_parser as register_flows
     register_flows(subparsers)
     from .operation_commands import register_parser as register_operations
@@ -2938,6 +2940,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     if args.command in ("accounts", "configuration"):
         from .account_commands import command
         return command(args, root)
+    if args.command == "health":
+        from .health_commands import command
+        return command(args, args.wake_root)
     if args.command == "flows":
         from .flow_commands import command
         return command(args, args.wake_root)

@@ -87,6 +87,10 @@ for name, spec in flow_specs().items():
         'required': spec[4], 'additionalProperties': False})
 
 
+from .health_commands import INPUT_SCHEMA as health_schema
+TOOLS['wake_controller_health'] = ('health.observe', health_schema)
+
+
 def operation_failure(operation, error):
     return {'schema_version': 1, 'operation': operation, 'status': 'failed',
             'error': {'code': error.code, 'message': str(error)}}
@@ -102,6 +106,7 @@ class ProtectedOperations:
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
+        'health.observe': ('observe', None, None),
         **{'tabs.'+verb: ('observe' if verb in ('list','show') else 'control', 'resources' if verb in ('list','show') else None, None) for verb in ('list','show','preview','apply','undo','capture','input')},
         **{'flows.' + verb: ('observe' if verb in ('propose', 'definition', 'inspect') else 'control', None, None)
             for verb in ('propose', 'publish', 'definition', 'start', 'inspect', 'advance', 'reconcile', 'cancel')},
@@ -144,7 +149,14 @@ class ProtectedOperations:
             raise InventoryError('unsupported_operation', 'operation is unsupported')
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
-        if operation.startswith('flows.'):
+        if operation == 'health.observe':
+            from .health_commands import protected_observe
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host health owner unavailable')
+            result = protected_observe(actor, arguments, self.operations.inventory.root,
+                authorize=lambda: self.authority.authenticate(token))
+        elif operation.startswith('flows.'):
+
             from types import SimpleNamespace
             from .flow_commands import owner, execute
             if self.operations.inventory is None:

@@ -56,3 +56,34 @@ def tool_specs():
     return {'wake_controller_health': ('controller-health', 'observe',
         'Read-only fresh challenge to the exact controlling native TUI loop. Unknown/unsupported never grants recovery.',
         INPUT_SCHEMA['properties'], INPUT_SCHEMA['required'], True)}
+
+
+def protected_observe(actor, arguments, root, *, authorize):
+    from .controller_runtime import ControllerRuntime
+    from .controller_auth import AuthError
+    from .controller_health import _TARGET_FIELDS
+    target = arguments.get('expected_target') if isinstance(arguments, dict) else None
+    if not isinstance(target, dict) or not isinstance(target.get('process'), dict):
+        raise InventoryError('invalid_argument', 'complete pinned native target required')
+    process = target['process']
+    flat = {key:value for key,value in target.items() if key != 'process'}
+    flat.update(process_pid=str(process.get('pid')), process_start_ticks=process.get('start_ticks'), process_boot_id=process.get('boot_id'))
+    required = (_TARGET_FIELDS - {'process'}) | {'process_pid','process_start_ticks','process_boot_id'}
+    if not any(required <= scope.keys() and all(flat.get(key)==value for key,value in scope.items()) for scope in actor.targets):
+        raise AuthError('insufficient_scope')
+    runtime = ControllerRuntime(root)
+    runtime.check_authority(actor, flat, 'observe', authorize=authorize)
+    value = execute('health.observe', arguments, root)
+    runtime.check_authority(actor, flat, 'observe', authorize=authorize)
+    return value
+
+
+def protected_execute(operation, arguments, root):
+    from types import SimpleNamespace
+    from .operation_commands import local_actor
+    from .controller_http import ProtectedOperations
+    from .controller_operations import ControllerOperations
+    from .managed_inventory import ManagedInventory
+    authority = SimpleNamespace(authenticate=lambda unused: local_actor(root))
+    operations = ControllerOperations(ManagedInventory(root), host='host-authorized', environment='host-authorized')
+    return ProtectedOperations(authority, operations).execute('host-local-grant', operation, arguments)
