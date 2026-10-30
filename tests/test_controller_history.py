@@ -90,6 +90,8 @@ profiles="{fixture.profiles}"
             'expires_at': '2027-01-16T09:00:00+00:00'})
         self.assertEqual(result['resume']['status'], 'resumed')
         self.assertEqual(result['session']['owner'], 'codex-alice')
+        self.assertEqual(result['attachment']['state'], 'ready')
+        self.assertEqual(result['attachment']['attachments'][0]['pane_id'], '%7')
         replay = owner.execute('history.resume', {'owner': 'alice', 'thread_id': THREAD,
             'expected_target': session['target'], 'intent': 'unified-history',
             'expires_at': '2027-01-16T09:00:00+00:00'})

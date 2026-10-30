@@ -31,9 +31,9 @@ class ControllerHistory:
             raise InventoryError('unsupported_operation', 'unsupported history operation')
         if not isinstance(arguments, dict) or set(arguments) - schemas[operation]:
             raise InventoryError('invalid_argument', 'unsupported history arguments')
+        if self.authorization_guard is not None:
+            self.authorization_guard(operation, arguments)
         try:
-            if self.authorization_guard is not None:
-                self.authorization_guard(operation, arguments)
             if not self.path.is_file():
                 raise InventoryError('configuration_unavailable', 'host history policy is unavailable')
             data = tomllib.loads(self.path.read_text())
@@ -172,7 +172,13 @@ class ManagedHistoryResume:
                                 config_loader=current_config)
             result = owner.resume(dict(managed_agent_id=binding['managed_agent_id'], profile=binding['profile'],
                 intent=arguments.get('intent'), expires_at=arguments.get('expires_at')), self.principal)
-            return dict(session=session, resume=result, work_authorized=False,
+            attachment = dict(state='unknown', attachments=[])
+            if result.get('status') == 'resumed':
+                observed = ManagedInventory(self.root, now=self.now).inspect(binding['managed_agent_id'])['agent']
+                if observed['binding_current']:
+                    attachment = dict(state='ready', attachments=observed['attachments'],
+                        process=observed['process'], observed_at=observed['observed_at'])
+            return dict(session=session, resume=result, attachment=attachment, work_authorized=False,
                         accounting='existing_owner_unchanged', conversation_ownership='preserved')
         except InventoryError:
             raise
