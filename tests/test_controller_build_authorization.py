@@ -74,3 +74,9 @@ class BuildAuthorizationTests(unittest.TestCase):
                 service.execute('token', 'builds.stage', {'recipe': 'approved',
                     '_request': {'target': dict(target, recipe='other')}})
             self.assertEqual(caught.exception.code, 'stale_target')
+
+    def test_runtime_control_does_not_grant_upgrade_selection_or_rollback(self):
+        target = {key: 'fixture' for key in BuildAuthorization.ACCOUNT_FIELDS}
+        for operation in ('builds.select', 'builds.rollback'):
+            with self.subTest(operation=operation), self.assertRaises(AuthError):
+                self.service({'control'}, [target]).execute('token', operation, {'expected_target': target})

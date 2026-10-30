@@ -25,7 +25,7 @@ class BuildAuthorization:
         actor = self.authority.authenticate(token)
         if operation not in self.OPERATIONS:
             raise InventoryError('unsupported_operation', 'unsupported build mutation')
-        required = 'admin' if operation == 'builds.stage' else 'control'
+        required = 'admin' if operation in ('builds.stage', 'builds.select', 'builds.rollback') else 'control'
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
         if not isinstance(arguments, dict):
