@@ -66,7 +66,7 @@ def poll_one(path,receipt,*,request=None,guard=None):
         if not _continuity(receipt['goal_before'],goal):
             receipt.update(state='blocked',reason='goal_continuity_unverified');return
         guard()
-        checks=_resources(receipt)
+        checks=_resources(receipt,request=request)
         guard()
         if checks is None:
             receipt.update(state='blocked',reason='source_workspace_mismatch');return
