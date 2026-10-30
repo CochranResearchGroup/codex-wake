@@ -1,0 +1,12 @@
+{
+  "ticket": 402,
+  "base": "d79a78c",
+  "scope": "Disposable installed package; isolated tmux; synthetic stdio and psmux protocol fixtures",
+  "installed_python": "/tmp/codex-wake-402-public/bin/python",
+  "module": "/tmp/codex-wake-402-public/lib/python3.12/site-packages/codex_wake/controller_tabs.py",
+  "public_acceptance_command": "/tmp/codex-wake-402-public/bin/python /tmp/codex-wake-402-wiring/scripts/controller_tabs_acceptance.py",
+  "public_acceptance": {"status":"passed","local_cli":true,"local_mutation_cli":true,"remote_cli":true,"oauth_api":true,"mcp":true,"native_mcp":true,"observe_cannot_capture":true,"retained_intent":true,"real_isolated_tmux":true,"windows_matrix":false},
+  "retained_tests": {"test_controller_tabs.py":9,"test_tab_organization.py":9,"test_controller_flow_surfaces.py":1,"status":"passed"},
+  "authority": "No production tabs, provider calls, shared restart, governor activation or new limits",
+  "remaining_boundary": "Windows psmux runtime matrix belongs to ticket405; the finite protocol fixture is not Windows acceptance"
+}

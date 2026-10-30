@@ -35,6 +35,9 @@ from .migration_commands import tool_specs as migration_specs
 for name, spec in migration_specs().items():
     TOOLS[name] = (spec[1], {'type': 'object', 'properties': spec[3],
         'required': spec[4], 'additionalProperties': False})
+from .tab_commands import tool_specs as tab_specs
+for name, spec in tab_specs().items():
+    TOOLS[name] = (spec[1], {'type':'object','properties':spec[3],'required':spec[4],'additionalProperties':False})
 TOOLS.update({
     'wake_hosts_list': ('hosts.list', {'type': 'object', 'properties': {}, 'additionalProperties': False}),
     'wake_hosts_resolve': ('hosts.resolve', {'type': 'object', 'properties': {'host': {'type': 'string'}, 'environment': {'type': 'string'}, 'expected_target': {'type': 'object'}}, 'required': ['host', 'environment'], 'additionalProperties': False}),
@@ -99,6 +102,7 @@ class ProtectedOperations:
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
+        **{'tabs.'+verb: ('observe' if verb in ('list','show') else 'control', 'resources' if verb in ('list','show') else None, None) for verb in ('list','show','preview','apply','undo','capture','input')},
         **{'flows.' + verb: ('observe' if verb in ('propose', 'definition', 'inspect') else 'control', None, None)
             for verb in ('propose', 'publish', 'definition', 'start', 'inspect', 'advance', 'reconcile', 'cancel')},
         'migration.preview': ('migration.observe', None, None),
@@ -155,6 +159,12 @@ class ProtectedOperations:
             flows = owner(self.operations.inventory.root, actor=actor,
                 authorize=lambda: self.authority.authenticate(token), dispatch=dispatch)
             result = execute(flows, actor, operation, arguments)
+        elif operation.startswith('tabs.') and operation not in ('tabs.list','tabs.show'):
+            from .controller_tabs import AuthorizedTabs
+            from .controller_runtime import ControllerRuntime
+            if self.operations.tabs is None or self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable','host presentation owner unavailable')
+            result = AuthorizedTabs(self.authority,self.operations.tabs,ControllerRuntime(self.operations.inventory.root)).execute(token,operation,arguments)
         elif operation.startswith('operations.'):
 
             from .operation_commands import execute
