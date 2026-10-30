@@ -219,7 +219,7 @@ class ControllerRuntime:
 
     def _refresh(self, actor, record, authorize):
         if self.adapter is None or record['phase']=='terminal':return record
-        if record['operation']=='sessions.prompt' and hasattr(self.adapter,'observe_native_owned'):
+        if record['operation'] in ('sessions.prompt','grok.prompt','grok.create','grok.load') and hasattr(self.adapter,'observe_native_owned'):
             self._owned(actor,record,authorize)
             try:
                 self.adapter.observe_native_owned(record)
@@ -302,7 +302,7 @@ class ControllerRuntime:
             raise InventoryError('unsupported_operation','original operation belongs to another effect owner')
         if operation == 'operations.cancel':
             if record['phase'] == 'terminal': return self.envelope(operation, record)
-            if record['operation']=='sessions.prompt' and self.adapter is not None and hasattr(self.adapter,'cancel_native_owned'):
+            if record['operation'] in ('sessions.prompt','grok.prompt') and self.adapter is not None and hasattr(self.adapter,'cancel_native_owned'):
                 record['cancellation']=self.adapter.cancel_native_owned(record)
                 if record['cancellation']=='confirmed' and record['phase']!='terminal':
                     record.update(execution='cancelled',phase='terminal',delivery='retained',acceptance='cancelled')
@@ -372,7 +372,7 @@ class ControllerRuntime:
             if record['cancellation'] in ('confirmed','requested'):
                 outcomes.append(dict(operation_id=record['operation_id'],cancellation=record['cancellation']));continue
             try:
-                if record['operation']=='sessions.prompt' and self.adapter is not None and hasattr(self.adapter,'cancel_native_owned'):
+                if record['operation'] in ('sessions.prompt','grok.prompt') and self.adapter is not None and hasattr(self.adapter,'cancel_native_owned'):
                     cancellation=self.adapter.cancel_native_owned(record)
                 elif self.adapter is None or record['operation']!='operations.send':
                     cancellation='uncertain'

@@ -99,6 +99,9 @@ for name, spec in notice_specs().items():
 from .recovery_commands import tool_specs as recovery_specs
 for name, spec in recovery_specs().items():
     TOOLS[name] = (spec[1], dict(type='object',properties=spec[3],required=spec[4],additionalProperties=False))
+from .grok_commands import tool_specs as grok_specs
+for name, spec in grok_specs().items():
+    TOOLS[name] = (spec[1], dict(type='object',properties=spec[3],required=spec[4],additionalProperties=False))
 
 
 def operation_failure(operation, error):
@@ -119,6 +122,8 @@ class ProtectedOperations:
         **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait','checkpoint') else 'control', None, None)
             for verb in ('capabilities','create','prompt','wait','cancel','checkpoint','fork')},
         'health.observe': ('observe', None, None),
+        **{'grok.'+verb: ('observe' if verb in ('capabilities','wait','health','checkpoint') else 'control',None,None)
+            for verb in ('capabilities','create','load','prompt','wait','cancel','health','checkpoint','fork')},
         **{'recovery.'+verb: ('observe' if verb in ('list','show','check') else 'recovery',None,None)
             for verb in ('list','show','configure','enable','disable','check','tick','apply','reconcile')},
         **{'notices.'+verb: ('observe',None,None)
@@ -165,7 +170,13 @@ class ProtectedOperations:
             raise InventoryError('unsupported_operation', 'operation is unsupported')
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
-        if operation.startswith('recovery.'):
+        if operation.startswith('grok.'):
+            from .controller_grok import ControllerGrok
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host Grok owner unavailable')
+            result = ControllerGrok(self.operations.inventory.root).execute(actor,operation,arguments,
+                authorize=lambda: self.authority.authenticate(token))
+        elif operation.startswith('recovery.'):
             from .controller_recovery import ControllerRecovery
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host recovery owner unavailable')
