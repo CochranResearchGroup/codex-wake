@@ -109,3 +109,33 @@ class BuildTests(unittest.TestCase):
             upgrades.select(root / 'install', home, identifier='successor')
             rolled = upgrades.select(root / 'install', home, channel='stock', rollback=True)
             self.assertEqual(rolled['id'], 'fixture')
+
+class PublicBuildAdapterTests(unittest.TestCase):
+    def test_cli_and_mcp_report_same_pinned_build_envelope(self):
+        from pathlib import Path
+        import contextlib
+        import io
+        import socket
+        import os
+        from codex_wake.cli import main
+        from codex_wake.mcp_server import CommandRunner
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            homes = root / 'homes'
+            home = homes / 'codex-alice'
+            home.mkdir(parents=True)
+            native = root / 'native'
+            native.write_text('#!/bin/sh\nexit 0\n')
+            native.chmod(0o700)
+            manifest = root / 'builds.json'
+            manifest.write_text(json.dumps({'schema_version': 1, 'builds': {'modded': {
+                'executable': str(native), 'sha256': hashlib.sha256(native.read_bytes()).hexdigest(),
+                'upstream_version': '1', 'revision': 'fixture', 'source': 'local fixture'}}}))
+            (root / 'controller-accounts.toml').write_text('[profiles]\nstate_root = "' + str(homes) + '"\nknown_profiles = ["alice"]\n[builds]\nmanifest = "' + str(manifest) + '"\n')
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                code = main(['--wake-root', str(root), 'builds', 'list', '--arguments', '{"account":"alice"}'])
+            mcp, failed = CommandRunner(wake_root=root).call('wake_builds_list', {'account': 'alice'})
+            self.assertFalse(failed)
+            self.assertEqual(code, 0)
+            self.assertEqual(json.loads(output.getvalue()), mcp)

@@ -16,6 +16,7 @@ from .controller_auth import AuthError, SCOPES
 from .managed_inventory import InventoryError
 
 TOOLS = {
+    'wake_builds_list': ('builds.list', {'type': 'object', 'properties': {'account': {'type': 'string'}}, 'required': ['account'], 'additionalProperties': False}),
     'wake_controller_list': ('inventory.list', {'type': 'object', 'properties': {'query': {'type': 'string'}}, 'additionalProperties': False}),
     'wake_controller_accounts': ('accounts.list', {'type': 'object', 'properties': {}, 'additionalProperties': False}),
     'wake_controller_account_resolve': ('accounts.resolve', {'type': 'object', 'properties': {'selector': {'type': 'string'}, 'expected_target': {'type': 'object'}}, 'required': ['selector'], 'additionalProperties': False}),
@@ -39,6 +40,7 @@ class ProtectedOperations:
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
+        'builds.list': ('account.observe', 'builds', None),
         'inventory.list': ('observe', 'resources', None),
         'inventory.resolve': ('observe', None, 'resource'),
         'accounts.list': ('account.observe', 'accounts', None),
@@ -212,7 +214,7 @@ class ControllerHandler(BaseHTTPRequestHandler):
             result = {'tools': [dict(name=name, description='Read scoped controller resource', inputSchema=schema)
                 for name, (operation, schema) in TOOLS.items()
                 if ProtectedOperations.READ_POLICIES[operation][0] in actor.scopes
-                and (operation.startswith('inventory.') or getattr(self.server.operations.operations, 'accounts', None) is not None)]}
+                and (operation.startswith('inventory.') or (operation.startswith('builds.') and getattr(self.server.operations.operations, 'builds', None) is not None) or (not operation.startswith('builds.') and getattr(self.server.operations.operations, 'accounts', None) is not None))]}
         elif method == 'tools/call':
             name = params.get('name')
             if name not in TOOLS:

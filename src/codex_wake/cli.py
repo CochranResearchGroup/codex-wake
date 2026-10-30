@@ -106,6 +106,8 @@ def build_parser() -> argparse.ArgumentParser:
     register_controller(subparsers)
     from .account_commands import register_parser as register_accounts
     register_accounts(subparsers)
+    from .build_commands import register_parser as register_builds
+    register_builds(subparsers)
     profiles = subparsers.add_parser("profiles", help="Profiles compatibility commands owned by Wake")
     profiles.add_argument("--config", type=Path, dest="profile_config")
     profiles.add_argument("profile_arguments", nargs=argparse.REMAINDER)
@@ -2926,6 +2928,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     if args.command in ("accounts", "configuration"):
         from .account_commands import command
         return command(args, root)
+    if args.command == "builds":
+        from .build_commands import command, owner_from_root
+        return command(args, owner_from_root(args.wake_root))
     if args.command == "controller":
         from .controller_commands import command
         return command(args)

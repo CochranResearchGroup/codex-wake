@@ -16,5 +16,35 @@ def register_parser(subparsers):
 
 
 def command(args, owner):
-    print(json.dumps(execute(owner, args.build_command, args.arguments), sort_keys=True))
+    result = execute(owner, args.build_command, args.arguments)
+    print(json.dumps({'schema_version': 1, 'operation': 'builds.' + args.build_command,
+                      'status': 'completed', 'result': result}, sort_keys=True))
     return 0
+
+
+def owner_from_root(root):
+    """Read the fixed host registry; callers cannot choose manifest or recipes."""
+    import os
+    import socket
+    import tomllib
+    from pathlib import Path
+    from .controller_accounts import ControllerAccounts
+    from .controller_builds import ControllerBuilds
+    from .managed_inventory import InventoryError
+    if root is None:
+        raise InventoryError('host_wake_root_required', 'host Wake root is required')
+    path = Path(root) / 'controller-accounts.toml'
+    try:
+        config = tomllib.loads(path.read_text())
+        builds = config['builds']
+        manifest = Path(builds['manifest'])
+        recipes = builds.get('recipes', {})
+        if not manifest.is_absolute() or not isinstance(recipes, dict):
+            raise ValueError('host manifest and recipes require absolute paths')
+        if any(not isinstance(value, str) or not Path(value).is_absolute() for value in recipes.values()):
+            raise ValueError('host recipe paths must be absolute')
+        accounts = ControllerAccounts(path, host=socket.gethostname(),
+            environment=os.environ.get('WSL_DISTRO_NAME') or os.name)
+        return ControllerBuilds(manifest, accounts, recipes=recipes)
+    except (OSError, KeyError, ValueError, TypeError) as error:
+        raise InventoryError('configuration_unavailable', 'host build configuration is unavailable') from error

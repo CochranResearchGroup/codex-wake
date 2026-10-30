@@ -35,7 +35,7 @@ def register(commands):
     remote = commands.add_parser('remote', help='perform authenticated direct controller operation')
     remote.add_argument('--endpoint', required=True)
     remote.add_argument('--token-file', type=Path, required=True)
-    remote.add_argument('operation', choices=['inventory.list', 'inventory.resolve', 'accounts.list', 'accounts.resolve', 'configuration.explain'])
+    remote.add_argument('operation', choices=['inventory.list', 'inventory.resolve', 'accounts.list', 'accounts.resolve', 'configuration.explain', 'builds.list'])
     remote.add_argument('--arguments', type=json.loads, default={})
 
 
@@ -92,6 +92,11 @@ def command(args):
         # The account owner is delivered by ticket395; no caller-selected path.
         from .controller_accounts import ControllerAccounts
         options['accounts'] = ControllerAccounts(account_config, host=host, environment=environment)
+    if account_config.is_file():
+        import tomllib
+        if 'builds' in tomllib.loads(account_config.read_text()):
+            from .build_commands import owner_from_root
+            options['builds'] = owner_from_root(args.wake_root)
     service = ControllerOperations(ManagedInventory(Path(args.wake_root)), host=host, environment=environment, **options)
     server = ControllerHTTPServer(('127.0.0.1', args.port), auth, service,
         consent_secret=(root / 'consent.secret').read_text(), owner=config['owner'])

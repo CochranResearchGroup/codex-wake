@@ -29,6 +29,7 @@ TARGET = {"on_missing": {"enum": ["error", "tab_only", "fresh", "resume"]},
           "profile": MESSAGE, "intent": {**INTENT, "maxLength": 200}, "expires_at": TEXT}
 # name: (CLI group, verb, description, properties, required, read-only)
 SPECS = {
+    "wake_builds_list": ("builds", "list", "Inspect pinned stock/modded build identities. Mutation tools require separate authority and are not exposed by this read tool.", {"account": TEXT}, ["account"], True),
     "wake_controller_accounts": ("controller-accounts", "accounts.list", "List host-configured isolated accounts without reading credentials.", {}, [], True),
     "wake_controller_account_resolve": ("controller-accounts", "accounts.resolve", "Resolve an account alias and pin its home/configuration generation.", {"selector": TEXT, "expected_target": {"type": "object"}}, ["selector"], True),
     "wake_controller_configuration": ("controller-accounts", "configuration.explain", "Explain account configuration values and scoped provenance; secrets are redacted.", {"selector": TEXT, "expected_target": {"type": "object"}}, ["selector"], True),
@@ -286,6 +287,13 @@ class CommandRunner:
                 return result, result['status'] != 'completed'
             except InventoryError as error:
                 return {'error': {'code': error.code, 'message': str(error)}}, True
+        if group == 'builds':
+            from .build_commands import owner_from_root
+            try:
+                result = owner_from_root(self.wake_root).execute('builds.' + verb, arguments)
+                return {'schema_version': 1, 'operation': 'builds.' + verb, 'status': 'completed', 'result': result}, False
+            except ValueError as error:
+                return {'error': {'code': getattr(error, 'code', 'build_held'), 'message': str(error)}}, True
         if group == 'controller':
             from .controller_commands import execute
             try:

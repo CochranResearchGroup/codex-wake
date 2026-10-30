@@ -44,7 +44,8 @@ class ControllerBuilds:
                     build = load_build(self.manifest, channel, home)
                 except BuildError as error:
                     if operation == 'builds.list':
-                        rows.append(dict(name=channel, status='held', reason=str(error)))
+                        rows.append(dict(name=channel, status='held', reason=str(error),
+                                         target=dict(account['target'], build_channel=channel)))
                         continue
                     raise
                 target = dict(account['target'], build_channel=channel, build_sha256=build.sha256,

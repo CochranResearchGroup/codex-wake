@@ -90,11 +90,13 @@
       "owned_paths": [],
       "base_sha": "519beebc54931ada96a3f8cafb267bb407f54c14",
       "result_sha": null,
-      "validation": []
+      "validation": [],
+      "worker_branch": "feat/controller-history396",
+      "worker_worktree": "/tmp/codex-wake-history396"
     },
     "397": {
       "title": "Launch visibly identified stock and modded immutable builds",
-      "state": "running",
+      "state": "integrated",
       "tracker_state": "open",
       "blockers": [
         395,
@@ -102,10 +104,27 @@
         377
       ],
       "worker": "/root/builds397",
-      "owned_paths": [],
+      "owned_paths": [
+        "controller_builds",
+        "build_commands",
+        "build tests",
+        "primary shared registrations"
+      ],
       "base_sha": "519beebc54931ada96a3f8cafb267bb407f54c14",
-      "result_sha": null,
-      "validation": []
+      "result_sha": "6a0b2b9",
+      "validation": [
+        {
+          "command": "source unittest test_controller_builds.py",
+          "result": "4 passed including added CLI/MCP envelope regression"
+        },
+        {
+          "command": "source unittest test_controller*.py",
+          "result": "19 passed"
+        }
+      ],
+      "worker_branch": "feat/controller-397",
+      "worker_worktree": "/tmp/codex-wake-397",
+      "integrated_sha": "f4ea22b"
     },
     "398": {
       "title": "Preview and qualify legacy migration with reversible cutover",
@@ -165,16 +184,18 @@
         394,
         399
       ],
-      "worker": "/root",
+      "worker": "/root/oauth399",
       "owned_paths": [
         "host/environment registry",
         "SSH routing adapter",
         "host command registrations",
         "host routing tests"
       ],
-      "base_sha": null,
+      "base_sha": "71b7766fbd199c91c45ee5b1a4425a99b5aa4bcf",
       "result_sha": null,
-      "validation": []
+      "validation": [],
+      "worker_branch": "feat/controller-400",
+      "worker_worktree": "/tmp/codex-wake-400"
     },
     "401": {
       "title": "Return correlated answers durably through caller disconnect",
