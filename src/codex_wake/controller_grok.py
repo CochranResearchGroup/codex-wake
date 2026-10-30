@@ -73,7 +73,7 @@ class ControllerGrok:
         if self.request is not None:
             class Connection:
                 def call(unused,method,params,identifier):
-                    guard();value=self.request(profile,method,params,identifier,guard);guard();return value
+                    guard();return self.request(profile,method,params,identifier,guard)
             yield Connection()
         else:
             from .grok_acp import GrokACPConnection
@@ -96,7 +96,7 @@ class ControllerGrok:
         unsupported=lambda reason:dict(status='unsupported',reason=reason)
         return dict(protocol_version=1,capabilities=dict(create=supported('ACPv1 session/new'),prompt=supported('bounded synchronous ACPv1 session/prompt'),
             load=supported('negotiated loadSession') if agent.get('loadSession') is True else unsupported('loadSession not negotiated'),
-            cancellation=dict(status='requested_only',reason='ACPv1 notification; confirmation requires original cancelled final reply'),
+            cancellation=unsupported('session-scoped ACP cancellation cannot prove exact original-turn custody; no native cancel I/O'),
             retained_results=supported('original controller-recorded final reply only'),
             native_result_lookup=unsupported('ACPv1 exposes no negotiated original-request result query'),
             fork=unsupported('no qualified common-prefix fork contract negotiated'),checkpoint=unsupported('no qualified immutable checkpoint contract negotiated'),
@@ -110,7 +110,9 @@ class ControllerGrok:
             'grok.prompt':{'profile','expected_target','_request','prompt'},'grok.wait':{'operation_id','timeout'},'grok.cancel':{'operation_id'}}
         if operation not in allowed or not isinstance(args,dict) or set(args)-allowed[operation]:raise InventoryError('invalid_argument','unsupported Grok controller operation/arguments')
         if operation in ('grok.wait','grok.cancel'):
-            return self.runtime.operation(actor,'operations.wait' if operation=='grok.wait' else 'operations.cancel',args,authorize=authorize,expected_operation='grok.prompt')
+            value=self.runtime.operation(actor,'operations.wait' if operation=='grok.wait' else 'operations.cancel',args,authorize=authorize,expected_operation='grok.prompt')
+            if operation=='grok.cancel':value['result']['cancellation_capability']=dict(status='unsupported',reason='native session-scoped notification cannot establish exact original-turn custody')
+            return value
         capability='observe' if operation in ('grok.capabilities','grok.health','grok.checkpoint') else 'control'
         profile=self._context(actor,args,capability,authorize,conversation=operation in ('grok.prompt','grok.load','grok.fork','grok.checkpoint') or operation in ('grok.capabilities','grok.health') and isinstance(args.get('expected_target'),dict) and 'conversation_id' in args['expected_target'])
         def guard():
@@ -119,6 +121,7 @@ class ControllerGrok:
             return actor
         with self._connection(profile,guard) as connection:
             negotiation=self._negotiation(connection,profile)
+            if operation in ('grok.capabilities','grok.health','grok.fork','grok.checkpoint'):guard()
             if operation=='grok.capabilities':return dict(schema_version=1,operation=operation,status='completed',result=self._capabilities(negotiation))
             if operation=='grok.health':return dict(schema_version=1,operation=operation,status='completed',result=dict(status='unsupported',responsive=False,reason='structured ACP metadata cannot establish exact controlling TUI-loop health',grants_recovery=False))
             if operation in ('grok.fork','grok.checkpoint'):raise InventoryError('unsupported_operation','Grok immutable common-prefix fork/checkpoint capability is not qualified')
@@ -136,7 +139,7 @@ class ControllerGrok:
                     value=connection.call('session/load',dict(sessionId=session,cwd=profile['cwd'],mcpServers=[]),identifier)
                     return dict(session_id=session,native_result=value,history_replay='native ACP only')
                 value=connection.call('session/prompt',dict(sessionId=session,prompt=[dict(type='text',text=args['prompt'])]),identifier)
-                text=[];size=0;truncated=False
+                text=[];size=0;truncated=value.pop('_wake_truncated',False)
                 for item in value.pop('_wake_updates',[]):
                     if item.get('sessionId')!=session:continue
                     update=item.get('update',{});content=update.get('content',{})
@@ -146,27 +149,36 @@ class ControllerGrok:
                     chunk=raw[:max(0,remaining)].decode(errors='ignore');text.append(chunk);size+=len(chunk.encode())
                 stop=value.get('stopReason')
                 if stop not in ('end_turn','max_tokens','max_turn_requests','refusal','cancelled'):raise InventoryError('effect_uncertain','native prompt final stop reason is not qualified')
-                return dict(session_id=session,text=''.join(text),stop_reason=stop,native_result=value,output_truncated=truncated,
-                    native_request_id=identifier,peer_content_trust='untrusted',allocation_created=False,authority='inherited',execution='cancelled' if stop=='cancelled' else 'completed')
-            return self.runtime.execute(actor,operation,prepared,authorize=authorize,dispatch=dispatch)
+                return dict(_pending=True,handle=dict(kind='grok_acp_final',session_id=session,text=''.join(text),stop_reason=stop,native_result=value,output_truncated=truncated,
+                    native_request_id=identifier,peer_content_trust='untrusted',allocation_created=False,authority='inherited',execution='cancelled' if stop=='cancelled' else 'completed'))
+            def retained_dispatch(name,payload):
+                from .grok_acp import ACPRefusal
+                try:return dispatch(name,payload)
+                except ACPRefusal as error:
+                    return dict(_pending=True,handle=dict(kind='grok_acp_refusal',reason=error.code,native_error_code=error.native_code,execution='not_started',provider_work=False))
+            value=self.runtime.execute(actor,operation,prepared,authorize=authorize,dispatch=retained_dispatch)
+            if operation=='grok.prompt' or (value['result']['operation'].get('result') or {}).get('kind')=='grok_acp_refusal':
+                value=self.runtime.operation(actor,'operations.result',dict(operation_id=value['result']['operation']['operation_id']),authorize=authorize,expected_operation=operation)
+                value['operation']=operation
+            return value
 
     def observe_native_owned(self,record):
-        # ACP has no negotiated original-request result query. The submitting
-        # connection alone may retain its original final reply in the journal.
+        # Settle only an already-recorded original native response. No native
+        # query is invented for a lost connection or pending prompt.
+        result=record.get('result') or {}
+        if result.get('kind')=='grok_acp_final':
+            if record['operation']!='grok.prompt' or result.get('session_id')!=record['target'].get('conversation_id') or result.get('native_request_id')!=record['operation_id']:
+                raise InventoryError('effect_uncertain','retained Grok final response identity differs')
+            record.update(phase='terminal',execution=result['execution'],delivery='retained',acceptance='native_final_reply',reason=None,
+                answer=dict(text=result['text'],source='original_grok_acp_reply',native_request_id=record['operation_id'],truncated=result.get('output_truncated',False),peer_content_trust='untrusted'))
+        elif result.get('kind')=='grok_acp_refusal':
+            record.update(phase='terminal',execution='not_started',delivery='retained',acceptance='native_refused',reason=result['reason'])
         return record
 
     def cancel_native_owned(self,record):
         if record.get('operation')!='grok.prompt':raise InventoryError('unsupported_operation','original operation belongs to another owner')
-        payload=record['payload'];profile=self.profile(payload['profile'])
-        if payload.get('_profile_sha256')!=profile['_sha256'] or record['target']!=payload['expected_target'] or {k:v for k,v in record['target'].items() if k!='conversation_id'}!=profile['target']:
-            raise InventoryError('stale_target','original Grok prompt profile/target changed')
-        def guard():
-            current=self.profile(payload['profile'])
-            if current['_sha256']!=profile['_sha256']:raise InventoryError('stale_target','original Grok profile changed')
-            self._pin(current)
-        with self._connection(profile,guard) as connection:
-            self._negotiation(connection,profile)
-            connection.call('session/cancel',dict(sessionId=record['target']['conversation_id']),'wake_cancel_original')
-        original=self.runtime._load(record['operation_id'])
-        if original['phase']=='terminal' and (original.get('result') or {}).get('stop_reason')=='cancelled':return 'confirmed'
-        return 'requested'
+        self.observe_native_owned(record)
+        if record['phase']=='terminal':return 'confirmed' if record['execution']=='cancelled' else 'not_required'
+        # ACP has session/cancel, but no qualified exact original-turn target.
+        # Opening another connection could stop unrelated later session work.
+        return 'uncertain'

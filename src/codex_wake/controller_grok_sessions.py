@@ -6,15 +6,17 @@ from .managed_inventory import InventoryError
 class ControllerGrokSessions:
     def __init__(self,root,*,owner=None):self.owner=owner or ControllerGrok(root)
 
-    def target(self,name):return dict(self.owner.profile(name)['target'])
+    def target(self,name):return dict(self.owner.profile(name.removeprefix('grok:'))['target'])
 
     def _context(self,actor,name,target,authorize,capability):
-        return self.owner._context(actor,dict(profile=name,expected_target=target),capability,authorize,conversation='conversation_id' in target)
+        return self.owner._context(actor,dict(profile=name.removeprefix('grok:'),expected_target=target),capability,authorize,conversation='conversation_id' in target)
 
     def execute(self,actor,operation,arguments,*,authorize):
         mapping={'sessions.capabilities':'grok.capabilities','sessions.create':'grok.create','sessions.prompt':'grok.prompt',
             'sessions.wait':'grok.wait','sessions.cancel':'grok.cancel','sessions.checkpoint':'grok.checkpoint','sessions.fork':'grok.fork'}
         if operation not in mapping:raise InventoryError('unsupported_operation','unsupported Grok session facade operation')
+        arguments=dict(arguments)
+        if 'profile' in arguments:arguments['profile']=arguments['profile'].removeprefix('grok:')
         value=self.owner.execute(actor,mapping[operation],arguments,authorize=authorize)
         if operation=='sessions.capabilities':
             value['result'].update(target=arguments['expected_target'],modes=['new_session','sequential'],max_parallelism=1,

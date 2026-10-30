@@ -71,3 +71,47 @@ class GrokControllerTests(unittest.TestCase):
             self.assertEqual(waited['result']['operation']['answer']['text'],'fixture answer')
             self.assertEqual(waited['result']['operation']['operation'],'grok.prompt')
             self.assertFalse(waited['result']['operation']['result']['allocation_created'])
+
+    def test_lost_reply_is_uncertain_no_replay_or_session_scoped_cancel(self):
+        with tempfile.TemporaryDirectory() as directory:
+            owner,actor,target,args,calls,profile=self.fixture(Path(directory));request=owner.request
+            def lost(profile,method,params,identifier,guard):
+                value=request(profile,method,params,identifier,guard)
+                if method=='session/prompt':raise OSError('fixture lost original reply')
+                return value
+            owner.request=lost;arguments=args('lost',conversation=True,prompt='fixture')
+            first=owner.execute(actor,'grok.prompt',arguments,authorize=lambda:actor)
+            self.assertEqual(first['result']['operation']['phase'],'uncertain')
+            owner.execute(actor,'grok.prompt',arguments,authorize=lambda:actor)
+            before=list(calls)
+            cancelled=owner.execute(actor,'grok.cancel',dict(operation_id='lost'),authorize=lambda:actor)
+            self.assertEqual(cancelled['result']['operation']['cancellation'],'uncertain')
+            self.assertEqual(calls,before)
+            self.assertEqual(len([method for method,params,key in calls if method=='session/prompt']),1)
+            self.assertEqual(cancelled['result']['cancellation_capability']['status'],'unsupported')
+
+    def test_definite_native_auth_refusal_is_not_started_and_final_reply_survives_grant_loss(self):
+        from codex_wake.grok_acp import ACPRefusal
+        with tempfile.TemporaryDirectory() as directory:
+            owner,actor,target,args,calls,profile=self.fixture(Path(directory));request=owner.request
+            def refused(profile,method,params,identifier,guard):
+                if method=='session/prompt':raise ACPRefusal('native_auth_required','fixture ACP authentication required',-32000)
+                return request(profile,method,params,identifier,guard)
+            owner.request=refused
+            value=owner.execute(actor,'grok.prompt',args('auth',conversation=True,prompt='fixture'),authorize=lambda:actor)['result']['operation']
+            self.assertEqual(value['execution'],'not_started')
+            self.assertEqual(value['reason'],'native_auth_required')
+            revoked=[False]
+            def authorize():
+                if revoked[0]:raise AuthError()
+                return actor
+            def lose_authority(profile,method,params,identifier,guard):
+                value=request(profile,method,params,identifier,guard)
+                if method=='session/prompt':revoked[0]=True
+                return value
+            owner.request=lose_authority
+            with self.assertRaises(AuthError):owner.execute(actor,'grok.prompt',args('retained',conversation=True,prompt='fixture'),authorize=authorize)
+            revoked[0]=False
+            result=owner.execute(actor,'grok.wait',dict(operation_id='retained',timeout=0),authorize=authorize)['result']['operation']
+            self.assertEqual(result['answer']['text'],'fixture answer')
+            self.assertEqual(result['acceptance'],'native_final_reply')

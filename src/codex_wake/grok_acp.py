@@ -17,6 +17,8 @@ from .managed_inventory import InventoryError
 
 class ACPRefusal(InventoryError):
     """A definitive native JSON-RPC rejection, distinct from lost response."""
+    def __init__(self,code,message,native_code=None):
+        super().__init__(code,message);self.native_code=native_code
 
 
 def owned_listener(profile):
@@ -56,7 +58,9 @@ class GrokACPConnection:
         return self
 
     def __exit__(self,*unused):
-        if self.connection is not None:self.connection.close()
+        if self.connection is not None:
+            try:self.connection.close()
+            except Exception:pass
 
     def call(self,method,params,identifier):
         self.guard()
@@ -65,35 +69,40 @@ class GrokACPConnection:
         if method!='session/cancel':message['id']=identifier
         self.connection.send(json.dumps(message,allow_nan=False))
         if method=='session/cancel':return dict(status='requested')
-        updates=[];retained_bytes=0;wire_bytes=0
+        updates=[];retained_bytes=0;wire_bytes=0;progress_seen=False;truncated=False
         for unused in range(2048):
-            self.guard();remaining=self.deadline-time.monotonic()
+            remaining=self.deadline-time.monotonic()
             if remaining<=0:raise TimeoutError('original native reply deadline elapsed; no replay')
             raw=self.connection.recv(timeout=remaining);wire_bytes+=len(raw.encode() if isinstance(raw,str) else raw)
             if wire_bytes>4194304:raise InventoryError('capacity','native ACP response exceeds bounded wire capacity')
             value=json.loads(raw)
             if not isinstance(value,dict) or value.get('jsonrpc')!='2.0':raise InventoryError('effect_uncertain','invalid native ACP frame')
-            if value.get('id')==identifier:
-                self.guard()
+            if value.get('id')==identifier and 'method' not in value:
                 if 'error' in value:
                     code=(value.get('error') or {}).get('code')
-                    if code==-32000:raise ACPRefusal('native_auth_required','native Grok authentication required; no authentication or provider experiment attempted')
-                    if code in (-32601,-32602):raise ACPRefusal('unsupported_operation' if code==-32601 else 'invalid_native_argument','native ACP definitively refused the requested method/parameters')
+                    if progress_seen:raise InventoryError('effect_uncertain','native error followed correlated progress; prior effects are uncertain')
+                    if code==-32000:raise ACPRefusal('native_auth_required','native Grok authentication required; no authentication or provider experiment attempted',code)
+                    if code in (-32601,-32602):raise ACPRefusal('unsupported_operation' if code==-32601 else 'invalid_native_argument','native ACP definitively refused the requested method/parameters',code)
                     raise InventoryError('effect_uncertain','native ACP returned an unqualified error; original effect is uncertain')
                 result=value.get('result')
                 if not isinstance(result,dict):raise InventoryError('effect_uncertain','native ACP reply is not an object')
-                if method=='session/prompt':result=dict(result,_wake_updates=updates)
+                if len(json.dumps(result).encode())>65536:raise InventoryError('capacity','original native final reply exceeds retained bound')
+                if method=='session/prompt':result=dict(result,_wake_updates=updates,_wake_truncated=truncated)
                 return result
             if value.get('method')=='session/update' and method=='session/prompt':
                 event=value.get('params',{})
                 if event.get('sessionId')==params.get('sessionId'):
+                    progress_seen=True
                     update=event.get('update',{})
                     if update.get('sessionUpdate')=='agent_message_chunk':
                         content=update.get('content',{})
-                        if content.get('type')=='text' and isinstance(content.get('text'),str) and retained_bytes<32768:
-                            raw_text=content['text'].encode();text=raw_text[:32768-retained_bytes].decode(errors='ignore');retained_bytes+=len(text.encode())
+                        if content.get('type')=='text' and isinstance(content.get('text'),str):
+                            raw_text=content['text'].encode()
+                            if len(raw_text)>32768-retained_bytes:truncated=True
+                            text=raw_text[:max(0,32768-retained_bytes)].decode(errors='ignore');retained_bytes+=len(text.encode())
                             updates.append(dict(sessionId=event['sessionId'],update=dict(sessionUpdate='agent_message_chunk',content=dict(type='text',text=text))))
             elif 'id' in value and 'method' in value:
+                progress_seen=True
                 # No client FS/terminal/tool capabilities were advertised. Native
                 # approval requests receive cancellation, never an invented grant.
                 if value['method']=='session/request_permission':reply=dict(result=dict(outcome=dict(outcome='cancelled')))
