@@ -1,0 +1,388 @@
+{
+  "authorities": {
+    "governor_activations": 0,
+    "production_shared_restarts": 0,
+    "provider_experiments": 0,
+    "resource_mode": "manual",
+    "resource_renewals": 0
+  },
+  "cleanup": {
+    "bastion": {
+      "byobu_private_socket_stopped": true,
+      "original_fixture_process_alive": false
+    },
+    "windows": {
+      "private_fixture_tokens_removed": 6,
+      "psmux_original_pid_present": false
+    },
+    "wsl-test": {
+      "byobu_private_socket_stopped": true,
+      "original_fixture_process_alive": false
+    }
+  },
+  "collected_at": "2026-10-30T17:05:09.689799+00:00",
+  "installed_identity": {
+    "execution_authority_source_hashes_match_all_13_wheel_and_root_modules": true,
+    "windows_caller_sha256": {
+      "controller_client.py": "e32bd156b034ba7fc782816f8788e9f1751474dd3a038b673a799823430bf7d6",
+      "controller_client_windows.py": "e95063d2d62b1d93627f7700ca1202362d498edd3aa680176f7064da6875eeab",
+      "entrypoint.py": "36e77bcfb1d2f1cd4dc85a3a9886091d8bbc418b7cd25759b2e5d4486734047e"
+    }
+  },
+  "local_ci": {
+    "environment": "Linux/WSL Python3.12.3/3.12.13 and native Windows Python3.12.10; actual OpenSSH and psmux3.4.0; no hosted CI matrix",
+    "hosted": "not run under operator cost policy"
+  },
+  "logs": {
+    "current-bastion-build-tests.log": {
+      "path": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/current-bastion-build-tests.log",
+      "sha256": "d52ff55c458be973a315940b5906a9ee53f32f7fc829b01de70d25cece362b54"
+    },
+    "current-portable-tests.log": {
+      "path": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/current-portable-tests.log",
+      "sha256": "9a8b3b6ab2472cb338c3b7508da645581247b823743eb756b4c1a4642be9273d"
+    },
+    "current-psmux-run.log": {
+      "path": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/current-psmux-run.log",
+      "sha256": "7f627438c2480adf1e66fb218caba8bb3e5eb89244464821d01d5440c57b9155"
+    },
+    "current-wsl-build-tests.log": {
+      "path": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/current-wsl-build-tests.log",
+      "sha256": "73ffa6b620670b9d5ffaf22a56bd4ab48e18d688c81c23173547610e17f0283f"
+    },
+    "distributed/current-run-final.log": {
+      "path": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/distributed/current-run-final.log",
+      "sha256": "c1d79c587a50644cc49429f610151f788bb7bf29e86ad98fd951b501492a7d75"
+    },
+    "distributed/current-run.log": {
+      "path": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/distributed/current-run.log",
+      "sha256": "1b969474ea983e26e23e0ddd54a3f49d20865ef640ccecbf3ade7f84e22529c9"
+    }
+  },
+  "native_bots_consumer": {
+    "boundary": "immutable Bots public API and actual OS receiver binding; no production SharedCodex enrollment",
+    "receipt": "/home/ecochran76/.local/state/codex-wake/controller393-resumed/bots-native-health-expanded/receipt.json",
+    "result": "passed; parent-owned proof reconciled by receipt/native5597 hash; root curates canonical source evidence"
+  },
+  "native_package": "docs/dev/evidence/plan0190/crosshost405-native-rebuild.json",
+  "physical_build_checks": {
+    "bastion": "13 installed tests passed; same bounded payload boundary",
+    "boundary": "physical installed owner proof, not a real production build promotion",
+    "wsl_test": "13 installed tests passed; synthetic immutable payloads; stage/select/rollback and scoped authorization"
+  },
+  "physical_matrix": {
+    "boundary": "Actual native Windows caller and actual WSL/remote Linux execution authorities; synthetic inventory accounts, real isolated Byobu panes. Native Windows owner, psmux bridge, staged upgrade and Bots health acceptance remain separate evidence.",
+    "checks": [
+      {
+        "caller": "wsl",
+        "filtered": true,
+        "operation": "inventory.list",
+        "original_principal": true,
+        "target": "bastion",
+        "transport": "api"
+      },
+      {
+        "caller": "wsl",
+        "filtered": true,
+        "operation": "inventory.list",
+        "original_principal": true,
+        "target": "bastion",
+        "transport": "mcp"
+      },
+      {
+        "caller": "windows",
+        "filtered": true,
+        "operation": "inventory.list",
+        "original_principal": true,
+        "target": "bastion",
+        "transport": "api"
+      },
+      {
+        "caller": "windows",
+        "filtered": true,
+        "operation": "inventory.list",
+        "original_principal": true,
+        "target": "bastion",
+        "transport": "mcp"
+      },
+      {
+        "caller": "windows",
+        "operation": "actual_byobu_capture",
+        "safe_disposable_panes": true,
+        "stale_generation_refused": true,
+        "target": "bastion",
+        "transport": "api"
+      },
+      {
+        "caller": "wsl",
+        "filtered": true,
+        "operation": "inventory.list",
+        "original_principal": true,
+        "target": "wsl-test",
+        "transport": "api"
+      },
+      {
+        "caller": "wsl",
+        "filtered": true,
+        "operation": "inventory.list",
+        "original_principal": true,
+        "target": "wsl-test",
+        "transport": "mcp"
+      },
+      {
+        "caller": "windows",
+        "filtered": true,
+        "operation": "inventory.list",
+        "original_principal": true,
+        "target": "wsl-test",
+        "transport": "api"
+      },
+      {
+        "caller": "windows",
+        "filtered": true,
+        "operation": "inventory.list",
+        "original_principal": true,
+        "target": "wsl-test",
+        "transport": "mcp"
+      },
+      {
+        "caller": "windows",
+        "operation": "actual_byobu_capture",
+        "safe_disposable_panes": true,
+        "stale_generation_refused": true,
+        "target": "wsl-test",
+        "transport": "api"
+      },
+      {
+        "actual_ssh_withheld_reply_stays_uncertain": true,
+        "caller": "wsl",
+        "fixed_principal": true,
+        "offline_refused": true,
+        "original_key_replay_returns_original": true,
+        "reconnect": true,
+        "revoked_mapping_refused": true,
+        "target": "bastion",
+        "transport": "actual_OpenSSH",
+        "uncertain_reconnect_not_replayed": true
+      },
+      {
+        "caller": "windows",
+        "original_oauth_grant_revoked": true,
+        "target": "bastion",
+        "transport": "API_and_OAuthMCP"
+      },
+      {
+        "caller": "windows",
+        "original_oauth_grant_revoked": true,
+        "target": "wsl-test",
+        "transport": "API_and_OAuthMCP"
+      }
+    ],
+    "provider_calls": 0,
+    "roles": {
+      "bastion": {
+        "byobu": {
+          "session": "$1",
+          "socket": "/home/ecochran76/.local/state/codex-wake/testing/controller405-20261030/matrix-012b7d79/presentation.sock"
+        },
+        "client_endpoint": "http://127.0.0.1:36917",
+        "endpoint": "http://127.0.0.1:33109",
+        "package": "/home/ecochran76/.local/state/codex-wake/testing/controller405-20261030/venv/lib/python3.12/site-packages/codex_wake/__init__.py",
+        "process": {
+          "boot_id": "e313801f-8558-4aad-a97d-5f45db3ebe12",
+          "pid": 3063944,
+          "start_ticks": 32801056
+        },
+        "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+        "role": "bastion",
+        "source_sha256": {
+          "controller_accounts.py": "cb235c1abed9431cf21c3948bfc5c1efeb446a4290a40d57c378fb3300e7ba39",
+          "controller_auth.py": "b1ae3b16c0e33ce1e55d191026444abf69bd2e99f6281112ab24ec7ead4d196e",
+          "controller_builds.py": "fe53ac6fad4577a124c1d87f509ac5f65d7b700113c2d4a703ce9a3dfd1d695e",
+          "controller_client.py": "e32bd156b034ba7fc782816f8788e9f1751474dd3a038b673a799823430bf7d6",
+          "controller_flows.py": "f92bb0a3fafcda52d6214aa4f2a738af6346abf5b89db55139b8ed2128dba347",
+          "controller_health.py": "8f3c6c7db9f963ae083b5bb7084d182b58a0f20c19b676fe72d63def708f7d47",
+          "controller_hosts.py": "768e23814f69917a8bb83a8cfa653e6b5b183f7a149069a6a889ffaf64893c2c",
+          "controller_http.py": "d3659b19c53ed85f53680847dc5f0562954002a83933cadd72393642645c9ca0",
+          "controller_notices.py": "43ba1540f65d7be5ceed09acfffb629028b9a096e9a3e38ccb862c76cc6ac155",
+          "controller_recovery.py": "09d0c38c2142504d6d10935263496984a46cac307eaaca4d93237bd25f39dcd5",
+          "controller_runtime.py": "ea5fc009087db93c9800b0c692c3d0dcf61f74c49021f46d8cfad2c06ae1fa63",
+          "controller_tabs.py": "96c1ebe746e7323eb6c57bd8355b445d9a3a9c5d6294212d8343ad2ad78b1e31",
+          "entrypoint.py": "36e77bcfb1d2f1cd4dc85a3a9886091d8bbc418b7cd25759b2e5d4486734047e"
+        },
+        "ssh_principal": "controller405-key",
+        "ssh_target": {
+          "authority": "controller405-bastion",
+          "environment": "posix",
+          "generation": "LR9zncgVnqnRWh-jghUQrHXI",
+          "host": "bastion"
+        },
+        "status": "ready",
+        "targets": [
+          {
+            "environment": "posix",
+            "host": "bastion",
+            "namespace": "account:alice"
+          },
+          {
+            "environment": "posix",
+            "host": "bastion",
+            "presentation": "byobu",
+            "workspace": "bastion"
+          }
+        ]
+      },
+      "wsl-test": {
+        "byobu": {
+          "session": "$1",
+          "socket": "/root/.local/state/codex-wake/testing/controller405-20261030/matrix-012b7d79/presentation.sock"
+        },
+        "client_endpoint": "http://127.0.0.1:39621",
+        "endpoint": "http://127.0.0.1:39621",
+        "package": "/root/.local/state/codex-wake/testing/controller405-20261030/venv/lib/python3.12/site-packages/codex_wake/__init__.py",
+        "process": {
+          "boot_id": "5af07ca0-b816-456e-89ec-ffb7590a368a",
+          "pid": 407,
+          "start_ticks": 514206
+        },
+        "python": "3.12.3 (main, Jul 15 2026, 23:46:41) [GCC 13.3.0]",
+        "role": "wsl-test",
+        "source_sha256": {
+          "controller_accounts.py": "cb235c1abed9431cf21c3948bfc5c1efeb446a4290a40d57c378fb3300e7ba39",
+          "controller_auth.py": "b1ae3b16c0e33ce1e55d191026444abf69bd2e99f6281112ab24ec7ead4d196e",
+          "controller_builds.py": "fe53ac6fad4577a124c1d87f509ac5f65d7b700113c2d4a703ce9a3dfd1d695e",
+          "controller_client.py": "e32bd156b034ba7fc782816f8788e9f1751474dd3a038b673a799823430bf7d6",
+          "controller_flows.py": "f92bb0a3fafcda52d6214aa4f2a738af6346abf5b89db55139b8ed2128dba347",
+          "controller_health.py": "8f3c6c7db9f963ae083b5bb7084d182b58a0f20c19b676fe72d63def708f7d47",
+          "controller_hosts.py": "768e23814f69917a8bb83a8cfa653e6b5b183f7a149069a6a889ffaf64893c2c",
+          "controller_http.py": "d3659b19c53ed85f53680847dc5f0562954002a83933cadd72393642645c9ca0",
+          "controller_notices.py": "43ba1540f65d7be5ceed09acfffb629028b9a096e9a3e38ccb862c76cc6ac155",
+          "controller_recovery.py": "09d0c38c2142504d6d10935263496984a46cac307eaaca4d93237bd25f39dcd5",
+          "controller_runtime.py": "ea5fc009087db93c9800b0c692c3d0dcf61f74c49021f46d8cfad2c06ae1fa63",
+          "controller_tabs.py": "96c1ebe746e7323eb6c57bd8355b445d9a3a9c5d6294212d8343ad2ad78b1e31",
+          "entrypoint.py": "36e77bcfb1d2f1cd4dc85a3a9886091d8bbc418b7cd25759b2e5d4486734047e"
+        },
+        "ssh_principal": "controller405-key",
+        "ssh_target": {
+          "authority": "controller405-wsl-test",
+          "environment": "wsl-test",
+          "generation": "QdIOcmx19oh0PPAk5eCCK0fd",
+          "host": "wsl-test"
+        },
+        "status": "ready",
+        "targets": [
+          {
+            "environment": "wsl-test",
+            "host": "wsl-test",
+            "namespace": "account:alice"
+          },
+          {
+            "environment": "wsl-test",
+            "host": "wsl-test",
+            "presentation": "byobu",
+            "workspace": "wsl-test"
+          }
+        ]
+      }
+    },
+    "run": "matrix-012b7d79",
+    "status": "passed",
+    "ticket": 405
+  },
+  "physical_windows_presentation": {
+    "actual_windows_capture": true,
+    "api_and_oauth_mcp": true,
+    "boundary": "Actual native Windows psmux with WSL-owned finite bridge; no native Windows Wake owner or Windows TUI responsiveness claim",
+    "bridge_generation": "406cee592b5fad71347cf2f0f6ba4a16a5b3e78454d26c13501f87817b6692ff",
+    "controller_execution_authority": {
+      "environment": "posix",
+      "host": "cooper",
+      "platform": "WSL/Linux"
+    },
+    "exact_namespace_shutdown_then_unavailable": true,
+    "native_windows_owner": "unsupported_explicit",
+    "provider_calls": 0,
+    "root": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/psmux-wake-controller405-final-20261030",
+    "same_intent_capture_no_replay": true,
+    "status": "passed",
+    "unowned_input_refused": true,
+    "windows_presentation_identity": {
+      "creation_filetime": 134378532447688061,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca",
+      "namespace": "controller405-final-20261030",
+      "pid": 73300,
+      "platform": "windows"
+    },
+    "wsl_test_caller": true
+  },
+  "portable_client_checks": {
+    "redirect": "Bearer credentials never follow redirects",
+    "unit": "4 public client checks passed on current installed root wheel",
+    "windows_acl": "actual Windows owner/private DACL accepted and Everyone-read denied; original module matches current wheel"
+  },
+  "prior_attempts": {
+    "limitations": [
+      "f23 source initial candidates were preliminary, superseded by this03677 root wheel",
+      "initial public remote CLI imported POSIX fcntl on Windows; portable caller fixed",
+      "mechanical MCP aliases were invalid; published aliases pinned",
+      "private fixture owner omitted tabs initially; explicit owner injection corrected",
+      "slow-host freshness refusal retained; bounded fixture-only birth-pinned reobservation before admission, never uncertain replay",
+      "OAuth401 error string expectation corrected; product preserved standard response"
+    ],
+    "retained_private_root": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405"
+  },
+  "qualified_roles": [
+    "native Windows published CLI OAuth caller",
+    "WSL caller and WSL native execution authority",
+    "Bastion remote Linux execution authority and local caller",
+    "actual OpenSSH fixed-principal route",
+    "actual Byobu presentations on WSL and Bastion",
+    "native Windows psmux presentation through a WSL-owned finite bridge"
+  ],
+  "review_round_consumed": false,
+  "schema_version": 1,
+  "source_commit": "03677e618891342257c2a87f284c2d1e05befa83",
+  "status": "qualified_roles_not_universal_native_platform_support",
+  "ticket": 405,
+  "unsupported_roles": {
+    "native_windows_tui_health": "unsupported: private Unix kernel-peer proof remains Linux GNU only",
+    "native_windows_wake_owner": "unsupported: POSIX storage/locking execution owners remain unported; no Windows native controller owner claimed",
+    "production_bots_sharedcodex_enrollment": "not qualified or activated; immutable consumer public API is a separate explicit boundary"
+  },
+  "validation_commands": [
+    {
+      "command": "uv build --wheel --out-dir ~/.local/state/codex-wake/testing/crosshost405/artifacts/current",
+      "cwd": "/home/ecochran76/workspace.local/codex-wake-controller393-resumed",
+      "result": "root03677 wheelcf2db34c built and exactly reinstalled on all four prefixes"
+    },
+    {
+      "command": "env -u PYTHONPATH ~/.local/state/codex-wake/testing/crosshost405/localvenv/bin/python scripts/controller_crosshost_acceptance.py --state ~/.local/state/codex-wake/testing/crosshost405/distributed --output ~/.local/state/codex-wake/testing/crosshost405/distributed/current-receipt.json",
+      "result": "13 checks passed on current root package"
+    },
+    {
+      "command": "env -u PYTHONPATH ~/.local/state/codex-wake/testing/crosshost405/localvenv/bin/python scripts/controller_psmux_acceptance405.py --state ~/.local/state/codex-wake/testing/crosshost405 --output ~/.local/state/codex-wake/testing/crosshost405/current-psmux-receipt.json --namespace controller405-final-20261030",
+      "result": "actual Windows physical presentation and WSL caller passed; namespace stopped"
+    },
+    {
+      "command": "ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=5 bastion <candidate-venv>/bin/python -m unittest discover -s <owned-build-tests> -p test_controller_build*.py -v",
+      "result": "13 tests passed"
+    },
+    {
+      "command": "/mnt/c/Windows/System32/wsl.exe --distribution wsl-test --exec <candidate-venv>/bin/python -m unittest discover -s <owned-build-tests> -p test_controller_build*.py -v",
+      "result": "13 tests passed"
+    },
+    {
+      "command": "env -u PYTHONPATH <local405-venv>/bin/python -m unittest discover -s tests -p test_controller_portable_client.py -v",
+      "result": "4 tests passed"
+    },
+    {
+      "command": "uvx --from ruff==0.14.2 ruff check --select F821,F822,F823 <changed-client-modules-and-acceptance-scripts>",
+      "result": "All checks passed"
+    }
+  ],
+  "wheel": {
+    "path": "/home/ecochran76/.local/state/codex-wake/testing/crosshost405/artifacts/current/codex_wake-0.22.0.dev2-py3-none-any.whl",
+    "sha256": "cf2db34ce43c49a4be9181393919f7a8bca402e289b03d38e1c93750c0b96c82",
+    "version": "0.22.0.dev2"
+  }
+}
