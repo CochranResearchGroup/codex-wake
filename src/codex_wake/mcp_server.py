@@ -167,6 +167,18 @@ from .history_commands import tool_specs as history_tool_specs
 SPECS.update(history_tool_specs())
 
 
+from .controller_http import TOOLS as controller_public_tools
+for tool_name, (operation, schema) in controller_public_tools.items():
+    if operation.startswith('operations.'):
+        SPECS[tool_name] = ('controller-operations', operation.split('.')[1],
+            'Use durable correlated operations under a fixed host grant; native senders require verified transport identity.',
+            schema['properties'], schema.get('required', []), operation in ('operations.result', 'operations.wait', 'operations.stream'))
+    elif operation.startswith('builds.') and operation != 'builds.list':
+        SPECS[tool_name] = ('controller-builds', operation.split('.')[1],
+            'Use pinned build operations under a fixed host grant and durable request; no caller-selected manifest or native configuration overrides.',
+            schema['properties'], schema.get('required', []), False)
+
+
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
@@ -293,6 +305,20 @@ class CommandRunner:
                 return result, result['status'] != 'completed'
             except InventoryError as error:
                 return {'error': {'code': error.code, 'message': str(error)}}, True
+        if group == 'controller-operations':
+            from .operation_commands import mcp_call
+            try:
+                value = mcp_call(self, verb, arguments, native_context)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'operation_held'), 'message': str(error)}}, True
+        if group == 'controller-builds':
+            from .build_commands import protected_execute
+            try:
+                value = protected_execute('builds.' + verb, arguments, self.wake_root)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError, KeyError) as error:
+                return {'error': {'code': getattr(error, 'code', 'build_held'), 'message': str(error)}}, True
         if group == 'controller-hosts':
             from .host_commands import owner
             try:

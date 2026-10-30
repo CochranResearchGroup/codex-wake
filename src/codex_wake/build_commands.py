@@ -48,3 +48,17 @@ def owner_from_root(root):
         return ControllerBuilds(manifest, accounts, recipes=recipes)
     except (OSError, KeyError, ValueError, TypeError) as error:
         raise InventoryError('configuration_unavailable', 'host build configuration is unavailable') from error
+
+
+def protected_execute(operation, arguments, root):
+    """Native MCP uses a fixed host grant through the same protected operation gate."""
+    from types import SimpleNamespace
+    from .operation_commands import local_actor
+    from .controller_http import ProtectedOperations
+    from .controller_operations import ControllerOperations
+    from .managed_inventory import ManagedInventory
+    builds = owner_from_root(root)
+    authority = SimpleNamespace(authenticate=lambda unused: local_actor(root))
+    operations = ControllerOperations(ManagedInventory(root), host=builds.accounts.host,
+        environment=builds.accounts.environment, accounts=builds.accounts, builds=builds)
+    return ProtectedOperations(authority, operations).execute('host-local-grant', operation, arguments)
