@@ -88,3 +88,60 @@ class OwnedTerminalBroker:
             self.transport.command(deadline,'send-keys','-t',pane,'-l','--',text)
             self.transport.command(deadline,'send-keys','-t',pane,'Enter')
             return dict(status='submitted',acceptance='unverified',transport='terminal')
+
+
+class ConfiguredBridge:
+    """Host-fixed finite subprocess protocol; no command selection in requests."""
+    def __init__(self, command):
+        if not isinstance(command,list) or not command or any(not isinstance(x,str) for x in command):
+            raise ValueError('host bridge command must be argv')
+        self.command = command
+
+    def __call__(self, action, arguments, deadline):
+        import json
+        import subprocess
+        import time
+        result = subprocess.run(self.command,input=json.dumps(dict(action=action,arguments=arguments)),
+            text=True,capture_output=True,check=True,timeout=max(.001,min(5,deadline-time.monotonic())))
+        if len(result.stdout)>1048576: raise ValueError('bridge reply exceeds bounded capacity')
+        return json.loads(result.stdout)
+
+
+class UnixInputBroker:
+    """Proxy the existing host stdin custodian, never attach to its pipes."""
+    def __init__(self, path):
+        from pathlib import Path
+        import os
+        import stat
+        self.path = Path(path)
+        info = self.path.lstat()
+        if (not self.path.is_absolute() or self.path != self.path.resolve() or
+            not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077):
+            raise ValueError('input broker requires private user-owned socket')
+        self.identity = (info.st_dev,info.st_ino)
+
+    def request(self, action, arguments):
+        import json
+        import socket
+        info = self.path.lstat()
+        if (info.st_dev,info.st_ino) != self.identity:
+            raise InventoryError('input_custody_required','broker socket generation changed')
+        with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as stream:
+            stream.settimeout(5)
+            stream.connect(str(self.path))
+            stream.sendall(json.dumps(dict(action=action,arguments=arguments)).encode()+b'\n')
+            data = b''
+            while b'\n' not in data:
+                chunk = stream.recv(65536)
+                if not chunk: raise InventoryError('input_custody_required','broker disconnected')
+                data += chunk
+                if len(data)>262144: raise ValueError('broker reply exceeds bound')
+            result = json.loads(data.split(b'\n',1)[0])
+            if not isinstance(result,dict): raise ValueError('invalid broker response')
+            return result
+
+    def inspect(self):
+        return self.request('inspect',{})
+
+    def send(self,pane,text,*,expected_custody):
+        return self.request('send',dict(pane=pane,input=text,expected_custody=expected_custody))

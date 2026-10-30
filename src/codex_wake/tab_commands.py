@@ -11,6 +11,9 @@ def register_parser(subparsers):
     return parser
 
 
-def command(args, owner):
+def command(args, owner=None):
+    if owner is None:
+        from .controller_tabs import controller_tabs_from_root
+        owner = controller_tabs_from_root(args.wake_root)
     print(json.dumps(owner.execute('tabs.' + args.tab_command, args.arguments), sort_keys=True))
     return 0

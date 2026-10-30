@@ -190,3 +190,38 @@ for line in sys.stdin:
                 self.assertIs(broker.client,client)
         finally:
             client.close()
+
+    def test_host_factory_installed_cli_uses_fixed_private_configuration(self):
+        import argparse
+        import contextlib
+        import io
+        import json
+        import shutil
+        import subprocess
+        from codex_wake.controller_tabs import controller_tabs_from_root
+        from codex_wake.tab_commands import register_parser, command
+        if not shutil.which('tmux'): self.skipTest('tmux unavailable')
+        with tempfile.TemporaryDirectory() as directory:
+            socket = str(Path(directory)/'factory.sock')
+            subprocess.run(['tmux','-S',socket,'new-session','-d','-s','fixture','sleep 60'],check=True)
+            try:
+                config = Path(directory)/'controller-tabs.json'
+                config.write_text(json.dumps(dict(schema_version=1,workspaces={'fixture':dict(kind='byobu',socket_path=socket,session_id='$0')})))
+                config.chmod(0o600)
+                owner = controller_tabs_from_root(directory)
+                target = owner.execute('tabs.list',{})['resources'][0]['target']
+                self.assertEqual(target['workspace'],'fixture')
+                with self.assertRaises(InventoryError) as caught:
+                    owner.execute('tabs.capture',dict(workspace='fixture',expected_target=target,pane='%0'))
+                self.assertEqual(caught.exception.code,'presentation_privacy_unknown')
+                parser = argparse.ArgumentParser()
+                parser.add_argument('--wake-root',default=directory)
+                register_parser(parser.add_subparsers())
+                args = parser.parse_args(['tabs','list'])
+                with contextlib.redirect_stdout(io.StringIO()) as output:
+                    self.assertEqual(command(args),0)
+                self.assertEqual(json.loads(output.getvalue())['resources'][0]['target']['workspace'],'fixture')
+                config.chmod(0o644)
+                with self.assertRaises(InventoryError): controller_tabs_from_root(directory)
+            finally:
+                subprocess.run(['tmux','-S',socket,'kill-server'],check=False)
