@@ -143,19 +143,27 @@ def main():
             driver('check',request(name,'check1'));driver('check',request(name,'check2'))
             state=driver('show',dict(policy_id=name,expected_target=target))['result']['policy']
             assert state['health_status']=='suspected_unresponsive' and state['attempts']==0
-            activated=driver('enable',request(name,'enable'));assert activated['result']['notification']['status']=='recorded',activated
-            state=driver('show',dict(policy_id=name,expected_target=target))['result']['policy'];assert state['mode']=='automatic'
             before=fixture['reloads']
-            time.sleep(1.05)
-            applied=driver('tick',request(name,'automatic-tick'));assert applied['result']['operation']['result']['outcome']=='completed',applied
+            activated=driver('enable',request(name,'enable'));assert activated['result']['notification']['status']=='recorded',activated
+            # No public tick/apply: the already-running controller's maintenance
+            # loop must drive the enabled original policy under retained authority.
+            deadline=time.monotonic()+25
+            while True:
+                state=driver('show',dict(policy_id=name,expected_target=target))['result']['policy']
+                if state['attempts']==1 and state['in_flight'] is None and state['action_status'] in ('completed','exhausted'):break
+                assert time.monotonic()<deadline,('scheduled action did not complete',name,state)
+                time.sleep(.1)
             assert fixture['reloads']==before+1
-            # Repeat immutable intent returns original custody, not another reload.
-            driver('tick',request(name,'automatic-tick'));assert fixture['reloads']==before+1
+            driver('enable',request(name,'enable'));assert fixture['reloads']==before+1
             disabled=driver('disable',request(name,'disable'));assert disabled['result']['operation']['result']['mode']=='off'
-            time.sleep(1.05)
-            driver('tick',request(name,'after-off-tick'))
-            after=driver('show',dict(policy_id=name,expected_target=target))['result']['policy']
-            assert after['mode']=='off' and after['attempts']==1 and after['checks']==4
+            baseline=driver('show',dict(policy_id=name,expected_target=target))['result']['policy']['checks']
+            deadline=time.monotonic()+15
+            while True:
+                after=driver('show',dict(policy_id=name,expected_target=target))['result']['policy']
+                if after['checks']>baseline:break
+                assert time.monotonic()<deadline,('deactivation lost authorized scheduled observation',name,after)
+                time.sleep(.1)
+            assert after['mode']=='off' and after['attempts']==1
             assert fixture['reloads']==before+1
             outcomes[name]=dict(mode=after['mode'],checks=after['checks'],attempts=after['attempts'],native_scope='thread_mcp_connections',replayed=False)
         # Lost activation notice acknowledgement must hold automatic work until readback.
@@ -174,7 +182,7 @@ def main():
         assert not any(row['method'] in ('config/mcpServer/reload','thread/goal/set','turn/start') for row in fixture['calls'])
         assert not (wake/'goal-supervision').exists()
         proof.update(status='passed',qualification='installed owned Unix protocol fixture composition; not native TUI or platform acceptance',frontdoors=outcomes,
-            lost_activation_notice_readback_no_reappend=True,observer_denied=True,broad_denied=True,revoked_denied=True,
+            scheduled_without_public_tick=True,authorized_observation_continues_after_off=True,lost_activation_notice_readback_no_reappend=True,observer_denied=True,broad_denied=True,revoked_denied=True,
             exact_thread_reload_count=fixture['reloads'],no_shared_restart=True,no_goal_change=True,no_model_turn=True,no_resource_renewal=True,
             hashes={name:hashlib.sha256((Path(codex_wake.__file__).parent/name).read_bytes()).hexdigest() for name in ('controller_recovery.py','recovery_commands.py','scoped_refresh.py','shared_refresh.py','controller_notices.py','controller_runtime.py','controller_http.py','cli.py','mcp_server.py')})
     finally:
