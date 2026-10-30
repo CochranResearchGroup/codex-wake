@@ -202,3 +202,18 @@ class RecoveryTests(unittest.TestCase):
             owner.boot=lambda:'replacement-boot'
             self.assertEqual(owner.drive_due(resolve)[0]['reason'],'time_uncertain')
             self.assertEqual(len(probes),before)
+
+    def test_wall_rollback_cannot_extend_original_scheduled_authority_expiry(self):
+        with tempfile.TemporaryDirectory() as directory:
+            owner,actor,target,args,policy,clock,probes,notices,status=self.fixture(Path(directory))
+            owner.execute(actor,'recovery.configure',args('configure',policy=policy),authorize=lambda:actor)
+            owner.execute(actor,'recovery.enable',args('enable'),authorize=lambda:actor)
+            clock[0]=1001.0
+            owner.now=lambda:50.0;owner.runtime.now=owner.now
+            result=owner.drive_due(lambda *unused:actor)
+            self.assertEqual(result[0]['status'],'held')
+            self.assertEqual(probes,[])
+            state=owner.execute(actor,'recovery.show',dict(policy_id='policy',expected_target=target),authorize=lambda:actor)['result']['policy']
+            self.assertEqual(state['checks'],0)
+            self.assertEqual(state['scheduler_status'],'authority_unavailable')
+            self.assertEqual(state['clock']['authorization_expires_elapsed'],1000.0)
