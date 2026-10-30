@@ -62,5 +62,7 @@ class ControllerBuilds:
             code = run_build(build, home, account['id'], args, output=output)
             return {'target': target, 'exit_code': code, 'identity': output.getvalue(),
                     'status': 'exited', 'account_identity': 'unverified'}
+        except InventoryError:
+            raise
         except (BuildError, upgrades.UpgradeError, OSError, ValueError) as error:
             raise InventoryError('build_held', str(error)) from error
