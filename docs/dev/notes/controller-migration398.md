@@ -183,3 +183,10 @@ account ID is seeded into the candidate (an explicit preview selection action),
 never credential contents or shared histories. An unknown selected account holds
 qualification. The original selector remains untouched and rollback preserves
 normal no-argument selection as well as explicit account entrypoints.
+
+The selector qualification includes non-default shared-directory settings. A
+second red showed the default planner path would ignore an explicitly configured
+shared directory; candidate planning now reuses the complete absorbed Settings
+value with only state_root replaced. Custom prefixes/shared paths and policy
+remain intact. Absolute/escaping shared paths and noncanonical account alias
+bindings remain explicit qualification holds rather than inferred ownership.

@@ -74,8 +74,9 @@ legacy_config="{self.legacy}"
 
     def test_apply_and_rollback_preserve_native_credential_inode_and_original_shared_store(self):
         owner = self.owner()
-        (self.accounts / 'shared').mkdir()
-        (self.accounts / 'shared' / '.current-profile').write_text('codex-alice\n')
+        (self.accounts / 'common').mkdir()
+        (self.accounts / 'common' / '.current-profile').write_text('codex-alice\n')
+        self.path.write_text(self.path.read_text().replace('known_profiles=["alice"]', 'known_profiles=["alice"]\nshared_dir_name="common"'))
         self.path.write_text(self.path.read_text() + '\n[configuration.base]\nmodel="shared-policy"\nmodel_max_output_tokens=8000\nmcp_oauth_credentials_store="keyring"\n[history]\nreadable_accounts=["alice"]\n')
         ledger = self.home / 'wake' / 'objective-ledgers' / 'prior.json'
         ledger.parent.mkdir(parents=True)
