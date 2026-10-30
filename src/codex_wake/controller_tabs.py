@@ -120,8 +120,8 @@ class AuthorizedTabs:
         if 'control' not in actor.scopes:
             raise AuthError('insufficient_scope')
         target = arguments.get('expected_target') if isinstance(arguments, dict) else None
-        required = {'host','environment','workspace','presentation','generation'}
-        if not isinstance(target, dict) or not required <= target.keys() or not any(
+        required = {'host','environment','workspace','presentation'}
+        if not isinstance(target, dict) or not (required | {'generation'}) <= target.keys() or not any(
                 required <= scope.keys() and all(target.get(k) == v for k,v in scope.items()) for scope in actor.targets):
             raise AuthError('insufficient_scope')
         def authorize():
@@ -129,3 +129,50 @@ class AuthorizedTabs:
             if current != actor: raise AuthError()
             return current
         return self.runtime.execute(actor, operation, arguments, authorize=authorize, dispatch=self.tabs.execute)
+
+
+def controller_tabs_from_root(root, *, host=None, environment=None):
+    """Construct host-owned adapters from fixed private controller-tabs.json.
+
+    Production content privacy is unknown by default. Disposable fixture
+    qualification may explicitly declare safe input; this never changes a native
+    privacy observer or grants access to production terminal content.
+    """
+    import json
+    import os
+    import socket
+    import stat
+    from pathlib import Path
+    from .controller_tab_adapters import (TmuxAttachmentTransport,
+        PsmuxAttachmentTransport, ConfiguredBridge, UnixInputBroker)
+    path = Path(root) / 'controller-tabs.json'
+    fd = os.open(path,os.O_RDONLY | os.O_NOFOLLOW)
+    try:
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+            raise InventoryError('configuration_unavailable','host attachment configuration must be private')
+        with os.fdopen(os.dup(fd)) as stream:
+            raw = stream.read(262145)
+        if len(raw)>262144: raise ValueError('configuration exceeds bound')
+        config = json.loads(raw)
+    finally:
+        os.close(fd)
+    if config.get('schema_version') != 1 or not isinstance(config.get('workspaces'),dict):
+        raise ValueError('unsupported attachment configuration')
+    workspaces = {}
+    for name,row in config['workspaces'].items():
+        kind = row['kind']
+        if kind in ('tmux','byobu'):
+            transport = TmuxAttachmentTransport(row['socket_path'],row['session_id'])
+        elif kind in ('psmux','stdio'):
+            transport = PsmuxAttachmentTransport(ConfiguredBridge(row['bridge_command']),generation=row['bridge_generation'])
+        else:
+            raise ValueError('unsupported host presentation')
+        workspace = dict(kind=kind,transport=transport)
+        if row.get('input_broker_socket'):
+            workspace['broker'] = UnixInputBroker(row['input_broker_socket'])
+        if row.get('evidence_scope') == 'disposable_fixture' and row.get('privacy') == 'safe':
+            workspace['privacy'] = lambda pane:'safe'
+        workspaces[name] = workspace
+    return ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
+                          environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name)
