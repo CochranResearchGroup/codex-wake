@@ -339,8 +339,8 @@
     },
     "405": {
       "title": "Qualify the packaged cross-host milestone with Codex Bots",
-      "state": "running",
-      "tracker_state": "open",
+      "state": "validated",
+      "tracker_state": "closed",
       "blockers": [
         398,
         401,
@@ -355,9 +355,18 @@
         "nativeartifactrebuild"
       ],
       "base_sha": "f23fd08",
-      "result_sha": null,
-      "validation": [],
-      "remaining_gate": "actualdistributedmatrix and immutableBotsconsumer packet; Windows native owner unsupported explicit"
+      "result_sha": "b1aa712",
+      "validation": [
+        {
+          "evidence": "docs/dev/evidence/plan0190/crosshost405-installed.json",
+          "result": "currentintegration03677e6/wheelcf2db34c onWindows+wsl-test+Bastion;13physicalmatrixchecks,4portablecaller,13buildchecks/eachLinuxhost;realSSHwithheldreply/originalreceipt;freshownedcleanup0"
+        },
+        {
+          "evidence": "docs/dev/evidence/plan0190/bots405-native-consumer.json",
+          "result": "immutableBotsconsumer actualnative95+all5Wakefrontdoors, exactlooponlystallunknown/freshresume;draft/history/queuepreserved;0ownedprocesses"
+        }
+      ],
+      "remaining_gate": "NativeWindowsowner unsupported; Windowscaller+WSLauthorizedWindowspsmux andLinuxexecutionrolesqualified; production380 separate"
     },
     "406": {
       "title": "Run a versioned branch-and-wait flow durably",
@@ -516,15 +525,19 @@
     },
     "412": {
       "title": "Control Grok through an honest structured-runtime adapter",
-      "state": "pending",
+      "state": "running",
       "tracker_state": "open",
       "blockers": [
         405,
         411
       ],
-      "worker": null,
-      "owned_paths": [],
-      "base_sha": null,
+      "worker": "/root/recovery404",
+      "owned_paths": [
+        "controller_grok.py",
+        "grok operation contracts/tests/acceptance",
+        "sharedhooksbyroot"
+      ],
+      "base_sha": "b1aa712",
       "result_sha": null,
       "validation": []
     },
