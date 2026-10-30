@@ -80,9 +80,20 @@ def main():
             captured=mcp('wake_tabs_capture',payload)
             record=captured['result']['operation']
             assert record['phase']=='terminal' and record['result']['fallback'] is True,record
+            local_grant = dict(subject='fixture-local',client_id='fixture-client',grant_id='fixture-local-grant',issuer=base,resource=auth.resource,
+                scopes=['observe','control'],targets=[{k:v for k,v in target.items() if k!='generation'}],expires_at=time.time()+600)
+            messaging = root/'controller-messaging.json'
+            messaging.write_text(json.dumps(dict(version=1,local_caller=local_grant)))
+            messaging.chmod(0o600)
+            local_payload = dict(payload,_request=dict(payload['_request'],operation_id='local-capture',idempotency_key='local-capture',correlation_id='local-capture'))
+            local_capture = cli('tabs','capture','--arguments',json.dumps(local_payload))
+            assert local_capture['result']['operation']['phase']=='terminal',local_capture
+            from codex_wake.mcp_server import CommandRunner
+            native,failed = CommandRunner(wake_root=root).call('wake_tabs_capture',local_payload)
+            assert not failed and native['result']['operation']['operation_id']=='local-capture',native
             same=http('/operations',dict(operation='tabs.capture',arguments=payload))[1]
             assert same['result']['operation']['operation_id']==record['operation_id']
-            print(json.dumps(dict(status='passed',module=source.__file__,local_cli=True,remote_cli=True,oauth_api=True,mcp=True,observe_cannot_capture=True,retained_intent=True,real_isolated_tmux=True,windows_matrix=False),sort_keys=True))
+            print(json.dumps(dict(status='passed',module=source.__file__,local_cli=True,remote_cli=True,oauth_api=True,mcp=True,observe_cannot_capture=True,retained_intent=True,native_mcp=True,local_mutation_cli=True,real_isolated_tmux=True,windows_matrix=False),sort_keys=True))
         finally:
             if listener:
                 listener.terminate()

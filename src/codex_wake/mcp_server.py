@@ -167,6 +167,8 @@ from .history_commands import tool_specs as history_tool_specs
 SPECS.update(history_tool_specs())
 from .migration_commands import tool_specs as migration_tool_specs
 SPECS.update(migration_tool_specs())
+from .tab_commands import tool_specs as tab_tool_specs
+SPECS.update(tab_tool_specs())
 
 
 from .flow_commands import tool_specs as flow_tool_specs
@@ -313,6 +315,13 @@ class CommandRunner:
                 return result, result['status'] != 'completed'
             except InventoryError as error:
                 return {'error': {'code': error.code, 'message': str(error)}}, True
+        if group == 'controller-tabs':
+            from .tab_commands import protected_execute
+            try:
+                value = protected_execute(verb,arguments,self.wake_root)
+                return value,value['status'] != 'completed'
+            except (ValueError,OSError,KeyError) as error:
+                return {'error':{'code':getattr(error,'code','attachment_held'),'message':str(error)}},True
         if group == 'controller-flows':
             from .flow_commands import mcp_call
             try:

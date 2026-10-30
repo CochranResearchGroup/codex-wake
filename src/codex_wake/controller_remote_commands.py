@@ -35,7 +35,7 @@ def register(commands):
     remote = commands.add_parser('remote', help='perform authenticated direct controller operation')
     remote.add_argument('--endpoint', required=True)
     remote.add_argument('--token-file', type=Path, required=True)
-    remote.add_argument('operation', choices=['inventory.list', 'inventory.resolve', 'accounts.list', 'accounts.resolve', 'configuration.explain', 'builds.list', 'builds.launch', 'builds.stage', 'builds.select', 'builds.rollback', 'hosts.list', 'hosts.resolve', 'hosts.route', 'history.search', 'history.read', 'history.resume', 'operations.send', 'operations.result', 'operations.wait', 'operations.stream', 'operations.cancel', 'operations.rebind', 'migration.preview', 'migration.apply', 'migration.rollback', 'flows.propose', 'flows.publish', 'flows.definition', 'flows.start', 'flows.inspect', 'flows.advance', 'flows.reconcile', 'flows.cancel'])
+    remote.add_argument('operation', choices=['tabs.list','tabs.show','tabs.preview','tabs.apply','tabs.undo','tabs.capture','tabs.input', 'inventory.list', 'inventory.resolve', 'accounts.list', 'accounts.resolve', 'configuration.explain', 'builds.list', 'builds.launch', 'builds.stage', 'builds.select', 'builds.rollback', 'hosts.list', 'hosts.resolve', 'hosts.route', 'history.search', 'history.read', 'history.resume', 'operations.send', 'operations.result', 'operations.wait', 'operations.stream', 'operations.cancel', 'operations.rebind', 'migration.preview', 'migration.apply', 'migration.rollback', 'flows.propose', 'flows.publish', 'flows.definition', 'flows.start', 'flows.inspect', 'flows.advance', 'flows.reconcile', 'flows.cancel'])
     remote.add_argument('--arguments', type=json.loads, default={})
 
 
@@ -103,6 +103,9 @@ def command(args):
     if account_config.is_file() and 'migration' in tomllib.loads(account_config.read_text()):
         from .migration_commands import owner_from_root as migration_owner
         options['migration'] = migration_owner(args.wake_root)
+    if (Path(args.wake_root)/'controller-tabs.json').is_file():
+        from .controller_tabs import controller_tabs_from_root
+        options['tabs'] = controller_tabs_from_root(args.wake_root)
     service = ControllerOperations(ManagedInventory(Path(args.wake_root)), host=host, environment=environment, **options)
     server = ControllerHTTPServer(('127.0.0.1', args.port), auth, service,
         consent_secret=(root / 'consent.secret').read_text(), owner=config['owner'])
