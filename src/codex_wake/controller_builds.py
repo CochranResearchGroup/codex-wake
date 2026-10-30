@@ -22,6 +22,7 @@ class ControllerBuilds:
             'builds.list': {'account'},
             'builds.launch': {'account', 'channel', 'expected_target', 'args'},
             'builds.stage': {'recipe'},
+            'builds.select': {'account', 'channel', 'expected_target', 'identifier'},
             'builds.rollback': {'account', 'channel', 'expected_target'},
         }
         if operation not in allowed:
@@ -41,8 +42,9 @@ class ControllerBuilds:
             for channel in channels:
                 try:
                     build = load_build(self.manifest, channel, home)
-                except BuildError:
+                except BuildError as error:
                     if operation == 'builds.list':
+                        rows.append(dict(name=channel, status='held', reason=str(error)))
                         continue
                     raise
                 target = dict(account['target'], build_channel=channel, build_sha256=build.sha256,
@@ -53,6 +55,8 @@ class ControllerBuilds:
                 return {'owner': 'codex-wake', 'builds': rows}
             if arguments.get('expected_target') != target:
                 raise InventoryError('stale_target', 'expected account and immutable build identity required')
+            if operation == 'builds.select':
+                return upgrades.select(self.manifest.parent, home, identifier=arguments.get('identifier'), channel=channel)
             if operation == 'builds.rollback':
                 return upgrades.select(self.manifest.parent, home, channel=channel, rollback=True)
             args = arguments.get('args', ['--version'])
