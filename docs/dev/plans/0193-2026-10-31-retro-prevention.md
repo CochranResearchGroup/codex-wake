@@ -24,9 +24,9 @@ Cleanup receipt contract: schema="codex-wake.cleanup.v1", kind="plan" or "result
 
 |Ticket|Blockers|Owner|State|Evidence|
 |---|---|---|---|---|
-|440|none|primary|running|pending|
-|441|none|worker|pending|pending|
-|442|none|worker|pending|pending|
+|440|none|primary|validated|a8822f1;9 cleanup public cases, cleanup+summary12 pass each Python3.11/3.12|
+|441|none|ticket441|running|isolated validation profile and packaging snapshot checks|
+|442|none|ticket442|validated|fd0308e cherry-pickedc70e6f7; integrated public checks pass|
 |443|440,441,442|worker after readiness|pending|pending|
 
 Private detailed receipts: user-state implement439. Commits/merges, validations and tracker closure are distinct. Changes reach canonical main through reviewed PRs under existing integration policy; local checks satisfy CI. Parent439 remains unmodified.
