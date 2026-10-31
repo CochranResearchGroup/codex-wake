@@ -51,6 +51,27 @@ class UpgradeJobsTests(unittest.TestCase):
             self.assertEqual(after['deadline'],original['deadline'])
             self.assertEqual(after['repair_attempts'],0)
 
+    def test_verification_readmission_never_renews_an_expired_job(self):
+        from codex_wake.managed_inventory import InventoryError
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);target={'host':'fixture'};now=[100.0]
+            actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
+            (root/'recipe.json').write_text(json.dumps(dict(id='candidate',upstream_version='0.166')))
+            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,
+                recipes={'release':str(root/'recipe.json')},repair={'patches':[]},limits={'total_seconds':10})))
+            owner=UpgradeJobs(root,now=lambda:now[0],executor=lambda _:dict(status='failed',reason='verification_interrupted'))
+            def call(verb,**extra):return owner.execute(actor,'upgrades.'+verb,dict(expected_target=target,**extra))['result']
+            call('enable');original=call('start',recipe='release')['job'];call('advance',job_id=original['id'])
+            evidence=root/'upgrade-jobs'/original['id']/'repair';evidence.mkdir(parents=True)
+            (evidence/'repair-state.json').write_text('{}')
+            now[0]=111.0
+            with self.assertRaisesRegex(InventoryError,'deadline_exhausted'):
+                call('reconcile',job_id=original['id'],mode='verify_only')
+            after=call('show',job_id=original['id'])['job']
+            self.assertEqual(after['deadline'],110.0)
+            self.assertEqual(after['state'],'held')
+            self.assertEqual(after['repair_attempts'],0)
+
     def test_installed_stage_and_public_adapters_use_same_job(self):
         import hashlib
         import tarfile
