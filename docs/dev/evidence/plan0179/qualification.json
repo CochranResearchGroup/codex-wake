@@ -1,0 +1,72 @@
+{
+  "status": "QUALIFIED_PRIVATE_CANDIDATE_NOT_ACTIVATED",
+  "upstream": "360319d8dee62d87e2d59fc0c21805d79519cfed",
+  "source_commit": "46a1f6506d204a99832656cb860ee353ca135be8",
+  "package": "/home/ecochran76/.local/share/codex-wake/native/modern-0165-46a1f6506d",
+  "version": "codex-cli 0.165.0",
+  "binaries": {
+    "bin/codex": {
+      "sha256": "8852916a844fef28036a9032f8d2f980676239f725c01a7e20eddb46f77a83b0",
+      "bytes": 420363968
+    },
+    "bin/codex-code-mode-host": {
+      "sha256": "c69ef6287fc3d0108d3561532e22d6b3b6e01074ec4e7edc4ded9735425f9760",
+      "bytes": 100782320
+    },
+    "codex-resources/bwrap": {
+      "sha256": "8b6679d62120e60335aac2bfe141f60237710ff0897e658113d1e039987a78db",
+      "bytes": 427584
+    },
+    "codex-path/rg": {
+      "sha256": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+      "bytes": 5408904
+    }
+  },
+  "source_checks": {
+    "context_history": 95,
+    "public_notice": 3,
+    "mcp_status": 11,
+    "scoped_reload": 1,
+    "persisted_resume": 1,
+    "stable_and_experimental_exports": true,
+    "sdk_generated": true,
+    "format_and_whitespace": true
+  },
+  "managed_roundtrip": {
+    "state": "passed",
+    "seconds": 37.996582717998535,
+    "model_turns": 0,
+    "owned_processes_remaining": []
+  },
+  "native_tui": {
+    "verdict": "PASS_REAL_NATIVE_INSTALLED_TUI_JOURNEY",
+    "seconds": 40.730577382000774,
+    "http_calls": 7,
+    "external_provider_calls": 0,
+    "peer_unchanged": true,
+    "genuine_native_mcp_enrollment": true,
+    "genuine_native_mcp_operator_renewal": true,
+    "notification_started_no_model_turn": true,
+    "final_owned_process_census": []
+  },
+  "shared_runtime_unchanged": {
+    "pid": true,
+    "exe": true,
+    "sha256": true,
+    "controller": true,
+    "supervision": true
+  },
+  "known_gap": null,
+  "live_deployment": false,
+  "followup_qualification": {
+    "native_test_fix_commit": "b111dd221bcf56f625c0aecde9380b1fb57a4d85",
+    "previous_known_gap": "Broader MCP selection retained22pass3fail: missing stdio fixture prerequisites fixed and status selection11pass; separate OAuth callback fixture timeout remains unqualified. No whole-native suite claim.",
+    "original_mcp_selection": {
+      "passed": 25,
+      "failed": 0,
+      "seconds": 2.65
+    },
+    "evidence": "docs/dev/evidence/plan0180/acceptance.md",
+    "production_source_and_package_unchanged": true
+  }
+}

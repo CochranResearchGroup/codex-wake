@@ -1,0 +1,182 @@
+{
+  "tier": "focused native component and opt-in isolated runtime qualification",
+  "full_workspace_suite": false,
+  "external_provider_calls": 0,
+  "build_jobs": 2,
+  "runs": {
+    "barrier-unit3": {
+      "exit_code": 0,
+      "elapsed": 363.39958095550537,
+      "command": "See retained runner",
+      "log_path": "/home/ecochran76/.local/state/codex-wake/plan184/barrier-unit3.log"
+    },
+    "daemon-unit": {
+      "exit_code": 101,
+      "elapsed": 468.36321926116943,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--profile",
+        "dev-small",
+        "-p",
+        "codex-app-server-daemon",
+        "--lib"
+      ],
+      "log_path": "/home/ecochran76/.local/state/codex-wake/plan184/daemon-unit.log"
+    },
+    "daemon-unit2": {
+      "exit_code": 101,
+      "elapsed": 84.82088232040405,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--profile",
+        "dev-small",
+        "-p",
+        "codex-app-server-daemon",
+        "--lib",
+        "--",
+        "--test-threads=2"
+      ],
+      "log_path": "/home/ecochran76/.local/state/codex-wake/plan184/daemon-unit2.log"
+    },
+    "schema-stable": {
+      "exit_code": 0,
+      "elapsed": 136.9772481918335,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--profile",
+        "dev-small",
+        "-p",
+        "codex-app-server-protocol",
+        "--lib",
+        "schema_fixtures_tests::write_schema_fixtures_from_env",
+        "--",
+        "--exact",
+        "--ignored"
+      ],
+      "log_path": "/home/ecochran76/.local/state/codex-wake/plan184/schema-stable.log"
+    },
+    "schema-experimental": {
+      "exit_code": 0,
+      "elapsed": 133.2216010093689,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--profile",
+        "dev-small",
+        "-p",
+        "codex-app-server-protocol",
+        "--lib",
+        "schema_fixtures_tests::write_schema_fixtures_from_env",
+        "--",
+        "--exact",
+        "--ignored"
+      ],
+      "log_path": "/home/ecochran76/.local/state/codex-wake/plan184/schema-experimental.log"
+    },
+    "checkpoint-final": {
+      "exit_code": 0,
+      "elapsed": 480.1300268173218,
+      "native_sha256": "acb3e9284ebfd99a7aa6f2248c0d538aa7a3e6eda159ffa6d880f23e0f1064c5",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--profile",
+        "dev-small",
+        "-p",
+        "codex-cli",
+        "--bin",
+        "codex"
+      ],
+      "log_path": "/home/ecochran76/.local/state/codex-wake/plan184/checkpoint-final.log"
+    },
+    "updater-regression": {
+      "exit_code": 0,
+      "elapsed": 804.0820090770721,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--profile",
+        "dev-small",
+        "-p",
+        "codex-app-server-daemon",
+        "--lib",
+        "update_loop::tests::",
+        "--",
+        "--test-threads=2"
+      ],
+      "log_path": "/home/ecochran76/.local/state/codex-wake/plan184/updater-regression.log"
+    },
+    "protocol-contract": {
+      "exit_code": 0,
+      "elapsed": 817.7802534103394,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--profile",
+        "dev-small",
+        "-p",
+        "codex-app-server-protocol",
+        "--lib",
+        "schema_fixtures_tests::",
+        "--",
+        "--test-threads=2"
+      ],
+      "log_path": "/home/ecochran76/.local/state/codex-wake/plan184/protocol-contract.log"
+    },
+    "checkpoint-formatted": {
+      "exit_code": 0,
+      "elapsed": 143.45338821411133,
+      "native_sha256": "acb3e9284ebfd99a7aa6f2248c0d538aa7a3e6eda159ffa6d880f23e0f1064c5"
+    }
+  },
+  "admission_tests": {
+    "passed": 2
+  },
+  "updater_regression": {
+    "passed": 21,
+    "filtered_out": 62,
+    "test_body_seconds": 47.48
+  },
+  "protocol_contract": {
+    "passed": 4,
+    "ignored": 1,
+    "filtered_out": 313,
+    "test_body_seconds": 3.93
+  },
+  "prior_full_daemon_suite": {
+    "passed": 81,
+    "failed": 1,
+    "failed_test": "backend::pid::tests::shutdown_grace_handles_process_exit",
+    "classification": "unresolved host-time-sensitive flake; diagnostic exact rerun passed; original retained"
+  },
+  "limits": [
+    "Independent real-model checkpoint quality not tested",
+    "Windows and power-loss fault injection not run",
+    "Current package/component selection is not a full Rust workspace suite"
+  ],
+  "qualification_receipt": "/home/ecochran76/.local/state/codex-wake/plan184/final-qualification-result.json",
+  "formatted_binary_byte_identical": true,
+  "qualified_package": {
+    "path": "/home/codex-daemon-test/daemon-qualification-0165/candidate-checkpoint4",
+    "sha256": "acb3e9284ebfd99a7aa6f2248c0d538aa7a3e6eda159ffa6d880f23e0f1064c5"
+  },
+  "fixture_wrong_uid_rejected": true,
+  "formatter_and_diff_checks": "passed"
+}

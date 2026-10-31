@@ -299,3 +299,19 @@ Subsequent label reuse or instance replacement does not redirect that operation.
 A view relating agents and conversations to their accounts, execution contexts,
 runtimes, presentation attachments and control relationships. Names and stable
 identifiers can locate observations, whose freshness and uncertainty remain visible.
+
+**Upgrade recovery**:
+Continuing work paused by a specific daemon upgrade from its durable checkpoint,
+under the same authority, remaining allowance, deadline and conversation identity.
+It does not resume work that was already paused or grant new resources.
+
+**Recovery acceptance**:
+Durable evidence that one recovery continuation was admitted for an exact upgrade
+and conversation. An absent reply does not prove that continuation was rejected.
+
+**Unknown recovery delivery**:
+A recorded recovery attempt whose acceptance cannot be established. It remains
+held for reconciliation rather than authorizing another attempt.
+
+**Upgrade resource authority**:
+Host-owned evidence binding a recovery to the original goal, tenant/account, policy, cumulative accounting and limits. The trusted TUI user action establishes original native policy when creating a native goal, and may carry already verified native policy through later controls without changing its grant. A later status action cannot convert an existing unknown or externally controlled goal into native-only authority. Model handoffs cannot establish this declaration; absent or unverifiable authority keeps recovery held.

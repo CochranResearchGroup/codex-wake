@@ -1,0 +1,444 @@
+{
+  "schema_version": 1,
+  "state": "ISOLATED_QUALIFIED_REVIEW_PENDING",
+  "spec": 413,
+  "tickets": [
+    414,
+    415,
+    416,
+    417,
+    418
+  ],
+  "native_branch": "fix/413-recovery-integration",
+  "native_integration_tip": "f8e5a5c24da256dda64853c8d6c36e3a8ef78a49",
+  "native_build_commit": "e52b43cc707e0c85f40f43558c7c13699fbfb570",
+  "test_only_delta_after_build": [
+    "codex-rs/app-server/tests/suite/v2/thread_delete.rs"
+  ],
+  "production_source_byte_equivalence": true,
+  "cli_sha256": "deadc6fa49b619fba2ce07bd10464db97cf525125d88443c3ac937826cac6c19",
+  "code_mode_host_sha256": "a338ecd979e1c7cc187fd586f151a8186d1ad3b353a3ffdb2d7ddbe371ec90d7",
+  "acceptance": {
+    "state": "passed",
+    "uid": 1017,
+    "scripted_localhost_provider": true,
+    "external_model_calls": 0,
+    "cases": [
+      {
+        "case": "a-accepted-crash1",
+        "mode": "accepted-crash",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 12,
+        "rollback_preserved": true
+      },
+      {
+        "case": "a-adoption2",
+        "mode": "adoption",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 6,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-allowedstring1",
+        "mode": "deadline",
+        "authority_case": "allowed-string",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-bad-handoff1",
+        "mode": "bad-handoff",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-boolversion1",
+        "mode": "deadline",
+        "authority_case": "seal-bool-version",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-deadline-at1",
+        "mode": "deadline",
+        "authority_case": "deadline_at",
+        "harness_sha256": "5ef435e4dadb1269aecd7c6b9c844df77a887b852bf645c3180056179cbcd58d",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-deadline1",
+        "mode": "deadline",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-delete2",
+        "mode": "delete-completed",
+        "authority_case": "",
+        "harness_sha256": "59e7549336ba5936a6fbb28026bce946eb00cbfd5e0d5e02e475b6432dc77529",
+        "provider_requests": 10,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-exhausted1",
+        "mode": "exhausted",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-limitstring1",
+        "mode": "deadline",
+        "authority_case": "limit-string",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-metadata1",
+        "mode": "success",
+        "authority_case": "metadata",
+        "harness_sha256": "5ef435e4dadb1269aecd7c6b9c844df77a887b852bf645c3180056179cbcd58d",
+        "provider_requests": 10,
+        "rollback_preserved": true
+      },
+      {
+        "case": "a-missing1",
+        "mode": "deadline",
+        "authority_case": "missing-declaration",
+        "harness_sha256": "59e7549336ba5936a6fbb28026bce946eb00cbfd5e0d5e02e475b6432dc77529",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-originalpause1",
+        "mode": "originalpause",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-ownerloss1",
+        "mode": "owner-loss",
+        "authority_case": "",
+        "harness_sha256": "59e7549336ba5936a6fbb28026bce946eb00cbfd5e0d5e02e475b6432dc77529",
+        "provider_requests": 10,
+        "rollback_preserved": true
+      },
+      {
+        "case": "a-response-loss1",
+        "mode": "response-loss",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 10,
+        "rollback_preserved": true
+      },
+      {
+        "case": "a-retention1",
+        "mode": "retention",
+        "authority_case": "",
+        "harness_sha256": "59e7549336ba5936a6fbb28026bce946eb00cbfd5e0d5e02e475b6432dc77529",
+        "provider_requests": 10,
+        "rollback_preserved": true
+      },
+      {
+        "case": "a-retention2",
+        "mode": "retention",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 10,
+        "rollback_preserved": true
+      },
+      {
+        "case": "a-rollback-old1",
+        "mode": "success",
+        "authority_case": "",
+        "harness_sha256": "d8945c635e9e0a0c90afd84278a0ea1ecbe5bc533dfe257f943d6f6ece1bbbed",
+        "provider_requests": 10,
+        "rollback_preserved": true
+      },
+      {
+        "case": "a-scopenumber1",
+        "mode": "deadline",
+        "authority_case": "scope-number",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-sealaccount1",
+        "mode": "deadline",
+        "authority_case": "seal-account",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-sealmissing1",
+        "mode": "deadline",
+        "authority_case": "seal-missing",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-startup-fail1",
+        "mode": "startup-fail",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 10,
+        "rollback_preserved": true
+      },
+      {
+        "case": "a-unknown1",
+        "mode": "unknown",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-unknownpolicy1",
+        "mode": "deadline",
+        "authority_case": "unknown-policy",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-userpause1",
+        "mode": "userpause",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-version1",
+        "mode": "deadline",
+        "authority_case": "seal-version",
+        "harness_sha256": "59e7549336ba5936a6fbb28026bce946eb00cbfd5e0d5e02e475b6432dc77529",
+        "provider_requests": 8,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-wrong-digest1",
+        "mode": "wrong-digest",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 6,
+        "rollback_preserved": false
+      },
+      {
+        "case": "a-wrong-target1",
+        "mode": "wrong-target",
+        "authority_case": "",
+        "harness_sha256": "792abc5645b9508ac3e71abbda22d8e4b3b602c42f0b5ce31380ccf2295c8a6e",
+        "provider_requests": 6,
+        "rollback_preserved": false
+      }
+    ],
+    "case_count": 28,
+    "stopped_request_checks": [
+      {
+        "case": "a-allowedstring1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-bad-handoff1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-boolversion1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-deadline-at1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-deadline1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-exhausted1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-limitstring1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-missing1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-originalpause1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-scopenumber1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-sealaccount1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-sealmissing1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-unknown1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-unknownpolicy1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-userpause1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-version1",
+        "stopped_provider_requests": [
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-wrong-digest1",
+        "stopped_provider_requests": [
+          3,
+          3
+        ],
+        "additional_recovery_requests": 0
+      },
+      {
+        "case": "a-wrong-target1",
+        "stopped_provider_requests": [
+          3,
+          3
+        ],
+        "additional_recovery_requests": 0
+      }
+    ],
+    "counter_continuity_checks": 34,
+    "retained_unchanged": 300,
+    "cold_pending_progressed": 40,
+    "packages": [
+      {
+        "package": "candidate-repair413a",
+        "files": 6,
+        "tree_sha256": "5f5bafce534551e7e3e2ca9f0f3e6739feab0dfad1a35d8c97f7fc3c07f43db5",
+        "unchanged": true
+      },
+      {
+        "package": "candidate-repair413a-baseline",
+        "files": 6,
+        "tree_sha256": "6b92b2ec14fb0356e459ba1d5a566f84f9060737af7290288a437ae895744574",
+        "unchanged": true
+      }
+    ],
+    "actual_older_rollback": true
+  },
+  "checks": {
+    "integrated-admission": {
+      "exit_code": 0,
+      "elapsed": 482.0283260345459
+    },
+    "integrated-recovery-union": {
+      "exit_code": 0,
+      "elapsed": 26.437986612319946
+    },
+    "integrated-schema": {
+      "exit_code": 0,
+      "elapsed": 96.1380786895752
+    },
+    "integrated-public-compile2": {
+      "exit_code": 0,
+      "elapsed": 111.19073581695557
+    },
+    "public-delete-a3": {
+      "exit_code": 0,
+      "elapsed_monotonic": 6.658062358999814
+    },
+    "public-driver-a2": {
+      "exit_code": 0,
+      "elapsed_monotonic": 37.01736974800042
+    }
+  },
+  "selected_counts": {
+    "admission": 5,
+    "storage_lifecycle": 6,
+    "protocol": 4,
+    "protocol_writer_ignored": 1,
+    "public_delete": 8,
+    "public_driver": 2
+  },
+  "limitations": [
+    "Scripted localhost provider, not independent real-model qualification",
+    "Separate Linux UID1017 shares WSL kernel and resources",
+    "dev-small offline/locked local checks; no hosted CI or comprehensive workspace suite",
+    "Working account, launcher, governor, supervision and main branches not changed",
+    "Review and one bounded TDD remediation remain parent-acceptance gates"
+  ],
+  "created": 1793385310.0821972
+}
