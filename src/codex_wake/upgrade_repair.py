@@ -393,6 +393,8 @@ class UpgradeRepair:
         existing=self.state.get('verification_readmission')
         inventory=_inventory(self.workspace);source_digest=_digest(inventory)
         if self.state.get('status')=='verify_ready' and existing:
+            if self.state.get('inflight'):
+                raise RepairHeld('verification_execution_unreconciled')
             if existing['source_digest']!=source_digest:raise RepairHeld('source_changed_after_readmission')
             return existing
         if self.state.get('status')!='held':raise RepairHeld('held_repair_evidence_required')
