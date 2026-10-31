@@ -89,3 +89,20 @@ pathlib.Path(os.environ['CODEX_HOME']).joinpath('fixture-invocation.json').write
                 run(config,'worker',packet,response)
             self.assertFalse((outside/'fixture-invocation.json').exists())
             self.assertFalse(response.exists())
+
+    def test_native_capacity_error_emits_constant_nonretryable_protocol_without_log_content(self):
+        import contextlib
+        import io
+        from unittest.mock import patch
+        from codex_wake.upgrade_codex_worker import main
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);config,packet,response,home,workspace=self.fixture(root)
+            declaration=json.loads(config.read_text());native=Path(declaration['executable'])
+            native.write_text(native.read_text()+"\nprint(json.dumps({'type':'error','error':{'code':'usage_limit_reached','message':'private diagnostic'}}));sys.exit(2)\n")
+            declaration['sha256']=hashlib.sha256(native.read_bytes()).hexdigest();config.write_text(json.dumps(declaration))
+            output=io.StringIO()
+            with patch.dict(os.environ,{'CODEX_UPGRADE_PACKET':str(packet),'CODEX_UPGRADE_RESPONSE':str(response)}),contextlib.redirect_stderr(output):
+                code=main(['--config',str(config),'--role','worker'])
+            self.assertEqual(code,2)
+            self.assertEqual(json.loads(output.getvalue()),dict(schema_version=1,status='held',reason='coding_capacity_unavailable',retryable=False))
+            self.assertFalse(response.exists())

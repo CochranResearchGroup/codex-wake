@@ -34,6 +34,25 @@ def _digest(value):
     return _sha(json.dumps(value,sort_keys=True,separators=(',',':')).encode())
 
 
+NONRETRYABLE_WORKER_REASONS=frozenset(('authentication_needed','coding_capacity_unavailable',
+    'configuration_unavailable','native_coding_failed'))
+
+
+def _explicit_worker_hold(output):
+    # Only the configured worker's complete/final structured protocol is metadata;
+    # native event prose and intermediate JSON records are not a retry decision.
+    candidates=[output.strip()]
+    if output.strip():candidates.append(output.strip().splitlines()[-1])
+    for candidate in candidates:
+        try:value=json.loads(candidate)
+        except ValueError:continue
+        if (isinstance(value,dict) and set(value)=={'schema_version','status','reason','retryable'}
+                and value['schema_version']==1 and value['status']=='held'
+                and value['retryable'] is False and value['reason'] in NONRETRYABLE_WORKER_REASONS):
+            return value['reason']
+    return None
+
+
 def _inventory(root):
     files={}
     for path in sorted(root.rglob('*')):
@@ -261,9 +280,9 @@ class UpgradeRepair:
 
     def _review(self):
         packet=self._packet('reviewer')
-        code,_,path=self._command(self.config['reviewer']['argv'],'reviewer',packet=packet)
+        code,output,path=self._command(self.config['reviewer']['argv'],'reviewer',packet=packet)
         if code:
-            raise RepairHeld('reviewer_failed')
+            raise RepairHeld(_explicit_worker_hold(output) or 'reviewer_failed')
         report=self._read_report(path,'reviewer')
         current=self._packet('reviewer')
         if current['candidate_digest']!=packet['candidate_digest'] or current['tests_digest']!=packet['tests_digest']:
@@ -355,8 +374,10 @@ class UpgradeRepair:
                 self._save()
                 self.checkpoint(dict(repair_attempts=self.state['repair_attempts']))
                 packet=self._packet('worker')
-                code,_,path=self._command(self.config['worker']['argv'],'worker',packet=packet)
+                code,output,path=self._command(self.config['worker']['argv'],'worker',packet=packet)
                 if code:
+                    reason=_explicit_worker_hold(output)
+                    if reason:raise RepairHeld(reason)
                     self.state['findings']=['worker command failed'];applied=False
                     continue
                 report=self._read_report(path,'worker')

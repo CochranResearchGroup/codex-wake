@@ -150,6 +150,35 @@ def _validate(value,schema):
         raise CodexAdapterHeld('native final response failed structured role validation')
 
 
+NONRETRYABLE_REASONS=frozenset(('authentication_needed','coding_capacity_unavailable',
+    'configuration_unavailable','native_coding_failed'))
+
+
+def _native_failure(events,errors):
+    def tail(path):
+        with path.open('rb') as stream:
+            stream.seek(0,2);stream.seek(max(0,stream.tell()-65536))
+            return stream.read(65536).decode('utf-8',errors='replace')
+    messages=[]
+    for line in tail(events).splitlines():
+        try:value=json.loads(line)
+        except ValueError:continue
+        if not isinstance(value,dict):continue
+        if value.get('type') in ('error','turn.failed') or isinstance(value.get('error'),dict):
+            error=value.get('error',value)
+            if isinstance(error,dict):
+                messages.extend(str(error.get(k,'')) for k in ('code','type','message','status'))
+    # Unstructured stderr is diagnostic only; recognize explicit native ERROR
+    # records, never arbitrary model/user prose printed among JSON events.
+    messages.extend(line for line in tail(errors).splitlines() if re.search(r'\bERROR\b',line))
+    text='\n'.join(messages).lower()
+    if re.search(r'\b401\b|authentication_error|not\s*logged\s*in|notloggedin',text):
+        return 'authentication_needed'
+    if re.search(r'usage[_ ]limit|quota|rate[_ ]limit',text):
+        return 'coding_capacity_unavailable'
+    return 'native_coding_failed'
+
+
 def run(config_path,role,packet_path,response_path):
     """Run a host-configured source-maintenance role; never perform login."""
     config=_configuration(Path(config_path),role)
@@ -199,7 +228,7 @@ def run(config_path,role,packet_path,response_path):
                     stdout=out,stderr=err,text=True,start_new_session=True)
                 process.communicate(prompt,timeout=config['timeout_seconds'])
                 if process.returncode:
-                    raise CodexAdapterHeld('native coding role failed; inspect retained private execution log')
+                    raise CodexAdapterHeld(_native_failure(events,errors))
         report=_read(final);_validate(report,schema)
         current=_identities(_inventory(workspace))
         if role=='reviewer' and current!=(packet['candidate_digest'],packet['tests_digest']):
@@ -236,7 +265,8 @@ def main(argv=None):
     except (OSError,ValueError,KeyError,subprocess.SubprocessError) as error:
         # Invalid source/output paths must not gain a write merely because an
         # error is being reported. The outer executor retains stderr and exit.
-        print(json.dumps(dict(schema_version=1,status='held',reason=str(error))),file=sys.stderr)
+        reason=str(error) if str(error) in NONRETRYABLE_REASONS else 'configuration_unavailable'
+        print(json.dumps(dict(schema_version=1,status='held',reason=reason,retryable=False)),file=sys.stderr)
         return 2
     return 0
 
