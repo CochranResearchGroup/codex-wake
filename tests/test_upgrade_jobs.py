@@ -202,3 +202,35 @@ class UpgradeJobsTests(unittest.TestCase):
             self.assertFalse(json.loads(output.getvalue())['result']['enabled'])
             state=UpgradeJobs(root).execute(actor,'upgrades.status',dict(expected_target=target))['result']
             self.assertFalse(state['enabled'])
+
+    def test_oauth_mcp_catalog_advertises_upgrade_tools_without_an_account_owner(self):
+        import base64
+        import hashlib
+        import threading
+        from urllib.request import Request, urlopen
+        from codex_wake.controller_auth import OAuthAuthority
+        from codex_wake.controller_http import ControllerHTTPServer
+        from codex_wake.controller_operations import ControllerOperations
+        from codex_wake.managed_inventory import ManagedInventory
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);target={'host':'fixture','environment':'test'}
+            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={})))
+            auth=OAuthAuthority(root/'oauth.sqlite',issuer='https://wake.test',resource='https://wake.test/mcp')
+            client=auth.register({'redirect_uris':['http://localhost/callback']});verifier='x'*43
+            challenge=base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+            code=auth.authorize(subject='owner',principal_kind='owner',client_id=client['client_id'],redirect_uri=client['redirect_uris'][0],resource=auth.resource,scopes=['observe','admin'],targets=[target],code_challenge=challenge)
+            token=auth.token(dict(grant_type='authorization_code',client_id=client['client_id'],code=code,redirect_uri=client['redirect_uris'][0],code_verifier=verifier,resource=auth.resource))['access_token']
+            server=ControllerHTTPServer(('127.0.0.1',0),auth,ControllerOperations(ManagedInventory(root),host='fixture',environment='test'))
+            thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+            def post(path,body):
+                request=Request('http://127.0.0.1:'+str(server.server_port)+path,data=json.dumps(body).encode(),headers={'Content-Type':'application/json','Authorization':'Bearer '+token})
+                with urlopen(request,timeout=5) as response:return json.load(response)
+            try:
+                tools=post('/mcp',dict(jsonrpc='2.0',id=1,method='tools/list'))['result']['tools']
+                self.assertIn('wake_upgrades_status',[tool['name'] for tool in tools])
+                args={'expected_target':target}
+                direct=post('/operations',dict(operation='upgrades.status',arguments=args))
+                mcp=post('/mcp',dict(jsonrpc='2.0',id=2,method='tools/call',params=dict(name='wake_upgrades_status',arguments=args)))
+                self.assertEqual(mcp['result']['structuredContent']['result'],direct['result'])
+            finally:
+                server.shutdown();server.server_close();thread.join(timeout=2)
