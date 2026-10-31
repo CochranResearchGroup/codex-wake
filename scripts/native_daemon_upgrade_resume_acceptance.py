@@ -491,7 +491,7 @@ with unix_connect(sys.argv[1],open_timeout=5,close_timeout=1) as c:
   for tid,g in after.items():
    before=report['goals_before'][tid];assert g['status']=='paused' and all(g[k]==before[k] for k in ['threadId','objective','createdAt','tokenBudget']) and g['tokensUsed']>=before['tokensUsed'],g
   def select_launcher_build(executable):
-   manifest=shared/'builds.json';v=json.loads(manifest.read_text());row=v['builds']['modded'];row.update(executable=str(executable),sha256=digest(executable),revision='qualified-upgrade-fixture')
+   manifest=shared/'builds.json';v=json.loads(manifest.read_text());row=v['builds']['modded'];row.update(executable=str(executable),sha256=digest(executable),upstream_version=native_version(executable),revision='qualified-upgrade-fixture')
    staged=manifest.with_suffix('.next');staged.write_text(json.dumps(v));os.replace(staged,manifest)
    report.setdefault('fixture_build_registrations',[]).append(dict(executable=str(executable),sha256=digest(executable)))
   select_launcher_build(target);pane('fresh',report['active_threads'][0])
