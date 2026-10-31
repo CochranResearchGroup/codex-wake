@@ -1,6 +1,8 @@
 # Integrated actual 0.166 acceptance (#453)
 
-State: RUNNING. Plan0193 and specification #444 remain the scope authority.
+State: HELD after a controller storage-scan race. Same-job verification-only
+continuation is being implemented; no new coding attempt or budget is authorized.
+Plan0193 and specification #444 remain the scope authority.
 This record distinguishes source verification, the actual disposable job and
 production activation. No production activation is authorized or claimed.
 
@@ -131,3 +133,34 @@ when the job becomes terminal. Its launch and terminal receipts are separate
 from job acceptance. At the latest checkpoint, temporary job data was
 221,594,783 bytes, with public dependency cache accounted separately; the live
 V8 Git pack's fresh modification time demonstrated checkout progress.
+
+
+## First compile hold
+
+The third regeneration command reached actual GNU/dev-small Rust compilation.
+The storage monitor then raced Rust deleting a temporary `lib.rmeta` file and
+held the job with `FileNotFoundError`. This was a controller sizing failure,
+not a Rust compiler rejection. The original completion receipt reports held;
+no 0.166 package, independent approval, qualification or promotion exists yet.
+
+`held-1-readback.json` records three charged attempts, original deadline
+`1793478757.2470584`, and the unchanged retained 0.165 selection (CLI SHA256
+`0d511c4a77c56b0a09f8549f6e43218ee899d0b66598725d4b67c71dc935a973`).
+Owned job processes were absent after cleanup. Terminal cleanup reclaimed
+348,215,537 bytes of owned compiler cache; public dependency cache and all
+source/reports remained retained. The interrupted command keeps its intent
+record and owned PID/start identity; no successful exit is inferred.
+
+Only `codex-rs/Cargo.lock` changed after worker 3, during owned Cargo generation.
+The test digest is unchanged. The current candidate digest is
+`922ba019ce189349f336b4ad4a156fbc0483bcf3e89d44a1ca513e3a30a986a6`;
+the last worker's pre-generation digest is
+`e0a68325910a7f6c79b471bcb6d905e836f9229e81a5c7f1a80725e9de67751d`.
+Continuation must preserve this generation provenance and original accounting.
+
+The missing test dependency was corrected in the disposable distro:
+`zstd 1.5.5+dfsg2-2build1.1`. The full actual candidate packaging-helper suite
+then passed 29 tests, with `PYTHONDONTWRITEBYTECODE=1` and before/after Python
+helper hashes unchanged. `supplemental-package-helpers.json` and `.log` retain
+that source-only evidence. No frozen driver, configuration or candidate code was
+manually edited.
