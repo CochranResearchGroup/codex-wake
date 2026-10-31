@@ -1,6 +1,7 @@
 # Plan0167 — Resource enforcement discoverability and first use
 
-State: CLOSED. Owner: primary / ecochran76. Work item: #279; related #274, #278.
+State: CLOSED
+Owner: primary / ecochran76. Work item: #279; related #274, #278.
 Branch: feat/objective-enforcement. Base:7dfb868.
 
 ## Original audit scope and acceptance (completed)

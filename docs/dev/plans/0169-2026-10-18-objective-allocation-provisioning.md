@@ -1,6 +1,6 @@
 # Plan0169 — Automatic caller provisioning with allocation continuity
 
-State: COMPLETE
+State: CLOSED
 Owner: primary / ecochran76
 Branch: docs/289-close-evidence-gaps. Target: origin/main.
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/289

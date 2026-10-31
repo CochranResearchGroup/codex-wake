@@ -1,6 +1,17 @@
 # Cooperative daemon upgrades
 
-State: OPEN. Native checkpoint gate is implemented and isolated-runtime qualified; broader real-model and downstream activation automation remain open. Operator requests every open tab receive a prompt instructing active work to pause and produce a durable handoff before a built daemon is installed. Prior Plan0183 runtime acceptance is evidence, not installation authority. Only dummy UID1017 qualification; preserve working services, eight supervision records and lifecycle registry.
+State: OPEN
+Outcome boundary (preserved): OPEN. Native checkpoint gate is implemented and isolated-runtime qualified; broader real-model and downstream activation automation remain open. Operator requests every open tab receive a prompt instructing active work to pause and produce a durable handoff before a built daemon is installed. Prior Plan0183 runtime acceptance is evidence, not installation authority. Only dummy UID1017 qualification; preserve working services, eight supervision records and lifecycle registry.
+
+## Current State
+
+The native checkpoint gate has isolated-runtime source qualification, with private
+native custody and exact compiled identity recorded below. Broader real-model
+acceptance and downstream activation automation remain OPEN. Canonical Wake
+integration through PR430 (`343ed9f`) publishes that evidence; it does not install
+or activate the candidate or close those broader gates. Historical runtime
+observations below remain dated qualification, not current live-state readbacks.
+
 
 Design: native updater preparation precedes package selection, stopping workers or replacing the daemon. One connection-owned native admission barrier rejects new work while allowing the coordinator to steer existing active turns. Closing the coordinator releases its upgrade hold without reopening a real shutdown drain. Capture all loaded conversations (including workers), publish durable visible/context notices to all, steer every active turn to checkpoint and pause. Idle conversations get a durable host snapshot and no unnecessary model turn. Active agents return an operation/thread-bound structured handoff; the updater atomically writes and fsyncs it into private CODEX_HOME/daemon-upgrades state, avoiding sandbox write permissions or mandatory MCP enrollment. Installation waits for valid handoffs, inactive goals, and idle native turns. Missing, invalid, timed-out or unacknowledged handoffs block installation; old daemon remains selected/running. No forced kill or invented summary. Preserve counters and deadlines; no automatic resource renewal or work resume.
 

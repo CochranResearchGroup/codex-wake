@@ -1,6 +1,7 @@
 # Recovery and controller reconciliation
 
-State: COMPLETE (isolated integration scope). Owner: primary for ecochran76. Authorities: parent#413 recovery spec and merged PR#419/controller#393. This is integration qualification, not a second broad review of the completed repair graph.
+State: CLOSED
+Outcome boundary (preserved): COMPLETE (isolated integration scope). Owner: primary for ecochran76. Authorities: parent#413 recovery spec and merged PR#419/controller#393. This is integration qualification, not a second broad review of the completed repair graph.
 
 ## Frozen inputs and custody
 

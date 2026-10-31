@@ -1,6 +1,7 @@
 # Plan0168 — Operational same-conversation self-refresh
 
-State: OPEN. Owner: primary / ecochran76. Work item: #282.
+State: OPEN
+Owner: primary / ecochran76. Work item: #282.
 Branch: fix/self-refresh-operational. Base: 27330f6. Target: origin/main.
 
 ## Current State

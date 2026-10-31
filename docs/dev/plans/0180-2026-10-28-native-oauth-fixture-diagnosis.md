@@ -1,6 +1,7 @@
 # Diagnose native0.165 OAuth completion timeout
 
-State: CLOSED — exact timeout diagnosed and corrected. Owner: primary / wake2. Work item: this bounded repo-native plan.
+State: CLOSED
+Outcome boundary (preserved): CLOSED — exact timeout diagnosed and corrected. Owner: primary / wake2. Work item: this bounded repo-native plan.
 Source baseline46a1f6506d; native branchfix/native-0165-oauth-fixture, existing owned native checkout. Plan0179 remains a closed private build with its frozen original evidence.
 
 Objective: reproduce and fix the single OAuth callback-completion timeout retained by plan0179, through the real isolated app-server fixture. No production daemon restart, credentials, external OAuth/provider service, grant change or governor/resource mutation. Preserve the qualified0.165 package and source baseline.
