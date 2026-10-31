@@ -1,7 +1,7 @@
 # Integrated actual 0.166 acceptance (#453)
 
-State: HELD after a controller storage-scan race. Same-job verification-only
-continuation is being implemented; no new coding attempt or budget is authorized.
+State: RUNNING in same-job verification-only continuation after the controller
+storage-scan correction. No new coding attempt or budget is authorized.
 Plan0193 and specification #444 remain the scope authority.
 This record distinguishes source verification, the actual disposable job and
 production activation. No production activation is authorized or claimed.
@@ -164,3 +164,38 @@ then passed 29 tests, with `PYTHONDONTWRITEBYTECODE=1` and before/after Python
 helper hashes unchanged. `supplemental-package-helpers.json` and `.log` retain
 that source-only evidence. No frozen driver, configuration or candidate code was
 manually edited.
+
+
+## Verification-only continuation
+
+Run 2 executes controller revision
+`82a61a17d6dcc5e443a2215dd131f59471369df7`. Only the six corrected controller,
+pipeline, repair and storage modules plus the separate continuation launcher were
+installed into the disposable source/prefix. `controller-update-2.json` records
+old/new module hashes and verifies every frozen qualification input unchanged.
+Candidate source, recipe, host programs and original job accounting were untouched.
+
+`upgrades.reconcile` returned `verification_ready` on this same job. Its receipt
+binds the current source inventory and last completed worker report, records the
+interrupted regeneration leader/group as dead, and retains the original monotonic
+and wall deadlines and three attempts. Run 2 never invokes enable or start.
+`launch-2.json`, `run-2/checkpoint.json`, `run-2/completion.json` and `run-2.log`
+identify the unique continuation. It has resumed actual Rust/C compilation.
+The later `4bb3586` cached-inflight readmission guard is source-tested but is not
+part of this frozen execution; the original first-reconciliation path is unchanged.
+
+Actual operator witness 6 recorded all four retained canonical events, including
+the held event. Its original grant expiry `1793479039.1637716` remained unchanged
+when the exact notice control capability was added. The failed scope-refusal
+journal from witness 5 remains retained. A fresh private native backend then read
+the exact held notice ID/text from durable history with model context available;
+`operator-witness-6/cold-readback.json` records zero model requests and no remaining
+owned reader process. Blocked background proxy CONNECT attempts are reported
+separately from successful external requests.
+
+Operator witness 7 now holds an actual old 0.165 private client through the public
+build launcher while a separate exact-health-bound TUI receives job notices.
+Its ready/progress/terminal artifacts retain the original process identity,
+selection, grant expiry and notice journal. It must observe selection before
+closing its owned clients. The independent reviewer, final package and fresh
+0.166 installed qualification are still pending.
