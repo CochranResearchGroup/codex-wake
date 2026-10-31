@@ -554,6 +554,10 @@ class UpgradeRepair:
                         prepared=self._prepared(recipe,review)
                         result=dict(status='reviewed',prepared_recipe=prepared,candidate_digest=review['candidate_digest'],tests_digest=review['tests_digest'],review=review,
                             repair_attempts=self.state['repair_attempts'],patch_provenance=self.state['patch_provenance'],evidence=str(self.state_path))
+                        if self.job.get('resume_mode')=='verify_review_only':
+                            result.update(patch_provenance=self.state['independent_patch_provenance'],
+                                original_patch_provenance=self.state['patch_provenance'],worker_completed=False,
+                                qualification_basis='independent_review_after_interrupted_worker')
                         self.state.update(status='reviewed',result=result);self._save()
                         return result
                     self.state['findings']=review.get('findings',['review rejected'])

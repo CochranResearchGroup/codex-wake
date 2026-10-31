@@ -49,6 +49,8 @@ class InterruptedWorkerReviewTests(unittest.TestCase):
             self.assertEqual(receipt['worker_proof']['kind'],'interrupted_worker_no_completion_report')
             result=UpgradeRepair(source,root/'evidence',config,checkpoint=charges.append).run(dict(job,resume_mode='verify_review_only'),recipe)
             self.assertEqual(result['status'],'reviewed',result)
+            self.assertEqual(result['patch_provenance'][0]['disposition'],'rewritten')
+            self.assertFalse(result['worker_completed'])
             self.assertEqual(charges,[{'repair_attempts':1}])
             after=json.loads((root/'evidence/repair-state.json').read_text())
             self.assertEqual(after['clock_anchor']['monotonic_deadline'],before['clock_anchor']['monotonic_deadline'])
