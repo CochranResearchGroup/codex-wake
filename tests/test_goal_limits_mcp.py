@@ -74,6 +74,9 @@ class GoalLimitsMCPTests(unittest.IsolatedAsyncioTestCase):
                 self.assertFalse(output['effect_attempted'])
                 self.assertEqual(output['operator_interaction'], 'available')
                 self.assertIn('host', output['next_action'])
+                self.assertEqual(output['authority_scope'], 'external_goal_supervision')
+                self.assertEqual(output['manual_work_authority'], 'not_evaluated')
+                self.assertIn('already-authorized manual work', output['next_action'])
                 self.assertIn('caller_identity', output['missing_evidence'])
                 self.assertFalse(list((root / 'journal').rglob('*.json')))
 

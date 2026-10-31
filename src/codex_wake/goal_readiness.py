@@ -64,6 +64,10 @@ def explain_error(error):
     if type(error).__name__=='NativeObservationUnavailable':
         status='runtime_unreachable'
         action='Inspect the existing native endpoint and exact-session readback; preserve its allocation and do not start a competing server.'
+    elif message == 'native active turn ambiguous':
+        status = 'native_turn_ambiguous'
+        action = ('Inspect the exact conversation for multiple nonterminal turn records. '
+                  'Preserve history and do not select or interrupt a turn by guesswork.')
     elif 'accounting' in message or 'qualified original history' in message:
         status = 'accounting_unavailable'
         action = ('Inspect the accounting reason and native compatibility. first_usage_unavailable means no qualified response-level usage was observed: a response may not have completed, or this runtime may lack the required usage writer. '
@@ -75,7 +79,14 @@ def explain_error(error):
           or type(error).__name__ in ('CallerGrantMissing', 'PermissionDenied')):
         status = 'not_permitted'
         action = 'Inspect the exact session permission decision and configured host scope; do not copy another caller grant.'
+    authority_notice = ('This refusal holds external supervision admission only. Continue '
+               'already-authorized manual work within existing limits and applicable '
+               'permissions; this diagnostic does not grant, revoke or renew that authority.')
+    action += ' ' + authority_notice
     result = dict(state='held', armed=False, reason=status, effect_attempted=False,
+                authority_scope='external_goal_supervision', supervision_admission='held',
+                manual_work_authority='not_evaluated',
+                authority_notice=authority_notice,
                 error=dict(code=code or 'goal_limits_unavailable', reason=type(error).__name__, message=message),
                 next_action=action, operator_interaction='available', campaign_continuation='held')
     if getattr(error,'accounting_reason',None):result['accounting_reason']=error.accounting_reason
