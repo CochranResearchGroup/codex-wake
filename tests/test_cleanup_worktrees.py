@@ -115,11 +115,26 @@ runpy.run_path(sys.argv[0],run_name='__main__')
         self.assertEqual(result.returncode, 0, result.stderr)
         return path, json.loads(path.read_text())
 
+    def summarize(self, path):
+        original = path.read_bytes()
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT.with_name("summarize_receipt.py")), str(path)],
+            capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertLessEqual(len(result.stdout), 8192)
+        self.assertEqual(path.read_bytes(), original)
+        return json.loads(result.stdout)
+
     def test_denied_census_retains_checkout(self):
-        _, plan = self.plan("denied")
+        path, plan = self.plan("denied")
         self.assertEqual(plan["entries"][0]["disposition"], "retained_unknown")
         self.assertEqual(plan["entries"][0]["action"], "retain")
         self.assertTrue(self.target.exists())
+        summary = self.summarize(path)
+        self.assertEqual(summary["status"], "HELD")
+        self.assertEqual(summary["unknown_count"], 1)
+        self.assertEqual(summary["omitted_count"], 0)
 
     def apply(self, path, plan):
         return self.command(
@@ -143,6 +158,12 @@ runpy.run_path(sys.argv[0],run_name='__main__')
         self.assertTrue((self.repo / "source").exists())
         receipt = json.loads((self.root / "result.json").read_text())
         self.assertEqual(receipt["entries"][0]["disposition"], "removed")
+        for receipt_path in (path, self.root / "result.json"):
+            summary = self.summarize(receipt_path)
+            self.assertEqual(summary["status"], "PASS")
+            self.assertEqual(summary["unknown_count"], 0)
+            self.assertEqual(summary["failure_count"], 0)
+            self.assertEqual(summary["omitted_count"], 0)
 
     def test_changed_target_refuses_apply(self):
         path, plan = self.plan()

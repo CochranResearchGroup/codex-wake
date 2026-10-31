@@ -75,6 +75,34 @@
           "-p",
           "test_local_validation.py"
         ]
+      },
+      {
+        "name": "cleanup public regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_cleanup_worktrees.py"
+        ]
+      },
+      {
+        "name": "summary public regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_summarize_receipt.py"
+        ]
       }
     ],
     "presubmit": [
@@ -163,6 +191,34 @@
           "tests",
           "-p",
           "test_local_validation.py"
+        ]
+      },
+      {
+        "name": "cleanup public regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_cleanup_worktrees.py"
+        ]
+      },
+      {
+        "name": "summary public regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_summarize_receipt.py"
         ]
       },
       {

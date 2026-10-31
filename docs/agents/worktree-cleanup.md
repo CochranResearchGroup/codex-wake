@@ -17,3 +17,6 @@ Plans and result files must be new and outside both the invoking source and targ
 A cooperative lock does not prevent unrelated programs starting after the last observation. Planning/apply is not an atomic system-wide inactivity guarantee. Incomplete cross-user visibility commonly means physical retirement remains held; obtain qualified owner evidence through an authorized future process, without granting this command additional privileges.
 
 Tests use disposable Git repositories and inject the OS process-observation boundary; they do not prove the existing historical inventory is inactive. This packet authorizes no actual retirement there. No daemon/service/process selection or credentials are changed. Private schema `codex-wake.cleanup.v1` supports the bounded read-only receipt summary command.
+
+For bounded plan/result inspection and the reusable local regression profile, see
+[source-bound validation](source-bound-validation.md#prevention-command-navigation-443).

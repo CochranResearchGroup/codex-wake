@@ -828,6 +828,7 @@ PYTHONPATH=src python -m codex_wake.cli app after thread_abc 45m -- "Resume the 
 ```
 
 Design and validation notes live under `docs/dev/`.
+For repository maintenance, see [source-bound local validation and receipt summaries](docs/agents/source-bound-validation.md) and [guarded Git worktree cleanup](docs/agents/worktree-cleanup.md).
 
 ### Live session discovery
 

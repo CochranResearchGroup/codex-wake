@@ -96,8 +96,8 @@ A missing `packaging` dependency explicitly blocks constraint verification.
 
 | Tier | Selection | Budget |
 | --- | --- | --- |
-| `focused` | Setup, pinned lint, policy wiring, active planning audit, runner and local profile public regressions | 600 seconds per check; 60 minutes total maximum |
-| `presubmit` (default) | Focused checks plus compilation and package build | 600 seconds per check; 80 minutes total maximum |
+| `focused` | Setup, pinned lint, policy wiring, active planning audit, runner, local profile, cleanup and summary public regressions | 600 seconds per check; 80 minutes total maximum |
+| `presubmit` (default) | Focused checks plus compilation and package build | 600 seconds per check; 100 minutes total maximum |
 | `comprehensive` | Setup, lint, policy, planning, compilation, full Python unittest discovery and package build | 600 seconds per check; 70 minutes total maximum |
 
 All tiers use one serial process slot; checks may launch their normal subprocesses.
@@ -144,3 +144,35 @@ no dependency downloads during validation, no OpenClaw/plugin checks, no install
 wheel or legacy-package smoke, and no provider/native/live acceptance. Those excluded
 surfaces require separate applicable authority and evidence; a tier PASS does not
 certify them. The command performs no commit, push, merge, installation or publication.
+
+## Prevention command navigation (#443)
+
+Use [guarded worktree cleanup](worktree-cleanup.md) for read-only planning and
+separately authorized exact apply. Its disposable public tests compose real plan
+and result files with the summary CLI, checking held uncertainty, exact removal,
+custody and peer preservation. OS observation substitution is fixture-only; it
+proves denial handling, not completeness of the working host's process visibility.
+
+Inspect private receipts without printing their raw logs:
+
+```sh
+/absolute/validation-prefix/bin/python scripts/summarize_receipt.py /private/evidence/receipt.json
+/absolute/validation-prefix/bin/python scripts/summarize_receipt.py /private/evidence/receipt.json --entry ENTRY_ID_OR_EXACT_NAME
+```
+
+The supported inputs are candidate-validation schema 1 and cleanup schema
+`codex-wake.cleanup.v1` plan/result records. The default output is at most 8192
+UTF-8 bytes. Counts, source digest, explicit omissions and bounded exception IDs
+survive large inputs; arbitrary names and paths are represented by SHA256 IDs.
+Use those IDs for exact drill-down. Summary success means rendering succeeded;
+a HELD/FAIL receipt remains HELD/FAIL. Unsupported or malformed input exits
+nonzero. Original receipt bytes remain authoritative and unchanged. Keep raw
+receipts and first-failure logs outside the candidate in private user state;
+summary output is a derived view, not publication or cleanup authority.
+
+The focused and presubmit profiles include all four relevant public regression
+files: runner, local profile, cleanup and summary. The existing local-profile
+regression creates a malformed real planning header, proves planning FAIL blocks
+the later check, then corrects it and passes with a fresh receipt while preserving
+the first failure. Independent axes remain separate in the receipt. Neither
+profile constitutes comprehensive or installed/live acceptance.
