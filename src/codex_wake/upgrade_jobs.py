@@ -29,6 +29,10 @@ TERMINAL = frozenset(('succeeded', 'failed', 'held', 'disabled', 'superseded'))
 READS = frozenset(('status', 'list', 'show'))
 
 
+def policy_digest(config):
+    return digest({key:config.get(key) for key in ('target','limits','repair','qualification','promotion')})
+
+
 def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
@@ -151,7 +155,7 @@ class UpgradeJobs:
     def execute(self, actor, operation, arguments, *, authorize=None):
         verb = operation.removeprefix('upgrades.')
         allowed = dict(status=set(), list=set(), show={'job_id'}, enable=set(), disable=set(),
-                       start={'recipe', 'expected_recipe_sha256', 'upstream_version'}, advance={'job_id'}, cancel={'job_id'})
+                       start={'recipe', 'expected_recipe_sha256', 'upstream_version'}, advance={'job_id'}, cancel={'job_id'}, rollback={'job_id','operation_id'})
         if not operation.startswith('upgrades.') or verb not in allowed or not isinstance(arguments, dict):
             raise InventoryError('invalid_argument', 'exact upgrade job arguments required')
         optional = {'expected_recipe_sha256', 'upstream_version'} if verb == 'start' else set()
@@ -160,12 +164,18 @@ class UpgradeJobs:
             raise InventoryError('invalid_argument', 'exact upgrade job arguments required')
         config = self.config()
         self.guard(actor, config['target'], arguments, authorize, write=verb not in READS)
-        if verb == 'advance':
+        if verb == 'rollback':
+            with self.runner_lease(arguments['job_id']):
+                result=self.rollback(actor,arguments,authorize)
+        elif verb == 'advance':
             with self.runner_lease(arguments['job_id']):
                 result = self.advance(actor, arguments, authorize)
         else:
             with self.locked():
                 state = self.load()
+                if state.get('target',config['target'])!=config['target'] or any(j['target']!=config['target'] for j in state['jobs'].values()):
+                    raise InventoryError('unauthorized_target','upgrade store is sealed to its original host scope')
+                state.setdefault('target',config['target'])
                 self.guard(actor, config['target'], arguments, authorize, write=verb not in READS)
                 if verb == 'status':
                     result = dict(enabled=state['enabled'], generation=state['generation'],
@@ -212,7 +222,7 @@ class UpgradeJobs:
                             version=recipe.get('upstream_version'), target=config['target'], state='queued',
                             created_at=self.now(), deadline=self.now()+config['limits']['total_seconds'],
                             last_seen=self.now(), repair_attempts=0, limits=config['limits'], generation=state['generation'],
-                            stage_id=recipe.get('id'), worker=None, results={})
+                            stage_id=recipe.get('id'), worker=None, results={}, policy_sha256=policy_digest(config))
                         host_clock=self.clock()
                         job['clock_anchor']=dict(boot_id=host_clock['boot_id'],monotonic_start=host_clock['seconds'],
                             monotonic_latest=host_clock['seconds'],monotonic_deadline=host_clock['seconds']+config['limits']['total_seconds'],
@@ -353,7 +363,7 @@ class UpgradeJobs:
                 self.event(state, 'held', job, reason=job['reason'])
                 self.save(state)
                 return dict(job=job)
-            if job.get('active_phase') and not job['worker']:
+            if job.get('active_phase') and not job['worker'] and job['active_phase']!='promote':
                 job.update(state='held', reason='worker_intent_pending_reconciliation')
                 self.event(state, 'held', job, reason=job['reason'])
                 self.save(state)
@@ -368,22 +378,48 @@ class UpgradeJobs:
             config = self.config()
             if str(Path(config['recipes'].get(job['recipe'], '')).resolve()) != job['recipe_path'] or hashlib.sha256(Path(job['recipe_path']).read_bytes()).hexdigest() != job['recipe_sha256']:
                 raise InventoryError('stale_recipe', 'pinned upgrade recipe changed')
-            phase = 'qualify' if job['state'] == 'qualifying' else 'stage'
+            phase = ('promote' if job['state']=='promoting' or job.get('active_phase')=='promote'
+                else 'qualify' if job['state']=='qualifying' else 'stage')
             job['active_phase'] = phase
-            job['state'] = 'qualifying' if phase == 'qualify' else 'building'
+            job['state'] = {'qualify':'qualifying','promote':'promoting','stage':'building'}[phase]
             self.event(state, job['state'], job)
             self.save(state)
             frozen = json.loads(json.dumps(job))
         self.notify(actor, authorize)
         try:
+            committing=[False]
+            def guard_locked():
+                current_state=self.load();current=self.job(current_state,frozen['id'])
+                self.guard(actor,current['target'],arguments,authorize,write=True)
+                current_config=self.config()
+                reason=self.budget_reason(current)
+                self.save(current_state)
+                if current_config['target']!=frozen['target'] or policy_digest(current_config)!=frozen.get('policy_sha256'):
+                    raise ValueError('upgrade_policy_changed')
+                if not current_state['enabled'] or current['state'] in TERMINAL or current_state['generation']!=frozen['generation'] or reason:
+                    raise ValueError(reason or 'upgrade_policy_changed')
             def guard():
+                if committing[0]:
+                    guard_locked()
+                else:
+                    with self.locked():guard_locked()
+            def commit(action):
                 with self.locked():
-                    current_state=self.load();current=self.job(current_state,frozen['id'])
-                    self.guard(actor,current['target'],arguments,authorize,write=True)
-                    reason=self.budget_reason(current)
-                    self.save(current_state)
-                    if not current_state['enabled'] or current['state'] in TERMINAL or current_state['generation'] != frozen['generation'] or reason:
-                        raise ValueError(reason or 'upgrade_policy_changed')
+                    committing[0]=True
+                    try:
+                        guard_locked()
+                        current_state=self.load();current=self.job(current_state,frozen['id'])
+                        current['selection_intent']=dict(status='prepared',at=self.now(),generation=current_state['generation'])
+                        self.save(current_state)
+                        outcome=action()
+                        current_state=self.load();current=self.job(current_state,frozen['id'])
+                        current['selection_intent'].update(status='committed',result=outcome)
+                        current['results']['promotion']=outcome
+                        current.update(state='succeeded',reason='future_launch_selection_committed',active_phase=None,worker=None)
+                        self.event(current_state,'succeeded',current,reason=current['reason'])
+                        self.save(current_state)
+                        return outcome
+                    finally:committing[0]=False
             def checkpoint(delta):
                 guard()
                 with self.locked():
@@ -395,6 +431,9 @@ class UpgradeJobs:
                     self.save(current_state)
             if self.executor:
                 result=self.executor(frozen)
+            elif frozen['active_phase']=='promote':
+                from .upgrade_promotion import UpgradePromotion
+                result=UpgradePromotion(self.root,now=self.now).run(frozen,config,guard=guard,commit=commit)
             elif frozen['active_phase']=='qualify':
                 from .upgrade_qualification import UpgradeQualification
                 if not config.get('qualification'):
@@ -425,14 +464,17 @@ class UpgradeJobs:
             self.guard(actor, job['target'], arguments, authorize, write=True)
             if job['state'] in TERMINAL:
                 job.update(worker=None,active_phase=None)
+                if frozen['active_phase']=='promote':job['results']['promotion_observation']=result
                 self.save(state)
                 return dict(job=job)
             reason = self.budget_reason(job)
             job['worker'] = None
             job['active_phase'] = None
-            job['results']['qualification' if frozen['active_phase']=='qualify' else 'stage'] = result
+            job['results'][{'qualify':'qualification','promote':'promotion','stage':'stage'}[frozen['active_phase']]] = result
             if not state['enabled'] or state['generation'] != frozen['generation'] or reason:
                 job.update(state='held', reason=reason or 'policy_changed')
+            elif result.get('status') == 'selected':
+                job.update(state='succeeded',reason='future_launch_selection_reconciled')
             elif result.get('status') == 'qualified':
                 job.update(state='promoting', reason='awaiting_qualified_selection')
             elif result.get('status') == 'staged':
@@ -442,6 +484,38 @@ class UpgradeJobs:
             self.event(state, job['state'], job, reason=job['reason'])
             self.save(state)
             return dict(job=job)
+
+    def rollback(self, actor, arguments, authorize):
+        from .upgrade_promotion import UpgradePromotion
+        config=self.config()
+        with self.locked():
+            original=self.job(self.load(),arguments['job_id'])
+            self.guard(actor,original['target'],arguments,authorize,write=True)
+        committing=[False]
+        def guard_locked():
+            current_config=self.config()
+            self.guard(actor,original['target'],arguments,authorize,write=True)
+            if current_config['target']!=original['target'] or current_config.get('promotion')!=config.get('promotion'):
+                raise ValueError('rollback_target_changed')
+        def guard():
+            if committing[0]:guard_locked()
+            else:
+                with self.locked():guard_locked()
+        def commit(action):
+            with self.locked():
+                committing[0]=True
+                try:
+                    guard_locked()
+                    value=action()
+                    state=self.load();job=self.job(state,original['id'])
+                    job.setdefault('rollback_operations',{})[arguments['operation_id']]=value
+                    self.event(state,'rollback',job,reason='explicit_future_launch_rollback')
+                    self.save(state)
+                    return value
+                finally:committing[0]=False
+        value=UpgradePromotion(self.root,now=self.now).rollback(config,
+            operation_id=arguments['operation_id'],guard=guard,commit=commit)
+        return dict(rollback=value)
 
     def run_stage(self, job):
         directory = self.store / job['id'];directory.mkdir(mode=0o700, exist_ok=True)

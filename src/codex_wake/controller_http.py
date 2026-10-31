@@ -123,7 +123,7 @@ class ProtectedOperations:
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
         **{'upgrades.'+verb: ('observe' if verb in ('status','list','show','discovery') else 'admin',None,None)
-            for verb in ('status','list','show','enable','disable','start','advance','cancel','poll','discovery')},
+            for verb in ('status','list','show','enable','disable','start','advance','cancel','poll','discovery','rollback')},
         **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait','checkpoint') else 'control', None, None)
             for verb in ('capabilities','create','prompt','wait','cancel','checkpoint','fork')},
         'health.observe': ('observe', None, None),
