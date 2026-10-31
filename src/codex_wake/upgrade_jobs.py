@@ -22,6 +22,7 @@ import uuid
 
 from codex_profiles.upgrades import _atomic
 from .managed_inventory import InventoryError
+from .upgrade_storage import owned_storage_bytes
 
 DEFAULT_LIMITS = dict(repair_attempts=3, total_seconds=7200, compiler_jobs=2,
                       temporary_bytes=24 * 1024**3)
@@ -287,7 +288,7 @@ class UpgradeJobs:
                 if cache.is_symlink() or not cache.resolve().is_relative_to((self.store/identifier).resolve()):
                     job['cache_reclamation']=dict(status='held',reason='owned_cache_path_changed')
                 else:
-                    size=sum(p.stat().st_size for p in cache.rglob('*') if p.is_file() and not p.is_symlink())
+                    size=owned_storage_bytes((cache,))
                     shutil.rmtree(cache)
                     job['cache_reclamation']=dict(status='reclaimed',bytes=size,at=self.now())
                 self.save(state)
@@ -347,7 +348,7 @@ class UpgradeJobs:
         if job['last_seen'] >= job['deadline'] or seconds >= anchor['monotonic_deadline']:
             return 'deadline_exhausted'
         workspace = self.store / job['id']
-        size = sum(p.lstat().st_size for p in workspace.rglob('*') if p.is_file() and not p.is_symlink()) if workspace.exists() else 0
+        size = owned_storage_bytes((workspace,))
         if size > job['limits']['temporary_bytes']:
             return 'temporary_storage_exhausted'
         return None
