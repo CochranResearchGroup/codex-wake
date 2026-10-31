@@ -360,10 +360,11 @@ class UpgradeRepair:
             ({'tui_health'} if recipe.get('channel') == 'modded' else set()))
         return _digest(dict(job_id=job['id'],recipe=recipe,config=self.config,workspace=str(self.workspace),required=self.required))
 
-    def _dead_owned_intent(self,inflight,role):
+    def _dead_owned_intent(self,inflight,role,*,historical=False):
         sequence=inflight.get('sequence')
         label='regeneration' if role=='regenerate' else 'worker'
-        if type(sequence) is not int or sequence!=len(self.state['commands']) or inflight.get('role')!=role:
+        if (type(sequence) is not int or not 1<=sequence<=len(self.state['commands'])
+                or (not historical and sequence!=len(self.state['commands'])) or inflight.get('role')!=role):
             raise RepairHeld('only_interrupted_'+label+'_can_reconcile')
         command=self.state['commands'][sequence-1]
         identity=command.get('process_identity')
@@ -373,6 +374,12 @@ class UpgradeRepair:
                 or not isinstance(identity,dict) or identity!=inflight.get('process_identity')
                 or command.get('owned_process_group')!=identity.get('pid')):
             raise RepairHeld('interrupted_'+label+'_identity_unverified')
+        return self._observed_dead_group(command,label)
+
+    def _observed_dead_group(self,command,label):
+        identity=command.get('process_identity')
+        if not isinstance(identity,dict) or command.get('owned_process_group')!=identity.get('pid'):
+            raise RepairHeld('owned_process_identity_unverified')
         boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip()
         if identity.get('boot_id')!=boot or type(identity.get('pid')) is not int or identity['pid']<=1:
             raise RepairHeld('interrupted_'+label+'_boot_unverified')
@@ -390,9 +397,9 @@ class UpgradeRepair:
         return dict(status='observed_dead',original_identity=identity,owned_process_group=identity['pid'],
             observed_boot_id=boot,leader_observation=leader,live_group_members=0)
 
-    def _interrupted_worker_proof(self,job,inflight,minimum_mono):
+    def _interrupted_worker_proof(self,job,inflight,minimum_mono,*,historical=False):
         if not inflight:raise RepairHeld('known_started_worker_intent_required')
-        dead=self._dead_owned_intent(inflight,'worker')
+        dead=self._dead_owned_intent(inflight,'worker',historical=historical)
         sequence=inflight['sequence'];command=self.state['commands'][sequence-1]
         if self.state['repair_attempts']<=0:raise RepairHeld('original_coding_attempt_charge_required')
         if (self.evidence/f'{sequence}-worker-response.json').exists():
@@ -436,6 +443,38 @@ class UpgradeRepair:
             original_command=command,dead_process=dead,census_path=str(path),census_sha256=_sha(path.read_bytes()),
             artifacts=retained,previous_hold_reason=self.state.get('reason'),
             prior_clock_uncertainty='retained_unclassified' if self.state.get('reason')=='clock_uncertain' else None)
+
+    def _repeat_interrupted_verification(self,job,existing,minimum_mono):
+        if self.state.get('inflight') or self.state.get('reason')!='verify_review_only_verification_failed':
+            raise RepairHeld('completed_deterministic_verification_failure_required')
+        old=existing.get('worker_proof',{})
+        inflight=existing.get('interrupted_intent')
+        if (existing.get('mode')!='verify_review_only' or existing.get('seal')!=self.state['seal']
+                or old.get('kind')!='interrupted_worker_no_completion_report' or not isinstance(inflight,dict)
+                or old.get('repair_attempts')!=self.state['repair_attempts']):
+            raise RepairHeld('original_interrupted_worker_attestation_required')
+        sequence=inflight['sequence'];tail=self.state['commands'][sequence:]
+        allowed_git=[['git','ls-files','--unmerged'],['git','diff','--check','HEAD']]
+        proofs=[]
+        for command in tail:
+            role=command.get('role')
+            allowed=(command.get('argv') in allowed_git if role=='git' else
+                command.get('argv') in self.config[role] if role in ('regenerate','verify') else False)
+            if not allowed or command.get('status')!='completed':
+                raise RepairHeld('later_worker_reviewer_or_ambiguous_verification_refused')
+            proofs.append(self._observed_dead_group(command,role))
+        if not tail:raise RepairHeld('completed_verification_tail_required')
+        worker=self._interrupted_worker_proof(job,inflight,minimum_mono,historical=True)
+        old_refs={(a['kind'],a['path'],a['sha256']) for a in old.get('artifacts',[]) if a['kind'] in ('native_events','worker_stdout','worker_stderr')}
+        new_refs={(a['kind'],a['path'],a['sha256']) for a in worker['artifacts']}
+        if not old_refs or not old_refs<=new_refs:raise RepairHeld('original_worker_artifact_references_changed')
+        old_census=Path(old['census_path'])
+        archive=old_census if _sha(old_census.read_bytes())==old['census_sha256'] else self.evidence.parent/'worker-exit-census-original.json'
+        if not archive.is_file() or _sha(archive.read_bytes())!=old['census_sha256']:
+            raise RepairHeld('prior_worker_exit_attestation_not_retained')
+        worker.update(prior_clock_uncertainty=old.get('prior_clock_uncertainty'),
+            prior_census=dict(path=str(archive),sha256=old['census_sha256']),completed_tail_proofs=proofs)
+        return worker,inflight
 
     def _worker_proof(self):
         provenance=self.state['patch_provenance']
@@ -485,8 +524,10 @@ class UpgradeRepair:
             return existing
         if self.state.get('status')!='held':raise RepairHeld('held_repair_evidence_required')
         inflight=self.state.get('inflight')
+        repeating=mode=='verify_review_only' and existing and not inflight
         if mode=='verify_review_only':
-            worker=self._interrupted_worker_proof(job,inflight,minimum_mono)
+            if repeating:worker,inflight=self._repeat_interrupted_verification(job,existing,minimum_mono)
+            else:worker=self._interrupted_worker_proof(job,inflight,minimum_mono)
             dead=worker['dead_process']
         else:
             worker=self._worker_proof()
@@ -497,6 +538,8 @@ class UpgradeRepair:
             repair_attempts=self.state['repair_attempts'],monotonic_deadline=self.state['clock_anchor']['monotonic_deadline'],
             source_digest=source_digest,source_inventory_path=str(self.evidence/'verification-readmission-source.json'),worker_proof=worker,
             interrupted_intent=inflight,interrupted_regeneration=dead,previous_reason=self.state.get('reason'))
+        if repeating:
+            self.state.setdefault('verification_readmission_history',[]).append(existing)
         _atomic(self.evidence/'verification-readmission-source.json',inventory)
         if dead:self.state['commands'][inflight['sequence']-1]['reconciliation']=dead
         self.state.update(status='verify_ready',inflight=None,verification_readmission=receipt)
