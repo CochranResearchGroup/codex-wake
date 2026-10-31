@@ -33,7 +33,7 @@ def main():
         model_requests=0,external_provider_requests=0,scripted_provider_requests=0,
         owned_processes_remaining=[],artifacts=str(root))
     python=str(args.prefix/'bin/python')
-    env=dict(os.environ,PYTHONPATH=str(args.source/'src'))
+    env=dict(os.environ,PYTHONPATH=str(args.source/'src'),WSL_DISTRO_NAME='wsl-test')
     env['PATH']=str(package/'bin')+':'+env.get('PATH','/usr/bin:/bin')
     def execute(name,argv,receipt):
         with (root/(name+'.stdout')).open('wb') as out,(root/(name+'.stderr')).open('wb') as err:
