@@ -18,7 +18,7 @@
         "Disable stops owned workers and fences later stages without affecting unrelated sessions."
       ],
       "number": 447,
-      "state": "validated",
+      "state": "closed",
       "worker": "/root",
       "validation": [
         "PYTHONPATH=src .venv/python -m unittest discover -s tests -p test_upgrade_jobs.py: 3 passed",
@@ -27,7 +27,9 @@
       "evidence": "/tmp/wake-upgrade-spec/447-*.log",
       "integration_tip": "eae1ed2e6a6f89af7e6dee87d70711261cd5b55b",
       "evidence_scope": "source_and_public_executor_regressions",
-      "runtime_acceptance_ticket": 453
+      "runtime_acceptance_ticket": 453,
+      "closure_source": "0013b1f",
+      "closure_validation": "73 integrated upgrade tests; 19 MCP tests each Python3.11/3.12; physical disposable 0.165 qualification and native held-notice witness; source boundary separate from #453"
     },
     {
       "n": 2,
@@ -43,7 +45,7 @@
         "Rejected repairs and crashes consume the same job budget; no hidden fresh attempt."
       ],
       "number": 448,
-      "state": "validated",
+      "state": "closed",
       "worker": "/root/repair448",
       "worker_base": "cdaaabb3bf2988d73cfb467ced6341ce15afb36c",
       "owned_paths": [
@@ -52,7 +54,9 @@
       ],
       "integration_tip": "eae1ed2e6a6f89af7e6dee87d70711261cd5b55b",
       "evidence_scope": "source_and_public_executor_regressions",
-      "runtime_acceptance_ticket": 453
+      "runtime_acceptance_ticket": 453,
+      "closure_source": "0013b1f",
+      "closure_validation": "73 integrated upgrade tests; 19 MCP tests each Python3.11/3.12; physical disposable 0.165 qualification and native held-notice witness; source boundary separate from #453"
     },
     {
       "n": 3,
@@ -68,7 +72,7 @@
         "Capabilities, session visibility, failure recovery and compatible rollback are exercised; teardown census records owned processes."
       ],
       "number": 449,
-      "state": "validated",
+      "state": "closed",
       "worker": "/root/qualify449",
       "worker_base": "cdaaabb3bf2988d73cfb467ced6341ce15afb36c",
       "owned_paths": [
@@ -80,7 +84,9 @@
       "evidence_scope": "actual_disposable_authenticated_combined165",
       "receipt": "/home/ecochran76/.local/state/codex-wake/testing/upgrade449-20261031/qualified-receipt.json",
       "receipt_object_sha256": "1c648e84b64e56527ed3a8672f0847f93d277b28678be1fcb14244150c74074f",
-      "executor_sha256": "ff4efdac5740a4fe52e885837c93df9032bc28bc27f49f45353e2ae5ce203d19"
+      "executor_sha256": "ff4efdac5740a4fe52e885837c93df9032bc28bc27f49f45353e2ae5ce203d19",
+      "closure_source": "0013b1f",
+      "closure_validation": "73 integrated upgrade tests; 19 MCP tests each Python3.11/3.12; physical disposable 0.165 qualification and native held-notice witness; source boundary separate from #453"
     },
     {
       "n": 4,
@@ -97,7 +103,7 @@
         "No live daemon replacement or account migration is triggered."
       ],
       "number": 450,
-      "state": "validated",
+      "state": "closed",
       "worker": "/root/discover451",
       "worker_result": "45386b5",
       "integration_tip": "92e32160c34c3e71ed73e3b81f657fd01cd47f89",
@@ -106,7 +112,9 @@
         "12 focused promotion tests passed",
         "5 existing build tests passed",
         "56 integrated upgrade tests passed before clock/localoff extensions"
-      ]
+      ],
+      "closure_source": "0013b1f",
+      "closure_validation": "73 integrated upgrade tests; 19 MCP tests each Python3.11/3.12; physical disposable 0.165 qualification and native held-notice witness; source boundary separate from #453"
     },
     {
       "n": 5,
@@ -122,7 +130,7 @@
         "Disable prevents discovery dispatch; reenable does not silently renew exhausted jobs."
       ],
       "number": 451,
-      "state": "validated",
+      "state": "closed",
       "worker": "/root/discover451",
       "worker_base": "cdaaabb3bf2988d73cfb467ced6341ce15afb36c",
       "owned_paths": [
@@ -131,7 +139,9 @@
       ],
       "integration_tip": "eae1ed2e6a6f89af7e6dee87d70711261cd5b55b",
       "evidence_scope": "source_and_public_executor_regressions",
-      "runtime_acceptance_ticket": 453
+      "runtime_acceptance_ticket": 453,
+      "closure_source": "0013b1f",
+      "closure_validation": "73 integrated upgrade tests; 19 MCP tests each Python3.11/3.12; physical disposable 0.165 qualification and native held-notice witness; source boundary separate from #453"
     },
     {
       "n": 6,
@@ -147,11 +157,13 @@
         "No external messaging channel is enabled."
       ],
       "number": 452,
-      "state": "validated",
+      "state": "closed",
       "worker": null,
       "integration_tip": "eae1ed2e6a6f89af7e6dee87d70711261cd5b55b",
       "evidence_scope": "source_and_public_executor_regressions",
-      "runtime_acceptance_ticket": 453
+      "runtime_acceptance_ticket": 453,
+      "closure_source": "0013b1f",
+      "closure_validation": "73 integrated upgrade tests; 19 MCP tests each Python3.11/3.12; physical disposable 0.165 qualification and native held-notice witness; source boundary separate from #453"
     },
     {
       "n": 7,
@@ -181,7 +193,7 @@
   "integration_tip": "92e32160c34c3e71ed73e3b81f657fd01cd47f89",
   "working_runtime_changed": false,
   "runtime_checkpoint": {
-    "state": "held_controller_fix_in_progress",
+    "state": "running_same_job_verification",
     "job_id": "6ca6cce33db1406db89087c3b9fe54c0",
     "original_deadline": 1793478757.2470584,
     "repair_attempts": 3,
@@ -190,6 +202,11 @@
     "owned_job_processes": [],
     "next": "same-job verify-only reconciliation after source correction; no fourth coding worker or renewed budget",
     "review_rounds": 0,
-    "remediation_rounds": 0
+    "remediation_rounds": 0,
+    "controller_revision": "82a61a17d6dcc5e443a2215dd131f59471369df7",
+    "pending_controller_revision": "4bb3586 cached-readmission guard affects subsequent crash reconciliation only; not hot-installed",
+    "source_digest": "922ba019ce189349f336b4ad4a156fbc0483bcf3e89d44a1ca513e3a30a986a6",
+    "reconciliation": "verification_ready; original regenerate16 observed dead; completed worker13 proof retained",
+    "operator_notices": "witness6 recorded four canonical retained events; original grant expiry unchanged; witness7 active for eventual selection"
   }
 }
