@@ -52,7 +52,7 @@ def prepare_reviewed_recipe(root, job, config, *, guard, checkpoint):
     return UpgradeRepair(source,directory/'repair',repair_config,guard=guard,checkpoint=checkpoint).run(job,checked_recipe)
 
 
-def reconcile_reviewed_recipe(root,job,config,*,guard):
+def reconcile_reviewed_recipe(root,job,config,*,guard,mode="verify_only"):
     """Validate same-job verification-only readmission without commands/locks."""
     from .managed_inventory import InventoryError
     from .upgrade_repair import RepairHeld
@@ -69,6 +69,6 @@ def reconcile_reviewed_recipe(root,job,config,*,guard):
         checked['source']=dict(original['source'],files=prepared['source_files'])
         owner=UpgradeRepair(directory/'upstream-source',directory/'repair',
             dict(declaration,base_revision=prepared['base_revision']),guard=guard)
-        return owner.reconcile(job,checked)
+        return owner.reconcile(job,checked,mode=mode)
     except (OSError,ValueError,KeyError) as error:
         raise InventoryError('reconciliation_refused',str(error)) from error
