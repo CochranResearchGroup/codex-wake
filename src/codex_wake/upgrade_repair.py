@@ -20,6 +20,7 @@ import tempfile
 import time
 
 from codex_profiles.upgrades import _atomic, REQUIRED_CAPABILITIES
+from .upgrade_storage import owned_storage_bytes
 
 
 class RepairHeld(ValueError):
@@ -131,9 +132,7 @@ class UpgradeRepair:
             raise RepairHeld('deadline_exhausted')
         limit=self.job['limits'].get('temporary_bytes')
         if limit is not None:
-            roots=(self.workspace,self.evidence,self.cache)
-            roots=tuple(root for root in roots if not any(root!=other and root.is_relative_to(other) for other in roots))
-            size=sum(p.stat().st_size for base in roots for p in base.rglob('*') if p.is_file() and not p.is_symlink())
+            size=owned_storage_bytes((self.workspace,self.evidence,self.cache))
             if size>limit:
                 raise RepairHeld('temporary_storage_exhausted')
 
