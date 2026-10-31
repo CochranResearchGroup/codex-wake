@@ -66,7 +66,7 @@ class UpgradeQualification:
         self.owned_groups=[]
         receipt=dict(schema_version=1,job_id=job.get('id'),job_key=job.get('key'),
             target=job.get('target'),status='held',eligible_for_promotion=False,
-            model_requests=0,started_at=self.now(),checks={},commands=[],executor_sha256=content_hash(__file__))
+            model_requests=0,scripted_provider_requests=0,external_provider_requests=0,started_at=self.now(),checks={},commands=[],executor_sha256=content_hash(__file__))
         directory=None
         try:
             if not isinstance(job.get('id'),str) or not job['id'] or '/' in job['id'] or job['id'] in ('.','..'):
@@ -137,6 +137,14 @@ class UpgradeQualification:
                 receipt['commands'].append(report)
                 if report['report'].get('status')=='authentication_needed':raise AuthenticationNeeded('designated test account needs authentication')
                 body=report['report']
+                scripted=body.get('scripted_provider_requests',0)
+                if type(scripted) is not int or scripted<0:raise QualificationError('invalid scripted fixture request count')
+                if scripted and (type(body.get('external_provider_requests')) is not int or body['external_provider_requests']!=0):
+                    raise QualificationError('scripted fixture requires explicit zero external provider requests')
+                if body.get('external_provider_requests',0)!=0:raise QualificationError('external model provider requests forbidden')
+                receipt['scripted_provider_requests']+=scripted
+                if environment['kind']!='source_fixture' and body.get('native_sha256')!=before['bin/codex']['sha256']:
+                    raise QualificationError('probe native executable identity differs from candidate')
                 observed=body.get('model_requests')
                 if type(observed) is int and observed>=0:receipt['model_requests']+=observed
                 if body.get('schema_version')!=1 or body.get('status')!='passed' or type(body.get('model_requests')) is not int or body['model_requests']!=0:
@@ -348,7 +356,7 @@ class UpgradeQualification:
                     if not isinstance(body,dict):raise QualificationError('structured qualification report required')
                     # Do not retain arbitrary probe output: account data or
                     # private diagnostics are not part of the report contract.
-                    body={key:body[key] for key in ('schema_version','status','model_requests','checks','owned_processes_remaining') if key in body}
+                    body={key:body[key] for key in ('schema_version','status','model_requests','scripted_provider_requests','external_provider_requests','native_sha256','checks','owned_processes_remaining','orphan_output_scope','accounting_scope') if key in body}
                     return dict(id=probe.get('id'),argv_sha256=object_hash(probe['argv']),exit_code=process.returncode,
                         report=body,report_sha256=hashlib.sha256(raw).hexdigest())
                 finally:self.stop(process)
