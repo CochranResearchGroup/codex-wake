@@ -334,3 +334,17 @@ pathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(dict(sc
                 UpgradeRepair(source,root/'evidence',config,guard=crash_guard).run(dict(job,resume_mode='verify_only'),recipe)
             with self.assertRaisesRegex(ValueError,'verification_execution_unreconciled'):
                 UpgradeRepair(source,root/'evidence',config).reconcile(job,recipe)
+
+    def test_host_generation_and_verification_receive_canonical_owned_repo_root(self):
+        import os
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source,config,recipe,job=self.fixture(root)
+            command=[sys.executable,'-c',"import os;from pathlib import Path;root=Path(os.environ['CODEX_REPO_ROOT']);assert root==Path.cwd().resolve();assert (root/'feature.txt').read_text()=='new\\n'"]
+            config['regenerate']=[command]
+            config['verify'].append(command)
+            with patch.dict(os.environ,{'CODEX_REPO_ROOT':'/unrelated/ambient/source'}):
+                result=UpgradeRepair(source,root/'evidence',config).run(job,recipe)
+                self.assertEqual(os.environ['CODEX_REPO_ROOT'],'/unrelated/ambient/source')
+            self.assertEqual(result['status'],'reviewed',result)
+            self.assertEqual(result['repair_attempts'],0)

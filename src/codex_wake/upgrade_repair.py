@@ -147,7 +147,8 @@ class UpgradeRepair:
         env={k:v for k,v in os.environ.items() if k in ('PATH','LANG','LC_ALL')}
         with tempfile.TemporaryDirectory(prefix='repair-home-',dir=self.evidence) as home:
             env.update(HOME=home,CODEX_HOME=home+'/.codex',XDG_CONFIG_HOME=home+'/.config',XDG_DATA_HOME=home+'/.local/share',
-                CARGO_BUILD_JOBS=str(self.job['limits'].get('compiler_jobs',2)),CARGO_TARGET_DIR=str(self.cache))
+                CARGO_BUILD_JOBS=str(self.job['limits'].get('compiler_jobs',2)),CARGO_TARGET_DIR=str(self.cache),
+                CODEX_REPO_ROOT=str(self.workspace))
             Path(env['CODEX_HOME']).mkdir(mode=0o700)
             if packet is not None:
                 packet_path=self.evidence/f'{sequence}-{role}-packet.json'
