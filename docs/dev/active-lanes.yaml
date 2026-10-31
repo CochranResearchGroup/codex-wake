@@ -966,7 +966,7 @@ lanes:
     branch: feat/controller-393-resumed
     target: origin/main
     integration: review_pr
-    plan_state: SOURCE_ACCEPTED
+    plan_state: CLOSED
     custody_state: PUBLISHED_REVIEW
     updated_at: 2026-10-30
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/419
@@ -979,7 +979,7 @@ lanes:
     plan: docs/dev/plans/0186-2026-10-30-upgrade-recovery-repairs.md
     branch: fix/413-repair-evidence
     target: origin/main
-    plan_state: COMPLETE
+    plan_state: CLOSED
     custody_state: ACTIVE_WORKTREE
     integration: private_native_source_and_local_evidence
     dependencies: []
@@ -994,7 +994,7 @@ lanes:
     plan: docs/dev/plans/0191-2026-10-30-recovery-controller-reconciliation.md
     branch: fix/413-419-reconciliation
     target: origin/main
-    plan_state: COMPLETE
+    plan_state: CLOSED
     custody_state: ACTIVE_WORKTREE
     integration: private_native_and_local_evidence
     dependencies: [P186-UPGRADE-RECOVERY-REPAIRS, P190-CONTROLLER393]
@@ -1008,8 +1008,8 @@ lanes:
     plan: docs/dev/plans/0192-2026-10-31-worktree-reconciliation.md
     branch: chore/420-worktree-reconciliation
     target: origin/main
-    plan_state: RUNNING
+    plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
     integration: validated_prs
     updated_at: 2026-10-31
-    disposition: Custody421 validated; remaining source/cleanup graph pending; no working runtime effects
+    disposition: Tickets421–428 closed through validated PRs430–436; final anchor429 running; physical retirement deferred, no working runtime effects

@@ -16,19 +16,21 @@ Read-only process/descriptor and service-reference census provides conservative 
 
 Private raw evidence: user-state reconcile420/inventory.json, custody/, custody-verification.json, working-before.json; tracker publication/edge receipts: tickets420/published-graph.json. Do not place private raw content in Git. Public/repo evidence contains curated source/custody metadata only.
 
+All eight prerequisite tickets are closed after provider-verified canonical integration. Final combined-source Python validation is running. Historical physical cleanup is intentionally conservative:30 missing Wake and2 missing native registrations retired, net physical removals zero. Five initial Wake removals had incomplete cross-UID census and were corrected by exact restoration; both receipts remain. Global process visibility remains incomplete; retained paths have owners, reasons and future census actions. No claim of physical inactivity is inferred.
+
 ## Ticket ledger
 
 | Ticket | Blocked by | State | Owner | Acceptance |
 | --- | --- | --- | --- | --- |
 |421 custody|none|validated|primary|Heads, dirty recovery, runtime holds verified; tracker closed completed|
-|422 qualified integration|421|pending|delegate|Qualified Wake reconciliation actually integrated through PR|
-|423 main policy|421|pending|delegate|Both local-only policy intents integrated or proved superseded|
-|424 parked goal/refresh|421|pending|delegate|Two dirty source/evidence lanes reconciled|
-|425 diagnostics|421|pending|delegate|Diagnostic/readiness authority preserved|
-|426 exact resume|421|pending|delegate|Conversation/account/build identity and labels reconciled|
-|427 historical Wake|421|pending|delegate|Remaining Wake entries classified and safe retirements verified|
-|428 private native|421|pending|delegate|Native feature/package custody and safe retirements verified|
-|429 final anchor|422–428|pending|delegate/primary acceptance|Primary Wake clean main exactly equal fresh origin/main; all items accounted|
+|422 qualified integration|421|validated, closed|ticket422|PR430 merged343ed9f; private native payloads excluded|
+|423 main policy|421|validated, closed|ticket423|PR431 mergedff89ad4; both local-only policy intents reconciled|
+|424 parked goal/refresh|421|validated, closed|ticket424|PR432 merged268974c;29 deltas dispositioned, public regressions pass|
+|425 diagnostics|421|validated, closed|publish425|PR436 mergedf13e2c0;54 focused plus10 CLI tests pass|
+|426 exact resume|421|validated, closed|publish426|PR434 merged7db24c3; isolated exact-resume red/green and47 tests per Python pass|
+|427 historical Wake|421|validated, closed|ticket427|PR435 mergedb90fc12;30 absent registrations retired;83 physical baseline paths retained|
+|428 private native|421|validated, closed|primary publication|PR433 merged27f89b0;16 heads preserved,2 absent registrations pruned,14 physical retained|
+|429 final anchor|422–428|running|ticket429/primary acceptance|Preparation readbacks; coordinator evidence publication precedes final primary ref movement|
 
 Three substantive implementation lanes maximum; overlapping canonical catalog/plan writes and PR merges are coordinator-owned and serialized. Shared Cargo cache and dummy runtime ownership serialized. Workers do not edit original dirty inputs, mutate working runtime or close tickets from implementation claims. Coordinator validates integrated results and provider effects before tracker closure. All newly created worktrees join final inventory.
 
