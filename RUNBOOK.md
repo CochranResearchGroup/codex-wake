@@ -8204,3 +8204,24 @@ review, disabled-state fencing, future-launch-only promotion and real disposable
 vertical child graph for required review before publishing children. Isolated
 branch feat/autonomous-upgrade-bot-spec starts at5df7c81; runtime untouched.
 Validation: issue body/labels/state read back; git diff --check passed.
+
+
+## 2026-10-31 — autonomous upgrade source and actual bounded continuation
+
+Published and independently delegated the seven-child graph #447–#453. Children
+#447–#452 are closed with 73 integrated upgrade tests, 19 MCP tests on each
+Python version, exact disposable combined0.165 qualification (eight checks, zero
+model/provider requests, 11 separate scripted requests) and native operator
+notice delivery/cold replay. Actual #453 used three coding attempts and reached
+Rust compilation; a controller storage scan raced with a removed rustc temporary
+file and held the job, preserving the working selection and original budget.
+
+Corrected owned storage observation and added explicit same-job verify-only
+reconciliation with dead-process proof, original worker report and generated
+Cargo.lock provenance. Public Jobs and 17 Repair regressions pass. The same job
+resumed on frozen82a61a1; original deadline/attempts remain unchanged. Later
+cached-intent refusal4bb3586 is source-tested and was not hot-installed into the
+running continuation. Operator witness6 recorded all four retained notices with
+unchanged grant expiry; a fresh witness holds the old private client for eventual
+selection. Full local matrix runs; actual0.166 acceptance and final review/TDD
+remain open. No production deployment, shared restart or governor activation.

@@ -1026,4 +1026,4 @@ lanes:
     dependencies: []
     overlaps: [P179, P190]
     updated_at: 2026-10-31
-    disposition: Ticket447 source validated; dependent worker lanes next; no production activation
+    disposition: Tickets447–452 closed; actual166 verification continues original job after corrected storage race; ticket453 and final review/TDD remain open; published source checkpoint eb9f6dc; no production activation

@@ -75,7 +75,7 @@ Production activation by this planning task; running-daemon replacement; automat
 
 ## Further Notes
 
-Current State: approved children #447–#453 are published with native blocking edges. Durable jobs, source repair/review, stable-release discovery and canonical notices are source-integrated with public regressions; disposable qualification executor is integrated and actual package probes are underway. Future-launch promotion and complete 0.166 installed acceptance remain open. This document extends earlier explicit-activation policy only for a configured opt-in future-launch scope; it does not silently alter installed policy.
+Current State: approved children #447–#452 are closed with source/public-seam evidence, actual disposable 0.165 qualification and native notice delivery/cold replay. The future-launch selection implementation is validated; assembled actual 0.166 acceptance #453 continues the original job through regeneration/build, review, qualification and selection after the corrected storage-observation race. This document extends earlier explicit-activation policy only for a configured opt-in future-launch scope; it does not silently alter installed policy.
 
 Reconciliation: #369 remains broader coordination. Closed #377 retains its accepted staging/rollback outcome. The Wake-owned controller delivered in #393 supplies account/build surfaces. Open #413 gates running-daemon recovery; it is not a prerequisite for a bot that leaves running daemons untouched. Production profile activation remains separately gated by #380. Existing parents are not edited or closed by this specification.
 
@@ -87,7 +87,7 @@ Definition of done: approved child outcomes integrated with local checks, an imm
 
 Critical path: durable job slice → semantic worker and disposable qualification → qualified selection → integrated 0.166 acceptance. Independent low-conflict tracks after the job contract: repair worker, qualification executor and scheduled discovery. Primary coordinator owns integration.
 
-Next action: complete disposable executor qualification, then implement future-launch selection and run the complete 0.166 acceptance before the single final review/remediation pass.
+Next action: finish the original bounded 0.166 verification/build, independent review, installed qualification and future-launch selection/rollback witness; close #453 only on qualified evidence, then run the single final review/remediation pass.
 
 <!-- idempotency:codex-wake-autonomous-upgrade-bot-spec-20261031 -->
 
