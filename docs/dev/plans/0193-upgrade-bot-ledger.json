@@ -40,8 +40,13 @@
         "Rejected repairs and crashes consume the same job budget; no hidden fresh attempt."
       ],
       "number": 448,
-      "state": "pending",
-      "worker": null
+      "state": "running",
+      "worker": "/root/repair448",
+      "worker_base": "cdaaabb3bf2988d73cfb467ced6341ce15afb36c",
+      "owned_paths": [
+        "src/codex_wake/upgrade_repair.py",
+        "tests/test_upgrade_repair.py"
+      ]
     },
     {
       "n": 3,
@@ -57,8 +62,13 @@
         "Capabilities, session visibility, failure recovery and compatible rollback are exercised; teardown census records owned processes."
       ],
       "number": 449,
-      "state": "pending",
-      "worker": null
+      "state": "running",
+      "worker": "/root/qualify449",
+      "worker_base": "cdaaabb3bf2988d73cfb467ced6341ce15afb36c",
+      "owned_paths": [
+        "src/codex_wake/upgrade_qualification.py",
+        "tests/test_upgrade_qualification.py"
+      ]
     },
     {
       "n": 4,
@@ -92,8 +102,13 @@
         "Disable prevents discovery dispatch; reenable does not silently renew exhausted jobs."
       ],
       "number": 451,
-      "state": "pending",
-      "worker": null
+      "state": "running",
+      "worker": "/root/discover451",
+      "worker_base": "cdaaabb3bf2988d73cfb467ced6341ce15afb36c",
+      "owned_paths": [
+        "src/codex_wake/upgrade_discovery.py",
+        "tests/test_upgrade_discovery.py"
+      ]
     },
     {
       "n": 6,
@@ -134,5 +149,6 @@
       "state": "pending",
       "worker": null
     }
-  ]
+  ],
+  "integration_tip": "cdaaabb3bf2988d73cfb467ced6341ce15afb36c"
 }
