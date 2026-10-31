@@ -48,7 +48,7 @@ def main():
     from codex_wake.native_protocol import native_request,NativeCapabilityUnavailable
     from codex_wake.controller_health import ControllerHealth
     root=args.artifacts.resolve();root.mkdir(mode=0o700,parents=True,exist_ok=False)
-    home=root/'home';home.mkdir();cwd=root/'work';cwd.mkdir();wake=root/'wake';wake.mkdir()
+    home=root/'home';home.mkdir(mode=0o700);cwd=root/'work';cwd.mkdir(mode=0o700);wake=root/'wake';wake.mkdir(mode=0o700)
     requests=[]
     class Trap(http.server.BaseHTTPRequestHandler):
         def reject(self):

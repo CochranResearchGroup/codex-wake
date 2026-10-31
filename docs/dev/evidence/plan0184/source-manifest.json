@@ -1,0 +1,33 @@
+{
+  "base": "e641e1daeda0d119f28e320c7cb328b30d118754",
+  "branch": "fix/native-0165-cooperative-upgrades",
+  "files": {
+    "codex-rs/app-server-daemon/README.md": "9ba0f797f86cefc5235856c99690442447bab2e3b315c05fa6de899687e21284",
+    "codex-rs/app-server-daemon/src/lib.rs": "2cbf23d0bc766291125b29ba3e5fbd5baa7a70d06002b0211938ba22c6d6aa42",
+    "codex-rs/app-server-daemon/src/prepare_install.rs": "bdbd13c247456ee1ad567a5c62170a301c9490540cdada87ef5022ebdf4f6c3b",
+    "codex-rs/app-server-daemon/src/update_loop.rs": "3575750523d597f2980474678ed68e86a8443c3e4aa42ddadec2f680b5c0b43e",
+    "codex-rs/app-server-daemon/src/update_loop_tests.rs": "d583e8f94090831793369804d01fc073d98d7ce922ca72214af6230b16b23992",
+    "codex-rs/app-server-daemon/src/upgrade_checkpoints.rs": "74e876cb790e0ad134bc3cdfba596d933e13f6d8262a12d37949d4bc2adcf96b",
+    "codex-rs/app-server-protocol/schema/json/ClientRequest.json": "28dcfa1dc9c61aeb27cf4fa42d9a4928f9ab40954974709c5cfc61fa15550d31",
+    "codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json": "554044ff3b6b62865b318fcadc257b9dcb01464419e1e44dd1a2f2897b2de1fb",
+    "codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json": "13d9e5338176e9a4b924fefb18ff452210c0cd377e67832989802d4c3d15a9bd",
+    "codex-rs/app-server-protocol/schema/json/v2/DaemonUpgradePrepareParams.json": "619c071e428e1262737bbd54ca10c3885b7b8c372c3374fa4d390bb7a6d3a8d2",
+    "codex-rs/app-server-protocol/schema/json/v2/DaemonUpgradePrepareResponse.json": "29f56492147d54617ae0e296e0eaa2d18e3021ea84db24254284991cfdb53995",
+    "codex-rs/app-server-protocol/schema/precomputed/app-server-exports-experimental.json.zst": "271af61cc26372cfe8ff1bf3acc9664dc45331e5966a19961cc53b13e76d8921",
+    "codex-rs/app-server-protocol/schema/precomputed/app-server-exports-stable.json.zst": "5bf0555f0cb2de976ed8f0ada33a808e46de4bd32d7235082f77bea4f66182fc",
+    "codex-rs/app-server-protocol/schema/typescript/ClientRequest.ts": "ea51c22b62c4c073d2d386bc6eb76144d3e836da2b949c6302a21fee432ed062",
+    "codex-rs/app-server-protocol/schema/typescript/v2/DaemonUpgradePrepareParams.ts": "ec9b9504287ced512afff2b3f464a3d5ca292266b82805be2438017ecda963d9",
+    "codex-rs/app-server-protocol/schema/typescript/v2/DaemonUpgradePrepareResponse.ts": "bdde34c11ec744849abf6ecdd84abea0ff66f7af5eaa2bd0d5ee1d83ed2a8f56",
+    "codex-rs/app-server-protocol/schema/typescript/v2/index.ts": "cf33706a9209f069e85ab083f3ac602022d1c6a067d521e00429135e051386e9",
+    "codex-rs/app-server-protocol/src/protocol/common.rs": "e21ece19bed847fa5f50b0542e3bd3ee03012e5f1137e79b97d5da94f08ea178",
+    "codex-rs/app-server-protocol/src/protocol/v2/daemon_upgrade.rs": "b75e50838a4f3866cbf2d8111af4156e1bcefc75c1eb8177dd0e54c805ff62dc",
+    "codex-rs/app-server-protocol/src/protocol/v2/mod.rs": "aeb30d283f9e0a3fc423c06c1eeb4b151cbbc5c4539e67645acb705240a75140",
+    "codex-rs/app-server/src/message_processor.rs": "55c1d839d7d8f74a9c72571c2c61887e061bbc109fb8742537d20ea4977e1ef0",
+    "codex-rs/app-server/src/turn_admission.rs": "8ed53262ea59d61ddb88ed1ef8b4996b0498d25aa250b0a28ff29d3bf2e3d1b9",
+    "codex-rs/app-server/src/turn_admission_tests.rs": "92fbbb22cd068152ea773e0aa2d0db6d7e7a246bc8c825e23882c8f22d042448",
+    "sdk/python/src/openai_codex/generated/v2_all.py": "283eb92f6aaa9aed3b34b1ec7fbee54104c7c1dd10dbfa6a8de2ac0038ea3297"
+  },
+  "acceptance_harness_sha256": "59c43d56c81196f8184ac2788d37f2af9880fc25467b0ff74812791e30435a1a",
+  "qualified_source_commit": "dfde754e597f0b4766f5b22fbeb990d2e78fe151",
+  "private_upstream_push": false
+}

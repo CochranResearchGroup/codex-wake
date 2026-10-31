@@ -15,7 +15,7 @@ class BotsHealthConsumer:
     def __init__(self,wake_cli,target,artifacts,env,bots_app,*,node):
         from codex_wake.controller_notices import flat_target
         self.root=Path(artifacts)/'bots-consumer';self.root.mkdir(mode=0o700)
-        self.wake=self.root/'wake';self.wake.mkdir()
+        self.wake=self.root/'wake';self.wake.mkdir(mode=0o700)
         self.env=dict(env);self.env.pop('PYTHONPATH',None)
         self.cli=Path(wake_cli);self.processes=[];self.logs=[];self.proof=dict(states=[],qualified_boundary='immutable Bots public health API with actual OS receiver binding; no production SharedCodex enrollment')
         self.opener=build_opener(ProxyHandler({}))

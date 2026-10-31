@@ -1,0 +1,31 @@
+{
+  "specification": {
+    "result": "reviewed",
+    "checks": [
+      "Checkpoint hook precedes native daemon stop and current selection mutation",
+      "Every loaded conversation receives retained visible/context notice before active-turn steers",
+      "Strict operation/thread identity binds active handoff; idle snapshots labeled honestly",
+      "Paused goal identity/objective/token ceiling and nondecreasing native accounting required",
+      "Preparation failure never advances selection or forcibly interrupts checkpoint work",
+      "Coordinator-owned hold cannot clear shutdown drain; only owner may checkpoint-steer",
+      "Scheduled checks defer loaded inventory; manual update requests preparation"
+    ]
+  },
+  "standards": {
+    "result": "reviewed",
+    "checks": [
+      "One hidden coordinator module with prepare/Mode public boundary",
+      "Atomic private host writer syncs files and directory entries",
+      "Existing native RPC and updater lifecycle reused; no MCP/controller enrollment",
+      "Bounded inventory/RPC checks; no unsafe older-daemon fallback",
+      "Generated protocol and SDK artifacts refreshed",
+      "Full synthetic failure receipts retained; unrelated prior work preserved"
+    ]
+  },
+  "limitations": [
+    "Native full suite retained a host-time-sensitive legacy PID test flake; exact rerun passing does not erase it",
+    "Scripted provider does not establish independent model checkpoint quality",
+    "No working installation; one-time older daemon save/stop adoption remains necessary",
+    "Explicit stop/restart and out-of-band executable replacement are outside cooperative updater scope"
+  ]
+}

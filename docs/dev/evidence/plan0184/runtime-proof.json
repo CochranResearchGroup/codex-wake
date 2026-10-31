@@ -1,0 +1,434 @@
+{
+  "red1": {
+    "state": "failed",
+    "error": "AssertionError('Updater completed without a checkpoint preparation receipt')",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "success",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "update_exit_code": 0,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-red1/receipt.json"
+  },
+  "green1": {
+    "state": "failed",
+    "error": "AssertionError({'operation_id': 'upgrade-OI88ez', 'candidate': '0.165.0', 'phase': 'blocked', 'threads': {'01a18abb-4fbc-7d00-bc3e-2884b0c84b19': {'file': '/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-green1/accounts/codex-test/daemon-upgrades/upgrade-OI88ez/01a18abb-4fbc-7d00-bc3e-2884b0c84b19.json', 'goal_before': None, 'notice': {'eventId': 'upgrade_upgrade-OI88ez_01a18abb-4fbc-7d00-bc3e-2884b0c84b19', 'recorded': True, 'modelContextAvailable': True, 'notificationPublished': False, 'alreadyRecorded': False}, 'status': 'idle_snapshot_written', 'goal_after': None}, '01a18abb-55a6-7d42-a381-2362a826d3e4': {'file': '/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-green1/accounts/codex-test/daemon-upgrades/upgrade-OI88ez/01a18abb-55a6-7d42-a381-2362a826d3e4.json', 'goal_before': {'threadId': '01a18abb-55a6-7d42-a381-2362a826d3e4', 'objective': 'Preserve isolated active work', 'status': 'active', 'tokenBudget': 2000, 'tokensUsed': 0, 'timeUsedSeconds': 0, 'createdAt': 1793328895, 'updatedAt': 1793328895}, 'notice': {'eventId': 'upgrade_upgrade-OI88ez_01a18abb-55a6-7d42-a381-2362a826d3e4', 'recorded': True, 'modelContextAvailable': True, 'notificationPublished': True, 'alreadyRecorded': False}, 'status': 'checkpoint_requested', 'turn_id': '01a18abb-56cc-7633-89c6-804715481019'}, '01a18abb-6252-7213-8bc8-10b44ac4ff31': {'file': '/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-green1/accounts/codex-test/daemon-upgrades/upgrade-OI88ez/01a18abb-6252-7213-8bc8-10b44ac4ff31.json', 'goal_before': {'threadId': '01a18abb-6252-7213-8bc8-10b44ac4ff31', 'objective': 'Preserve isolated active work', 'status': 'active', 'tokenBudget': 2000, 'tokensUsed': 0, 'timeUsedSeconds': 0, 'createdAt': 1793328898, 'updatedAt': 1793328899}, 'notice': {'eventId': 'upgrade_upgrade-OI88ez_01a18abb-6252-7213-8bc8-10b44ac4ff31', 'recorded': True, 'modelContextAvailable': True, 'notificationPublished': True, 'alreadyRecorded': False}, 'status': 'checkpoint_requested', 'turn_id': '01a18abb-6354-7d12-8ef5-015709dac8f0'}, '01a18abb-692b-7521-915c-7bb9b9380934': {'file': '/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-green1/accounts/codex-test/daemon-upgrades/upgrade-OI88ez/01a18abb-692b-7521-915c-7bb9b9380934.json', 'goal_before': None, 'notice': {'eventId': 'upgrade_upgrade-OI88ez_01a18abb-692b-7521-915c-7bb9b9380934', 'recorded': True, 'modelContextAvailable': True, 'notificationPublished': True, 'alreadyRecorded': False}, 'status': 'idle_snapshot_written', 'goal_after': None}}, 'reason': 'conversation 01a18abb-55a6-7d42-a381-2362a826d3e4 ended without the requested operation-bound handoff; current daemon unchanged'})",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "success",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "dec10a575fc84911a2a5e05485582b2873ec22dfade3c2b5777fb538cf9b8f06",
+    "update_exit_code": 1,
+    "notices_visible": {
+      "active0": true,
+      "active1": true,
+      "idle": true
+    },
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-green1/receipt.json",
+    "preparation_phase": "blocked",
+    "preparation_reason": "conversation 01a18abb-55a6-7d42-a381-2362a826d3e4 ended without the requested operation-bound handoff; current daemon unchanged"
+  },
+  "green2": {
+    "state": "passed",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "success",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "076ff7187be40308903f8396c8adc9e4b042259dff787cad6f7659326a245233",
+    "update_exit_code": 0,
+    "notices_visible": {
+      "active0": true,
+      "active1": true,
+      "idle": true
+    },
+    "new_work_held_during_preparation": true,
+    "all_tabs_notified": true,
+    "durable_handoffs_before_replacement": true,
+    "counters_and_limits_preserved": true,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-green2/receipt.json",
+    "preparation_phase": "ready",
+    "preparation_reason": null
+  },
+  "refuse1": {
+    "state": "passed",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "refuse",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "076ff7187be40308903f8396c8adc9e4b042259dff787cad6f7659326a245233",
+    "update_exit_code": 1,
+    "notices_visible": {
+      "active0": true,
+      "active1": true,
+      "idle": true
+    },
+    "new_work_held_during_preparation": true,
+    "refusal_holds_old_daemon": true,
+    "cancellation_releases_admission": true,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-refuse1/receipt.json",
+    "preparation_phase": "blocked",
+    "preparation_reason": "conversation 01a18ac4-d291-7762-b62a-9e16e01264f5 reported it cannot safely checkpoint; current daemon unchanged"
+  },
+  "green3": {
+    "state": "failed",
+    "error": "AssertionError('Actual TUI session identity after upgrade active0 unavailable')",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "success",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "076ff7187be40308903f8396c8adc9e4b042259dff787cad6f7659326a245233",
+    "update_exit_code": 0,
+    "notices_visible": {
+      "active0": true,
+      "active0mirror": true,
+      "active1": true,
+      "idle": true
+    },
+    "new_work_held_during_preparation": true,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-green3/receipt.json",
+    "preparation_phase": "ready",
+    "preparation_reason": null
+  },
+  "green4": {
+    "state": "failed",
+    "error": "AssertionError('Actual TUI session identity after upgrade active0 unavailable')",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "success",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "076ff7187be40308903f8396c8adc9e4b042259dff787cad6f7659326a245233",
+    "update_exit_code": 0,
+    "notices_visible": {
+      "active0": true,
+      "active0mirror": true,
+      "active1": true,
+      "idle": true
+    },
+    "new_work_held_during_preparation": true,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-green4/receipt.json",
+    "preparation_phase": "ready",
+    "preparation_reason": null
+  },
+  "green5": {
+    "state": "passed",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "success",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "076ff7187be40308903f8396c8adc9e4b042259dff787cad6f7659326a245233",
+    "update_exit_code": 0,
+    "notices_visible": {
+      "active0": true,
+      "active0mirror": true,
+      "active1": true,
+      "idle": true
+    },
+    "new_work_held_during_preparation": true,
+    "all_tabs_notified": true,
+    "durable_handoffs_before_replacement": true,
+    "counters_and_limits_preserved": true,
+    "ui_after_upgrade": {
+      "active0": "01a18ad0-e9c1-7b42-8e33-54d10fbfd281",
+      "active0mirror": "01a18ad0-e9c1-7b42-8e33-54d10fbfd281",
+      "active1": "01a18ad0-f35e-7e21-b470-3565a76bcaba",
+      "idle": "01a18ad1-0493-7ea0-87de-fcd74393957d"
+    },
+    "ui_after_rollback": {
+      "active0": "01a18ad0-e9c1-7b42-8e33-54d10fbfd281",
+      "active0mirror": "01a18ad0-e9c1-7b42-8e33-54d10fbfd281",
+      "active1": "01a18ad0-f35e-7e21-b470-3565a76bcaba",
+      "idle": "01a18ad1-0493-7ea0-87de-fcd74393957d"
+    },
+    "rollback_preserves_handoffs": true,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-green5/receipt.json",
+    "goals_before": {
+      "01a18ad0-e9c1-7b42-8e33-54d10fbfd281": {
+        "threadId": "01a18ad0-e9c1-7b42-8e33-54d10fbfd281",
+        "objective": "Preserve isolated active work",
+        "status": "active",
+        "tokenBudget": 2000,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1793330309,
+        "updatedAt": 1793330310
+      },
+      "01a18ad0-f35e-7e21-b470-3565a76bcaba": {
+        "threadId": "01a18ad0-f35e-7e21-b470-3565a76bcaba",
+        "objective": "Preserve isolated active work",
+        "status": "active",
+        "tokenBudget": 2000,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1793330312,
+        "updatedAt": 1793330312
+      }
+    },
+    "goals_after": {
+      "01a18ad0-e9c1-7b42-8e33-54d10fbfd281": {
+        "threadId": "01a18ad0-e9c1-7b42-8e33-54d10fbfd281",
+        "objective": "Preserve isolated active work",
+        "status": "paused",
+        "tokenBudget": 2000,
+        "tokensUsed": 20,
+        "timeUsedSeconds": 16,
+        "createdAt": 1793330309,
+        "updatedAt": 1793330326
+      },
+      "01a18ad0-f35e-7e21-b470-3565a76bcaba": {
+        "threadId": "01a18ad0-f35e-7e21-b470-3565a76bcaba",
+        "objective": "Preserve isolated active work",
+        "status": "paused",
+        "tokenBudget": 2000,
+        "tokensUsed": 20,
+        "timeUsedSeconds": 14,
+        "createdAt": 1793330312,
+        "updatedAt": 1793330326
+      }
+    },
+    "checkpoint_kinds": {
+      "01a18ad0-e406-7142-92af-a635d8e3ec8a": "idle_snapshot",
+      "01a18ad0-e9c1-7b42-8e33-54d10fbfd281": "agent_handoff",
+      "01a18ad0-f35e-7e21-b470-3565a76bcaba": "agent_handoff",
+      "01a18ad1-0493-7ea0-87de-fcd74393957d": "idle_snapshot"
+    },
+    "preparation_phase": "ready",
+    "preparation_reason": null
+  },
+  "hang1": {
+    "state": "passed",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "hang",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "076ff7187be40308903f8396c8adc9e4b042259dff787cad6f7659326a245233",
+    "update_exit_code": 1,
+    "notices_visible": {
+      "active0": true,
+      "active0mirror": true,
+      "active1": true,
+      "idle": true
+    },
+    "new_work_held_during_preparation": true,
+    "refusal_holds_old_daemon": true,
+    "cancellation_releases_admission": true,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-hang1/receipt.json",
+    "preparation_phase": "blocked",
+    "preparation_reason": "handoff deadline reached; conversation status: {\"01a18ad1-3e55-7913-b2d6-f14ca1cbcd92\": String(\"idle_snapshot_written\"), \"01a18ad1-43fa-77a1-88e4-b00befefd0db\": String(\"handoff_written\"), \"01a18ad1-513e-74d0-a4e9-d5e5cc1a7c41\": String(\"checkpoint_requested\"), \"01a18ad1-6490-7741-8c83-141ce16ff34a\": String(\"idle_snapshot_written\")}; no daemon replaced. Inspect /home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-hang1/accounts/codex-test/daemon-upgrades/upgrade-CecsIw/state.json"
+  },
+  "legacy1": {
+    "state": "passed",
+    "uid": 1017,
+    "mode": "legacy",
+    "external_provider_calls": 0,
+    "baseline_sha256": "c07eb2ef5d6863a59e0bc7069c28778e274053cd43a41be60980130843e35b0f",
+    "target_sha256": "076ff7187be40308903f8396c8adc9e4b042259dff787cad6f7659326a245233",
+    "update_exit_code": 1,
+    "refusal_holds_old_daemon": true,
+    "cancellation_releases_admission": true,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-legacy1/receipt.json",
+    "preparation_phase": "blocked",
+    "preparation_reason": "Upgrade held: running daemon lacks safe checkpoint preparation or is busy. No daemon was stopped or replaced; save work and stop an older daemon once before adopting cooperative upgrades: Invalid request: unknown variant `daemon/upgrade/prepare`, expected one of `initialize`, `server/diagnostics`, `userVerification/status`, `userVerification/enroll`, `userVerification/delete`, `userVerification/verify`, `userVerification/cancel`, `thread/start`, `thread/resume`, `thread/fork`, `thread/sample`, `thread/sample/cancel`, `thread/archive`, `thread/delete`, `thread/unsubscribe`, `thread/increment_elicitation`, `thread/decrement_elicitation`, `thread/name/set`, `thread/prediction/request`, `thread/goal/set`, `thread/notice/append`, `thread/notice/read`, `thread/goal/get`, `thread/goal/clear`, `thread/queue/add`, `thread/queue/list`, `thread/queue/update`, `thread/queue/delete`, `thread/queue/reorder`, `thread/queue/start`, `thread/metadata/update`, `thread/attachment/add`, `thread/attachment/list`, `thread/attachmentOwner/list`, `thread/attachment/remove`, `thread/section/move`, `thread/settings/update`, `thread/memoryMode/set`, `thread/memory/read`, `memory/status`, `memory/reset`, `rollout/compress`, `thread/unarchive`, `thread/compact/start`, `thread/shellCommand`, `thread/approveGuardianDeniedAction`, `thread/backgroundTerminals/clean`, `thread/backgroundTerminals/list`, `thread/backgroundTerminals/terminate`, `thread/revert`, `thread/list`, `project/list`, `project/read`, `project/create`, `project/import`, `project/update`, `project/move`, `project/delete`, `threadSection/list`, `threadSection/create`, `threadSection/update`, `threadSection/delete`, `thread/search`, `thread/searchOccurrences`, `thread/loaded/list`, `thread/read`, `thread/readState/update`, `thread/turns/list`, `thread/items/list`, `thread/items/read`, `thread/inject_items`, `skills/list`, `skills/extraRoots/set`, `hooks/list`, `marketplace/add`, `marketplace/remove`, `marketplace/upgrade`, `plugin/list`, `plugin/search`, `plugin/installed`, `plugin/reconcile`, `plugin/read`, `plugin/skill/read`, `plugin/share/save`, `plugin/share/updateTargets`, `plugin/share/list`, `plugin/share/checkout`, `plugin/share/delete`, `app/read`, `app/list`, `app/installed`, `fs/readFile`, `fs/writeFile`, `fs/createDirectory`, `fs/getMetadata`, `fs/readDirectory`, `fs/remove`, `fs/copy`, `fs/watch`, `fs/unwatch`, `skills/config/write`, `plugin/install`, `plugin/uninstall`, `turn/start`, `turn/settings/update`, `turn/steer`, `turn/interrupt`, `thread/realtime/start`, `thread/realtime/appendAudio`, `thread/realtime/appendText`, `thread/realtime/appendSpeech`, `thread/realtime/stop`, `thread/timeline/list`, `thread/realtime/listVoices`, `review/start`, `model/list`, `account/gatewayOAuth/read`, `account/gatewayOAuth/login`, `account/gatewayOAuth/cancel`, `modelProvider/capabilities/read`, `experimentalFeature/list`, `permissionProfile/list`, `experimentalFeature/enablement/set`, `remoteControl/enable`, `remoteControl/disable`, `remoteControl/status/read`, `remoteControl/pairing/start`, `remoteControl/pairing/status`, `remoteControl/client/list`, `remoteControl/client/revoke`, `collaborationMode/list`, `mock/experimentalMethod`, `environment/add`, `environment/info`, `environment/status`, `mcpServer/oauth/login`, `thread/mcpServer/reload`, `config/mcpServer/reload`, `mcpServerStatus/list`, `mcpServer/resource/read`, `mcpServer/event/stream/start`, `mcpServer/event/stream/stop`, `mcpServer/tool/call`, `windowsSandbox/setupStart`, `windowsSandbox/readiness`, `account/login/start`, `account/bedrock/discover`, `account/bedrock/setup`, `account/bedrock/checkGovCloudRequirements`, `account/login/cancel`, `account/logout`, `account/rateLimits/read`, `account/rateLimitResetCredit/consume`, `account/usage/read`, `account/workspaceMessages/read`, `account/sendAddCreditsNudgeEmail`, `feedback/upload`, `feedback/save`, `command/exec`, `command/exec/write`, `command/exec/terminate`, `command/exec/resize`, `process/spawn`, `process/writeStdin`, `process/kill`, `process/resizePty`, `config/read`, `externalAgentConfig/detect`, `externalAgentConfig/import`, `externalAgentConfig/import/recordHistory`, `externalAgentConfig/import/readHistories`, `config/value/write`, `config/batchWrite`, `configRequirements/read`, `account/read`, `getConversationSummary`, `gitDiffToRemote`, `getAuthStatus`, `fuzzyFileSearch`, `fuzzyFileSearch/sessionStart`, `fuzzyFileSearch/sessionUpdate`, `fuzzyFileSearch/sessionStop`"
+  },
+  "final1": {
+    "state": "passed",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "success",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "acb3e9284ebfd99a7aa6f2248c0d538aa7a3e6eda159ffa6d880f23e0f1064c5",
+    "update_exit_code": 0,
+    "notices_visible": {
+      "active0": true,
+      "active0mirror": true,
+      "active1": true,
+      "idle": true
+    },
+    "new_work_held_during_preparation": true,
+    "all_tabs_notified": true,
+    "durable_handoffs_before_replacement": true,
+    "counters_and_limits_preserved": true,
+    "ui_after_upgrade": {
+      "active0": "01a18ade-84e0-78d0-b8dd-d0b0e811060b",
+      "active0mirror": "01a18ade-84e0-78d0-b8dd-d0b0e811060b",
+      "active1": "01a18ade-8e15-7a60-8ef6-ad4d7a8d32e7",
+      "idle": "01a18ade-a01e-7812-b273-c7a7bec515c1"
+    },
+    "ui_after_rollback": {
+      "active0": "01a18ade-84e0-78d0-b8dd-d0b0e811060b",
+      "active0mirror": "01a18ade-84e0-78d0-b8dd-d0b0e811060b",
+      "active1": "01a18ade-8e15-7a60-8ef6-ad4d7a8d32e7",
+      "idle": "01a18ade-a01e-7812-b273-c7a7bec515c1"
+    },
+    "rollback_preserves_handoffs": true,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-final1/receipt.json",
+    "preparation_phase": "ready",
+    "preparation_reason": null
+  },
+  "finalhang1": {
+    "state": "passed",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "hang",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "acb3e9284ebfd99a7aa6f2248c0d538aa7a3e6eda159ffa6d880f23e0f1064c5",
+    "update_exit_code": 1,
+    "notices_visible": {
+      "active0": true,
+      "active0mirror": true,
+      "active1": true,
+      "idle": true
+    },
+    "new_work_held_during_preparation": true,
+    "refusal_holds_old_daemon": true,
+    "cancellation_releases_admission": true,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-finalhang1/receipt.json",
+    "preparation_phase": "blocked",
+    "preparation_reason": "handoff deadline reached; conversation status: {\"01a18ade-78c7-7431-b240-80e3c91d3a80\": String(\"idle_snapshot_written\"), \"01a18ade-7fe6-7960-90dc-b657d3dfe787\": String(\"handoff_written\"), \"01a18ade-8882-7022-8bac-f6f161749d2b\": String(\"checkpoint_requested\"), \"01a18ade-9ada-7211-8100-679509fc8f2b\": String(\"idle_snapshot_written\")}; no daemon replaced. Inspect /home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-finalhang1/accounts/codex-test/daemon-upgrades/upgrade-QLbO4B/state.json"
+  },
+  "finalrefuse1": {
+    "state": "passed",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "refuse",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "acb3e9284ebfd99a7aa6f2248c0d538aa7a3e6eda159ffa6d880f23e0f1064c5",
+    "update_exit_code": 1,
+    "notices_visible": {
+      "active0": true,
+      "active0mirror": true,
+      "active1": true,
+      "idle": true
+    },
+    "new_work_held_during_preparation": true,
+    "refusal_holds_old_daemon": true,
+    "cancellation_releases_admission": true,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-finalrefuse1/receipt.json",
+    "preparation_phase": "blocked",
+    "preparation_reason": "conversation 01a18adf-39cb-72c0-847c-7f8b2caa3a6b reported it cannot safely checkpoint; current daemon unchanged"
+  },
+  "finallegacy1": {
+    "state": "passed",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "legacy",
+    "baseline_sha256": "c07eb2ef5d6863a59e0bc7069c28778e274053cd43a41be60980130843e35b0f",
+    "target_sha256": "acb3e9284ebfd99a7aa6f2248c0d538aa7a3e6eda159ffa6d880f23e0f1064c5",
+    "update_exit_code": 1,
+    "refusal_holds_old_daemon": true,
+    "cancellation_releases_admission": true,
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-finallegacy1/receipt.json",
+    "preparation_phase": "blocked",
+    "preparation_reason": "Upgrade held: running daemon lacks safe checkpoint preparation or is busy. No daemon was stopped or replaced; save work and stop an older daemon once before adopting cooperative upgrades: Invalid request: unknown variant `daemon/upgrade/prepare`, expected one of `initialize`, `server/diagnostics`, `userVerification/status`, `userVerification/enroll`, `userVerification/delete`, `userVerification/verify`, `userVerification/cancel`, `thread/start`, `thread/resume`, `thread/fork`, `thread/sample`, `thread/sample/cancel`, `thread/archive`, `thread/delete`, `thread/unsubscribe`, `thread/increment_elicitation`, `thread/decrement_elicitation`, `thread/name/set`, `thread/prediction/request`, `thread/goal/set`, `thread/notice/append`, `thread/notice/read`, `thread/goal/get`, `thread/goal/clear`, `thread/queue/add`, `thread/queue/list`, `thread/queue/update`, `thread/queue/delete`, `thread/queue/reorder`, `thread/queue/start`, `thread/metadata/update`, `thread/attachment/add`, `thread/attachment/list`, `thread/attachmentOwner/list`, `thread/attachment/remove`, `thread/section/move`, `thread/settings/update`, `thread/memoryMode/set`, `thread/memory/read`, `memory/status`, `memory/reset`, `rollout/compress`, `thread/unarchive`, `thread/compact/start`, `thread/shellCommand`, `thread/approveGuardianDeniedAction`, `thread/backgroundTerminals/clean`, `thread/backgroundTerminals/list`, `thread/backgroundTerminals/terminate`, `thread/revert`, `thread/list`, `project/list`, `project/read`, `project/create`, `project/import`, `project/update`, `project/move`, `project/delete`, `threadSection/list`, `threadSection/create`, `threadSection/update`, `threadSection/delete`, `thread/search`, `thread/searchOccurrences`, `thread/loaded/list`, `thread/read`, `thread/readState/update`, `thread/turns/list`, `thread/items/list`, `thread/items/read`, `thread/inject_items`, `skills/list`, `skills/extraRoots/set`, `hooks/list`, `marketplace/add`, `marketplace/remove`, `marketplace/upgrade`, `plugin/list`, `plugin/search`, `plugin/installed`, `plugin/reconcile`, `plugin/read`, `plugin/skill/read`, `plugin/share/save`, `plugin/share/updateTargets`, `plugin/share/list`, `plugin/share/checkout`, `plugin/share/delete`, `app/read`, `app/list`, `app/installed`, `fs/readFile`, `fs/writeFile`, `fs/createDirectory`, `fs/getMetadata`, `fs/readDirectory`, `fs/remove`, `fs/copy`, `fs/watch`, `fs/unwatch`, `skills/config/write`, `plugin/install`, `plugin/uninstall`, `turn/start`, `turn/settings/update`, `turn/steer`, `turn/interrupt`, `thread/realtime/start`, `thread/realtime/appendAudio`, `thread/realtime/appendText`, `thread/realtime/appendSpeech`, `thread/realtime/stop`, `thread/timeline/list`, `thread/realtime/listVoices`, `review/start`, `model/list`, `account/gatewayOAuth/read`, `account/gatewayOAuth/login`, `account/gatewayOAuth/cancel`, `modelProvider/capabilities/read`, `experimentalFeature/list`, `permissionProfile/list`, `experimentalFeature/enablement/set`, `remoteControl/enable`, `remoteControl/disable`, `remoteControl/status/read`, `remoteControl/pairing/start`, `remoteControl/pairing/status`, `remoteControl/client/list`, `remoteControl/client/revoke`, `collaborationMode/list`, `mock/experimentalMethod`, `environment/add`, `environment/info`, `environment/status`, `mcpServer/oauth/login`, `thread/mcpServer/reload`, `config/mcpServer/reload`, `mcpServerStatus/list`, `mcpServer/resource/read`, `mcpServer/event/stream/start`, `mcpServer/event/stream/stop`, `mcpServer/tool/call`, `windowsSandbox/setupStart`, `windowsSandbox/readiness`, `account/login/start`, `account/bedrock/discover`, `account/bedrock/setup`, `account/bedrock/checkGovCloudRequirements`, `account/login/cancel`, `account/logout`, `account/rateLimits/read`, `account/rateLimitResetCredit/consume`, `account/usage/read`, `account/workspaceMessages/read`, `account/sendAddCreditsNudgeEmail`, `feedback/upload`, `feedback/save`, `command/exec`, `command/exec/write`, `command/exec/terminate`, `command/exec/resize`, `process/spawn`, `process/writeStdin`, `process/kill`, `process/resizePty`, `config/read`, `externalAgentConfig/detect`, `externalAgentConfig/import`, `externalAgentConfig/import/recordHistory`, `externalAgentConfig/import/readHistories`, `config/value/write`, `config/batchWrite`, `configRequirements/read`, `account/read`, `getConversationSummary`, `gitDiffToRemote`, `getAuthStatus`, `fuzzyFileSearch`, `fuzzyFileSearch/sessionStart`, `fuzzyFileSearch/sessionUpdate`, `fuzzyFileSearch/sessionStop`"
+  },
+  "finalfresh1": {
+    "state": "passed",
+    "uid": 1017,
+    "provider": "Owned scripted localhost Responses fixture",
+    "external_provider_calls": 0,
+    "mode": "success",
+    "baseline_sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72",
+    "target_sha256": "acb3e9284ebfd99a7aa6f2248c0d538aa7a3e6eda159ffa6d880f23e0f1064c5",
+    "update_exit_code": 0,
+    "notices_visible": {
+      "active0": true,
+      "active0mirror": true,
+      "active1": true,
+      "idle": true
+    },
+    "new_work_held_during_preparation": true,
+    "all_tabs_notified": true,
+    "durable_handoffs_before_replacement": true,
+    "counters_and_limits_preserved": true,
+    "ui_after_upgrade": {
+      "active0": "01a18ae1-22a4-7923-9e60-30866f72b789",
+      "active0mirror": "01a18ae1-22a4-7923-9e60-30866f72b789",
+      "active1": "01a18ae1-2c96-7a10-bee8-ee93ad07f361",
+      "idle": "01a18ae1-3d34-7551-ad5a-77103f76ec86",
+      "fresh": "01a18ae1-22a4-7923-9e60-30866f72b789"
+    },
+    "ui_after_rollback": {
+      "active0": "01a18ae1-22a4-7923-9e60-30866f72b789",
+      "active0mirror": "01a18ae1-22a4-7923-9e60-30866f72b789",
+      "active1": "01a18ae1-2c96-7a10-bee8-ee93ad07f361",
+      "idle": "01a18ae1-3d34-7551-ad5a-77103f76ec86",
+      "fresh": "01a18ae1-22a4-7923-9e60-30866f72b789",
+      "rollbackfresh": "01a18ae1-22a4-7923-9e60-30866f72b789"
+    },
+    "rollback_preserves_handoffs": true,
+    "fixture_build_registrations": [
+      {
+        "executable": "/home/codex-daemon-test/daemon-qualification-0165/candidate-checkpoint4/bin/codex",
+        "sha256": "acb3e9284ebfd99a7aa6f2248c0d538aa7a3e6eda159ffa6d880f23e0f1064c5"
+      },
+      {
+        "executable": "/home/codex-daemon-test/daemon-qualification-0165/candidate-barrier/bin/codex",
+        "sha256": "0eb13be0065cc4c865e421bf27a084842cec83dd1199bb7bc6e4d0fd85178a72"
+      }
+    ],
+    "receipt_path": "/home/codex-daemon-test/daemon-qualification-0165/upgrade-journey-finalfresh1/receipt.json",
+    "preparation_phase": "ready",
+    "preparation_reason": null,
+    "goals_before": {
+      "01a18ae1-22a4-7923-9e60-30866f72b789": {
+        "threadId": "01a18ae1-22a4-7923-9e60-30866f72b789",
+        "objective": "Preserve isolated active work",
+        "status": "active",
+        "tokenBudget": 2000,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1793331373,
+        "updatedAt": 1793331373
+      },
+      "01a18ae1-2c96-7a10-bee8-ee93ad07f361": {
+        "threadId": "01a18ae1-2c96-7a10-bee8-ee93ad07f361",
+        "objective": "Preserve isolated active work",
+        "status": "active",
+        "tokenBudget": 2000,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 0,
+        "createdAt": 1793331375,
+        "updatedAt": 1793331375
+      }
+    },
+    "goals_after": {
+      "01a18ae1-22a4-7923-9e60-30866f72b789": {
+        "threadId": "01a18ae1-22a4-7923-9e60-30866f72b789",
+        "objective": "Preserve isolated active work",
+        "status": "paused",
+        "tokenBudget": 2000,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 11,
+        "createdAt": 1793331373,
+        "updatedAt": 1793331383
+      },
+      "01a18ae1-2c96-7a10-bee8-ee93ad07f361": {
+        "threadId": "01a18ae1-2c96-7a10-bee8-ee93ad07f361",
+        "objective": "Preserve isolated active work",
+        "status": "paused",
+        "tokenBudget": 2000,
+        "tokensUsed": 0,
+        "timeUsedSeconds": 9,
+        "createdAt": 1793331375,
+        "updatedAt": 1793331383
+      }
+    },
+    "checkpoint_kinds": {
+      "01a18ae1-1e54-7032-b531-39d53fc88889": "idle_snapshot",
+      "01a18ae1-22a4-7923-9e60-30866f72b789": "agent_handoff",
+      "01a18ae1-2c96-7a10-bee8-ee93ad07f361": "agent_handoff",
+      "01a18ae1-3d34-7551-ad5a-77103f76ec86": "idle_snapshot"
+    }
+  }
+}
