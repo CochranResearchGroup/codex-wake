@@ -73,3 +73,37 @@ class RefreshGoalTests(unittest.TestCase):
             self.assertEqual([c for c in calls if c[0]=='send-keys'],[('send-keys','-t','%1','Escape')])
             self.assertEqual(goal['status'],'paused')
             self.assertEqual(receipt['reason'],'refresh_composer_or_dialog_unverified')
+
+    def test_default_allocation_binding_uses_authenticated_thread_without_intent(self):
+        from codex_wake.refresh_goal import resource_ready
+        proof=dict(state='armed',stop_latched=False,controller=dict(fresh=True),
+                   accounting=dict(state='qualified'),used_tokens=20,token_limit=100,deadline=9999)
+        receipt=dict(thread_id='source')
+        with patch('codex_wake.goal_supervision.show',return_value=proof) as show, patch(
+                'codex_wake.lifecycle_budget.trusted_upper',return_value=100):
+            self.assertTrue(resource_ready(Path('/unused'),receipt,
+                dict(goal_supervision=dict(root='/unused',policy='/unused')),{}))
+        self.assertEqual(show.call_args.kwargs['permission_principal'].subject,'source')
+        self.assertIsNone(show.call_args.args[3])
+
+    def test_prepared_scoped_refresh_restores_only_after_resource_readiness(self):
+        from codex_wake.scoped_refresh import poll_one, METHOD
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'shared-refresh'/'owned.json';path.parent.mkdir()
+            goal=dict(status='paused',tokensUsed=20,timeUsedSeconds=3,updatedAt=2)
+            receipt=dict(thread_id='source',state='prepared',profile={},
+                operational_goal_pause=dict(state='acknowledged'))
+            calls=[]
+            def request(method,params):
+                calls.append((method,params))
+                if method=='thread/read':return dict(thread=dict(status=dict(type='idle',activeFlags=[])))
+                if method=='thread/goal/get':return dict(goal=goal)
+                if method==METHOD:return dict(threadId='source',queued=not params.get('dryRun',False))
+                raise AssertionError(method)
+            with patch('codex_wake.shared_refresh._source_workspace',return_value=True), patch(
+                    'codex_wake.shared_refresh._resources',return_value={'toy':dict(state='ready')}), patch(
+                    'codex_wake.refresh_goal.restore',return_value=True) as restore:
+                poll_one(path,receipt,request=request)
+            self.assertEqual(receipt['state'],'completed')
+            restore.assert_called_once()
+            self.assertEqual(sum(m==METHOD and not p.get('dryRun') for m,p in calls),1)
