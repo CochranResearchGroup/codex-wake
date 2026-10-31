@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -63,7 +64,7 @@ class UpgradeRepair:
     each worker submission. The executor's own journal independently retains the
     same high-water mark and unresolved subprocess intents across reconstruction.
     """
-    def __init__(self, workspace, evidence, config, *, now=None, guard=None, checkpoint=None):
+    def __init__(self, workspace, evidence, config, *, now=None, clock=None, guard=None, checkpoint=None):
         self.workspace=Path(workspace).resolve(strict=True)
         self.evidence=Path(evidence).resolve()
         if self.evidence == self.workspace or self.evidence.is_relative_to(self.workspace):
@@ -73,11 +74,16 @@ class UpgradeRepair:
             raise ValueError('owned compiler cache must be outside candidate source')
         self.config=config
         self.now=now or time.time
+        self.clock=clock or self._host_clock
         self.guard=guard or (lambda: None)
         self.checkpoint=checkpoint or (lambda value: None)
         self.evidence.mkdir(parents=True,exist_ok=True,mode=0o700)
         self.state_path=self.evidence/'repair-state.json'
         self.state={}
+
+    @staticmethod
+    def _host_clock():
+        return dict(boot_id=Path('/proc/sys/kernel/random/boot_id').read_text().strip(),seconds=time.monotonic())
 
     def _save(self):
         _atomic(self.state_path,self.state)
@@ -85,10 +91,24 @@ class UpgradeRepair:
     def _budget(self):
         self.guard()
         current=self.now()
-        if current < self.state['last_seen']:
-            raise RepairHeld('clock_uncertain')
-        self.state['last_seen']=current
-        if current >= self.job['deadline'] or time.monotonic() >= self.monotonic_deadline:
+        try:
+            sample=self.clock();anchor=self.state['clock_anchor'];counter=sample['seconds']
+            if (not isinstance(sample['boot_id'],str) or not sample['boot_id'] or sample['boot_id']!=anchor['boot_id']
+                    or type(counter) not in (int,float) or not math.isfinite(counter)
+                    or counter<anchor['monotonic_latest']
+                    or type(current) not in (int,float) or not math.isfinite(current)
+                    or anchor['wall_high_water']-current>=1.0):
+                raise ValueError('clock continuity lost')
+            regressed=current<anchor['wall_high_water']
+            negative_delta=current-anchor['wall_observed']
+            anchor.update(monotonic_latest=counter,wall_high_water=max(anchor['wall_high_water'],current),
+                wall_observed=current,wall_observation='regressed' if regressed else 'nondecreasing',
+                wall_adjustment_count=anchor.get('wall_adjustment_count',0)+int(negative_delta<0),
+                last_negative_delta=negative_delta if negative_delta<0 else anchor.get('last_negative_delta',0))
+            self.state['last_seen']=anchor['wall_high_water']
+        except (KeyError,OSError,TypeError,ValueError):
+            raise RepairHeld('clock_uncertain') from None
+        if anchor['wall_high_water']>=self.job['deadline'] or counter>=anchor['monotonic_deadline']:
             raise RepairHeld('deadline_exhausted')
         limit=self.job['limits'].get('temporary_bytes')
         if limit is not None:
@@ -284,18 +304,27 @@ class UpgradeRepair:
 
     def run(self,job,recipe):
         self.job=job
-        remaining=job['deadline']-self.now()
-        self.monotonic_deadline=time.monotonic()+max(0,remaining)
+        first_wall=self.now()
+        first_clock=self.clock()
         self.required=sorted(set(REQUIRED_CAPABILITIES.get(recipe.get('channel'), ())) |
             set(job.get('required_capabilities', ())) | set(self.config.get('required_capabilities', ())) |
             ({'tui_health'} if recipe.get('channel') == 'modded' else set()))
         seal=_digest(dict(job_id=job['id'],recipe=recipe,config=self.config,workspace=str(self.workspace),required=self.required))
-        self.state=dict(schema_version=1,seal=seal,repair_attempts=job.get('repair_attempts',0),last_seen=self.now(),commands=[],patch_provenance=[],inflight=None,status='applying')
+        self.state=dict(schema_version=1,seal=seal,repair_attempts=job.get('repair_attempts',0),last_seen=first_wall,
+            clock_anchor=dict(boot_id=first_clock.get('boot_id'),monotonic_start=first_clock.get('seconds'),
+                monotonic_latest=first_clock.get('seconds'),monotonic_deadline=first_clock.get('seconds',0)+max(0,job['deadline']-first_wall),
+                wall_high_water=first_wall,wall_observed=first_wall,wall_adjustment_count=0,last_negative_delta=0,
+                wall_observation='nondecreasing'),commands=[],patch_provenance=[],inflight=None,status='applying')
         if self.state_path.exists():
             self.state=json.loads(self.state_path.read_text())
             if self.state.get('seal')!=seal:
                 raise RepairHeld('repair_job_input_changed')
             self.state['repair_attempts']=max(self.state['repair_attempts'],job.get('repair_attempts',0))
+            try:
+                self._budget()
+            except (RepairHeld,OSError,ValueError) as error:
+                self.state.update(status='held',reason=str(error));self._save()
+                return dict(status='held',reason=str(error),repair_attempts=self.state['repair_attempts'],evidence=str(self.state_path))
             if self.state.get('status')=='reviewed':
                 result=self.state['result']
                 prepared=json.loads(Path(result['prepared_recipe']).read_text())
