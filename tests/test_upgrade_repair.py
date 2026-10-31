@@ -317,3 +317,20 @@ pathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(dict(sc
             owner=UpgradeRepair(source,root/'evidence',config)
             with self.assertRaisesRegex(ValueError,'only_interrupted_regeneration_can_reconcile'):
                 owner.reconcile(job,recipe)
+
+    def test_cached_readmission_refuses_new_intent_after_verification_crash(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source,config,recipe,job=self.fixture(root)
+            counter=root/'regeneration-count'
+            config['regenerate']=[[sys.executable,'-c',"import pathlib,time;p=pathlib.Path("+repr(str(counter))+");n=int(p.read_text())+1 if p.exists() else 1;p.write_text(str(n));time.sleep(120)"]]
+            def first_guard():
+                if counter.exists():raise FileNotFoundError('first known interrupted regeneration')
+            held=UpgradeRepair(source,root/'evidence',config,guard=first_guard).run(job,recipe)
+            self.assertEqual(held['status'],'held')
+            UpgradeRepair(source,root/'evidence',config).reconcile(job,recipe)
+            def crash_guard():
+                if counter.exists() and counter.read_text()=='2':raise KeyboardInterrupt()
+            with self.assertRaises(KeyboardInterrupt):
+                UpgradeRepair(source,root/'evidence',config,guard=crash_guard).run(dict(job,resume_mode='verify_only'),recipe)
+            with self.assertRaisesRegex(ValueError,'verification_execution_unreconciled'):
+                UpgradeRepair(source,root/'evidence',config).reconcile(job,recipe)
