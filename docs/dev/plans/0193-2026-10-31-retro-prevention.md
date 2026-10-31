@@ -8,7 +8,7 @@ Base/comparator:5df7c811b4cd9b95a06d3ac4f6f92e84e3ec4f65
 
 ## Current State
 
-Tickets440 cleanup (primary),441 validation adoption (worker),442 summaries (worker) are ready.443 integrated qualification is blocked by all three. Source-bound runner356 is reused. Three substantive lanes maximum; integration/shared documentation serialized by primary. No live cleanup/native/service/provider effects. All tests use disposable state. Review0/1 and final findings TDD0/1; freeze full diff only after ticket closure.
+Tickets440–443 are implemented, integrated and validated on14b90c9. Canonical PR publication and tracker closeout precede the single broad review. Source-bound runner356 is reused. Three substantive lanes maximum; integration/shared documentation serialized by primary. No live cleanup/native/service/provider effects. All tests use disposable state. Review0/1 and final findings TDD0/1; freeze full diff only after ticket closure.
 
 ## Scope and acceptance
 
@@ -27,7 +27,7 @@ Cleanup receipt contract: schema="codex-wake.cleanup.v1", kind="plan" or "result
 |440|none|primary|validated|a8822f1;9 cleanup public cases, cleanup+summary12 pass each Python3.11/3.12|
 |441|none|ticket441|validated|a690a22+d45c1bb integrated71b9993+3882c00;8-check presubmit and9 follow-up runner tests pass|
 |442|none|ticket442|validated|fd0308e cherry-pickedc70e6f7; integrated public checks pass|
-|443|440,441,442|ticket443|running|All blocker SHAs integrated and locally validated; combined qualification next|
+|443|440,441,442|ticket443|validated|14b90c9 exact integrated source;10-check presubmit+21 public tests on311+composed retained fixtures PASS|
 
 Private detailed receipts: user-state implement439. Commits/merges, validations and tracker closure are distinct. Changes reach canonical main through reviewed PRs under existing integration policy; local checks satisfy CI. Parent439 remains unmodified.
 
