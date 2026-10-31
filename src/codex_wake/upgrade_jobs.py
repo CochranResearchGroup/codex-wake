@@ -49,7 +49,10 @@ class UpgradeJobs:
         self.executor = executor
 
     def config(self):
-        value = json.loads((self.root / 'upgrade-bot.json').read_text())
+        path=self.root/'upgrade-bot.json'
+        if path.is_symlink() or path.stat().st_uid != os.getuid() or path.stat().st_mode & 0o022:
+            raise InventoryError('invalid_configuration','host upgrade configuration ownership or permissions invalid')
+        value = json.loads(path.read_text())
         if value.get('schema_version') != 1 or not isinstance(value.get('target'), dict) or not value['target']:
             raise InventoryError('invalid_configuration', 'versioned fixed upgrade target required')
         limits = dict(DEFAULT_LIMITS, **value.get('limits', {}))
@@ -110,7 +113,10 @@ class UpgradeJobs:
     @contextmanager
     def locked(self):
         self.store.mkdir(parents=True, exist_ok=True, mode=0o700)
-        with (self.store / '.lock').open('a') as stream:
+        if self.store.is_symlink() or self.store.stat().st_uid != os.getuid() or self.store.stat().st_mode & 0o022:
+            raise InventoryError('invalid_configuration','upgrade store ownership or permissions invalid')
+        fd=os.open(self.store/'.lock',os.O_CREAT|os.O_RDWR|getattr(os,'O_NOFOLLOW',0),0o600)
+        with os.fdopen(fd,'a') as stream:
             fcntl.flock(stream, fcntl.LOCK_EX)
             yield
 

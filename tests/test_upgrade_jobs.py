@@ -156,3 +156,14 @@ class UpgradeJobsTests(unittest.TestCase):
             actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target],expires_at=time.time()-1)
             with self.assertRaises(InventoryError):
                 UpgradeJobs(root).execute(actor,'upgrades.enable',dict(expected_target=target),authorize=lambda:actor)
+
+    def test_writable_host_configuration_is_refused_before_enabling(self):
+        from codex_wake.managed_inventory import InventoryError
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);target={'host':'fixture'}
+            path=root/'upgrade-bot.json'
+            path.write_text(json.dumps(dict(schema_version=1,target=target,recipes={})))
+            path.chmod(0o666)
+            actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
+            with self.assertRaises(InventoryError):
+                UpgradeJobs(root).execute(actor,'upgrades.enable',dict(expected_target=target))
