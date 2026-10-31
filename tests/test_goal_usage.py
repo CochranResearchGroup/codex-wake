@@ -75,11 +75,12 @@ class GoalUsageTests(unittest.TestCase):
         rollout(tmp_path,'root',[inherited,goal(),event('task_started',turn_id='work'),
             event('collab_agent_spawn_end',call_id='spawn',sender_thread_id='root',new_thread_id='child'),
             response('root','work','parent',40)])
-        rollout(tmp_path,'child',[inherited,response('child','child-work','child-response',20,'work')],
+        rollout(tmp_path,'child',[inherited,response('child','child-work','child-response',20,'work'),
+            event('task_started',turn_id='child-resumed'),response('child','child-resumed','child-later',25)],
                 parent_thread_id='root',source_override='unused')
         result=observe_usage(tmp_path,'root',CREATED)
         assert result['state']=='qualified'
-        assert result['used_tokens']==60
+        assert result['used_tokens']==85
 
 
     def test_reset_excludes_verified_snapshot_without_goal_reset(self):

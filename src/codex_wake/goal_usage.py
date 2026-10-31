@@ -278,6 +278,13 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, 
             raise ValueError('goal_start_during_active_turn')
         turns = {r['payload']['turn_id'] for r in rows[boundary+1:]
             if r.get('type') == 'event_msg' and r['payload'].get('type') == 'task_started'}
+        # A descendant can start later turns after an operational refresh or
+        # goal continuation. Its initial inherited root_turn_id is not permanent.
+        for identity, (_, history) in sessions.items():
+            if identity != thread_id:
+                turns.update(r['payload']['turn_id'] for r in history
+                    if r.get('type') == 'event_msg' and r['payload'].get('type') == 'task_started'
+                    and _epoch(r['timestamp']) >= _epoch(creation['timestamp']))
         for identity, (meta, _) in sessions.items():
             parent = meta.get('parent_thread_id')
             source = meta.get('source', {})
@@ -376,7 +383,7 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, 
         selected = [records[k]['usage'] for k in charged - excluded]
         inclusive = sum(v['total_tokens'] for v in selected)
         cached = sum(v['cached_input_tokens'] for v in selected)
-        return dict(state='qualified', parent_thread_id=parent_thread_id, used_tokens=inclusive - cached if token_accounting == 'fresh' else inclusive,
+        return dict(state='qualified', thread_ids=sorted(owned), parent_thread_id=parent_thread_id, used_tokens=inclusive - cached if token_accounting == 'fresh' else inclusive,
             fresh_tokens=inclusive - cached, cached_input_tokens=cached,
             cache_inclusive_tokens=inclusive, token_accounting=token_accounting,
             charges={json.dumps(k):dict(

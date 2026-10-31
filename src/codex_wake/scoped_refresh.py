@@ -33,6 +33,8 @@ def poll_one(path,receipt,*,request=None,guard=None):
         return value
     guard()
     thread=receipt['thread_id']
+    if receipt['state']=='prepared' and receipt.get('operational_goal_pause'):
+        receipt['state']='queued'
     if receipt['state']=='queued':
         source=request('thread/read',dict(threadId=thread,includeTurns=False))['thread']
         if not _source_workspace(receipt,source):
@@ -72,6 +74,10 @@ def poll_one(path,receipt,*,request=None,guard=None):
             receipt.update(state='blocked',reason='source_workspace_mismatch');return
         receipt.update(goal_after=goal,goal_continuity_verified=True,resource_status=checks)
         if all(check['state']=='ready' for check in checks.values()):
+            if receipt.get('operational_goal_pause'):
+                from .refresh_goal import restore
+                if not restore(path,receipt,receipt['profile'],request):
+                    return
             receipt.update(state='completed',reason=None)
         elif receipt['state']!='uncertain':
             receipt.update(state='verifying',reason='requested_resources_not_ready')
