@@ -57,3 +57,24 @@ This persists OFF, fences promotion and stops only owned workers. It requires no
 service-grant reset or new resource allowance. It grants no ability to enable or
 run work. Remote API/MCP controls retain their current scoped authentication.
 Delivery failure remains visible if the notice recipient grant is unavailable.
+
+
+## Interrupted verification
+
+Normal restart/handoff retains the existing job and its cumulative limits. An
+explicit `upgrades.reconcile` with `mode=verify_only` requires completed worker
+provenance and never submits another coding worker. For a known-started, observed
+dead worker without a final report, `mode=verify_review_only` additionally requires
+a private host-owned full process census and pinned native-event artifacts. The
+configured independent reviewer must then establish every original patch intent,
+disposition and retirement equivalence after host verification. Public provenance
+records `worker_completed=false`; absent output is never fabricated.
+
+A repeat after deterministic host failure requires fresh census, retained original
+evidence and only completed configured host commands since admission. Later
+workers, reviewers or ambiguous in-flight effects refuse readmission. Both modes
+retain original counters and deadlines. UTC adjustment metadata remains visible;
+boot/counter uncertainty still holds. Host launcher PATH must retain any recipe's
+sealed toolchain wrapper before the raw toolchain, including its approved cache
+and profile settings. Local owner `upgrades disable` remains available without a
+current service grant.

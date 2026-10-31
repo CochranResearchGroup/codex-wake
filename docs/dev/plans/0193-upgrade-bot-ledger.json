@@ -248,8 +248,8 @@
   "successor_checkpoint": {
     "job_id": "88ffcb281213459da987156e8af41984",
     "root": "/home/ubuntu/codex-profile-lab/upgrade453-successor-20261031",
-    "controller_revision": "3b31bdfa0010b7881f235fd5ec4338de73888f53",
-    "state": "source_worker_running",
+    "controller_revision": "628a1ed105304e970013a5cc9d8cd7e041599133",
+    "state": "host_regeneration",
     "repair_attempts": 1,
     "maximum_repair_attempts": 1,
     "prior_contexts": 3,
@@ -263,6 +263,40 @@
     "config_sha256": "a6871b6c31dc6c43fa28e711ddd29c342c50335a475d655a78114024d8365ac9",
     "recipe_sha256": "cb8c45fde3213291804b5a3e77fd4716e40a0ca2cdf6903a0bd6d06a0e093f44",
     "resource_mode": "manual",
-    "original_unchanged": true
+    "original_unchanged": true,
+    "coding_context_status": "interrupted_no_completed_report",
+    "readmission_mode": "verify_review_only",
+    "current_command_sequence": 11,
+    "known_native_api_edits": "both present in native file_change events; not yet host-verified",
+    "source_digest": "3d74750c5b85faab4baf8297eda3162fea18778170069a3222796c8793ded5f4",
+    "tests_digest": "1c7a648508a8bb315369694668458664ef36c3d9dd8a110ef29162ff58ed66bc",
+    "worker_completed": false,
+    "independent_review_executed": false,
+    "qualification": false,
+    "promotion": false,
+    "sealed_cargo_wrapper_sha256": "eb59796d4764809a16728012d5675f786504b45cdf56e249bc6de4541144ffe0",
+    "cargo_wrapper_path_restored": true,
+    "history": [
+      {
+        "event": "clock_uncertain",
+        "cause": "historical offending sample unavailable; subtype unclassified",
+        "counter": 1
+      },
+      {
+        "event": "attested_verify_review_admission",
+        "controller": "26b52dc",
+        "no_worker_retry": true
+      },
+      {
+        "event": "owned_regeneration_stopped",
+        "reason": "continuation PATH omitted sealed Cargo wrapper; no input/candidate change",
+        "exit_code": -15
+      },
+      {
+        "event": "deterministic_verification_readmitted",
+        "controller": "628a1ed",
+        "reason": "restored exact sealed wrapper on PATH; original attempt/deadlines unchanged"
+      }
+    ]
   }
 }

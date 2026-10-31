@@ -129,3 +129,23 @@ root and private-child prerequisites. New disposable-only authority is permitted
 production/shared service effects, global governor activation and working-resource
 renewal remain outside scope. Preserve original job, source, deadlines and history.
 Final broad review/TDD counts remain0 until ticket acceptance.
+
+
+## Successor recovery checkpoint
+
+The sole additional native coding context wrote both API corrections but was
+interrupted by a clock-uncertain hold before producing a completed report. Its
+source remains unconfirmed. Same-boot UTC adjustments no longer invalidate an
+otherwise valid fixed monotonic budget; changed/missing boot and invalid/backward
+monotonic counters still hold. The historical offending sample is unavailable,
+so its exact clock subtype remains unclassified rather than retrospectively proved.
+
+Explicit `verify_review_only` preserves the one charged attempt and original
+deadlines, requires stopped-process/cross-group census plus retained native events,
+and allows host verification followed by independent disposition of every original
+patch. It never fabricates worker completion or replays a coding worker/reviewer.
+A continuation PATH omission then bypassed the sealed Cargo wrapper; the owned
+verification group was stopped and the exact wrapper restored. Runtime628a1ed now
+runs host regeneration against the approved shared dependency cache. Candidate,
+recipe, probes, original failed job and all deadlines remain unchanged. No166
+qualification or promotion is claimed before its actual results.
