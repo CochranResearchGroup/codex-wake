@@ -9,6 +9,7 @@ import html
 import json
 import secrets
 import threading
+from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlencode, urlsplit
 
