@@ -52,7 +52,7 @@
     },
     {
       "path": "docs/dev/policies/0006-validation-and-closeout.md",
-      "sha256": "a9a7a226063c919d9bc390b315a1bd1d60a10cf9a9ce582a5d57fceb4d637845"
+      "sha256": "9d9ae771172b9a6f44baf018ce4e152e6585f8f83e834d99f69bf8e47152f8ce"
     },
     {
       "path": "docs/dev/policies/0007-graph-backed-memory-usage.md",
@@ -64,7 +64,7 @@
     },
     {
       "path": "docs/dev/policies/0009-goal-execution-governance.md",
-      "sha256": "a9744fc169329b1331bc8b6e89722f731fa844967c31eadab1a1ab98d0067547"
+      "sha256": "9c3307bd88e39d24aad45b880a7ae63a62d8e939ffd9abf4258d958098fb4993"
     },
     {
       "path": "docs/dev/policies/0010-policy-management.md",
@@ -80,7 +80,7 @@
     },
     {
       "path": "docs/dev/policies/0013-planning-discipline.md",
-      "sha256": "c07fc6d47bbc389a5a1757f6e9ebb40ff5fe688d58dbdf0682b6c0aa9ad128a2"
+      "sha256": "68cb59a54c307300bc17191dc65f35480e764cdf837f36174fbde027152263f2"
     },
     {
       "path": "docs/dev/policies/0014-architecture-guardrails.md",
@@ -88,19 +88,19 @@
     },
     {
       "path": "docs/dev/policies/0015-turn-closeout.md",
-      "sha256": "b2af31262a58a4785ebf13f78b30f880d553d30d0568d9a598b0819f26eefd44"
+      "sha256": "08eaff1f573bf5e82ecf45fbf389116955306c96cdd7417cfd8dc458c7b08818"
     },
     {
       "path": "docs/dev/policies/0016-code-testing-discipline.md",
-      "sha256": "c5184686efc6650d733376667b20964ddf735f97c5ca7a5f23938eaab840e797"
+      "sha256": "34d9bc0be17c051fe3227b0eca324270ee4e1219382d0bacf9bb1f7486b18680"
     },
     {
       "path": "docs/dev/policies/0017-work-item-traceability.md",
-      "sha256": "b2adb8ec67916fa3752cdbc63c836fc105d1767790aaae18ddc515f5bda5f5b5"
+      "sha256": "d0c68695c512989ad6007be706c08317ed4cdb8e1daa14c6b918abbb6a9e97f6"
     },
     {
       "path": "docs/dev/policies/0018-model-selection-and-calibration.md",
-      "sha256": "619e128624c1e5942278cefeda6da3ae5b3c374b00c6af1704426e1dfed642fe"
+      "sha256": "819d113f019cf9a66ba3f2e3df39581d67097db3c78ca1d6a0294ff7276a8638"
     },
     {
       "path": "docs/dev/policies/0019-forge-issue-reporting.md",
@@ -116,7 +116,7 @@
     },
     {
       "path": "docs/dev/policies/0022-policy-context-pilot.md",
-      "sha256": "8ce8e1784ebfa923f030ba90fe7ec35be9da30f82373183fb68a0a746eb7d39e"
+      "sha256": "93f31dabebd4b15b4fb5581c6c052032d462342b57b2d328f9450556bc846229"
     }
   ],
   "profiles": [
@@ -173,7 +173,7 @@
         },
         {
           "path": "docs/dev/policies/0006-validation-and-closeout.md",
-          "sha256": "a9a7a226063c919d9bc390b315a1bd1d60a10cf9a9ce582a5d57fceb4d637845",
+          "sha256": "9d9ae771172b9a6f44baf018ce4e152e6585f8f83e834d99f69bf8e47152f8ce",
           "sections": [
             {
               "heading_path": [
@@ -217,7 +217,7 @@
         },
         {
           "path": "docs/dev/policies/0013-planning-discipline.md",
-          "sha256": "c07fc6d47bbc389a5a1757f6e9ebb40ff5fe688d58dbdf0682b6c0aa9ad128a2",
+          "sha256": "68cb59a54c307300bc17191dc65f35480e764cdf837f36174fbde027152263f2",
           "sections": [
             {
               "heading_path": [
@@ -228,7 +228,7 @@
         },
         {
           "path": "docs/dev/policies/0015-turn-closeout.md",
-          "sha256": "b2af31262a58a4785ebf13f78b30f880d553d30d0568d9a598b0819f26eefd44",
+          "sha256": "08eaff1f573bf5e82ecf45fbf389116955306c96cdd7417cfd8dc458c7b08818",
           "sections": [
             {
               "heading_path": [
@@ -239,7 +239,7 @@
         },
         {
           "path": "docs/dev/policies/0016-code-testing-discipline.md",
-          "sha256": "c5184686efc6650d733376667b20964ddf735f97c5ca7a5f23938eaab840e797",
+          "sha256": "34d9bc0be17c051fe3227b0eca324270ee4e1219382d0bacf9bb1f7486b18680",
           "sections": [
             {
               "heading_path": [
@@ -261,11 +261,24 @@
         },
         {
           "path": "docs/dev/policies/0022-policy-context-pilot.md",
-          "sha256": "8ce8e1784ebfa923f030ba90fe7ec35be9da30f82373183fb68a0a746eb7d39e",
+          "sha256": "93f31dabebd4b15b4fb5581c6c052032d462342b57b2d328f9450556bc846229",
           "sections": [
             {
               "heading_path": [
-                "Policy | Policy Context Pilot"
+                "Policy | Policy Context MCP",
+                "Policy"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "docs/dev/policies/0017-work-item-traceability.md",
+          "sha256": "d0c68695c512989ad6007be706c08317ed4cdb8e1daa14c6b918abbb6a9e97f6",
+          "sections": [
+            {
+              "heading_path": [
+                "Policy | Work Item Traceability",
+                "Policy"
               ]
             }
           ]
@@ -284,7 +297,17 @@
         "docs/dev/policies/0015-turn-closeout.md",
         "docs/dev/policies/0016-code-testing-discipline.md",
         "docs/dev/policies/0021-collaborative-development-workflow.md",
-        "docs/dev/policies/0022-policy-context-pilot.md"
+        "docs/dev/policies/0022-policy-context-pilot.md",
+        "docs/dev/policies/0003-runtime-state-and-wake-semantics.md",
+        "docs/dev/policies/0004-agent-runtime-governance.md",
+        "docs/dev/policies/0007-graph-backed-memory-usage.md",
+        "docs/dev/policies/0008-codegraph-usage.md",
+        "docs/dev/policies/0009-goal-execution-governance.md",
+        "docs/dev/policies/0014-architecture-guardrails.md",
+        "docs/dev/policies/0017-work-item-traceability.md",
+        "docs/dev/policies/0018-model-selection-and-calibration.md",
+        "docs/dev/policies/0019-forge-issue-reporting.md",
+        "docs/dev/policies/0020-github-issue-operations.md"
       ],
       "reread_triggers": [
         "Canonical policy or AGENTS source changes",
@@ -328,7 +351,8 @@
               {
                 "path": "docs/dev/policies/0022-policy-context-pilot.md",
                 "heading_path": [
-                  "Policy | Policy Context Pilot"
+                  "Policy | Policy Context MCP",
+                  "Policy"
                 ]
               }
             ]
@@ -380,7 +404,8 @@
               {
                 "path": "docs/dev/policies/0022-policy-context-pilot.md",
                 "heading_path": [
-                  "Policy | Policy Context Pilot"
+                  "Policy | Policy Context MCP",
+                  "Policy"
                 ]
               }
             ]
@@ -394,6 +419,20 @@
                 "path": "docs/dev/policies/0011-policy-adoption-feedback-loop.md",
                 "heading_path": [
                   "Policy | Policy Adoption Feedback Loop"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "gate.ticket-driven-engineering",
+            "kind": "required_gate",
+            "statement": "For substantive engineering work, use a tracker or local ticket, deliver small vertical slices and close from acceptance evidence; this grants no provider effects.",
+            "citations": [
+              {
+                "path": "docs/dev/policies/0017-work-item-traceability.md",
+                "heading_path": [
+                  "Policy | Work Item Traceability",
+                  "Policy"
                 ]
               }
             ]
