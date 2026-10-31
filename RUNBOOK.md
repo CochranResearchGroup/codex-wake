@@ -8225,3 +8225,22 @@ running continuation. Operator witness6 recorded all four retained notices with
 unchanged grant expiry; a fresh witness holds the old private client for eventual
 selection. Full local matrix runs; actual0.166 acceptance and final review/TDD
 remain open. No production deployment, shared restart or governor activation.
+
+
+## 2026-10-31 — actual 0.166 held outcome and source checkpoint
+
+The original job exhausted its three source contexts and held on native E0223
+(ThreadItem API) and E0061 (new AuthManager constructor argument). Regeneration
+and protocol round trips passed, but complete package/review/qualification/selection
+were not reached. Explicit local disable preserved the entire held job dictionary;
+owned process census is empty and retained0.165 remains selected. Sampled peak
+7,183,492,823 bytes; owned cache reclamation6,958,987,125 bytes. No fourth worker.
+
+Corrected source defaults for future child permissions and canonical host source
+root; current76 upgrade tests pass on each Python3.11/3.12. Earlier full matrix
+passed1988/1skip each; reconciled798ca78 source-bound presubmit passed10checks
+each, and its installed wheel passed13 smoke/legacy checks across retained setup
+receipts. Setup corrections excluded source imports, used short Unix paths and
+explicit unavailable time authority; they do not qualify0.166. Source checkpoint
+remains a draft. Ticket453 and final review/TDD remain open; an explicit bounded
+successor request is pending, with no new grant/job/model call created.

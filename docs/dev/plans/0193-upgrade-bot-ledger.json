@@ -184,29 +184,53 @@
         "Source integration and test qualification are reported separately from production activation."
       ],
       "number": 453,
-      "state": "pending",
+      "state": "held",
       "worker": null,
       "ready": true,
-      "remaining": "Assign actual166 whole-bot disposable acceptance"
+      "remaining": "Assign actual166 whole-bot disposable acceptance",
+      "reason": "two actual native compile errors; successor approval pending"
     }
   ],
   "integration_tip": "92e32160c34c3e71ed73e3b81f657fd01cd47f89",
   "working_runtime_changed": false,
   "runtime_checkpoint": {
-    "state": "running_same_job_verification",
+    "state": "held_disabled_awaiting_successor_authorization",
     "job_id": "6ca6cce33db1406db89087c3b9fe54c0",
     "original_deadline": 1793478757.2470584,
     "repair_attempts": 3,
-    "reason": "owned_storage_scan_raced_rustc_temporary_file_removal",
+    "reason": "verify_only_verification_failed: E0223 ThreadItem API; E0061 missing AuthManager constructor argument",
     "selected_build": "retained_combined165",
     "owned_job_processes": [],
-    "next": "same-job verify-only reconciliation after source correction; no fourth coding worker or renewed budget",
+    "next": "Await explicit approval of prepared one-attempt/90-minute successor; original remains disabled and unchanged",
     "review_rounds": 0,
     "remediation_rounds": 0,
     "controller_revision": "82a61a17d6dcc5e443a2215dd131f59471369df7",
     "pending_controller_revision": "4bb3586 cached-readmission guard affects subsequent crash reconciliation only; not hot-installed",
-    "source_digest": "922ba019ce189349f336b4ad4a156fbc0483bcf3e89d44a1ca513e3a30a986a6",
+    "source_digest": "1ea75d639a83bb0e487baf36630c2f929a5f0469b627f9e8b24d01132a7c8fef",
     "reconciliation": "verification_ready; original regenerate16 observed dead; completed worker13 proof retained",
-    "operator_notices": "witness6 recorded four canonical retained events; original grant expiry unchanged; witness7 active for eventual selection"
+    "operator_notices": "witness6 recorded four canonical retained events; original grant expiry unchanged; witness7 active for eventual selection",
+    "tests_digest": "cbd569da9c6b7c6750c933d6f8285fd1bc100f1c2203dfb6a8d0a2997160e11c",
+    "enabled": false,
+    "generation": 2,
+    "native_package": null,
+    "independent_review_executed": false,
+    "qualification": false,
+    "promotion": false,
+    "sampled_peak_job_file_bytes": 7183492823,
+    "cache_reclaimed_bytes": 6958987125,
+    "source_only_corrections": [
+      "private stage/qualification child permissions",
+      "canonical CODEX_REPO_ROOT for host commands"
+    ],
+    "private_evidence": "testing/ticket453/actual166-original-20261031/final-held-closeout.json"
+  },
+  "validation_checkpoint": {
+    "full_matrix_source": "0013b1f",
+    "full_matrix": "1988 tests / 1 skip each Python3.11.15 and3.12.13",
+    "current_upgrade_source": "d5f6d96",
+    "current_upgrade_tests": "76 pass each Python version",
+    "installed_smoke_source": "798ca78",
+    "installed_smoke": "13 checks pass across retained corrected setup receipts; short private paths and explicit unavailable time authority",
+    "source_fixes_after_installed_smoke": "private child umask and CODEX_REPO_ROOT; current source-targeted suite passes"
   }
 }

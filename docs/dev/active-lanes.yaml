@@ -1026,7 +1026,7 @@ lanes:
     dependencies: []
     overlaps: [P179, P190]
     updated_at: 2026-10-31
-    disposition: Tickets447–452 closed; actual166 verification continues original job after corrected storage race; ticket453 and final review/TDD remain open; published source checkpoint eb9f6dc; no production activation
+    disposition: Tickets447–452 closed; ticket453 held on2native compiler API errors; original fixture disabled and history preserved; bounded successor awaits approval; final review/TDD0; no production activation
 
   - id: P193-RETRO439
     owner: primary / ecochran76
