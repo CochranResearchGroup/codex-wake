@@ -1,7 +1,8 @@
 # Integrated actual 0.166 acceptance (#453)
 
-State: HELD after a controller storage-scan race. Same-job verification-only
-continuation is being implemented; no new coding attempt or budget is authorized.
+State: HELD and fixture DISABLED after two genuine 0.166 Rust compile errors.
+The original three-attempt job is preserved. A separately bounded successor is
+awaiting explicit user approval; none has been started.
 Plan0193 and specification #444 remain the scope authority.
 This record distinguishes source verification, the actual disposable job and
 production activation. No production activation is authorized or claimed.
@@ -164,3 +165,84 @@ then passed 29 tests, with `PYTHONDONTWRITEBYTECODE=1` and before/after Python
 helper hashes unchanged. `supplemental-package-helpers.json` and `.log` retain
 that source-only evidence. No frozen driver, configuration or candidate code was
 manually edited.
+
+
+## Verification-only continuation
+
+Run 2 executes controller revision
+`82a61a17d6dcc5e443a2215dd131f59471369df7`. Only the six corrected controller,
+pipeline, repair and storage modules plus the separate continuation launcher were
+installed into the disposable source/prefix. `controller-update-2.json` records
+old/new module hashes and verifies every frozen qualification input unchanged.
+Candidate source, recipe, host programs and original job accounting were untouched.
+
+`upgrades.reconcile` returned `verification_ready` on this same job. Its receipt
+binds the current source inventory and last completed worker report, records the
+interrupted regeneration leader/group as dead, and retains the original monotonic
+and wall deadlines and three attempts. Run 2 never invokes enable or start.
+`launch-2.json`, `run-2/checkpoint.json`, `run-2/completion.json` and `run-2.log`
+identify the unique continuation. It has resumed actual Rust/C compilation.
+The later `4bb3586` cached-inflight readmission guard is source-tested but is not
+part of this frozen execution; the original first-reconciliation path is unchanged.
+
+Actual operator witness 6 recorded all four retained canonical events, including
+the held event. Its original grant expiry `1793479039.1637716` remained unchanged
+when the exact notice control capability was added. The failed scope-refusal
+journal from witness 5 remains retained. A fresh private native backend then read
+the exact held notice ID/text from durable history with model context available;
+`operator-witness-6/cold-readback.json` records zero model requests and no remaining
+owned reader process. Blocked background proxy CONNECT attempts are reported
+separately from successful external requests.
+
+Operator witness 7 now holds an actual old 0.165 private client through the public
+build launcher while a separate exact-health-bound TUI receives job notices.
+Its ready/progress/terminal artifacts retain the original process identity,
+selection, grant expiry and notice journal. It must observe selection before
+closing its owned clients. The independent reviewer, final package and fresh
+0.166 installed qualification are still pending.
+
+
+## Terminal result: unqualified native candidate
+
+The verification-only continuation held at `1793475950` with
+`verify_only_verification_failed`. The actual app-server library test build
+reported two source-port errors:
+
+- `E0223`, `app-server/src/request_processors/thread_notice.rs:86`: the old
+  agent-message construction does not match the 0.166 `ThreadItem` API.
+- `E0061`, `app-server/src/request_processors/thread_listener_shutdown_tests.rs:67`:
+  the goal processor constructor now requires an additional authentication-manager
+  argument.
+
+`repair/20-verify.stdout` retains the complete compiler output. No fourth coding
+worker or manual native correction was issued. Independent source review,
+complete 0.166 package, qualification, promotion and new-package rollback were
+not reached. **#453 remains open.** No 0.166 source/package acceptance is claimed.
+
+`final-held-closeout.json` and `final-held-source-inventory.json` retain the final
+9,786-file source digest
+`1ea75d639a83bb0e487baf36630c2f929a5f0469b627f9e8b24d01132a7c8fef`
+and test digest
+`cbd569da9c6b7c6750c933d6f8285fd1bc100f1c2203dfb6a8d0a2997160e11c`.
+The working 0.165 CLI and complete package remain selected and unchanged
+(package digest `34be699bbbd6fee8f9f87c2f81fa7e28d15bc3636b265d9d3b9edc2b509fd38a`).
+
+Operator witness 7 confirmed that its actual old 0.165 private client remained
+pinned through this terminal failure; retained job notices were recorded and its
+owned clients were closed. The final fixture process census was empty. The
+sampled peak job file size was 7,183,492,823 bytes, below the 24 GiB cap; terminal
+cleanup reclaimed 6,958,987,125 bytes of owned compiler cache while retaining
+source, reports, public dependency caches and the known-good package.
+
+An explicit bare local `upgrades disable` completed at `1793476613`.
+`disable-local-readback.json` proves `enabled=false`, generation 1 to 2, and the
+entire held job dictionary unchanged, including identity, three charged attempts
+and original deadline. No worker, existing profile or shared native service was
+restarted.
+
+`successor-preparation.json` contains locators and proposed bounds only: one
+additional actual coding attempt and 90 minutes under fresh disposable authority,
+with the failed original retained. It creates no successor, grant or model call.
+Future-child private-umask corrections are source-tested but were not installed
+or exercised in this failed original run. Production activation and managed
+running-daemon cutover remain separately gated by #380 and #413.
