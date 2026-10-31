@@ -1,0 +1,9 @@
+# Optional user-unit example. Installation does not enable the updater.
+[Unit]
+Description=Bounded Codex Wake upstream upgrade pass
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/codex-wake-upgrade-watch --root %h/.local/state/codex-wake --once
+TimeoutStartSec=2h5m
+KillMode=control-group
