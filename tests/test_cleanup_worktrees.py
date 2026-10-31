@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import shutil
+import stat
 import unittest
 
 
@@ -135,6 +136,19 @@ runpy.run_path(sys.argv[0],run_name='__main__')
         self.assertEqual(summary["status"], "HELD")
         self.assertEqual(summary["unknown_count"], 1)
         self.assertEqual(summary["omitted_count"], 0)
+
+    def test_plan_and_result_are_private_under_permissive_umask(self):
+        previous = os.umask(0o022)
+        try:
+            path, plan = self.plan()
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600)
+            result = self.apply(path, plan)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(
+                stat.S_IMODE((self.root / "result.json").stat().st_mode), 0o600
+            )
+        finally:
+            os.umask(previous)
 
     def apply(self, path, plan):
         return self.command(
