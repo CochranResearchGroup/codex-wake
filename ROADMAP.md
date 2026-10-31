@@ -1404,7 +1404,8 @@ promotion. Plan0193 owns execution; children #447–#452 are closed with source,
 public-seam and disposable baseline evidence. The original #453 job reached two
 real 0.166 native API compile errors after the storage correction.
 Its three attempts/deadline/history are preserved and the fixture is disabled.
-A one-attempt/90-minute successor awaits approval; native acceptance is unqualified.
+A one-attempt/90-minute disposable successor is approved and entering execution;
+native acceptance remains unqualified until its results are verified.
 Reuses #377/#393; #369 remains broader
 coordination, #413 gates running-daemon recovery and #380 production activation.
 No production deployment. One final review/TDD round remains after acceptance.
