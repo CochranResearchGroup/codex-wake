@@ -1,0 +1,265 @@
+{
+  "schema": 1,
+  "tiers": {
+    "focused": [
+      {
+        "name": "setup preflight",
+        "axis": "setup",
+        "argv": [
+          "{runtime}",
+          "scripts/validation_preflight.py",
+          "--tier",
+          "focused"
+        ]
+      },
+      {
+        "name": "pinned lint",
+        "axis": "lint",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "ruff",
+          "check",
+          "--select",
+          "F821,F822,F823",
+          "src",
+          "scripts",
+          "tests",
+          ".codex/hooks"
+        ]
+      },
+      {
+        "name": "policy wiring",
+        "axis": "policy",
+        "argv": [
+          "{runtime}",
+          "scripts/check_policy_wiring.py"
+        ]
+      },
+      {
+        "name": "active planning audit",
+        "axis": "planning",
+        "argv": [
+          "{runtime}",
+          ".codex/skills/repo-policy-selector/scripts/audit_planning_contract.py",
+          "--repo-root",
+          ".",
+          "--active-only",
+          "--json"
+        ]
+      },
+      {
+        "name": "runner public regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_validate_candidate.py"
+        ]
+      },
+      {
+        "name": "local profile public regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_local_validation.py"
+        ]
+      }
+    ],
+    "presubmit": [
+      {
+        "name": "setup preflight",
+        "axis": "setup",
+        "argv": [
+          "{runtime}",
+          "scripts/validation_preflight.py",
+          "--tier",
+          "presubmit"
+        ]
+      },
+      {
+        "name": "pinned lint",
+        "axis": "lint",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "ruff",
+          "check",
+          "--select",
+          "F821,F822,F823",
+          "src",
+          "scripts",
+          "tests",
+          ".codex/hooks"
+        ]
+      },
+      {
+        "name": "policy wiring",
+        "axis": "policy",
+        "argv": [
+          "{runtime}",
+          "scripts/check_policy_wiring.py"
+        ]
+      },
+      {
+        "name": "active planning audit",
+        "axis": "planning",
+        "argv": [
+          "{runtime}",
+          ".codex/skills/repo-policy-selector/scripts/audit_planning_contract.py",
+          "--repo-root",
+          ".",
+          "--active-only",
+          "--json"
+        ]
+      },
+      {
+        "name": "compilation",
+        "axis": "compile",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "compileall",
+          "-q",
+          "src",
+          "tests",
+          ".codex/hooks"
+        ]
+      },
+      {
+        "name": "runner public regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_validate_candidate.py"
+        ]
+      },
+      {
+        "name": "local profile public regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_local_validation.py"
+        ]
+      },
+      {
+        "name": "package build",
+        "axis": "packaging",
+        "argv": [
+          "{runtime}",
+          "scripts/validation_build.py",
+          "--outdir",
+          "{artifacts}"
+        ]
+      }
+    ],
+    "comprehensive": [
+      {
+        "name": "setup preflight",
+        "axis": "setup",
+        "argv": [
+          "{runtime}",
+          "scripts/validation_preflight.py",
+          "--tier",
+          "comprehensive"
+        ]
+      },
+      {
+        "name": "pinned lint",
+        "axis": "lint",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "ruff",
+          "check",
+          "--select",
+          "F821,F822,F823",
+          "src",
+          "scripts",
+          "tests",
+          ".codex/hooks"
+        ]
+      },
+      {
+        "name": "policy wiring",
+        "axis": "policy",
+        "argv": [
+          "{runtime}",
+          "scripts/check_policy_wiring.py"
+        ]
+      },
+      {
+        "name": "active planning audit",
+        "axis": "planning",
+        "argv": [
+          "{runtime}",
+          ".codex/skills/repo-policy-selector/scripts/audit_planning_contract.py",
+          "--repo-root",
+          ".",
+          "--active-only",
+          "--json"
+        ]
+      },
+      {
+        "name": "compilation",
+        "axis": "compile",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "compileall",
+          "-q",
+          "src",
+          "tests",
+          ".codex/hooks"
+        ]
+      },
+      {
+        "name": "public Python suite",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_*.py"
+        ]
+      },
+      {
+        "name": "package build",
+        "axis": "packaging",
+        "argv": [
+          "{runtime}",
+          "scripts/validation_build.py",
+          "--outdir",
+          "{artifacts}"
+        ]
+      }
+    ]
+  }
+}
