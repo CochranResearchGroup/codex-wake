@@ -1,6 +1,7 @@
 # Handoff resource continuity / #365
 
-State: CLOSED — bounded source, installed commands and agent guidance qualified
+State: CLOSED
+Outcome boundary: bounded source, installed commands and agent guidance qualified
 Owner: primary / ecochran76; delegated implementation: handoff_ritual_diagnosis
 Branch: fix/handoff-automatic-allocation
 Baseline: origin/main96f0f01104e6f0297d3c1ea4c7c2477051270787

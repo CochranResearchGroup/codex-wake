@@ -1,6 +1,7 @@
 # Upgrade recovery repair integration
 
-State: COMPLETE (isolated ticket scope). Owner: primary for operator ecochran76.
+State: CLOSED
+Outcome boundary (preserved): COMPLETE (isolated ticket scope). Owner: primary for operator ecochran76.
 Spec: GitHub #413; child tickets #414–#418. Task is ticket completion, followed by exactly one broad Standards/Spec review and one bounded TDD remediation pass.
 
 ## Current State

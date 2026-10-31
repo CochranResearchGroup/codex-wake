@@ -1,6 +1,7 @@
 # Post-upgrade work resumption
 
-State: COMPLETE — isolated native qualification; working rollout not performed
+State: CLOSED
+Outcome boundary (preserved): COMPLETE — isolated native qualification; working rollout not performed
 Owner: primary / wake2
 Authority: operator approved Ask Matt recovery contract and implementation on2026-10-30.
 Native base: dfde754e597f0b4766f5b22fbeb990d2e78fe151.

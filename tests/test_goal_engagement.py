@@ -18,6 +18,40 @@ class GoalEngagementTests(unittest.TestCase):
     fixture = fixtures.GoalSupervisionTests.fixture
     controller = fixtures.GoalSupervisionTests.controller
 
+    def test_ambiguous_diagnosis_holds_supervision_without_deciding_manual_authority(self):
+        from contextlib import redirect_stdout
+        from io import StringIO
+        from codex_wake.cli import run
+        from codex_wake.mcp_server import CommandRunner
+
+        with tempfile.TemporaryDirectory() as directory:
+            root, policy, _, native, _ = self.fixture(directory)
+            native['active'] = ['retained-turn', 'operator-turn']
+            output = StringIO()
+            with redirect_stdout(output):
+                code = run(['--wake-root', str(root), 'goal-limits', 'diagnose',
+                            '--policy', str(policy), '--caller-thread-id', THREAD, '--json'])
+            self.assertEqual(code, 2)
+            cli = json.loads(output.getvalue())
+            context = dict(threadId=THREAD, sessionId=THREAD, callId='diagnose-ambiguity',
+                **{'x-codex-turn-metadata': dict(thread_id=THREAD, session_id=THREAD,
+                                              turn_id='operator-turn')})
+            result, failed = CommandRunner(wake_root=root, goal_limits_policy=policy).call(
+                'wake_goal_limits_diagnose', dict(caller_thread_id=THREAD), native_context=context)
+            self.assertTrue(failed)
+            for value in (cli, result):
+                self.assertEqual(value['reason'], 'native_turn_ambiguous')
+                self.assertEqual(value['authority_scope'], 'external_goal_supervision')
+                self.assertEqual(value['supervision_admission'], 'held')
+                self.assertEqual(value['manual_work_authority'], 'not_evaluated')
+                self.assertFalse(value['effect_attempted'])
+                self.assertIn('already-authorized manual work', value['next_action'])
+                self.assertIn('existing limits', value['next_action'])
+            self.assertFalse(any(method in ('thread/goal/set', 'turn/interrupt',
+                                           'turn/steer', 'turn/start')
+                                 for method, _ in native['calls']))
+            self.assertFalse(any((root/'goal-supervision').glob('*.json')))
+
 
 def test_enrollment_waits_for_exact_first_poll(self):
     with tempfile.TemporaryDirectory() as directory:

@@ -1,6 +1,7 @@
 # Plan0166 — Strict objective execution enforcement
 
-State: CLOSED. Owner: ecochran76 / primary. Spec#274; tickets#275–278.
+State: CLOSED
+Owner: ecochran76 / primary. Spec#274; tickets#275–278.
 Integration branch: feat/objective-enforcement. Base:0a5c8d1.
 Latest renewed allowance: NEW2MMtokens/4h from2026-10-16T22:01:51Z; historical counters preserved inledger.json. Implementation completed within this renewed window.
 

@@ -1,5 +1,7 @@
 # Cross-host controller specification
 
+State: CLOSED
+
 Status: SOURCE_ACCEPTED; all20implementation tickets closed, review1of1 and remediation1of1 complete; source/disposable qualification recorded in the implementation ledger. Main integration and production activation retain their separate authority. Canonical specification: https://github.com/CochranResearchGroup/codex-wake/issues/393
 
 Owner: controller coordinator. Scope and acceptance are below; done means accepted specification and reviewed implementation-ticket graph, not production deployment.
