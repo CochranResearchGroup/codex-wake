@@ -1,6 +1,6 @@
 # Autonomous upstream Codex upgrade bot
 
-State: PLANNED
+State: OPEN
 Owner: primary upgrade-bot coordinator
 Specification: https://github.com/CochranResearchGroup/codex-wake/issues/444
 Related work: #369, #377, #393, #413
@@ -75,7 +75,7 @@ Production activation by this planning task; running-daemon replacement; automat
 
 ## Further Notes
 
-Current State: interview complete; existing discovery/staging/selection primitives exist. The durable autonomous orchestrator and semantic repair-to-promotion loop are not implemented. This document extends earlier explicit-activation policy only for a configured opt-in future-launch scope; it does not silently alter installed policy.
+Current State: approved children #447–#453 are published with native blocking edges. Durable jobs, source repair/review, stable-release discovery and canonical notices are source-integrated with public regressions; disposable qualification executor is integrated and actual package probes are underway. Future-launch promotion and complete 0.166 installed acceptance remain open. This document extends earlier explicit-activation policy only for a configured opt-in future-launch scope; it does not silently alter installed policy.
 
 Reconciliation: #369 remains broader coordination. Closed #377 retains its accepted staging/rollback outcome. The Wake-owned controller delivered in #393 supplies account/build surfaces. Open #413 gates running-daemon recovery; it is not a prerequisite for a bot that leaves running daemons untouched. Production profile activation remains separately gated by #380. Existing parents are not edited or closed by this specification.
 
@@ -87,6 +87,6 @@ Definition of done: approved child outcomes integrated with local checks, an imm
 
 Critical path: durable job slice → semantic worker and disposable qualification → qualified selection → integrated 0.166 acceptance. Independent low-conflict tracks after the job contract: repair worker, qualification executor and scheduled discovery. Primary coordinator owns integration.
 
-Next action: approve the proposed vertical ticket graph, then publish children and their blocking edges.
+Next action: complete disposable executor qualification, then implement future-launch selection and run the complete 0.166 acceptance before the single final review/remediation pass.
 
 <!-- idempotency:codex-wake-autonomous-upgrade-bot-spec-20261031 -->

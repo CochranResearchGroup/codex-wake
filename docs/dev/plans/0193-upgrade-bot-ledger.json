@@ -24,7 +24,10 @@
         "PYTHONPATH=src .venv/python -m unittest discover -s tests -p test_upgrade_jobs.py: 3 passed",
         "test_controller_builds.py: 5 passed"
       ],
-      "evidence": "/tmp/wake-upgrade-spec/447-*.log"
+      "evidence": "/tmp/wake-upgrade-spec/447-*.log",
+      "integration_tip": "eae1ed2e6a6f89af7e6dee87d70711261cd5b55b",
+      "evidence_scope": "source_and_public_executor_regressions",
+      "runtime_acceptance_ticket": 453
     },
     {
       "n": 2,
@@ -40,13 +43,16 @@
         "Rejected repairs and crashes consume the same job budget; no hidden fresh attempt."
       ],
       "number": 448,
-      "state": "running",
+      "state": "validated",
       "worker": "/root/repair448",
       "worker_base": "cdaaabb3bf2988d73cfb467ced6341ce15afb36c",
       "owned_paths": [
         "src/codex_wake/upgrade_repair.py",
         "tests/test_upgrade_repair.py"
-      ]
+      ],
+      "integration_tip": "eae1ed2e6a6f89af7e6dee87d70711261cd5b55b",
+      "evidence_scope": "source_and_public_executor_regressions",
+      "runtime_acceptance_ticket": 453
     },
     {
       "n": 3,
@@ -62,13 +68,15 @@
         "Capabilities, session visibility, failure recovery and compatible rollback are exercised; teardown census records owned processes."
       ],
       "number": 449,
-      "state": "running",
+      "state": "integrated",
       "worker": "/root/qualify449",
       "worker_base": "cdaaabb3bf2988d73cfb467ced6341ce15afb36c",
       "owned_paths": [
         "src/codex_wake/upgrade_qualification.py",
         "tests/test_upgrade_qualification.py"
-      ]
+      ],
+      "integration_tip": "eae1ed2e6a6f89af7e6dee87d70711261cd5b55b",
+      "remaining": "Combined exact-package disposable probes underway; real metadata, fresh TUI health and normalization/accounting passed; scoped managed journey pending"
     },
     {
       "n": 4,
@@ -102,13 +110,16 @@
         "Disable prevents discovery dispatch; reenable does not silently renew exhausted jobs."
       ],
       "number": 451,
-      "state": "running",
+      "state": "validated",
       "worker": "/root/discover451",
       "worker_base": "cdaaabb3bf2988d73cfb467ced6341ce15afb36c",
       "owned_paths": [
         "src/codex_wake/upgrade_discovery.py",
         "tests/test_upgrade_discovery.py"
-      ]
+      ],
+      "integration_tip": "eae1ed2e6a6f89af7e6dee87d70711261cd5b55b",
+      "evidence_scope": "source_and_public_executor_regressions",
+      "runtime_acceptance_ticket": 453
     },
     {
       "n": 6,
@@ -124,8 +135,11 @@
         "No external messaging channel is enabled."
       ],
       "number": 452,
-      "state": "pending",
-      "worker": null
+      "state": "validated",
+      "worker": null,
+      "integration_tip": "eae1ed2e6a6f89af7e6dee87d70711261cd5b55b",
+      "evidence_scope": "source_and_public_executor_regressions",
+      "runtime_acceptance_ticket": 453
     },
     {
       "n": 7,
@@ -150,5 +164,6 @@
       "worker": null
     }
   ],
-  "integration_tip": "cdaaabb3bf2988d73cfb467ced6341ce15afb36c"
+  "integration_tip": "eae1ed2e6a6f89af7e6dee87d70711261cd5b55b",
+  "working_runtime_changed": false
 }

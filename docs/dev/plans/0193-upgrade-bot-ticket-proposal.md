@@ -1,6 +1,6 @@
 # Proposed child graph for #444
 
-Status: DRAFT — awaiting operator review; no child issues created.
+Status: APPROVED — published as #447–#453 with native sub-issue and blocking relationships under #444.
 
 ## 1. Run a durable bounded upgrade job through deterministic staging
 
