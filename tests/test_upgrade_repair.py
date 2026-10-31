@@ -243,3 +243,30 @@ pathlib.Path(sys.argv[1]).write_text(str(child.pid))
                 self.assertEqual(result['status'],'held',result)
                 self.assertEqual(result['reason'],'clock_uncertain')
                 self.assertEqual(result['repair_attempts'],0)
+
+    def test_explicit_nonretryable_worker_hold_spends_one_attempt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source,config,recipe,job=self.fixture(root)
+            (source/'feature.txt').write_text('upstream\n')
+            subprocess.run(['git','add','.'],cwd=source,check=True)
+            subprocess.run(['git','commit','-qm','upstream change'],cwd=source,check=True)
+            config['base_revision']=subprocess.check_output(['git','rev-parse','HEAD'],cwd=source,text=True).strip()
+            (root/'worker.py').write_text("import json,sys;print(json.dumps(dict(schema_version=1,status='held',reason='authentication_needed',retryable=False)),file=sys.stderr);sys.exit(2)\n")
+            charges=[]
+            result=UpgradeRepair(source,root/'evidence',config,checkpoint=charges.append).run(job,recipe)
+            self.assertEqual(result['status'],'held')
+            self.assertEqual(result['reason'],'authentication_needed')
+            self.assertEqual(charges,[{'repair_attempts':1}])
+
+    def test_unstructured_worker_failure_keeps_bounded_repair_retries(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source,config,recipe,job=self.fixture(root)
+            (source/'feature.txt').write_text('upstream\n')
+            subprocess.run(['git','add','.'],cwd=source,check=True)
+            subprocess.run(['git','commit','-qm','upstream change'],cwd=source,check=True)
+            config['base_revision']=subprocess.check_output(['git','rev-parse','HEAD'],cwd=source,text=True).strip()
+            (root/'worker.py').write_text("import sys;print('compilation needs another repair',file=sys.stderr);sys.exit(1)\n")
+            charges=[]
+            result=UpgradeRepair(source,root/'evidence',config,checkpoint=charges.append).run(job,recipe)
+            self.assertEqual(result['reason'],'repair_attempts_exhausted')
+            self.assertEqual([c['repair_attempts'] for c in charges],[1,2,3])
