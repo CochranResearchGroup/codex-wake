@@ -17,7 +17,7 @@ import subprocess
 import tempfile
 import time
 
-from codex_profiles.upgrades import _atomic
+from codex_profiles.upgrades import _atomic, official_source_url
 
 CAPABILITIES = frozenset(('scoped_reload','durable_notices','caller_accounting',
                          'orphan_output','tui_health'))
@@ -89,6 +89,8 @@ class UpgradeQualification:
             receipt.update(package_files=before,package_sha256=object_hash(before),
                 source_identity=stage.get('source_identity'),candidate_sha256=object_hash(stage))
             if config.get('schema_version')!=1:raise QualificationError('qualification config schema unsupported')
+            if 'source' in stage and not official_source_url(stage['source']):
+                raise QualificationError('official upstream source provenance required')
             environment=self.environment(config.get('environment',{}))
             receipt['environment']=environment
             if environment['kind']!='source_fixture':
@@ -203,7 +205,7 @@ class UpgradeQualification:
     def genuine_provenance(self,stage,package,job,guard):
         if stage.get('evidence_scope') not in ('official_source_build','native_source_build','disposable_native_build'):
             raise QualificationError('native source-build provenance required; fixtures cannot qualify by environment location')
-        if not str(stage.get('source','')).startswith('https://github.com/openai/codex/releases/download/'):
+        if not official_source_url(stage.get('source')):
             raise QualificationError('official upstream source provenance required')
         source=stage['source_identity'].get('source_files')
         if not isinstance(source,dict) or not source:
