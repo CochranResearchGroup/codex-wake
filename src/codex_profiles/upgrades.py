@@ -140,7 +140,7 @@ def _commands(commands,cwd,receipt,phase, *, timeout=600):
     for command in commands:
         if not isinstance(command,list) or not command or any(not isinstance(x,str) for x in command):
             raise UpgradeError('commands must be explicit argv arrays')
-        env={key:os.environ[key] for key in ('PATH','LANG','LC_ALL','CARGO_BUILD_JOBS','CODEX_UPGRADE_OWNED_GROUP','CODEX_UPGRADE_TEMP_ROOT') if key in os.environ}
+        env={key:os.environ[key] for key in ('PATH','LANG','LC_ALL','CARGO_BUILD_JOBS','CARGO_TARGET_DIR','CODEX_UPGRADE_OWNED_GROUP','CODEX_UPGRADE_TEMP_ROOT') if key in os.environ}
         env['CODEX_UPGRADE_PACKAGE']=str(cwd)
         try:
             with tempfile.TemporaryDirectory(prefix='codex-upgrade-home-', dir=env.get('CODEX_UPGRADE_TEMP_ROOT')) as home:

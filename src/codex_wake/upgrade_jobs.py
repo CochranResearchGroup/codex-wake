@@ -365,7 +365,7 @@ class UpgradeJobs:
         with tempfile.TemporaryDirectory(prefix='worker-home-', dir=directory) as home:
             env = {k:v for k,v in os.environ.items() if k in ('PATH','LANG','LC_ALL','PYTHONPATH')}
             env.update(CODEX_UPGRADE_TEMP_ROOT=str(directory), CODEX_UPGRADE_OWNED_GROUP='1', HOME=home, CODEX_HOME=home+'/.codex', XDG_CONFIG_HOME=home+'/.config',
-                XDG_DATA_HOME=home+'/.local/share', CARGO_BUILD_JOBS=str(job['limits']['compiler_jobs']))
+                XDG_DATA_HOME=home+'/.local/share', CARGO_BUILD_JOBS=str(job['limits']['compiler_jobs']), CARGO_TARGET_DIR=str(directory/'cargo-target'))
             Path(env['CODEX_HOME']).mkdir(mode=0o700)
             output = directory / 'stage-result.json'
             with (directory / 'worker.log').open('ab') as log:
