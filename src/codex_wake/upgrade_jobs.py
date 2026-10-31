@@ -139,7 +139,7 @@ class UpgradeJobs:
     def guard(self, actor, target, arguments, authorize, *, write=False):
         current = authorize() if authorize else actor
         expiry=getattr(current,'expires_at',None)
-        if expiry is not None and (type(expiry) not in (int,float) or not math.isfinite(expiry) or expiry <= time.time()):
+        if expiry is not None and (type(expiry) not in (int,float) or not math.isfinite(expiry) or expiry <= self.now()):
             raise InventoryError('unauthorized_target', 'current upgrade grant expired')
         if current.subject != actor.subject or ('admin' if write else 'observe') not in current.scopes:
             raise InventoryError('unauthorized_target', 'current upgrade grant required')
