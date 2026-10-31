@@ -8256,3 +8256,27 @@ official archive and original69-path stack; prior failed candidate is read-only
 reference with both compiler errors supplied. Budget4800seconds job+600seconds
 post-check reserve, compiler2/storage24GiB/manual monitoring. Launch once; no
 production/shared restart/governor/working-resource renewal. Final review/TDD0.
+
+
+## 2026-10-31 — successor deadline hold and bounded cleanup
+
+Successor88ffcb281213459da987156e8af41984 used its one coding context. The native
+worker wrote both Rust corrections but did not complete a report. Explicit
+attested verify_review_only recovery preserved its evidence and accounting;
+source628a1ed permits only deterministic verification readmission after the host
+Cargo-wrapper PATH error, without a new worker or reviewer replay.
+
+Full regeneration passed, then protocol verification4pass/1ignored. The original
+job deadline interrupted app-server/TUI-health compilation; no independent review,
+complete166 package, qualification or promotion. Local disable preserves the held
+job; final independent census0owned. Old165 remains selected and client pinning
+was preserved. Original job+eight inputs unchanged. Issue453 comment6549533282
+and the Plan0193 acceptance record retain source/timing/cache/evidence hashes.
+No further native context or deadline extension; final review/TDD remains0/0.
+
+At26b52dc, Python3.11 comprehensive passes7checks/2013tests/1skip. Python3.12
+comprehensive timed out900seconds. A verbose diagnostic using inherited working
+environment completed2013tests with23failures/1error in refresh scenarios; its
+29-test refresh group subsequently passed in16.435seconds through the canonical
+isolated runner. The full3.12 timeout remains unresolved; no matrix pass claimed.
+Latest628a1ed has5focused+18Repair tests passing. Hosted CI not used.

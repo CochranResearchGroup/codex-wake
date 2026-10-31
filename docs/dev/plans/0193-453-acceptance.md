@@ -1,7 +1,7 @@
 # Integrated actual 0.166 acceptance (#453)
 
 State: original job HELD and DISABLED after two genuine 0.166 Rust compile errors.
-The separately authorized successor is RUNNING; actual compilation is in progress.
+The separately authorized successor is HELD after its unchanged job deadline expired.
 Neither job has a qualified 0.166 package yet. The original job remains preserved.
 Plan0193 and specification #444 remain the scope authority.
 This record distinguishes source verification, the actual disposable job and
@@ -282,3 +282,63 @@ The Python3.12 run is still in progress. Receipts are private `/tmp/w26v/`;
 the explicit unavailable time fixture avoids Windows clock inspection. Latest
 repeat-admission source628a1ed has five focused and18 existing Repair tests passing.
 Final broad review/findings TDD counters remain0/0 pending actual ticket acceptance.
+
+
+## Successor terminal result
+
+The public job and Repair controller report `held: deadline_exhausted`. First
+observation was1793482874.446 / monotonic25656.316, about9.84seconds after the
+original job monotonic deadline25646.475213728. Observation latency alone does
+not establish exact process stop timing; the terminal census must resolve it.
+The original overall monotonic deadline26246.475213728 remains unchanged.
+
+Host regeneration completed: standard and experimental schema fixtures each
+passed one test; SDK and configuration schema generation completed. Verification
+then passed protocol fixtures4/0failed/1ignored in9.45seconds. App-server/TUI-health
+compilation was interrupted by the deadline; no new compiler error was reported.
+The two Rust source corrections therefore remain incompletely verified. There
+was no independent reviewer, complete166 package, qualification or promotion.
+Ticket453 stays open. No additional coding context or extended deadline is
+authorized. Final broad review/findings TDD remain0/0 because acceptance is unmet.
+
+Python3.12 comprehensive validation timed out after900seconds; its receipt is
+retained and does not qualify that matrix entry. A separate verbose diagnostic
+uses the frozen source explicitly. An earlier ad hoc diagnostic omitted source
+PYTHONPATH and imported an older installed package; it was stopped and excluded.
+Python3.11 comprehensive remains seven checks PASS,2013tests/1skip.
+
+
+The enforcement decision was monotonic25647.050692496,0.575479seconds after the
+job limit. Exact child signal/exit monotonic times were not journaled. An
+independent root census at25671.313 found no owned processes,24.838seconds after
+the job deadline and within the original overall deadline. Local disable at
+25707.863 changed generation1to2 and preserved the entire held job. The original
+job and eight frozen inputs are unchanged. Final independent post-disable census at25778.716 scanned78process entries,
+with zero unreadable and zero owned processes, within the original overall bound.
+
+Final successor source:9,784files, digest
+`bb296cbefc1f576acc54f8aae153708b2911c732f6555538e4aab7dddc2012fe`;
+test digest remains
+`1c7a648508a8bb315369694668458664ef36c3d9dd8a110ef29162ff58ed66bc`.
+Sampled peak job data was6,054,948,083bytes; terminal GC reclaimed4,075,991,076bytes
+of owned compiler cache. These partial artifacts are not a qualified package.
+
+
+The retained165 client stayed pinned through the terminal event and closed. The
+active recipient recorded all ten canonical notices. Four historical delivery
+failures to already-closed recipients remain visible. No new provider model turn
+was used for these notice checks. Final terminal receipt SHA256:
+`22b9ebb77c37bfcfb8c2ea6b5e0970d0236a3c860936b318ad098425065a00ad`;
+post-disable census SHA256:
+`e10e989c5cb60ecb51c72892a255000b367a88acbb79ccf23579df73f1ca87be`.
+Curated private receipts remain in the ticket453 actual166-successor packet.
+Published terminal readback: issue453 comment6549533282. Neither native held job
+is resumed, and no additional native work is authorized by this checkpoint.
+
+
+Python3.12 source diagnostic completed2013tests in677.459seconds with23failures
+and1error, all in refresh scenarios. It inherited working environment and is not
+a canonical qualification result. Re-running that group through the canonical
+isolated source-bound runner passed29tests in16.435seconds. The initial full
+canonical900-second timeout remains unresolved; neither diagnostic replaces it.
+No clean full3.12 matrix is claimed.

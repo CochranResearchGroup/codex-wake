@@ -187,8 +187,8 @@
       "state": "in_progress",
       "worker": "/root/accept453",
       "ready": true,
-      "remaining": "Actual successor native acceptance then final review/TDD",
-      "reason": "operator approved one-attempt/90-minute successor"
+      "remaining": "Full app-server verification, independent review, complete166 package, qualification/promotion and rollback not achieved; no further native context authorized",
+      "reason": "successor deadline exhausted; original and successor preserved disabled"
     }
   ],
   "integration_tip": "92e32160c34c3e71ed73e3b81f657fd01cd47f89",
@@ -201,7 +201,7 @@
     "reason": "verify_only_verification_failed: E0223 ThreadItem API; E0061 missing AuthManager constructor argument",
     "selected_build": "retained_combined165",
     "owned_job_processes": [],
-    "next": "Execute authorized bounded successor; preserve failed original",
+    "next": "Preserve both held jobs; no additional native context authorized",
     "review_rounds": 0,
     "remediation_rounds": 0,
     "controller_revision": "82a61a17d6dcc5e443a2215dd131f59471369df7",
@@ -231,7 +231,13 @@
     "current_upgrade_tests": "76 pass each Python version",
     "installed_smoke_source": "798ca78",
     "installed_smoke": "13 checks pass across retained corrected setup receipts; short private paths and explicit unavailable time authority",
-    "source_fixes_after_installed_smoke": "private child umask and CODEX_REPO_ROOT; current source-targeted suite passes"
+    "source_fixes_after_installed_smoke": "private child umask and CODEX_REPO_ROOT; current source-targeted suite passes",
+    "latest_comprehensive": {
+      "source": "26b52dcd384a852d7cbefec7d6c026e672e84b41",
+      "python311": "PASS7checks;2013tests/1skip;788.298seconds",
+      "python312": "full canonical timeout900seconds retained; inherited-environment diagnostic23failures/1error all refresh; canonical isolated refresh29pass16.435s; no full-matrix pass",
+      "latest628a1ed": "5focused+18Repair pass"
+    }
   },
   "successor_authorization": {
     "operator_message": "ok go",
@@ -242,14 +248,14 @@
     "controller_source": "3b31bdfa0010b7881f235fd5ec4338de73888f53",
     "resource_mode": "manual",
     "original_job": "preserve disabled unchanged",
-    "state": "running",
+    "state": "terminal_held_deadline_exhausted",
     "worker": "/root/accept453"
   },
   "successor_checkpoint": {
     "job_id": "88ffcb281213459da987156e8af41984",
     "root": "/home/ubuntu/codex-profile-lab/upgrade453-successor-20261031",
     "controller_revision": "628a1ed105304e970013a5cc9d8cd7e041599133",
-    "state": "host_regeneration",
+    "state": "held",
     "repair_attempts": 1,
     "maximum_repair_attempts": 1,
     "prior_contexts": 3,
@@ -266,9 +272,9 @@
     "original_unchanged": true,
     "coding_context_status": "interrupted_no_completed_report",
     "readmission_mode": "verify_review_only",
-    "current_command_sequence": 11,
+    "current_command_sequence": 12,
     "known_native_api_edits": "both present in native file_change events; not yet host-verified",
-    "source_digest": "3d74750c5b85faab4baf8297eda3162fea18778170069a3222796c8793ded5f4",
+    "source_digest": "bb296cbefc1f576acc54f8aae153708b2911c732f6555538e4aab7dddc2012fe",
     "tests_digest": "1c7a648508a8bb315369694668458664ef36c3d9dd8a110ef29162ff58ed66bc",
     "worker_completed": false,
     "independent_review_executed": false,
@@ -296,7 +302,41 @@
         "event": "deterministic_verification_readmitted",
         "controller": "628a1ed",
         "reason": "restored exact sealed wrapper on PATH; original attempt/deadlines unchanged"
+      },
+      {
+        "event": "deadline_exhausted",
+        "coding_contexts": 1,
+        "independent_review": false,
+        "package": false,
+        "qualification": false,
+        "promotion": false
       }
-    ]
+    ],
+    "reason": "deadline_exhausted",
+    "native_package": null,
+    "host_regeneration_completed": true,
+    "verification": "protocol4pass1ignored; deadline interrupted app-server/TUI-health compile; incomplete",
+    "terminal_observed_at": 1793482874.446,
+    "terminal_observed_monotonic": 25656.316,
+    "job_monotonic_deadline": 25646.475213728,
+    "overall_monotonic_deadline": 26246.475213728,
+    "cleanup": "final independent post-disable root census:78entries/0unreadable/0owned; local disabled; original job+8inputs unchanged",
+    "source_files": 9784,
+    "enabled": false,
+    "generation": 2,
+    "held_job_unchanged_on_disable": true,
+    "original_job_and_eight_inputs_unchanged": true,
+    "sampled_peak_job_file_bytes": 6054948083,
+    "cache_reclaimed_bytes": 4075991076,
+    "enforcement_decision_monotonic": 25647.050692496,
+    "empty_owned_census_monotonic": 25671.313,
+    "disable_monotonic": 25707.863,
+    "exact_child_exit_monotonic": null,
+    "post_disable_census_monotonic": 25778.716,
+    "operator_notices": "10canonical events delivered to active recipient; historical stale targets retained",
+    "selected_build": "retained_combined165",
+    "old_client": "pinned through terminal then closed",
+    "private_closeout_sha256": "22b9ebb77c37bfcfb8c2ea6b5e0970d0236a3c860936b318ad098425065a00ad",
+    "private_post_disable_census_sha256": "e10e989c5cb60ecb51c72892a255000b367a88acbb79ccf23579df73f1ca87be"
   }
 }
