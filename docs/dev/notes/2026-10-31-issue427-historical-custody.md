@@ -91,3 +91,19 @@ in place. This is metadata reconciliation, not fabricated runtime completion.
 
 Memory disposition: forbidden. This bounded delegated packet does not authorize
 an additional persistent-memory update; the primary owns the parent closeout.
+
+## Fresh canonical-source reconciliation
+
+After PR430 advanced canonical main to `343ed9f`, this branch merged that exact
+source and re-ran the active planning audit. Six additional historical state
+headers (0179/0180/0184/0185/0186/0191) were non-deterministic and are now normalized.
+The original scope/outcome text is preserved adjacent to each header. Plans0179,
+0180,0185,0186 and0191 are CLOSED only for their explicitly qualified private or
+isolated source scopes. Plan0184 remains OPEN with a Current State section naming
+its broader real-model and downstream-activation gates. Integration is not live
+acceptance. The refreshed audit passes without adding baseline exceptions.
+
+The191-test source qualification above remains bound to the original `5fcf2d6`
+source; it is not relabelled as a run against the subsequently integrated launcher
+changes. The new main source has the primary's separate422 qualification packet.
+This branch changes documentation only relative to `343ed9f`.
