@@ -179,5 +179,17 @@
     }
   ],
   "integration_tip": "92e32160c34c3e71ed73e3b81f657fd01cd47f89",
-  "working_runtime_changed": false
+  "working_runtime_changed": false,
+  "runtime_checkpoint": {
+    "state": "held_controller_fix_in_progress",
+    "job_id": "6ca6cce33db1406db89087c3b9fe54c0",
+    "original_deadline": 1793478757.2470584,
+    "repair_attempts": 3,
+    "reason": "owned_storage_scan_raced_rustc_temporary_file_removal",
+    "selected_build": "retained_combined165",
+    "owned_job_processes": [],
+    "next": "same-job verify-only reconciliation after source correction; no fourth coding worker or renewed budget",
+    "review_rounds": 0,
+    "remediation_rounds": 0
+  }
 }

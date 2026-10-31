@@ -90,3 +90,29 @@ Critical path: durable job slice → semantic worker and disposable qualificatio
 Next action: complete disposable executor qualification, then implement future-launch selection and run the complete 0.166 acceptance before the single final review/remediation pass.
 
 <!-- idempotency:codex-wake-autonomous-upgrade-bot-spec-20261031 -->
+
+## Runtime checkpoint | 2026-10-31
+
+Actual #453 source repair spent three coding attempts, preserved the 69-path
+patch dispositions, and reached owned Rust regeneration/build. The controller
+then held the original job because its storage observation raced with rustc
+removing a temporary `lib.rmeta`; this is a controller failure, not a compiler
+failure or qualified 0.166 outcome. The retained 0.165 selection is unchanged,
+owned job processes are gone, and the original deadline and attempt count remain.
+Only Cargo.lock changed after the final coding report, attributable to the owned
+regenerator; current source and original reports remain distinct evidence.
+
+The bounded corrective packet fixes vanished-file storage observation and adds
+explicit `upgrades.reconcile` with `mode=verify_only`. It may readmit only the
+same sealed held job under current scope, original generation, clock, deadline,
+limits and attempt count. It must retain interrupted regeneration provenance,
+prove the owned process group is gone, rerun deterministic verification and
+obtain independent review. Ambiguous worker/reviewer submission cannot be
+readmitted by this path, and verification failure cannot invoke another coding
+worker. No original input, allowance or external grant is renewed.
+
+The real operator witness proved an existing private 0.165 client remains pinned;
+notice delivery was refused for insufficient test-recipient scope. That failure
+is retained and is being corrected through the exact disposable recipient grant.
+Neither partial witness proves 0.166 promotion. Final broad review/remediation
+counts remain zero pending complete ticket acceptance.
