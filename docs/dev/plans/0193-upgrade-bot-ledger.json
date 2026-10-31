@@ -184,11 +184,11 @@
         "Source integration and test qualification are reported separately from production activation."
       ],
       "number": 453,
-      "state": "held",
-      "worker": null,
+      "state": "in_progress",
+      "worker": "/root/accept453",
       "ready": true,
-      "remaining": "Assign actual166 whole-bot disposable acceptance",
-      "reason": "two actual native compile errors; successor approval pending"
+      "remaining": "Actual successor native acceptance then final review/TDD",
+      "reason": "operator approved one-attempt/90-minute successor"
     }
   ],
   "integration_tip": "92e32160c34c3e71ed73e3b81f657fd01cd47f89",
@@ -201,7 +201,7 @@
     "reason": "verify_only_verification_failed: E0223 ThreadItem API; E0061 missing AuthManager constructor argument",
     "selected_build": "retained_combined165",
     "owned_job_processes": [],
-    "next": "Await explicit approval of prepared one-attempt/90-minute successor; original remains disabled and unchanged",
+    "next": "Execute authorized bounded successor; preserve failed original",
     "review_rounds": 0,
     "remediation_rounds": 0,
     "controller_revision": "82a61a17d6dcc5e443a2215dd131f59471369df7",
@@ -232,5 +232,17 @@
     "installed_smoke_source": "798ca78",
     "installed_smoke": "13 checks pass across retained corrected setup receipts; short private paths and explicit unavailable time authority",
     "source_fixes_after_installed_smoke": "private child umask and CODEX_REPO_ROOT; current source-targeted suite passes"
+  },
+  "successor_authorization": {
+    "operator_message": "ok go",
+    "authorized": true,
+    "additional_coding_attempts": 1,
+    "total_seconds": 5400,
+    "authority": "fresh disposable test scope only",
+    "controller_source": "3b31bdfa0010b7881f235fd5ec4338de73888f53",
+    "resource_mode": "manual",
+    "original_job": "preserve disabled unchanged",
+    "state": "preflight",
+    "worker": "/root/accept453"
   }
 }

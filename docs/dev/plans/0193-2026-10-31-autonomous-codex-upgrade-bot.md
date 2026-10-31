@@ -75,7 +75,7 @@ Production activation by this planning task; running-daemon replacement; automat
 
 ## Further Notes
 
-Current State: children #447–#452 are closed with source/public-seam evidence, actual disposable 0.165 qualification and native notice delivery/cold replay. Assembled 0.166 acceptance #453 is held after two genuine native Rust API errors; the original three-attempt job is disabled with its identity, deadline and history preserved. No complete 0.166 package, independent review, qualification or promotion occurred. One additional coding attempt and a 90-minute successor test run await explicit approval; none has started. Private child permissions and the host source-root environment are corrected and source-tested. Production activation remains separate.
+Current State: children #447–#452 are closed with source/public-seam evidence, actual disposable 0.165 qualification and native notice delivery/cold replay. Assembled 0.166 acceptance #453 is held after two genuine native Rust API errors; the original three-attempt job is disabled with its identity, deadline and history preserved. No complete 0.166 package, independent review, qualification or promotion occurred. The operator approved one additional coding attempt and a 90-minute successor test run with “ok go”; fresh disposable preflight is underway. Private child permissions and the host source-root environment are corrected and source-tested. Production activation remains separate.
 
 Reconciliation: #369 remains broader coordination. Closed #377 retains its accepted staging/rollback outcome. The Wake-owned controller delivered in #393 supplies account/build surfaces. Open #413 gates running-daemon recovery; it is not a prerequisite for a bot that leaves running daemons untouched. Production profile activation remains separately gated by #380. Existing parents are not edited or closed by this specification.
 
@@ -87,7 +87,7 @@ Definition of done: approved child outcomes integrated with local checks, an imm
 
 Critical path: durable job slice → semantic worker and disposable qualification → qualified selection → integrated 0.166 acceptance. Independent low-conflict tracks after the job contract: repair worker, qualification executor and scheduled discovery. Primary coordinator owns integration.
 
-Next action: await the prepared bounded successor decision; do not revive or renew the failed original. Close #453 only after complete native acceptance, then run the single final review/remediation pass.
+Next action: execute the approved one-attempt/90-minute disposable successor; do not revive or renew the failed original. Close #453 only after complete native acceptance, then run the single final review/remediation pass.
 
 <!-- idempotency:codex-wake-autonomous-upgrade-bot-spec-20261031 -->
 
@@ -116,3 +116,16 @@ notice delivery was refused for insufficient test-recipient scope. That failure
 is retained and is being corrected through the exact disposable recipient grant.
 Neither partial witness proves 0.166 promotion. Final broad review/remediation
 counts remain zero pending complete ticket acceptance.
+
+
+## Authorized successor
+
+Operator confirmation: “ok go” after the explicit request for one additional
+coding attempt and90minutes in disposable WSL. The new run starts from official
+166 plus the original69-path patch stack. The failed candidate is a read-only
+reference with its retained digest and exact compiler diagnostics; it is not
+manually edited or promoted. Freeze controller3b31bdf, including the host source
+root and private-child prerequisites. New disposable-only authority is permitted;
+production/shared service effects, global governor activation and working-resource
+renewal remain outside scope. Preserve original job, source, deadlines and history.
+Final broad review/TDD counts remain0 until ticket acceptance.
