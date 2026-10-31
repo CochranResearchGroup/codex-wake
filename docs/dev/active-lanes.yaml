@@ -918,3 +918,16 @@ lanes:
     updated_at: 2026-10-30
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/419
     disposition: All20children and parent393 closed from source/disposable qualification; review1of1 and TDD1of1 fixed6findings; both Python versions1909passed/1skip; production380 and recovery368/370 separate; manual resource monitoring only
+
+  - id: P192-WORKTREE420
+    owner: primary / ecochran76
+    objective: Reconcile Wake/native custody and anchor primary Wake clean canonical main
+    work_items: [420, 421, 422, 423, 424, 425, 426, 427, 428, 429]
+    plan: docs/dev/plans/0192-2026-10-31-worktree-reconciliation.md
+    branch: chore/420-worktree-reconciliation
+    target: origin/main
+    plan_state: RUNNING
+    custody_state: ACTIVE_WORKTREE
+    integration: validated_prs
+    updated_at: 2026-10-31
+    disposition: Custody421 validated; remaining source/cleanup graph pending; no working runtime effects
