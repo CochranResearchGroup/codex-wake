@@ -65,6 +65,10 @@ def open_session(args):
                        {'threadId': thread_id, 'name': args.name}, args.timeout)
     metadata = native_request(args.app_server, codex, 'thread/read',
                               {'threadId': thread_id, 'includeTurns': False}, args.timeout)['thread']
+    if not metadata.get('name'):
+        # The TUI publishes this label as its pane title. Keep existing names.
+        native_request(args.app_server, codex, 'thread/name/set',
+                       {'threadId': thread_id, 'name': args.name}, args.timeout)
     cwd = metadata['cwd']
     command = shlex.join(['env', '-u', 'CODEX_THREAD_ID', '-u', 'TMUX_PANE', codex,
                           'resume', '--no-alt-screen', '-C', cwd, thread_id])
