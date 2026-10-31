@@ -469,6 +469,8 @@ class ControllerHandler(BaseHTTPRequestHandler):
                 for name, (operation, schema) in TOOLS.items()
                 if ProtectedOperations.READ_POLICIES[operation][0] in actor.scopes
                 and (operation.startswith('inventory.')
+                     or (operation.startswith('upgrades.') and self.server.operations.operations.inventory is not None
+                         and (Path(self.server.operations.operations.inventory.root)/'upgrade-bot.json').is_file())
                      or (operation.startswith('operations.') and self.server.operations.operations.inventory is not None)
                      or (operation.startswith('hosts.') and self.server.operations.operations.hosts is not None)
                      or (operation.startswith('migration.') and self.server.operations.operations.migration is not None)
