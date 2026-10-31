@@ -142,7 +142,8 @@ def qualify(options):
             path.read_bytes() == (package / path.name).read_bytes(),
             "installed source mismatch: " + path.name,
         )
-    home = base / "home"
+    home = (base / "profiles-state/codex-test" if options.managed_launcher else base / "home")
+    home.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     home.mkdir(mode=0o700)
     workspace = base / "workspace"
     workspace.mkdir(mode=0o700)
@@ -150,15 +151,16 @@ def qualify(options):
     root.mkdir(mode=0o700)
     owned = tempfile.TemporaryDirectory(prefix="cw346-native-")
     socket_dir = Path(owned.name)
-    alias = socket_dir / "native.sock"
+    alias = (home / "app-server-control/app-server-control.sock" if options.managed_launcher else socket_dir / "native.sock")
     tmux_socket = socket_dir / "tmux.sock"
     expiry = time.monotonic() + 180
     report = dict(
         verdict="INCOMPLETE",
         started_at=datetime.now(timezone.utc).isoformat(),
-        source_commit=subprocess.check_output(
+        source_commit=(options.source_commit or subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=source, text=True
-        ).strip(),
+        ).strip()),
+        frontend_mode="registered_modified_launcher" if options.managed_launcher else "direct_tui",
         source_python_sha256={
             str(path.relative_to(source)): digest(path)
             for path in sorted((source / "src/codex_wake").glob("*.py"))
@@ -572,11 +574,9 @@ def qualify(options):
             "CODEX_HOME=" + str(home),
             "TERM=xterm-256color",
             str(tui),
-            "--remote",
-            endpoint,
+            *([] if options.managed_launcher else ["--remote", endpoint]),
             "--no-alt-screen",
-            "resume",
-            thread,
+            *(["resume", thread] if thread else []),
         ]
         # Private tmux server/environment never addresses another user's pane.
         tmux(
@@ -613,20 +613,69 @@ def qualify(options):
         raise AssertionError(label + " unavailable within bounded observation")
 
     try:
-        native = subprocess.Popen(
-            appserver_command
-            + [
-                "--listen",
-                "unix://" + str(alias),
-            ]
-            + ([] if options.app_server_cli else ["--session-source", "cli"]),
-            cwd=workspace,
-            env=env,
-            stdin=subprocess.DEVNULL,
-            stdout=nlog,
-            stderr=nlog,
-            start_new_session=True,
-        )
+        if options.managed_launcher:
+            profiles = base / "launcher-profiles.toml"
+            profiles.write_text("\n".join([
+                "[profiles]", "state_root=" + json.dumps(str(home.parent)),
+                'selection_mode="launcher"', 'default_profile="test"',
+                'known_profiles=["test"]', 'shared_links=[]',
+                'check_upstream_releases=false', "",
+            ]))
+            shared = home.parent / "shared"
+            shared.mkdir(mode=0o700)
+            write_build = dict(schema_version=1, builds=dict(modded=dict(
+                executable=str(appserver), sha256=options.app_server_sha256,
+                upstream_version="0.165.0", revision="qualified-native",
+                source="local-qualified", read_schemas=[5], backend="managed")))
+            (shared / "builds.json").write_text(json.dumps(write_build))
+            env["CODEX_PROFILES_CONFIG"] = str(profiles)
+            env["CODEX_BUILD_UPDATE_CHECK"] = "0"
+            attach("", None)
+            wait(lambda: "mock-model" in capture("tui-managed-bootstrap.txt"), "modified launcher usable frontend", 25)
+            wait(lambda: alias.exists(), "modified launcher managed bootstrap", 20)
+            physical_boot = alias.resolve(strict=True)
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+                connection.connect(str(physical_boot))
+                managed_pid, managed_uid, _ = struct.unpack("3i", connection.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
+            require(managed_uid == os.geteuid(), "managed bootstrap peer owner differs")
+            require(digest(Path("/proc", str(managed_pid), "exe")) == options.app_server_sha256,
+                    "managed bootstrap executable differs")
+            require(os.getpgid(managed_pid) == managed_pid, "managed bootstrap must own its process group")
+            class ObservedDaemon:
+                def __init__(self, pid):
+                    self.pid = pid
+                    self.identity = process_identity(pid)
+                    self.returncode = None
+                def poll(self):
+                    if process_identity(self.pid) != self.identity:
+                        self.returncode = 0
+                    return self.returncode
+                def wait(self, timeout):
+                    until = time.monotonic() + timeout
+                    while self.poll() is None and time.monotonic() < until:
+                        time.sleep(.05)
+                    if self.poll() is None:
+                        raise subprocess.TimeoutExpired("owned managed daemon", timeout)
+                    return self.returncode
+            native = ObservedDaemon(managed_pid)
+            tmux("kill-session", "-t", "ux")
+            report["modified_launcher_bootstrap"] = dict(
+                launcher=str(tui), registered_backend="managed", per_session_setup=False)
+        else:
+            native = subprocess.Popen(
+                appserver_command
+                + [
+                    "--listen",
+                    "unix://" + str(alias),
+                ]
+                + ([] if options.app_server_cli else ["--session-source", "cli"]),
+                cwd=workspace,
+                env=env,
+                stdin=subprocess.DEVNULL,
+                stdout=nlog,
+                stderr=nlog,
+                start_new_session=True,
+            )
         report.update(
             native_pid=native.pid, native_identity=process_identity(native.pid)
         )
@@ -1623,6 +1672,30 @@ def qualify(options):
                     exit_code=process.returncode,
                     identity_after=process_identity(process.pid),
                 )
+        if options.managed_launcher:
+            updater_cleanup = []
+            marker = ("CODEX_HOME=" + str(home)).encode()
+            for proc in Path("/proc").iterdir():
+                if not proc.name.isdigit():
+                    continue
+                try:
+                    if (b"pid-update-loop" not in (proc / "cmdline").read_bytes()
+                            or marker not in (proc / "environ").read_bytes().split(b"\0")):
+                        continue
+                    pid = int(proc.name)
+                    identity = process_identity(pid)
+                    require(digest(proc / "exe") == options.app_server_sha256,
+                            "owned updater executable differs")
+                    groups.append(os.getpgid(pid))
+                    if process_identity(pid) == identity:
+                        os.kill(pid, signal.SIGTERM)
+                    until = time.monotonic() + 3
+                    while process_identity(pid) == identity and time.monotonic() < until:
+                        time.sleep(.05)
+                    updater_cleanup.append(dict(pid=pid, identity_after=process_identity(pid)))
+                except (FileNotFoundError, ProcessLookupError, PermissionError):
+                    continue
+            report["managed_updater_cleanup"] = updater_cleanup
         http.shutdown()
         http.server_close()
         http_thread.join(timeout=2)
@@ -1689,6 +1762,8 @@ if __name__ == "__main__":
     parser.add_argument("--app-server-sha256", required=True)
     parser.add_argument("--app-server-cli", action="store_true")
     parser.add_argument("--tui", type=Path, required=True)
+    parser.add_argument("--source-commit", help="Original commit for a hash-checked source snapshot without Git metadata")
+    parser.add_argument("--managed-launcher", action="store_true", help="Launch actual registered codex-modded and let it bootstrap its account daemon")
     parser.add_argument(
         "--history-mode", choices=("legacy", "paginated"), default="legacy"
     )

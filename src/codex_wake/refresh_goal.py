@@ -54,16 +54,19 @@ def continuous(before, after, status):
 
 def resource_ready(root, receipt, profile, goal):
     from .lifecycle_budget import track_refresh_budget, trusted_upper
-    configured = bool(receipt['intent'].get('configuration'))
+    configured = bool(receipt.get('intent',{}).get('configuration'))
     if configured and not track_refresh_budget(root, receipt, goal):
         return False
     binding = profile.get('goal_supervision')
     if binding is None:
         return configured
-    if not isinstance(binding, dict) or set(binding) != {'root', 'policy', 'allocation_id'}:
+    if (not isinstance(binding, dict) or not {'root','policy'} <= set(binding)
+            or set(binding)-{'root','policy','allocation_id'}):
         return False
     from .goal_supervision import show
-    proof = show(binding['root'], binding['policy'], receipt['thread_id'], binding['allocation_id'])
+    from .session_permissions import Principal
+    proof = show(binding['root'], binding['policy'], receipt['thread_id'], binding.get('allocation_id'),
+        permission_principal=Principal(receipt['thread_id']))
     receipt['refresh_resource_proof'] = proof
     return (proof.get('state') == 'armed' and not proof.get('stop_latched')
             and proof.get('controller', {}).get('fresh') is True

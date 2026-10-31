@@ -182,6 +182,7 @@ class GoalSupervisionTests(unittest.TestCase):
             with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
                 for invalid,metadata in ((dict(args,token_limit=101),context),(args,None),
                         (args,dict(context,threadId='00000000-0000-7000-8000-000000000290')),
+                        (args,dict(context,sessionId='00000000-0000-7000-8000-000000000290')),
                         (dict(args,allocation_id='native-00000000-0000-7000-8000-000000000290'),context)):
                     denied,failed=runner.call('wake_goal_limits_set',invalid,native_context=metadata)
                     self.assertTrue(failed,denied)
@@ -239,10 +240,11 @@ class GoalSupervisionTests(unittest.TestCase):
                 rows[-1]['payload']['response_id']='successor-response'
                 rows[1]['payload']['goal']['createdAt']=NOW+10
                 for row in rows[1:]:row['timestamp']='2030-01-01T00:00:10Z'
+                rows.pop(1)  # Native create_goal during a child turn has no independent rollout boundary.
                 (log.parent/'successor.jsonl').write_text(''.join(json.dumps(row)+'\n' for row in rows))
-                native['siblings']={successor:dict(goal=dict(threadId=successor,createdAt=NOW+10,status='active'),active=['work'],calls=[])}
-                context=lambda thread:dict(threadId=thread,sessionId=thread,callId='call-'+thread,
-                    **{'x-codex-turn-metadata':dict(thread_id=thread,session_id=thread,turn_id='work')})
+                native['siblings']={successor:dict(goal=dict(threadId=successor,createdAt=NOW+10,status='active'),active=['work'],calls=[],parent_thread_id=THREAD)}
+                context=lambda thread:dict(threadId=thread,sessionId=THREAD,callId='call-'+thread,
+                    **{'x-codex-turn-metadata':dict(thread_id=thread,session_id=THREAD,turn_id='work')})
                 runner=CommandRunner(goal_limits_policy=policy,goal_limits_root=root)
                 with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+10):
                     first,failed=runner.call('wake_goal_limits_set',dict(caller_thread_id=THREAD,token_limit=100,time_limit_seconds=120,token_accounting=accounting),native_context=context(THREAD))
@@ -777,7 +779,7 @@ class GoalSupervisionTests(unittest.TestCase):
             if method=='thread/goal/get':return {'goal':dict(selected['goal'])}
             if method=='thread/read':
                 items=selected.get('user_items', [dict(type='userMessage',content=[dict(type='text',text=selected['user_text'])])] if 'user_text' in selected else [])
-                return {'thread':dict(id=params['threadId'],turns=[dict(id=t,status='inProgress',items=items) for t in selected['active']])}
+                return {'thread':dict(id=params['threadId'],parentThreadId=selected.get('parent_thread_id'),turns=[dict(id=t,status='inProgress',items=items) for t in selected['active']])}
             if method=='thread/turns/list':return dict(data=[dict(id=t,status='inProgress') for t in selected['active']],nextCursor=None)
             if method.startswith('thread/notice/') and 'notices' in selected:
                 notice=selected['notices'].get(params['eventId'])

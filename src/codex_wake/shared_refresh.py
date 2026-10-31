@@ -87,7 +87,7 @@ def _validate_profile(profile):
         required={'refresh_mode', 'scope_approval', 'cwd', 'app_server', 'codex_path', 'timeout', 'resources'}
         client=profile.get('refresh_mode')==CLIENT_MODE
         if client:required.add('tmux_session')
-        optional={'tmux_socket','codex_home','goal_supervision','client_connection'} if client else set()
+        optional={'tmux_socket','codex_home','goal_supervision','client_connection'} if client else ({'goal_supervision'} if profile.get('refresh_mode')==THREAD_MODE else set())
         if (not required <= set(profile) or set(profile)-required-optional
                 or profile['refresh_mode'] not in (MODE,CLIENT_MODE,THREAD_MODE) or not isinstance(profile['scope_approval'], str)
                 or not profile['scope_approval'].strip()
@@ -199,10 +199,10 @@ def command(args, root, config, profile, checkpoint, content, *, permission_cont
                 receipt['permission_context']=permission_context
                 receipt['policy_root']=str(Path(root).absolute())
             _save(path, receipt)
-            if profile['refresh_mode']==CLIENT_MODE:
+            if profile['refresh_mode']==CLIENT_MODE or (profile['refresh_mode']==THREAD_MODE and profile.get('goal_supervision')):
                 from .refresh_goal import pause
                 def request(method,params):
-                    _client_effect_guard(receipt)
+                    if profile['refresh_mode']==CLIENT_MODE:_client_effect_guard(receipt)
                     return _request(receipt,method,params)
                 value=request('thread/read',dict(threadId=args.thread_id,includeTurns=False))['thread']
                 if not _source_workspace(receipt,value):
