@@ -1,6 +1,7 @@
 # Native orphaned-output recovery / #364
 
-State: OPEN — qualified private candidate; shared cutover pending
+State: OPEN
+Outcome boundary: qualified private candidate; shared cutover pending
 Owner: ecochran76 / primary
 Wake integration branch: fix/native-orphan-output-364
 Native source branch: fix/ar2-orphan-custom-output

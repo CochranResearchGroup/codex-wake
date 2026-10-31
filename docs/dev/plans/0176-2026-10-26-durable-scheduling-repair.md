@@ -16,6 +16,17 @@ Diagnosis loop: python3 /tmp/t360-repro.py reports existing ID/status/due/monito
 
 Ranked hypotheses: missing selected-root coverage; qualified time not reaching/recovering resident MCP; TTL/due coupling truncating long-delay eligibility. Missing root/action grants is separately observed. Inspect each without broad activation of queued work. Current state: qualified red, source discovery started.
 
+## Current State
+
+Source repairs are integrated through PR361 (`02b68e8`) and PR362
+(`e58d3a9`); terminal evidence reconciliation is integrated through PR363
+(`65c4cca`). This plan remains OPEN because the expired shared-idle refresh
+provided no successful resident catalog, scoped control or resource-continuity
+qualification. The remaining supported connection refresh requires its own
+existing authority; no retry, restart or recurrence acceptance is implied.
+The dated observations below remain historical evidence, not current runtime
+readbacks.
+
 ## Verified cause and first remediation
 
 Root has no registered monitor and native MCP arguments omit wake-control host grants. Qualified source red additionally finds misleading registration metadata: valid original clock anchors saved but due display remains null and time reason is hardcoded unavailable. There is no24h scheduling limit; TTL already starts after due. Fixed receipt projections and explicit monitored/armed state, durable-loop distinction, owner-held readback, no-dispatch pending timer reconciliation, and agent control inventory dates. Public red/green regressions cover24h and3650d, late monitor arrival retaining oneID, exact-scope inventory/cancel, and original timer reconciliation without resubmission.
