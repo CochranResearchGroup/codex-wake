@@ -227,6 +227,30 @@ class UpgradeJobs:
             self.notify(actor, authorize)
         return dict(schema_version=1, operation=operation, status='completed', result=result)
 
+    def disable_local(self):
+        """Local file owner may always stop this bot; this grants no new work.
+
+        Remote and native-MCP callers still use authenticated scoped controls.
+        The local operator owns the private config/store and could already stop
+        these same-user processes. Expired service credentials cannot trap ON.
+        """
+        self.config()  # validates the local host file's ownership and permissions
+        with self.locked():
+            state=self.load();state['enabled']=False;state['generation']+=1
+            for job in state['jobs'].values():
+                if job['state'] not in TERMINAL:
+                    self.stop(job)
+                    job.update(state='disabled',reason='disabled_by_local_operator')
+            self.event(state,'disable',reason='local_operator')
+            self.save(state)
+            result=dict(enabled=False,generation=state['generation'],authority='local_file_owner')
+        try:
+            from .operation_commands import local_actor
+            self.notify(local_actor(self.root),None)
+        except (OSError,ValueError,KeyError) as error:
+            _atomic(self.store/'notice-drain-status.json',dict(status='failed',reason=getattr(error,'code','notice_authority_unavailable'),at=self.now()))
+        return dict(schema_version=1,operation='upgrades.disable',status='completed',result=result)
+
     @contextmanager
     def runner_lease(self, identifier):
         with self.locked():

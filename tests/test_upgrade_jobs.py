@@ -185,3 +185,20 @@ class UpgradeJobsTests(unittest.TestCase):
             wall[0]=100;mono[0]=20.1
             expired=call('advance',job_id=job['id'])['job']
             self.assertEqual(expired['reason'],'deadline_exhausted')
+
+    def test_local_operator_can_disable_without_a_service_grant_ritual(self):
+        import contextlib
+        import io
+        from codex_wake.cli import main
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);target={'host':'fixture'}
+            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={})))
+            actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
+            UpgradeJobs(root).execute(actor,'upgrades.enable',dict(expected_target=target))
+            output=io.StringIO()
+            with contextlib.redirect_stdout(output):
+                code=main(['--wake-root',str(root),'upgrades','disable'])
+            self.assertEqual(code,0)
+            self.assertFalse(json.loads(output.getvalue())['result']['enabled'])
+            state=UpgradeJobs(root).execute(actor,'upgrades.status',dict(expected_target=target))['result']
+            self.assertFalse(state['enabled'])

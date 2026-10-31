@@ -25,10 +25,14 @@ def register_parser(subparsers):
     parser=subparsers.add_parser('upgrades',help='inspect and control bounded autonomous build upgrades')
     verbs=parser.add_subparsers(dest='upgrade_verb',required=True)
     for spec in tool_specs().values():
-        verbs.add_parser(spec[1].split('.')[1]).add_argument('--arguments',type=json.loads,required=True)
+        verbs.add_parser(spec[1].split('.')[1]).add_argument('--arguments',type=json.loads,required=spec[1]!='upgrades.disable')
 
 
 def command(args,root):
-    result=protected_execute('upgrades.'+args.upgrade_verb,args.arguments,root)
+    if args.upgrade_verb=='disable' and args.arguments is None:
+        from .upgrade_jobs import UpgradeJobs
+        result=UpgradeJobs(root).disable_local()
+    else:
+        result=protected_execute('upgrades.'+args.upgrade_verb,args.arguments,root)
     print(json.dumps(result,sort_keys=True))
     return 0 if result['status']=='completed' else 2

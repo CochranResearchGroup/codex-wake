@@ -44,3 +44,16 @@ job lock. A metadata failure, unknown source, changed pin, disabled bot, exhaust
 cache or unavailable authority produces inspectable held/disabled state while the
 working build remains selected. Interrupted or uncertain jobs are never silently
 resubmitted.
+
+## Immediate local deactivation
+
+The local owner of the private host configuration can stop the bot with one command:
+
+```sh
+codex-wake --wake-root /path/to/configured/root upgrades disable
+```
+
+This persists OFF, fences promotion and stops only owned workers. It requires no
+service-grant reset or new resource allowance. It grants no ability to enable or
+run work. Remote API/MCP controls retain their current scoped authentication.
+Delivery failure remains visible if the notice recipient grant is unavailable.
