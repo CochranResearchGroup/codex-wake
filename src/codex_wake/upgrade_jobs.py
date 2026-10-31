@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -204,9 +205,26 @@ class UpgradeJobs:
                         self.event(state, 'queued', job)
                         result = dict(job=job)
                 self.save(state)
+        if verb == 'advance':
+            self.reclaim_terminal_cache(arguments['job_id'])
         if verb not in READS:
             self.notify(actor, authorize)
         return dict(schema_version=1, operation=operation, status='completed', result=result)
+
+    def reclaim_terminal_cache(self, identifier):
+        with self.locked():
+            state=self.load();job=self.job(state,identifier)
+            if job['state'] not in TERMINAL or job.get('active_phase') or job.get('worker'):
+                return
+            cache=self.store/identifier/'cargo-target'
+            if cache.exists() or cache.is_symlink():
+                if cache.is_symlink() or not cache.resolve().is_relative_to((self.store/identifier).resolve()):
+                    job['cache_reclamation']=dict(status='held',reason='owned_cache_path_changed')
+                else:
+                    size=sum(p.stat().st_size for p in cache.rglob('*') if p.is_file() and not p.is_symlink())
+                    shutil.rmtree(cache)
+                    job['cache_reclamation']=dict(status='reclaimed',bytes=size,at=self.now())
+                self.save(state)
 
     def notice_summary(self):
         from .upgrade_notices import UpgradeNotices
@@ -337,6 +355,8 @@ class UpgradeJobs:
             state = self.load();job = self.job(state, frozen['id'])
             self.guard(actor, job['target'], arguments, authorize, write=True)
             if job['state'] in TERMINAL:
+                job.update(worker=None,active_phase=None)
+                self.save(state)
                 return dict(job=job)
             reason = self.budget_reason(job)
             job['worker'] = None

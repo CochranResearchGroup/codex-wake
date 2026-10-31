@@ -126,3 +126,23 @@ class UpgradeJobsTests(unittest.TestCase):
             same=call('start',recipe='release')['job']
             self.assertEqual(same['id'],job['id'])
             self.assertEqual(same['state'],'disabled')
+
+    def test_terminal_failure_reclaims_only_the_owned_compiler_cache(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);target={'host':'fixture'}
+            actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
+            (root/'recipe.json').write_text(json.dumps(dict(id='candidate',upstream_version='0.166')))
+            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={'release':str(root/'recipe.json')})))
+            owner=UpgradeJobs(root);args={'expected_target':target}
+            def call(verb,**extra):return owner.execute(actor,'upgrades.'+verb,dict(args,**extra))['result']
+            call('enable');job=call('start',recipe='release')['job']
+            def failed(job):
+                cache=root/'upgrade-jobs'/job['id']/'cargo-target';cache.mkdir(parents=True)
+                (cache/'rebuildable').write_bytes(b'12345678')
+                return dict(status='failed',reason='compile_rejected')
+            owner.executor=failed
+            call('advance',job_id=job['id'])
+            after=call('show',job_id=job['id'])['job']
+            self.assertEqual(after['state'],'held')
+            self.assertEqual(after['cache_reclamation']['status'],'reclaimed')
+            self.assertEqual(after['cache_reclamation']['bytes'],8)
