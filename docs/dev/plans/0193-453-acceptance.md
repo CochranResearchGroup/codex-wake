@@ -1,8 +1,8 @@
 # Integrated actual 0.166 acceptance (#453)
 
-State: HELD and fixture DISABLED after two genuine 0.166 Rust compile errors.
-The original three-attempt job is preserved. A separately bounded successor is
-awaiting explicit user approval; none has been started.
+State: original job HELD and DISABLED after two genuine 0.166 Rust compile errors.
+The separately authorized successor is RUNNING; actual compilation is in progress.
+Neither job has a qualified 0.166 package yet. The original job remains preserved.
 Plan0193 and specification #444 remain the scope authority.
 This record distinguishes source verification, the actual disposable job and
 production activation. No production activation is authorized or claimed.
@@ -246,3 +246,39 @@ with the failed original retained. It creates no successor, grant or model call.
 Future-child private-umask corrections are source-tested but were not installed
 or exercised in this failed original run. Production activation and managed
 running-daemon cutover remain separately gated by #380 and #413.
+
+
+## Approved successor checkpoint
+
+The operator approved one additional coding context and 90 minutes overall in
+disposable `wsl-test`. Successor `88ffcb281213459da987156e8af41984` uses a
+separate root, `upgrade453-successor-20261031`, and unchanged frozen configuration
+`a6871b6c31dc6c43fa28e711ddd29c342c50335a475d655a78114024d8365ac9`.
+The coding allowance is charged 1/1. Its original job deadline is
+1793483044.1438994, with overall deadline1793483643.8781624; persisted monotonic
+deadlines remain authoritative when guest UTC rolls back. No deadline, coding
+allowance or resource authority has been renewed.
+
+The native worker wrote both reported Rust corrections but was interrupted
+before `turn.completed`; no worker report is inferred. Its source digest was
+`3d74750c5b85faab4baf8297eda3162fea18778170069a3222796c8793ded5f4`.
+Explicit `verify_review_only` recovery retains the original worker identity,
+exit census, native events and charged context. It requires host verification
+and independent review of every patch; `worker_completed` remains false.
+
+A first recovery launcher omitted the sealed Cargo wrapper from PATH, causing
+a redundant dependency fetch. Its verified owned regeneration group was stopped;
+the failed command and receipt remain retained. No candidate source was manually
+edited. Controller628a1ed permits another deterministic verification admission
+with a fresh census and no coding/reviewer replay. Run3 uses the sealed wrapper
+first in PATH, pinned GNU/dev-small Cargo and two compiler jobs. At1793481875,
+regeneration11 was compiling actual0.166 utility/network crates without reported
+errors, using1.46GB of workspace data. Independent review, complete package,
+qualification, future-launch selection and rollback remain pending.
+
+Local comprehensive validation at source26b52dcd384a852d7cbefec7d6c026e672e84b41
+passed all seven checks under Python3.11.15, including2013 tests in788.298seconds.
+The Python3.12 run is still in progress. Receipts are private `/tmp/w26v/`;
+the explicit unavailable time fixture avoids Windows clock inspection. Latest
+repeat-admission source628a1ed has five focused and18 existing Repair tests passing.
+Final broad review/findings TDD counters remain0/0 pending actual ticket acceptance.
