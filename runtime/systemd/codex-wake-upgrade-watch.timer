@@ -1,0 +1,11 @@
+# Explicit operator installation/enablement required; the bot also starts disabled.
+[Unit]
+Description=Check the opt-in Codex Wake upgrade watcher
+
+[Timer]
+OnBootSec=2m
+OnUnitInactiveSec=1m
+Unit=codex-wake-upgrade-watch.service
+
+[Install]
+WantedBy=timers.target
