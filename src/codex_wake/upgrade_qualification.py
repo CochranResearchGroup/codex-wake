@@ -224,7 +224,7 @@ class UpgradeQualification:
             env={key:value for key,value in os.environ.items() if key in ('PATH','LANG','LC_ALL')}
             env.update(HOME=home,CODEX_HOME=home+'/.codex')
             process=subprocess.Popen([str(package/'bin/codex'),'--version'],env=env,stdin=subprocess.DEVNULL,
-                stdout=output,stderr=subprocess.DEVNULL,start_new_session=True)
+                stdout=output,stderr=subprocess.DEVNULL,start_new_session=True,umask=0o077)
             self.owned_groups.append(process.pid)
             deadline=time.monotonic()+30
             try:
@@ -282,7 +282,7 @@ class UpgradeQualification:
         env={k:v for k,v in os.environ.items() if k in ('PATH','LANG','LC_ALL')}
         env.update(HOME=str(home),CODEX_HOME=str(home),XDG_CONFIG_HOME=str(home/'.config'),XDG_DATA_HOME=str(home/'.local/share'))
         process=subprocess.Popen([str(package/'bin/codex'),'app-server'],cwd=home,env=env,
-            stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,start_new_session=True)
+            stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,start_new_session=True,umask=0o077)
         self.owned_groups.append(process.pid)
         selector=selectors.DefaultSelector();selector.register(process.stdout,selectors.EVENT_READ)
         pending=b''
@@ -346,7 +346,7 @@ class UpgradeQualification:
             local_deadline=time.monotonic()+timeout
             with tempfile.TemporaryFile() as output,tempfile.TemporaryFile() as errors:
                 process=subprocess.Popen(probe['argv'],cwd=package,env=env,stdin=subprocess.DEVNULL,
-                    stdout=output,stderr=errors,start_new_session=True)
+                    stdout=output,stderr=errors,start_new_session=True,umask=0o077)
                 self.owned_groups.append(process.pid)
                 try:
                     while process.poll() is None:
