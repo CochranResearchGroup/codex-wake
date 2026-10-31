@@ -93,3 +93,41 @@ selection with old-process pinning; registered notice delivery; explicit rollbac
 disable and final owned-process/resource census. Until these exist, #453 stays
 open. Managed running-daemon cutover and production profile activation remain
 separately held by #413 and #380.
+
+## Same-job execution checkpoint
+
+The three real coding contexts completed, and all 69 intended patch paths remain
+represented in the candidate. These are worker dispositions, pending independent
+review and actual compilation. Regeneration after workers 1 and 2 failed because
+the private host adapter imported the upstream package helper without
+`CODEX_REPO_ROOT`. Both failures remain in `repair/8-regenerate.stderr` and
+`repair/12-regenerate.stderr` under the job directory. No input was edited,
+no fourth worker was started, and no deadline or counter was renewed.
+
+Worker 3 added a checked standalone helper root fallback, preserving explicit
+root overrides, with focused root/V8/Cargo helper tests. Its broader Python
+packaging checks reported four missing-`zstd` environment errors; those are not
+passing tests. Host regeneration command 16 has now passed the root import and
+is completing the public dependency checkout. Rust compilation, independent
+review, complete package and installed acceptance remain pending.
+
+Native aggregate usage reported by completed coding contexts (allocation and
+underlying provider request count are unknown):
+
+| Context | Input tokens | Cached input | Output tokens |
+| --- | ---: | ---: | ---: |
+| Worker 1 | 1,966,820 | 1,837,568 | 10,929 |
+| Worker 2 | 1,217,092 | 1,126,656 | 7,959 |
+| Worker 3 | 670,308 | 613,760 | 5,559 |
+
+`restart-dedup-readback.json` records a fresh installed CLI process re-admitting
+this release: the same job, key, creation time, deadline and three charged
+attempts were returned, without replaying work. This proves admission continuity
+across processes, not crash recovery of an interrupted stage.
+
+A separate read-only observer records phase changes, owned job processes,
+temporary file bytes and shared-kernel resources in `monitor-1.jsonl`. It exits
+when the job becomes terminal. Its launch and terminal receipts are separate
+from job acceptance. At the latest checkpoint, temporary job data was
+221,594,783 bytes, with public dependency cache accounted separately; the live
+V8 Git pack's fresh modification time demonstrated checkout progress.
