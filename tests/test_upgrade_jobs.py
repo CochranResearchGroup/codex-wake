@@ -229,6 +229,25 @@ class UpgradeJobsTests(unittest.TestCase):
                 expired=call('advance',job_id=job['id'])['job']
                 self.assertEqual(expired['reason'],'deadline_exhausted')
 
+    def test_lost_boot_or_monotonic_continuity_still_holds_without_work(self):
+        for invalid in ({'boot_id':'other','seconds':11.0},{'seconds':11.0},
+                        {'boot_id':'boot-one','seconds':9.0},{'boot_id':'boot-one','seconds':float('nan')}):
+            with self.subTest(clock=invalid),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);sample=[dict(boot_id='boot-one',seconds=10.0)];calls=[]
+                target={'host':'fixture'}
+                actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
+                (root/'recipe.json').write_text(json.dumps(dict(id='candidate',upstream_version='0.166')))
+                (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={'release':str(root/'recipe.json')},limits={'total_seconds':10})))
+                owner=UpgradeJobs(root,now=lambda:100.0,clock=lambda:sample[0],executor=lambda job:calls.append(job['id']))
+                def call(verb,**extra):return owner.execute(actor,'upgrades.'+verb,dict(expected_target=target,**extra))['result']
+                call('enable');job=call('start',recipe='release')['job'];sample[0]=invalid
+                held=call('advance',job_id=job['id'])['job']
+                self.assertEqual(held['reason'],'clock_uncertain')
+                self.assertEqual(held['deadline'],110.0)
+                self.assertEqual(held['clock_anchor']['monotonic_deadline'],20.0)
+                self.assertEqual(held['repair_attempts'],0)
+                self.assertEqual(calls,[])
+
     def test_local_operator_can_disable_without_a_service_grant_ritual(self):
         import contextlib
         import io
