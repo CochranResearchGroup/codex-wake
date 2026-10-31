@@ -1,6 +1,6 @@
 # Whole-worktree reconciliation and primary main anchor
 
-State: OPEN
+State: CLOSED
 Owner: primary for ecochran76. Spec: GitHub420. Child graph421–429.
 
 ## Authority and frozen packet
@@ -17,7 +17,7 @@ Read-only process/descriptor and service-reference census provides conservative 
 
 Private raw evidence: user-state reconcile420/inventory.json, custody/, custody-verification.json, working-before.json; tracker publication/edge receipts: tickets420/published-graph.json. Do not place private raw content in Git. Public/repo evidence contains curated source/custody metadata only.
 
-All eight prerequisite tickets are closed after provider-verified canonical integration. Final combined-source Python validation is running. Historical physical cleanup is intentionally conservative:30 missing Wake and2 missing native registrations retired, net physical removals zero. Five initial Wake removals had incomplete cross-UID census and were corrected by exact restoration; both receipts remain. Global process visibility remains incomplete; retained paths have owners, reasons and future census actions. No claim of physical inactivity is inferred.
+All eight prerequisite tickets are closed after provider-verified canonical integration. Fresh combined-source Python3.12 validation passed1914 tests/1skip; bounded post-review launcher checks passed3 tests on each Python3.11/3.12. Historical physical cleanup is intentionally conservative:30 missing Wake and2 missing native registrations retired, net physical removals zero. Five initial Wake removals had incomplete cross-UID census and were corrected by exact restoration; both receipts remain. Global process visibility remains incomplete; retained paths have owners, reasons and future census actions. No claim of physical inactivity is inferred.
 
 ## Ticket ledger
 
@@ -31,7 +31,7 @@ All eight prerequisite tickets are closed after provider-verified canonical inte
 |426 exact resume|421|validated, closed|publish426|PR434 merged7db24c3; isolated exact-resume red/green and47 tests per Python pass|
 |427 historical Wake|421|validated, closed|ticket427|PR435 mergedb90fc12;30 absent registrations retired;83 physical baseline paths retained|
 |428 private native|421|validated, closed|primary publication|PR433 merged27f89b0;16 heads preserved,2 absent registrations pruned,14 physical retained|
-|429 final anchor|422–428|running|ticket429/primary acceptance|Preparation readbacks; coordinator evidence publication precedes final primary ref movement|
+|429 final anchor|422–428|validated, closed|ticket429/primary acceptance|Primary clean main5e2315f equals fresh origin/main;129 custody refs and protected state/package readbacks pass|
 
 Three substantive implementation lanes maximum; overlapping canonical catalog/plan writes and PR merges are coordinator-owned and serialized. Shared Cargo cache and dummy runtime ownership serialized. Workers do not edit original dirty inputs, mutate working runtime or close tickets from implementation claims. Coordinator validates integrated results and provider effects before tracker closure. All newly created worktrees join final inventory.
 
@@ -43,4 +43,4 @@ Done means each accepted source obligation has canonical integration/equivalence
 
 ## Review/remediation limits
 
-Review completed:0/1. Remediation completed:0/1. Freeze exact complete diff/commit list/spec and standards packet only after all tickets close. Adjudicate both axes independently; preserve accepted blockers and first red/green receipts. No repeat broad-review loop.
+Review completed:1/1. Remediation completed:1/1. Frozen comparison5fcf2d6...5e2315f produced one accepted P2 per axis. Public launcher timeout red/green and canonical catalog corrections resolve both in one bounded pass; see [review evidence](../evidence/reconcile420/review.md). No repeat broad review. Primary must fast-forward to the final merged evidence/fix commit and refresh exact ref/status/protected readbacks before reporting completion. All90 Wake and14 native physical paths remain intentionally retained;32 missing registrations retired; no native publication or working activation.
