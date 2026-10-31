@@ -54,7 +54,56 @@ class UpgradeJobs:
         if set(limits) != set(DEFAULT_LIMITS) or any(type(v) is not int or v <= 0 for v in limits.values()):
             raise InventoryError('invalid_configuration', 'positive integer upgrade limits required')
         value['limits'] = limits
+        value['recipes'] = dict(value.get('recipes', {}))
+        catalog_path = self.store / 'generated-recipes.json'
+        discovery = value.get('discovery', {})
+        if discovery.get('recipe_template') and catalog_path.exists():
+            template_sha = hashlib.sha256(Path(discovery['recipe_template']).read_bytes()).hexdigest()
+            if template_sha != discovery.get('recipe_template_sha256'):
+                raise InventoryError('stale_template', 'host recipe template pin changed')
+            catalog = json.loads(catalog_path.read_text())
+            if catalog.get('schema_version') != 1:
+                raise InventoryError('unsupported_schema', 'generated recipe catalog schema unsupported')
+            for name, row in catalog.get('recipes', {}).items():
+                if row.get('template_sha256') != template_sha:
+                    continue
+                path = Path(row['path'])
+                if hashlib.sha256(path.read_bytes()).hexdigest() != row['sha256']:
+                    raise InventoryError('stale_recipe', 'generated recipe pin changed')
+                value['recipes'][name] = str(path)
         return value
+
+    def register_generated_recipe(self, name, path, expected_sha256):
+        # Host-internal only: discovery can fill release/source identity, never
+        # invent executable recipe instructions downloaded from the network.
+        from codex_profiles.upgrades import official_source_url
+        with self.locked():
+            config = self.config()
+            declaration = config.get('discovery', {})
+            template_path = Path(declaration['recipe_template'])
+            template = json.loads(template_path.read_text())
+            template_sha = hashlib.sha256(template_path.read_bytes()).hexdigest()
+            if template_sha != declaration.get('recipe_template_sha256'):
+                raise InventoryError('stale_template', 'host recipe template pin required')
+            path = Path(path).resolve(strict=True)
+            if hashlib.sha256(path.read_bytes()).hexdigest() != expected_sha256:
+                raise InventoryError('stale_recipe', 'generated recipe pin mismatch')
+            recipe = json.loads(path.read_text())
+            mutable = {'id','upstream_version','revision','source'}
+            if {k:v for k,v in template.items() if k not in mutable} != {k:v for k,v in recipe.items() if k not in mutable}:
+                raise InventoryError('unauthorized_target', 'generated recipe changed host execution policy')
+            source = recipe.get('source', {})
+            if not official_source_url(source.get('official_url')) or not isinstance(source.get('sha256'), str) or len(source['sha256']) != 64:
+                raise InventoryError('invalid_source', 'pinned official source archive required')
+            catalog_path = self.store / 'generated-recipes.json'
+            catalog = json.loads(catalog_path.read_text()) if catalog_path.exists() else dict(schema_version=1,recipes={})
+            previous = catalog['recipes'].get(name)
+            row = dict(path=str(path), sha256=expected_sha256, template_sha256=template_sha, upstream_version=recipe.get('upstream_version'))
+            if previous and previous != row:
+                raise InventoryError('stale_recipe', 'generated recipe name already bound to other bytes')
+            catalog['recipes'][name] = row
+            _atomic(catalog_path, catalog)
+            return row
 
     @contextmanager
     def locked(self):
@@ -90,8 +139,12 @@ class UpgradeJobs:
     def execute(self, actor, operation, arguments, *, authorize=None):
         verb = operation.removeprefix('upgrades.')
         allowed = dict(status=set(), list=set(), show={'job_id'}, enable=set(), disable=set(),
-                       start={'recipe'}, advance={'job_id'}, cancel={'job_id'})
-        if not operation.startswith('upgrades.') or verb not in allowed or not isinstance(arguments, dict) or set(arguments) != allowed[verb] | {'expected_target'}:
+                       start={'recipe', 'expected_recipe_sha256', 'upstream_version'}, advance={'job_id'}, cancel={'job_id'})
+        if not operation.startswith('upgrades.') or verb not in allowed or not isinstance(arguments, dict):
+            raise InventoryError('invalid_argument', 'exact upgrade job arguments required')
+        optional = {'expected_recipe_sha256', 'upstream_version'} if verb == 'start' else set()
+        required = (allowed[verb] - optional) | {'expected_target'}
+        if set(arguments) - (allowed[verb] | {'expected_target'}) or required - set(arguments):
             raise InventoryError('invalid_argument', 'exact upgrade job arguments required')
         config = self.config()
         self.guard(actor, config['target'], arguments, authorize, write=verb not in READS)
@@ -131,6 +184,8 @@ class UpgradeJobs:
                         raise InventoryError('unauthorized_target', 'host-approved upgrade recipe required')
                     recipe_path = Path(config['recipes'][name]).resolve(strict=True)
                     recipe = json.loads(recipe_path.read_text())
+                    if arguments.get('expected_recipe_sha256', hashlib.sha256(recipe_path.read_bytes()).hexdigest()) != hashlib.sha256(recipe_path.read_bytes()).hexdigest() or arguments.get('upstream_version', recipe.get('upstream_version')) != recipe.get('upstream_version'):
+                        raise InventoryError('stale_recipe', 'resolved release recipe changed before job admission')
                     key = digest(dict(recipe=recipe, target=config['target']))
                     existing = next((j for j in state['jobs'].values() if j['key'] == key), None)
                     if existing:
@@ -235,16 +290,21 @@ class UpgradeJobs:
 
     def run_stage(self, job):
         directory = self.store / job['id'];directory.mkdir(mode=0o700, exist_ok=True)
+        recipe_bytes = Path(job['recipe_path']).read_bytes()
+        if hashlib.sha256(recipe_bytes).hexdigest() != job['recipe_sha256']:
+            raise InventoryError('stale_recipe', 'pinned upgrade recipe changed')
+        frozen_recipe = directory / 'recipe.json'
+        _atomic(frozen_recipe, json.loads(recipe_bytes))
         # Child inherits no Codex credentials; build recipes are host-owned.
         with tempfile.TemporaryDirectory(prefix='worker-home-', dir=directory) as home:
             env = {k:v for k,v in os.environ.items() if k in ('PATH','LANG','LC_ALL','PYTHONPATH')}
-            env.update(CODEX_UPGRADE_OWNED_GROUP='1', HOME=home, CODEX_HOME=home+'/.codex', XDG_CONFIG_HOME=home+'/.config',
+            env.update(CODEX_UPGRADE_TEMP_ROOT=str(directory), CODEX_UPGRADE_OWNED_GROUP='1', HOME=home, CODEX_HOME=home+'/.codex', XDG_CONFIG_HOME=home+'/.config',
                 XDG_DATA_HOME=home+'/.local/share', CARGO_BUILD_JOBS=str(job['limits']['compiler_jobs']))
             Path(env['CODEX_HOME']).mkdir(mode=0o700)
             output = directory / 'stage-result.json'
             with (directory / 'worker.log').open('ab') as log:
                 process = subprocess.Popen([sys.executable, '-m', 'codex_wake.upgrade_stage_worker',
-                    str(directory / 'build-store'), job['recipe_path'], str(output)],
+                    str(directory / 'build-store'), str(frozen_recipe), str(output)],
                     env=env, stdout=log, stderr=log, start_new_session=True)
                 identity = process_identity(process.pid)
                 with self.locked():
