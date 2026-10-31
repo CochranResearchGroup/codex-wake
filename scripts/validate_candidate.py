@@ -95,7 +95,7 @@ def run(args):
     if receipt_path.is_relative_to(repo):
         raise ValueError("receipt must be outside candidate")
     # Exclusive creation prevents a rerun from erasing the original failure.
-    with receipt_path.open("x") as output:
+    with os.fdopen(os.open(receipt_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w") as output:
         receipt = dict(
             schema=1, status="FAIL", checks=[], actions=[], started_at=time.time()
         )
@@ -112,6 +112,8 @@ def run(args):
             manifest_bytes = args.manifest.read_bytes()
             manifest = json.loads(manifest_bytes)
             receipt["manifest_sha256"] = digest(manifest_bytes)
+            if "profile" in manifest:
+                receipt["profile"] = manifest["profile"]
             checks = manifest["checks"]
             actions = manifest.get("on_success", [])
             runtime_files = manifest.get("runtime_files", [])

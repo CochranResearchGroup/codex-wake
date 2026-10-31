@@ -73,3 +73,71 @@ intentionally commit the qualified candidate; receipts refer to the source ident
 before that action. A source-changing action cannot precede another success action
 without invalidating validation. Interrupted runs retain `FAIL` with the interrupted
 step `RUNNING`; they cannot become passing by rerun overwrite.
+
+## Repository local profile (#441 / specification #439)
+
+Use one entrypoint with an explicitly selected Python 3.11 or 3.12 environment:
+
+```sh
+/absolute/validation-prefix/bin/python scripts/local_validation.py \
+  --repo "$PWD" --runtime /absolute/validation-prefix/bin/python \
+  --tier presubmit --receipt /private/evidence/new-presubmit.json
+```
+
+Provision a separate disposable validation environment beforehand with `.[dev,mcp]`,
+`build>=1,<2`, `setuptools>=68` and `wheel>=0.41`. Do not add tooling to the working installation.
+The command installs nothing and downloads no dependencies. Setup preflight reads
+`pyproject.toml`, checks declared dependency constraints (including `ruff==0.14.2`),
+and reports missing or incompatible tools separately as the first named check.
+Its stdout records the selected executable, prefix, Python and dependency versions.
+A missing `packaging` dependency explicitly blocks constraint verification.
+
+`scripts/local_validation_profile.json` owns these serial, bounded tiers:
+
+| Tier | Selection | Budget |
+| --- | --- | --- |
+| `focused` | Setup, pinned lint, policy wiring, active planning audit, runner and local profile public regressions | 300 seconds per check; 30 minutes total maximum |
+| `presubmit` (default) | Focused checks plus compilation and package build | 300 seconds per check; 40 minutes total maximum |
+| `comprehensive` | Setup, lint, policy, planning, compilation, full Python unittest discovery and package build | 300 seconds per check; 35 minutes total maximum |
+
+All tiers use one serial process slot; checks may launch their normal subprocesses.
+`--timeout SECONDS` changes the per-check bound and therefore the total bound.
+Use `comprehensive` for unknown Python impact and periodic comprehensive regression;
+focused/presubmit selection proves this developer-tool surface, not the full suite.
+The existing audit invocation is
+`.codex/skills/repo-policy-selector/scripts/audit_planning_contract.py --repo-root . --active-only --json`.
+It retains the explicit historical exceptions in
+`docs/dev/planning-audit-baseline.json`; this profile does not normalize old plans.
+
+The launcher creates fresh private HOME, XDG config/state/cache/data/runtime,
+CODEX_HOME and temporary directories outside the candidate. It clears inherited
+account/provider configuration and passes only PATH, locale and platform essentials,
+plus explicit source import and isolated bytecode paths. Compilation writes caches
+outside the candidate. Packaging snapshots Git candidate files outside the checkout
+and runs the existing `python -m build --no-isolation` there. Build artifacts and
+isolated state are temporary; the durable evidence is the private receipt. This is
+local process isolation, not an OS security sandbox. Do not select live tests or
+supply secrets to validation commands.
+
+The launcher generates an explicit argv manifest and delegates all check execution,
+failure/timeout handling and source/runtime/manifest drift detection to #356's
+`scripts/validate_candidate.py`. The default profiles contain no success actions.
+A custom `--profile PATH` selects the same tier keys for bounded local fixture or
+changed-surface checks; it has the same authority limits. It cannot add success
+actions through this launcher.
+
+Receipts remain schema 1, exclusively created with mode `0600`. Their existing
+`source`, `runtime`, `environment`, `manifest_sha256`, `checks`, `actions`, `failure`
+and status fields retain their meanings. An additive `profile` field records the
+profile locator, tier and material hosted-environment differences; the profile file
+is also bound through `runtime.files`. Check argv arrays preserve the complete
+selection, and setup stdout preserves versions. Required failures stop later checks;
+corrected runs need a new receipt. No environment values are dumped, but check
+stdout/stderr can contain sensitive output, so keep all receipts private.
+
+Passing documented local checks satisfies the CI cost policy. Material differences
+from hosted Actions are explicit: local OS and selected runtime, no hosted execution,
+no dependency downloads during validation, no OpenClaw/plugin checks, no installed
+wheel or legacy-package smoke, and no provider/native/live acceptance. Those excluded
+surfaces require separate applicable authority and evidence; a tier PASS does not
+certify them. The command performs no commit, push, merge, installation or publication.
