@@ -207,23 +207,26 @@ class UpgradeJobsTests(unittest.TestCase):
             with self.assertRaises(InventoryError):
                 UpgradeJobs(root).execute(actor,'upgrades.enable',dict(expected_target=target))
 
-    def test_small_wall_adjustment_cannot_extend_the_monotonic_job_deadline(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory);wall=[100.0];mono=[10.0]
-            target={'host':'fixture'}
-            actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
-            (root/'recipe.json').write_text(json.dumps(dict(id='candidate',upstream_version='0.166')))
-            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={'release':str(root/'recipe.json')},limits={'total_seconds':10})))
-            owner=UpgradeJobs(root,now=lambda:wall[0],clock=lambda:dict(boot_id='boot-one',seconds=mono[0]),executor=lambda _:dict(status='staged'))
-            def call(verb,**extra):return owner.execute(actor,'upgrades.'+verb,dict(expected_target=target,**extra))['result']
-            call('enable');job=call('start',recipe='release')['job']
-            wall[0]=99.8;mono[0]=10.3
-            first=call('advance',job_id=job['id'])['job']
-            self.assertEqual(first['state'],'qualifying',first)
-            self.assertGreater(first['clock_anchor']['wall_adjustment_count'],0)
-            wall[0]=100;mono[0]=20.1
-            expired=call('advance',job_id=job['id'])['job']
-            self.assertEqual(expired['reason'],'deadline_exhausted')
+    def test_wall_adjustments_cannot_extend_the_monotonic_job_deadline(self):
+        for adjusted in (99.8,95.0):
+            with self.subTest(wall=adjusted),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);wall=[100.0];mono=[10.0]
+                target={'host':'fixture'}
+                actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
+                (root/'recipe.json').write_text(json.dumps(dict(id='candidate',upstream_version='0.166')))
+                (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={'release':str(root/'recipe.json')},limits={'total_seconds':10})))
+                owner=UpgradeJobs(root,now=lambda:wall[0],clock=lambda:dict(boot_id='boot-one',seconds=mono[0]),executor=lambda _:dict(status='staged'))
+                def call(verb,**extra):return owner.execute(actor,'upgrades.'+verb,dict(expected_target=target,**extra))['result']
+                call('enable');job=call('start',recipe='release')['job']
+                wall[0]=adjusted;mono[0]=10.3
+                first=call('advance',job_id=job['id'])['job']
+                self.assertEqual(first['state'],'qualifying',first)
+                self.assertGreater(first['clock_anchor']['wall_adjustment_count'],0)
+                self.assertEqual(first['deadline'],job['deadline'])
+                self.assertEqual(first['clock_anchor']['monotonic_deadline'],20.0)
+                mono[0]=20.1
+                expired=call('advance',job_id=job['id'])['job']
+                self.assertEqual(expired['reason'],'deadline_exhausted')
 
     def test_local_operator_can_disable_without_a_service_grant_ritual(self):
         import contextlib

@@ -338,8 +338,6 @@ class UpgradeJobs:
         high=anchor['wall_high_water']
         delta=now-high
         anchor.update(monotonic_latest=seconds,wall_observed=now)
-        if delta <= -1:
-            return 'clock_uncertain'
         if delta<0:
             anchor['wall_adjustment_count']+=1
             anchor['last_negative_delta']=delta
