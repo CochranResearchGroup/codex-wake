@@ -303,3 +303,17 @@ pathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(dict(sc
             self.assertEqual(after['clock_anchor']['monotonic_deadline'],before['clock_anchor']['monotonic_deadline'])
             self.assertEqual([c for c in after['commands'] if c['role']=='worker'],[c for c in before['commands'] if c['role']=='worker'])
             self.assertEqual((Path(json.loads(Path(reviewed['prepared_recipe']).read_text())['source']['tree'])/'Cargo.lock').read_text(),'generated lockfile')
+
+    def test_uncertain_reviewer_cannot_be_readmitted_as_dead_regeneration(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source,config,recipe,job=self.fixture(root)
+            marker=root/'reviewer-started'
+            reviewer=Path(config['reviewer']['argv'][1])
+            reviewer.write_text("import pathlib,time;pathlib.Path("+repr(str(marker))+").write_text('ready');time.sleep(120)\n")
+            def guard():
+                if marker.exists():raise FileNotFoundError('simulated interrupted observer')
+            held=UpgradeRepair(source,root/'evidence',config,guard=guard).run(job,recipe)
+            self.assertEqual(held['status'],'held')
+            owner=UpgradeRepair(source,root/'evidence',config)
+            with self.assertRaisesRegex(ValueError,'only_interrupted_regeneration_can_reconcile'):
+                owner.reconcile(job,recipe)
