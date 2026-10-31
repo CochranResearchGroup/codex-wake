@@ -170,8 +170,12 @@ def observe(repo, target, custody, references):
     }
 
 
+def private_new(path):
+    return os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w")
+
+
 def write_new(path, payload):
-    with path.open("x") as stream:
+    with private_new(path) as stream:
         json.dump(payload, stream, indent=2)
         stream.write("\n")
 
@@ -210,7 +214,7 @@ def apply_plan(args):
             dict(entry, disposition="unknown", reasons=["operation_pending_readback"])
         ]
         # Reserve a new durable receipt before any effect; never erase a prior run.
-        with output.open("x") as stream:
+        with private_new(output) as stream:
 
             def save():
                 stream.seek(0)
