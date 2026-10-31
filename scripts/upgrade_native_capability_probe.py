@@ -118,7 +118,31 @@ trust_level="trusted"
         if not (last.get('inputTokens')==11 and last.get('cachedInputTokens')==2 and last.get('outputTokens')==4):raise AssertionError('native usage differs from independently scripted11/2/4 counts')
         recorded=next(item for item in actual['turns'] if item['id']==turn)
         if recorded.get('rootTurnId')!=turn:raise AssertionError('native usage turn lost root-turn attribution')
-        report.update(status='passed',checks={'orphan_output':True,'caller_accounting':True},
+        peer=rpc('thread/start',{'cwd':str(root),'ephemeral':False})['thread']['id']
+        event='qualification-notice-'+uuid4().hex
+        text='Owned durable no-model notice for qualification. [External supervision event '+event+']'
+        appended=rpc('thread/notice/append',{'threadId':thread,'eventId':event,'text':text})
+        duplicate=rpc('thread/notice/append',{'threadId':thread,'eventId':event,'text':text})
+        if appended.get('recorded') is not True or duplicate.get('recorded') is not True or appended.get('alreadyRecorded') is not False or duplicate.get('alreadyRecorded') is not True:
+            raise AssertionError('notice append was not idempotent')
+        if rpc('thread/notice/read',{'threadId':peer,'eventId':event}).get('notice') is not None:
+            raise AssertionError('notice leaked to peer thread')
+        selector.unregister(process.stdout)
+        os.killpg(process.pid,signal.SIGTERM);process.wait(timeout=2)
+        try:os.killpg(process.pid,signal.SIGKILL)
+        except ProcessLookupError:pass
+        process.stdin.close();process.stdout.close()
+        process=subprocess.Popen([str(binary),'app-server'],cwd=root,env=env,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=log,start_new_session=True)
+        selector.register(process.stdout,selectors.EVENT_READ);pending=b''
+        rpc('initialize',{'clientInfo':{'name':'upgrade_native_qualification_cold','version':'1'},'capabilities':{'experimentalApi':True}})
+        process.stdin.write(b'{"method":"initialized"}\n');process.stdin.flush()
+        cold=rpc('thread/resume',{'threadId':thread})['thread']
+        notice=rpc('thread/notice/read',{'threadId':thread,'eventId':event})
+        if cold['id']!=thread or notice.get('notice')!={'eventId':event,'text':text} or notice.get('modelContextAvailable') is not True:
+            raise AssertionError('durable notice missing after cold native restart')
+        if len(requests)!=1:raise AssertionError('notice or cold restart started an additional scripted model turn')
+        report.update(status='passed',checks={'orphan_output':True,'caller_accounting':True,'durable_notices':True},
+            notice_scope='idempotent append, peer isolation and model-readable context after cold native restart',
             accounting_scope='native thread usage11input/2cached/4output and stable rootTurnId; MCP caller identity requires scoped reload probe',
             thread_id=thread,turn_id=turn,usage=last,scripted_provider_requests=len(requests))
     except Exception as error:report.update(reason=type(error).__name__+': '+str(error),scripted_provider_requests=len(requests))

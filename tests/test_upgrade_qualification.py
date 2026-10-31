@@ -133,3 +133,11 @@ for line in sys.stdin:
             self.assertEqual(explicit['status'],'fixture_verified',explicit)
             self.assertEqual(explicit['scripted_provider_requests'],1)
             self.assertEqual(explicit['external_provider_requests'],0)
+
+    def test_account_metadata_must_match_explicit_designated_identity_binding(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,package,job,config=self.fixture(directory)
+            config['accounts'][0]['identity_sha256']='0'*64
+            receipt=UpgradeQualification(root).run(job,config)
+            self.assertEqual(receipt['status'],'authentication_needed',receipt)
+            self.assertFalse(receipt['eligible_for_promotion'])

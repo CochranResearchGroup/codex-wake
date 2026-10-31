@@ -266,6 +266,11 @@ class UpgradeQualification:
         for index in (0,1,0):
             self.check(job,guard)
             result=self.account_read(job,package,homes[index],guard)
+            expected=accounts[index].get('identity_sha256')
+            if config['environment'].get('kind')!='source_fixture' and (not isinstance(expected,str) or len(expected)!=64 or any(ch not in '0123456789abcdef' for ch in expected)):
+                raise QualificationError('designated authenticated account identity binding required')
+            if expected is not None and result!=expected:
+                raise AuthenticationNeeded('designated test account identity differs from approved binding')
             identities.append(result)
         if identities[0]!=identities[2]:raise QualificationError('account identity changed after A-B-A restart/reconnect')
         if identities[0]==identities[1]:raise QualificationError('test account identities are not distinct')
@@ -356,7 +361,7 @@ class UpgradeQualification:
                     if not isinstance(body,dict):raise QualificationError('structured qualification report required')
                     # Do not retain arbitrary probe output: account data or
                     # private diagnostics are not part of the report contract.
-                    body={key:body[key] for key in ('schema_version','status','model_requests','scripted_provider_requests','external_provider_requests','native_sha256','checks','owned_processes_remaining','orphan_output_scope','accounting_scope') if key in body}
+                    body={key:body[key] for key in ('schema_version','status','model_requests','scripted_provider_requests','external_provider_requests','native_sha256','checks','owned_processes_remaining','orphan_output_scope','accounting_scope','notice_scope') if key in body}
                     return dict(id=probe.get('id'),argv_sha256=object_hash(probe['argv']),exit_code=process.returncode,
                         report=body,report_sha256=hashlib.sha256(raw).hexdigest())
                 finally:self.stop(process)
