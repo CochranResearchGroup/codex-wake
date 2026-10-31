@@ -118,3 +118,18 @@ for line in sys.stdin:
             rejected=UpgradeQualification(root).run(job,config)
             self.assertEqual(rejected['status'],'held',rejected)
             self.assertIn('official upstream',rejected['reason'])
+
+    def test_scripted_fixture_requests_need_explicit_zero_external_inference(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,package,job,config=self.fixture(directory)
+            probe=root/'probe.py'
+            probe.write_text(probe.read_text().replace("'model_requests':0","'model_requests':0,'scripted_provider_requests':1"))
+            config['test_files'][str(probe)]=hashlib.sha256(probe.read_bytes()).hexdigest()
+            missing=UpgradeQualification(root).run(job,config)
+            self.assertEqual(missing['status'],'held',missing)
+            probe.write_text(probe.read_text().replace("'scripted_provider_requests':1","'scripted_provider_requests':1,'external_provider_requests':0"))
+            config['test_files'][str(probe)]=hashlib.sha256(probe.read_bytes()).hexdigest()
+            explicit=UpgradeQualification(root).run(job,config)
+            self.assertEqual(explicit['status'],'fixture_verified',explicit)
+            self.assertEqual(explicit['scripted_provider_requests'],1)
+            self.assertEqual(explicit['external_provider_requests'],0)
