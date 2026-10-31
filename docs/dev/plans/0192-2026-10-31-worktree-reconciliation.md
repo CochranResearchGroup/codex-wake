@@ -1,6 +1,7 @@
 # Whole-worktree reconciliation and primary main anchor
 
-State: OPEN. Owner: primary for ecochran76. Spec: GitHub420. Child graph421–429.
+State: OPEN
+Owner: primary for ecochran76. Spec: GitHub420. Child graph421–429.
 
 ## Authority and frozen packet
 
