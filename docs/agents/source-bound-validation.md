@@ -96,12 +96,15 @@ A missing `packaging` dependency explicitly blocks constraint verification.
 
 | Tier | Selection | Budget |
 | --- | --- | --- |
-| `focused` | Setup, pinned lint, policy wiring, active planning audit, runner and local profile public regressions | 300 seconds per check; 30 minutes total maximum |
-| `presubmit` (default) | Focused checks plus compilation and package build | 300 seconds per check; 40 minutes total maximum |
-| `comprehensive` | Setup, lint, policy, planning, compilation, full Python unittest discovery and package build | 300 seconds per check; 35 minutes total maximum |
+| `focused` | Setup, pinned lint, policy wiring, active planning audit, runner and local profile public regressions | 600 seconds per check; 60 minutes total maximum |
+| `presubmit` (default) | Focused checks plus compilation and package build | 600 seconds per check; 80 minutes total maximum |
+| `comprehensive` | Setup, lint, policy, planning, compilation, full Python unittest discovery and package build | 600 seconds per check; 70 minutes total maximum |
 
 All tiers use one serial process slot; checks may launch their normal subprocesses.
+The local launcher defaults to 600 seconds per check: the full Python suite has
+measured 350.623 seconds, exceeding the underlying runner's 300-second default.
 `--timeout SECONDS` changes the per-check bound and therefore the total bound.
+Receipts record the selected bound as `timeout_seconds`.
 Use `comprehensive` for unknown Python impact and periodic comprehensive regression;
 focused/presubmit selection proves this developer-tool surface, not the full suite.
 The existing audit invocation is
