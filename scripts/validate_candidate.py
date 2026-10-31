@@ -97,7 +97,8 @@ def run(args):
     # Exclusive creation prevents a rerun from erasing the original failure.
     with os.fdopen(os.open(receipt_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w") as output:
         receipt = dict(
-            schema=1, status="FAIL", checks=[], actions=[], started_at=time.time()
+            schema=1, status="FAIL", checks=[], actions=[], started_at=time.time(),
+            timeout_seconds=args.timeout
         )
 
         def save():

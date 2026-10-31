@@ -40,6 +40,7 @@ class LocalValidationTests(unittest.TestCase):
             self.assertEqual(data['checks'][1]['returncode'], 23)
             self.assertEqual(data['actions'], [])
             self.assertEqual(data['profile']['tier'], 'focused')
+            self.assertEqual(data['timeout_seconds'], 600)
             self.assertEqual(receipt.stat().st_mode & 0o777, 0o600)
             original = receipt.read_bytes()
             subprocess.run(command, capture_output=True)
@@ -114,4 +115,5 @@ class LocalValidationTests(unittest.TestCase):
             data = json.loads(receipt.read_text())
             self.assertEqual([x['status'] for x in data['checks']], ['FAIL', 'BLOCKED'])
             self.assertIn('timed out', data['checks'][0]['error'])
+            self.assertEqual(data['timeout_seconds'], 0.05)
             self.assertEqual(data['checks'][0]['name'], 'bounded check')

@@ -17,7 +17,7 @@ def main():
     parser.add_argument('--receipt', type=Path, required=True)
     parser.add_argument('--profile', type=Path, default=Path(__file__).with_name('local_validation_profile.json'))
     parser.add_argument('--tier', choices=['focused', 'presubmit', 'comprehensive'], default='presubmit')
-    parser.add_argument('--timeout', type=float, default=300)
+    parser.add_argument('--timeout', type=float, default=600)
     args = parser.parse_args()
     repo, receipt = args.repo.resolve(), args.receipt.resolve()
     if receipt.is_relative_to(repo) or receipt.exists():
