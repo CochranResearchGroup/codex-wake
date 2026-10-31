@@ -42,11 +42,12 @@ def process_identity(pid):
 
 
 class UpgradeJobs:
-    def __init__(self, root, *, now=None, executor=None):
+    def __init__(self, root, *, now=None, executor=None, clock=None):
         self.root = Path(root)
         self.store = self.root / 'upgrade-jobs'
         self.now = now or time.time
         self.executor = executor
+        self.clock=clock or (lambda:dict(boot_id=Path('/proc/sys/kernel/random/boot_id').read_text().strip(),seconds=time.monotonic()))
 
     def config(self):
         path=self.root/'upgrade-bot.json'
@@ -160,7 +161,8 @@ class UpgradeJobs:
         config = self.config()
         self.guard(actor, config['target'], arguments, authorize, write=verb not in READS)
         if verb == 'advance':
-            result = self.advance(actor, arguments, authorize)
+            with self.runner_lease(arguments['job_id']):
+                result = self.advance(actor, arguments, authorize)
         else:
             with self.locked():
                 state = self.load()
@@ -211,6 +213,10 @@ class UpgradeJobs:
                             created_at=self.now(), deadline=self.now()+config['limits']['total_seconds'],
                             last_seen=self.now(), repair_attempts=0, limits=config['limits'], generation=state['generation'],
                             stage_id=recipe.get('id'), worker=None, results={})
+                        host_clock=self.clock()
+                        job['clock_anchor']=dict(boot_id=host_clock['boot_id'],monotonic_start=host_clock['seconds'],
+                            monotonic_latest=host_clock['seconds'],monotonic_deadline=host_clock['seconds']+config['limits']['total_seconds'],
+                            wall_high_water=job['last_seen'],wall_observed=job['last_seen'],wall_adjustment_count=0)
                         state['jobs'][job['id']] = job
                         self.event(state, 'queued', job)
                         result = dict(job=job)
@@ -220,6 +226,19 @@ class UpgradeJobs:
         if verb not in READS:
             self.notify(actor, authorize)
         return dict(schema_version=1, operation=operation, status='completed', result=result)
+
+    @contextmanager
+    def runner_lease(self, identifier):
+        with self.locked():
+            self.job(self.load(),identifier)
+        name=hashlib.sha256(identifier.encode()).hexdigest()
+        fd=os.open(self.store/('.runner-'+name),os.O_CREAT|os.O_RDWR|getattr(os,'O_NOFOLLOW',0),0o600)
+        try:
+            try:fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            except BlockingIOError as error:
+                raise InventoryError('upgrade_busy','the original upgrade advance remains active') from error
+            yield
+        finally:os.close(fd)
 
     def reclaim_terminal_cache(self, identifier):
         with self.locked():
@@ -270,10 +289,25 @@ class UpgradeJobs:
 
     def budget_reason(self, job):
         now = self.now()
-        if now < job['last_seen']:
+        host=self.clock();anchor=job.get('clock_anchor')
+        if not anchor or host.get('boot_id')!=anchor.get('boot_id'):
             return 'clock_uncertain'
-        job['last_seen'] = now
-        if now >= job['deadline']:
+        seconds=host.get('seconds')
+        if type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<anchor['monotonic_latest']:
+            return 'clock_uncertain'
+        if type(now) not in (int,float) or not math.isfinite(now):
+            return 'clock_uncertain'
+        high=anchor['wall_high_water']
+        delta=now-high
+        anchor.update(monotonic_latest=seconds,wall_observed=now)
+        if delta <= -1:
+            return 'clock_uncertain'
+        if delta<0:
+            anchor['wall_adjustment_count']+=1
+            anchor['last_negative_delta']=delta
+        anchor['wall_high_water']=max(high,now)
+        job['last_seen']=anchor['wall_high_water']
+        if job['last_seen'] >= job['deadline'] or seconds >= anchor['monotonic_deadline']:
             return 'deadline_exhausted'
         workspace = self.store / job['id']
         size = sum(p.lstat().st_size for p in workspace.rglob('*') if p.is_file() and not p.is_symlink()) if workspace.exists() else 0
@@ -290,6 +324,7 @@ class UpgradeJobs:
                 return dict(job=job)
             reason = self.budget_reason(job)
             if not state['enabled'] or reason:
+                self.stop(job)
                 job.update(state='held', reason=reason or 'upgrade_disabled')
                 self.event(state, 'held', job, reason=job['reason'])
                 self.save(state)
