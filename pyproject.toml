@@ -18,6 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
+codex-wake-upgrade-watch = "codex_wake.upgrade_discovery:main"
 codex-wake = "codex_wake.entrypoint:main"
 codex-profiles = "codex_wake.profile_compat:main"
 codex-profile = "codex_wake.profile_compat:profile_main"

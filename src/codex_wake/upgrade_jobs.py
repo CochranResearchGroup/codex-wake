@@ -245,7 +245,7 @@ class UpgradeJobs:
                 self.event(state, 'held', job, reason=job['reason'])
                 self.save(state)
                 return dict(job=job)
-            if job['state'] == 'building' and not job['worker']:
+            if job.get('active_phase') and not job['worker']:
                 job.update(state='held', reason='worker_intent_pending_reconciliation')
                 self.event(state, 'held', job, reason=job['reason'])
                 self.save(state)
@@ -260,12 +260,53 @@ class UpgradeJobs:
             config = self.config()
             if str(Path(config['recipes'].get(job['recipe'], '')).resolve()) != job['recipe_path'] or hashlib.sha256(Path(job['recipe_path']).read_bytes()).hexdigest() != job['recipe_sha256']:
                 raise InventoryError('stale_recipe', 'pinned upgrade recipe changed')
-            job['state'] = 'building'
+            phase = 'qualify' if job['state'] == 'qualifying' else 'stage'
+            job['active_phase'] = phase
+            job['state'] = 'qualifying' if phase == 'qualify' else 'building'
             self.event(state, 'building', job)
             self.save(state)
             frozen = json.loads(json.dumps(job))
         try:
-            result = self.executor(frozen) if self.executor else self.run_stage(frozen)
+            def guard():
+                with self.locked():
+                    current_state=self.load();current=self.job(current_state,frozen['id'])
+                    self.guard(actor,current['target'],arguments,authorize,write=True)
+                    reason=self.budget_reason(current)
+                    self.save(current_state)
+                    if not current_state['enabled'] or current['state'] in TERMINAL or current_state['generation'] != frozen['generation'] or reason:
+                        raise ValueError(reason or 'upgrade_policy_changed')
+            def checkpoint(delta):
+                guard()
+                with self.locked():
+                    current_state=self.load();current=self.job(current_state,frozen['id'])
+                    value=delta['repair_attempts']
+                    if type(value) is not int or value<current['repair_attempts'] or value>current['limits']['repair_attempts']:
+                        raise ValueError('invalid_repair_budget_checkpoint')
+                    current['repair_attempts']=value
+                    self.save(current_state)
+            if self.executor:
+                result=self.executor(frozen)
+            elif frozen['active_phase']=='qualify':
+                from .upgrade_qualification import UpgradeQualification
+                if not config.get('qualification'):
+                    result=dict(status='held',reason='disposable_qualification_not_configured')
+                else:
+                    result=UpgradeQualification(self.root).run(frozen,config['qualification'],guard=guard)
+            else:
+                from .upgrade_pipeline import prepare_reviewed_recipe
+                repair=prepare_reviewed_recipe(self.root,frozen,config,guard=guard,checkpoint=checkpoint)
+                if repair is not None:
+                    with self.locked():
+                        current_state=self.load();current=self.job(current_state,frozen['id'])
+                        current['results']['repair']=repair
+                        self.save(current_state)
+                    if repair.get('status')!='reviewed':
+                        result=dict(status='held',reason=repair.get('reason','semantic_repair_held'))
+                    else:
+                        frozen['prepared_recipe']=repair['prepared_recipe']
+                        result=self.run_stage(frozen)
+                else:
+                    result=self.run_stage(frozen)
             if not isinstance(result, dict):
                 raise ValueError('upgrade executor returned no structured outcome')
         except Exception as error:
@@ -277,9 +318,12 @@ class UpgradeJobs:
                 return dict(job=job)
             reason = self.budget_reason(job)
             job['worker'] = None
-            job['results']['stage'] = result
+            job['active_phase'] = None
+            job['results']['qualification' if frozen['active_phase']=='qualify' else 'stage'] = result
             if not state['enabled'] or state['generation'] != frozen['generation'] or reason:
                 job.update(state='held', reason=reason or 'policy_changed')
+            elif result.get('status') == 'qualified':
+                job.update(state='promoting', reason='awaiting_qualified_selection')
             elif result.get('status') == 'staged':
                 job.update(state='qualifying', reason='awaiting_disposable_qualification')
             else:
@@ -290,8 +334,8 @@ class UpgradeJobs:
 
     def run_stage(self, job):
         directory = self.store / job['id'];directory.mkdir(mode=0o700, exist_ok=True)
-        recipe_bytes = Path(job['recipe_path']).read_bytes()
-        if hashlib.sha256(recipe_bytes).hexdigest() != job['recipe_sha256']:
+        recipe_bytes = Path(job.get('prepared_recipe',job['recipe_path'])).read_bytes()
+        if not job.get('prepared_recipe') and hashlib.sha256(recipe_bytes).hexdigest() != job['recipe_sha256']:
             raise InventoryError('stale_recipe', 'pinned upgrade recipe changed')
         frozen_recipe = directory / 'recipe.json'
         _atomic(frozen_recipe, json.loads(recipe_bytes))

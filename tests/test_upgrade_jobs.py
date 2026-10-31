@@ -56,9 +56,11 @@ class UpgradeJobsTests(unittest.TestCase):
             recipe.write_text(json.dumps(dict(schema_version=1,id='fixture',channel='stock',upstream_version='0.166.0',revision='fixture',package='package',
                 source=dict(official_url='https://github.com/openai/codex/archive/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.tar.gz',archive_file=str(archive),sha256=hashlib.sha256(archive.read_bytes()).hexdigest()),
                 qualify=[['/bin/echo','{"schema_version":1,"checks":{"official_cli":true}}']],read_schemas=[1],write_schema=1)))
+            reviewer=root/'reviewer.py'
+            reviewer.write_text("import os,json,pathlib\np=json.loads(pathlib.Path(os.environ['CODEX_UPGRADE_PACKET']).read_text())\npathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(dict(schema_version=1,status='approved',reviewer='independent',candidate_digest=p['candidate_digest'],tests_digest=p['tests_digest'],capabilities={'official_cli':'Fixture executable passes pinned version check'},retirements={})))\n")
             target={'host':'fixture','environment':'test','namespace':'upgrade-test'}
             declaration=dict(subject='owner',client_id='client',grant_id='grant',issuer='issuer',resource='resource',scopes=['observe','admin'],targets=[target],expires_at=time.time()+1000)
-            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={'release':str(recipe)})))
+            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={'release':str(recipe)},repair=dict(patches=[],worker=dict(identity='worker',argv=['/bin/false']),reviewer=dict(identity='independent',argv=[__import__('sys').executable,str(reviewer)]),regenerate=[],verify=[['/bin/true']]))))
             (root/'controller-messaging.json').write_text(json.dumps(dict(version=1,local_caller=declaration)))
             (root/'controller-messaging.json').chmod(0o600)
             from codex_wake.operation_commands import local_actor
@@ -70,6 +72,7 @@ class UpgradeJobsTests(unittest.TestCase):
             result=protected.execute('token','upgrades.advance',dict(args,job_id=job['id']))
             self.assertEqual(result['result']['job']['state'],'qualifying',result)
             self.assertEqual(result['result']['job']['results']['stage']['status'],'staged')
+            self.assertEqual(result['result']['job']['results']['repair']['status'],'reviewed')
             output=io.StringIO()
             with contextlib.redirect_stdout(output):
                 code=main(['--wake-root',str(root),'upgrades','show','--arguments',json.dumps(dict(args,job_id=job['id']))])

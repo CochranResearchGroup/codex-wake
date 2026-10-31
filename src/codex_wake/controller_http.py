@@ -122,8 +122,8 @@ class ProtectedOperations:
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
-        **{'upgrades.'+verb: ('observe' if verb in ('status','list','show') else 'admin',None,None)
-            for verb in ('status','list','show','enable','disable','start','advance','cancel')},
+        **{'upgrades.'+verb: ('observe' if verb in ('status','list','show','discovery') else 'admin',None,None)
+            for verb in ('status','list','show','enable','disable','start','advance','cancel','poll','discovery')},
         **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait','checkpoint') else 'control', None, None)
             for verb in ('capabilities','create','prompt','wait','cancel','checkpoint','fork')},
         'health.observe': ('observe', None, None),
@@ -179,8 +179,18 @@ class ProtectedOperations:
             from .upgrade_jobs import UpgradeJobs
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host upgrade owner unavailable')
-            result = UpgradeJobs(self.operations.inventory.root).execute(actor,operation,arguments,
-                authorize=lambda: self.authority.authenticate(token))
+            root=self.operations.inventory.root
+            owner=UpgradeJobs(root)
+            if operation in ('upgrades.poll','upgrades.discovery'):
+                from .upgrade_discovery import UpgradeDiscovery
+                config=owner.config()
+                owner.guard(actor,config['target'],arguments,lambda:self.authority.authenticate(token),write=operation=='upgrades.poll')
+                if set(arguments)!={'expected_target'}:
+                    raise InventoryError('invalid_argument','exact discovery arguments required')
+                value=UpgradeDiscovery(root).tick(actor,authorize=lambda:self.authority.authenticate(token)) if operation=='upgrades.poll' else UpgradeDiscovery(root).status()
+                result=dict(schema_version=1,operation=operation,status='completed',result=value)
+            else:
+                result = owner.execute(actor,operation,arguments,authorize=lambda: self.authority.authenticate(token))
         elif operation.startswith('grok.'):
             from .controller_grok import ControllerGrok
             if self.operations.inventory is None:

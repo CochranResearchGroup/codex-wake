@@ -5,14 +5,14 @@ import json
 def tool_specs():
     text = dict(type='string', minLength=1, maxLength=200)
     specs = {}
-    for verb in ('status','list','show','enable','disable','start','advance','cancel'):
+    for verb in ('status','list','show','enable','disable','start','advance','cancel','poll','discovery'):
         properties = {'expected_target': {'type':'object', 'minProperties':1}}
-        if verb in ('show','advance','cancel'):properties['job_id']=text
+        if verb in ('show','advance','cancel','poll','discovery'):properties['job_id']=text
         if verb=='start':
             properties.update(recipe=text,expected_recipe_sha256=text,upstream_version=text)
         specs['wake_upgrades_'+verb]=('controller-upgrades','upgrades.'+verb,
             'Inspect or drive bounded opt-in upgrades within a host-approved scope; no daemon replacement or grant renewal.',
-            properties,[k for k in properties if k not in ('expected_recipe_sha256','upstream_version')],verb in ('status','list','show'))
+            properties,[k for k in properties if k not in ('expected_recipe_sha256','upstream_version')],verb in ('status','list','show','discovery'))
     return specs
 
 
