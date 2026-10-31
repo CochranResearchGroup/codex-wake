@@ -270,3 +270,36 @@ pathlib.Path(sys.argv[1]).write_text(str(child.pid))
             result=UpgradeRepair(source,root/'evidence',config,checkpoint=charges.append).run(job,recipe)
             self.assertEqual(result['reason'],'repair_attempts_exhausted')
             self.assertEqual([c['repair_attempts'] for c in charges],[1,2,3])
+
+    def test_dead_regeneration_reconciles_to_verification_only_without_new_worker(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source,config,recipe,job=self.fixture(root)
+            (source/'feature.txt').write_text('upstream\n')
+            subprocess.run(['git','add','.'],cwd=source,check=True)
+            subprocess.run(['git','commit','-qm','upstream change'],cwd=source,check=True)
+            config['base_revision']=subprocess.check_output(['git','rev-parse','HEAD'],cwd=source,text=True).strip()
+            (root/'worker.py').write_text("""import json,os,pathlib,subprocess
+pathlib.Path('feature.txt').write_text('new\\n');subprocess.run(['git','add','feature.txt'],check=True)
+pathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(dict(schema_version=1,status='repaired',identity='repairer',patch_dispositions={'feature':dict(disposition='rewritten',evidence='Retained feature')},retirements={})))
+""")
+            marker=root/'regeneration-started'
+            config['regenerate']=[[sys.executable,'-c',"import pathlib,time; marker=pathlib.Path("+repr(str(marker))+"); first=not marker.exists(); pathlib.Path('Cargo.lock').write_text('generated lockfile'); marker.write_text('ready'); time.sleep(120 if first else 0)"]]
+            job['limits']['repair_attempts']=1;job['deadline']=time.time()+60
+            def guard():
+                if marker.exists():raise FileNotFoundError('simulated vanished rustc temp file')
+            charges=[]
+            first=UpgradeRepair(source,root/'evidence',config,guard=guard,checkpoint=charges.append).run(job,recipe)
+            self.assertEqual(first['status'],'held')
+            before=json.loads((root/'evidence/repair-state.json').read_text())
+            self.assertEqual(before['inflight']['role'],'regenerate')
+            owner=UpgradeRepair(source,root/'evidence',config,checkpoint=charges.append)
+            receipt=owner.reconcile(dict(job,repair_attempts=1),recipe)
+            self.assertEqual(receipt['mode'],'verify_only')
+            self.assertEqual(owner.reconcile(dict(job,repair_attempts=1),recipe),receipt)
+            reviewed=UpgradeRepair(source,root/'evidence',config,checkpoint=charges.append).run(dict(job,repair_attempts=1,resume_mode='verify_only'),recipe)
+            self.assertEqual(reviewed['status'],'reviewed',reviewed)
+            self.assertEqual(charges,[{'repair_attempts':1}])
+            after=json.loads((root/'evidence/repair-state.json').read_text())
+            self.assertEqual(after['clock_anchor']['monotonic_deadline'],before['clock_anchor']['monotonic_deadline'])
+            self.assertEqual([c for c in after['commands'] if c['role']=='worker'],[c for c in before['commands'] if c['role']=='worker'])
+            self.assertEqual((Path(json.loads(Path(reviewed['prepared_recipe']).read_text())['source']['tree'])/'Cargo.lock').read_text(),'generated lockfile')

@@ -320,19 +320,108 @@ class UpgradeRepair:
         path=self.evidence/'prepared-recipe.json';_atomic(path,prepared)
         return str(path)
 
+    def _seal(self,job,recipe):
+        self.required=sorted(set(REQUIRED_CAPABILITIES.get(recipe.get('channel'), ())) |
+            set(job.get('required_capabilities', ())) | set(self.config.get('required_capabilities', ())) |
+            ({'tui_health'} if recipe.get('channel') == 'modded' else set()))
+        return _digest(dict(job_id=job['id'],recipe=recipe,config=self.config,workspace=str(self.workspace),required=self.required))
+
+    def _dead_regeneration(self,inflight):
+        sequence=inflight.get('sequence')
+        if type(sequence) is not int or sequence!=len(self.state['commands']) or inflight.get('role')!='regenerate':
+            raise RepairHeld('only_interrupted_regeneration_can_reconcile')
+        command=self.state['commands'][sequence-1]
+        identity=command.get('process_identity')
+        if (command.get('role')!='regenerate' or command.get('status')!='intent'
+                or command.get('argv') not in self.config['regenerate']
+                or not isinstance(identity,dict) or identity!=inflight.get('process_identity')
+                or command.get('owned_process_group')!=identity.get('pid')):
+            raise RepairHeld('interrupted_regeneration_identity_unverified')
+        boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+        if identity.get('boot_id')!=boot or type(identity.get('pid')) is not int or identity['pid']<=1:
+            raise RepairHeld('interrupted_regeneration_boot_unverified')
+        leader='absent'
+        for process in Path('/proc').iterdir():
+            if not process.name.isdigit():continue
+            try:fields=(process/'stat').read_text().rsplit(')',1)[1].split()
+            except FileNotFoundError:continue
+            if int(process.name)==identity['pid']:
+                leader='same_zombie' if fields[19]==identity.get('start_ticks') and fields[0]=='Z' else 'different_or_live'
+                if fields[19]==identity.get('start_ticks') and fields[0]!='Z':
+                    raise RepairHeld('original_regeneration_still_running')
+            if fields[0]!='Z' and (int(fields[2])==identity['pid'] or int(fields[3])==identity['pid']):
+                raise RepairHeld('original_regeneration_group_still_running')
+        return dict(status='observed_dead',original_identity=identity,owned_process_group=identity['pid'],
+            observed_boot_id=boot,leader_observation=leader,live_group_members=0)
+
+    def _worker_proof(self):
+        provenance=self.state['patch_provenance']
+        if (len(provenance)!=len(self.config['patches']) or {p.get('id') for p in provenance}!={p['id'] for p in self.config['patches']}
+                or any(p.get('disposition') not in ('applied','rewritten','retired') for p in provenance)):
+            raise RepairHeld('complete_patch_provenance_required')
+        if self.state['repair_attempts']==0:
+            if any(p['disposition']!='applied' for p in provenance):raise RepairHeld('worker_provenance_missing')
+            return dict(kind='deterministic_replay',repair_attempts=0)
+        workers=[(i,c) for i,c in enumerate(self.state['commands'],1) if c.get('role')=='worker' and c.get('status')=='completed' and c.get('exit_code')==0]
+        if not workers:raise RepairHeld('complete_worker_report_required')
+        sequence,command=workers[-1]
+        path=self.evidence/f'{sequence}-worker-response.json'
+        report=self._read_report(path,'worker')
+        if report.get('identity')!=self.config['worker']['identity'] or report.get('status')!='repaired':
+            raise RepairHeld('retained_worker_identity_mismatch')
+        declarations=report.get('patch_dispositions',{})
+        if not isinstance(declarations,dict) or set(declarations)!={p['id'] for p in provenance}:
+            raise RepairHeld('retained_worker_patch_proof_incomplete')
+        for patch in provenance:
+            declaration=declarations[patch['id']]
+            if not isinstance(declaration,dict) or any(declaration.get(k)!=patch.get(k) for k in ('disposition','evidence')):
+                raise RepairHeld('retained_worker_patch_proof_changed')
+            if patch['disposition']=='retired' and report.get('retirements',{}).get(patch['id'])!=patch.get('equivalence'):
+                raise RepairHeld('retained_retirement_proof_changed')
+        return dict(kind='completed_worker_report',sequence=sequence,identity=report['identity'],
+            report_path=str(path),report_sha256=_sha(path.read_bytes()),repair_attempts=self.state['repair_attempts'])
+
+    def reconcile(self,job,recipe):
+        """Readmit known stopped verification; never run a command or model."""
+        self.job=job;seal=self._seal(job,recipe)
+        if not self.state_path.is_file():raise RepairHeld('held_repair_evidence_required')
+        self.state=json.loads(self.state_path.read_text())
+        if self.state.get('seal')!=seal:raise RepairHeld('repair_job_input_changed')
+        self._validate_config(recipe);self._budget()
+        if self.state.get('repair_attempts')!=job.get('repair_attempts'):
+            raise RepairHeld('original_attempt_accounting_differs')
+        existing=self.state.get('verification_readmission')
+        inventory=_inventory(self.workspace);source_digest=_digest(inventory)
+        if self.state.get('status')=='verify_ready' and existing:
+            if existing['source_digest']!=source_digest:raise RepairHeld('source_changed_after_readmission')
+            return existing
+        if self.state.get('status')!='held':raise RepairHeld('held_repair_evidence_required')
+        worker=self._worker_proof()
+        inflight=self.state.get('inflight')
+        dead=self._dead_regeneration(inflight) if inflight else None
+        if not inflight and any(c.get('status')=='intent' and not c.get('reconciliation') for c in self.state['commands']):
+            raise RepairHeld('unreconciled_command_intent')
+        receipt=dict(status='verification_ready',mode='verify_only',job_id=job['id'],seal=seal,
+            repair_attempts=self.state['repair_attempts'],monotonic_deadline=self.state['clock_anchor']['monotonic_deadline'],
+            source_digest=source_digest,source_inventory_path=str(self.evidence/'verification-readmission-source.json'),worker_proof=worker,
+            interrupted_intent=inflight,interrupted_regeneration=dead,previous_reason=self.state.get('reason'))
+        _atomic(self.evidence/'verification-readmission-source.json',inventory)
+        if dead:self.state['commands'][inflight['sequence']-1]['reconciliation']=dead
+        self.state.update(status='verify_ready',inflight=None,verification_readmission=receipt)
+        self._save()
+        return receipt
+
     def run(self,job,recipe):
         self.job=job
         first_wall=self.now()
         first_clock=self.clock()
-        self.required=sorted(set(REQUIRED_CAPABILITIES.get(recipe.get('channel'), ())) |
-            set(job.get('required_capabilities', ())) | set(self.config.get('required_capabilities', ())) |
-            ({'tui_health'} if recipe.get('channel') == 'modded' else set()))
-        seal=_digest(dict(job_id=job['id'],recipe=recipe,config=self.config,workspace=str(self.workspace),required=self.required))
+        seal=self._seal(job,recipe)
         self.state=dict(schema_version=1,seal=seal,repair_attempts=job.get('repair_attempts',0),last_seen=first_wall,
             clock_anchor=dict(boot_id=first_clock.get('boot_id'),monotonic_start=first_clock.get('seconds'),
                 monotonic_latest=first_clock.get('seconds'),monotonic_deadline=first_clock.get('seconds',0)+max(0,job['deadline']-first_wall),
                 wall_high_water=first_wall,wall_observed=first_wall,wall_adjustment_count=0,last_negative_delta=0,
                 wall_observation='nondecreasing'),commands=[],patch_provenance=[],inflight=None,status='applying')
+        verify_only=False
         if self.state_path.exists():
             self.state=json.loads(self.state_path.read_text())
             if self.state.get('seal')!=seal:
@@ -349,11 +438,21 @@ class UpgradeRepair:
                 if _identities(_inventory(Path(prepared['source']['tree'])))!=(result['candidate_digest'],result['tests_digest']):
                     raise RepairHeld('reviewed_snapshot_changed')
                 return result
-            return dict(status='held',reason='interrupted_repair_reconcile_required',repair_attempts=self.state['repair_attempts'],evidence=str(self.state_path))
+            if job.get('resume_mode')=='verify_only':
+                receipt=self.state.get('verification_readmission',{})
+                if (self.state.get('status')!='verify_ready' or receipt.get('status')!='verification_ready'
+                        or receipt.get('seal')!=seal or self.state.get('inflight')
+                        or receipt.get('source_digest')!=_digest(_inventory(self.workspace))):
+                    raise RepairHeld('verification_readmission_required')
+                verify_only=True
+            else:
+                return dict(status='held',reason='interrupted_repair_reconcile_required',repair_attempts=self.state['repair_attempts'],evidence=str(self.state_path))
+        elif job.get('resume_mode')=='verify_only':
+            raise RepairHeld('verification_readmission_required')
         self._save()
         try:
             self._validate_config(recipe);self._budget()
-            applied=self._replay()
+            applied=not self._unresolved() if verify_only else self._replay()
             limit=job['limits']['repair_attempts']
             while True:
                 verified=applied and self._verify()
@@ -366,6 +465,8 @@ class UpgradeRepair:
                         self.state.update(status='reviewed',result=result);self._save()
                         return result
                     self.state['findings']=review.get('findings',['review rejected'])
+                if verify_only:
+                    raise RepairHeld('verify_only_review_rejected' if verified else 'verify_only_verification_failed')
                 if self.state['repair_attempts']>=limit:
                     raise RepairHeld('repair_attempts_exhausted')
                 self._budget()

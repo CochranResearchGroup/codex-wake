@@ -50,3 +50,25 @@ def prepare_reviewed_recipe(root, job, config, *, guard, checkpoint):
     checked_recipe['source']=dict(original['source'],files=prepared['source_files'])
     guard()
     return UpgradeRepair(source,directory/'repair',repair_config,guard=guard,checkpoint=checkpoint).run(job,checked_recipe)
+
+
+def reconcile_reviewed_recipe(root,job,config,*,guard):
+    """Validate same-job verification-only readmission without commands/locks."""
+    from .managed_inventory import InventoryError
+    from .upgrade_repair import RepairHeld
+    try:
+        original=json.loads(Path(job['recipe_path']).read_text())
+        if hashlib.sha256(Path(job['recipe_path']).read_bytes()).hexdigest()!=job['recipe_sha256']:
+            raise RepairHeld('sealed_recipe_changed')
+        directory=Path(root)/'upgrade-jobs'/job['id']
+        prepared=json.loads((directory/'source-preparation.json').read_text())
+        if prepared['recipe_sha256']!=job['recipe_sha256']:raise RepairHeld('source_preparation_changed')
+        declaration=config.get('repair')
+        if not isinstance(declaration,dict):raise RepairHeld('sealed_repair_configuration_required')
+        checked=json.loads(json.dumps(original))
+        checked['source']=dict(original['source'],files=prepared['source_files'])
+        owner=UpgradeRepair(directory/'upstream-source',directory/'repair',
+            dict(declaration,base_revision=prepared['base_revision']),guard=guard)
+        return owner.reconcile(job,checked)
+    except (OSError,ValueError,KeyError) as error:
+        raise InventoryError('reconciliation_refused',str(error)) from error
