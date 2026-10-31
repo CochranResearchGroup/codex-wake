@@ -15,7 +15,7 @@ verified native adapter, without repeated confirmation. Honor the resulting
 inactive state across retries, delegates and restart; it neither resumes work nor
 renews resources. **Reactivate governor** is the explicit inverse. A missing or
 deactivated governor is not a reason to block already-authorized manual repair.
-See [governor controls](../../../docs/governor-control.md) for offline authenticated
+See [governor controls](governor-control.md) for offline authenticated
 host access and notice-delivery limitations. Verify installed capabilities before
 claiming these source features are present.
 
@@ -45,6 +45,12 @@ actual limit or missing measurement plainly. This source change does not install
 a startup hook that observes ordinary file reads.
 
 ## Agent workflow
+
+Read supervision diagnostics as scoped evidence. A refused diagnosis or missing
+enrollment holds external supervision admission; it does not decide authority for
+already-authorized manual work. Continue that work within its existing limits
+and applicable permissions. Preserve a genuine exhausted allowance or explicit
+operator stop; a diagnostic failure neither establishes nor clears either one.
 
 When the user requests external supervision for a token or time allowance, load
 this guide before heavy work. For that opt-in mode, obtain your actual `CODEX_THREAD_ID` in a native shell, then call:

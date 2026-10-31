@@ -102,7 +102,8 @@ def goal_limits_command(args, root):
                 next_action='The host must bind trusted caller identity and operator allocation '
                     'authority before provisioning. Agents cannot issue their own grants. '
                     'Preserve the allocation; setup diagnosis, checkpointing and operator replies '
-                    'remain available. Do not retry with another caller or copy a grant.')
+                    'remain available. Do not retry with another caller or copy a grant. '
+                    + result['authority_notice'])
         if getattr(exc,'decision',None) is not None:result['permission']=exc.decision
         if type(exc).__name__=='PermissionDenied':result['effect_attempted']=False
         if getattr(exc,'code',None):result['error']['code']=exc.code
