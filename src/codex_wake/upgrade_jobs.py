@@ -155,7 +155,7 @@ class UpgradeJobs:
     def execute(self, actor, operation, arguments, *, authorize=None):
         verb = operation.removeprefix('upgrades.')
         allowed = dict(status=set(), list=set(), show={'job_id'}, enable=set(), disable=set(),
-                       start={'recipe', 'expected_recipe_sha256', 'upstream_version'}, advance={'job_id'}, cancel={'job_id'}, rollback={'job_id','operation_id'})
+                       start={'recipe', 'expected_recipe_sha256', 'upstream_version'}, advance={'job_id'}, cancel={'job_id'}, rollback={'job_id','operation_id'}, reconcile={'job_id','mode'})
         if not operation.startswith('upgrades.') or verb not in allowed or not isinstance(arguments, dict):
             raise InventoryError('invalid_argument', 'exact upgrade job arguments required')
         optional = {'expected_recipe_sha256', 'upstream_version'} if verb == 'start' else set()
@@ -164,7 +164,10 @@ class UpgradeJobs:
             raise InventoryError('invalid_argument', 'exact upgrade job arguments required')
         config = self.config()
         self.guard(actor, config['target'], arguments, authorize, write=verb not in READS)
-        if verb == 'rollback':
+        if verb == 'reconcile':
+            with self.runner_lease(arguments['job_id']):
+                result=self.reconcile(actor,arguments,authorize)
+        elif verb == 'rollback':
             with self.runner_lease(arguments['job_id']):
                 result=self.rollback(actor,arguments,authorize)
         elif verb == 'advance':
@@ -482,6 +485,42 @@ class UpgradeJobs:
             else:
                 job.update(state='held', reason=result.get('reason', 'stage_failed'))
             self.event(state, job['state'], job, reason=job['reason'])
+            self.save(state)
+            return dict(job=job)
+
+    def reconcile(self, actor, arguments, authorize):
+        if arguments['mode']!='verify_only':
+            raise InventoryError('invalid_argument','only verify_only reconciliation is supported')
+        with self.locked():
+            config=self.config();state=self.load();job=self.job(state,arguments['job_id'])
+            self.guard(actor,job['target'],arguments,authorize,write=True)
+            evidence=self.store/job['id']/'repair'/'repair-state.json'
+            if job['state']!='held' or not config.get('repair') or not evidence.is_file():
+                raise InventoryError('reconciliation_required','held repair evidence required')
+            reason=self.budget_reason(job)
+            if (not state['enabled'] or state['generation']!=job['generation'] or reason
+                    or policy_digest(config)!=job['policy_sha256']):
+                raise InventoryError('reconciliation_refused',reason or 'original upgrade authority changed')
+            if any(other['id']!=job['id'] and other['state'] not in TERMINAL for other in state['jobs'].values()):
+                raise InventoryError('upgrade_busy','another upgrade job remains active')
+            if job.get('worker') or job.get('active_phase'):
+                raise InventoryError('reconciliation_refused','owned worker observation unresolved')
+            path=Path(job['recipe_path'])
+            if (str(Path(config['recipes'].get(job['recipe'],'')).resolve())!=str(path)
+                    or hashlib.sha256(path.read_bytes()).hexdigest()!=job['recipe_sha256']):
+                raise InventoryError('stale_recipe','pinned upgrade recipe changed')
+            from .upgrade_pipeline import reconcile_reviewed_recipe
+            def guard():
+                self.guard(actor,job['target'],arguments,authorize,write=True)
+                reason=self.budget_reason(job)
+                if reason:raise InventoryError('reconciliation_refused',reason)
+            previous_reason=job.get('reason')
+            receipt=reconcile_reviewed_recipe(self.root,job,config,guard=guard)
+            guard()
+            job.setdefault('reconciliations',[]).append(dict(mode='verify_only',at=self.now(),
+                previous_reason=previous_reason,receipt=receipt,controller_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()))
+            job.update(state='queued',reason='verification_readmitted',resume_mode='verify_only')
+            self.event(state,'verification_readmitted',job,reason='same_job_original_budget')
             self.save(state)
             return dict(job=job)
 

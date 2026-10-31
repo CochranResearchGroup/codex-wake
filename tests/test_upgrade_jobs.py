@@ -33,6 +33,24 @@ class UpgradeJobsTests(unittest.TestCase):
             self.assertEqual(after['repair_attempts'], 0)
             self.assertEqual(call('status')['limits']['compiler_jobs'], 2)
 
+    def test_verification_readmission_requires_held_repair_evidence(self):
+        from codex_wake.managed_inventory import InventoryError
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);target={'host':'fixture'}
+            actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
+            (root/'recipe.json').write_text(json.dumps(dict(id='candidate',upstream_version='0.166')))
+            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={'release':str(root/'recipe.json')})))
+            owner=UpgradeJobs(root,executor=lambda _:dict(status='failed',reason='verification_interrupted'))
+            def call(verb,**extra):return owner.execute(actor,'upgrades.'+verb,dict(expected_target=target,**extra))['result']
+            call('enable');original=call('start',recipe='release')['job']
+            call('advance',job_id=original['id'])
+            with self.assertRaisesRegex(InventoryError,'held repair evidence'):
+                call('reconcile',job_id=original['id'],mode='verify_only')
+            after=call('show',job_id=original['id'])['job']
+            self.assertEqual(after['state'],'held')
+            self.assertEqual(after['deadline'],original['deadline'])
+            self.assertEqual(after['repair_attempts'],0)
+
     def test_installed_stage_and_public_adapters_use_same_job(self):
         import hashlib
         import tarfile
