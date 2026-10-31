@@ -14,7 +14,7 @@ from codex_wake.upgrade_repair import UpgradeRepair
 
 
 class InterruptedWorkerReviewTests(unittest.TestCase):
-    def interrupted(self,root):
+    def interrupted(self,root,prerequisite=None):
         source,config,recipe,job=fixtures.UpgradeRepairTests().fixture(root)
         (source/'feature.txt').write_text('upstream\n')
         subprocess.run(['git','add','.'],cwd=source,check=True)
@@ -24,6 +24,8 @@ class InterruptedWorkerReviewTests(unittest.TestCase):
         (root/'worker.py').write_text("import pathlib,subprocess,time;pathlib.Path('feature.txt').write_text('new\\n');subprocess.run(['git','add','feature.txt'],check=True);pathlib.Path("+repr(str(events))+").write_text('{\\\"type\\\":\\\"thread.started\\\",\\\"scope\\\":\\\"fixture_not_model_acceptance\\\"}\\n');pathlib.Path("+repr(str(marker))+").write_text('ready');time.sleep(120)\n")
         reviewer=Path(config['reviewer']['argv'][1])
         reviewer.write_text(reviewer.read_text().replace("pathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(r))", "\nif p.get('require_patch_dispositions'):\n r['patch_dispositions']={x['id']:dict(disposition='rewritten',intent=x['intent'],evidence='Independently inspected fixture feature and tests',equivalence='') for x in p['patches']}\npathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(r))"))
+        if prerequisite is not None:
+            config['regenerate']=[[sys.executable,'-c',"from pathlib import Path; assert Path("+repr(str(prerequisite))+").exists(), 'host prerequisite missing'"]]
         job['limits']['repair_attempts']=1;job['deadline']=time.time()+60
         def guard():
             if marker.exists():raise ValueError('clock_uncertain')
@@ -100,3 +102,24 @@ class InterruptedWorkerReviewTests(unittest.TestCase):
             independent=run(config,'reviewer',packet,response)
             self.assertEqual(set(independent['patch_dispositions']),{'health'})
             self.assertEqual(independent['patch_dispositions']['health']['intent'],'Preserve main-loop nonce health')
+
+    def test_deterministic_verification_failure_can_readmit_without_another_worker_or_review(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);prerequisite=root/'host-ready'
+            source,config,recipe,job,charges,before,census=self.interrupted(root,prerequisite)
+            first=UpgradeRepair(source,root/'evidence',config).reconcile(job,recipe,mode='verify_review_only')
+            held=UpgradeRepair(source,root/'evidence',config,checkpoint=charges.append).run(dict(job,resume_mode='verify_review_only'),recipe)
+            self.assertEqual(held['reason'],'verify_review_only_verification_failed')
+            original=census.read_bytes();(root/'worker-exit-census-original.json').write_bytes(original)
+            proof=json.loads(original);proof['observed_monotonic_seconds']=time.monotonic();census.write_text(json.dumps(proof))
+            prerequisite.write_text('ready')
+            second=UpgradeRepair(source,root/'evidence',config).reconcile(job,recipe,mode='verify_review_only')
+            self.assertEqual(second['monotonic_deadline'],first['monotonic_deadline'])
+            reviewed=UpgradeRepair(source,root/'evidence',config,checkpoint=charges.append).run(dict(job,resume_mode='verify_review_only'),recipe)
+            self.assertEqual(reviewed['status'],'reviewed',reviewed)
+            self.assertEqual(charges,[{'repair_attempts':1}])
+            state=json.loads((root/'evidence/repair-state.json').read_text())
+            self.assertEqual(sum(c['role']=='worker' for c in state['commands']),1)
+            self.assertEqual(sum(c['role']=='reviewer' for c in state['commands']),1)
+            self.assertEqual(state['verification_readmission_history'][0],first)
+            self.assertEqual(second['worker_proof']['prior_clock_uncertainty'],'retained_unclassified')
