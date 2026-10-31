@@ -196,6 +196,7 @@ class UpgradeRepair:
         candidate,tests=_identities(files)
         return dict(schema_version=1,role=role,job_id=self.job['id'],candidate_digest=candidate,tests_digest=tests,
             workspace=str(self.workspace),required_capabilities=self.required,patches=self.config['patches'],
+            verification_reports=[dict(report) for report in self.state['commands'] if report['role'] in ('regenerate','verify') and report.get('status')=='completed'],
             patch_provenance=self.state['patch_provenance'],prior_findings=self.state.get('findings',[]),
             contract='Preserve every required capability and acceptance standard. Resolve conflicts by upstream and patch intent. Return schema_version 1, status, identity, candidate_digest, tests_digest, capabilities mapping to evidence, patch_dispositions for EVERY patch ID (disposition applied/rewritten/retired plus nonempty intent evidence), and retirements mapping patch IDs to equivalence evidence. Reviewer additionally returns reviewer identity and status approved or rejected. Never weaken tests to obtain approval.')
 
