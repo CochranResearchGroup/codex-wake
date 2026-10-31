@@ -204,42 +204,43 @@ pathlib.Path(sys.argv[1]).write_text(str(child.pid))
                     try:os.kill(pid,signal.SIGKILL)
                     except ProcessLookupError:pass
 
-    def test_subsecond_same_boot_wall_adjustment_preserves_fixed_monotonic_deadline(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory);source,config,recipe,job=self.fixture(root)
-            job['deadline']=130.0
-            walls=iter([100.0])
-            ticks=[500.0]
-            def wall():return next(walls,99.8)
-            def clock():
-                ticks[0]+=.01
-                return dict(boot_id='fixture-boot',seconds=ticks[0])
-            result=UpgradeRepair(source,root/'evidence',config,now=wall,clock=clock).run(job,recipe)
-            self.assertEqual(result['status'],'reviewed',result)
-            state=json.loads((root/'evidence/repair-state.json').read_text())
-            anchor=state['clock_anchor']
-            self.assertAlmostEqual(anchor['monotonic_deadline'],530.01)
-            self.assertEqual(anchor['wall_high_water'],100.0)
-            self.assertEqual(anchor['wall_observed'],99.8)
-            self.assertEqual(anchor['wall_adjustment_count'],1)
-            self.assertEqual(anchor['wall_observation'],'regressed')
-            ticks[0]=531.0
-            expired=UpgradeRepair(source,root/'evidence',config,now=lambda:99.8,clock=clock).run(job,recipe)
-            self.assertEqual(expired['reason'],'deadline_exhausted')
-            after=json.loads((root/'evidence/repair-state.json').read_text())
-            self.assertAlmostEqual(after['clock_anchor']['monotonic_deadline'],530.01)
-
-    def test_material_wall_rollback_or_boot_change_is_held_without_extra_attempt(self):
-        for mode in ('material_rollback','boot_changed','boot_missing'):
-            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as directory:
+    def test_same_boot_utc_adjustments_never_renew_fixed_monotonic_deadline(self):
+        for rollback in (.2,5.0):
+            with self.subTest(rollback=rollback),tempfile.TemporaryDirectory() as directory:
                 root=Path(directory);source,config,recipe,job=self.fixture(root)
                 job['deadline']=130.0
-                walls=iter([100.0]);counter=[500.0];samples=[0]
-                def wall():return next(walls,99.0 if mode=='material_rollback' else 100.0)
+                walls=iter([100.0]);ticks=[500.0]
+                def wall():return next(walls,100.0-rollback)
                 def clock():
-                    samples[0]+=1;counter[0]+=.01
-                    return dict(boot_id='before' if samples[0]==1 or mode=='material_rollback' else ('' if mode=='boot_missing' else 'after'),seconds=counter[0])
+                    ticks[0]+=.01
+                    return dict(boot_id='fixture-boot',seconds=ticks[0])
                 result=UpgradeRepair(source,root/'evidence',config,now=wall,clock=clock).run(job,recipe)
+                self.assertEqual(result['status'],'reviewed',result)
+                state=json.loads((root/'evidence/repair-state.json').read_text())
+                anchor=state['clock_anchor']
+                self.assertAlmostEqual(anchor['monotonic_deadline'],530.01)
+                self.assertEqual(anchor['wall_high_water'],100.0)
+                self.assertEqual(anchor['wall_observed'],100.0-rollback)
+                self.assertEqual(anchor['wall_adjustment_count'],1)
+                self.assertEqual(anchor['wall_observation'],'regressed')
+                ticks[0]=531.0
+                expired=UpgradeRepair(source,root/'evidence',config,now=wall,clock=clock).run(job,recipe)
+                self.assertEqual(expired['reason'],'deadline_exhausted')
+                after=json.loads((root/'evidence/repair-state.json').read_text())
+                self.assertAlmostEqual(after['clock_anchor']['monotonic_deadline'],530.01)
+
+    def test_boot_or_monotonic_uncertainty_is_held_without_extra_attempt(self):
+        for mode in ('boot_changed','boot_missing','counter_rollback','counter_nonfinite'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);source,config,recipe,job=self.fixture(root)
+                job['deadline']=130.0;samples=[0]
+                def clock():
+                    samples[0]+=1
+                    if samples[0]==1:return dict(boot_id='before',seconds=500.0)
+                    if mode=='counter_rollback':return dict(boot_id='before',seconds=499.0)
+                    if mode=='counter_nonfinite':return dict(boot_id='before',seconds=float('nan'))
+                    return dict(boot_id='' if mode=='boot_missing' else 'after',seconds=500.1)
+                result=UpgradeRepair(source,root/'evidence',config,now=lambda:100.0,clock=clock).run(job,recipe)
                 self.assertEqual(result['status'],'held',result)
                 self.assertEqual(result['reason'],'clock_uncertain')
                 self.assertEqual(result['repair_attempts'],0)

@@ -116,8 +116,7 @@ class UpgradeRepair:
             if (not isinstance(sample['boot_id'],str) or not sample['boot_id'] or sample['boot_id']!=anchor['boot_id']
                     or type(counter) not in (int,float) or not math.isfinite(counter)
                     or counter<anchor['monotonic_latest']
-                    or type(current) not in (int,float) or not math.isfinite(current)
-                    or anchor['wall_high_water']-current>=1.0):
+                    or type(current) not in (int,float) or not math.isfinite(current)):
                 raise ValueError('clock continuity lost')
             regressed=current<anchor['wall_high_water']
             negative_delta=current-anchor['wall_observed']
