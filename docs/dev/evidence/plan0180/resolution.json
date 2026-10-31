@@ -1,0 +1,37 @@
+{
+  "status": "RESOLVED_TEST_FIXTURE_ONLY",
+  "source_commit": "b111dd221bcf56f625c0aecde9380b1fb57a4d85",
+  "baseline_commit": "46a1f6506d204a99832656cb860ee353ca135be8",
+  "changed_files": [
+    "codex-rs/app-server/tests/suite/v2/mcp_server_status.rs"
+  ],
+  "root_cause": "File-store setting was appended under model_providers.mock_provider and ignored; default keyring persistence could stall OAuth completion.",
+  "causal_probe": {
+    "wrong_config_stalled_bus": {
+      "exit_code": 101,
+      "seconds": 11.296265810000477,
+      "bus_connections": 1
+    },
+    "corrected_config_stalled_bus": {
+      "exit_code": 0,
+      "seconds": 1.0021443810001074,
+      "bus_connections": 0
+    }
+  },
+  "regression_red_seconds": 11.02,
+  "regression_green_seconds": 0.94,
+  "original_mcp_selection": {
+    "passed": 25,
+    "failed": 0,
+    "seconds": 2.65
+  },
+  "package_hashes_unchanged": {
+    "bin/codex": true,
+    "bin/codex-code-mode-host": true,
+    "codex-resources/bwrap": true,
+    "codex-path/rg": true
+  },
+  "owned_process_survivors": [],
+  "shared_runtime_effects": false,
+  "recorded_at": "2026-10-28T19:15:25.295972+00:00"
+}
