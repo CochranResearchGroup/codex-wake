@@ -517,6 +517,8 @@ class UpgradeJobs:
                 if reason:raise InventoryError('reconciliation_refused',reason)
             previous_reason=job.get('reason')
             receipt=reconcile_reviewed_recipe(self.root,job,config,guard=guard)
+            if not isinstance(receipt,dict) or receipt.get('status')!='verification_ready' or receipt.get('mode')!='verify_only':
+                raise InventoryError('reconciliation_refused','verification readiness not established')
             guard()
             job.setdefault('reconciliations',[]).append(dict(mode='verify_only',at=self.now(),
                 previous_reason=previous_reason,receipt=receipt,controller_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()))
