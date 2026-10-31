@@ -68,6 +68,9 @@ class UpgradeRepair:
         self.evidence=Path(evidence).resolve()
         if self.evidence == self.workspace or self.evidence.is_relative_to(self.workspace):
             raise ValueError('repair evidence must be outside candidate source')
+        self.cache=self.evidence.parent/'cargo-target'
+        if self.cache==self.workspace or self.cache.is_relative_to(self.workspace) or self.workspace.is_relative_to(self.cache):
+            raise ValueError('owned compiler cache must be outside candidate source')
         self.config=config
         self.now=now or time.time
         self.guard=guard or (lambda: None)
@@ -89,7 +92,9 @@ class UpgradeRepair:
             raise RepairHeld('deadline_exhausted')
         limit=self.job['limits'].get('temporary_bytes')
         if limit is not None:
-            size=sum(p.stat().st_size for base in (self.workspace,self.evidence) for p in base.rglob('*') if p.is_file() and not p.is_symlink())
+            roots=(self.workspace,self.evidence,self.cache)
+            roots=tuple(root for root in roots if not any(root!=other and root.is_relative_to(other) for other in roots))
+            size=sum(p.stat().st_size for base in roots for p in base.rglob('*') if p.is_file() and not p.is_symlink())
             if size>limit:
                 raise RepairHeld('temporary_storage_exhausted')
 
@@ -104,7 +109,7 @@ class UpgradeRepair:
         env={k:v for k,v in os.environ.items() if k in ('PATH','LANG','LC_ALL')}
         with tempfile.TemporaryDirectory(prefix='repair-home-',dir=self.evidence) as home:
             env.update(HOME=home,CODEX_HOME=home+'/.codex',XDG_CONFIG_HOME=home+'/.config',XDG_DATA_HOME=home+'/.local/share',
-                CARGO_BUILD_JOBS=str(self.job['limits'].get('compiler_jobs',2)))
+                CARGO_BUILD_JOBS=str(self.job['limits'].get('compiler_jobs',2)),CARGO_TARGET_DIR=str(self.cache))
             Path(env['CODEX_HOME']).mkdir(mode=0o700)
             if packet is not None:
                 packet_path=self.evidence/f'{sequence}-{role}-packet.json'
@@ -118,6 +123,11 @@ class UpgradeRepair:
             try:
                 with output.open('wb') as out,error.open('wb') as err:
                     process=subprocess.Popen(argv,cwd=self.workspace,env=env,stdout=out,stderr=err,start_new_session=True)
+                    report['owned_process_group']=process.pid
+                    stat=Path(f'/proc/{process.pid}/stat').read_text().rsplit(')',1)[1].split()
+                    report['process_identity']=dict(pid=process.pid,start_ticks=stat[19],boot_id=Path('/proc/sys/kernel/random/boot_id').read_text().strip())
+                    self.state['inflight']['process_identity']=report['process_identity']
+                    self._save()
                     started=time.monotonic()
                     timeout=self.config.get('command_timeout_seconds',600)
                     if type(timeout) is not int or timeout<=0:
@@ -137,7 +147,10 @@ class UpgradeRepair:
                     try:os.killpg(process.pid,signal.SIGTERM)
                     except ProcessLookupError:pass
                     try:process.wait(timeout=1)
-                    except subprocess.TimeoutExpired:
+                    except subprocess.TimeoutExpired:pass
+                    finally:
+                        # A completed leader can leave descendants that ignore TERM.
+                        # The session/group created for this child remains ours.
                         try:os.killpg(process.pid,signal.SIGKILL)
                         except ProcessLookupError:pass
                         process.wait()

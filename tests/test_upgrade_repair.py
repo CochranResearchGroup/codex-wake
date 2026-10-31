@@ -148,3 +148,58 @@ pathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(dict(sc
             self.assertEqual(result['status'],'held',result)
             self.assertEqual(result['reason'],'upstream_source_identity_mismatch')
             self.assertEqual((source/'feature.txt').read_text(),'old\n')
+
+    def test_verifier_build_cache_is_owned_outside_candidate_and_snapshot_with_compiler_cap(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source,config,recipe,job=self.fixture(root)
+            # A source directory named target is legitimate and must not be
+            # excluded merely because Cargo commonly uses that name for output.
+            (source/'target').mkdir()
+            (source/'target/source.rs').write_text('legitimate source\n')
+            subprocess.run(['git','add','.'],cwd=source,check=True)
+            subprocess.run(['git','commit','-qm','source named target'],cwd=source,check=True)
+            config['base_revision']=subprocess.check_output(['git','rev-parse','HEAD'],cwd=source,text=True).strip()
+            config['verify'].append([sys.executable,'-c',
+                "import os; from pathlib import Path; assert os.environ['CARGO_BUILD_JOBS']=='2'; cache=Path(os.environ.get('CARGO_TARGET_DIR','target')); cache.mkdir(exist_ok=True,parents=True); (cache/'compiler.bin').write_bytes(b'compiled-cache')"])
+            result=UpgradeRepair(source,root/'evidence',config).run(job,recipe)
+            self.assertEqual(result['status'],'reviewed',result)
+            prepared=json.loads(Path(result['prepared_recipe']).read_text())
+            snapshot=Path(prepared['source']['tree'])
+            self.assertEqual((snapshot/'target/source.rs').read_text(),'legitimate source\n')
+            self.assertFalse((source/'target/compiler.bin').exists())
+            self.assertFalse((snapshot/'target/compiler.bin').exists())
+            self.assertEqual((root/'cargo-target/compiler.bin').read_bytes(),b'compiled-cache')
+
+    def test_completed_command_reaps_its_term_resistant_descendant_before_returning(self):
+        import os
+        import signal
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source,config,recipe,job=self.fixture(root)
+            pidfile=root/'child-pid'
+            script=root/'spawn.py'
+            script.write_text("""import os,pathlib,subprocess,sys
+read_fd,write_fd=os.pipe()
+child=subprocess.Popen([sys.executable,'-c',"import os,signal,sys,time;signal.signal(signal.SIGTERM,signal.SIG_IGN);os.write(int(sys.argv[1]),b'R');time.sleep(120)",str(write_fd)],pass_fds=(write_fd,))
+os.close(write_fd)
+assert os.read(read_fd,1)==b'R'
+os.close(read_fd)
+pathlib.Path(sys.argv[1]).write_text(str(child.pid))
+""")
+            config['verify'].append([sys.executable,str(script),str(pidfile)])
+            pid=None
+            try:
+                result=UpgradeRepair(source,root/'evidence',config).run(job,recipe)
+                self.assertEqual(result['status'],'reviewed',result)
+                pid=int(pidfile.read_text())
+                deadline=time.monotonic()+2
+                while time.monotonic()<deadline:
+                    path=Path(f'/proc/{pid}/stat')
+                    if not path.exists():break
+                    if path.read_text().rsplit(')',1)[1].split()[0]=='Z':break
+                    time.sleep(.01)
+                else:self.fail('owned TERM-resistant descendant survived command teardown')
+            finally:
+                if pid is None and pidfile.exists():pid=int(pidfile.read_text())
+                if pid is not None:
+                    try:os.kill(pid,signal.SIGKILL)
+                    except ProcessLookupError:pass
