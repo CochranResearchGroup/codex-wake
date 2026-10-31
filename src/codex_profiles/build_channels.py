@@ -272,9 +272,14 @@ def _managed_endpoint(build: Build, home: Path, executable: int, env: dict) -> s
     control = home / 'app-server-control/app-server-control.sock'
 
     def lifecycle(verb: str, *args: str) -> dict:
-        result = subprocess.run([f'/proc/self/fd/{executable}', 'app-server', 'daemon', verb, *args],
-                                env=env, pass_fds=(executable,), capture_output=True,
-                                text=True, timeout=100, check=False)
+        try:
+            result = subprocess.run([f'/proc/self/fd/{executable}', 'app-server', 'daemon', verb, *args],
+                                    env=env, pass_fds=(executable,), capture_output=True,
+                                    text=True, timeout=100, check=False)
+        except subprocess.TimeoutExpired as exc:
+            raise BuildError(f'account daemon {verb} timed out; outcome is unknown; '
+                             'inspect daemon status and package selection, then reconcile '
+                             'before retrying or rolling back') from exc
         if result.returncode:
             raise BuildError(f'account daemon {verb} failed: {result.stderr.strip()}')
         try:

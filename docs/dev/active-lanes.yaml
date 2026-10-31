@@ -918,13 +918,13 @@ lanes:
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/341
     checkpoint: b674427
     target: origin/main
-    integration: review_pr
+    integration: cumulative_squash_pr
     plan_state: SOURCE_ACCEPTED
-    custody_state: PUBLISHED_REVIEW
+    custody_state: INTEGRATED
     dependencies: [HF02, HF03, HF04, HF06, HF07, HF13]
     overlaps: [feat/harness-observation-ownership, feat/harness-frontier]
-    updated_at: 2026-10-24
-    disposition: Seven source tickets closed; one review and one TDD pass complete; validation repair342 complete; final1651-test full run passes with1skip; first failures retained; consolidated PR341 supersedes327/329/333; issue328 awaits main integration; CI skipped; main and production unchanged
+    updated_at: 2026-10-31
+    disposition: Seven source tickets closed; one review and one TDD pass complete; validation repair342 complete; final1651-test full run passes with1skip; first failures retained; consolidated PR341 supersedes327/329/333; source families integrated cumulatively by PR349 at ce1ad93eec437c1b4854dde2c9a174d5c5f94255; historical isolated qualification retained; production activation remains separate
 
   - id: P173-COMBINED-UX
     owner: primary / ecochran76
@@ -934,13 +934,13 @@ lanes:
     branch: feat/combined-refresh-goal-ux
     target: origin/main
     plan_state: OPEN
-    custody_state: PUBLISHED_CHECKPOINT
-    integration: review_pr
+    custody_state: INTEGRATED
+    integration: squash_pr
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/349
     dependencies: [PR341, PR332, PR348]
     overlaps: [P173-NEXT-FRONTIER]
-    updated_at: 2026-10-25
-    disposition: Qualified combined candidate PR349; matching native refresh/restart/recovery TUI acceptance and 81 affected tests pass both Python versions; review1of1 and findingsTDD1of1 complete; main integration and shared activation remain open
+    updated_at: 2026-10-31
+    disposition: Qualified combined candidate PR349; matching native refresh/restart/recovery TUI acceptance and 81 affected tests pass both Python versions; review1of1 and findingsTDD1of1 complete; main integration completed by PR349 at ce1ad93eec437c1b4854dde2c9a174d5c5f94255; shared activation remains open
 
   - id: P173-NATIVE-ACTIVATION
     owner: primary / ecochran76
@@ -1008,8 +1008,8 @@ lanes:
     plan: docs/dev/plans/0192-2026-10-31-worktree-reconciliation.md
     branch: chore/420-worktree-reconciliation
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
     integration: validated_prs
     updated_at: 2026-10-31
-    disposition: Tickets421–428 closed through validated PRs430–436; final anchor429 running; physical retirement deferred, no working runtime effects
+    disposition: Tickets421–429 closed; primary anchored5e2315f; one review and one TDD pass resolve2P2 findings; final fix/evidence PR and fresh primary readback complete custody; physical paths retained, no working runtime effects
