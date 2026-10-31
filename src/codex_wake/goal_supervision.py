@@ -158,11 +158,13 @@ def verified_native_caller(context,claimed):
     if not isinstance(context,dict):raise ValueError('verified native caller metadata required')
     turn=context.get('x-codex-turn-metadata')
     if not isinstance(turn,dict):raise ValueError('verified native caller turn required')
-    identities=[context.get('threadId'),context.get('sessionId'),
-        turn.get('thread_id'),turn.get('session_id')]
-    if any(identity!=claimed for identity in identities):
+    # Native successors have their own thread identity but retain the source's
+    # session identity. Neither transport field may contradict its turn metadata.
+    if (context.get('threadId') != claimed or turn.get('thread_id') != claimed
+            or context.get('sessionId') != turn.get('session_id')):
         raise ValueError('native caller identity does not match claim')
     _name(claimed)
+    _name(context.get('sessionId'))
     if not all(isinstance(value,str) and value for value in (context.get('callId'),turn.get('turn_id'))):
         raise ValueError('native caller call and turn required')
     return dict(thread_id=claimed,turn_id=turn['turn_id'],call_id=context['callId'])
@@ -302,7 +304,8 @@ def _allocation_admit(directory,receipt,old):
         allocation['token_limit']=min(receipt['token_limit'],allocation['token_limit'])
         allocation['time_limit_seconds']=min(receipt['time_limit_seconds'],allocation['time_limit_seconds'])
         allocation['deadline']=min(allocation['deadline'],allocation['time_origin']+allocation['time_limit_seconds'])
-        allocation['members'].setdefault(receipt['thread_id'],dict(goal_created_at=receipt['goal_created_at'],reset_anchor=anchor))
+        allocation['members'].setdefault(receipt['thread_id'],dict(goal_created_at=receipt['goal_created_at'],reset_anchor=anchor,
+            **{key:receipt[key] for key in ('usage_thread_id','usage_goal_created_at','usage_reset_anchor') if key in receipt}))
         member=allocation['members'][receipt['thread_id']]
         if renewal and member.get('reset_anchor')!=anchor:
             raise ValueError('renewal boundary changed; reconcile the persisted target allocation before continuing')
@@ -376,8 +379,12 @@ def _usage(receipt):
             if 'finalized_charges' in member:
                 observation=dict(state='qualified',charges=member['finalized_charges'])
             else:
-                observation=observe_usage(receipt['grant']['codex_home'],thread,member['goal_created_at'],
-                token_accounting=allocation['token_accounting'],reset_anchor=member.get('reset_anchor'))
+                observation=observe_usage(receipt['grant']['codex_home'],member.get('usage_thread_id',thread),
+                    member.get('usage_goal_created_at',member['goal_created_at']),
+                    token_accounting=allocation['token_accounting'],
+                    reset_anchor=member.get('usage_reset_anchor',member.get('reset_anchor')))
+                if member.get('usage_thread_id') and thread not in observation.get('thread_ids',[]):
+                    return dict(state='unknown',used_tokens=None,reason='successor_lineage_unavailable')
             if observation['state']!='qualified':
                 return dict(state='unknown',used_tokens=None,reason='allocation_member_accounting_unknown',
                     member_thread_id=thread,member_reason=observation.get('reason'))
@@ -623,9 +630,13 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         else:receipt.setdefault('enrollment_revision',1)
         if grant.get('auto_enrolled') and grant['allocation_id']=='native-'+caller_thread_id and not old:
             from .goal_usage import observe_usage
-            first=observe_usage(grant['codex_home'],caller_thread_id,created,token_accounting=basis)
-            if first.get('state')!='qualified':raise AccountingUnavailable('first enrollment requires qualified original history',first)
-            parent=first.get('parent_thread_id')
+            native=_request(grant,'thread/read',dict(threadId=caller_thread_id,includeTurns=False))['thread']
+            if native.get('id')!=caller_thread_id:raise ValueError('native thread identity changed')
+            parent=native.get('parentThreadId')
+            if not parent:
+                first=observe_usage(grant['codex_home'],caller_thread_id,created,token_accounting=basis)
+                if first.get('state')!='qualified':raise AccountingUnavailable('first enrollment requires qualified original history',first)
+                parent=first.get('parent_thread_id')
             if parent:
                 if allocation_id is not None:
                     raise ValueError('successor must continue its existing objective allocation, not select a fresh one')
@@ -635,6 +646,16 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                 _private(source);predecessor=json.loads(source.read_text())
                 if predecessor.get('thread_id')!=parent:
                     raise ValueError('successor source identity changed')
+                if native.get('parentThreadId'):
+                    usage_thread=predecessor.get('usage_thread_id',parent)
+                    usage_created=predecessor.get('usage_goal_created_at',predecessor['goal_created_at'])
+                    usage_anchor=predecessor.get('usage_reset_anchor',predecessor.get('reset_anchor'))
+                    original=observe_usage(grant['codex_home'],usage_thread,usage_created,
+                        reset_anchor=usage_anchor,token_accounting=predecessor['token_accounting'])
+                    if original.get('state')!='qualified' or caller_thread_id not in original.get('thread_ids',[]):
+                        raise AccountingUnavailable('successor requires qualified original objective lineage',original)
+                    receipt.update(usage_thread_id=usage_thread,usage_goal_created_at=usage_created,
+                        usage_reset_anchor=usage_anchor)
                 inherited=_grant(policy_path,caller_thread_id,predecessor['allocation_id'],root)
                 if any(inherited[key]!=grant[key] for key in ('app_server','codex_home','codex_path')):
                     raise ValueError('cross-native successor allocation is unsupported')
