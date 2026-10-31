@@ -156,7 +156,8 @@ class UpgradeJobs:
                 self.guard(actor, config['target'], arguments, authorize, write=verb not in READS)
                 if verb == 'status':
                     result = dict(enabled=state['enabled'], generation=state['generation'],
-                        limits=config['limits'], target=config['target'], events=state['events'])
+                        limits=config['limits'], target=config['target'], events=state['events'],
+                        notice_delivery=self.notice_summary())
                 elif verb == 'list':
                     result = dict(jobs=list(state['jobs'].values()))
                 elif verb in ('show', 'cancel'):
@@ -203,7 +204,27 @@ class UpgradeJobs:
                         self.event(state, 'queued', job)
                         result = dict(job=job)
                 self.save(state)
+        if verb not in READS:
+            self.notify(actor, authorize)
         return dict(schema_version=1, operation=operation, status='completed', result=result)
+
+    def notice_summary(self):
+        from .upgrade_notices import UpgradeNotices
+        value=UpgradeNotices(self.root).summary()
+        drain_status=self.store/'notice-drain-status.json'
+        if drain_status.exists():value['last_drain']=json.loads(drain_status.read_text())
+        return value
+
+    def notify(self, actor, authorize):
+        from .upgrade_notices import UpgradeNotices
+        try:
+            UpgradeNotices(self.root).drain(actor, authorize=authorize or (lambda: actor))
+            _atomic(self.store/'notice-drain-status.json',dict(status='completed',at=self.now()))
+        except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
+            # Notice delivery is independently observable, never grounds for
+            # changing an already committed upgrade outcome or replaying work.
+            _atomic(self.store/'notice-drain-status.json', dict(status='failed',
+                reason=getattr(error,'code',type(error).__name__),at=self.now()))
 
     def job(self, state, identifier):
         if not isinstance(identifier, str) or identifier not in state['jobs']:
@@ -263,9 +284,10 @@ class UpgradeJobs:
             phase = 'qualify' if job['state'] == 'qualifying' else 'stage'
             job['active_phase'] = phase
             job['state'] = 'qualifying' if phase == 'qualify' else 'building'
-            self.event(state, 'building', job)
+            self.event(state, job['state'], job)
             self.save(state)
             frozen = json.loads(json.dumps(job))
+        self.notify(actor, authorize)
         try:
             def guard():
                 with self.locked():

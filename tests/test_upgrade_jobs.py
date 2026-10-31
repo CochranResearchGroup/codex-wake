@@ -12,7 +12,7 @@ class UpgradeJobsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             target = {'host': 'fixture', 'environment': 'test', 'namespace': 'upgrade-test'}
-            actor = SimpleNamespace(subject='owner', scopes={'admin', 'observe'}, targets=[target])
+            actor = SimpleNamespace(subject='owner', client_id='client', grant_id='grant', scopes={'admin', 'observe'}, targets=[target])
             (root / 'upgrade-bot.json').write_text(json.dumps({'schema_version': 1,
                 'target': target, 'recipes': {'release': str(root / 'recipe.json')}}))
             (root / 'recipe.json').write_text(json.dumps({'id': 'candidate', 'upstream_version': '0.166.0'}))
@@ -88,7 +88,7 @@ class UpgradeJobsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);clock=[100.0]
             target={'host':'fixture'}
-            actor=SimpleNamespace(subject='owner',scopes={'admin','observe'},targets=[target])
+            actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
             (root/'recipe.json').write_text(json.dumps(dict(id='candidate',upstream_version='0.166')))
             (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={'release':str(root/'recipe.json')},limits={'total_seconds':10})))
             owner=UpgradeJobs(root,now=lambda:clock[0]);args={'expected_target':target}
@@ -109,7 +109,7 @@ class UpgradeJobsTests(unittest.TestCase):
     def test_disable_during_work_rejects_late_success(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);target={'host':'fixture'}
-            actor=SimpleNamespace(subject='owner',scopes={'admin','observe'},targets=[target])
+            actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
             (root/'recipe.json').write_text(json.dumps(dict(id='candidate',upstream_version='0.166')))
             (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={'release':str(root/'recipe.json')})))
             owner=UpgradeJobs(root);args={'expected_target':target}
