@@ -54,7 +54,7 @@ class UpgradeJobsTests(unittest.TestCase):
             with tarfile.open(archive,'w') as stream:stream.add(source/'package',arcname='package')
             recipe=root/'recipe.json'
             recipe.write_text(json.dumps(dict(schema_version=1,id='fixture',channel='stock',upstream_version='0.166.0',revision='fixture',package='package',
-                source=dict(official_url='https://github.com/openai/codex/releases/download/fixture/source.tar',archive_file=str(archive),sha256=hashlib.sha256(archive.read_bytes()).hexdigest()),
+                source=dict(official_url='https://github.com/openai/codex/archive/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.tar.gz',archive_file=str(archive),sha256=hashlib.sha256(archive.read_bytes()).hexdigest()),
                 qualify=[['/bin/echo','{"schema_version":1,"checks":{"official_cli":true}}']],read_schemas=[1],write_schema=1)))
             target={'host':'fixture','environment':'test','namespace':'upgrade-test'}
             declaration=dict(subject='owner',client_id='client',grant_id='grant',issuer='issuer',resource='resource',scopes=['observe','admin'],targets=[target],expires_at=time.time()+1000)
@@ -102,3 +102,24 @@ class UpgradeJobsTests(unittest.TestCase):
             self.assertEqual(held['state'],'held')
             self.assertEqual(calls,[job['id']])
             self.assertEqual(held['deadline'],110)
+
+    def test_disable_during_work_rejects_late_success(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);target={'host':'fixture'}
+            actor=SimpleNamespace(subject='owner',scopes={'admin','observe'},targets=[target])
+            (root/'recipe.json').write_text(json.dumps(dict(id='candidate',upstream_version='0.166')))
+            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={'release':str(root/'recipe.json')})))
+            owner=UpgradeJobs(root);args={'expected_target':target}
+            def call(verb,**extra):return owner.execute(actor,'upgrades.'+verb,dict(args,**extra))['result']
+            call('enable');job=call('start',recipe='release')['job']
+            def delayed(job):
+                call('disable')
+                return dict(status='staged')
+            owner.executor=delayed
+            result=call('advance',job_id=job['id'])['job']
+            self.assertEqual(result['state'],'disabled')
+            self.assertEqual(result['results'],{})
+            call('enable')
+            same=call('start',recipe='release')['job']
+            self.assertEqual(same['id'],job['id'])
+            self.assertEqual(same['state'],'disabled')

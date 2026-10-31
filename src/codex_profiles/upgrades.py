@@ -140,10 +140,10 @@ def _commands(commands,cwd,receipt,phase, *, timeout=600):
     for command in commands:
         if not isinstance(command,list) or not command or any(not isinstance(x,str) for x in command):
             raise UpgradeError('commands must be explicit argv arrays')
-        env={key:os.environ[key] for key in ('PATH','LANG','LC_ALL','CARGO_BUILD_JOBS','CODEX_UPGRADE_OWNED_GROUP') if key in os.environ}
+        env={key:os.environ[key] for key in ('PATH','LANG','LC_ALL','CARGO_BUILD_JOBS','CODEX_UPGRADE_OWNED_GROUP','CODEX_UPGRADE_TEMP_ROOT') if key in os.environ}
         env['CODEX_UPGRADE_PACKAGE']=str(cwd)
         try:
-            with tempfile.TemporaryDirectory(prefix='codex-upgrade-home-') as home:
+            with tempfile.TemporaryDirectory(prefix='codex-upgrade-home-', dir=env.get('CODEX_UPGRADE_TEMP_ROOT')) as home:
                 env.update(HOME=home,CODEX_HOME=str(Path(home)/'.codex'),XDG_CONFIG_HOME=str(Path(home)/'.config'),XDG_DATA_HOME=str(Path(home)/'.local/share'))
                 Path(env['CODEX_HOME']).mkdir(mode=0o700)
                 process=subprocess.Popen(command,cwd=cwd,env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=env.get('CODEX_UPGRADE_OWNED_GROUP') != '1')
@@ -179,7 +179,7 @@ def _source_tree(source, destination, receipt):
     try:
         if not fixture:
             final=urlparse(stream.geturl())
-            if final.scheme!='https' or not (final.hostname=='github.com' or final.hostname.endswith('.githubusercontent.com')):
+            if final.scheme!='https' or not (final.hostname in ('github.com','codeload.github.com') or final.hostname.endswith('.githubusercontent.com')):
                 raise UpgradeError('upstream archive redirected outside official hosting')
         digest=hashlib.sha256();size=0;deadline=time.monotonic()+300
         with archive_path.open('xb') as output:
@@ -230,6 +230,15 @@ def _source_tree(source, destination, receipt):
         if archive_path.exists():archive_path.unlink()
 
 
+def official_source_url(value):
+    """Official release assets or a source archive pinned to an exact commit."""
+    if not isinstance(value, str):return False
+    parsed=urlparse(value)
+    return (parsed.scheme=='https' and parsed.netloc=='github.com' and not parsed.query and not parsed.fragment
+        and (parsed.path.startswith('/openai/codex/releases/download/')
+             or re.fullmatch(r'/openai/codex/archive/[0-9a-f]{40}\.tar\.gz', parsed.path) is not None))
+
+
 def stage(root:Path, recipe_path:Path):
     root=root.resolve();recipe_path=recipe_path.resolve()
     recipe=_json(recipe_path)
@@ -237,7 +246,7 @@ def stage(root:Path, recipe_path:Path):
     identifier=_name(recipe.get('id'));channel=recipe.get('channel')
     if channel not in ('stock','modded'):raise UpgradeError('invalid channel')
     source=recipe.get('source',{})
-    if not str(source.get('official_url','')).startswith('https://github.com/openai/codex/releases/download/'):
+    if not official_source_url(source.get('official_url', '')):
         raise UpgradeError('official upstream source provenance required')
     for key in ['upstream_version','revision']:_name(recipe.get(key))
     receipt={'schema_version':1,'id':identifier,'channel':channel,'status':'building','phase':'source','recipe_sha256':hashlib.sha256(recipe_path.read_bytes()).hexdigest(),'source':source['official_url'],'created_at':time.time()}
