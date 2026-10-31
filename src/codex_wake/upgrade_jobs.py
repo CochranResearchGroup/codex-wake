@@ -488,8 +488,9 @@ class UpgradeJobs:
             return dict(job=job)
 
     def reconcile(self, actor, arguments, authorize):
-        if arguments['mode']!='verify_only':
-            raise InventoryError('invalid_argument','only verify_only reconciliation is supported')
+        mode=arguments['mode']
+        if mode not in ('verify_only','verify_review_only'):
+            raise InventoryError('invalid_argument','explicit verification-only reconciliation mode required')
         with self.locked():
             config=self.config();state=self.load();job=self.job(state,arguments['job_id'])
             self.guard(actor,job['target'],arguments,authorize,write=True)
@@ -514,14 +515,14 @@ class UpgradeJobs:
                 reason=self.budget_reason(job)
                 if reason:raise InventoryError('reconciliation_refused',reason)
             previous_reason=job.get('reason')
-            receipt=reconcile_reviewed_recipe(self.root,job,config,guard=guard)
-            if not isinstance(receipt,dict) or receipt.get('status')!='verification_ready' or receipt.get('mode')!='verify_only':
+            receipt=reconcile_reviewed_recipe(self.root,job,config,guard=guard,**({'mode':mode} if mode!='verify_only' else {}))
+            if not isinstance(receipt,dict) or receipt.get('status')!='verification_ready' or receipt.get('mode')!=mode:
                 raise InventoryError('reconciliation_refused','verification readiness not established')
             guard()
-            job.setdefault('reconciliations',[]).append(dict(mode='verify_only',at=self.now(),
+            job.setdefault('reconciliations',[]).append(dict(mode=mode,at=self.now(),
                 previous_reason=previous_reason,receipt=receipt,controller_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()))
-            job.update(state='queued',reason='verification_readmitted',resume_mode='verify_only')
-            self.event(state,'verification_readmitted',job,reason='same_job_original_budget')
+            job.update(state='queued',reason='verification_readmitted',resume_mode=mode)
+            self.event(state,'verification_readmitted',job,reason='known_interrupted_worker_verify_review_only' if mode=='verify_review_only' else 'same_job_original_budget',mode=mode)
             self.save(state)
             return dict(job=job)
 

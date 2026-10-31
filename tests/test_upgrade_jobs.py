@@ -44,8 +44,9 @@ class UpgradeJobsTests(unittest.TestCase):
             def call(verb,**extra):return owner.execute(actor,'upgrades.'+verb,dict(expected_target=target,**extra))['result']
             call('enable');original=call('start',recipe='release')['job']
             call('advance',job_id=original['id'])
-            with self.assertRaisesRegex(InventoryError,'held repair evidence'):
-                call('reconcile',job_id=original['id'],mode='verify_only')
+            for mode in ('verify_only','verify_review_only'):
+                with self.subTest(mode=mode),self.assertRaisesRegex(InventoryError,'held repair evidence'):
+                    call('reconcile',job_id=original['id'],mode=mode)
             after=call('show',job_id=original['id'])['job']
             self.assertEqual(after['state'],'held')
             self.assertEqual(after['deadline'],original['deadline'])
