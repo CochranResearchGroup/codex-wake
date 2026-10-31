@@ -74,8 +74,8 @@ def profile_main():
 
 
 def stock_main():
-    return main(['run', '--channel', 'stock', *sys.argv[1:]])
+    return main(['run', '--channel', 'stock', '--', *sys.argv[1:]])
 
 
 def modded_main():
-    return main(['run', '--channel', 'modded', *sys.argv[1:]])
+    return main(['run', '--channel', 'modded', '--', *sys.argv[1:]])

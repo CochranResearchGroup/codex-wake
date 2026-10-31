@@ -1,0 +1,9 @@
+{
+  "supervision_files": 8,
+  "supervision_hashes_unchanged": true,
+  "lifecycle_registry_sha256": "09f4c044639c668052ed802532a5652f78b4aec6b8c43cf2f096d4a6d206b470",
+  "governor_enabled": "masked",
+  "governor_active": "inactive",
+  "dummy_uid1017_processes": [],
+  "working_installation_attempted": false
+}

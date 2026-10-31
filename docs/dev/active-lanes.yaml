@@ -14,6 +14,59 @@ lanes:
     overlaps: []
     updated_at: 2026-10-28
     disposition: Five source-fixture outcomes accepted; original auth and active-goal-paginated continuity remain open; review1 and TDD1 complete; profiles PR1 CI3.11/3.12 PASS; coordination PR379 published; no production activation
+
+  - id: P185
+    owner: primary / wake2
+    objective: Automatically recover work paused by a qualified daemon upgrade
+    work_items: [docs/dev/plans/0185-2026-10-30-post-upgrade-resumption.md]
+    plan: docs/dev/plans/0185-2026-10-30-post-upgrade-resumption.md
+    branch: fix/native-0165-oauth-acceptance
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P184]
+    overlaps: [P183, P184]
+    updated_at: 2026-10-30
+    disposition: Native source 6efee650fb; exact package qualified in 13 UID1017 runtime cases; working rollout untouched; real-model Plan0183 remains open
+  - id: P184
+    owner: primary / wake2
+    objective: Checkpoint all open conversations before daemon replacement
+    work_items: [docs/dev/plans/0184-2026-10-29-cooperative-daemon-upgrades.md]
+    plan: docs/dev/plans/0184-2026-10-29-cooperative-daemon-upgrades.md
+    branch: fix/native-0165-oauth-acceptance
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P182]
+    overlaps: [P183]
+    updated_at: 2026-10-29
+    disposition: Exact native package qualified in UID1017 including prompts, handoffs, timeout, refusal, reconnect, fresh launch and rollback; real-model and downstream activation automation remain open; no working installation
+  - id: P180
+    owner: primary / wake2
+    objective: Diagnose and repair native0.165 OAuth fixture completion timeout
+    work_items: [docs/dev/plans/0180-2026-10-28-native-oauth-fixture-diagnosis.md]
+    plan: docs/dev/plans/0180-2026-10-28-native-oauth-fixture-diagnosis.md
+    branch: fix/native-0165-oauth-acceptance
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P179-NATIVE0165]
+    overlaps: [P179-NATIVE0165]
+    updated_at: 2026-10-28
+    disposition: Test-only native fixb111dd221b; deterministic red11.02s to green0.94s; original MCP selection25PASS; package hashes unchanged; local source custody retained
+  - id: P179-NATIVE0165
+    owner: primary / native-0165
+    objective: Build and qualify complete patched Codex0.165 daemon package
+    work_items: [docs/dev/plans/0179-2026-10-28-native-0165-build.md]
+    plan: docs/dev/plans/0179-2026-10-28-native-0165-build.md
+    branch: build/native-0165
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P177]
+    overlaps: [P173-NATIVE-ACTIVATION]
+    updated_at: 2026-10-28
+    disposition: Native46a1f6506d and complete0.165 package qualified; managed rollback and real native stock-TUI journey pass; local checkout retained for source custody; no shared deployment
   - id: P177
     owner: primary / ecochran76
     objective: Recover orphaned custom tool outputs without native debug panic
@@ -918,6 +971,35 @@ lanes:
     updated_at: 2026-10-30
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/419
     disposition: All20children and parent393 closed from source/disposable qualification; review1of1 and TDD1of1 fixed6findings; both Python versions1909passed/1skip; production380 and recovery368/370 separate; manual resource monitoring only
+
+  - id: P186-UPGRADE-RECOVERY-REPAIRS
+    owner: primary / ecochran76
+    objective: Repair four native upgrade authority and startup liveness blockers
+    work_items: [413, 414, 415, 416, 417, 418]
+    plan: docs/dev/plans/0186-2026-10-30-upgrade-recovery-repairs.md
+    branch: fix/413-repair-evidence
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: ACTIVE_WORKTREE
+    integration: private_native_source_and_local_evidence
+    dependencies: []
+    overlaps: [fix/native-0165-upgrade-resumption, fix/native-0165-oauth-acceptance]
+    updated_at: 2026-10-30
+    disposition: Tickets414-418 closed and C30 journeys qualified; review1 and bounded remediation1 complete; no working activation or native upstream push
+
+  - id: P191-RECOVERY-CONTROLLER-RECONCILIATION
+    owner: primary / ecochran76
+    objective: Qualify upgrade recovery and actual TUI health on one combined native package
+    work_items: [413, 419]
+    plan: docs/dev/plans/0191-2026-10-30-recovery-controller-reconciliation.md
+    branch: fix/413-419-reconciliation
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: ACTIVE_WORKTREE
+    integration: private_native_and_local_evidence
+    dependencies: [P186-UPGRADE-RECOVERY-REPAIRS, P190-CONTROLLER393]
+    updated_at: 2026-10-30
+    disposition: Combined isolated package and final launcher qualified;30 recovery journeys, health/Bots and serialized Python1911 total/1skip; first timing flake retained; no working install or governor activation
 
   - id: P192-WORKTREE420
     owner: primary / ecochran76

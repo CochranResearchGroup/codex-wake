@@ -18,6 +18,9 @@ from pathlib import Path
 import re
 import signal
 import select
+import shlex
+import socket
+import struct
 import time
 from urllib.parse import urlparse
 import stat
@@ -42,6 +45,7 @@ class Build:
     source: str
     read_schemas: tuple[int, ...] | None = None
     tenant_home: str | None = None
+    backend: str = 'private'
 
 
 def load_build(manifest: Path, channel: str = 'modded', account_home: Path | None = None) -> Build:
@@ -71,8 +75,11 @@ def load_build(manifest: Path, channel: str = 'modded', account_home: Path | Non
         schemas = row.get('read_schemas')
         if schemas is not None and (not isinstance(schemas, list) or not schemas or any(type(value) is not int or value < 1 for value in schemas)):
             raise BuildError('registered history compatibility is invalid')
+        backend = row.get('backend', 'private')
+        if backend not in ('private', 'managed'):
+            raise BuildError('registered backend must be private or managed')
         return Build(channel, path.resolve(strict=True), digest, *fields,
-                     tuple(schemas) if schemas is not None else None, row.get('tenant_home'))
+                     tuple(schemas) if schemas is not None else None, row.get('tenant_home'), backend)
     except (OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
         raise BuildError('build registration is unavailable or invalid') from exc
 
@@ -95,8 +102,31 @@ def _pinned_executable(build: Build) -> Iterator[int]:
         os.close(descriptor)
 
 
+def _process_start_ticks(pid: int) -> str | None:
+    try:
+        # The comm field can contain spaces and parentheses.
+        return Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()[19]
+    except (OSError, IndexError):
+        return None
+
+
+def _lock_owner(descriptor: int) -> str:
+    try:
+        record = json.loads(os.pread(descriptor, 4096, 0))
+        pid = record.get('pid')
+        ticks = record.get('start_ticks')
+        if (type(pid) is int and pid > 0 and isinstance(ticks, str)
+                and ticks == _process_start_ticks(pid)):
+            channel = record.get('channel')
+            suffix = f' (channel {channel})' if channel in ('stock', 'modded') else ''
+            return f'recorded launcher PID {pid}{suffix}'
+    except (OSError, ValueError, AttributeError):
+        pass
+    return 'launcher identity unavailable'
+
+
 @contextmanager
-def _home_ownership(home: Path) -> Iterator[int]:
+def _home_ownership(home: Path, *, channel: str | None = None) -> Iterator[int]:
     if not home.is_dir() or home.is_symlink():
         raise BuildError('tenant home must be an existing real directory')
     if home.stat().st_uid != os.getuid():
@@ -111,7 +141,16 @@ def _home_ownership(home: Path) -> Iterator[int]:
         try:
             fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
-            raise BuildError('tenant already has a private build client; native concurrent-store safety is unqualified') from exc
+            owner = _lock_owner(descriptor)
+            raise BuildError(
+                'tenant already has a private build client; native concurrent-store safety is unqualified. '
+                f'Account home: {home}; {owner}. '
+                'Close the existing client for this account, then retry. '
+                f'Inspect processes using its lock with: fuser -- {shlex.quote(str(path))}'
+            ) from exc
+        record = json.dumps(dict(pid=os.getpid(), start_ticks=_process_start_ticks(os.getpid()), channel=channel)).encode()
+        os.ftruncate(descriptor, 0)
+        os.pwrite(descriptor, record, 0)
         yield descriptor
     finally:
         os.close(descriptor)
@@ -148,7 +187,7 @@ def inspect_account(build: Build, account_home: Path, *, timeout: float = 5.0, r
         {'method': 'initialized'},
     ]
     env = account_environment(home, home.name)
-    with _home_ownership(home) as lock, _pinned_executable(build) as executable:
+    with _home_ownership(home, channel=build.channel) as lock, _pinned_executable(build) as executable:
         validate_history(build, home)
         command = [f'/proc/self/fd/{executable}']
         if routing_url is not None:
@@ -227,9 +266,64 @@ def inspect_account(build: Build, account_home: Path, *, timeout: float = 5.0, r
             process.stdout.close()
 
 
+def _managed_endpoint(build: Build, home: Path, executable: int, env: dict) -> str:
+    """Bootstrap only an empty account or start the exact already-selected build."""
+    selected = home / 'packages/app-server-daemon/current/bin/codex'
+    control = home / 'app-server-control/app-server-control.sock'
+
+    def lifecycle(verb: str, *args: str) -> dict:
+        result = subprocess.run([f'/proc/self/fd/{executable}', 'app-server', 'daemon', verb, *args],
+                                env=env, pass_fds=(executable,), capture_output=True,
+                                text=True, timeout=100, check=False)
+        if result.returncode:
+            raise BuildError(f'account daemon {verb} failed: {result.stderr.strip()}')
+        try:
+            value = json.loads(result.stdout)
+            if not isinstance(value, dict):
+                raise ValueError
+            return value
+        except ValueError as exc:
+            raise BuildError('account daemon returned an invalid lifecycle result') from exc
+
+    if selected.exists():
+        with selected.open('rb') as stream:
+            digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+        if digest != build.sha256:
+            raise BuildError('account daemon uses a different build; explicitly qualify and upgrade or roll back before launching')
+    else:
+        if selected.is_symlink() or os.path.lexists(control):
+            raise BuildError('account daemon selection is incomplete; inspect existing state before recovery')
+        lifecycle('start')
+        lifecycle('update', '--from-cli', '--yes')
+    lifecycle('start')
+    version = lifecycle('version')
+    if version.get('status') != 'running' or version.get('socketPath') != str(control):
+        raise BuildError('account daemon running endpoint is unverified')
+    physical = control.resolve(strict=True)
+    info = physical.lstat()
+    parent = physical.parent.stat()
+    if (not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.getuid()
+            or parent.st_uid != os.getuid() or stat.S_IMODE(parent.st_mode) != 0o700):
+        raise BuildError('account daemon socket is not private and user-owned')
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as peer:
+        peer.settimeout(5)
+        peer.connect(str(physical))
+        pid, uid, _ = struct.unpack('3i', peer.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
+    if uid != os.getuid():
+        raise BuildError('account daemon peer belongs to another user')
+    with Path(f'/proc/{pid}/exe').open('rb') as stream:
+        digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+    if digest != build.sha256:
+        raise BuildError('account daemon peer does not match the registered build')
+    marker = ('CODEX_HOME=' + str(home)).encode()
+    if marker not in Path(f'/proc/{pid}/environ').read_bytes().split(b'\0'):
+        raise BuildError('account daemon peer does not own the selected account home')
+    return 'unix://' + str(physical)
+
+
 def run_build(build: Build, account_home: Path, profile: str, args: list[str], *,
               output: TextIO | None = None) -> int:
-    """Launch exact registered bytes in private mode, retaining tenant ownership.
+    """Launch exact registered bytes through the registered account backend.
 
     This is a conservative local-client path. It does not grant recovery rights,
     make an official provenance claim beyond registration, or change account auth.
@@ -245,11 +339,16 @@ def run_build(build: Build, account_home: Path, profile: str, args: list[str], *
         if args[0] in ('app-server', 'update', 'exec', 'mcp', 'debug'):
             raise BuildError('administrative command requires a separate explicit operation')
     home = account_home.absolute()
-    with _home_ownership(home) as lock, _pinned_executable(build) as executable:
+    with _home_ownership(home, channel=build.channel) as lock, _pinned_executable(build) as executable:
+        if (build.backend == 'private' and args not in (['--version'], ['-V'])
+                and (os.path.lexists(home / 'packages/app-server-daemon/current')
+                     or os.path.lexists(home / 'app-server-control/app-server-control.sock'))):
+            raise BuildError('private writer cannot open this account; use its registered managed backend')
         if args not in (['--version'], ['-V']):
             validate_history(build, home)
         label = f'{build.channel.upper()} | {profile} | {build.upstream_version}+{build.revision}'
-        print(f'[{label}] private backend; account identity: unverified; executable SHA256 {build.sha256}',
+        backend_label = 'managed account backend' if build.backend == 'managed' else 'private backend'
+        print(f'[{label}] {backend_label}; account identity: unverified; executable SHA256 {build.sha256}',
               file=output, flush=True)
         if output.isatty():
             print(f'\033]0;{label}\007', end='', file=output, flush=True)
@@ -258,8 +357,17 @@ def run_build(build: Build, account_home: Path, profile: str, args: list[str], *
         env.pop('CODEX_THREAD_ID', None)
         # A pinned file descriptor avoids selection-link races between hash and exec.
         title_options = ['-c', 'tui.terminal_title=[]'] if output.isatty() else []
-        command = [f'/proc/self/fd/{executable}', '--no-daemon', *title_options, *args]
-        return subprocess.run(command, env=env, pass_fds=(executable, lock), check=False).returncode
+        backend = (['--remote', _managed_endpoint(build, home, executable, env)]
+                   if build.backend == 'managed' and args not in (['--version'], ['-V'])
+                   else ['--no-daemon'])
+        command = [f'/proc/self/fd/{executable}', *backend, *title_options, *args]
+        descriptors = (executable, lock)
+        if build.backend == 'managed' and args not in (['--version'], ['-V']):
+            # Only the verified account daemon owns the store. Other clients may
+            # attach after setup; embedded private writers still retain the lock.
+            fcntl.flock(lock, fcntl.LOCK_UN)
+            descriptors = (executable,)
+        return subprocess.run(command, env=env, pass_fds=descriptors, check=False).returncode
 
 
 def main(argv: list[str] | None = None) -> int:

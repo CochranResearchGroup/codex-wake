@@ -1,6 +1,6 @@
 # Whole-worktree reconciliation and primary main anchor
 
-State: RUNNING. Owner: primary for ecochran76. Spec: GitHub420. Child graph421–429.
+State: OPEN. Owner: primary for ecochran76. Spec: GitHub420. Child graph421–429.
 
 ## Authority and frozen packet
 
@@ -8,7 +8,7 @@ Initial canonical Wake main/review comparator:5fcf2d65052c3316f84d821c6ff1d233e6
 
 User approved publication and implementation of the nine-ticket graph, primary custody ownership and one ticket per delegated worker. After ticket closure: exactly one broad independent Standards/Spec review and one bounded TDD remediation pass, with focused verification. The initial canonical main is the recommended frozen comparison, honoring the standing comparator preference. No deployment, working install, resource renewal, governor activation or service/session termination.
 
-## Current state and custody
+## Current State
 
 #421 custody is validated:113 Wake registrations/83 existing and16 native registrations/14 existing, including this new integration checkout. Five Wake and six native checkouts show changes; native derived-index metadata accounts for most native dirt. All129 heads have verified private custody refs. Staged/unstaged patches restore successfully into private indices for all11 dirty checkouts, with live tracked-file hashes matched. Eligible untracked source/evidence archives were extracted/read and hash-verified. Opaque/generated/sensitive candidates are explicitly held in place; no retirement is authorized by an unreviewed payload. No live checkout or working branch was modified by restoration checks.
 
@@ -20,7 +20,7 @@ Private raw evidence: user-state reconcile420/inventory.json, custody/, custody-
 
 | Ticket | Blocked by | State | Owner | Acceptance |
 | --- | --- | --- | --- | --- |
-|421 custody|none|validated|primary|Heads, dirty recovery, runtime holds verified; tracker close pending|
+|421 custody|none|validated|primary|Heads, dirty recovery, runtime holds verified; tracker closed completed|
 |422 qualified integration|421|pending|delegate|Qualified Wake reconciliation actually integrated through PR|
 |423 main policy|421|pending|delegate|Both local-only policy intents integrated or proved superseded|
 |424 parked goal/refresh|421|pending|delegate|Two dirty source/evidence lanes reconciled|

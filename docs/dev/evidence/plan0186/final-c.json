@@ -1,0 +1,417 @@
+{
+  "state": "passed",
+  "uid": 1017,
+  "scripted_localhost_provider": true,
+  "external_model_calls": 0,
+  "cases": [
+    {
+      "case": "c-accepted-crash1",
+      "mode": "accepted-crash",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 12,
+      "rollback_preserved": true
+    },
+    {
+      "case": "c-adoption2",
+      "mode": "adoption",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 6,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-allowedstring1",
+      "mode": "deadline",
+      "authority_case": "allowed-string",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-bad-handoff1",
+      "mode": "bad-handoff",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-boolversion1",
+      "mode": "deadline",
+      "authority_case": "seal-bool-version",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-deadline-at1",
+      "mode": "deadline",
+      "authority_case": "deadline_at",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-deadline1",
+      "mode": "deadline",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-delete2",
+      "mode": "delete-completed",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 10,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-exhausted1",
+      "mode": "exhausted",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-limitstring1",
+      "mode": "deadline",
+      "authority_case": "limit-string",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-metadata1",
+      "mode": "success",
+      "authority_case": "metadata",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 10,
+      "rollback_preserved": true
+    },
+    {
+      "case": "c-missing1",
+      "mode": "deadline",
+      "authority_case": "missing-declaration",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-originalpause1",
+      "mode": "originalpause",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-ownerloss1",
+      "mode": "owner-loss",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 10,
+      "rollback_preserved": true
+    },
+    {
+      "case": "c-response-loss1",
+      "mode": "response-loss",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 10,
+      "rollback_preserved": true
+    },
+    {
+      "case": "c-retention2",
+      "mode": "retention",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 10,
+      "rollback_preserved": true
+    },
+    {
+      "case": "c-rollback-old1",
+      "mode": "success",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 10,
+      "rollback_preserved": true
+    },
+    {
+      "case": "c-scopenumber1",
+      "mode": "deadline",
+      "authority_case": "scope-number",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-sealaccount1",
+      "mode": "deadline",
+      "authority_case": "seal-account",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-sealmissing1",
+      "mode": "deadline",
+      "authority_case": "seal-missing",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-startup-fail1",
+      "mode": "startup-fail",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 10,
+      "rollback_preserved": true
+    },
+    {
+      "case": "c-unknown1",
+      "mode": "unknown",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-unknownpolicy1",
+      "mode": "deadline",
+      "authority_case": "unknown-policy",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-userpause1",
+      "mode": "userpause",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-version1",
+      "mode": "deadline",
+      "authority_case": "seal-version",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-wrong-digest1",
+      "mode": "wrong-digest",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 6,
+      "rollback_preserved": false
+    },
+    {
+      "case": "c-wrong-target1",
+      "mode": "wrong-target",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 6,
+      "rollback_preserved": false
+    },
+    {
+      "case": "r1-external-green-c1",
+      "mode": "deadline",
+      "authority_case": "tui-after-external",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "r1-legacy-green-c1",
+      "mode": "deadline",
+      "authority_case": "tui-legacy",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 8,
+      "rollback_preserved": false
+    },
+    {
+      "case": "r1-tui-green-c1",
+      "mode": "tui-authority",
+      "authority_case": "",
+      "harness_sha256": "43e1c871c2101f1193bf5680e042d99f587abcf9cf8f13aa4cbf901eaaa265f4",
+      "provider_requests": 10,
+      "rollback_preserved": true
+    }
+  ],
+  "case_count": 30,
+  "stopped_request_checks": [
+    {
+      "case": "c-allowedstring1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-bad-handoff1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-boolversion1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-deadline-at1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-deadline1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-exhausted1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-limitstring1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-missing1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-originalpause1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-scopenumber1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-sealaccount1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-sealmissing1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-unknown1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-unknownpolicy1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-userpause1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-version1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-wrong-digest1",
+      "stopped_provider_requests": [
+        3,
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "c-wrong-target1",
+      "stopped_provider_requests": [
+        3,
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "r1-external-green-c1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    },
+    {
+      "case": "r1-legacy-green-c1",
+      "stopped_provider_requests": [
+        3
+      ],
+      "additional_recovery_requests": 0
+    }
+  ],
+  "counter_continuity_checks": 36,
+  "retained_unchanged": 300,
+  "cold_pending_progressed": 40,
+  "packages": [
+    {
+      "package": "candidate-remediation-c",
+      "files": 6,
+      "tree_sha256": "4f4e344478da6cdbc8a790f319124b1eee0e4115012d6f5f69f157d79b1b8e82",
+      "unchanged": true
+    },
+    {
+      "package": "candidate-remediation-c-baseline",
+      "files": 6,
+      "tree_sha256": "79a084780bf34a37ff7028c886649d3f65e40b68e92301d4b1a138fcd022a986",
+      "unchanged": true
+    }
+  ],
+  "actual_older_rollback": true,
+  "source_commit": "fbe6dbfacff79360b00f2b38345b8aec991fb160",
+  "branch": "fix/413-recovery-integration",
+  "review_rounds": 1,
+  "remediation_passes": 1,
+  "manifest_boundary": "Package manifests captured during final matrix and compared at closeout; executable SHA checked by every journey. No pretest full-tree C snapshot.",
+  "working_install": false
+}
