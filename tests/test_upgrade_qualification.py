@@ -106,3 +106,15 @@ for line in sys.stdin:
             drifted=UpgradeQualification(root).run(job,config)
             self.assertEqual(drifted['status'],'held',drifted)
             self.assertIn('test digest mismatch',drifted['reason'])
+
+    def test_official_commit_archive_supported_and_foreign_source_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,package,job,config=self.fixture(directory)
+            stage=job['results']['stage']
+            stage['source']='https://github.com/openai/codex/archive/'+'a'*40+'.tar.gz'
+            accepted=UpgradeQualification(root).run(job,config)
+            self.assertEqual(accepted['status'],'fixture_verified',accepted)
+            stage['source']='https://github.com/untrusted/codex/archive/'+'a'*40+'.tar.gz'
+            rejected=UpgradeQualification(root).run(job,config)
+            self.assertEqual(rejected['status'],'held',rejected)
+            self.assertIn('official upstream',rejected['reason'])
