@@ -146,3 +146,13 @@ class UpgradeJobsTests(unittest.TestCase):
             self.assertEqual(after['state'],'held')
             self.assertEqual(after['cache_reclamation']['status'],'reclaimed')
             self.assertEqual(after['cache_reclamation']['bytes'],8)
+
+    def test_expired_host_grant_cannot_enable_the_bot(self):
+        import time
+        from codex_wake.managed_inventory import InventoryError
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);target={'host':'fixture'}
+            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={})))
+            actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target],expires_at=time.time()-1)
+            with self.assertRaises(InventoryError):
+                UpgradeJobs(root).execute(actor,'upgrades.enable',dict(expected_target=target),authorize=lambda:actor)
