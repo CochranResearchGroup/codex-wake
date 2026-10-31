@@ -194,7 +194,9 @@ Use `sessions close thread:THREAD_UUID` for an exact thread selector.
 `native` scheduling and `open --resume` take the bare UUID.
 
 `sessions open` requires explicit new or exact resume and reuses an existing
-attachment; extra attachment is explicit. Close guards pending work and active
+attachment; extra attachment is explicit. When a saved conversation has no name,
+open initializes its name from `--name` so the TUI and discovery can correlate
+the attachment. Existing conversation names are preserved. Close guards pending work and active
 or unknown recipients. Force preserves conversations and wakes; cancel/archive
 are separate. Provide custom bus roots explicitly for close checks.
 
