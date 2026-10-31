@@ -99,6 +99,9 @@ for name, spec in notice_specs().items():
 from .recovery_commands import tool_specs as recovery_specs
 for name, spec in recovery_specs().items():
     TOOLS[name] = (spec[1], dict(type='object',properties=spec[3],required=spec[4],additionalProperties=False))
+from .upgrade_commands import tool_specs as upgrade_specs
+for name, spec in upgrade_specs().items():
+    TOOLS[name] = (spec[1], dict(type='object',properties=spec[3],required=spec[4],additionalProperties=False))
 from .grok_commands import tool_specs as grok_specs
 for name, spec in grok_specs().items():
     TOOLS[name] = (spec[1], dict(type='object',properties=spec[3],required=spec[4],additionalProperties=False))
@@ -119,6 +122,8 @@ class ProtectedOperations:
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
+        **{'upgrades.'+verb: ('observe' if verb in ('status','list','show') else 'admin',None,None)
+            for verb in ('status','list','show','enable','disable','start','advance','cancel')},
         **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait','checkpoint') else 'control', None, None)
             for verb in ('capabilities','create','prompt','wait','cancel','checkpoint','fork')},
         'health.observe': ('observe', None, None),
@@ -170,7 +175,13 @@ class ProtectedOperations:
             raise InventoryError('unsupported_operation', 'operation is unsupported')
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
-        if operation.startswith('grok.'):
+        if operation.startswith('upgrades.'):
+            from .upgrade_jobs import UpgradeJobs
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host upgrade owner unavailable')
+            result = UpgradeJobs(self.operations.inventory.root).execute(actor,operation,arguments,
+                authorize=lambda: self.authority.authenticate(token))
+        elif operation.startswith('grok.'):
             from .controller_grok import ControllerGrok
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host Grok owner unavailable')

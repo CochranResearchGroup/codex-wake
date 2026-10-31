@@ -1013,3 +1013,17 @@ lanes:
     integration: validated_prs
     updated_at: 2026-10-31
     disposition: Tickets421–429 closed; primary anchored5e2315f; one review and one TDD pass resolve2P2 findings; final fix/evidence PR and fresh primary readback complete custody; physical paths retained, no working runtime effects
+
+  - id: P193
+    owner: primary / ecochran76
+    objective: Autonomous bounded Codex patch repair and future-launch upgrade
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/444, https://github.com/CochranResearchGroup/codex-wake/issues/447]
+    plan: docs/dev/plans/0193-2026-10-31-autonomous-codex-upgrade-bot.md
+    branch: feat/autonomous-upgrade-bot-spec
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P179, P190]
+    updated_at: 2026-10-31
+    disposition: Ticket447 source validated; dependent worker lanes next; no production activation

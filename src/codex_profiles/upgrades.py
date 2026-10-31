@@ -140,19 +140,20 @@ def _commands(commands,cwd,receipt,phase, *, timeout=600):
     for command in commands:
         if not isinstance(command,list) or not command or any(not isinstance(x,str) for x in command):
             raise UpgradeError('commands must be explicit argv arrays')
-        env={key:os.environ[key] for key in ('PATH','LANG','LC_ALL') if key in os.environ}
+        env={key:os.environ[key] for key in ('PATH','LANG','LC_ALL','CARGO_BUILD_JOBS','CODEX_UPGRADE_OWNED_GROUP') if key in os.environ}
         env['CODEX_UPGRADE_PACKAGE']=str(cwd)
         try:
             with tempfile.TemporaryDirectory(prefix='codex-upgrade-home-') as home:
                 env.update(HOME=home,CODEX_HOME=str(Path(home)/'.codex'),XDG_CONFIG_HOME=str(Path(home)/'.config'),XDG_DATA_HOME=str(Path(home)/'.local/share'))
                 Path(env['CODEX_HOME']).mkdir(mode=0o700)
-                process=subprocess.Popen(command,cwd=cwd,env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
+                process=subprocess.Popen(command,cwd=cwd,env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=env.get('CODEX_UPGRADE_OWNED_GROUP') != '1')
                 try:
                     stdout,stderr=process.communicate(timeout=timeout)
                 except subprocess.TimeoutExpired:
-                    os.killpg(process.pid,signal.SIGKILL);process.communicate();raise
+                    (process.kill() if env.get('CODEX_UPGRADE_OWNED_GROUP') == '1' else os.killpg(process.pid,signal.SIGKILL));process.communicate();raise
                 finally:
-                    try:os.killpg(process.pid,signal.SIGKILL)
+                    try:
+                        if env.get('CODEX_UPGRADE_OWNED_GROUP') != '1':os.killpg(process.pid,signal.SIGKILL)
                     except ProcessLookupError:pass
                 run=subprocess.CompletedProcess(command,process.returncode,stdout,stderr)
         except subprocess.TimeoutExpired as error:

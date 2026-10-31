@@ -8194,3 +8194,13 @@ are byte-identical. Controller remains masked and current caller has no host
 refresh grant. Prepared scope/service proposals are not applied. Shared cutover
 and actual requesting-session proof remain open; 318/310 are not closed.
 Memory disposition: forbidden because no memory write was authorized.
+
+## 2026-10-31 — autonomous upgrade bot specification
+
+Published #444 from the operator-confirmed two-round interview and chat confirmation
+of the public upgrade-job test seam. Plan0193 records scope, limits, capability
+review, disabled-state fencing, future-launch-only promotion and real disposable
+0.166 acceptance. Existing #369/#377/#393/#413 outcomes remain distinct. Drafted
+vertical child graph for required review before publishing children. Isolated
+branch feat/autonomous-upgrade-bot-spec starts at5df7c81; runtime untouched.
+Validation: issue body/labels/state read back; git diff --check passed.

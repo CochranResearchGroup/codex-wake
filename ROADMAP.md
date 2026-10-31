@@ -1397,3 +1397,10 @@ stacked PR327 on PR326. One broad Standards/Spec review and one bounded TDD
 pass repaired assignment revocation checks and contextual approval inspection.
 Installed acceptance #310 and runtime gaps #318/#319 remain open; no production
 policy changes, deployment or resource renewal.
+
+2026-10-31 autonomous upgrade bot specification #444: confirmed semantic repair,
+independent review, disposable qualification and opt-in automatic future-launch
+promotion. Plan0193 owns the bounded design; child graph awaits granularity and
+blocking-edge review. Reuses #377/#393; does not reopen them. #369 remains broader
+coordination, #413 gates running-daemon recovery and #380 production activation.
+No implementation or deployment from this planning slice.
