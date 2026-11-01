@@ -19,6 +19,7 @@ import stat
 import subprocess
 import sys
 import time
+import signal
 
 
 def digest(data):
@@ -197,31 +198,47 @@ def run(args):
             def execute(row):
                 row["status"] = "RUNNING"
                 save()
+                process = None
                 try:
-                    result = subprocess.run(
+                    process = subprocess.Popen(
                         row["argv"],
                         cwd=repo,
-                        capture_output=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
                         text=True,
                         errors="replace",
-                        timeout=args.timeout,
+                        start_new_session=os.name == "posix",
                     )
+                    stdout, stderr = process.communicate(timeout=args.timeout)
                     row.update(
-                        returncode=result.returncode,
-                        stdout=result.stdout,
-                        stderr=result.stderr,
-                        status="PASS" if result.returncode == 0 else "FAIL",
+                        returncode=process.returncode,
+                        stdout=stdout,
+                        stderr=stderr,
+                        status="PASS" if process.returncode == 0 else "FAIL",
                     )
                 except subprocess.TimeoutExpired as error:
-                    # TimeoutExpired carries bytes even when text=True. Preserve
-                    # progress so a bounded failure can be diagnosed without replay.
-                    def partial_text(value):
-                        return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else value or ""
+                    if os.name == "posix":
+                        try:
+                            os.killpg(process.pid, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
+                    else:
+                        process.kill()
+                    stdout, stderr = process.communicate()
                     row.update(status="FAIL", error=str(error), timed_out=True,
-                               stdout=partial_text(error.stdout),
-                               stderr=partial_text(error.stderr))
+                               stdout=stdout, stderr=stderr)
                 except OSError as error:
                     row.update(status="FAIL", error=str(error))
+                finally:
+                    if process is not None and process.poll() is None:
+                        if os.name == "posix":
+                            try:
+                                os.killpg(process.pid, signal.SIGKILL)
+                            except ProcessLookupError:
+                                pass
+                        else:
+                            process.kill()
+                        process.wait()
                 save()
 
             for row in receipt["checks"]:

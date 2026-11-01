@@ -366,3 +366,13 @@ replay/every subprocess; fallback/changed wrappers hold without a coding charge.
 No original or successor fixture config or job is changed, and no native retry
 is started. This diagnostic work does not count as the final broad review or
 post-review findings TDD round.
+
+
+A second timeout regression reproduced an owned child surviving the runner's
+expired command. POSIX checks now launch in a new session; timeout cleanup kills
+that owned process group before collecting output. The regression uses a real
+child ignoring SIGTERM and observes its exit, then verifies failed status and no
+success actions. Seven runner tests pass on both3.12 and3.11. The
+ongoing comprehensive snapshot8595293 predates this process-group change and
+host-tool preflight2d928ba; those changes have focused validation, not that full
+run's identity. Non-POSIX fallback terminates the direct child only.

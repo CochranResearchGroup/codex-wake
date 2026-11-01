@@ -6,6 +6,9 @@ import subprocess
 import shutil
 import sys
 import tempfile
+import os
+import signal
+import time
 import unittest
 
 RUNNER = Path(__file__).resolve().parents[1] / "scripts/validate_candidate.py"
@@ -94,6 +97,37 @@ class CandidateValidationTests(unittest.TestCase):
         self.assertTrue(check["timed_out"])
         self.assertEqual(receipt["checks"][1]["status"], "BLOCKED")
         self.assertEqual(receipt["actions"][0]["status"], "BLOCKED")
+
+    @unittest.skipUnless(sys.platform == "linux", "process exit observation uses Linux procfs")
+    def test_timeout_stops_owned_descendants_that_ignore_termination(self):
+        marker = self.base / "child.pid"
+        child = ("import os,signal,time;from pathlib import Path;"
+                 "signal.signal(signal.SIGTERM,signal.SIG_IGN);"
+                 f"Path({str(marker)!r}).write_text(str(os.getpid()));time.sleep(30)")
+        parent = ("import subprocess,sys,time;"
+                  f"subprocess.Popen([sys.executable,'-c',{child!r}],"
+                  "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);time.sleep(30)")
+        try:
+            process, receipt = self.run_candidate(
+                [dict(name="owned tree", argv=[sys.executable,"-c",parent])],
+                timeout=0.5,
+            )
+            self.assertNotEqual(process.returncode,0)
+            self.assertTrue(receipt["checks"][0]["timed_out"])
+            self.assertTrue(marker.exists(),"child must start before testing timeout cleanup")
+            pid = int(marker.read_text())
+            deadline=time.monotonic()+1
+            while time.monotonic()<deadline:
+                state=Path(f"/proc/{pid}/stat")
+                if not state.exists() or state.read_text().rsplit(')',1)[1].split()[0]=='Z':
+                    break
+                time.sleep(.01)
+            else:
+                self.fail("timed-out check left its owned descendant running")
+        finally:
+            if marker.exists():
+                try:os.kill(int(marker.read_text()),signal.SIGKILL)
+                except ProcessLookupError:pass
 
     def test_required_failure_blocks_later_checks_and_commit(self):
         command = [sys.executable, "-c", "raise SystemExit(23)"]
