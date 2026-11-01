@@ -33,7 +33,7 @@ class CandidateValidationTests(unittest.TestCase):
             ["git", "-C", str(self.repo), *args], text=True
         ).strip()
 
-    def run_candidate(self, checks, actions=None):
+    def run_candidate(self, checks, actions=None, timeout=300):
         manifest = self.base / "checks.json"
         manifest.write_text(
             json.dumps(
@@ -69,12 +69,31 @@ class CandidateValidationTests(unittest.TestCase):
                 str(manifest),
                 "--receipt",
                 str(receipt),
+                "--timeout",
+                str(timeout),
             ],
             capture_output=True,
             text=True,
         )
         self.assertTrue(receipt.exists(), process.stderr)
         return process, json.loads(receipt.read_text())
+
+    def test_timeout_retains_partial_output_and_blocks_success(self):
+        process, receipt = self.run_candidate(
+            [dict(name="slow", argv=[sys.executable, "-c",
+                "import os,time; os.write(1,b'completed first test\\n'); "
+                "os.write(2,b'running second test\\xff\\n'); time.sleep(10)"]),
+             dict(name="later", argv=[sys.executable, "-c", "pass"])],
+            timeout=0.2,
+        )
+        self.assertNotEqual(process.returncode, 0)
+        check = receipt["checks"][0]
+        self.assertEqual(check["status"], "FAIL")
+        self.assertEqual(check["stdout"], "completed first test\n")
+        self.assertEqual(check["stderr"], "running second test\ufffd\n")
+        self.assertTrue(check["timed_out"])
+        self.assertEqual(receipt["checks"][1]["status"], "BLOCKED")
+        self.assertEqual(receipt["actions"][0]["status"], "BLOCKED")
 
     def test_required_failure_blocks_later_checks_and_commit(self):
         command = [sys.executable, "-c", "raise SystemExit(23)"]

@@ -212,7 +212,15 @@ def run(args):
                         stderr=result.stderr,
                         status="PASS" if result.returncode == 0 else "FAIL",
                     )
-                except (OSError, subprocess.TimeoutExpired) as error:
+                except subprocess.TimeoutExpired as error:
+                    # TimeoutExpired carries bytes even when text=True. Preserve
+                    # progress so a bounded failure can be diagnosed without replay.
+                    def partial_text(value):
+                        return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else value or ""
+                    row.update(status="FAIL", error=str(error), timed_out=True,
+                               stdout=partial_text(error.stdout),
+                               stderr=partial_text(error.stderr))
+                except OSError as error:
                     row.update(status="FAIL", error=str(error))
                 save()
 
