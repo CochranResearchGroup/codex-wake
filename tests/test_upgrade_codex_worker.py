@@ -25,6 +25,8 @@ report={'schema_version':1,'status':'approved' if 'reviewer' in props else 'repa
 if 'reviewer' in props:
  report['reviewer']=props['reviewer']['const']
  report['findings']=[]
+ if 'patch_dispositions' in props:
+  report['patch_dispositions']={key:dict(disposition='rewritten',intent=value['properties']['intent']['const'],evidence='fixture independent source evidence',equivalence='') for key,value in props['patch_dispositions']['properties'].items()}
 else:
  report['identity']=props['identity']['const']
  report['patch_dispositions']={key:dict(disposition='rewritten',evidence='fixture source repair') for key in props['patch_dispositions']['properties']}
@@ -73,6 +75,19 @@ pathlib.Path(os.environ['CODEX_HOME']).joinpath('fixture-invocation.json').write
             self.assertIn('independent read-only source reviewer',invocation['prompt'])
             self.assertIn('Do not trust worker assertions as proof',invocation['prompt'])
             self.assertTrue(result['adapter_provenance']['ephemeral'])
+
+    def test_full_patch_review_does_not_invent_an_interrupted_worker(self):
+        for interrupted in (False,True):
+            with self.subTest(interrupted=interrupted), tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);config,packet,response,home,workspace=self.fixture(root,'reviewer')
+                declaration=json.loads(packet.read_text());declaration['require_patch_dispositions']=True
+                if interrupted:declaration['interrupted_worker']={'kind':'interrupted_worker_no_completion_report','worker_completed':False}
+                packet.write_text(json.dumps(declaration))
+                result=run(config,'reviewer',packet,response)
+                self.assertEqual(result['patch_dispositions']['health']['disposition'],'rewritten')
+                prompt=json.loads((home/'fixture-invocation.json').read_text())['prompt']
+                self.assertIn('Independently disposition EVERY original patch',prompt)
+                self.assertEqual('original worker was interrupted' in prompt,interrupted)
 
     def test_mismatched_executable_or_outside_account_never_reaches_native_cli(self):
         with tempfile.TemporaryDirectory() as directory:
