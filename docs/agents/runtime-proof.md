@@ -22,3 +22,13 @@ this cache, refuses active or uncertain workers, and records reclaimed bytes.
 Packages, rollback selections and evidence are outside this cleanup boundary.
 Legacy job-local `cargo-target` scratch remains disposable. Cache reuse is
 compiler work reuse, not proof of a fresh compilation or package acceptance.
+
+An opaque recipe evidence label does not establish or invalidate a native build.
+Qualification can derive provenance from the owned completed build commands,
+immutable package and exact native probes, independently approved source/tests,
+review execution and prepared recipe. The original label and receipts remain
+unchanged. Public `upgrades.reconcile` mode `qualification_only` archives the
+prior qualification hold, revalidates these identities and pinned acceptance
+artifacts, and readmits only qualification under the same job, policy, counters
+and original deadline. It runs no coding worker or rebuild and grants no new
+allowance; fresh qualification and promotion remain separate gates.

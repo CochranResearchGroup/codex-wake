@@ -211,8 +211,9 @@ class UpgradeQualification:
         return dict(kind=kind,uid=os.getuid(),distro=distro,shared_kernel=True)
 
     def genuine_provenance(self,stage,package,job,guard):
+        derived=None
         if stage.get('evidence_scope') not in ('official_source_build','native_source_build','disposable_native_build'):
-            raise QualificationError('native source-build provenance required; fixtures cannot qualify by environment location')
+            derived=self.reviewed_build_provenance(job)
         if not official_source_url(stage.get('source')):
             raise QualificationError('official upstream source provenance required')
         source=stage['source_identity'].get('source_files')
@@ -236,8 +237,116 @@ class UpgradeQualification:
                 expected='codex-cli '+stage['source_identity']['upstream_version']
                 if process.returncode or len(version)>4096 or version!=expected:
                     raise QualificationError('native executable version differs from pinned upstream identity')
-                return dict(value=version,executable_sha256=stage['build']['sha256'])
+                result=dict(value=version,executable_sha256=stage['build']['sha256'])
+                if derived:result['derived_reviewed_build_provenance']=derived
+                return result
             finally:self.stop(process)
+
+    def reviewed_build_provenance(self,job):
+        """Derive proof from the existing owned build, never its display label."""
+        from .upgrade_repair import _inventory, _identities
+        directory=self.root/'upgrade-jobs'/job['id']
+        def read(path):
+            path=Path(path)
+            if path.is_symlink() or not path.resolve(strict=True).is_relative_to(directory.resolve(strict=True)):
+                raise QualificationError('reviewed build artifact outside owned job')
+            return json.loads(path.read_text())
+        stage=job.get('results',{}).get('stage',{})
+        repair=job.get('results',{}).get('repair',{})
+        if stage.get('status')!='staged' or repair.get('status')!='reviewed':
+            raise QualificationError('native source-build provenance requires a reviewed staged build')
+        stage_dir=directory/'build-store/stages'/job['stage_id']
+        if read(stage_dir/'receipt.json')!=stage:
+            raise QualificationError('retained stage receipt changed')
+        package=stage_dir/'package';files=package_inventory(package)
+        if files!=stage.get('files') or stage.get('build',{}).get('executable')!=str(package/'bin/codex') or files['bin/codex']['sha256']!=stage['build'].get('sha256'):
+            raise QualificationError('reviewed build package changed')
+        with (package/'bin/codex').open('rb') as stream:
+            if stream.read(4)!=b'\x7fELF':raise QualificationError('reviewed source build requires a native executable')
+        original=Path(job['recipe_path'])
+        if content_hash(original)!=job['recipe_sha256']:
+            raise QualificationError('original build recipe changed')
+        recipe=json.loads(original.read_text())
+        if not official_source_url(stage.get('source')) or stage['source']!=recipe.get('source',{}).get('official_url'):
+            raise QualificationError('reviewed build official source differs')
+        if read(directory/'source-preparation.json').get('recipe_sha256')!=job['recipe_sha256']:
+            raise QualificationError('original source preparation differs')
+        prepared_path=Path(repair.get('prepared_recipe',''));prepared=read(prepared_path)
+        if stage.get('recipe_sha256')!=content_hash(prepared_path):
+            raise QualificationError('staged prepared recipe differs')
+        mutable={'source','patches','repair_provenance'}
+        if {k:v for k,v in recipe.items() if k not in mutable}!={k:v for k,v in prepared.items() if k not in mutable}:
+            raise QualificationError('reviewed recipe changed execution policy')
+        source=Path(prepared.get('source',{}).get('tree',''))
+        if source.is_symlink() or source.resolve(strict=True)!=(directory/'repair/reviewed-source').resolve(strict=True):
+            raise QualificationError('reviewed source outside owned snapshot')
+        inventory=_inventory(source);candidate,tests=_identities(inventory)
+        expected={name:value['sha256'] for name,value in inventory.items()}
+        if prepared['source'].get('files')!=expected or stage.get('source_identity',{}).get('source_files')!=expected:
+            raise QualificationError('staged source differs from reviewed snapshot')
+        review=repair.get('review',{})
+        for evidence in (repair,review,prepared.get('repair_provenance',{})):
+            if evidence.get('candidate_digest')!=candidate or evidence.get('tests_digest')!=tests:
+                raise QualificationError('reviewed source or tests changed')
+        if prepared.get('repair_provenance',{}).get('review')!=review or review.get('status')!='approved':
+            raise QualificationError('independent approved review required')
+        config=json.loads((self.root/'upgrade-bot.json').read_text());roles=config.get('repair',{})
+        if review.get('reviewer')!=roles.get('reviewer',{}).get('identity') or review.get('reviewer')==roles.get('worker',{}).get('identity'):
+            raise QualificationError('independent review identity differs')
+        journal=read(directory/'repair/repair-state.json');commands=journal.get('commands',[])
+        if journal.get('status')!='reviewed' or journal.get('result')!=repair or journal.get('inflight'):
+            raise QualificationError('completed trusted repair journal required')
+        reviews=[(n,c) for n,c in enumerate(commands,1) if c.get('role')=='reviewer']
+        last_worker=max((n for n,c in enumerate(commands,1) if c.get('role')=='worker'),default=0)
+        verified=[c.get('argv') for n,c in enumerate(commands,1) if c.get('role')=='verify' and last_worker<n<(reviews[-1][0] if reviews else 0) and c.get('status')=='completed' and c.get('exit_code')==0]
+        expected_verification=roles.get('verify',[])
+        if not expected_verification or any(argv not in verified for argv in expected_verification):
+            raise QualificationError('sealed verification commands must complete after source repair')
+        if not verified or not reviews or reviews[-1][1].get('status')!='completed' or reviews[-1][1].get('exit_code')!=0 or reviews[-1][1].get('argv')!=roles.get('reviewer',{}).get('argv') or roles.get('reviewer',{}).get('argv')==roles.get('worker',{}).get('argv'):
+            raise QualificationError('completed verification and review required')
+        report_path=directory/'repair'/f'{reviews[-1][0]}-reviewer-response.json'
+        if dict(read(report_path),report_sha256=content_hash(report_path))!=review:
+            raise QualificationError('native reviewer report changed')
+        adapter=review.get('adapter_provenance',{});events=Path(adapter.get('events',''))
+        if adapter.get('role')!='reviewer' or adapter.get('identity')!=review['reviewer'] or adapter.get('evidence_scope')!='native_source_maintenance_execution_not_installed_qualification' or not events.resolve(strict=True).is_relative_to(directory.resolve(strict=True)) or content_hash(events)!=adapter.get('events_sha256'):
+            raise QualificationError('native review execution proof differs')
+        for phase,key in (('build','build'),('qualify','qualify')):
+            observed=[c for c in stage.get('commands',[]) if c.get('phase')==phase]
+            if not observed or [c.get('argv') for c in observed]!=prepared.get(key) or any(c.get('exit')!=0 for c in observed):
+                raise QualificationError('completed staged build and probe commands required')
+        reports=stage.get('qualification_reports',[])
+        if not reports or any(r.get('status')!='passed' or r.get('native_sha256')!=files['bin/codex']['sha256'] or r.get('model_requests')!=0 or r.get('external_provider_requests')!=0 or r.get('owned_processes_remaining')!=[] for r in reports):
+            raise QualificationError('exact native stage probe proof required')
+        return dict(kind='derived_from_reviewed_source_and_completed_native_stage',candidate_digest=candidate,tests_digest=tests,
+            package_sha256=object_hash(files),stage_sha256=object_hash(stage),review_sha256=object_hash(review),
+            repair_journal_sha256=content_hash(directory/'repair/repair-state.json'),prepared_recipe_sha256=content_hash(prepared_path),
+            declared_evidence_scope=stage.get('evidence_scope'))
+
+    def reconcile(self,job,config,*,guard):
+        """Readmit qualification of the exact completed stage without rebuilding."""
+        self.check(job,guard)
+        old=job.get('results',{}).get('qualification',{})
+        if old.get('status')!='held':raise QualificationError('completed held qualification required')
+        if old.get('owned_processes_remaining')!=[]:
+            raise QualificationError('previous qualification teardown is unresolved')
+        host=json.loads((self.root/'upgrade-bot.json').read_text())
+        if host.get('qualification')!=config:
+            raise QualificationError('qualification configuration differs from sealed host')
+        path=Path(old.get('receipt_path',''));expected=self.root/'upgrade-jobs'/job['id']/'qualification/receipt.json'
+        if path.is_symlink() or path.resolve(strict=True)!=expected.resolve(strict=True) or json.loads(path.read_text())!=old or object_hash({k:v for k,v in old.items() if k!='receipt_sha256'})!=old.get('receipt_sha256'):
+            raise QualificationError('previous qualification receipt changed')
+        stage=job['results']['stage']
+        if old.get('job_id')!=job['id'] or old.get('job_key')!=job['key'] or old.get('target')!=job['target'] or old.get('configuration_sha256',object_hash(config))!=object_hash(config) or old.get('candidate_sha256')!=object_hash(stage) or old.get('package_sha256')!=object_hash(stage['files']):
+            raise QualificationError('qualification hold belongs to changed inputs')
+        tests=self.test_files(config);proof=self.reviewed_build_provenance(job)
+        archive=expected.parent/('held-'+old['receipt_sha256']+'.json')
+        if archive.is_symlink() or (archive.exists() and archive.read_bytes()!=path.read_bytes()):raise QualificationError('qualification archive changed')
+        if not archive.exists():_atomic(archive,old)
+        self.check(job,guard)
+        return dict(status='qualification_ready',mode='qualification_only',job_id=job['id'],provenance=proof,
+            qualification_configuration_sha256=object_hash(config),tests_sha256=object_hash(tests),
+            configuration_binding='original_job_policy_revalidated',
+            previous_qualification_sha256=old['receipt_sha256'],previous_qualification_path=str(archive))
 
     def test_files(self,config):
         files=config.get('test_files')

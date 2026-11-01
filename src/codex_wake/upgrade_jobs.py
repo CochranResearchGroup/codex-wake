@@ -507,7 +507,7 @@ class UpgradeJobs:
 
     def reconcile(self, actor, arguments, authorize):
         mode=arguments['mode']
-        if mode not in ('verify_only','verify_review_only'):
+        if mode not in ('verify_only','verify_review_only','qualification_only'):
             raise InventoryError('invalid_argument','explicit verification-only reconciliation mode required')
         with self.locked():
             config=self.config();state=self.load();job=self.job(state,arguments['job_id'])
@@ -533,6 +533,16 @@ class UpgradeJobs:
                 reason=self.budget_reason(job)
                 if reason:raise InventoryError('reconciliation_refused',reason)
             previous_reason=job.get('reason')
+            if mode=='qualification_only':
+                from .upgrade_qualification import UpgradeQualification
+                try:receipt=UpgradeQualification(self.root,now=self.now).reconcile(job,config.get('qualification',{}),guard=guard)
+                except (OSError,ValueError,KeyError) as error:raise InventoryError('reconciliation_refused',str(error)) from error
+                guard()
+                job.setdefault('reconciliations',[]).append(dict(mode=mode,at=self.now(),previous_reason=previous_reason,receipt=receipt,controller_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()))
+                job.update(state='qualifying',reason='qualification_readmitted',resume_mode=mode)
+                self.event(state,'qualification_readmitted',job,reason='same_stage_original_budget',mode=mode)
+                self.save(state)
+                return dict(job=job)
             receipt=reconcile_reviewed_recipe(self.root,job,config,guard=guard,**({'mode':mode} if mode!='verify_only' else {}))
             if not isinstance(receipt,dict) or receipt.get('status')!='verification_ready' or receipt.get('mode')!=mode:
                 raise InventoryError('reconciliation_refused','verification readiness not established')
