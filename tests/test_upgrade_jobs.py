@@ -312,5 +312,17 @@ class UpgradeJobsTests(unittest.TestCase):
                 direct=post('/operations',dict(operation='upgrades.status',arguments=args))
                 mcp=post('/mcp',dict(jsonrpc='2.0',id=2,method='tools/call',params=dict(name='wake_upgrades_status',arguments=args)))
                 self.assertEqual(mcp['result']['structuredContent']['result'],direct['result'])
+                from jsonschema import Draft202012Validator
+                published={tool['name']:tool for tool in tools}
+                for verb in ('discovery','poll'):
+                    with self.subTest(operation=verb):
+                        name='wake_upgrades_'+verb
+                        Draft202012Validator(published[name]['inputSchema']).validate(args)
+                        called=post('/mcp',dict(jsonrpc='2.0',id=3,method='tools/call',params=dict(name=name,arguments=args)))
+                        expected=post('/operations',dict(operation='upgrades.'+verb,arguments=args))
+                        self.assertFalse(called['result']['isError'],called)
+                        self.assertEqual(called['result']['structuredContent'],expected)
+                for verb in ('show','advance','cancel','rollback','reconcile'):
+                    self.assertIn('job_id',published['wake_upgrades_'+verb]['inputSchema']['required'])
             finally:
                 server.shutdown();server.server_close();thread.join(timeout=2)
