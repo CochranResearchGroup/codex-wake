@@ -479,11 +479,19 @@
       "config_sha256": "9e0befe0229d141e118265f5165601dcb38257c9250a703e653438707c0fd330",
       "recipe_sha256": "e6ea265fac4a02ca86dedfe0ffbc55d3e2b81eef1327308e4703d41bb3023ac3",
       "cached_generation_evidence_sha256": "0df000fa76e8a8b870c60f80b9dea29edce85b10c5232201e1b39a3d6742afbe",
-      "last_observation_monotonic": 85142.547748107,
-      "last_observation": "actual Rust verification running; cached generation validated; coding0/reviewer0; no native package",
+      "last_observation_monotonic": 86268.28,
+      "last_observation": "protocol4pass/0fail/1ignored; app-server tui_health actual compile running; coding0/reviewer0; no package",
       "host_evidence": "/home/ecochran76/.local/state/codex-wake/testing/ticket453/fresh-verification-20261101/retry",
       "post_supervisor_pid": 10330,
-      "post_acceptance_sha256": "67065949128323197ebecda52cce8b667a1b7248df1bc7a4774c7edc8344b2a3"
+      "post_acceptance_sha256": "67065949128323197ebecda52cce8b667a1b7248df1bc7a4774c7edc8344b2a3",
+      "continuation_wake": {
+        "id": "wake_intent_967af61945e540f48f6fee96d144978e",
+        "armed": false,
+        "state": "retained_pending_time",
+        "reason": "original_utc_unavailable; relative_origin_unanchored",
+        "monitor_ready": true,
+        "fallback": "bounded foreground manual supervision; no replacement intent or deadline reset"
+      }
     }
   }
 }

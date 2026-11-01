@@ -517,3 +517,29 @@ immediately before public start. Native acceptance and final review/TDD remain o
 
 Private diagnostic SHA033b9390d134d0b6b35ea11ee1081d6b976954da74981b43064f8bdda1121598;
 source diff SHAf7de0de1237b61a80d16518150ce9204a5f6954b7dbffe48e4eb240bf3073324.
+
+### Bounded retry started
+
+Public job `9e709dff983a423886954202a739351d` started once in disposable
+`/home/ubuntu/codex-profile-lab/upgrade453-retry-20261101`, from controller
+`c9aafa4367ee98159cd3e8c8316a2d6ffd3199a7`. Duration3211seconds, monotonic
+start84455.241567116, job deadline87666.241567116, post/cleanup88566.241567116;
+both deadlines precede the original packet's limits. Freeze SHA
+`53de7da884e6d69b1bdd27651fdea6d0ed980269a5ef8f3e973f943ee6104398`.
+The ledger retains config/recipe and cached-generation pins. Generation reuse
+validated actual completed job72 output; it is not a regeneration rerun.
+
+Latest verified observation at monotonic86268.28: protocol tests4passed/0failed/
+1ignored, actual app-server TUI-health compilation running, coding0/reviewer0,
+no complete package. Owned files5.21GB; Linux available39.88GiB and Windows
+physical free5.61GiB. Later control reads timed out; the last good snapshot is
+explicitly stale. The in-distro monitor and passive post supervisor were placed
+once; no duplicate launch or third attempt is authorized.
+
+An attempted five-minute self-wake retained intent
+`wake_intent_967af61945e540f48f6fee96d144978e`, but was NOT armed: monitor ready,
+`original_utc_unavailable` / `relative_origin_unanchored`. It is not delivery
+proof. Primary retains bounded foreground supervision with manual resources;
+no replacement intent, governor enrollment or allowance renewal occurred.
+
+Native qualification remains pending. Final broad review/TDD remain0/0.
