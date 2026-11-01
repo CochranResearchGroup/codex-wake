@@ -45,7 +45,7 @@ def prepare_reviewed_recipe(root, job, config, *, guard, checkpoint):
         base=subprocess.check_output(['git','rev-parse','HEAD'],cwd=source,text=True).strip()
         prepared=dict(receipt,base_revision=base,source_files=observed)
         upgrades._atomic(preparation,prepared)
-    repair_config=dict(declaration,base_revision=prepared['base_revision'])
+    repair_config=dict(declaration,base_revision=prepared['base_revision'],compiler_cache=str(Path(root)/'upgrade-compiler-cache'))
     checked_recipe=json.loads(json.dumps(original))
     checked_recipe['source']=dict(original['source'],files=prepared['source_files'])
     guard()
@@ -68,7 +68,7 @@ def reconcile_reviewed_recipe(root,job,config,*,guard,mode="verify_only"):
         checked=json.loads(json.dumps(original))
         checked['source']=dict(original['source'],files=prepared['source_files'])
         owner=UpgradeRepair(directory/'upstream-source',directory/'repair',
-            dict(declaration,base_revision=prepared['base_revision']),guard=guard)
+            dict(declaration,base_revision=prepared['base_revision'],compiler_cache=str(Path(root)/'upgrade-compiler-cache')),guard=guard)
         return owner.reconcile(job,checked,mode=mode)
     except (OSError,ValueError,KeyError) as error:
         raise InventoryError('reconciliation_refused',str(error)) from error

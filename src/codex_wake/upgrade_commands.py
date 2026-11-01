@@ -5,7 +5,7 @@ import json
 def tool_specs():
     text = dict(type='string', minLength=1, maxLength=200)
     specs = {}
-    for verb in ('status','list','show','enable','disable','start','advance','cancel','poll','discovery','rollback','reconcile'):
+    for verb in ('status','list','show','enable','disable','start','advance','cancel','poll','discovery','rollback','reconcile','cache_cleanup'):
         properties = {'expected_target': {'type':'object', 'minProperties':1}}
         if verb in ('show','advance','cancel','poll','discovery','rollback','reconcile'):properties['job_id']=text
         if verb=='reconcile':properties['mode']={'type':'string','enum':['verify_only','verify_review_only']}

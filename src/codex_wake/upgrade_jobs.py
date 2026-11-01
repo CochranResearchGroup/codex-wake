@@ -156,7 +156,7 @@ class UpgradeJobs:
     def execute(self, actor, operation, arguments, *, authorize=None):
         verb = operation.removeprefix('upgrades.')
         allowed = dict(status=set(), list=set(), show={'job_id'}, enable=set(), disable=set(),
-                       start={'recipe', 'expected_recipe_sha256', 'upstream_version'}, advance={'job_id'}, cancel={'job_id'}, rollback={'job_id','operation_id'}, reconcile={'job_id','mode'})
+                       start={'recipe', 'expected_recipe_sha256', 'upstream_version'}, advance={'job_id'}, cancel={'job_id'}, rollback={'job_id','operation_id'}, reconcile={'job_id','mode'}, cache_cleanup=set())
         if not operation.startswith('upgrades.') or verb not in allowed or not isinstance(arguments, dict):
             raise InventoryError('invalid_argument', 'exact upgrade job arguments required')
         optional = {'expected_recipe_sha256', 'upstream_version'} if verb == 'start' else set()
@@ -164,6 +164,7 @@ class UpgradeJobs:
         if set(arguments) - (allowed[verb] | {'expected_target'}) or required - set(arguments):
             raise InventoryError('invalid_argument', 'exact upgrade job arguments required')
         config = self.config()
+        self.compiler_cache(config)
         self.guard(actor, config['target'], arguments, authorize, write=verb not in READS)
         if verb == 'reconcile':
             with self.runner_lease(arguments['job_id']):
@@ -184,7 +185,15 @@ class UpgradeJobs:
                 if verb == 'status':
                     result = dict(enabled=state['enabled'], generation=state['generation'],
                         limits=config['limits'], target=config['target'], events=state['events'],
-                        notice_delivery=self.notice_summary())
+                        notice_delivery=self.notice_summary(), compiler_cache=self.compiler_cache(config))
+                elif verb == 'cache_cleanup':
+                    if any(j['state'] not in TERMINAL or j.get('worker') or j.get('active_phase') for j in state['jobs'].values()):
+                        raise InventoryError('upgrade_busy','compiler cache owner remains active or uncertain')
+                    cache=self.compiler_cache(config)
+                    path=Path(cache['path'])
+                    if path.exists():shutil.rmtree(path)
+                    self.event(state,'compiler_cache_cleaned',bytes=cache['bytes'])
+                    result=dict(compiler_cache=self.compiler_cache(config),reclaimed_bytes=cache['bytes'])
                 elif verb == 'list':
                     result = dict(jobs=list(state['jobs'].values()))
                 elif verb in ('show', 'cancel'):
@@ -283,6 +292,7 @@ class UpgradeJobs:
             state=self.load();job=self.job(state,identifier)
             if job['state'] not in TERMINAL or job.get('active_phase') or job.get('worker'):
                 return
+            # Legacy job-local scratch only; the shared compiler cache survives holds.
             cache=self.store/identifier/'cargo-target'
             if cache.exists() or cache.is_symlink():
                 if cache.is_symlink() or not cache.resolve().is_relative_to((self.store/identifier).resolve()):
@@ -292,6 +302,14 @@ class UpgradeJobs:
                     shutil.rmtree(cache)
                     job['cache_reclamation']=dict(status='reclaimed',bytes=size,at=self.now())
                 self.save(state)
+
+    def compiler_cache(self, config):
+        path=self.root/'upgrade-compiler-cache'
+        if path.is_symlink() or (path.exists() and (not path.is_dir() or path.stat().st_uid!=os.getuid() or path.stat().st_mode & 0o022)):
+            raise InventoryError('invalid_configuration','compiler cache ownership or permissions invalid')
+        return dict(path=str(path), identity=digest(dict(root=str(self.root.resolve()),target=config['target'])),
+            bytes=owned_storage_bytes((path,)), limit_bytes=config['limits']['temporary_bytes'],
+            retention='until_explicit_cleanup', invalidation='cargo_fingerprints')
 
     def notice_summary(self):
         from .upgrade_notices import UpgradeNotices
@@ -346,7 +364,7 @@ class UpgradeJobs:
         if job['last_seen'] >= job['deadline'] or seconds >= anchor['monotonic_deadline']:
             return 'deadline_exhausted'
         workspace = self.store / job['id']
-        size = owned_storage_bytes((workspace,))
+        size = owned_storage_bytes((workspace, self.root/'upgrade-compiler-cache'))
         if size > job['limits']['temporary_bytes']:
             return 'temporary_storage_exhausted'
         return None
@@ -560,6 +578,8 @@ class UpgradeJobs:
 
     def run_stage(self, job):
         directory = self.store / job['id'];directory.mkdir(mode=0o700, exist_ok=True)
+        self.compiler_cache(self.config())
+        (self.root/'upgrade-compiler-cache').mkdir(mode=0o700,exist_ok=True)
         recipe_bytes = Path(job.get('prepared_recipe',job['recipe_path'])).read_bytes()
         if not job.get('prepared_recipe') and hashlib.sha256(recipe_bytes).hexdigest() != job['recipe_sha256']:
             raise InventoryError('stale_recipe', 'pinned upgrade recipe changed')
@@ -569,7 +589,7 @@ class UpgradeJobs:
         with tempfile.TemporaryDirectory(prefix='worker-home-', dir=directory) as home:
             env = {k:v for k,v in os.environ.items() if k in ('PATH','LANG','LC_ALL','PYTHONPATH')}
             env.update(CODEX_UPGRADE_TEMP_ROOT=str(directory), CODEX_UPGRADE_OWNED_GROUP='1', HOME=home, CODEX_HOME=home+'/.codex', XDG_CONFIG_HOME=home+'/.config',
-                XDG_DATA_HOME=home+'/.local/share', CARGO_BUILD_JOBS=str(job['limits']['compiler_jobs']), CARGO_TARGET_DIR=str(directory/'cargo-target'))
+                XDG_DATA_HOME=home+'/.local/share', CARGO_BUILD_JOBS=str(job['limits']['compiler_jobs']), CARGO_TARGET_DIR=str(self.root/'upgrade-compiler-cache'))
             Path(env['CODEX_HOME']).mkdir(mode=0o700)
             output = directory / 'stage-result.json'
             with (directory / 'worker.log').open('ab') as log:
