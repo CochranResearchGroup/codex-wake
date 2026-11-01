@@ -31,8 +31,14 @@ class LocalValidationTests(unittest.TestCase):
                 {'name': 'later success', 'argv': ['{runtime}', '-c', 'pass']}]}}))
             (base / 'credential').write_text('private')
             receipt = base / 'receipt.json'
+            temporary_root=base/'test-temp';temporary_root.mkdir()
+            (temporary_root/'unrelated').write_text('retain')
+            profile_data=json.loads(profile.read_text())
+            profile_data['tiers']['focused'][0]['argv'][-1]+="; import json; print(json.dumps(dict(tmpdir=os.environ['TMPDIR'],mode=Path(os.environ['TMPDIR']).stat().st_mode & 0o777)))"
+            profile.write_text(json.dumps(profile_data))
             command = [sys.executable, str(LAUNCHER), '--repo', str(repo), '--runtime', sys.executable,
-                       '--profile', str(profile), '--receipt', str(receipt), '--tier', 'focused']
+                       '--profile', str(profile), '--receipt', str(receipt), '--tier', 'focused',
+                       '--test-temp-root',str(temporary_root)]
             result = subprocess.run(command, env={**os.environ, 'HOME': str(base), 'SECRET_TOKEN': 'secret'}, capture_output=True, text=True)
             self.assertEqual(result.returncode, 1, result.stderr)
             data = json.loads(receipt.read_text())
@@ -42,9 +48,22 @@ class LocalValidationTests(unittest.TestCase):
             self.assertEqual(data['profile']['tier'], 'focused')
             self.assertEqual(data['timeout_seconds'], 600)
             self.assertEqual(receipt.stat().st_mode & 0o777, 0o600)
+            temporary=json.loads(data['checks'][0]['stdout'].splitlines()[-1])
+            self.assertEqual(Path(temporary['tmpdir']).parent,temporary_root)
+            self.assertEqual(temporary['mode'],0o700)
+            self.assertFalse(Path(temporary['tmpdir']).exists())
+            self.assertEqual((temporary_root/'unrelated').read_text(),'retain')
+            self.assertEqual(data['profile']['test_temp_root'],str(temporary_root))
             original = receipt.read_bytes()
             subprocess.run(command, capture_output=True)
             self.assertEqual(receipt.read_bytes(), original)
+            invalid=command.copy()
+            invalid[invalid.index('--receipt')+1]=str(base/'invalid.json')
+            invalid[invalid.index('--test-temp-root')+1]=str(repo)
+            rejected=subprocess.run(invalid,capture_output=True,text=True)
+            self.assertNotEqual(rejected.returncode,0)
+            self.assertIn('outside candidate',rejected.stderr)
+            self.assertFalse((base/'invalid.json').exists())
 
     def test_setup_names_missing_build_dependency(self):
         with tempfile.TemporaryDirectory() as temp:

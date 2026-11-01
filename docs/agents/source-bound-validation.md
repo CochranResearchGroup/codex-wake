@@ -122,6 +122,22 @@ isolated state are temporary; the durable evidence is the private receipt. This 
 local process isolation, not an OS security sandbox. Do not select live tests or
 supply secrets to validation commands.
 
+`--test-temp-root /existing/parent` explicitly places only temporary test files
+(`TMPDIR`) in a fresh mode0700 directory under that parent. Account/XDG state,
+packaging and receipts retain their existing locations. The parent must be outside
+the candidate. Cleanup removes the created child only; unrelated parent contents
+are preserved. The receipt records `profile.test_temp_root` and identifies this
+as functional validation with physical-disk durability acceptance separate.
+Without the option, behavior is unchanged. For RAM-backed functional checks on
+Linux, an explicit existing parent such as `/dev/shm` may be selected; no mount
+or global environment is changed. Keep disk-backed durability/runtime acceptance.
+
+Issue453 profiling at8595293 measured the same first150 tests at64.760seconds
+on disk,25.895seconds with RAM temporary files, then68.495seconds on disk again.
+A matched scheduler test made217fsync calls in each case, taking1.033202seconds
+on disk and0.006431seconds in RAM. This identifies fixture storage overhead in
+that selection; it does not prove every full-suite cost or justify a higher gate.
+
 The launcher generates an explicit argv manifest and delegates all check execution,
 failure/timeout handling and source/runtime/manifest drift detection to #356's
 `scripts/validate_candidate.py`. The default profiles contain no success actions.

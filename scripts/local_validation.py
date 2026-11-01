@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import nullcontext
 import json
 import os
 from pathlib import Path
@@ -18,20 +19,29 @@ def main():
     parser.add_argument('--profile', type=Path, default=Path(__file__).with_name('local_validation_profile.json'))
     parser.add_argument('--tier', choices=['focused', 'presubmit', 'comprehensive'], default='presubmit')
     parser.add_argument('--timeout', type=float, default=600)
+    parser.add_argument('--test-temp-root', type=Path,
+                        help='explicit parent for private temporary test files; recorded separately from durability acceptance')
     args = parser.parse_args()
     repo, receipt = args.repo.resolve(), args.receipt.resolve()
     if receipt.is_relative_to(repo) or receipt.exists():
         parser.error('receipt must be new and outside candidate')
     profile = args.profile.resolve()
     try:
+        test_temp_root=args.test_temp_root.resolve(strict=True) if args.test_temp_root else None
+        if test_temp_root is not None and test_temp_root.is_relative_to(repo):
+            raise ValueError('test temporary root must be outside candidate')
         selection = json.loads(profile.read_text())['tiers'][args.tier]
-        with tempfile.TemporaryDirectory(prefix='wake-validation-', dir=receipt.parent) as temp:
+        with tempfile.TemporaryDirectory(prefix='wake-validation-', dir=receipt.parent) as temp, \
+                (tempfile.TemporaryDirectory(prefix='wake-tests-',dir=test_temp_root)
+                 if test_temp_root is not None else nullcontext(None)) as test_temp:
             state = Path(temp)
             env = {key: os.environ[key] for key in ('PATH', 'LANG', 'LC_ALL', 'SYSTEMROOT') if key in os.environ}
             for key in ('HOME', 'XDG_CONFIG_HOME', 'XDG_STATE_HOME', 'XDG_CACHE_HOME', 'XDG_DATA_HOME', 'XDG_RUNTIME_DIR', 'CODEX_HOME', 'TMPDIR', 'PYTHONPYCACHEPREFIX'):
                 directory = state / key.lower()
                 directory.mkdir(mode=0o700)
                 env[key] = str(directory)
+            if test_temp is not None:
+                env['TMPDIR']=test_temp
             env.update(PYTHONPATH=str(repo / 'src'), PYTHONDONTWRITEBYTECODE='1', CODEX_WAKE_STABLE_TIME_CONFIG='')
             checks = []
             for row in selection:
@@ -39,6 +49,8 @@ def main():
             manifest = state / 'manifest.json'
             manifest.write_text(json.dumps(dict(checks=checks, on_success=[], runtime_files=[str(profile)],
                                                 profile=dict(path=str(profile), tier=args.tier,
+                                                             test_temp_root=str(test_temp_root) if test_temp_root is not None else None,
+                                                             temporary_files_acceptance='functional only; physical-disk durability is separate' if test_temp_root is not None else 'default isolated state beside receipt',
                                                              hosted_differences=['local selected Python; no hosted Actions', 'no OpenClaw/plugin, provider, installed-wheel or live acceptance', 'external build snapshot; no dependency downloads during checks']))))
             return subprocess.run([sys.executable, str(Path(__file__).with_name('validate_candidate.py')),
                                    '--repo', str(repo), '--runtime', str(args.runtime.absolute()),
