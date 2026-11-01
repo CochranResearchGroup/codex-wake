@@ -31,7 +31,7 @@
     {
       "id": "repair-and-isolated-qualification",
       "owner": "primary",
-      "state": "running",
+      "state": "source_validated_live_qualification_pending",
       "blockers": [
         "launcher-owner",
         "live-store-inventory"
@@ -64,11 +64,22 @@
     "focused_result": "PASS",
     "undefined_names": "PASS",
     "policy_wiring": "PASS",
-    "full_suite": "running diagnostic pre-remediation source; final source needs separate qualification",
+    "full_suite": {
+      "result": "PASS",
+      "tests": 1941,
+      "skipped": 1,
+      "seconds": 376.18,
+      "python": "3.12.13",
+      "source": "83b3032993179e4013260f3adca409a8ca955fb9",
+      "receipt_sha256": "53b7fe0e945c221a1396c8c34d04a29ca0c12524ff7492eaa050a79d4828af3e",
+      "environment": "isolated XDG configuration/state, RAM-backed TMPDIR; inherited Profiles config unset"
+    },
     "focused_seconds": 17.367,
     "package_build": "PASS; wheel and sdist",
     "staged_stock_version": "PASS; exact registered b93f6811 stock0.164 in neutral home; live aliases unchanged",
-    "python311_focused": "58 PASS in15.307s"
+    "python311_focused": "58 PASS in15.307s",
+    "final_wheel_sha256": "d93ea6fef6ff3cfdc6e589064a0b539367466fdd911ecd99d5bff596350330f5",
+    "stock166_identity": "official asset digest validated; extracted binary matches existing plain codex b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8; public pinned version rc0"
   },
   "live_preview": {
     "status": "held",
@@ -82,5 +93,8 @@
     "receipt_sha256": "5077106e58a7dd6d7ece1da59c2f9c45168b12d6184e75928a11be2a8156f0e2"
   },
   "review_source": "abdb91d3091fc8cba1cb7c83c7c22d4257563410",
-  "remediation_state": "complete_S1_S2_red_green"
+  "remediation_state": "complete_S1_S2_red_green",
+  "source_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/459",
+  "source_pr_state": "draft",
+  "runtime_stage": "held; protected storage dependencies and incomplete live census"
 }

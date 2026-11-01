@@ -68,3 +68,43 @@ Post-review implementation source:051027fb8dbea398b907320dae18af73515e5f7b.
 The same58 focused tests also PASS on Python3.11.15 in15.307s.
 The broad pre-remediation run is diagnostic only because source changed while
 it was running; do not attribute its result to an immutable final-source tree.
+
+## Immutable final-source broad qualification
+
+Source83b3032993179e4013260f3adca409a8ca955fb9 (implementation source unchanged
+from051027f): **1,941 tests PASS, one skipped**, 376.180s, Python3.12.13.
+Command: `PYTHONPATH=src timeout 600 python -m unittest discover -s tests -p 'test_*.py'`.
+Environment: fresh XDG_CONFIG_HOME/XDG_STATE_HOME; CODEX_WAKE_STABLE_TIME_CONFIG
+empty; inherited CODEX_PROFILES_CONFIG/CODEX_WAKE_ACCOUNTS_CONFIG/CODEX_WAKE_ROOT
+unset; TMPDIR in a fresh owned /dev/shm directory. This is functional isolation,
+not production disk persistence or native installed acceptance. Python3.11
+qualification was the focused58-test selection, not a second full suite.
+No remaining visible test-root environment processes were observed; unreadable
+unrelated processes remain unknown and no whole-host quiescence is claimed.
+The superseded broad run was stopped only after exact PID-generation/group
+ownership verification; its diagnostic log is preserved.
+
+Final wheel SHA256:
+d93ea6fef6ff3cfdc6e589064a0b539367466fdd911ecd99d5bff596350330f5.
+Final wheel's stock0.164 version entrypoint passed from the temporary installation.
+Production launcher hashes remain the original identical staged-refusal scripts.
+
+## Official stock0.166 provenance
+
+Official release: https://github.com/openai/codex/releases/tag/rust-v0.166.0.
+GitHub asset689712643, codex-x86_64-unknown-linux-musl.tar.gz,
+121,764,138bytes, API-published archive SHA256
+a0bf572d2f93f056c6712a6da348e96078dc84f3885fd7be67807ef389cb3978
+matched the actual downloaded bytes. Its single regular native binary is
+319,346,888bytes, SHA256
+b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8.
+That SHA matches the existing plain codex executable. The public load_build /
+run_build pinned-version path returned0 and codex-cli0.166.0 using a separate
+private manifest and neutral temporary home. The native executable emitted its
+temporary-home helper-alias warning; no live helper aliases were installed.
+This resolves provenance only. Live stock fallback compatibility remains unpassed.
+The official archive and curated receipts remain private; no current registry,
+PATH launcher, shared daemon or account was changed.
+
+Draft source PR: https://github.com/CochranResearchGroup/codex-wake/pull/459.
+#380 remains OPEN; source review/TDD counters are1/1, live acceptance false.
