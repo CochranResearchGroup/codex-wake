@@ -537,5 +537,12 @@
       "exact_child_exit_timestamp": "not separately journaled; verification command remains intent",
       "recorded_canonical_notice_deliveries": 4
     }
+  },
+  "spec_revision": {
+    "id": "working-modified-build-first-20261101",
+    "scope": "same444; finish real166 package then reproduce successful procedure through existing bot",
+    "primary_acceptance_seam": "existing public durable upgrade-job CLI/API/MCP; actual complete package in disposable WSL",
+    "runtime_authority": "unchanged; no expired job revival or renewed allowance",
+    "ticket_reconciliation": "447-452 remain validated/closed;453 remains blocked/open; no new tickets created by specification revision"
   }
 }

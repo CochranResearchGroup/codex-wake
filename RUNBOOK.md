@@ -8345,3 +8345,12 @@ after bound; disable and empty owned process census within cleanup reserve.
 GC reclaimed6,048,477,337B,165 selection/pinned session retained. No166 package/
 qualification/promotion/post rollback. Ledger/acceptance retain terminal hash,
 clocks and known unarmed self-wake. #453 blocked/open; final review/TDD0/0.
+
+## Turn | 2026-11-01 | Upgrade objective correction
+
+Revised existing #444/Plan0193 from operator clarification: keeping modified
+Codex current is the product outcome. Complete real166 first, then reproduce
+the successful deterministic patch/semantic repair/build/qualification journey
+through the existing public job seam. Draft specifies bounded compatible-cache
+reuse, practical measured limits and explicit outcomes; no new orchestrator,
+fixture campaign or runtime allowance.447-452 retain closure;453 remains open.

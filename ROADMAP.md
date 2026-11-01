@@ -1417,3 +1417,9 @@ actual protocol4pass/1ignored and app-server TUI-health3pass. No166 complete
 package, native review or installed qualification. Fixture disabled, owned
 process census empty, selected165 retained; no third attempt or renewal.
 #453 remains open; final broad review/TDD0/0. Acceptance/ledger own exact evidence.
+
+2026-11-01 operator correction to #444/Plan0193: deliver a working complete
+modified166 package first, then make the existing public bot reproduce the
+successful deterministic-plus-semantic procedure. Retain compatible compiler
+work under explicit cache bounds; avoid repeated cold builds and fixture growth.
+No new allowance or production authority;453 remains blocked/open.

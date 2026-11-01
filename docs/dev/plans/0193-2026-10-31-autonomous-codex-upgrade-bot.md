@@ -1,180 +1,100 @@
-# Autonomous upstream Codex upgrade bot
+# Keep modified Codex current through deterministic patching and semantic completion
 
 State: BLOCKED
 Owner: primary upgrade-bot coordinator
 Specification: https://github.com/CochranResearchGroup/codex-wake/issues/444
-Related work: #369, #377, #393, #413
-Design: confirmed by operator, 2026-10-31; acceptance seam confirmed.
+Execution evidence: 0193-453-acceptance.md and 0193-upgrade-bot-ledger.json
+Revision: operator correction, 2026-11-01; no runtime allowance created.
 
 ## Problem Statement
 
-Frequent upstream Codex releases make manual maintenance of the modified build expensive. A deterministic patch replay can fail even when most changes merge mechanically. The operator needs a bot that resolves semantic conflicts, proves required capabilities, and makes qualified builds available without repeated intervention, while preserving a working version and exposing every failure or intervention.
+The operator uses modified Codex and needs it to keep up with official releases without personally maintaining merges. Most patch application should be deterministic; a coding agent should finish semantic conflicts, adapt changed upstream APIs and fix compilation failures when mechanical replay is insufficient.
+
+The current effort has delivered supporting upgrade-controller code but has not delivered a qualified modified 0.166 package. Repeated cold compilation, host-tool drift and bounded attempts consumed the execution window. Passing intermediate tests, controller fixtures and closed supporting tickets have not established that the upgrade works.
 
 ## Solution
 
-Provide a persistently opt-in upgrade bot using existing build, staging, selection and rollback machinery. It discovers official stable releases, creates an isolated candidate, attempts deterministic replay and three-way merging, and delegates necessary semantic repairs to a bounded coding worker. An independent reviewer evaluates behavioral preservation. The bot builds and qualifies the exact package in disposable WSL, then automatically selects qualified builds for future launches within its configured target scope. Existing sessions remain pinned. One disable control stops owned work and prevents promotion; durable job state and visible notices explain progress and failures.
+Deliver a practical upgrade loop: discover an official stable release, apply the maintained patch stack mechanically, use semantic repair where necessary, build the complete modified package, verify required behavior and make it available for future launches in the configured opt-in scope. Preserve the previous working build and existing sessions.
+
+First finish the actual 0.166 port and produce a working identifiable package in disposable WSL. Use that successful procedure as the reference for the automation, then demonstrate the existing public upgrade-job interface performing the same journey. Direct completion is a delivery milestone and source of implementation evidence; it does not substitute for automated acceptance. Do not build a second orchestrator or require the operator to resolve routine conflicts, restart cold builds or approve ordinary repair steps.
 
 ## User Stories
 
-1. As an operator, I want automatic official stable-release discovery, so that upgrades do not depend on an agent handoff.
-2. As an operator, I want persistent opt-in configuration, so that the bot's operating scope is explicit.
-3. As an operator, I want stock and modified build identities retained, so that upgrades cannot silently substitute a stock backend.
-4. As an operator, I want deterministic patch replay attempted first, so that simple upgrades use no semantic repair worker.
-5. As an operator, I want autonomous semantic conflict repair, so that upstream changes do not routinely require manual rebasing.
-6. As an operator, I want patches retired when upstream demonstrably supplies equivalent behavior, so that the maintained patch set stays small.
-7. As an operator, I want independent review of repairs and test changes, so that the worker cannot declare success by weakening requirements.
-8. As an operator, I want missing capabilities to reject a candidate, so that upgrades preserve the modified product.
-9. As an operator, I want complete immutable package provenance, so that qualification identifies the exact executable set.
-10. As an operator, I want disposable installed-path qualification, so that working credentials and histories remain protected.
-11. As an operator, I want metadata-only checks using designated authenticated test accounts, so that account switching and reconnect are tested without model turns.
-12. As an operator, I want authentication expiry reported explicitly, so that it cannot cause hidden retries or credential substitution.
-13. As an operator, I want qualified builds automatically selected for future launches, so that routine upgrades require no cutover ritual.
-14. As an operator, I want active sessions pinned to their builds, so that promotion does not interrupt ongoing work.
-15. As an operator, I want a retained compatible rollback, so that a failed candidate cannot strand new launches.
-16. As an operator, I want durable CLI/API/MCP job status, so that every surface reports the same outcome.
-17. As an operator, I want visible notices in registered operator sessions, so that held jobs and promotions are never silent.
-18. As an operator, I want bounded repair and build resources, so that the bot cannot run away.
-19. As an operator, I want disable to stop owned workers and promotion, so that deactivation is immediate and easy.
-20. As an operator, I want crash recovery to reconcile completed or uncertain stages, so that restarts do not duplicate effects or reset budgets.
-21. As an operator, I want superseded releases recorded and the newest stable processed next, so that the bot does not accumulate an unnecessary backlog.
-22. As an operator, I want retained packages separated from disposable caches, so that storage cleanup preserves rollback and evidence.
-23. As an operator, I want the full 0.166 port exercised first, so that acceptance includes genuine upstream conflicts.
+1. As an operator, I want modified Codex to follow official stable releases, so that local features do not strand me on an old version.
+2. As an operator, I want official release discovery, so that upgrades do not depend on my noticing a release.
+3. As an operator, I want persistent opt-in scope, so that automatic selection happens only where I enabled it.
+4. As an operator, I want deterministic patch application first, so that uncomplicated upgrades avoid semantic worker cost.
+5. As an operator, I want ordinary three-way merging, so that independent upstream changes combine mechanically.
+6. As an operator, I want a coding agent to resolve semantic conflicts, so that I do not have to rebase the patch stack manually.
+7. As an operator, I want the agent to adapt changed upstream APIs, so that compiler errors are handled as normal upgrade work.
+8. As an operator, I want repair to continue through actual build feedback within the configured allowance, so that the bot completes the merge rather than merely reports conflicts.
+9. As an operator, I want local feature behavior preserved, so that an upgrade cannot silently replace modified Codex with stock Codex.
+10. As an operator, I want evidence before retiring an upstreamed patch, so that the maintained stack shrinks without losing features.
+11. As an operator, I want generated artifacts and lockfiles reconciled, so that the package represents a complete port.
+12. As an operator, I want a complete working 0.166 package first, so that the present work produces a usable result.
+13. As an operator, I want automation to reproduce the successful porting procedure, so that subsequent upgrades need little involvement.
+14. As an operator, I want valid compiler and dependency work reused, so that successive stages and authorized recovery do not repeatedly pay for cold builds.
+15. As an operator, I want cache storage bounded and reclaimable, so that keeping upgrades current does not fill my disks.
+16. As an operator, I want source, toolchain and build inputs identified, so that reused artifacts cannot qualify the wrong candidate.
+17. As an operator, I want independent behavioral review, so that semantic repairs cannot pass by deleting features or weakening tests.
+18. As an operator, I want tests of the actual package, so that fixture success cannot stand in for a working modified executable.
+19. As an operator, I want disposable installation qualification, so that my working credentials, sessions and services remain protected.
+20. As an operator, I want exact build identity visible, so that I can distinguish official, modified and retained builds.
+21. As an operator, I want successful builds selected for future launches, so that routine upgrades do not require a cutover ritual.
+22. As an operator, I want existing sessions pinned, so that upgrading future launches does not interrupt current work.
+23. As an operator, I want a compatible previous package retained, so that I can recover from a bad candidate.
+24. As an operator, I want explicit progress, failure and intervention notices, so that work never stops silently.
+25. As an operator, I want one easy disable control, so that I can stop owned upgrade work and prevent promotion.
+26. As an operator, I want sensible explicit resource limits and measured build costs, so that runaway agents are prevented without routine operator friction.
+27. As an operator, I want restart and handoff to preserve valid work and cumulative accounting, so that continuing does not require resource-reset rituals.
+28. As an operator, I want a precise terminal reason and recoverable work when a real limit is reached, so that recovery can address the cause instead of blindly repeating the attempt.
+29. As an operator, I want the same upgrade outcome through CLI, API and MCP, so that each surface controls the same job.
+30. As an operator, I want completion judged by a working upgraded build, so that supporting infrastructure and test counts cannot be mistaken for delivery.
 
 ## Implementation Decisions
 
-- Reuse the Wake-owned account/build controller and existing stage, selection, archive and rollback primitives. Do not add a competing account store or launcher owner.
-- The public upgrade-job interface is the principal seam, shared by CLI/API/MCP. Discovery, repair, build and qualification executors sit behind that interface; exact verb spelling follows the controller command tree during implementation.
-- Persist job identity, release/source/package digests, original scope, policy generation, cumulative usage/deadline, worker ownership, review findings, qualification receipts, promotion state and uncertainty. Status distinguishes queued, discovering, applying, repairing, building, reviewing, qualifying, promoting, succeeded, held, failed, stopping, disabled and superseded outcomes; terminality and allowed transitions are explicit and versioned.
-- Discover official stable releases only. Deduplicate release/policy/patch identities. Finish the current bounded attempt before processing the newest available stable release; preserve skipped-release history. A failed unchanged candidate must not acquire a fresh budget merely because polling repeats.
-- Defaults: one candidate at a time, three semantic repair attempts, two hours total per release job, two compiler jobs, and 24 GiB temporary build storage. Limits are visible and configurable. Retries, restarts and handoffs preserve cumulative usage. Budget exhaustion produces a durable reason and retains the selected working build.
-- Deterministic replay includes ordinary application and three-way merge with explicit unresolved-conflict detection. Exit status alone is insufficient: a check may emit conflict diagnostics despite returning success. Regenerate derived protocol bindings/schema and reconcile lockfile changes before build qualification.
-- Semantic repair may rewrite or retire patches only with evidence of preserved required behavior. Bind independent review to candidate and test digests; further edits invalidate affected review/qualification. The worker cannot waive capabilities or weaken acceptance to obtain a pass.
-- Required behavior includes scoped MCP reload, durable notices, caller/accounting continuity, orphan-output handling, exact TUI responsiveness and the recovery capabilities claimed by the selected manifest. Claimed unsupported behavior is not silently accepted.
-- Qualification uses the exact immutable complete package in disposable WSL, actual launcher/account wiring, synthetic histories and designated disposable authenticated accounts. Authenticated canaries are identity/switch/restart/reconnect metadata only: zero provider model turns. Scripted local-provider and provider-free fixtures remain separately identified evidence.
-- Promotion is an atomic tenant/target-scoped selection for future launches after current compatibility, review and qualification checks. Revalidate enabled policy, target identity, generations, package digest and scope immediately before selection. Existing sessions and shared daemons are not replaced by this bot.
-- Preserve known-good complete packages and schema-compatible rollback. An incompatible downgrade must refuse clearly rather than mutate histories. Qualification does not imply all future schemas permit rollback.
-- Disable is durable, immediately fences new stages and promotion, then cleanly terminates only owned repair/build workers and retains evidence. Define crash-safe reconciliation for a selection committed just before disable; report its actual order rather than claim it never happened. No unrelated session is stopped.
-- Publish durable activity through CLI/API/MCP plus attributable notices in registered operator Codex sessions. Held/failure/promotion notices are immediate; delivery failure is observable and does not erase the job state. Notices do not submit model turns. No external messaging service is included.
-- Temporary build storage is monitored independently from retained packages/evidence and shared dependency caches. On limit, stop owned work and report; never delete rollback packages or unrelated cache contents to make room.
-- Manual resource monitoring remains the mode. Updater-specific explicit limits neither enable the governor nor renew any external grant.
+- Retain the existing upgrade-job boundary, account/build controller, patch source, package staging, qualification, notices, selection and rollback owners. Tighten their integration instead of adding a parallel pipeline or account store.
+- Treat semantic completion as normal execution: inspect unresolved merges, edit code, compile, diagnose actual errors and iterate within explicit cumulative limits. A conflict or compiler error alone is not an operator approval gate.
+- Sequence delivery around observable outcomes: complete and launch the actual modified 0.166 package; capture the successful procedure and required inputs; reproduce it through the assembled public job path; qualify future-launch selection and rollback. Existing valid controller work is reused.
+- Maintain reviewable feature intent for each patch. Mechanical application and semantic edits must preserve it. Retire a patch only when upstream equivalence is demonstrated. Changed source or tests invalidate affected review and qualification.
+- Use an independent reviewer for behavioral preservation and test changes. Review must evaluate actual source and feature intent; successful worker exit or a generated report alone is insufficient.
+- Identify source revision, patch state, generated outputs, toolchain, target, build profile and consequential compiler inputs. Reuse only compatible artifacts through supported build tooling. Cached generation and compilation must be labelled as reuse, not falsely reported as fresh execution.
+- Use a declared bounded compiler cache across verification, packaging and compatible authorized continuation. Keep it outside disposable job scratch space. A terminal hold must not unconditionally destroy valid reusable compilation. Bound cache size and retention, make cleanup inspectable, and preserve rollback packages and evidence. Cache loss is recoverable by rebuilding; a cache is not acceptance evidence.
+- Preserve isolated, identified host tools or revalidate their identity before use. Report host prerequisite drift explicitly without silently changing the candidate, weakening checks or repeatedly starting coding workers to fix an environment problem.
+- Set practical execution limits from observed cold/warm build costs and separate semantic effort, compilation, cache storage and cleanup. Keep limits explicit and cumulative. No silent renewal, deadline reset, governor insertion or revival of expired jobs. When the actual allowance is exhausted, stop owned execution, explain the remaining work and retain reusable artifacts for a separately authorized continuation.
+- Persist enough state to reconcile an interrupted stage and reuse valid work without duplicate submissions or promotions. A restart or handoff is not a new full allowance. Unknown stage results remain unknown until reconciled.
+- Bind the complete immutable package and qualification to exact source, tests, patch intent, toolchain and configuration identities. Claim only supported native behavior; retain unresolved capability boundaries explicitly.
+- Qualification uses disposable WSL, actual launcher/account wiring and synthetic histories. Designated authenticated test accounts are used only for metadata checks; qualification canaries submit zero provider model turns. Authorized coding/review contexts are source-maintenance work and are accounted separately.
+- Promote atomically for future launches only after current review, compatibility, qualification, enabled-policy and target checks. Existing clients remain pinned. Retain supported compatible rollback and refuse incompatible history downgrades clearly.
+- Publish durable phase/status and attributable notices through the existing surfaces. A limit, authentication failure, disable, uncertain result or failed notice delivery must be explicit. Disable fences promotion and terminates only owned work.
+- Run applicable validation locally under the existing GitHub CI cost policy. Report source integration, direct package completion, automated acceptance and production activation as distinct outcomes.
 
 ## Testing Decisions
 
-- The operator confirmed the public durable upgrade-job boundary, with injected release, worker, build and qualification executors for deterministic regressions and a real installed disposable WSL acceptance of the complete 0.166 port.
-- Test externally visible outcomes, preserved build selection, immutable provenance, worker ownership, notices and cumulative budgets rather than private implementation layout.
-- Reuse controller build/account acceptance, existing staged-upgrade failure and tenant-selection/schema regressions, native capability acceptance and installed recovery/rollback journeys as prior art.
-- Cover clean application, three-way merge with unresolved conflicts even on exit zero, semantic repair success/failure, redundant-patch retirement, missing capabilities, review rejection, generated-artifact drift and package mismatch.
-- Cover worker death, process restart, delayed results, release deduplication, newer-release arrival, retry budget preservation, deadline uncertainty, disk exhaustion, disable versus stage/promotion races, and uncertain selection reconciliation.
-- Cover test-account authentication-needed with no production credential fallback and zero unintended model requests; switching/restart/reconnect preserve owning account and histories.
-- Qualify future-launch selection, existing-session pinning, failed-start preservation, compatible rollback and clear incompatible rollback refusal. Finish real acceptance with an owned-process/resource census.
-- Run applicable checks locally; record commands, results, source/package identities and environment differences. Do not enable paid hosted CI.
+- Prefer one primary seam: request an upgrade through the existing public durable upgrade-job interface and observe the exact modified package, its installed behavior, scoped selection, preserved prior build and rollback. CLI/API/MCP share this owner; they are not separate engines to qualify independently with invented fixtures.
+- Retain the previously operator-confirmed public job boundary. The refinement makes successful complete-package delivery the principal acceptance signal; a seam-check question was presented during this revision. An additional unattended next-release demonstration is not assumed without an operator decision.
+- First reproduce the real 0.166 port using actual source, actual semantic fixes and actual build tools. Retain compiler failures and final successful commands. Launch the complete package and inspect its identity before claiming this milestone.
+- Then demonstrate the assembled automated path on official 0.166 and the maintained feature stack. A package manually substituted into a job, a precomputed success report or a fixture executable cannot satisfy this demonstration. Reuse of declared valid inputs and compiler artifacts is allowed and must remain visible.
+- Retain focused deterministic tests only for consequential behavior: clean replay without a coding worker; semantic conflict/compiler repair reaching a build; missing-feature/review rejection preserving the working version; stale-cache invalidation; reuse across compatible stages/authorized recovery; disable and cumulative-limit preservation. Assert external outcomes instead of private methods, journal layouts or test counts.
+- Use existing build/account acceptance, package-identity checks, native capability probes, installed history/reconnect journeys and selection/rollback regressions as prior art. Do not create another test framework or broad fixture campaign.
+- On the exact complete modified package, verify claimed native capabilities, synthetic default/account/shared history visibility and resume, account ownership, reconnect, failed-start preservation and compatible rollback. Report unsupported recurrence, raw orphan-output and HF-20 boundaries explicitly rather than passing them by proxy.
+- Measure cold and warm elapsed time, coding/review usage, compiler concurrency, cache occupancy/reuse and final owned processes. Evidence must show whether compilation progresses and where time is spent, not merely whether a wrapper remains running.
+- Final acceptance requires: a complete identified modified 0.166 package; actual successful launch and claimed capability checks; the public bot producing and qualifying that package from official source plus the maintained stack; scoped future-launch selection; previous-session pinning and compatible rollback; visible terminal outcome and clean owned-process census. Preserve the current working build on every failure.
+- Applicable local checks and one final bounded review/remediation pass remain required. Supporting tests do not replace end-to-end acceptance. No paid hosted CI, production credential/history copying or provider-model canaries.
 
 ## Out of Scope
 
-Production activation by this planning task; running-daemon replacement; automatic recovery of old goals; governor activation; grant renewal; production credential/history copying; model-turn canaries; external messaging; business/provider experiments; arbitrary upstream repository writes; unrelated account migration.
+A new general-purpose controller, competing orchestrator or account store; unrelated fixture expansion; running-daemon replacement; business/provider experiments; automatic resumption of old goals; silent governor activation; renewal of expired allowances; production installation or activation by this specification; production credential/history copying; model-turn qualification canaries; broader account migration; arbitrary upstream writes. This specification does not claim that unbuilt recurrence or raw orphan-output/HF-20 capabilities already work.
 
 ## Further Notes
 
-Current State: children #447–#452 are integrated/validated and tracker-closed. #453 is blocked/open. Fresh job72 completed regeneration then held on unattended Git pin drift. One private-Git retry9e exhausted its original remaining3211seconds after protocol4pass/1ignored and app-server TUI-health3pass; turn-admission/remaining TUI incomplete. No native review, complete166 package, installed qualification or promotion. Fixture disabled, owned census empty, selected165 retained. Acceptance record and ledger own exact clocks/hashes. Final broad review/TDD0/0. No third attempt in the current packet.
+This revision sharpens existing specification #444; it does not start a competing program. Plan0193 remains the execution authority. Children #447–#452 retain their integrated/validated/closed outcomes unless concrete regressions invalidate them. #453 remains blocked/open because installed 0.166 acceptance has not passed. Do not close it based on this document.
 
-Reconciliation: #369 remains broader coordination. Closed #377 retains its accepted staging/rollback outcome. The Wake-owned controller delivered in #393 supplies account/build surfaces. Open #413 gates running-daemon recovery; it is not a prerequisite for a bot that leaves running daemons untouched. Production profile activation remains separately gated by #380. Existing parents are not edited or closed by this specification.
+Observed baseline: the corrected 0.166 source is retained; actual protocol tests4passed/1ignored and app-server TUI-health3passed. The last bounded retry reached its deadline during turn-admission compilation. Independent review, complete package, installed qualification and promotion were not reached. Owned cleanup completed and selected0.165 remained intact. This is partial evidence, not success or proof that the port is infeasible.
 
-Baseline: official 0.166 commit 6ff1e1ca3b30fc8b914720681fcf5fe62e95f856. Narrow 42-path source/test replay has README conflict after three-way merge; larger 69-path recovery/health replay additionally conflicts in turn-admission code and tests. Generated bindings and lockfiles were excluded from that preliminary check; compilation/runtime acceptance remains outstanding. That check is input evidence, not upgrade qualification.
+Definition of done: the operator can obtain and launch the complete modified0.166 build, and the existing bot demonstrably performs deterministic patching with semantic completion through package qualification and configured future-launch selection, retaining a working rollback. Exact evidence and remaining boundaries are recorded. Production activation remains separate.
 
-Acceptance criteria: the public job path discovers, repairs, builds, independently reviews, qualifies and selects a complete 0.166 candidate for future disposable launches; required capabilities, budgets, disable fencing, account isolation, notices and rollback behavior pass named regressions. Source integration and production activation remain separate outcomes.
-
-Definition of done: approved child outcomes integrated with local checks, an immutable 0.166 installed acceptance receipt, review disposition, rollback and teardown evidence, truthful remaining boundaries and reconciled execution records. This planning artifact alone is not delivery.
-
-Critical path: durable job slice → semantic worker and disposable qualification → qualified selection → integrated 0.166 acceptance. Independent low-conflict tracks after the job contract: repair worker, qualification executor and scheduled discovery. Primary coordinator owns integration.
-
-Next action: resolve the measured native build/cache execution cost in a separately bounded packet before another acceptance run; preserve all expired jobs. Close #453 only after complete native acceptance, then run the single final broad review and bounded TDD remediation pass.
+Next bounded planning action: reconcile unfinished #453 work with the measured build/cache blocker, identify the minimal implementation changes and practical execution envelope, then complete the real port before expanding supporting infrastructure. This specification grants no new runtime allowance and does not revive any expired attempt. #369 remains broader coordination; #413 running-daemon recovery and #380 production activation remain separate.
 
 <!-- idempotency:codex-wake-autonomous-upgrade-bot-spec-20261031 -->
-
-## Runtime checkpoint | 2026-10-31
-
-Actual #453 source repair spent three coding attempts, preserved the 69-path
-patch dispositions, and reached owned Rust regeneration/build. The controller
-then held the original job because its storage observation raced with rustc
-removing a temporary `lib.rmeta`; this is a controller failure, not a compiler
-failure or qualified 0.166 outcome. The retained 0.165 selection is unchanged,
-owned job processes are gone, and the original deadline and attempt count remain.
-Only Cargo.lock changed after the final coding report, attributable to the owned
-regenerator; current source and original reports remain distinct evidence.
-
-The bounded corrective packet fixes vanished-file storage observation and adds
-explicit `upgrades.reconcile` with `mode=verify_only`. It may readmit only the
-same sealed held job under current scope, original generation, clock, deadline,
-limits and attempt count. It must retain interrupted regeneration provenance,
-prove the owned process group is gone, rerun deterministic verification and
-obtain independent review. Ambiguous worker/reviewer submission cannot be
-readmitted by this path, and verification failure cannot invoke another coding
-worker. No original input, allowance or external grant is renewed.
-
-The real operator witness proved an existing private 0.165 client remains pinned;
-notice delivery was refused for insufficient test-recipient scope. That failure
-is retained and is being corrected through the exact disposable recipient grant.
-Neither partial witness proves 0.166 promotion. Final broad review/remediation
-counts remain zero pending complete ticket acceptance.
-
-
-## Authorized successor
-
-Operator confirmation: “ok go” after the explicit request for one additional
-coding attempt and90minutes in disposable WSL. The new run starts from official
-166 plus the original69-path patch stack. The failed candidate is a read-only
-reference with its retained digest and exact compiler diagnostics; it is not
-manually edited or promoted. Freeze controller3b31bdf, including the host source
-root and private-child prerequisites. New disposable-only authority is permitted;
-production/shared service effects, global governor activation and working-resource
-renewal remain outside scope. Preserve original job, source, deadlines and history.
-Final broad review/TDD counts remain0 until ticket acceptance.
-
-
-## Successor recovery checkpoint
-
-The sole additional native coding context wrote both API corrections but was
-interrupted by a clock-uncertain hold before producing a completed report. Its
-source remains unconfirmed. Same-boot UTC adjustments no longer invalidate an
-otherwise valid fixed monotonic budget; changed/missing boot and invalid/backward
-monotonic counters still hold. The historical offending sample is unavailable,
-so its exact clock subtype remains unclassified rather than retrospectively proved.
-
-Explicit `verify_review_only` preserves the one charged attempt and original
-deadlines, requires stopped-process/cross-group census plus retained native events,
-and allows host verification followed by independent disposition of every original
-patch. It never fabricates worker completion or replays a coding worker/reviewer.
-A continuation PATH omission then bypassed the sealed Cargo wrapper; the owned
-verification group was stopped and the exact wrapper restored. Runtime628a1ed now
-runs host regeneration against the approved shared dependency cache. Candidate,
-recipe, probes, original failed job and all deadlines remain unchanged. No166
-qualification or promotion is claimed before its actual results.
-
-
-## Current verification packet | 2026-11-01
-
-Primary owns453; no other unblocked unfinished child exists. Runtime helper
-accept453 performs bounded disposable operations; integration/final acceptance
-stay with primary. Read-only preflight verifies retained sourcebb296/tests1c7,
-both disabled job dictionaries and eight original inputs unchanged.
-
-The new job uses normal official166 replay plus a mechanically derived124-path
-delta retaining all69 original handwritten paths. A pinned first host command
-validates all9784file paths/bytes and restores only the retained modes, accounting
-for Git/umask differences. Later generated changes require fresh measured hashes
-and independent review. Old source/job/account roots are not modified; public
-dependency caches and designated disposable credentials may be copied into the
-new owned fixture. No production credential/history is used.
-
-Limits: spec-default7200second native job,900seconds reserved cleanup, compiler2,
-owned temporary24GiB, zero coding attempts, one native independent source review.
-Manual resource monitoring; no governor activation, resource renewal, shared
-restart, production deployment or canary model turn. Source review is the
-required builder verification, distinct from the final broad code-review round.
-The two old packet ceilings/history remain intact. Fresh clock anchors and
-config/recipe/tool/program hashes are frozen before public start.
-
-Public-seam TDD adds zero-coding admission and failure reasons plus optional
-strict per-patch review with published provenance. Red: zero config rejected;
-strict disposition omitted/ignored in result; failure reason ambiguous. Green:
-88upgrade tests each3.11/3.12. Ledger owns current packet IDs and bounds.
+<!-- revision:working-modified-build-first-20261101 -->
