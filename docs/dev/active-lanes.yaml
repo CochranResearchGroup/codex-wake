@@ -1014,6 +1014,20 @@ lanes:
     updated_at: 2026-10-31
     disposition: Tickets421–429 closed; primary anchored5e2315f; one review and one TDD pass resolve2P2 findings; final fix/evidence PR and fresh primary readback complete custody; physical paths retained, no working runtime effects
 
+  - id: P193
+    owner: primary / ecochran76
+    objective: Autonomous bounded Codex patch repair and future-launch upgrade
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/444, https://github.com/CochranResearchGroup/codex-wake/issues/447]
+    plan: docs/dev/plans/0193-2026-10-31-autonomous-codex-upgrade-bot.md
+    branch: feat/autonomous-upgrade-bot-spec
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
+    dependencies: []
+    overlaps: [P179, P190]
+    updated_at: 2026-11-01
+    disposition: All delivery tickets closed; actual semantic166 native qualification/futurelaunch/publicrollback accepted; review1/TDD1 resolved2P2; finalsource9d045b1; warmcache retained; no productioneffects
+
   - id: P193-RETRO439
     owner: primary / ecochran76
     objective: Prevent cleanup and validation regressions with bounded evidence
@@ -1028,3 +1042,31 @@ lanes:
     overlaps: []
     updated_at: 2026-10-31
     disposition: Tickets440–443 closed viaPR445; one review and one TDD pass resolve private-receipt P2; final PR/ref readback pending; no working runtime or historical cleanup
+
+  - id: P193-CACHE456
+    owner: cache456 / ecochran76
+    objective: Compatible bounded compiler reuse through public upgrade jobs
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/456]
+    plan: docs/dev/plans/0193-2026-10-31-autonomous-codex-upgrade-bot.md
+    branch: feat/456-compatible-compiler-cache
+    target: feat/autonomous-upgrade-bot-spec
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
+    dependencies: []
+    overlaps: [P193]
+    updated_at: 2026-11-01
+    disposition: Implementedc105bfd integratedf893b20; actualpubliccompiler/package+invalidation+cleanup qualified;456closed; warmpubliccache retainedfor457
+
+  - id: P193-BOT457
+    owner: bot457 / ecochran76
+    objective: Actual deterministic and semantic upgrade through reviewed complete package
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/457]
+    plan: docs/dev/plans/0193-2026-10-31-autonomous-codex-upgrade-bot.md
+    branch: feat/457-proven-upgrade-procedure
+    target: feat/autonomous-upgrade-bot-spec
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
+    dependencies: [P193-CACHE456]
+    overlaps: [P193]
+    updated_at: 2026-11-01
+    disposition: All delivery tickets closed; actual semantic166 native qualification/futurelaunch/publicrollback accepted; review1/TDD1 resolved2P2; finalsource9d045b1; warmcache retained; no productioneffects

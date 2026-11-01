@@ -106,6 +106,8 @@ def build_parser() -> argparse.ArgumentParser:
     register_controller(subparsers)
     from .account_commands import register_parser as register_accounts
     register_accounts(subparsers)
+    from .upgrade_commands import register_parser as register_upgrades
+    register_upgrades(subparsers)
     from .build_commands import register_parser as register_builds
     register_builds(subparsers)
     from .history_commands import register_parser as register_history
@@ -2951,6 +2953,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         return command(args, args.wake_root)
     if args.command == "notices":
         from .notice_commands import command
+        return command(args, args.wake_root)
+    if args.command == "upgrades":
+        from .upgrade_commands import command
         return command(args, args.wake_root)
     if args.command == "recovery":
         from .recovery_commands import command

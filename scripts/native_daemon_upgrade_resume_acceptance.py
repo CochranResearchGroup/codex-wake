@@ -7,9 +7,15 @@ legacy/refuse/hang controls. Full receipts and terminal captures remain in dummy
 """
 import os,json,time,pathlib,subprocess,threading,shlex,hashlib,signal,traceback,sys,socket,struct,tempfile,re
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
-assert os.getuid() == 1017, "Run this isolated acceptance harness as codex-daemon-test UID1017"
+test_base=os.environ.get('CODEX_QUALIFICATION_TEST_ROOT')
+if test_base:
+ base=pathlib.Path(test_base).resolve(strict=True)
+ assert os.getuid()==1000 and os.environ.get('WSL_DISTRO_NAME')=='wsl-test', 'Explicit test-root override requires disposable wsl-test ubuntu user'
+ assert base.is_relative_to(pathlib.Path('/home/ubuntu/codex-profile-lab')) and base.stat().st_uid==os.getuid() and not base.stat().st_mode&0o022, 'Private owned disposable fixture root required'
+else:
+ assert os.getuid() == 1017, "Run this isolated acceptance harness as codex-daemon-test UID1017"
 from codex_wake.native_protocol import native_request
-P=pathlib.Path;b=P('/home/codex-daemon-test/daemon-qualification-0165');root=b/('resume-journey-'+sys.argv[1]);root.mkdir(mode=0o700)
+P=pathlib.Path;b=P(test_base) if test_base else P('/home/codex-daemon-test/daemon-qualification-0165');root=b/('resume-journey-'+sys.argv[1]);root.mkdir(mode=0o700)
 ws=root/'workspace';ws.mkdir(mode=0o700);home=root/'accounts/codex-test';home.mkdir(mode=0o700,parents=True)
 prefix=P(os.environ.get('CODEX_QUALIFICATION_WAKE_PREFIX',str(b/'wake')));launcher=prefix/'bin/codex-modded';baseline=P(os.environ.get('CODEX_QUALIFICATION_BASELINE',str(b/'candidate-barrier/bin/codex')));target=P(os.environ.get('CODEX_QUALIFICATION_TARGET',str(baseline)));control=home/'app-server-control/app-server-control.sock'
 (root/'harness.py').write_bytes(P(__file__).read_bytes());(root/'harness.py').chmod(0o600)
@@ -23,6 +29,12 @@ retention_locks=[]
 coordinator=None;coordinator_child=None;failed_executable=None;failed_mode=None
 def digest(p):
  with p.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
+def native_version(executable):
+ with tempfile.TemporaryDirectory(prefix='version-',dir=root) as scratch:
+  result=subprocess.run([str(executable),'--version'],env=dict(PATH=os.environ.get('PATH','/usr/bin:/bin'),HOME=scratch,CODEX_HOME=scratch+'/.codex'),capture_output=True,text=True,timeout=15,check=True)
+ version=result.stdout.strip().removeprefix('codex-cli ')
+ assert re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+(?:[-+][A-Za-z0-9_.-]+)?',version),result.stdout
+ return version
 def durable_fixture_json(path,value):
  with tempfile.NamedTemporaryFile(mode='w',dir=path.parent,delete=False) as stream:
   temporary=P(stream.name);os.fchmod(stream.fileno(),0o600);json.dump(value,stream);stream.flush();os.fsync(stream.fileno())
@@ -111,7 +123,7 @@ http=ThreadingHTTPServer(('127.0.0.1',0),Handler);http.daemon_threads=True;threa
 config='model="mock-model"\nmodel_provider="local_fixture"\napproval_policy="never"\nsandbox_mode="read-only"\n[features]\nplugins=false\n[model_providers.local_fixture]\nname="Owned upgrade fixture"\nbase_url="http://127.0.0.1:'+str(http.server_address[1])+'/v1"\nwire_api="responses"\nrequires_openai_auth=false\nsupports_websockets=false\nrequest_max_retries=0\nstream_max_retries=0\n[projects.'+json.dumps(str(ws))+']\ntrust_level="trusted"\n'
 (home/'config.toml').write_text(config)
 settings=home/'app-server-daemon';settings.mkdir(mode=0o700);(settings/'settings.json').write_text(json.dumps(dict(shutdownGraceSeconds=2)))
-shared=home.parent/'shared';shared.mkdir(mode=0o700);(shared/'builds.json').write_text(json.dumps(dict(schema_version=1,builds=dict(modded=dict(executable=str(baseline),sha256=digest(baseline),upstream_version='0.165.0',revision='barrier-baseline',source='local-qualified',read_schemas=[5],backend='managed')))))
+shared=home.parent/'shared';shared.mkdir(mode=0o700);(shared/'builds.json').write_text(json.dumps(dict(schema_version=1,builds=dict(modded=dict(executable=str(baseline),sha256=digest(baseline),upstream_version=native_version(baseline),revision='barrier-baseline',source='local-qualified',read_schemas=[5],backend='managed')))))
 profiles=root/'profiles.toml';profiles.write_text('[profiles]\nstate_root='+json.dumps(str(home.parent))+'\nselection_mode="launcher"\ndefault_profile="test"\nknown_profiles=["test"]\nshared_links=[]\ncheck_upstream_releases=false\n')
 (root/'tmux.conf').write_text('set -g remain-on-exit on\n')
 env=dict(os.environ,CODEX_HOME=str(home),CODEX_PROFILES_CONFIG=str(profiles),CODEX_BUILD_UPDATE_CHECK='0',TERM='xterm-256color');tm=['tmux','-f',str(root/'tmux.conf'),'-S',str(root/'tmux.sock')]
@@ -479,7 +491,7 @@ with unix_connect(sys.argv[1],open_timeout=5,close_timeout=1) as c:
   for tid,g in after.items():
    before=report['goals_before'][tid];assert g['status']=='paused' and all(g[k]==before[k] for k in ['threadId','objective','createdAt','tokenBudget']) and g['tokensUsed']>=before['tokensUsed'],g
   def select_launcher_build(executable):
-   manifest=shared/'builds.json';v=json.loads(manifest.read_text());row=v['builds']['modded'];row.update(executable=str(executable),sha256=digest(executable),revision='qualified-upgrade-fixture')
+   manifest=shared/'builds.json';v=json.loads(manifest.read_text());row=v['builds']['modded'];row.update(executable=str(executable),sha256=digest(executable),upstream_version=native_version(executable),revision='qualified-upgrade-fixture')
    staged=manifest.with_suffix('.next');staged.write_text(json.dumps(v));os.replace(staged,manifest)
    report.setdefault('fixture_build_registrations',[]).append(dict(executable=str(executable),sha256=digest(executable)))
   select_launcher_build(target);pane('fresh',report['active_threads'][0])

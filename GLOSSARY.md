@@ -315,3 +315,12 @@ held for reconciliation rather than authorizing another attempt.
 
 **Upgrade resource authority**:
 Host-owned evidence binding a recovery to the original goal, tenant/account, policy, cumulative accounting and limits. The trusted TUI user action establishes original native policy when creating a native goal, and may carry already verified native policy through later controls without changing its grant. A later status action cannot convert an existing unknown or externally controlled goal into native-only authority. Model handoffs cannot establish this declaration; absent or unverifiable authority keeps recovery held.
+
+**Upgrade candidate**:
+A particular proposed build under evaluation for selection, identified separately from the currently selected working build.
+
+**Upgrade job**:
+A durable, bounded attempt to qualify an upstream release for a configured scope, retaining its progress, evidence and consumed budget across restarts.
+
+**Future-launch promotion**:
+Selecting a qualified build for subsequent launches in a defined scope while existing sessions retain their current build.

@@ -122,6 +122,30 @@ isolated state are temporary; the durable evidence is the private receipt. This 
 local process isolation, not an OS security sandbox. Do not select live tests or
 supply secrets to validation commands.
 
+`--test-temp-root /existing/parent` explicitly places only temporary test files
+(`TMPDIR`) in a fresh mode0700 directory under that parent. Account/XDG state,
+packaging and receipts retain their existing locations. The parent must be outside
+the candidate. Cleanup removes the created child only; unrelated parent contents
+are preserved. The receipt records `profile.test_temp_root` and identifies this
+as functional validation with physical-disk durability acceptance separate.
+Without the option, behavior is unchanged. For RAM-backed functional checks on
+Linux, an explicit existing parent such as `/dev/shm` may be selected; no mount
+or global environment is changed. Keep disk-backed durability/runtime acceptance.
+
+Issue453 verified profiling at311d7e5 measured the same first150 tests at
+98.266seconds on disk and40.544seconds with RAM temporary files. A matched
+scheduler test made217fsync calls on each filesystem:1.033202seconds on disk
+and0.006431seconds in RAM. No durability operation was disabled. Full3.12
+functional validation on RAM passed2018tests/1skip in548.785seconds plus all
+other comprehensive checks. Its explicit diagnostic bound was900seconds; the
+observed unit runtime also fits the unchanged600-second default. This does not
+qualify physical-storage durability or native build acceptance.
+
+An initial external profiling helper omitted the repository import root and
+produced import errors; those runs are retained as invalid qualification. The
+corrected helper first verifies the complete ordered test-ID digest against
+standard unittest discovery. Do not infer a passing selection from timing rows.
+
 The launcher generates an explicit argv manifest and delegates all check execution,
 failure/timeout handling and source/runtime/manifest drift detection to #356's
 `scripts/validate_candidate.py`. The default profiles contain no success actions.

@@ -1397,3 +1397,31 @@ stacked PR327 on PR326. One broad Standards/Spec review and one bounded TDD
 pass repaired assignment revocation checks and contextual approval inspection.
 Installed acceptance #310 and runtime gaps #318/#319 remain open; no production
 policy changes, deployment or resource renewal.
+
+2026-10-31 autonomous upgrade bot specification #444: confirmed semantic repair,
+independent review, disposable qualification and opt-in automatic future-launch
+promotion. Plan0193 owns execution; children #447–#452 are closed with source,
+public-seam and disposable baseline evidence. The original #453 job reached two
+real 0.166 native API compile errors after the storage correction.
+Its three attempts/deadline/history are preserved and the fixture is disabled.
+The approved one-attempt/90-minute successor held at its unchanged job deadline.
+Host regeneration and protocol verification passed; app-server verification was
+interrupted. No complete166 package/review/qualification/promotion. Both fixtures
+are disabled, original evidence preserved, final owned census empty. #453 remains open.
+Reuses #377/#393; #369 remains broader
+coordination, #413 gates running-daemon recovery and #380 production activation.
+No production deployment. One final review/TDD round remains after acceptance.
+
+2026-11-01 Plan0193/#453: bounded fresh retry9e held deadline_exhausted after
+actual protocol4pass/1ignored and app-server TUI-health3pass. No166 complete
+package, native review or installed qualification. Fixture disabled, owned
+process census empty, selected165 retained; no third attempt or renewal.
+#453 remains open; final broad review/TDD0/0. Acceptance/ledger own exact evidence.
+
+2026-11-01 operator correction to #444/Plan0193: deliver a working complete
+modified166 package first, then make the existing public bot reproduce the
+successful deterministic-plus-semantic procedure. Retain compatible compiler
+work under explicit cache bounds; avoid repeated cold builds and fixture growth.
+No new allowance or production authority;453 remains blocked/open.
+
+2026-11-01 Plan0193 final: #455/#456/#457/#453 closed. Actual public semantic166 package independently reviewed, installed A-B-A/all11 native checks qualified; future selection/pinning, real public launch/reconnect and public compatible rollback passed. Privileged owned census empty. Final review1/TDD1 resolves2P2; full3.12 source2026/1skip plus final93upgrade tests on3.11/3.12, lint/packagePASS. Native453/final-review evidence owns identities. Final disposable165 is deliberate rollback; qualified166 retained. Prior failed runs remain history; production/#413/#380/raw-orphan/recurrence/HF20 remain separate.

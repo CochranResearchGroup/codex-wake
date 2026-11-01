@@ -8194,3 +8194,274 @@ are byte-identical. Controller remains masked and current caller has no host
 refresh grant. Prepared scope/service proposals are not applied. Shared cutover
 and actual requesting-session proof remain open; 318/310 are not closed.
 Memory disposition: forbidden because no memory write was authorized.
+
+## 2026-10-31 — autonomous upgrade bot specification
+
+Published #444 from the operator-confirmed two-round interview and chat confirmation
+of the public upgrade-job test seam. Plan0193 records scope, limits, capability
+review, disabled-state fencing, future-launch-only promotion and real disposable
+0.166 acceptance. Existing #369/#377/#393/#413 outcomes remain distinct. Drafted
+vertical child graph for required review before publishing children. Isolated
+branch feat/autonomous-upgrade-bot-spec starts at5df7c81; runtime untouched.
+Validation: issue body/labels/state read back; git diff --check passed.
+
+
+## 2026-10-31 — autonomous upgrade source and actual bounded continuation
+
+Published and independently delegated the seven-child graph #447–#453. Children
+#447–#452 are closed with 73 integrated upgrade tests, 19 MCP tests on each
+Python version, exact disposable combined0.165 qualification (eight checks, zero
+model/provider requests, 11 separate scripted requests) and native operator
+notice delivery/cold replay. Actual #453 used three coding attempts and reached
+Rust compilation; a controller storage scan raced with a removed rustc temporary
+file and held the job, preserving the working selection and original budget.
+
+Corrected owned storage observation and added explicit same-job verify-only
+reconciliation with dead-process proof, original worker report and generated
+Cargo.lock provenance. Public Jobs and 17 Repair regressions pass. The same job
+resumed on frozen82a61a1; original deadline/attempts remain unchanged. Later
+cached-intent refusal4bb3586 is source-tested and was not hot-installed into the
+running continuation. Operator witness6 recorded all four retained notices with
+unchanged grant expiry; a fresh witness holds the old private client for eventual
+selection. Full local matrix runs; actual0.166 acceptance and final review/TDD
+remain open. No production deployment, shared restart or governor activation.
+
+
+## 2026-10-31 — actual 0.166 held outcome and source checkpoint
+
+The original job exhausted its three source contexts and held on native E0223
+(ThreadItem API) and E0061 (new AuthManager constructor argument). Regeneration
+and protocol round trips passed, but complete package/review/qualification/selection
+were not reached. Explicit local disable preserved the entire held job dictionary;
+owned process census is empty and retained0.165 remains selected. Sampled peak
+7,183,492,823 bytes; owned cache reclamation6,958,987,125 bytes. No fourth worker.
+
+Corrected source defaults for future child permissions and canonical host source
+root; current76 upgrade tests pass on each Python3.11/3.12. Earlier full matrix
+passed1988/1skip each; reconciled798ca78 source-bound presubmit passed10checks
+each, and its installed wheel passed13 smoke/legacy checks across retained setup
+receipts. Setup corrections excluded source imports, used short Unix paths and
+explicit unavailable time authority; they do not qualify0.166. Source checkpoint
+remains a draft. Ticket453 and final review/TDD remain open; an explicit bounded
+successor request is pending, with no new grant/job/model call created.
+
+
+## 2026-10-31 — bounded successor authorized
+
+The operator answered “ok go” to one additional coding attempt and90minutes
+under fresh disposable test authority. Original held/disabled job and source
+remain unchanged. Frozen controller3b31bdf includes canonical source-root and
+private-child corrections. Successor preflight proves installed imports/hashes,
+official archive and original69-path stack; prior failed candidate is read-only
+reference with both compiler errors supplied. Budget4800seconds job+600seconds
+post-check reserve, compiler2/storage24GiB/manual monitoring. Launch once; no
+production/shared restart/governor/working-resource renewal. Final review/TDD0.
+
+
+## 2026-10-31 — successor deadline hold and bounded cleanup
+
+Successor88ffcb281213459da987156e8af41984 used its one coding context. The native
+worker wrote both Rust corrections but did not complete a report. Explicit
+attested verify_review_only recovery preserved its evidence and accounting;
+source628a1ed permits only deterministic verification readmission after the host
+Cargo-wrapper PATH error, without a new worker or reviewer replay.
+
+Full regeneration passed, then protocol verification4pass/1ignored. The original
+job deadline interrupted app-server/TUI-health compilation; no independent review,
+complete166 package, qualification or promotion. Local disable preserves the held
+job; final independent census0owned. Old165 remains selected and client pinning
+was preserved. Original job+eight inputs unchanged. Issue453 comment6549533282
+and the Plan0193 acceptance record retain source/timing/cache/evidence hashes.
+No further native context or deadline extension; final review/TDD remains0/0.
+
+At26b52dc, Python3.11 comprehensive passes7checks/2013tests/1skip. Python3.12
+comprehensive timed out900seconds. A verbose diagnostic using inherited working
+environment completed2013tests with23failures/1error in refresh scenarios; its
+29-test refresh group subsequently passed in16.435seconds through the canonical
+isolated runner. The full3.12 timeout remains unresolved; no matrix pass claimed.
+Latest628a1ed has5focused+18Repair tests passing. Hosted CI not used.
+
+
+## 2026-11-01 UTC — bounded diagnosis of upgrade acceptance blockers
+
+Differential clock tests establish the already-landed same-boot UTC rollback fix
+without deadline renewal; historical interruption subtype remains unclassified.
+Added public red/green regressions and fixes for lost timeout output8595293,
+sealed host tool resolution/bytes2d928ba and owned timeout descendants2771981.
+Presubmit10checksPASS;runner7tests each3.11/3.12;Repair/interruption25pass3.12.
+
+One corrected comprehensive3.12 diagnostic again hit900seconds, retaining1281
+completed rows and no failure lines. Its final runtime A2A group passes5tests in
+3.416seconds alone; last-test blame is unsupported. Full-suite cumulative cost
+needs per-test profiling; no raised gate or clean full-matrix claim. Initial
+diagnostic argument-order failure retained. Final owned diagnostic group empty.
+No native retry, resource renewal, production effect or additional review round.
+Plan0193 acceptance/ledger and private `/tmp/wake-diagnosis453/` retain evidence.
+
+
+## 2026-11-01 UTC — measured fixture storage overhead and qualified functional lane
+
+Matched fsync trace217calls:disk1.033202seconds/RAM0.006431seconds. The initial
+external timing helper omitted repo import root; five sample entries were import
+errors and its full collection1679versus2018 was invalid. Stopped owned group,
+retained failures, corrected the report and required full test-ID digest parity.
+
+Added explicit `--test-temp-root` at311d7e5 with private child cleanup, candidate
+root refusal and receipt disclosure. Four public launcher tests pass both Python
+versions. Verified first150tests:98.266seconds disk/40.544RAM. Corrected full3.12
+functional run:2018tests/1skip548.785seconds, all7comprehensive checksPASS.
+Source311d7e5; temporary filesRAM, other state/artifacts retain original placement.
+Default600-second gate unchanged; diagnostic used existing900-second ceiling.
+Physical-disk durability/native166 remain separate. No native retry or deployment.
+Curated private receipts and helper/source provenance retained in ticket453
+profiling-20261101; Plan0193 acceptance and ledger own the compact checkpoint.
+
+
+## 2026-11-01 UTC — fresh453 native verification started
+
+Primary resumes implement-spec; only453 remains. Controllerc9aafa4 admits coding0
+and requires optional strict independent patch dispositions, published in public
+and prepared provenance.88upgrade tests pass each Python3.11/3.12.
+
+Fresh public job72caa827b813497e80d2c7c16c3708cd starts once inwsl-test from
+retained native source via mechanically derived124-path delta/all69originalpaths.
+Pinned metadata normalizer restores1131modes with no byte edits→exactbb296/tests1c7.
+Both expired jobs/inputs preserved. New private source/prefix and cache copies;
+one-time fixture-only prestart control authentication fixes headroom before any
+job existed. No old goal/resource renewal, shared restart or deployment.
+
+Job7200seconds+900cleanup, compiler2/storage24GiB/coding0/independentsourcereview1.
+Actualmonostart80476.137646633, jobdeadline87676.137646633, overall88576.137646633.
+Witness2pins actual165PID1242. Regeneration8 is compiling actualRust, worker0/
+reviewer0. Native package/qualification/promotion still pending. Ledger and453
+acceptance own hashes/receipts. Final broad review/findings TDD remains0/0.
+
+
+2026-11-01 Plan0193/#453 terminal recovery: job72 regeneration passed then held
+on unattended Git pin drift; one private-Git retry9e used only the original
+remaining3211seconds, coding0/B0. Actual protocol4pass/1ignored, app-server
+TUI-health3pass; final verification incomplete at deadline. Hold detection0.602s
+after bound; disable and empty owned process census within cleanup reserve.
+GC reclaimed6,048,477,337B,165 selection/pinned session retained. No166 package/
+qualification/promotion/post rollback. Ledger/acceptance retain terminal hash,
+clocks and known unarmed self-wake. #453 blocked/open; final review/TDD0/0.
+
+## Turn | 2026-11-01 | Upgrade objective correction
+
+Revised existing #444/Plan0193 from operator clarification: keeping modified
+Codex current is the product outcome. Complete real166 first, then reproduce
+the successful deterministic patch/semantic repair/build/qualification journey
+through the existing public job seam. Draft specifies bounded compatible-cache
+reuse, practical measured limits and explicit outcomes; no new orchestrator,
+fixture campaign or runtime allowance.447-452 retain closure;453 remains open.
+
+## Turn | 2026-11-01 | Direct166 build and compiler-cache delivery
+
+Published455/456/457 with native dependencies455+456→457→453 and parent444
+relationships. Primary owns455; cache456 deliveredc105bfd, integratedf893b20;
+worker88 upgrade tests PASS and integrated14 job tests PASS7.049s. Real compiler
+reuse/invalidation proof remains pending;456 is integrated, not accepted/closed.
+New direct455 root inwsl-test compiles the complete canonical package from
+9784byte-identical retained source files; fixed supervisor-only import setup
+error before Cargo with original monotonic deadline106414.882757813 preserved.
+Compiler2/cache24GiB, cache retained outside job scratch; old jobs untouched.
+Detached collector739105 writes the unique observed completion artifact.
+Wake5135e785a48c44dc9c84ed6c74bba339 armed, monitor ready, file-exists predicate
+and exact native caller/resume target read back. Ledger owns full paths/clocks.
+Build pending; final broad review/TDD0/0. No production effects/governor activation.
+
+## Turn | 2026-11-01 | Working modified166 delivered (#455)
+
+Actual canonical complete166 package builds35m01s, total2296s includingsetup,
+public profile launcher/version and exactbinary native capabilities pass.
+Evidence issue0444/direct166-package.md owns SHA/packageinventory, original
+deadline, compilerusage, zero external model/provider effects and empty census.
+Broader historyharness tmux setup failure retained; notclaimed aspassed.
+#455 validated;456 runtime proofactive,457/453 stillblocked. Outcome_progress.
+
+## Turn | 2026-11-01 | Native package proof and active follow-up
+
+Direct455nativecapabilities/publicprofilelaunch PASS exactfa09;7filepackage
+inventoryb180 unchanged. Explicit--locked follow-up timedout120s without live
+descendants/sourcechanges; boundedlogged retry active untilmono97359.412170926
+under original455deadline. Completion wake56df0e007bb14697bf7b132b102cae02 armed/
+monitorready; private collector1452041 owns exact completionartifact.
+456manualrealprotocol tests4PASS/1ignored after455Fresh270Compiling; source
+invalidation/restore/package active withinoriginal60min deadline98071.20294.
+Three precompiler publicsetup failures preserved; no fabricated qualification
+or counter reset. Tickets remain open;457 waits455+456,453 waits457.
+
+## Turn | 2026-11-01 | Direct166 ticket455 closed
+
+Explicit locked3binary build exits0 in1414.158s;9784trackedbytes/Cargo.lock
+unchanged. Final packageinventory unchanged and owned census empty at97039.5373.
+#455 validated/closed from completepackage/publiclauncher/exactnative evidence.
+#456 actual reusedprotocol tests pass, changedsource fails and restoration
+passes; owncanonicalpackage stillcompiles underoriginal60min.457 gatedby456;
+453 acceptance/final review/TDD remain pending. Outcome_progress.
+
+## Turn | 2026-11-01 | Compiler behavior proven; public456 gap retained
+
+Actualmanual456 protocol PASS→realchangedsource rejection→restoredPASS→
+canonicalcomplete166package PASS, under original60min. Publicexplicitcleanup
+reclaims8.524GB, package/evidence/jobs retained, finalcensus0. Primary keeps456
+OPEN because publiccompilerexecution failedbeforeCargo in original3admissions.
+Separate single-admission public recovery preflight PASSES and actualjobstarts;
+50minwork+5cleanup fixednative clocks and monitoredcompletion retained inledger.
+No manualfallback, oldjobrenewal, qualificationfabrication or productioneffect.
+457 remains gated; final review/TDD0/0. Outcome_progress/compilerlayer; public
+end-to-end criterion pending.
+
+## Turn | 2026-11-01 | Public compiler-cache ticket456 accepted
+
+Solepublicjob verifiesprotocol4PASS then buildscompletepackage exit0 through
+actualstageowner/samesharedcache;1018Fresh/73Compiling package phase. Deliberate
+unconfiguredqualification hold remains honest. Publiccompletion withinbounds,
+finalcensus0, warmcache8.525GB retained for457. Combined with prior real source
+invalidation/restoration and explicitpubliccleanup,456 validated/closed.
+455+456 validated onintegration;457 nowready. Source-review/TDD finalrounds0/0.
+
+## Turn | 2026-11-01 | Dispatch actual bot procedure457
+
+455+456 validatedonintegration e641a96 and trackerclosed. Freshbot457 owns
+isolatedfeat/457-proven-upgrade-procedure atsamebase, native new457namespace,
+actualsemantic port/review/verification/package. Primary ownsintegration and
+final453. Max3hwork15mcleanup/compiler2/cache24GiB/onepublicadmission,<=2source
+coding and<=2independentnative reviews; no broadreviewyet. Nativeclock/source
+freeze due beforelaunch. No oldjobreset/production/governor effects.
+
+## Turn | 2026-11-01 | Assembled bot457 admitted after native qualification preflight
+
+Fixed strictreview wording forfreshsemantic workers (47focusedchecks). Replaced
+managed-daemon historyadapter with actual publicprivateprofile/history/TUI
+compatibility; nativeCLI27s and unchangedaggregate11checks36s PASS reference.
+Evidence issue0444/private-history-qualification.md labels scopedproof and
+remainingactualpublicrollback. Q/promotion sealedBEFOREadmission.
+Single457jobda6a022b403049e7917227eff21fe901 nowrunning actualoriginal69path
+conflict semanticworker1. Originalpacketstart100718/work111518/cleanup112418;
+jobdeadline111507withinwork; repair2/compiler2/cache24GiB, noreset. Prefixsource
+f2aa followsinitial6e7clockprepfreeze. Actualrunner765/monitor766/host2509302
+verified; old165witness/private/noticeready, expiryunchanged. Completionwake
+a7e296107c6543b69a85bfa83bd1c2fa armed+monitorready, exacthostartifact.
+No newcandidatepackage/Qsuccess claimed;457/453remainopen, finalreview/TDD0/0.
+
+## Turn | 2026-11-01 | Same-job deterministic host-artifact repair
+
+457nativeworkers2 completedrealport; strictcachedgenerationfailedONLYmissing
+3Ruffcacheentries. Explicitexacthostrestoration leaves9781sourcefiles/tests/
+workerreports unchanged, currentBBsnapshot. No validator/Qpolicy or counters/
+deadline edited. Publicverify_only samejob queues/advances withfreshwitness2;
+no codingworker3. Newrunner824/monitor825/host2750454 originalbounds, fresh
+terminalwake486b0de583a54116b61ade26eab2977a armed, oldwakea7cancelled. Native
+Rustverification/independentreview/package/Q/promotion remainpending; source
+semanticcompletion evidence distinctfromhostcachedartifactfailure.
+
+## 2026-11-01 | Plan0193 #457 actual public package accepted
+
+Actual original69path semantic repair, fresh independent review, locked Rust checks and new canonical166 package passed; exact11native stage checks passed/model0. Receipt0269e98c and public `docs/dev/evidence/issue0444/semantic457-package.md` bind hashes and empty census. #453 remains active at provenance classification/readmission; no installed acceptance or production effect claimed. Final broad review/TDD0/0.
+
+## 2026-11-01 | Plan0193 final native delivery and review
+
+#453 closed after actual qualified public job/promotion, witness3 old165 pinning and durable notices, public166launch/reconnect and actual public rollback165 with saved history unchanged. Finalprivileged census0, cache14,877,582,585B retained. Privatefinalreceipt354e1650; public native453-acceptance.md. Exactlyone broad Standards+Spec review atbase289bb97/head15f accepted2P2; oneboundedTDD pass fixedMCPschema4ffc53e and stoppedpromotionobservation9d045b1. Fullsource15f3.12 PASS7gates/2026tests1skip; final93upgradePASSboth3.11/3.12, lint/packagePASS. Missingdevcheckerpreflight retainedthenfixedisolated. Final-review.md preserves source/runtime/physical/RAM boundaries. No production/governor/sharedrestart/oldbudgetrenewal.
+
+Closeout memory disposition: forbidden, explicit memory-update request required by developer instruction; machine-readable private final444-memory-disposition.json records zero Graphiti write attempts.
