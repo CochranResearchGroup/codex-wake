@@ -116,6 +116,44 @@ pathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(dict(sc
             self.assertEqual(result['status'],'held',result)
             self.assertEqual(result['reason'],'original_patch_stack_mismatch')
 
+    def test_pinned_host_tool_cannot_fall_back_to_another_path(self):
+        import os
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source,config,recipe,job=self.fixture(root)
+            for name in ('sealed','fallback'):
+                folder=root/name;folder.mkdir()
+                tool=folder/'fixture-cargo';tool.write_text('#!/bin/sh\nexit 0\n');tool.chmod(0o700)
+            expected=root/'sealed/fixture-cargo'
+            config['host_tools']={'fixture-cargo':dict(path=str(expected),sha256=hashlib.sha256(expected.read_bytes()).hexdigest())}
+            config['verify'].append([sys.executable,'-c',"import subprocess;subprocess.run(['fixture-cargo'],check=True)"])
+            charges=[]
+            with patch.dict(os.environ,PATH=str(root/'fallback')+os.pathsep+os.environ['PATH']):
+                result=UpgradeRepair(source,root/'evidence',config,checkpoint=charges.append).run(job,recipe)
+            self.assertEqual(result['status'],'held',result)
+            self.assertEqual(result['reason'],'host_tool_path_mismatch: fixture-cargo')
+            self.assertEqual(charges,[])
+            self.assertEqual((source/'feature.txt').read_text(),'old\n')
+
+    def test_pinned_host_tool_requires_matching_bytes_before_generation(self):
+        import os
+        from unittest.mock import patch
+        for changed in (False,True):
+            with self.subTest(changed=changed),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);source,config,recipe,job=self.fixture(root)
+                tools=root/'tools';tools.mkdir();marker=root/'generated'
+                tool=tools/'fixture-cargo'
+                tool.write_text('#!'+sys.executable+'\nfrom pathlib import Path\nPath('+repr(str(marker))+').write_text("generated")\n')
+                tool.chmod(0o700)
+                config['host_tools']={'fixture-cargo':dict(path=str(tool),sha256=hashlib.sha256(tool.read_bytes()).hexdigest())}
+                config['regenerate']=[[sys.executable,'-c',"import subprocess;subprocess.run(['fixture-cargo'],check=True)"]]
+                if changed:tool.write_text(tool.read_text()+'# replaced\n')
+                with patch.dict(os.environ,PATH=str(tools)+os.pathsep+os.environ['PATH']):
+                    result=UpgradeRepair(source,root/'evidence',config).run(job,recipe)
+                self.assertEqual(result['status'],'held' if changed else 'reviewed',result)
+                self.assertEqual(marker.exists(),not changed)
+                if changed:self.assertEqual(result['reason'],'host_tool_hash_mismatch: fixture-cargo')
+
     def test_reviewer_source_mutation_invalidates_approval_and_generated_files_are_bound(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);source,config,recipe,job=self.fixture(root)

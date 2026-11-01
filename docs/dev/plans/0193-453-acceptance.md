@@ -342,3 +342,27 @@ a canonical qualification result. Re-running that group through the canonical
 isolated source-bound runner passed29tests in16.435seconds. The initial full
 canonical900-second timeout remains unresolved; neither diagnostic replaces it.
 No clean full3.12 matrix is claimed.
+
+
+## Follow-up diagnosis (source-only, no native retry)
+
+Operator approved diagnosing-bugs after the terminal hold. A differential probe
+runs existing public Repair clock tests against pristine3b31bdf and current
+source: the old revision holds on a five-second UTC rollback; current passes
+while preserving deadline and boot/counter uncertainty holds. Logs are private
+`/tmp/wake-diagnosis453/{before,current}-clock.log`. This qualifies that regression
+fix, not the historical interrupted sample, whose exact subtype remains unknown.
+
+A new public validation-runner regression reproduced lost partial stdout on a
+0.2-second timeout. Fix8595293 retains stdout/stderr with replacement decoding,
+marks `timed_out=true` and still blocks later checks/actions. Six runner tests
+pass. A single diagnostic comprehensive3.12 run uses immutable8595293, verbose
+output and unchanged900-second check limit; result pending. Its initial argument
+ordering failure is retained separately from the corrected run.
+
+Host PATH omission now has a subsecond public Repair reproduction. Optional
+sealed `repair.host_tools` declarations pin command resolution and bytes before
+replay/every subprocess; fallback/changed wrappers hold without a coding charge.
+No original or successor fixture config or job is changed, and no native retry
+is started. This diagnostic work does not count as the final broad review or
+post-review findings TDD round.

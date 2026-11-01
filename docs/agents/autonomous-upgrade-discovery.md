@@ -78,3 +78,16 @@ boot/counter uncertainty still holds. Host launcher PATH must retain any recipe'
 sealed toolchain wrapper before the raw toolchain, including its approved cache
 and profile settings. Local owner `upgrades disable` remains available without a
 current service grant.
+
+
+## Host tool preflight
+
+The host-owned repair configuration may declare `host_tools`, mapping each
+command basename to an absolute `path` and lowercase SHA256 `sha256`. For
+example, pin `cargo` to the approved wrapper, rather than its underlying binary.
+The executor checks PATH resolution and bytes before replay and before every
+subprocess. Missing/fallback paths report `host_tool_path_mismatch: <name>`;
+changed bytes report `host_tool_hash_mismatch: <name>`, without starting that
+command. No PATH rewrite, dependency fetch or additional coding allowance occurs.
+Undeclared tools retain existing behavior. These pins belong to the sealed job
+configuration; adding them does not authorize changing an existing held job.

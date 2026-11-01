@@ -136,10 +136,30 @@ class UpgradeRepair:
             if size>limit:
                 raise RepairHeld('temporary_storage_exhausted')
 
+    def _host_tools(self):
+        tools=self.config.get('host_tools',{})
+        if not isinstance(tools,dict):
+            raise RepairHeld('host_tools must map command names to absolute paths and SHA256 pins')
+        # Subprocesses resolve relative PATH entries from the owned workspace.
+        search_path=os.pathsep.join(str(Path(part) if Path(part).is_absolute() else self.workspace/part)
+                                    for part in os.environ.get('PATH','').split(os.pathsep))
+        for name,pin in tools.items():
+            if (not isinstance(name,str) or not re.fullmatch(r'[A-Za-z0-9_.+-]+',name)
+                    or not isinstance(pin,dict) or set(pin)!={'path','sha256'}
+                    or not isinstance(pin['path'],str) or not Path(pin['path']).is_absolute()
+                    or not isinstance(pin['sha256'],str) or not re.fullmatch(r'[a-f0-9]{64}',pin['sha256'])):
+                raise RepairHeld('invalid host tool pin')
+            selected=shutil.which(name,path=search_path)
+            if selected is None or Path(selected).absolute()!=Path(pin['path']):
+                raise RepairHeld('host_tool_path_mismatch: '+name)
+            if _sha(Path(selected).read_bytes())!=pin['sha256']:
+                raise RepairHeld('host_tool_hash_mismatch: '+name)
+
     def _command(self, argv, role, *, packet=None):
         if not isinstance(argv,list) or not argv or any(not isinstance(x,str) or not x for x in argv):
             raise RepairHeld('host command must be an explicit argv array')
         self._budget()
+        self._host_tools()
         sequence=len(self.state['commands'])+1
         output=self.evidence/f'{sequence}-{role}.stdout'
         error=self.evidence/f'{sequence}-{role}.stderr'
@@ -206,6 +226,7 @@ class UpgradeRepair:
         return 'conflict marker' in output.lower()
 
     def _validate_config(self, recipe):
+        self._host_tools()
         worker=self.config.get('worker',{});reviewer=self.config.get('reviewer',{})
         if not worker.get('identity') or not reviewer.get('identity') or worker['identity']==reviewer['identity']:
             raise RepairHeld('independently configured worker and reviewer identities required')
