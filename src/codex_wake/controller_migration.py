@@ -11,6 +11,7 @@ from dataclasses import replace
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import stat
 import shutil
@@ -89,7 +90,7 @@ def _tree(root, fixture, *, limit=4096):
 
 
 def probe_writers(roots):
-    """Bounded same-user open-write-FD census; uncertainty never means idle."""
+    """Bounded same-user runtime-home and write-FD census; uncertainty never means idle."""
     writers, unknown = [], False
     try:
         processes = []
@@ -107,6 +108,25 @@ def probe_writers(roots):
             return dict(status='unknown', writers=[], reason='process census exceeds bounded capacity')
         for process in processes:
             try:
+                # An idle TUI can reopen its database later. Open descriptors
+                # alone do not prove an account home is safe to detach.
+                environment = {}
+                for item in (process / 'environ').read_bytes().split(b'\0'):
+                    key, separator, value = item.partition(b'=')
+                    if separator and key in (b'CODEX_HOME', b'HOME'):
+                        environment[key] = os.fsdecode(value)
+                configured_home = environment.get(b'CODEX_HOME')
+                if not configured_home and Path(os.readlink(process / 'exe')).name == 'codex':
+                    default_home = environment.get(b'HOME')
+                    if default_home:
+                        configured_home = str(Path(default_home) / '.codex')
+                if configured_home:
+                    dependency = Path(configured_home)
+                    if not dependency.is_absolute():
+                        dependency = (process / 'cwd').resolve() / dependency
+                    dependency = dependency.absolute()
+                    if any(dependency == root or dependency.is_relative_to(root) for root in roots):
+                        writers.append(dict(pid=int(process.name), path=str(dependency), evidence='configured_account_home'))
                 descriptors = list((process / 'fd').iterdir())
                 if len(descriptors) > 4096:
                     unknown = True
@@ -160,6 +180,8 @@ class ControllerMigration:
     def _configuration(self):
         data = tomllib.loads(self.path.read_text())
         policy = data['migration']
+        if policy.get('strategy', 'relocate') not in ('relocate', 'isolate_in_place'):
+            raise InventoryError('unsupported_target', 'unknown migration strategy')
         fixture = Path(policy.get('scope_root', policy.get('fixture_root', '')))
         if not fixture.is_absolute() or fixture != fixture.resolve() or not fixture.is_dir():
             raise InventoryError('unauthorized_target', 'canonical disposable fixture root required')
@@ -206,18 +228,27 @@ class ControllerMigration:
             if operation == 'migration.preview':
                 return self._preview()
             data, settings, fixture, marker, paths = self._configuration()
+            isolation = data['migration'].get('strategy') == 'isolate_in_place'
+            if marker is None and not (isolation and data['migration'].get('live_activation') is True):
+                raise InventoryError('production_not_authorized', 'explicit host live activation or disposable designation required')
             if marker is None:
-                raise InventoryError('production_not_authorized', 'production effects remain gated by issue380; disposable designation required')
-            if self.root.resolve().is_relative_to(fixture):
+                info = self.path.lstat()
+                if self.path.is_symlink() or info.st_uid != os.getuid() or info.st_mode & 0o022:
+                    raise InventoryError('unauthorized_target', 'live migration policy must be owned and private from other writers')
+            if not isolation and self.root.resolve().is_relative_to(fixture):
                 raise InventoryError('unsupported_target', 'migration provenance must remain outside the disposable target')
             directory = self.root / 'controller-migration'
             directory.mkdir(mode=0o700, parents=True, exist_ok=True)
-            with _lock(directory, marker['fixture_id']):
+            with _lock(directory, marker['fixture_id'] if marker else _digest(self.scope_target())):
                 preview = self._preview()
                 if arguments.get('expected_target') != preview['target']:
                     raise InventoryError('stale_target', 'migration plan or target changed')
                 if preview['holds']:
                     raise InventoryError('migration_held', 'migration evidence has explicit holds: ' + ','.join(preview['holds']))
+                if isolation:
+                    if operation == 'migration.apply':
+                        return self._isolate_apply(directory, preview, settings, paths, fixture, authorize)
+                    return self._isolate_rollback(directory, arguments.get('receipt_id'), preview, settings, paths, fixture, authorize)
                 if operation == 'migration.apply':
                     return self._apply(directory, preview, settings, paths, fixture, authorize)
                 return self._rollback(directory, arguments.get('receipt_id'), preview, paths, fixture, authorize)
@@ -399,6 +430,8 @@ class ControllerMigration:
 
     def _preview(self):
         data, settings, fixture, marker, paths = self._configuration()
+        if data['migration'].get('strategy') == 'isolate_in_place':
+            return self._isolate_preview(data, settings, fixture, marker, paths)
         entries, links = {}, []
         for path in paths.values():
             found, discovered = _tree(path, fixture)
@@ -468,3 +501,344 @@ class ControllerMigration:
                     production_effect_status='not_authorized', production_gate='issue380',
                     disposable_effect_status='authorized' if marker is not None else 'not_authorized',
                     production_activation=False, credential_copy=False, original_shared_store='preserved')
+
+    def _isolate_preview(self, data, settings, scope, marker, paths):
+        """Plan only affected aliases, never traverse or assign legacy histories."""
+        holds, entries, links, plan = [], {}, [], []
+        declared = list(settings.known_profiles) + list(settings.aliases.values())
+        declared += [
+            p.name
+            for p in settings.state_root.glob(settings.account_prefix + "*")
+            if p.is_dir()
+        ]
+        if len(declared) > 256:
+            raise InventoryError(
+                "unsupported_target", "account isolation inventory exceeds capacity"
+            )
+        names = sorted({settings.resolve_profile_name(name) for name in declared})
+        if not names or any(
+            re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", name) is None
+            for name in names
+        ):
+            raise InventoryError(
+                "unsupported_target", "explicit canonical owning accounts required"
+            )
+        homes = [settings.account_root(name) for name in names]
+        for home in homes:
+            if (
+                home.is_symlink()
+                or home != home.resolve()
+                or not home.is_dir()
+                or home.stat().st_uid != os.getuid()
+            ):
+                holds.append("account_home_unqualified")
+        if any(
+            paths["candidate_root"].is_relative_to(root)
+            or root.is_relative_to(paths["candidate_root"])
+            or self.root.resolve().is_relative_to(root)
+            for root in (settings.state_root, settings.source_root)
+        ):
+            holds.append("isolation_provenance_or_candidate_overlaps_runtime")
+        if set(settings.shared_links) - {"config.toml", "skills", "rules"}:
+            holds.append("shared_mutable_policy")
+        directories = {"sessions", "memories", "cache", "log"}
+        mutable = directories | {"history.jsonl"}
+        credentials = {}
+        affected = set()
+        for home in homes:
+            auth = home / "auth.json"
+            credentials[str(auth)] = _tree(auth, scope)[0]
+            if auth.is_symlink():
+                holds.append("credential_owner_required")
+            candidates = {home / name for name in mutable} | set(home.glob("*.sqlite*"))
+            affected.update(str(path) for path in candidates)
+            for path in sorted(candidates):
+                found, discovered = (
+                    _tree(path, scope)
+                    if path.is_symlink() or not path.exists() or path.is_file()
+                    else (
+                        {
+                            str(path): dict(
+                                kind="private_directory",
+                                device=path.stat().st_dev,
+                                inode=path.stat().st_ino,
+                            )
+                        },
+                        [],
+                    )
+                )
+                entries.update(found)
+                links.extend(discovered)
+                if not path.is_symlink():
+                    continue
+                link = discovered[0]
+                if (
+                    not link.get("exists")
+                    or link.get("scope") != "internal"
+                    or not Path(link["resolved"]).is_relative_to(
+                        settings.shared_root.resolve()
+                    )
+                ):
+                    holds.append("legacy_runtime_link_unqualified")
+                    continue
+                plan.append(
+                    dict(
+                        kind="isolate_runtime_link",
+                        path=str(path),
+                        target=os.readlink(path),
+                        inode=path.lstat().st_ino,
+                        replacement="directory"
+                        if path.name in directories
+                        else "file"
+                        if path.name == "history.jsonl"
+                        else "absent",
+                    )
+                )
+        protected = data["migration"].get(
+            "protected_roots", [str(settings.source_root)]
+        )
+        if (
+            not isinstance(protected, list)
+            or len(protected) > 256
+            or any(not isinstance(p, str) for p in protected)
+        ):
+            raise InventoryError(
+                "unsupported_target", "bounded protected runtime roots required"
+            )
+        protected_bindings = []
+        for value in protected:
+            root = Path(value)
+            if (
+                not root.is_absolute()
+                or not root.is_relative_to(scope)
+                or root.is_symlink()
+            ):
+                holds.append("protected_runtime_root_unqualified")
+                continue
+            candidates = {root / name for name in mutable} | set(root.glob("*.sqlite*"))
+            for path in sorted(candidates):
+                if not path.exists() and not path.is_symlink():
+                    continue
+                try:
+                    link = _links(path)
+                    protected_bindings.append(link)
+                    if any(step["path"] in affected for step in link["chain"]) or any(
+                        Path(link["resolved"]).is_relative_to(Path(path))
+                        for path in affected
+                    ):
+                        holds.append("protected_runtime_depends_on_account_alias")
+                except (InventoryError, OSError, RuntimeError):
+                    holds.append("protected_runtime_dependency_unknown")
+        writers = self.writer_probe(tuple(homes))
+        if writers.get("status") != "complete":
+            holds.append("writer_census_unknown")
+        if writers.get("writers"):
+            holds.append("competing_writer")
+        policy_sha = hashlib.sha256(self.path.read_bytes()).hexdigest()
+        target = dict(
+            self.scope_target(),
+            migration_revision=_digest(
+                dict(
+                    configuration=policy_sha,
+                    entries=entries,
+                    credentials=credentials,
+                    protected=protected_bindings,
+                    writers=writers,
+                )
+            ),
+        )
+        return dict(
+            status="held" if holds else "ready",
+            strategy="isolate_in_place",
+            target=target,
+            holds=sorted(set(holds)),
+            accounts=names,
+            homes=[str(p) for p in homes],
+            plan=plan,
+            credentials=credentials,
+            links=links,
+            protected_bindings=protected_bindings,
+            writers=writers,
+            history=dict(
+                qualified_sessions=0, unassigned_policy="preserve_original_store"
+            ),
+            phase="legacy" if plan else "isolated",
+            credential_copy=False,
+            original_shared_store="preserved",
+            production_activation=False,
+            production_effect_status="authorized"
+            if data["migration"].get("live_activation") is True
+            else "not_authorized",
+            disposable_effect_status="authorized" if marker else "not_authorized",
+            production_gate="issue380",
+        )
+
+    def _isolate_guard(self, authorize, policy_sha, credentials):
+        if authorize is not None:
+            authorize()
+        if hashlib.sha256(self.path.read_bytes()).hexdigest() != policy_sha:
+            raise InventoryError("stale_target", "isolation policy changed")
+        data, settings, scope, marker, paths = self._configuration()
+        current = self._isolate_preview(data, settings, scope, marker, paths)
+        if current["holds"]:
+            raise InventoryError(
+                "migration_held",
+                "isolation dependency or writer changed: " + ",".join(current["holds"]),
+            )
+        if current["credentials"] != credentials:
+            raise InventoryError(
+                "stale_target", "native credential owner changed during isolation"
+            )
+        return current
+
+    def _isolate_apply(self, directory, preview, settings, paths, scope, authorize):
+        candidate = paths["candidate_root"]
+        if candidate.exists() or candidate.is_symlink():
+            raise InventoryError(
+                "target_changed", "isolation backup already exists; no replay permitted"
+            )
+        receipt_id = preview["target"]["migration_revision"]
+        receipt_path = directory / (receipt_id + ".json")
+        if receipt_path.exists():
+            raise InventoryError(
+                "uncertain_effect",
+                "original isolation receipt already exists; no replay permitted",
+            )
+        receipt = dict(
+            schema_version=1,
+            strategy="isolate_in_place",
+            state="preparing",
+            scope=self.scope_target(),
+            receipt_id=receipt_id,
+            candidate=str(candidate),
+            credentials=preview["credentials"],
+            policy_sha=hashlib.sha256(self.path.read_bytes()).hexdigest(),
+            moves=[],
+            effects_attempted=True,
+        )
+        _save(receipt_path, receipt)
+        try:
+            current = self._isolate_guard(
+                authorize, receipt["policy_sha"], receipt["credentials"]
+            )
+            if current["target"] != preview["target"]:
+                raise InventoryError(
+                    "stale_target", "isolation plan changed before first effect"
+                )
+            candidate.mkdir(mode=0o700)
+            for number, action in enumerate(preview["plan"]):
+                self._isolate_guard(
+                    authorize, receipt["policy_sha"], receipt["credentials"]
+                )
+                path = Path(action["path"])
+                backup = candidate / str(number)
+                if (
+                    not path.is_symlink()
+                    or os.readlink(path) != action["target"]
+                    or path.lstat().st_ino != action["inode"]
+                ):
+                    raise InventoryError(
+                        "stale_target", "legacy alias changed before isolation"
+                    )
+                row = dict(action, backup=str(backup), state="intent")
+                receipt["moves"].append(row)
+                _save(receipt_path, receipt)
+                os.rename(path, backup)
+                if action["replacement"] == "directory":
+                    path.mkdir(mode=0o700)
+                elif action["replacement"] == "file":
+                    with path.open("x"):
+                        pass
+                    path.chmod(0o600)
+                row.update(state="isolated", after=_tree(path, scope)[0])
+                _save(receipt_path, receipt)
+            self._isolate_guard(
+                authorize, receipt["policy_sha"], receipt["credentials"]
+            )
+            ControllerAccounts(
+                self.path, host=self.host, environment=self.environment
+            ).execute("accounts.list", {})
+            receipt.update(state="applied")
+            _save(receipt_path, receipt)
+            return dict(
+                status="applied",
+                strategy="isolate_in_place",
+                receipt_id=receipt_id,
+                target=self._preview()["target"],
+                credential_copy=False,
+                credential_files="same_native_inodes",
+                original_shared_store="preserved",
+                production_activation=False,
+            )
+        except BaseException:
+            receipt["state"] = "uncertain"
+            _save(receipt_path, receipt)
+            raise
+
+    def _isolate_rollback(
+        self, directory, receipt_id, preview, settings, paths, scope, authorize
+    ):
+        if (
+            not isinstance(receipt_id, str)
+            or re.fullmatch("[a-f0-9]{64}", receipt_id) is None
+        ):
+            raise InventoryError("invalid_argument", "exact isolation receipt required")
+        receipt_path = directory / (receipt_id + ".json")
+        if receipt_path.is_symlink():
+            raise InventoryError(
+                "unsupported_target", "private isolation receipt required"
+            )
+        receipt = json.loads(receipt_path.read_text())
+        if (
+            receipt.get("strategy") != "isolate_in_place"
+            or receipt.get("state") != "applied"
+            or receipt.get("scope") != self.scope_target()
+            or receipt.get("candidate") != str(paths["candidate_root"])
+        ):
+            raise InventoryError(
+                "uncertain_effect", "completed attributable isolation required"
+            )
+        self._isolate_guard(authorize, receipt["policy_sha"], receipt["credentials"])
+        for row in receipt["moves"]:
+            path, backup = Path(row["path"]), Path(row["backup"])
+            if (
+                not backup.is_symlink()
+                or os.readlink(backup) != row["target"]
+                or backup.lstat().st_ino != row["inode"]
+                or _tree(path, scope)[0] != row["after"]
+            ):
+                raise InventoryError(
+                    "target_changed",
+                    "private state changed; retain it rather than roll it back",
+                )
+        receipt["state"] = "rolling_back"
+        _save(receipt_path, receipt)
+        try:
+            for row in reversed(receipt["moves"]):
+                self._isolate_guard(
+                    authorize, receipt["policy_sha"], receipt["credentials"]
+                )
+                path = Path(row["path"])
+                if path.exists():
+                    if path.is_dir():
+                        path.rmdir()
+                    else:
+                        path.unlink()
+                os.rename(row["backup"], path)
+                row["state"] = "restored"
+                _save(receipt_path, receipt)
+            receipt["state"] = "rolled_back"
+            _save(receipt_path, receipt)
+            return dict(
+                status="rolled_back",
+                strategy="isolate_in_place",
+                receipt_id=receipt_id,
+                target=self._preview()["target"],
+                credential_copy=False,
+                original_shared_store="preserved",
+                production_activation=False,
+            )
+        except BaseException:
+            receipt["state"] = "uncertain"
+            _save(receipt_path, receipt)
+            raise
