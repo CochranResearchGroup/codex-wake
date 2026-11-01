@@ -8429,3 +8429,18 @@ actualsemantic port/review/verification/package. Primary ownsintegration and
 final453. Max3hwork15mcleanup/compiler2/cache24GiB/onepublicadmission,<=2source
 coding and<=2independentnative reviews; no broadreviewyet. Nativeclock/source
 freeze due beforelaunch. No oldjobreset/production/governor effects.
+
+## Turn | 2026-11-01 | Assembled bot457 admitted after native qualification preflight
+
+Fixed strictreview wording forfreshsemantic workers (47focusedchecks). Replaced
+managed-daemon historyadapter with actual publicprivateprofile/history/TUI
+compatibility; nativeCLI27s and unchangedaggregate11checks36s PASS reference.
+Evidence issue0444/private-history-qualification.md labels scopedproof and
+remainingactualpublicrollback. Q/promotion sealedBEFOREadmission.
+Single457jobda6a022b403049e7917227eff21fe901 nowrunning actualoriginal69path
+conflict semanticworker1. Originalpacketstart100718/work111518/cleanup112418;
+jobdeadline111507withinwork; repair2/compiler2/cache24GiB, noreset. Prefixsource
+f2aa followsinitial6e7clockprepfreeze. Actualrunner765/monitor766/host2509302
+verified; old165witness/private/noticeready, expiryunchanged. Completionwake
+a7e296107c6543b69a85bfa83bd1c2fa armed+monitorready, exacthostartifact.
+No newcandidatepackage/Qsuccess claimed;457/453remainopen, finalreview/TDD0/0.
