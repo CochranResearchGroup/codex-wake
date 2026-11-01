@@ -58,6 +58,29 @@ changed private history must prevent destructive migration rollback. This is
 separate from build rollback. Host opt-in/current scoped authorization is
 required for live effects; no fake disposable marker is placed on production.
 
+## Incremental admission after live dependency reconciliation
+
+The refreshed live inventory maps23 native processes to tmux panes. A global
+shared restart is unnecessary for enabling selected inactive accounts. Explicit
+host `[accounts].enabled` admission limits the existing account and in-place
+migration owners to chosen canonical accounts. Inactive legacy accounts remain
+visible as inactive and cannot be resolved for private launch. Default behavior
+without this host list remains unchanged. Do not use this control to bypass a
+writer or protected dependency on an admitted account.
+
+The read-only selected-account preview includes six accounts and30 aliases;
+it excludes the account used by protected global cache/log/memory bindings.
+That removes the protected-dependency hold without changing any binding. Actual
+activation still holds on incomplete kernel process visibility. A standalone
+metadata-only census was prepared privately for operator-authenticated sudo;
+it cannot mutate accounts or restart processes. Its result is evidence, never
+an authorization or automatic stale-census bypass.
+
+The late selective-admission change is targeted-tested but is outside the
+previous frozen broad source review. Review/TDD counters stay1/1; no repeated
+broad review loop or live acceptance is claimed. Record its final source/tests
+and qualify the actual installed journeys before closing #380.
+
 ## Interruption boundary
 
 Operator explicitly requires asking BEFORE interrupting work. Never stop,

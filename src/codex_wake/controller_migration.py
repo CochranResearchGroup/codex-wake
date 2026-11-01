@@ -21,7 +21,7 @@ from uuid import UUID
 from codex_profiles.config import load_settings
 from codex_profiles.history import discover, select_session
 from codex_profiles.layout import plan_migration, apply_migration
-from .controller_accounts import ControllerAccounts
+from .controller_accounts import ControllerAccounts, account_inventory
 from .managed_inventory import InventoryError
 from .goal_supervision import _lock, _save
 
@@ -182,6 +182,8 @@ class ControllerMigration:
         policy = data['migration']
         if policy.get('strategy', 'relocate') not in ('relocate', 'isolate_in_place'):
             raise InventoryError('unsupported_target', 'unknown migration strategy')
+        if policy.get('strategy', 'relocate') != 'isolate_in_place' and 'enabled' in data.get('accounts', {}):
+            raise InventoryError('unsupported_target', 'selective admission requires in-place isolation')
         fixture = Path(policy.get('scope_root', policy.get('fixture_root', '')))
         if not fixture.is_absolute() or fixture != fixture.resolve() or not fixture.is_dir():
             raise InventoryError('unauthorized_target', 'canonical disposable fixture root required')
@@ -505,24 +507,9 @@ class ControllerMigration:
     def _isolate_preview(self, data, settings, scope, marker, paths):
         """Plan only affected aliases, never traverse or assign legacy histories."""
         holds, entries, links, plan = [], {}, [], []
-        declared = list(settings.known_profiles) + list(settings.aliases.values())
-        declared += [
-            p.name
-            for p in settings.state_root.glob(settings.account_prefix + "*")
-            if p.is_dir()
-        ]
-        if len(declared) > 256:
-            raise InventoryError(
-                "unsupported_target", "account isolation inventory exceeds capacity"
-            )
-        names = sorted({settings.resolve_profile_name(name) for name in declared})
-        if not names or any(
-            re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", name) is None
-            for name in names
-        ):
-            raise InventoryError(
-                "unsupported_target", "explicit canonical owning accounts required"
-            )
+        names, inactive = account_inventory(settings, data)
+        if not names:
+            raise InventoryError('unsupported_target', 'explicit owning accounts required')
         homes = [settings.account_root(name) for name in names]
         for home in homes:
             if (
@@ -653,6 +640,7 @@ class ControllerMigration:
             target=target,
             holds=sorted(set(holds)),
             accounts=names,
+            inactive_accounts=inactive,
             homes=[str(p) for p in homes],
             plan=plan,
             credentials=credentials,

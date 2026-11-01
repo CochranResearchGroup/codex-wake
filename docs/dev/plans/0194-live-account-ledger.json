@@ -79,7 +79,12 @@
     "staged_stock_version": "PASS; exact registered b93f6811 stock0.164 in neutral home; live aliases unchanged",
     "python311_focused": "58 PASS in15.307s",
     "final_wheel_sha256": "d93ea6fef6ff3cfdc6e589064a0b539367466fdd911ecd99d5bff596350330f5",
-    "stock166_identity": "official asset digest validated; extracted binary matches existing plain codex b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8; public pinned version rc0"
+    "stock166_identity": "official asset digest validated; extracted binary matches existing plain codex b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8; public pinned version rc0",
+    "selective_focused": {
+      "python312": "60 PASS in12.965s",
+      "python311": "60 PASS in12.812s",
+      "public_seams": "migration preservation plus CLI/MCP parity and invalid admission refusal"
+    }
   },
   "live_preview": {
     "status": "held",
@@ -96,5 +101,20 @@
   "remediation_state": "complete_S1_S2_red_green",
   "source_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/459",
   "source_pr_state": "draft",
-  "runtime_stage": "held; protected storage dependencies and incomplete live census"
+  "runtime_stage": "read-only ownership reconciliation; seven protected process inspections need operator-authenticated metadata census",
+  "post_review_changes": {
+    "scope": "explicit host account admission for noninterrupting incremental activation",
+    "reviewed_by_previous_frozen_broad_review": false,
+    "state": "targeted_validated; final source qualification pending"
+  },
+  "selected_live_preview": {
+    "accounts": 6,
+    "inactive_accounts": 1,
+    "planned_aliases": 30,
+    "holds": [
+      "writer_census_unknown"
+    ],
+    "production_effect_status": "not_authorized",
+    "receipt_sha256": "9b23209d6387d64069a2caec63039c7273709e80c04a3f5b67f297aba1ff35b1"
+  }
 }

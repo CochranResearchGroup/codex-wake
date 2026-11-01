@@ -524,3 +524,41 @@ class InPlaceIsolationTests(unittest.TestCase):
             (self.home / "state_5.sqlite").read_bytes(),
             b"new native state after initial rollback check",
         )
+
+    def test_selected_account_isolation_leaves_protected_legacy_peer_untouched(self):
+        self.legacy_links()
+        peer = self.accounts / "codex-bob"
+        peer.mkdir()
+        (peer / "auth.json").write_text('{"synthetic_account":"bob"}')
+        (peer / "sessions").symlink_to(self.source / "sessions")
+        (peer / "cache").mkdir()
+        (self.global_home / "cache").symlink_to(peer / "cache")
+        self.path.write_text(
+            self.path.read_text().replace(
+                'known_profiles=["alice"]', 'known_profiles=["alice","bob"]'
+            )
+            + '\n[accounts]\nenabled=["alice"]\n'
+        )
+        peer_link = (peer / "sessions").lstat().st_ino
+        protected_link = (self.global_home / "cache").readlink()
+        owner = self.owner()
+        preview = owner.execute("migration.preview", {})
+        self.assertEqual(preview["status"], "ready", preview["holds"])
+        self.assertEqual(preview["accounts"], ["codex-alice"])
+        owner.execute("migration.apply", {"expected_target": preview["target"]})
+        self.assertFalse((self.home / "sessions").is_symlink())
+        self.assertEqual((peer / "sessions").lstat().st_ino, peer_link)
+        self.assertEqual((self.global_home / "cache").readlink(), protected_link)
+        from codex_wake.controller_accounts import ControllerAccounts
+
+        consumer = ControllerAccounts(
+            self.path, host="fixture-host", environment="fixture-env"
+        )
+        listing = consumer.execute("accounts.list", {})
+        self.assertEqual([row["id"] for row in listing["accounts"]], ["codex-alice"])
+        self.assertEqual(listing["inactive_accounts"], ["codex-bob"])
+        from codex_wake.managed_inventory import InventoryError
+
+        with self.assertRaises(InventoryError) as error:
+            consumer.execute("accounts.resolve", {"selector": "bob"})
+        self.assertEqual(error.exception.code, "target_not_found")
