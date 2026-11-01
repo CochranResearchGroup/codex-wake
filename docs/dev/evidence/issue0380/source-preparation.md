@@ -108,3 +108,42 @@ PATH launcher, shared daemon or account was changed.
 
 Draft source PR: https://github.com/CochranResearchGroup/codex-wake/pull/459.
 #380 remains OPEN; source review/TDD counters are1/1, live acceptance false.
+
+## Incremental admission after refreshed dependency census
+
+Implementation5f8c467 adds optional host `[accounts].enabled` selection to the
+same account and in-place migration owners. Inactive configured accounts are
+reported explicitly and cannot be resolved for private launch. Default discovery
+is unchanged; empty/invalid/unknown admission lists are refused. A synthetic
+public migration regression first failed on a protected legacy peer, then passed
+when only the selected account was isolated; peer/global links and inode identity
+remained unchanged. CLI/MCP admission parity and invalid configuration refusal pass.
+
+Current source: **1,943 tests PASS, one skipped**, Python3.12.13,356.771s,
+using the same isolated XDG/RAM temporary-state command/environment above.
+Focused60 tests pass on3.12 (12.965s) and3.11 (12.812s). Undefined-name, policy,
+focused lint and package build pass. A fresh temporary installation with declared
+base dependencies starts the actual codex-wake entrypoint successfully. The
+initial deliberately no-dependency installation lacked websockets at CLI startup;
+its diagnostic was preserved, then the declared dependencies were installed.
+No source change or unsupported dependency workaround was used for that result.
+Wheel SHA256:60e82e7394eb05e56b1f24e60c43ba9355835eea62d80044196d2eae6fcbb2ef.
+The installed wheel's real-account metadata-only preview reports six admitted
+accounts, one inactive account,30 planned aliases and only writer_census_unknown;
+production effects remain unauthorized.
+
+The refreshed read-only census maps23 native processes to tmux panes;26 native
+processes in total infer the global legacy home. Seven OS-protected processes
+remain uninspectable without privileged metadata access. The global credential
+file has no observed hardlink peer among the named account credential files.
+No credential bodies were opened. An isolated stdlib-only read-only census helper
+was prepared privately; it reads kernel metadata, not commands or credential
+bodies, and has no mutation/signal/restart operation. Operator-authenticated sudo
+was requested to collect the missing evidence. No existing restricted browser
+or filesystem privileged helper was repurposed to bypass its scope.
+
+The selective-admission addition is outside the prior frozen broad review.
+Counters remain1 broad review/1 findings pass; no second review loop or claim of
+live acceptance was made. No source has been merged or deployed. Real activation
+requires fresh ownership/dependency qualification, precise effects/rollback and
+operator approval before any interruption. #380 remains OPEN.

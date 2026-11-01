@@ -58,7 +58,7 @@
   "git_custody": "isolatedworktree",
   "working_runtime_changed": false,
   "strategy_decision": "Prefer in-place isolation of inactive named homes, preserving global legacy store and current clients; no relocation of live global data. Any unknown dependency remains held; interruption requires operator approval.",
-  "implementation_source": "051027fb8dbea398b907320dae18af73515e5f7b",
+  "implementation_source": "5f8c467",
   "source_validation": {
     "focused_tests": 58,
     "focused_result": "PASS",
@@ -84,6 +84,21 @@
       "python312": "60 PASS in12.965s",
       "python311": "60 PASS in12.812s",
       "public_seams": "migration preservation plus CLI/MCP parity and invalid admission refusal"
+    },
+    "selected_full_suite": {
+      "source": "5f8c467",
+      "tests": 1943,
+      "skipped": 1,
+      "result": "PASS",
+      "seconds": 356.771,
+      "python": "3.12.13",
+      "focused312": "60 PASS in12.965s",
+      "focused311": "60 PASS in12.812s",
+      "log_sha256": "b00e4fbf75edb7c046b7816b0c40cc08f6272b517170823acfd95676846e2a60",
+      "wheel_sha256": "60e82e7394eb05e56b1f24e60c43ba9355835eea62d80044196d2eae6fcbb2ef",
+      "installed_help": "PASS with declared base dependencies",
+      "live_changes": false,
+      "receipt_sha256": "bfc528784d4206cc24d2d704f35f0eeb7f0db9d082d5d6dac41f398078bf410c"
     }
   },
   "live_preview": {
@@ -101,11 +116,11 @@
   "remediation_state": "complete_S1_S2_red_green",
   "source_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/459",
   "source_pr_state": "draft",
-  "runtime_stage": "read-only ownership reconciliation; seven protected process inspections need operator-authenticated metadata census",
+  "runtime_stage": "awaiting operator-authenticated read-only process metadata for seven protected processes; no live effects",
   "post_review_changes": {
     "scope": "explicit host account admission for noninterrupting incremental activation",
     "reviewed_by_previous_frozen_broad_review": false,
-    "state": "targeted_validated; final source qualification pending"
+    "state": "targeted and full source validated; outside prior frozen broad review; installed live acceptance pending"
   },
   "selected_live_preview": {
     "accounts": 6,
