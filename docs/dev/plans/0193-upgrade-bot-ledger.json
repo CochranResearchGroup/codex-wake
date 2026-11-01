@@ -570,8 +570,8 @@
       },
       {
         "number": 456,
-        "state": "integrated",
-        "tracker_state": "open",
+        "state": "validated",
+        "tracker_state": "closed",
         "blockers": [],
         "owner": "/root/cache456",
         "owned_scope": "compiler cache integration and public regressions; no live WSL mutation",
@@ -604,12 +604,12 @@
         "manual_package_sha256": "2dcda7d3adb7e9d3d9553ea4566d75447b9c70f597da80626abdb5e926e5d1cf",
         "actual_cache_reclaimed_bytes": 8524370598,
         "final_oldpacket_census": "empty at98002.7286; alloldjobobjectsunchanged",
-        "remaining": "successful public verification-to-complete-package proof; manual evidence alone not ticket acceptance",
+        "remaining": null,
         "evidence": "docs/dev/evidence/issue0444/compiler-cache-runtime.md",
         "public_recovery": {
           "authority": "explicitprimaryboundedsetuprecovery understandingusergoal; expiredpacketuntouched",
           "root": "/home/ubuntu/codex-profile-lab/cache456-public-20261101",
-          "state": "running",
+          "state": "verification_package_passed",
           "source": "f893b20",
           "job_id": "2e7c319a96ee424eb09b6bd077a35a0e",
           "packet_monotonic_start": 98283.542188153,
@@ -626,8 +626,19 @@
           "wake_id": "wake_intent_c6d7935cc511476cbe01db58a0e80295",
           "wake_armed": true,
           "monitor_ready": true,
-          "wake_expires_at": "2026-11-01T20:28:27.357363Z"
-        }
+          "wake_expires_at": "2026-11-01T20:28:27.357363Z",
+          "job_state": "held_at_unconfigured_installed_qualification",
+          "qualification": false,
+          "promotion": false,
+          "public_protocol": "4pass/1ignored;466Fresh/259Compiling;729.460s",
+          "public_package": "exit0;1018Fresh/73Compiling;823.562s",
+          "completion_monotonic": 99886.884656248,
+          "final_census_monotonic": 99966.8514,
+          "owned_processes_remaining": [],
+          "warm_cache_retained_bytes": 8524529493,
+          "exact_peak_bytes": null
+        },
+        "public_receipt_sha256": "eb3592924503120265f8bbccca1619adf15b77ab398c9041c69d8a30babfa099"
       },
       {
         "number": 457,
@@ -637,7 +648,8 @@
           455,
           456
         ],
-        "owner": "unassigned"
+        "owner": "pending_dispatch",
+        "ready": true
       },
       {
         "number": 453,
