@@ -91,3 +91,20 @@ changed bytes report `host_tool_hash_mismatch: <name>`, without starting that
 command. No PATH rewrite, dependency fetch or additional coding allowance occurs.
 Undeclared tools retain existing behavior. These pins belong to the sealed job
 configuration; adding them does not authorize changing an existing held job.
+
+
+## Fresh deterministic verification jobs
+
+Host `limits.repair_attempts: 0` admits a new job that may replay, regenerate,
+verify and obtain independent review, but cannot submit a coding worker. Failed
+verification/rejected review holds with `coding_disabled_verification_failed` or
+`coding_disabled_review_rejected`; identity, deadline and zero counter remain
+inspectable. Other numeric limits stay strictly positive. This does not renew
+an existing expired job or make an interrupted worker complete.
+
+Host `repair.reviewer.require_patch_dispositions: true` requires independent
+intent/evidence/equivalence dispositions for every declared patch, even on a clean
+normal replay. Prepared/public provenance identifies the independent dispositions
+and retains original replay provenance. Missing/invalid dispositions fail closed.
+Any mechanically derived source delta retains its prior-worker lineage separately;
+review must bind the resulting exact source/tests and required capabilities.

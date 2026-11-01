@@ -51,6 +51,55 @@ pathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(r))
             self.assertEqual(result['review']['reviewer'],'independent')
             self.assertEqual(result['patch_provenance'][0]['disposition'],'applied')
 
+    def test_fresh_strict_review_requires_every_patch_without_a_coding_attempt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source,config,recipe,job=self.fixture(root)
+            job['limits']['repair_attempts']=0
+            config['reviewer']['require_patch_dispositions']=True
+            charges=[]
+            result=UpgradeRepair(source,root/'evidence',config,checkpoint=charges.append).run(job,recipe)
+            self.assertEqual(result['status'],'held',result)
+            self.assertEqual(result['reason'],'independent_review_patch_dispositions_required')
+            self.assertEqual(charges,[])
+            self.assertEqual(result['repair_attempts'],0)
+
+    def test_fresh_strict_review_publishes_independent_patch_provenance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);source,config,recipe,job=self.fixture(root)
+            job['limits']['repair_attempts']=0
+            config['reviewer']['require_patch_dispositions']=True
+            reviewer=Path(config['reviewer']['argv'][1])
+            reviewer.write_text(reviewer.read_text().replace("pathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(r))",
+                "r['patch_dispositions']={x['id']:dict(disposition='applied',intent=x['intent'],evidence='Independently checked feature and tests',equivalence='') for x in p['patches']}\npathlib.Path(os.environ['CODEX_UPGRADE_RESPONSE']).write_text(json.dumps(r))"))
+            result=UpgradeRepair(source,root/'evidence',config).run(job,recipe)
+            self.assertEqual(result['status'],'reviewed',result)
+            self.assertEqual(result['repair_attempts'],0)
+            self.assertEqual(result['patch_provenance'][0]['basis'],'independent_review')
+            prepared=json.loads(Path(result['prepared_recipe']).read_text())
+            self.assertEqual(prepared['repair_provenance']['patches'],result['patch_provenance'])
+            self.assertEqual(prepared['repair_provenance']['original_patch_provenance'][0]['disposition'],'applied')
+            state=json.loads((root/'evidence/repair-state.json').read_text())
+            self.assertEqual(sum(x['role']=='worker' for x in state['commands']),0)
+            self.assertEqual(sum(x['role']=='reviewer' for x in state['commands']),1)
+
+    def test_zero_coding_job_explains_failure_without_submitting_a_worker(self):
+        for failure in ('verification','review'):
+            with self.subTest(failure=failure),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);source,config,recipe,job=self.fixture(root)
+                job['limits']['repair_attempts']=0
+                if failure=='verification':config['verify']=[[sys.executable,'-c','raise SystemExit(23)']]
+                else:
+                    reviewer=Path(config['reviewer']['argv'][1])
+                    reviewer.write_text(reviewer.read_text().replace("status='approved'","status='rejected'"))
+                charges=[]
+                result=UpgradeRepair(source,root/'evidence',config,checkpoint=charges.append).run(job,recipe)
+                self.assertEqual(result['status'],'held',result)
+                self.assertEqual(result['reason'],'coding_disabled_'+('verification_failed' if failure=='verification' else 'review_rejected'))
+                self.assertEqual(charges,[])
+                self.assertEqual(result['repair_attempts'],0)
+                state=json.loads((root/'evidence/repair-state.json').read_text())
+                self.assertFalse(any(x['role']=='worker' for x in state['commands']))
+
     def test_conflict_worker_repairs_and_spends_persisted_attempt_before_review(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);source,config,recipe,job=self.fixture(root)

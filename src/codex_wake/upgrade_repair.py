@@ -228,6 +228,8 @@ class UpgradeRepair:
     def _validate_config(self, recipe):
         self._host_tools()
         worker=self.config.get('worker',{});reviewer=self.config.get('reviewer',{})
+        if type(reviewer.get('require_patch_dispositions',False)) is not bool:
+            raise RepairHeld('reviewer require_patch_dispositions must be boolean')
         if not worker.get('identity') or not reviewer.get('identity') or worker['identity']==reviewer['identity']:
             raise RepairHeld('independently configured worker and reviewer identities required')
         if worker.get('argv')==reviewer.get('argv'):
@@ -261,6 +263,8 @@ class UpgradeRepair:
             contract='Preserve every required capability and acceptance standard. Resolve conflicts by upstream and patch intent. Return schema_version 1, status, identity, candidate_digest, tests_digest, capabilities mapping to evidence, patch_dispositions for EVERY patch ID (disposition applied/rewritten/retired plus nonempty intent evidence), and retirements mapping patch IDs to equivalence evidence. Reviewer additionally returns reviewer identity and status approved or rejected. Never weaken tests to obtain approval.')
         if role=='reviewer' and self.job.get('resume_mode')=='verify_review_only':
             packet.update(require_patch_dispositions=True,interrupted_worker=self.state['verification_readmission']['worker_proof'])
+        elif role=='reviewer' and self.config['reviewer'].get('require_patch_dispositions',False):
+            packet['require_patch_dispositions']=True
         return packet
 
     def _read_report(self,path,role):
@@ -367,6 +371,9 @@ class UpgradeRepair:
         prepared['source']=dict(prepared.get('source',{}),tree=str(snapshot),files={p:v['sha256'] for p,v in before.items()})
         prepared['patches']=[]
         prepared['repair_provenance']=dict(original_recipe_sha256=_digest(recipe),base_revision=self.state['base_revision'],base_files_digest=self.state['base_files_digest'],candidate_digest=review['candidate_digest'],tests_digest=review['tests_digest'],patches=self.state['patch_provenance'],review=review)
+        if self.config['reviewer'].get('require_patch_dispositions',False):
+            prepared['repair_provenance'].update(qualification_basis='independent_review_with_patch_dispositions',
+                original_patch_provenance=self.state['patch_provenance'],patches=self.state['independent_patch_provenance'])
         if self.job.get('resume_mode')=='verify_review_only':
             provenance=prepared['repair_provenance']
             provenance.update(qualification_basis='independent_review_after_interrupted_worker',worker_completed=False,
@@ -618,6 +625,9 @@ class UpgradeRepair:
                         prepared=self._prepared(recipe,review)
                         result=dict(status='reviewed',prepared_recipe=prepared,candidate_digest=review['candidate_digest'],tests_digest=review['tests_digest'],review=review,
                             repair_attempts=self.state['repair_attempts'],patch_provenance=self.state['patch_provenance'],evidence=str(self.state_path))
+                        if self.config['reviewer'].get('require_patch_dispositions',False):
+                            result.update(qualification_basis='independent_review_with_patch_dispositions',
+                                original_patch_provenance=self.state['patch_provenance'],patch_provenance=self.state['independent_patch_provenance'])
                         if self.job.get('resume_mode')=='verify_review_only':
                             result.update(patch_provenance=self.state['independent_patch_provenance'],
                                 original_patch_provenance=self.state['patch_provenance'],worker_completed=False,
@@ -627,6 +637,8 @@ class UpgradeRepair:
                     self.state['findings']=review.get('findings',['review rejected'])
                 if verify_only:
                     raise RepairHeld(self.job['resume_mode']+('_review_rejected' if verified else '_verification_failed'))
+                if limit==0:
+                    raise RepairHeld('coding_disabled_'+('review_rejected' if verified else 'verification_failed'))
                 if self.state['repair_attempts']>=limit:
                     raise RepairHeld('repair_attempts_exhausted')
                 self._budget()

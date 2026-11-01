@@ -8,6 +8,20 @@ from codex_wake.upgrade_jobs import UpgradeJobs
 
 
 class UpgradeJobsTests(unittest.TestCase):
+    def test_zero_coding_limit_is_retained_by_a_fresh_job(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);target={'host':'fixture','environment':'test'}
+            actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
+            (root/'recipe.json').write_text(json.dumps(dict(id='verification',upstream_version='0.166')))
+            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,
+                recipes={'verification':str(root/'recipe.json')},limits={'repair_attempts':0})))
+            owner=UpgradeJobs(root)
+            def call(verb,**arguments):return owner.execute(actor,'upgrades.'+verb,dict(expected_target=target,**arguments))['result']
+            call('enable');job=call('start',recipe='verification')['job']
+            self.assertEqual(job['limits']['repair_attempts'],0)
+            self.assertEqual(job['repair_attempts'],0)
+            self.assertEqual(call('start',recipe='verification')['job']['id'],job['id'])
+
     def test_durable_job_deduplicates_release_and_disable_preserves_budget(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

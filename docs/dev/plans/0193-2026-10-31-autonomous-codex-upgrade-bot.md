@@ -75,7 +75,7 @@ Production activation by this planning task; running-daemon replacement; automat
 
 ## Further Notes
 
-Current State: children #447–#452 are closed with source/public-seam evidence, actual disposable 0.165 qualification and native notice delivery/cold replay. Assembled 0.166 acceptance #453 is held after two genuine native Rust API errors; the original three-attempt job is disabled with its identity, deadline and history preserved. No complete 0.166 package, independent review, qualification or promotion occurred. The operator approved one additional coding attempt and a 90-minute successor test run with “ok go”; fresh disposable preflight is underway. Private child permissions and the host source-root environment are corrected and source-tested. Production activation remains separate.
+Current State: children #447–#452 are integrated and validated, with tracker closure retained separately. #453 remains open. Both actual166 jobs are held/disabled with original counters and evidence preserved. The operator re-invoked implement-spec on2026-11-01 to finish the remaining ticket. A fresh normal job will replay a mechanically derived retained-source delta, use zero coding attempts and require one strict independent patch review. Source functional validation now passes2018tests/1skip on3.12 with explicitly selected RAM temporary files; native166 qualification is still unmet.
 
 Reconciliation: #369 remains broader coordination. Closed #377 retains its accepted staging/rollback outcome. The Wake-owned controller delivered in #393 supplies account/build surfaces. Open #413 gates running-daemon recovery; it is not a prerequisite for a bot that leaves running daemons untouched. Production profile activation remains separately gated by #380. Existing parents are not edited or closed by this specification.
 
@@ -87,7 +87,7 @@ Definition of done: approved child outcomes integrated with local checks, an imm
 
 Critical path: durable job slice → semantic worker and disposable qualification → qualified selection → integrated 0.166 acceptance. Independent low-conflict tracks after the job contract: repair worker, qualification executor and scheduled discovery. Primary coordinator owns integration.
 
-Next action: execute the approved one-attempt/90-minute disposable successor; do not revive or renew the failed original. Close #453 only after complete native acceptance, then run the single final review/remediation pass.
+Next action: execute the fresh zero-coding verification packet from retained source; preserve both expired jobs. Close #453 only after complete native acceptance, then run the single final broad review and bounded TDD remediation pass.
 
 <!-- idempotency:codex-wake-autonomous-upgrade-bot-spec-20261031 -->
 
@@ -149,3 +149,32 @@ verification group was stopped and the exact wrapper restored. Runtime628a1ed no
 runs host regeneration against the approved shared dependency cache. Candidate,
 recipe, probes, original failed job and all deadlines remain unchanged. No166
 qualification or promotion is claimed before its actual results.
+
+
+## Current verification packet | 2026-11-01
+
+Primary owns453; no other unblocked unfinished child exists. Runtime helper
+accept453 performs bounded disposable operations; integration/final acceptance
+stay with primary. Read-only preflight verifies retained sourcebb296/tests1c7,
+both disabled job dictionaries and eight original inputs unchanged.
+
+The new job uses normal official166 replay plus a mechanically derived124-path
+delta retaining all69 original handwritten paths. A pinned first host command
+validates all9784file paths/bytes and restores only the retained modes, accounting
+for Git/umask differences. Later generated changes require fresh measured hashes
+and independent review. Old source/job/account roots are not modified; public
+dependency caches and designated disposable credentials may be copied into the
+new owned fixture. No production credential/history is used.
+
+Limits: spec-default7200second native job,900seconds reserved cleanup, compiler2,
+owned temporary24GiB, zero coding attempts, one native independent source review.
+Manual resource monitoring; no governor activation, resource renewal, shared
+restart, production deployment or canary model turn. Source review is the
+required builder verification, distinct from the final broad code-review round.
+The two old packet ceilings/history remain intact. Fresh clock anchors and
+config/recipe/tool/program hashes are frozen before public start.
+
+Public-seam TDD adds zero-coding admission and failure reasons plus optional
+strict per-patch review with published provenance. Red: zero config rejected;
+strict disposition omitted/ignored in result; failure reason ambiguous. Green:
+88upgrade tests each3.11/3.12. Ledger owns current packet IDs and bounds.

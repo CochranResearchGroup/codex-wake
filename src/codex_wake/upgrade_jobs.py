@@ -62,8 +62,8 @@ class UpgradeJobs:
         if value.get('schema_version') != 1 or not isinstance(value.get('target'), dict) or not value['target']:
             raise InventoryError('invalid_configuration', 'versioned fixed upgrade target required')
         limits = dict(DEFAULT_LIMITS, **value.get('limits', {}))
-        if set(limits) != set(DEFAULT_LIMITS) or any(type(v) is not int or v <= 0 for v in limits.values()):
-            raise InventoryError('invalid_configuration', 'positive integer upgrade limits required')
+        if set(limits) != set(DEFAULT_LIMITS) or any(type(v) is not int or v < (0 if k=='repair_attempts' else 1) for k,v in limits.items()):
+            raise InventoryError('invalid_configuration', 'nonnegative repair attempts and positive integer upgrade limits required')
         value['limits'] = limits
         value['recipes'] = dict(value.get('recipes', {}))
         catalog_path = self.store / 'generated-recipes.json'
