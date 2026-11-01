@@ -586,7 +586,18 @@
         "runtime_monotonic_start": 94471.20294,
         "runtime_monotonic_deadline": 98071.20294,
         "worker": "cache456",
-        "public_admission_amendment": "max3 within original60min after2precompiler failures; no4th; manual compilerproof uses remaining originalbudget, no fakequalification"
+        "public_admission_amendment": "max3 within original60min after2precompiler failures; no4th; manual compilerproof uses remaining originalbudget, no fakequalification",
+        "completion_wake": {
+          "id": "wake_intent_36e30d3c84c64bc1a352e10f480fe4d9",
+          "armed": true,
+          "monitor_ready": true,
+          "predicate": "file_exists",
+          "path": "/home/ecochran76/.local/state/codex-wake/testing/upgrade-bot444/cache456/manual-observed-completion.json",
+          "expires_at": "2026-11-01T20:12:04.098786Z",
+          "collector_pid": 1328151,
+          "worker_resume": "cache456 for finalcensus/cleanup/receipt",
+          "terminal_warning": "timeout rc is not descendant cleanup proof; require exact-owned census before cache_cleanup"
+        }
       },
       {
         "number": 457,
