@@ -42,6 +42,8 @@ def main(argv=None):
         try:
             settings = load_settings(parsed.config, parsed.state_root, parsed.source_root)
             profile, native_args = split_run_profile_and_args(settings, parsed.profile, list(parsed.codex_args))
+            if native_args in (['--version'], ['-V']):
+                return profiles_main(arguments)
             owner = ControllerAccounts(parsed.config, host=socket.gethostname(),
                 environment=os.environ.get('WSL_DISTRO_NAME') or os.name)
             view = owner.execute('configuration.explain', {'selector': profile})
