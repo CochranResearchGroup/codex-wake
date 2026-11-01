@@ -1,7 +1,7 @@
 # Complete modified0.166 package | #455
 
-State: package/launcher/native capabilities VALIDATED in disposable wsl-test,
-ubuntu UID1000; ticket closure waits for explicit locked-build check. Production installation
+State: VALIDATED in disposable wsl-test, ubuntu UID1000. Explicit locked-build
+check passed and final owned census is empty. Production installation
 is separate. This is the successful direct reference port, not automated-job
 acceptance. #456/#457/#453 remain open.
 
@@ -51,3 +51,15 @@ files and Cargo.lock still equal retained source. Failure is preserved. A
 durable retry using original HOME/PATH, cache and outer455deadline is active
 under sub-deadline97359.412170926; it has not yet passed. Both first package
 success and this pending check are reported independently.
+
+## Explicit locked build and final closeout
+
+The actual three-binary `cargo build --locked --target x86_64-unknown-linux-gnu
+--profile dev-small --bin codex --bin codex-code-mode-host --bin codex-exec-server`
+exits0 in1414.158s (Cargo23m17s). This reused some work but rebuilt substantial
+artifacts; it is not described as a fast/no-op cache hit. All9784 tracked source
+paths and Cargo.lock remain unchanged. The initial120s timeout remains retained.
+Final census atmonotonic97039.537276954 finds zero owned native/compiler
+processes; the frozen7filepackage inventory is unchanged. #455 is accepted.
+Compiler-cache runtime qualification and automated upgrade acceptance remain
+separate #456/#457/#453 work.
