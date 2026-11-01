@@ -8399,3 +8399,15 @@ unchanged. Final packageinventory unchanged and owned census empty at97039.5373.
 #456 actual reusedprotocol tests pass, changedsource fails and restoration
 passes; owncanonicalpackage stillcompiles underoriginal60min.457 gatedby456;
 453 acceptance/final review/TDD remain pending. Outcome_progress.
+
+## Turn | 2026-11-01 | Compiler behavior proven; public456 gap retained
+
+Actualmanual456 protocol PASS→realchangedsource rejection→restoredPASS→
+canonicalcomplete166package PASS, under original60min. Publicexplicitcleanup
+reclaims8.524GB, package/evidence/jobs retained, finalcensus0. Primary keeps456
+OPEN because publiccompilerexecution failedbeforeCargo in original3admissions.
+Separate single-admission public recovery preflight PASSES and actualjobstarts;
+50minwork+5cleanup fixednative clocks and monitoredcompletion retained inledger.
+No manualfallback, oldjobrenewal, qualificationfabrication or productioneffect.
+457 remains gated; final review/TDD0/0. Outcome_progress/compilerlayer; public
+end-to-end criterion pending.
