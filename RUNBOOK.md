@@ -8315,3 +8315,23 @@ Default600-second gate unchanged; diagnostic used existing900-second ceiling.
 Physical-disk durability/native166 remain separate. No native retry or deployment.
 Curated private receipts and helper/source provenance retained in ticket453
 profiling-20261101; Plan0193 acceptance and ledger own the compact checkpoint.
+
+
+## 2026-11-01 UTC — fresh453 native verification started
+
+Primary resumes implement-spec; only453 remains. Controllerc9aafa4 admits coding0
+and requires optional strict independent patch dispositions, published in public
+and prepared provenance.88upgrade tests pass each Python3.11/3.12.
+
+Fresh public job72caa827b813497e80d2c7c16c3708cd starts once inwsl-test from
+retained native source via mechanically derived124-path delta/all69originalpaths.
+Pinned metadata normalizer restores1131modes with no byte edits→exactbb296/tests1c7.
+Both expired jobs/inputs preserved. New private source/prefix and cache copies;
+one-time fixture-only prestart control authentication fixes headroom before any
+job existed. No old goal/resource renewal, shared restart or deployment.
+
+Job7200seconds+900cleanup, compiler2/storage24GiB/coding0/independentsourcereview1.
+Actualmonostart80476.137646633, jobdeadline87676.137646633, overall88576.137646633.
+Witness2pins actual165PID1242. Regeneration8 is compiling actualRust, worker0/
+reviewer0. Native package/qualification/promotion still pending. Ledger and453
+acceptance own hashes/receipts. Final broad review/findings TDD remains0/0.

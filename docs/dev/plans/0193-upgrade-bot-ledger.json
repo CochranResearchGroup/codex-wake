@@ -199,7 +199,7 @@
       "runtime_helper": "/root/accept453"
     }
   ],
-  "integration_tip": "122a690d971669ca4a76d02392794a4d1a358635",
+  "integration_tip": "c9aafa4367ee98159cd3e8c8316a2d6ffd3199a7",
   "working_runtime_changed": false,
   "runtime_checkpoint": {
     "state": "original_held_disabled",
@@ -386,7 +386,7 @@
   },
   "fresh_verification_packet": {
     "authority": "operator implement-spec invocation,2026-11-01; existing444/453 disposable target only",
-    "state": "preparing",
+    "state": "running",
     "primary": "/root",
     "runtime_helper": "/root/accept453",
     "blockers_validated": [
@@ -417,6 +417,31 @@
     "validation": "88upgrade testsPASS3.11/3.12,31.241s/32.612s; red/green public seams retained in session",
     "review_rounds": 0,
     "remediation_rounds": 0,
-    "review_base_proposed": "289bb97ecf8a0382089819e4c4119bc5462e48d0; optional operator choice requested before final review"
+    "review_base_proposed": "289bb97ecf8a0382089819e4c4119bc5462e48d0; optional operator choice requested before final review",
+    "controller_revision": "c9aafa4367ee98159cd3e8c8316a2d6ffd3199a7",
+    "root": "/home/ubuntu/codex-profile-lab/upgrade453-verify-20261101",
+    "job_id": "72caa827b813497e80d2c7c16c3708cd",
+    "job_created_at": 1793534081.088541,
+    "job_monotonic_start": 80476.137646633,
+    "job_monotonic_deadline": 87676.137646633,
+    "overall_monotonic_deadline": 88576.137646633,
+    "job_wall_deadline": 1793541281.088541,
+    "overall_wall_deadline": 1793542181.088541,
+    "freeze_sha256": "d350f6f935dfcdc7f3c3d9d2c7bb8546c7d0b1968fb604baebafe7cbde47801f",
+    "config_sha256": "7715c5723672c8ee1babc71bcaa2c1edfe9dd819d3d64c15b35f6831d0cd53d4",
+    "recipe_sha256": "de1ae0e7862b8ac8f7bbed9d23c48cc407d8bc2f7130487f79bf10641d275538",
+    "launcher_pid": 1508,
+    "operator_private_pid": 1242,
+    "actual_state": "building/regenerate8; actual2rustc; normalizer passed; worker0/reviewer0",
+    "fresh_prestart_auth": "One-time new-scope prestart control authentication replacement; job did not yet exist; no old job/global resource renewal",
+    "fresh_actor_expiry": 1793543079.808495,
+    "installed_python": "3.12.3",
+    "installed_codex_wake": "0.22.0.dev2",
+    "installed_mcp": "2.2.0",
+    "first_evidence": "clean replay+metadata-only normalizer reproduces bb296/tests1c7; real regeneration compiling",
+    "progress_classification": "outcome_progress",
+    "native_package": null,
+    "qualification": false,
+    "promotion": false
   }
 }

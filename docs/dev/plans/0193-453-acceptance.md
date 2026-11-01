@@ -437,3 +437,46 @@ Raw import failures, helper versions, collection guard and syscall summaries are
 retained privately. Created RAM test directory was removed by the launcher.
 Native453 package/verification/review/qualification remains open. No native job
 action or deployment occurred; final broad code-review/findings TDD remain0/0.
+
+
+## Fresh zero-coding native verification | 2026-11-01
+
+The operator re-invoked implement-spec to finish453. Primary owns the remaining
+ticket; other children are validated and tracker-closed. New controllerc9aafa4
+adds zero-coding limits and strict independent per-patch review. Public upgrade
+regressions pass88tests each3.11/3.12; exact fresh-prefix Jobs/Repair hashes match
+fd14b934/8bf1f360. WSL prefixPython3.12.3, CodexWake0.22.0.dev2, MCP2.2.0.
+
+The normal new job replays a mechanically derived124-path delta (all69 original
+handwritten paths), with original patch ID/intent and four prior coding contexts
+retained separately. A pinned mode-only normalizer validates all9784paths/bytes
+and restores1131modes, reproducingbb296/tests1c7. No old source file is edited.
+Both old job dictionaries and eight original inputs remain unchanged/disabled.
+Public dependency/V8 caches are copied into the new scope without old hardlinks.
+
+Fresh job `72caa827b813497e80d2c7c16c3708cd` was publicly started once, with zero
+coding attempts and one required native independent source review. Canary model
+turns remain zero. Created1793534081.088541 / monotonic80476.137646633; job
+monotonic deadline87676.137646633, overall88576.137646633. Limits7200seconds
+plus900reserved cleanup, compiler2, temporary24GiB, manual monitoring. Source
+review is distinct from the final broad controller review/TDD, still0/0.
+
+Fresh witness2 pins actual165PID1242. Its private helper lifetime was corrected
+7500to9000 before job creation; the expired witness was cleanly closed. A final
+prestart guard caught control authentication7.136seconds short of the reserve.
+Primary replaced only that new fixture's prestart control grant once, with same
+target/scopes/resources and expiry1793543079.808495. This did not renew any old
+job, goal or resource allowance. No work clock existed before this start.
+
+Freeze-v2 SHA256
+`d350f6f935dfcdc7f3c3d9d2c7bb8546c7d0b1968fb604baebafe7cbde47801f`;
+configuration
+`7715c5723672c8ee1babc71bcaa2c1edfe9dd819d3d64c15b35f6831d0cd53d4`;
+recipe remains
+`de1ae0e7862b8ac8f7bbed9d23c48cc407d8bc2f7130487f79bf10641d275538`.
+Host private freeze/start proofs live in ticket453/fresh-verification-20261101.
+
+First runtime evidence: clean patch replay and metadata normalizer pass, then
+actual regeneration8 runs two Rust compiler processes without a dependency-fetch
+loop. Atmonotonic80774.945, worker/reviewer counts0/0 and115minutes job remain.
+No native166 package, qualification or promotion is yet claimed.
