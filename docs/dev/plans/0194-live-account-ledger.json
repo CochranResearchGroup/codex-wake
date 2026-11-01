@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "ticket": 380,
+  "plan": "0194-2026-11-01-live-account-acceptance.md",
+  "branch": "fix/live-acceptance-380",
+  "base": "289bb97ecf8a0382089819e4c4119bc5462e48d0",
+  "resource_mode": "manual",
+  "review_rounds": 0,
+  "remediation_rounds": 0,
+  "live_acceptance": false,
+  "interruption_approval": "required_before_any_affected_operator_work",
+  "units": [
+    {
+      "id": "launcher-owner",
+      "owner": "/root/final_standards",
+      "state": "validated",
+      "blockers": [],
+      "receipt_sha256": "daf5bfee0c4142b8cbcce3d3ed43153d6e7d16a96adc9ba5aca2698db673998d"
+    },
+    {
+      "id": "live-store-inventory",
+      "owner": "primary",
+      "state": "validated_metadata_with_declared_uncertainty",
+      "blockers": [],
+      "receipt_sha256": "a5a279042c50bb4fb893de8e20c4da499e33c36651e195454fa962b9c2de4d91",
+      "protected_native_clients": 26,
+      "protected_home": "global legacy home; names and exact PIDs private",
+      "unknown_process_inspections": 17,
+      "secondary_worker": "unavailable threadslot; primary owns"
+    },
+    {
+      "id": "repair-and-isolated-qualification",
+      "owner": "primary",
+      "state": "running",
+      "blockers": [
+        "launcher-owner",
+        "live-store-inventory"
+      ]
+    },
+    {
+      "id": "live-activation",
+      "owner": "primary",
+      "state": "pending",
+      "blockers": [
+        "repair-and-isolated-qualification"
+      ]
+    },
+    {
+      "id": "actual-account-acceptance",
+      "owner": "primary",
+      "state": "pending",
+      "blockers": [
+        "live-activation"
+      ]
+    }
+  ],
+  "private_evidence": "/home/ecochran76/.local/state/codex-wake/testing/live-acceptance380",
+  "git_custody": "isolatedworktree",
+  "working_runtime_changed": false,
+  "strategy_decision": "Prefer in-place isolation of inactive named homes, preserving global legacy store and current clients; no relocation of live global data. Any unknown dependency remains held; interruption requires operator approval."
+}

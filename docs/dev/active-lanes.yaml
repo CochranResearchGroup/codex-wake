@@ -1028,3 +1028,17 @@ lanes:
     overlaps: []
     updated_at: 2026-10-31
     disposition: Tickets440–443 closed viaPR445; one review and one TDD pass resolve private-receipt P2; final PR/ref readback pending; no working runtime or historical cleanup
+
+  - id: P194-LIVE380
+    owner: primary / ecochran76
+    objective: Actual live account launcher and concurrent profile acceptance
+    work_items: [380]
+    plan: docs/dev/plans/0194-2026-11-01-live-account-acceptance.md
+    branch: fix/live-acceptance-380
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P193]
+    updated_at: 2026-11-01
+    disposition: Read-only current setup and isolated repairs authorized; ask operator before any interruption or mutation of storage used by active work
