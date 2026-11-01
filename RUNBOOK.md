@@ -8335,3 +8335,13 @@ Actualmonostart80476.137646633, jobdeadline87676.137646633, overall88576.1376466
 Witness2pins actual165PID1242. Regeneration8 is compiling actualRust, worker0/
 reviewer0. Native package/qualification/promotion still pending. Ledger and453
 acceptance own hashes/receipts. Final broad review/findings TDD remains0/0.
+
+
+2026-11-01 Plan0193/#453 terminal recovery: job72 regeneration passed then held
+on unattended Git pin drift; one private-Git retry9e used only the original
+remaining3211seconds, coding0/B0. Actual protocol4pass/1ignored, app-server
+TUI-health3pass; final verification incomplete at deadline. Hold detection0.602s
+after bound; disable and empty owned process census within cleanup reserve.
+GC reclaimed6,048,477,337B,165 selection/pinned session retained. No166 package/
+qualification/promotion/post rollback. Ledger/acceptance retain terminal hash,
+clocks and known unarmed self-wake. #453 blocked/open; final review/TDD0/0.

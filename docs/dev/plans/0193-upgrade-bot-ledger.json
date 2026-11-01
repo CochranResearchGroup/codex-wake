@@ -190,11 +190,11 @@
         "Source integration and test qualification are reported separately from production activation."
       ],
       "number": 453,
-      "state": "running",
+      "state": "blocked",
       "worker": "/root",
-      "ready": true,
-      "remaining": "Fresh zero-coding native verification, strict independent review, complete package, qualification, future-launch/rollback; then one final broad review/TDD",
-      "reason": "operator re-invoked implement-spec to finish remaining ticket; old jobs preserved",
+      "ready": false,
+      "remaining": "Complete turn-admission/TUI verification, native B review, complete166 package, installed qualification and future-launch/rollback; final broad review/TDD only after acceptance",
+      "reason": "Actual retry9e held deadline_exhausted; no further native attempt authorized in this packet",
       "tracker_state": "open",
       "runtime_helper": "/root/accept453"
     }
@@ -455,7 +455,7 @@
     "disabled": true,
     "controller_generation": 2,
     "bounded_retry": {
-      "state": "running",
+      "state": "held",
       "max_additional_starts": 1,
       "source_revision": "c9aafa4367ee98159cd3e8c8316a2d6ffd3199a7",
       "original_job_deadline": 87676.137646633,
@@ -491,7 +491,51 @@
         "reason": "original_utc_unavailable; relative_origin_unanchored",
         "monitor_ready": true,
         "fallback": "bounded foreground manual supervision; no replacement intent or deadline reset"
-      }
+      },
+      "reason": "deadline_exhausted",
+      "disabled": true,
+      "controller_generation": 2,
+      "coding_attempts_spent": 0,
+      "native_source_reviews_spent": 0,
+      "completed_native_tests": {
+        "protocol": {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 1
+        },
+        "app_server_tui_health": {
+          "passed": 3,
+          "failed": 0
+        }
+      },
+      "incomplete_native_tests": [
+        "turn_admission",
+        "remaining TUI verification"
+      ],
+      "native_package": null,
+      "qualification": false,
+      "promotion": false,
+      "post_acceptance": "not_run_job_terminal",
+      "terminal_monotonic_latest": 87666.843407547,
+      "deadline_detection_overshoot_seconds": 0.601840431,
+      "disable_monotonic": 87672.045419929,
+      "final_census_monotonic": 87683.376588649,
+      "owned_processes_remaining": [],
+      "census_unreadable": [],
+      "cache_reclaimed_bytes": 6048477337,
+      "old_session_pinned": true,
+      "selected_future_sha256": "0d511c4a77c56b0a09f8549f6e43218ee899d0b66598725d4b67c71dc935a973",
+      "model_requests": 0,
+      "external_provider_requests": 0,
+      "terminal_observation_sha256": "a11257cb04a4d0c2a8e5da917088d3511678e95aa7f22b455a11244417d11a8d",
+      "final_closeout_sha256": "a7d7b045461242bc5d0fdcf821233476ba3ef54c02cce506ce778ff8a7c62320",
+      "final_source_digest": "bb296cbefc1f576acc54f8aae153708b2911c732f6555538e4aab7dddc2012fe",
+      "final_tests_digest": "1c7a648508a8bb315369694668458664ef36c3d9dd8a110ef29162ff58ed66bc",
+      "protected_old_controls_unchanged": true,
+      "sampled_whole_root_peak_bytes": 7538784750,
+      "first_empty_owned_processes_monotonic": 87670.12330836,
+      "exact_child_exit_timestamp": "not separately journaled; verification command remains intent",
+      "recorded_canonical_notice_deliveries": 4
     }
   }
 }

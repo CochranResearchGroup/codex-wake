@@ -1,6 +1,6 @@
 # Autonomous upstream Codex upgrade bot
 
-State: OPEN
+State: BLOCKED
 Owner: primary upgrade-bot coordinator
 Specification: https://github.com/CochranResearchGroup/codex-wake/issues/444
 Related work: #369, #377, #393, #413
@@ -75,7 +75,7 @@ Production activation by this planning task; running-daemon replacement; automat
 
 ## Further Notes
 
-Current State: children #447–#452 are integrated and validated, with tracker closure retained separately. #453 remains open. Both actual166 jobs are held/disabled with original counters and evidence preserved. The operator re-invoked implement-spec on2026-11-01 to finish the remaining ticket. A fresh normal job will replay a mechanically derived retained-source delta, use zero coding attempts and require one strict independent patch review. Source functional validation now passes2018tests/1skip on3.12 with explicitly selected RAM temporary files; native166 qualification is still unmet.
+Current State: children #447–#452 are integrated/validated and tracker-closed. #453 is blocked/open. Fresh job72 completed regeneration then held on unattended Git pin drift. One private-Git retry9e exhausted its original remaining3211seconds after protocol4pass/1ignored and app-server TUI-health3pass; turn-admission/remaining TUI incomplete. No native review, complete166 package, installed qualification or promotion. Fixture disabled, owned census empty, selected165 retained. Acceptance record and ledger own exact clocks/hashes. Final broad review/TDD0/0. No third attempt in the current packet.
 
 Reconciliation: #369 remains broader coordination. Closed #377 retains its accepted staging/rollback outcome. The Wake-owned controller delivered in #393 supplies account/build surfaces. Open #413 gates running-daemon recovery; it is not a prerequisite for a bot that leaves running daemons untouched. Production profile activation remains separately gated by #380. Existing parents are not edited or closed by this specification.
 
@@ -87,7 +87,7 @@ Definition of done: approved child outcomes integrated with local checks, an imm
 
 Critical path: durable job slice → semantic worker and disposable qualification → qualified selection → integrated 0.166 acceptance. Independent low-conflict tracks after the job contract: repair worker, qualification executor and scheduled discovery. Primary coordinator owns integration.
 
-Next action: execute the fresh zero-coding verification packet from retained source; preserve both expired jobs. Close #453 only after complete native acceptance, then run the single final broad review and bounded TDD remediation pass.
+Next action: resolve the measured native build/cache execution cost in a separately bounded packet before another acceptance run; preserve all expired jobs. Close #453 only after complete native acceptance, then run the single final broad review and bounded TDD remediation pass.
 
 <!-- idempotency:codex-wake-autonomous-upgrade-bot-spec-20261031 -->
 

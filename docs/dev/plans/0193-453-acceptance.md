@@ -1,6 +1,7 @@
 # Integrated actual 0.166 acceptance (#453)
 
-State: original job HELD and DISABLED after two genuine 0.166 Rust compile errors.
+State: BLOCKED. Latest bounded retry9e HELD and DISABLED at its deadline; no166 package.
+Original job HELD and DISABLED after two genuine 0.166 Rust compile errors.
 The separately authorized successor is HELD after its unchanged job deadline expired.
 Neither job has a qualified 0.166 package yet. The original job remains preserved.
 Plan0193 and specification #444 remain the scope authority.
@@ -543,3 +544,42 @@ proof. Primary retains bounded foreground supervision with manual resources;
 no replacement intent, governor enrollment or allowance renewal occurred.
 
 Native qualification remains pending. Final broad review/TDD remain0/0.
+
+### Retry terminal outcome: acceptance remains blocked
+
+Retry9e is HELD `deadline_exhausted`. Protocol4passed/0failed/1ignored and
+app-server TUI-health3passed/0failed are actual results. Turn-admission compilation
+was interrupted; its test outcome and the remaining TUI check are unqualified.
+No coding worker or independent native reviewer ran, no complete166 package was
+produced, and qualification/promotion/post-rollback were not run. #453 stays open.
+
+Job clock latest87666.843407547 exceeds its monotonic deadline by0.601840431s.
+This is detection timing, not an exact descendant-stop timestamp. Supervisor
+observed hold87667.752124274; public disable exited0 at87672.045419929, generation
+1→2, preserving the entire held job dictionary. Final cross-group process census
+at87683.376588649 found zero owned descendants, with no unreadable entries; all
+cleanup completed within original reserve. Terminal GC reclaimed6,048,477,337B.
+
+Witness status `observed_terminal_hold` confirms old-session pinning and unchanged
+selected165 executable SHA
+`0d511c4a77c56b0a09f8549f6e43218ee899d0b66598725d4b67c71dc935a973`.
+Model/provider requests0/0. Passive post supervisor correctly did not run.
+Raw private terminal receipt SHA
+`a11257cb04a4d0c2a8e5da917088d3511678e95aa7f22b455a11244417d11a8d`.
+No third attempt, deadline renewal, governor activation or production effect.
+
+The requested final broad review and findings TDD remain0/0 because not all
+tickets have passed acceptance. #413/#380, native recurrence and broader raw
+orphan-output/HF-20 boundaries remain unresolved. Next packet must first address
+build execution/cache economics, then obtain complete native acceptance; do not
+replay this expired job or silently grant another full duration.
+
+Final curated private closeout SHA
+`a7d7b045461242bc5d0fdcf821233476ba3ef54c02cce506ce778ff8a7c62320`
+confirms exact sourcebb296/tests1c7 (9784files), protected original/successor/72
+controls unchanged, first recorded empty owned-process sample87670.12330836,
+whole-root sampled peak7,538,784,750B and4 canonical recorded notices. Verification
+journal remains `intent`; no exact child exit timestamp is fabricated. The
+witness trap blocked10 background CONNECT attempts; successful external provider
+requests0. Final Linux available35,965,836KiB, disk available988,380,250,112B;
+Windows physical free4,473,952KiB and virtual free41,274,296KiB.

@@ -1021,12 +1021,12 @@ lanes:
     plan: docs/dev/plans/0193-2026-10-31-autonomous-codex-upgrade-bot.md
     branch: feat/autonomous-upgrade-bot-spec
     target: origin/main
-    plan_state: OPEN
+    plan_state: BLOCKED
     custody_state: ACTIVE_WORKTREE
     dependencies: []
     overlaps: [P179, P190]
-    updated_at: 2026-10-31
-    disposition: Tickets447–452 closed; ticket453 held on2native compiler API errors; original fixture disabled and history preserved; one-attempt90minute disposable successor authorized and in preflight; final review/TDD0; no production activation
+    updated_at: 2026-11-01
+    disposition: Tickets447–452 validated/closed;453 blocked/open after bounded retry9e deadline; protocol4pass/1ignored and app-server tui_health3pass; no166 package/review/qualification; fixture disabled, owned census empty,165 retained; final review/TDD0; no third attempt or production activation
 
   - id: P193-RETRO439
     owner: primary / ecochran76
