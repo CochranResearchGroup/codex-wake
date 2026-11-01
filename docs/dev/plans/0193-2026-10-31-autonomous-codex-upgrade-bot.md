@@ -110,11 +110,18 @@ closure. One final broad review and one TDD findings pass remain after acceptanc
 Old native jobs remain expired/frozen; new direct455 work does not mutate them.
 
 
-## Execution readback | 2026-11-01
+## Current State
 
-#455 complete modified166 package and #456 realpublic compiler-cache path are
-validated/closed. #457 actualoriginalpatch semanticupgrade jobda6a022b... runs
-from sealedprefixf2aa, firstcodingcontext admitted, nativeindependentreview
-pending. Properprivateprofile/historyqualifier preflight passes onreference;
-newcandidate qualification stillrequired. #453 finalfuturelaunch/publicrollback
-remainsopen. Ledger/evidence own exactclocks/hashes; no production authority.
+#455, #456 and #457 are validated and closed. The actual public semantic job
+completed two coding contexts, one independent approved review, real locked
+Rust verification and canonical complete0.166 package construction. Its exact
+package passed all11 native stage capability/history checks. See
+[package acceptance](../evidence/issue0444/semantic457-package.md).
+
+#453 remains active: installed qualification held on the recipe's descriptive
+provenance category, before account metadata/probes. A generic same-job
+provenance/readmission correction is being tested without changing the sealed
+recipe, original deadline, policy or spent attempts. Future launch, pinning and
+actual public rollback acceptance remain required. Final broad review/TDD are
+0/0 until that acceptance. The ledger owns exact identities and clocks;
+production165 and the separate #413/#380 boundaries remain unchanged.
