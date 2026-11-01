@@ -643,7 +643,7 @@
       {
         "number": 457,
         "state": "validated",
-        "tracker_state": "closure_pending",
+        "tracker_state": "closed",
         "blockers": [
           455,
           456
@@ -720,7 +720,9 @@
         "acceptance_receipt_sha256": "0269e98c4f6c7e975814294f737a159dca1e33741d472b5d3bf0a5cf2001fa5a",
         "package_inventory_sha256": "fe4266c33a9c2e71b08bb09df0aa5359d59d16b1307cea0bc536e2fd5a852003",
         "native_sha256": "48ed489ceed144d277c44a505ef5cbcb63250fa361fe132bed1fdab3f7cfb7d5",
-        "independent_review_sha256": "9934c189c6e4739044027408554c19139ffb69d27e2beff86c9cef645a2088a8"
+        "independent_review_sha256": "9934c189c6e4739044027408554c19139ffb69d27e2beff86c9cef645a2088a8",
+        "closure_source": "3a78fb4",
+        "closed_at": "2026-11-01T18:33:51Z"
       },
       {
         "number": 453,
