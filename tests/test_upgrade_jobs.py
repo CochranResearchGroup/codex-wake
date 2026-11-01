@@ -181,7 +181,7 @@ class UpgradeJobsTests(unittest.TestCase):
             self.assertEqual(same['id'],job['id'])
             self.assertEqual(same['state'],'disabled')
 
-    def test_terminal_failure_reclaims_only_the_owned_compiler_cache(self):
+    def test_terminal_hold_retains_shared_compiler_cache_until_explicit_cleanup(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);target={'host':'fixture'}
             actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
@@ -190,16 +190,20 @@ class UpgradeJobsTests(unittest.TestCase):
             owner=UpgradeJobs(root);args={'expected_target':target}
             def call(verb,**extra):return owner.execute(actor,'upgrades.'+verb,dict(args,**extra))['result']
             call('enable');job=call('start',recipe='release')['job']
+            from codex_wake.managed_inventory import InventoryError
+            with self.assertRaisesRegex(InventoryError,'active or uncertain'):
+                call('cache_cleanup')
             def failed(job):
-                cache=root/'upgrade-jobs'/job['id']/'cargo-target';cache.mkdir(parents=True)
+                cache=root/'upgrade-compiler-cache';cache.mkdir(parents=True)
                 (cache/'rebuildable').write_bytes(b'12345678')
                 return dict(status='failed',reason='compile_rejected')
             owner.executor=failed
             call('advance',job_id=job['id'])
             after=call('show',job_id=job['id'])['job']
             self.assertEqual(after['state'],'held')
-            self.assertEqual(after['cache_reclamation']['status'],'reclaimed')
-            self.assertEqual(after['cache_reclamation']['bytes'],8)
+            self.assertEqual(call('status')['compiler_cache']['bytes'],8)
+            self.assertEqual(call('cache_cleanup')['compiler_cache']['bytes'],0)
+            self.assertEqual(call('show',job_id=job['id'])['job']['deadline'],job['deadline'])
 
     def test_expired_host_grant_cannot_enable_the_bot(self):
         import time

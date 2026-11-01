@@ -90,7 +90,7 @@ class UpgradeRepair:
         self.evidence=Path(evidence).resolve()
         if self.evidence == self.workspace or self.evidence.is_relative_to(self.workspace):
             raise ValueError('repair evidence must be outside candidate source')
-        self.cache=self.evidence.parent/'cargo-target'
+        self.cache=Path(config.get('compiler_cache',self.evidence.parent/'cargo-target'))
         if self.cache==self.workspace or self.cache.is_relative_to(self.workspace) or self.workspace.is_relative_to(self.cache):
             raise ValueError('owned compiler cache must be outside candidate source')
         self.config=config
