@@ -209,7 +209,9 @@ def run(config_path,role,packet_path,response_path):
         'Identify missing behavior or weakened tests. Supply evidence for every required capability and independently justify each retirement. '
         'Reject when preservation is unproved; do not edit source.')
     if role=='reviewer' and packet.get('require_patch_dispositions') is True:
-        role_instructions+=' The original worker was interrupted without a completed report. Independently disposition EVERY original patch using its exact intent plus source/test evidence; a retired patch needs equivalence evidence. Never claim the worker completed. Return patch_dispositions for every patch ID; equivalence may be empty only for non-retired patches.'
+        role_instructions+=' Independently disposition EVERY original patch using its exact intent plus source/test evidence; a retired patch needs equivalence evidence. Return patch_dispositions for every patch ID; equivalence may be empty only for non-retired patches.'
+        if packet.get('interrupted_worker',{}).get('kind')=='interrupted_worker_no_completion_report':
+            role_instructions+=' The original worker was interrupted without a completed report. Never claim the worker completed.'
     prompt=(role_instructions+'\nThis is upgrade source maintenance, not authenticated acceptance or a model-turn canary. '
         'Do not log in, copy/read credentials, use production state, enable a governor, renew resources, submit business work or activate a build. '
         'Return only the required final JSON. For non-retired patches use an empty retirement string.\n\nCanonical upgrade packet:\n'+json.dumps(packet,sort_keys=True))
