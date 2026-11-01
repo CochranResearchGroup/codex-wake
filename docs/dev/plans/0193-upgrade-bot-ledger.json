@@ -642,14 +642,28 @@
       },
       {
         "number": 457,
-        "state": "pending",
+        "state": "running",
         "tracker_state": "open",
         "blockers": [
           455,
           456
         ],
-        "owner": "pending_dispatch",
-        "ready": true
+        "owner": "/root/bot457",
+        "ready": true,
+        "branch": "feat/457-proven-upgrade-procedure",
+        "worktree": "/home/ecochran76/workspace.local/codex-wake-bot457",
+        "base": "e641a962551a5e81135e072b5543a1d02cbcf08c",
+        "owned_scope": "necessary implementation/tests/existingQadapters and newisolated457WSLjob; primaryownsledger/integration453",
+        "bounds": {
+          "max_work_seconds": 10800,
+          "cleanup_reserve_seconds": 900,
+          "compiler_jobs": 2,
+          "cache_limit_bytes": 25769803776,
+          "max_public_job_admissions": 1,
+          "max_source_coding_contexts": 2,
+          "max_native_independent_review_contexts": 2
+        },
+        "remaining": "actualbot deterministic/semantic originalstack completion, independentreview, realverification+completepackage; installedfinal453 remains"
       },
       {
         "number": 453,

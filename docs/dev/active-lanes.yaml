@@ -1026,7 +1026,7 @@ lanes:
     dependencies: []
     overlaps: [P179, P190]
     updated_at: 2026-11-01
-    disposition: Primary455 direct complete166 build active; isolated cache456 worker active;457 blocked455+456;453 final acceptance blocked457;447–452 validated/closed; one final review/TDD pending; no production effects
+    disposition: Primary455 validated/closed;456 public verification/package+retention/cleanup validated/closed; freshbot457 source/runtime worker active; primary ownsintegration/final453; finalreview/TDD0; no productioneffects
 
   - id: P193-RETRO439
     owner: primary / ecochran76
@@ -1050,9 +1050,23 @@ lanes:
     plan: docs/dev/plans/0193-2026-10-31-autonomous-codex-upgrade-bot.md
     branch: feat/456-compatible-compiler-cache
     target: feat/autonomous-upgrade-bot-spec
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
     dependencies: []
     overlaps: [P193]
     updated_at: 2026-11-01
-    disposition: Owned isolated code/test changes; primary retains ledger/docs/native runtime; integrate serially
+    disposition: Implementedc105bfd integratedf893b20; actualpubliccompiler/package+invalidation+cleanup qualified;456closed; warmpubliccache retainedfor457
+
+  - id: P193-BOT457
+    owner: bot457 / ecochran76
+    objective: Actual deterministic and semantic upgrade through reviewed complete package
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/457]
+    plan: docs/dev/plans/0193-2026-10-31-autonomous-codex-upgrade-bot.md
+    branch: feat/457-proven-upgrade-procedure
+    target: feat/autonomous-upgrade-bot-spec
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P193-CACHE456]
+    overlaps: [P193]
+    updated_at: 2026-11-01
+    disposition: Newisolated457 source/runtime owner; primaryretains ledger/integration453; bounded3hwork15mcleanup; oldjobsuntouched
