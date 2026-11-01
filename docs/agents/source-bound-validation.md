@@ -132,15 +132,19 @@ Without the option, behavior is unchanged. For RAM-backed functional checks on
 Linux, an explicit existing parent such as `/dev/shm` may be selected; no mount
 or global environment is changed. Keep disk-backed durability/runtime acceptance.
 
-Issue453 exploratory profiling at8595293 measured a matched145 valid-test subset
-at64.757seconds on disk,25.895seconds with RAM temporary files, then68.495seconds
-on disk again. The initial helper omitted the repository import root and had five
-additional import errors; those runs are not passing150-test selections. Corrected
-profiling requires the complete collected test-ID digest to match standard
-unittest discovery before execution.
-A matched scheduler test made217fsync calls in each case, taking1.033202seconds
-on disk and0.006431seconds in RAM. This identifies fixture storage overhead in
-that selection; it does not prove every full-suite cost or justify a higher gate.
+Issue453 verified profiling at311d7e5 measured the same first150 tests at
+98.266seconds on disk and40.544seconds with RAM temporary files. A matched
+scheduler test made217fsync calls on each filesystem:1.033202seconds on disk
+and0.006431seconds in RAM. No durability operation was disabled. Full3.12
+functional validation on RAM passed2018tests/1skip in548.785seconds plus all
+other comprehensive checks. Its explicit diagnostic bound was900seconds; the
+observed unit runtime also fits the unchanged600-second default. This does not
+qualify physical-storage durability or native build acceptance.
+
+An initial external profiling helper omitted the repository import root and
+produced import errors; those runs are retained as invalid qualification. The
+corrected helper first verifies the complete ordered test-ID digest against
+standard unittest discovery. Do not infer a passing selection from timing rows.
 
 The launcher generates an explicit argv manifest and delegates all check execution,
 failure/timeout handling and source/runtime/manifest drift detection to #356's

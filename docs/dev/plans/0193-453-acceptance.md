@@ -395,3 +395,45 @@ and the new tool/runner selection passes8tests on3.11. These focused fixes do
 not qualify the full3.12 matrix or native166. No native context, original job
 renewal, deployment or shared restart occurred. Final broad review/TDD remain0/0.
 Private diagnosis summary and source-bound receipts: `/tmp/wake-diagnosis453/`.
+
+
+## Profiling result and explicit temporary storage (2026-11-01 UTC)
+
+The operator authorized per-test profiling. A matched scheduler test made217
+fsync calls in both configurations, taking1.033202seconds on disk and0.006431
+seconds on RAM. This confirms a substantial temporary-fixture storage cost;
+production fsync/durability operations are unchanged.
+
+The initial external helper omitted the repository import root. Five entries in
+its150-row samples were import errors, not passing tests. Its attempted full run
+collected1679instead of2018tests and was explicitly stopped in its owned group.
+Those failed receipts remain retained; the earlier statement that150tests passed
+was incorrect. The valid145-test subset measured64.757/25.895/68.495seconds for
+disk/RAM/disk, but none of those initial selections qualifies as a passing run.
+
+The corrected helper verifies the full ordered test-ID digest against ordinary
+unittest discovery before any test executes. At immutable311d7e5, the verified
+first150tests passed on disk in98.266seconds; the identical first150 in the full
+RAM run passed in40.544seconds. Public `local_validation.py --test-temp-root`
+creates only a private mode0700 TMPDIR child under an explicit existing parent,
+records that root and its acceptance boundary, preserves unrelated files and
+rejects candidate-internal roots. Default placement remains unchanged. Four
+public launcher regressions pass on each Python3.11/3.12.
+
+The full guarded3.12 run at311d7e5b66063ccaafda0f46851c44ed521a66b5 passed
+2018tests/1skip in548.785seconds; all seven comprehensive checks, including
+packaging, passed. It used explicit `/dev/shm` TMPDIR and a900-second diagnostic
+ceiling. Its observed unit duration is below the unchanged600-second default.
+This is RAM-backed functional source validation, not physical-disk durability or
+native166 qualification. Earlier disk-backed timeout receipts remain failures.
+No third disk-backed full run, removed tests, disabled fsync or increased default.
+
+Private durable evidence: `testing/ticket453/profiling-20261101/` under user-state
+Codex Wake. Full receipt SHA256:
+`7a1adb920ffe7a060cebbf6fa2a49895948f1052bf181ccfd249d9cc8d9b65bf`;
+verified disk150 receipt:
+`be46a38ff4aa91eb5e3eb6cf91c51e454cd651dbd12bf444ffdb36569b101588`.
+Raw import failures, helper versions, collection guard and syscall summaries are
+retained privately. Created RAM test directory was removed by the launcher.
+Native453 package/verification/review/qualification remains open. No native job
+action or deployment occurred; final broad code-review/findings TDD remain0/0.

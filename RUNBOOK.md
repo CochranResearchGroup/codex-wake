@@ -8297,3 +8297,21 @@ needs per-test profiling; no raised gate or clean full-matrix claim. Initial
 diagnostic argument-order failure retained. Final owned diagnostic group empty.
 No native retry, resource renewal, production effect or additional review round.
 Plan0193 acceptance/ledger and private `/tmp/wake-diagnosis453/` retain evidence.
+
+
+## 2026-11-01 UTC — measured fixture storage overhead and qualified functional lane
+
+Matched fsync trace217calls:disk1.033202seconds/RAM0.006431seconds. The initial
+external timing helper omitted repo import root; five sample entries were import
+errors and its full collection1679versus2018 was invalid. Stopped owned group,
+retained failures, corrected the report and required full test-ID digest parity.
+
+Added explicit `--test-temp-root` at311d7e5 with private child cleanup, candidate
+root refusal and receipt disclosure. Four public launcher tests pass both Python
+versions. Verified first150tests:98.266seconds disk/40.544RAM. Corrected full3.12
+functional run:2018tests/1skip548.785seconds, all7comprehensive checksPASS.
+Source311d7e5; temporary filesRAM, other state/artifacts retain original placement.
+Default600-second gate unchanged; diagnostic used existing900-second ceiling.
+Physical-disk durability/native166 remain separate. No native retry or deployment.
+Curated private receipts and helper/source provenance retained in ticket453
+profiling-20261101; Plan0193 acceptance and ledger own the compact checkpoint.

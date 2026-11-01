@@ -55,3 +55,14 @@ The corrected full3.12 diagnostic again timed out900seconds after1281completed
 test rows/no failure lines. Last runtime A2A group passes5tests/3.416seconds alone.
 Full-suite cost cause remains unresolved; no budget increase or full-matrix pass.
 Native453 acceptance and final broad review/TDD remain open; no native retry.
+
+
+Profiling update311d7e5: source-bound full3.12 RAM-backed functional validation
+passes all7checks,2018tests/1skip in548.785seconds. Default disk placement and
+600-second limit are unchanged; explicit `--test-temp-root /dev/shm` records
+storage choice. Same verified150test IDs:98.266seconds disk versus40.544RAM.
+A matched case retains217fsync calls:1.033202seconds disk versus0.006431RAM.
+Initial helper import failures/wrong full count are retained as invalid; the
+corrected run checks the entire standard discovery digest. Disk timeout history
+is preserved. This is functional source evidence, not disk durability or native
+166 acceptance. No native retry/deployment/final-review round.

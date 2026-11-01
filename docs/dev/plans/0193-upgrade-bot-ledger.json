@@ -248,8 +248,32 @@
       "presubmit": "2771981:10checksPASS3.12",
       "comprehensive": "8595293:second canonical3.12 timeout900s;1281completed/nofailure lines;no full qualification",
       "last_group": "runtime A2A5pass3.416s isolated; no demonstrated local stall",
-      "remaining": "profile per-test cumulative suite cost without raising gate; historical clock subtype unclassified",
+      "remaining": "Default disk full suite remains over budget; explicit RAM functional source lane passes. Native166 acceptance remains open.",
       "native_retries": 0
+    },
+    "functional_comprehensive": {
+      "source": "311d7e5b66063ccaafda0f46851c44ed521a66b5",
+      "runtime": "Python3.12.13",
+      "tests": 2018,
+      "skipped": 1,
+      "unit_seconds": 548.785,
+      "checks": "7PASS including packaging",
+      "test_temp_root": "/dev/shm",
+      "acceptance": "functional only; physical-storage durability/native166 separate",
+      "explicit_timeout_seconds": 900,
+      "default_timeout_unchanged": 600,
+      "receipt_sha256": "7a1adb920ffe7a060cebbf6fa2a49895948f1052bf181ccfd249d9cc8d9b65bf"
+    },
+    "profiling": {
+      "verified_disk150_seconds": 98.266,
+      "verified_ram150_seconds": 40.544,
+      "matched_fsync_calls": 217,
+      "disk_fsync_seconds": 1.033202,
+      "ram_fsync_seconds": 0.006431,
+      "initial_helper": "invalid import root; five import errors and wrong full count retained",
+      "collection_guard": "complete ordered test-ID digest matches standard discovery",
+      "public_launcher_tests": "4PASS each3.11/3.12",
+      "native_actions": 0
     }
   },
   "successor_authorization": {
