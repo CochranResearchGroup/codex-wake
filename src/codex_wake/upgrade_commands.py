@@ -7,7 +7,7 @@ def tool_specs():
     specs = {}
     for verb in ('status','list','show','enable','disable','start','advance','cancel','poll','discovery','rollback','reconcile','cache_cleanup'):
         properties = {'expected_target': {'type':'object', 'minProperties':1}}
-        if verb in ('show','advance','cancel','poll','discovery','rollback','reconcile'):properties['job_id']=text
+        if verb in ('show','advance','cancel','rollback','reconcile'):properties['job_id']=text
         if verb=='reconcile':properties['mode']={'type':'string','enum':['verify_only','verify_review_only','qualification_only']}
         if verb=='rollback':properties['operation_id']=text
         if verb=='start':
