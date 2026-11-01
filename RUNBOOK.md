@@ -8354,3 +8354,18 @@ the successful deterministic patch/semantic repair/build/qualification journey
 through the existing public job seam. Draft specifies bounded compatible-cache
 reuse, practical measured limits and explicit outcomes; no new orchestrator,
 fixture campaign or runtime allowance.447-452 retain closure;453 remains open.
+
+## Turn | 2026-11-01 | Direct166 build and compiler-cache delivery
+
+Published455/456/457 with native dependencies455+456→457→453 and parent444
+relationships. Primary owns455; cache456 deliveredc105bfd, integratedf893b20;
+worker88 upgrade tests PASS and integrated14 job tests PASS7.049s. Real compiler
+reuse/invalidation proof remains pending;456 is integrated, not accepted/closed.
+New direct455 root inwsl-test compiles the complete canonical package from
+9784byte-identical retained source files; fixed supervisor-only import setup
+error before Cargo with original monotonic deadline106414.882757813 preserved.
+Compiler2/cache24GiB, cache retained outside job scratch; old jobs untouched.
+Detached collector739105 writes the unique observed completion artifact.
+Wake5135e785a48c44dc9c84ed6c74bba339 armed, monitor ready, file-exists predicate
+and exact native caller/resume target read back. Ledger owns full paths/clocks.
+Build pending; final broad review/TDD0/0. No production effects/governor activation.
