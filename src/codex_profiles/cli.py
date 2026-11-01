@@ -1476,6 +1476,18 @@ def cmd_run(args: argparse.Namespace) -> int:
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 1
+    if codex_args in (["--version"], ["-V"]):
+        from .build_channels import BuildError, load_build, run_build
+        if not getattr(args, "build_manifest", None) or args.sudo:
+            print("version inspection requires a pinned build manifest without sudo", file=sys.stderr)
+            return 2
+        try:
+            account_root = settings.account_root(profile)
+            return run_build(load_build(Path(args.build_manifest), args.channel or "modded", account_root),
+                             account_root, profile, codex_args)
+        except (BuildError, OSError, ValueError) as exc:
+            print(f"build inspection held: {exc}", file=sys.stderr)
+            return 2
     safety_issues = launcher_safety_issues(settings)
     if safety_issues:
         for issue in safety_issues:
