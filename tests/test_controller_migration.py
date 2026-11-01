@@ -450,3 +450,77 @@ class InPlaceIsolationTests(unittest.TestCase):
             next((self.root / "controller-migration").glob("*.json")).read_text()
         )
         self.assertEqual(receipt["state"], "uncertain")
+
+    def test_idle_process_using_account_home_alias_holds_isolation(self):
+        import os
+        import subprocess
+        import sys
+
+        self.legacy_links()
+        alias = self.lab / "account-home-alias"
+        alias.symlink_to(self.home, target_is_directory=True)
+        child = subprocess.Popen(
+            [
+                sys.executable,
+                "-c",
+                'import time; print("ready", flush=True); time.sleep(30)',
+            ],
+            env={**os.environ, "CODEX_HOME": str(alias)},
+            stdout=subprocess.PIPE,
+            text=True,
+        )
+        try:
+            self.assertEqual(child.stdout.readline().strip(), "ready")
+            from codex_wake.controller_migration import probe_writers
+
+            preview = self.owner(writer_probe=probe_writers).execute(
+                "migration.preview", {}
+            )
+            self.assertTrue(
+                any(
+                    row["pid"] == child.pid
+                    and row["evidence"] == "configured_account_home"
+                    for row in preview["writers"]["writers"]
+                ),
+                preview["writers"],
+            )
+            self.assertIn("competing_writer", preview["holds"])
+            self.assertTrue((self.home / "sessions").is_symlink())
+        finally:
+            child.terminate()
+            child.wait(timeout=5)
+            child.stdout.close()
+
+    def test_rollback_rechecks_new_private_file_after_authorization(self):
+        self.legacy_links()
+        owner = self.owner()
+        applied = owner.execute(
+            "migration.apply",
+            {"expected_target": owner.execute("migration.preview", {})["target"]},
+        )
+        calls = 0
+
+        def authorize():
+            nonlocal calls
+            calls += 1
+            if calls == 3:
+                (self.home / "state_5.sqlite").write_bytes(
+                    b"new native state after initial rollback check"
+                )
+
+        from codex_wake.managed_inventory import InventoryError
+
+        with self.assertRaises(InventoryError) as error:
+            owner.execute(
+                "migration.rollback",
+                {
+                    "expected_target": owner.execute("migration.preview", {})["target"],
+                    "receipt_id": applied["receipt_id"],
+                },
+                authorize=authorize,
+            )
+        self.assertEqual(error.exception.code, "target_changed")
+        self.assertEqual(
+            (self.home / "state_5.sqlite").read_bytes(),
+            b"new native state after initial rollback check",
+        )

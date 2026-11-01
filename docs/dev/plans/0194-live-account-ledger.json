@@ -5,8 +5,8 @@
   "branch": "fix/live-acceptance-380",
   "base": "289bb97ecf8a0382089819e4c4119bc5462e48d0",
   "resource_mode": "manual",
-  "review_rounds": 0,
-  "remediation_rounds": 0,
+  "review_rounds": 1,
+  "remediation_rounds": 1,
   "live_acceptance": false,
   "interruption_approval": "required_before_any_affected_operator_work",
   "units": [
@@ -57,5 +57,29 @@
   "private_evidence": "/home/ecochran76/.local/state/codex-wake/testing/live-acceptance380",
   "git_custody": "isolatedworktree",
   "working_runtime_changed": false,
-  "strategy_decision": "Prefer in-place isolation of inactive named homes, preserving global legacy store and current clients; no relocation of live global data. Any unknown dependency remains held; interruption requires operator approval."
+  "strategy_decision": "Prefer in-place isolation of inactive named homes, preserving global legacy store and current clients; no relocation of live global data. Any unknown dependency remains held; interruption requires operator approval.",
+  "implementation_source": "abdb91d3091fc8cba1cb7c83c7c22d4257563410",
+  "source_validation": {
+    "focused_tests": 58,
+    "focused_result": "PASS",
+    "undefined_names": "PASS",
+    "policy_wiring": "PASS",
+    "full_suite": "running diagnostic pre-remediation source; final source needs separate qualification",
+    "focused_seconds": 17.367,
+    "package_build": "PASS; wheel and sdist",
+    "staged_stock_version": "PASS; exact registered b93f6811 stock0.164 in neutral home; live aliases unchanged"
+  },
+  "live_preview": {
+    "status": "held",
+    "holds": [
+      "protected_runtime_depends_on_account_alias",
+      "writer_census_unknown"
+    ],
+    "accounts": 7,
+    "planned_aliases": 35,
+    "effect_authorization": "not_authorized",
+    "receipt_sha256": "5077106e58a7dd6d7ece1da59c2f9c45168b12d6184e75928a11be2a8156f0e2"
+  },
+  "review_source": "abdb91d3091fc8cba1cb7c83c7c22d4257563410",
+  "remediation_state": "complete_S1_S2_red_green"
 }

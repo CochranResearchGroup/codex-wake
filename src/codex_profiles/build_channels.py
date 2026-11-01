@@ -327,31 +327,56 @@ def _managed_endpoint(build: Build, home: Path, executable: int, env: dict) -> s
     return 'unix://' + str(physical)
 
 
-def _inspect_version(build: Build, profile: str, args: list[str], output: TextIO) -> int:
+def _inspect_version(
+    build: Build, profile: str, args: list[str], output: TextIO
+) -> int:
     """Run only exact version flags with neutral state and no account ownership."""
-    with _pinned_executable(build) as executable, tempfile.TemporaryDirectory(prefix='codex-version-', dir='/tmp') as temporary:
+    with (
+        _pinned_executable(build) as executable,
+        tempfile.TemporaryDirectory(prefix="codex-version-", dir="/tmp") as temporary,
+    ):
         home = Path(temporary)
-        env = {key: os.environ[key] for key in ('PATH', 'LANG', 'LC_ALL') if key in os.environ}
-        env.update(HOME=temporary, CODEX_HOME=str(home/'.codex'),
-                   XDG_CONFIG_HOME=str(home/'.config'), XDG_DATA_HOME=str(home/'.local/share'),
-                   XDG_STATE_HOME=str(home/'.local/state'), XDG_CACHE_HOME=str(home/'.cache'),
-                   CODEX_BUILD_CHANNEL=build.channel)
-        (home/'.codex').mkdir(mode=0o700)
-        print(f'[{build.channel.upper()} | {profile} | {build.upstream_version}+{build.revision}] '
-              f'version inspection of registered executable SHA256 {build.sha256}; account identity: unverified',
-              file=output, flush=True)
-        process = subprocess.Popen([f'/proc/self/fd/{executable}', *args], env=env, cwd=home,
-                                   stdin=subprocess.DEVNULL, pass_fds=(executable,), start_new_session=True, umask=0o077)
+        env = {
+            key: os.environ[key]
+            for key in ("PATH", "LANG", "LC_ALL")
+            if key in os.environ
+        }
+        env.update(
+            HOME=temporary,
+            CODEX_HOME=str(home / ".codex"),
+            XDG_CONFIG_HOME=str(home / ".config"),
+            XDG_DATA_HOME=str(home / ".local/share"),
+            XDG_STATE_HOME=str(home / ".local/state"),
+            XDG_CACHE_HOME=str(home / ".cache"),
+            CODEX_BUILD_CHANNEL=build.channel,
+        )
+        (home / ".codex").mkdir(mode=0o700)
+        print(
+            f"[{build.channel.upper()} | {profile} | {build.upstream_version}+{build.revision}] "
+            f"version inspection of registered executable SHA256 {build.sha256}; account identity: unverified",
+            file=output,
+            flush=True,
+        )
+        process = subprocess.Popen(
+            [f"/proc/self/fd/{executable}", *args],
+            env=env,
+            cwd=home,
+            stdin=subprocess.DEVNULL,
+            pass_fds=(executable,),
+            start_new_session=True,
+            umask=0o077,
+        )
         try:
             try:
                 return process.wait(timeout=15)
             except subprocess.TimeoutExpired as error:
-                raise BuildError('version inspection timed out') from error
+                raise BuildError("version inspection timed out") from error
         finally:
-            try:os.killpg(process.pid, signal.SIGKILL)
-            except ProcessLookupError:pass
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
             process.wait()
-
 
 def run_build(build: Build, account_home: Path, profile: str, args: list[str], *,
               output: TextIO | None = None) -> int:

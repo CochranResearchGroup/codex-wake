@@ -124,7 +124,7 @@ def probe_writers(roots):
                     dependency = Path(configured_home)
                     if not dependency.is_absolute():
                         dependency = (process / 'cwd').resolve() / dependency
-                    dependency = dependency.absolute()
+                    dependency = Path(_links(dependency)["resolved"])
                     if any(dependency == root or dependency.is_relative_to(root) for root in roots):
                         writers.append(dict(pid=int(process.name), path=str(dependency), evidence='configured_account_home'))
                 descriptors = list((process / 'fd').iterdir())
@@ -147,7 +147,7 @@ def probe_writers(roots):
                         unknown = True
             except FileNotFoundError:
                 continue
-            except OSError:
+            except (OSError, InventoryError, RuntimeError):
                 unknown = True
         return dict(status='unknown' if unknown else 'complete', writers=writers)
     except (OSError, AttributeError):
@@ -799,7 +799,8 @@ class ControllerMigration:
                 "uncertain_effect", "completed attributable isolation required"
             )
         self._isolate_guard(authorize, receipt["policy_sha"], receipt["credentials"])
-        for row in receipt["moves"]:
+
+        def check_replacement(row):
             path, backup = Path(row["path"]), Path(row["backup"])
             if (
                 not backup.is_symlink()
@@ -811,6 +812,9 @@ class ControllerMigration:
                     "target_changed",
                     "private state changed; retain it rather than roll it back",
                 )
+
+        for row in receipt["moves"]:
+            check_replacement(row)
         receipt["state"] = "rolling_back"
         _save(receipt_path, receipt)
         try:
@@ -818,6 +822,7 @@ class ControllerMigration:
                 self._isolate_guard(
                     authorize, receipt["policy_sha"], receipt["credentials"]
                 )
+                check_replacement(row)
                 path = Path(row["path"])
                 if path.exists():
                     if path.is_dir():

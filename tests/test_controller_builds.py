@@ -119,62 +119,183 @@ class PublicBuildAdapterTests(unittest.TestCase):
         import stat
         import subprocess
         import sys
+
         with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory);homes=root/'homes';home=homes/'codex-alice';shared=homes/'shared'
-            home.mkdir(parents=True);shared.mkdir()
-            (shared/'sessions').mkdir();(shared/'sessions/history.jsonl').write_text('synthetic retained history\n')
-            (shared/'state_5.sqlite').write_bytes(b'synthetic shared database, never opened')
-            (shared/'config.toml').write_text('intentionally invalid native configuration')
-            (home/'auth.json').write_text('{"fixture_identity":"must-not-be-read"}')
-            for name in ('sessions','state_5.sqlite','config.toml'):(home/name).symlink_to(shared/name)
-            config=root/'profiles.toml'
-            config.write_text('[profiles]\nstate_root='+json.dumps(str(homes))+'\nsource_root='+json.dumps(str(root/'seed'))+'\nknown_profiles=["alice"]\ndefault_profile="alice"\nselection_mode="launcher"\nshared_links=["config.toml","sessions","state_5.sqlite"]\n')
-            native=root/'native-version'
-            native.write_text('#!'+sys.executable+'\nimport os,sys\nfrom pathlib import Path\n'
+            root = Path(directory)
+            homes = root / "homes"
+            home = homes / "codex-alice"
+            shared = homes / "shared"
+            home.mkdir(parents=True)
+            shared.mkdir()
+            (shared / "sessions").mkdir()
+            (shared / "sessions/history.jsonl").write_text(
+                "synthetic retained history\n"
+            )
+            (shared / "state_5.sqlite").write_bytes(
+                b"synthetic shared database, never opened"
+            )
+            (shared / "config.toml").write_text(
+                "intentionally invalid native configuration"
+            )
+            (home / "auth.json").write_text('{"fixture_identity":"must-not-be-read"}')
+            for name in ("sessions", "state_5.sqlite", "config.toml"):
+                (home / name).symlink_to(shared / name)
+            config = root / "profiles.toml"
+            config.write_text(
+                "[profiles]\nstate_root="
+                + json.dumps(str(homes))
+                + "\nsource_root="
+                + json.dumps(str(root / "seed"))
+                + '\nknown_profiles=["alice"]\ndefault_profile="alice"\nselection_mode="launcher"\nshared_links=["config.toml","sessions","state_5.sqlite"]\n'
+            )
+            native = root / "native-version"
+            native.write_text(
+                "#!" + sys.executable + "\nimport os,sys\nfrom pathlib import Path\n"
                 'assert sys.argv[1:] in (["--version"],["-V"])\n'
                 'h=Path(os.environ["HOME"]); c=Path(os.environ["CODEX_HOME"])\n'
-                'assert h==Path.cwd() and c.is_relative_to(h)\n'
-                'assert not h.is_relative_to(Path('+repr(str(homes))+'))\n'
+                "assert h==Path.cwd() and c.is_relative_to(h)\n"
+                "assert not h.is_relative_to(Path(" + repr(str(homes)) + "))\n"
                 'assert not any(k in os.environ for k in ("OPENAI_API_KEY","CODEX_ACCESS_TOKEN","CODEX_THREAD_ID","CODEX_PROFILE"))\n'
                 '(h/"version-marker").write_text("temporary version output")\n'
-                'print("codex-cli 9.9.9")\n')
-            native.chmod(0o700);pin=hashlib.sha256(native.read_bytes()).hexdigest()
-            builds={channel:dict(executable=str(native),sha256=pin,upstream_version='9.9.9',revision='fixture',
-                source='https://github.com/openai/codex/releases/download/rust-v9.9.9/codex.tar.gz' if channel=='stock' else 'registered fixture',backend='managed') for channel in ('stock','modded')}
-            (shared/'builds.json').write_text(json.dumps(dict(schema_version=1,builds=builds)))
+                'print("codex-cli 9.9.9")\n'
+            )
+            native.chmod(0o700)
+            pin = hashlib.sha256(native.read_bytes()).hexdigest()
+            builds = {
+                channel: dict(
+                    executable=str(native),
+                    sha256=pin,
+                    upstream_version="9.9.9",
+                    revision="fixture",
+                    source="https://github.com/openai/codex/releases/download/rust-v9.9.9/codex.tar.gz"
+                    if channel == "stock"
+                    else "registered fixture",
+                    backend="managed",
+                )
+                for channel in ("stock", "modded")
+            }
+            (shared / "builds.json").write_text(
+                json.dumps(dict(schema_version=1, builds=builds))
+            )
+
             def snapshot():
-                result={}
-                for path in [homes,*homes.rglob('*')]:
-                    metadata=path.lstat()
-                    result[str(path.relative_to(homes))]=dict(inode=metadata.st_ino,mode=metadata.st_mode,size=metadata.st_size,
-                        mtime_ns=metadata.st_mtime_ns,ctime_ns=metadata.st_ctime_ns,
+                result = {}
+                for path in [homes, *homes.rglob("*")]:
+                    metadata = path.lstat()
+                    result[str(path.relative_to(homes))] = dict(
+                        inode=metadata.st_ino,
+                        mode=metadata.st_mode,
+                        size=metadata.st_size,
+                        mtime_ns=metadata.st_mtime_ns,
+                        ctime_ns=metadata.st_ctime_ns,
                         target=os.readlink(path) if path.is_symlink() else None,
-                        sha256=hashlib.sha256(path.read_bytes()).hexdigest() if stat.S_ISREG(metadata.st_mode) else None)
+                        sha256=hashlib.sha256(path.read_bytes()).hexdigest()
+                        if stat.S_ISREG(metadata.st_mode)
+                        else None,
+                    )
                 return result
-            lock=home/'.build-channel.lock';lock.write_text(json.dumps(dict(pid=os.getpid(),channel='modded',start_ticks='retained-owner')));lock.chmod(0o600)
-            env={key:os.environ[key] for key in ('PATH','LANG','LC_ALL') if key in os.environ}
-            env.update(PYTHONPATH=str(Path(__file__).resolve().parents[1]/'src'),CODEX_PROFILES_CONFIG=str(config),
-                HOME=str(root/'operator'),OPENAI_API_KEY='synthetic-test-key',CODEX_ACCESS_TOKEN='synthetic-test-token',
-                CODEX_THREAD_ID='synthetic-thread',CODEX_PROFILE='synthetic-inherited-profile',CODEX_BUILD_UPDATE_CHECK='0')
-            with lock.open('r+') as retained:
-                fcntl.flock(retained,fcntl.LOCK_EX|fcntl.LOCK_NB);before=snapshot()
-                for flag in ('--version','-V'):
-                    for entry,arguments,label in (
-                        ('main',['run','--channel','modded','alice','--',flag],'MODDED'),
-                        ('profile_main',[flag],'MODDED'),('stock_main',[flag],'STOCK'),('modded_main',[flag],'MODDED')):
-                        with self.subTest(entry=entry,flag=flag):
-                            command=[sys.executable,'-c','from codex_wake.profile_compat import '+entry+';raise SystemExit('+entry+'())',*arguments]
-                            result=subprocess.run(command,env=env,cwd=root,capture_output=True,text=True,timeout=10)
-                            self.assertEqual(result.returncode,0,result.stderr)
-                            self.assertEqual(result.stdout.strip(),'codex-cli 9.9.9')
-                            self.assertIn(label,result.stderr);self.assertIn(pin,result.stderr)
-                            self.assertEqual(snapshot(),before)
-                    result=subprocess.run([sys.executable,'-m','codex_profiles.build_channels','--config',str(config),
-                        '--manifest',str(shared/'builds.json'),'--profile','alice','--',flag],env=env,cwd=root,capture_output=True,text=True,timeout=10)
-                    self.assertEqual(result.returncode,0,result.stderr);self.assertEqual(result.stdout.strip(),'codex-cli 9.9.9')
-                    self.assertEqual(snapshot(),before)
-                refused=subprocess.run([sys.executable,'-c','from codex_wake.profile_compat import modded_main;raise SystemExit(modded_main())','--version','extra'],env=env,cwd=root,capture_output=True,text=True,timeout=10)
-                self.assertNotEqual(refused.returncode,0);self.assertEqual(snapshot(),before)
+
+            lock = home / ".build-channel.lock"
+            lock.write_text(
+                json.dumps(
+                    dict(
+                        pid=os.getpid(), channel="modded", start_ticks="retained-owner"
+                    )
+                )
+            )
+            lock.chmod(0o600)
+            env = {
+                key: os.environ[key]
+                for key in ("PATH", "LANG", "LC_ALL")
+                if key in os.environ
+            }
+            env.update(
+                PYTHONPATH=str(Path(__file__).resolve().parents[1] / "src"),
+                CODEX_PROFILES_CONFIG=str(config),
+                HOME=str(root / "operator"),
+                OPENAI_API_KEY="synthetic-test-key",
+                CODEX_ACCESS_TOKEN="synthetic-test-token",
+                CODEX_THREAD_ID="synthetic-thread",
+                CODEX_PROFILE="synthetic-inherited-profile",
+                CODEX_BUILD_UPDATE_CHECK="0",
+            )
+            with lock.open("r+") as retained:
+                fcntl.flock(retained, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                before = snapshot()
+                for flag in ("--version", "-V"):
+                    for entry, arguments, label in (
+                        (
+                            "main",
+                            ["run", "--channel", "modded", "alice", "--", flag],
+                            "MODDED",
+                        ),
+                        ("profile_main", [flag], "MODDED"),
+                        ("stock_main", [flag], "STOCK"),
+                        ("modded_main", [flag], "MODDED"),
+                    ):
+                        with self.subTest(entry=entry, flag=flag):
+                            command = [
+                                sys.executable,
+                                "-c",
+                                "from codex_wake.profile_compat import "
+                                + entry
+                                + ";raise SystemExit("
+                                + entry
+                                + "())",
+                                *arguments,
+                            ]
+                            result = subprocess.run(
+                                command,
+                                env=env,
+                                cwd=root,
+                                capture_output=True,
+                                text=True,
+                                timeout=10,
+                            )
+                            self.assertEqual(result.returncode, 0, result.stderr)
+                            self.assertEqual(result.stdout.strip(), "codex-cli 9.9.9")
+                            self.assertIn(label, result.stderr)
+                            self.assertIn(pin, result.stderr)
+                            self.assertEqual(snapshot(), before)
+                    result = subprocess.run(
+                        [
+                            sys.executable,
+                            "-m",
+                            "codex_profiles.build_channels",
+                            "--config",
+                            str(config),
+                            "--manifest",
+                            str(shared / "builds.json"),
+                            "--profile",
+                            "alice",
+                            "--",
+                            flag,
+                        ],
+                        env=env,
+                        cwd=root,
+                        capture_output=True,
+                        text=True,
+                        timeout=10,
+                    )
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(result.stdout.strip(), "codex-cli 9.9.9")
+                    self.assertEqual(snapshot(), before)
+                refused = subprocess.run(
+                    [
+                        sys.executable,
+                        "-c",
+                        "from codex_wake.profile_compat import modded_main;raise SystemExit(modded_main())",
+                        "--version",
+                        "extra",
+                    ],
+                    env=env,
+                    cwd=root,
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                self.assertNotEqual(refused.returncode, 0)
+                self.assertEqual(snapshot(), before)
 
     def test_cli_and_mcp_report_same_pinned_build_envelope(self):
         from pathlib import Path
