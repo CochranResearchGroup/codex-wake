@@ -8378,3 +8378,15 @@ Evidence issue0444/direct166-package.md owns SHA/packageinventory, original
 deadline, compilerusage, zero external model/provider effects and empty census.
 Broader historyharness tmux setup failure retained; notclaimed aspassed.
 #455 validated;456 runtime proofactive,457/453 stillblocked. Outcome_progress.
+
+## Turn | 2026-11-01 | Native package proof and active follow-up
+
+Direct455nativecapabilities/publicprofilelaunch PASS exactfa09;7filepackage
+inventoryb180 unchanged. Explicit--locked follow-up timedout120s without live
+descendants/sourcechanges; boundedlogged retry active untilmono97359.412170926
+under original455deadline. Completion wake56df0e007bb14697bf7b132b102cae02 armed/
+monitorready; private collector1452041 owns exact completionartifact.
+456manualrealprotocol tests4PASS/1ignored after455Fresh270Compiling; source
+invalidation/restore/package active withinoriginal60min deadline98071.20294.
+Three precompiler publicsetup failures preserved; no fabricated qualification
+or counter reset. Tickets remain open;457 waits455+456,453 waits457.

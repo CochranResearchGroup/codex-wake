@@ -1,6 +1,7 @@
 # Complete modified0.166 package | #455
 
-State: VALIDATED in disposable wsl-test, ubuntu UID1000. Production installation
+State: package/launcher/native capabilities VALIDATED in disposable wsl-test,
+ubuntu UID1000; ticket closure waits for explicit locked-build check. Production installation
 is separate. This is the successful direct reference port, not automated-job
 acceptance. #456/#457/#453 remain open.
 
@@ -43,3 +44,10 @@ These remain #453 criteria. Running-daemon recovery#413 remains separate.
 Private curated closeout direct455/direct455-closeout.json SHA256
 b4f14b3f1f549750cd391e286b547671931dfb1d29b932a308babceeb83ab77c.
 Private root: ~/.local/state/codex-wake/testing/upgrade-bot444/primary.
+
+Follow-up: an explicit three-binary `cargo build --locked` check exceeded its
+initial120s auxiliary bound. No descendants remained; all9784tracked source
+files and Cargo.lock still equal retained source. Failure is preserved. A
+durable retry using original HOME/PATH, cache and outer455deadline is active
+under sub-deadline97359.412170926; it has not yet passed. Both first package
+success and this pending check are reported independently.

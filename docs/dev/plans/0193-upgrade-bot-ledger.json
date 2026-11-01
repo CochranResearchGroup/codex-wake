@@ -554,15 +554,16 @@
     "tickets": [
       {
         "number": 455,
-        "state": "validated",
-        "tracker_state": "close_pending",
+        "state": "implemented",
+        "tracker_state": "open",
         "blockers": [],
         "owner": "/root",
         "owned_scope": "new disposable direct166 build; private native source/package and455 evidence",
         "worktree": "codex-wake-upgrade-bot-spec",
         "evidence": "docs/dev/evidence/issue0444/direct166-package.md",
         "native_sha256": "fa09be30351d253712e375e46301d2721aa542e4189ad80ee856504f8d70f482",
-        "package_inventory_sha256": "b1804452749407f3a13d0a2ccb8d1078cfd71b15884b0f93af0b48ad7f653127"
+        "package_inventory_sha256": "b1804452749407f3a13d0a2ccb8d1078cfd71b15884b0f93af0b48ad7f653127",
+        "remaining": "explicit locked-build completion/final census before tracker closure; built package/launcher/native capabilities verified"
       },
       {
         "number": 456,
@@ -576,7 +577,13 @@
         "base": "8ada67c196871f64361cc9433a6fa0caefd622f0",
         "worker_result": "c105bfdef134df655f4ba34a8e27ac6a479c625a",
         "integration_commit": "f893b20",
-        "source_validation": "worker88 public upgrade tests PASS90.562s; integrated14 public job tests PASS7.049s; runtime reuse/invalidation still pending"
+        "source_validation": "worker88 public upgrade tests PASS90.562s; integrated14 public job tests PASS7.049s; runtime reuse/invalidation still pending",
+        "runtime_state": "manual actualprotocol4pass/1ignored; forced invalidation/restore/package in progress;3 precompiler publicsetup failures retained",
+        "runtime_root": "/home/ubuntu/codex-profile-lab/cache456-20261101",
+        "runtime_monotonic_start": 94471.20294,
+        "runtime_monotonic_deadline": 98071.20294,
+        "worker": "cache456",
+        "public_admission_amendment": "max3 within original60min after2precompiler failures; no4th; manual compilerproof uses remaining originalbudget, no fakequalification"
       },
       {
         "number": 457,
@@ -642,7 +649,28 @@
       "elapsed_seconds": 2296.0248591900017,
       "owned_processes_remaining": [],
       "package_inventory_sha256": "b1804452749407f3a13d0a2ccb8d1078cfd71b15884b0f93af0b48ad7f653127",
-      "private_closeout_sha256": "b4f14b3f1f549750cd391e286b547671931dfb1d29b932a308babceeb83ab77c"
+      "private_closeout_sha256": "b4f14b3f1f549750cd391e286b547671931dfb1d29b932a308babceeb83ab77c",
+      "locked_check": {
+        "first_auxiliary": "120s timeout, no descendants,9784trackedsource unchanged/Cargo.lockunchanged; failed evidence retained",
+        "supervisor_pid": 7253,
+        "cargo_pid": 7256,
+        "monotonic_deadline": 97359.412170926,
+        "original_direct_deadline": 106414.882757813,
+        "log": "direct166-455-20261101/locked-build.log inwsl-test",
+        "host_collector_pid": 1452041,
+        "completion": "/home/ecochran76/.local/state/codex-wake/testing/upgrade-bot444/primary/direct455/locked-build-observed-completion.json",
+        "wake_id": "wake_intent_56df0e007bb14697bf7b132b102cae02",
+        "wake_armed": true,
+        "monitor_ready": true,
+        "expires_at": "2026-11-01T23:47:23.885017Z"
+      },
+      "native_acceptance": {
+        "package": "built, frozen inventory unchanged",
+        "public_profile_launcher": "run_build --version exit0, MODDED identity",
+        "capabilities": "missingoutput/calleraccounting/durablenotices/TUIhealth/scopedreload PASS exactfa09",
+        "history": "broader tmux setup failed before launch; retained/unpassed453scope",
+        "raw_orphan_output_recurrence_HF20": "unqualified; do not broaden"
+      }
     },
     "write_ownership": "primary ledger/docs/integration/native455; cache456 code/tests in isolated worktree",
     "integration_tip": "f893b20"
