@@ -8280,3 +8280,20 @@ environment completed2013tests with23failures/1error in refresh scenarios; its
 29-test refresh group subsequently passed in16.435seconds through the canonical
 isolated runner. The full3.12 timeout remains unresolved; no matrix pass claimed.
 Latest628a1ed has5focused+18Repair tests passing. Hosted CI not used.
+
+
+## 2026-11-01 UTC — bounded diagnosis of upgrade acceptance blockers
+
+Differential clock tests establish the already-landed same-boot UTC rollback fix
+without deadline renewal; historical interruption subtype remains unclassified.
+Added public red/green regressions and fixes for lost timeout output8595293,
+sealed host tool resolution/bytes2d928ba and owned timeout descendants2771981.
+Presubmit10checksPASS;runner7tests each3.11/3.12;Repair/interruption25pass3.12.
+
+One corrected comprehensive3.12 diagnostic again hit900seconds, retaining1281
+completed rows and no failure lines. Its final runtime A2A group passes5tests in
+3.416seconds alone; last-test blame is unsupported. Full-suite cumulative cost
+needs per-test profiling; no raised gate or clean full-matrix claim. Initial
+diagnostic argument-order failure retained. Final owned diagnostic group empty.
+No native retry, resource renewal, production effect or additional review round.
+Plan0193 acceptance/ledger and private `/tmp/wake-diagnosis453/` retain evidence.

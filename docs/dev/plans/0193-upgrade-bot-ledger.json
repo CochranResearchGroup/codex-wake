@@ -237,6 +237,19 @@
       "python311": "PASS7checks;2013tests/1skip;788.298seconds",
       "python312": "full canonical timeout900seconds retained; inherited-environment diagnostic23failures/1error all refresh; canonical isolated refresh29pass16.435s; no full-matrix pass",
       "latest628a1ed": "5focused+18Repair pass"
+    },
+    "diagnosis": {
+      "source_fixes": [
+        "8595293 timeout partial output",
+        "2d928ba optional sealed host tool preflight",
+        "2771981 POSIX owned timeout cleanup"
+      ],
+      "focused": "runner7pass both Python versions;Repair/interruption25pass3.12;newtool/runner8pass3.11",
+      "presubmit": "2771981:10checksPASS3.12",
+      "comprehensive": "8595293:second canonical3.12 timeout900s;1281completed/nofailure lines;no full qualification",
+      "last_group": "runtime A2A5pass3.416s isolated; no demonstrated local stall",
+      "remaining": "profile per-test cumulative suite cost without raising gate; historical clock subtype unclassified",
+      "native_retries": 0
     }
   },
   "successor_authorization": {

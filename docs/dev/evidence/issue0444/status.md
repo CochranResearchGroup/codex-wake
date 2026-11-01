@@ -45,3 +45,13 @@ source diagnostic in progress and no matrix pass claimed. Latest repeat-admissio
 has five focused and18 existing Repair tests passing.
 Final broad code review and findings TDD counts remain0 until ticket acceptance.
 Managed running-daemon recovery413 and production activation380 remain separate.
+
+
+Follow-up source diagnosis:8595293 retains partial timeout output;2d928ba
+preflights optional sealed host tool paths/bytes;2771981 stops owned POSIX check
+descendants on timeout. Each defect has a failing-before/passing-after public
+regression. Latest presubmit10checksPASS;runner7tests pass both Python versions.
+The corrected full3.12 diagnostic again timed out900seconds after1281completed
+test rows/no failure lines. Last runtime A2A group passes5tests/3.416seconds alone.
+Full-suite cost cause remains unresolved; no budget increase or full-matrix pass.
+Native453 acceptance and final broad review/TDD remain open; no native retry.

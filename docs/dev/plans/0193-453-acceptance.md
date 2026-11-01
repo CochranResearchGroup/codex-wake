@@ -376,3 +376,22 @@ success actions. Seven runner tests pass on both3.12 and3.11. The
 ongoing comprehensive snapshot8595293 predates this process-group change and
 host-tool preflight2d928ba; those changes have focused validation, not that full
 run's identity. Non-POSIX fallback terminates the direct child only.
+
+
+### Diagnostic terminal outcome
+
+The corrected comprehensive3.12 run at8595293 also timed out at900seconds. Its
+new receipt retains1281completed test rows with no failure lines, stopping during
+`test_operator_cli_issues_separate_grok_actor_with_real_audit_receipt`. The entire
+five-test runtime A2A group then passed in3.416seconds through canonical isolation;
+the observed last test took0.278seconds. It is not established as a stall. The
+full isolated suite exceeds its budget, but the cause of cumulative cost is still
+unresolved. No third full replay or raised budget. Diagnostic owned group census
+is empty. Per-test profiling is the next performance seam.
+
+Latest2771981 source-bound presubmit passed all10checks on3.12. Seven runner
+regressions pass on both versions;25Repair/interrupted-worker tests pass3.12,
+and the new tool/runner selection passes8tests on3.11. These focused fixes do
+not qualify the full3.12 matrix or native166. No native context, original job
+renewal, deployment or shared restart occurred. Final broad review/TDD remain0/0.
+Private diagnosis summary and source-bound receipts: `/tmp/wake-diagnosis453/`.
