@@ -455,7 +455,7 @@
     "disabled": true,
     "controller_generation": 2,
     "bounded_retry": {
-      "state": "preparing",
+      "state": "running",
       "max_additional_starts": 1,
       "source_revision": "c9aafa4367ee98159cd3e8c8316a2d6ffd3199a7",
       "original_job_deadline": 87676.137646633,
@@ -468,7 +468,22 @@
       "native_tests": "must actually compile/run verify.py before B review/package/qualification",
       "compiler_cache": "one owned CARGO_TARGET_DIR shared across verification/package outside reviewedsource",
       "old_job": "preserve72 terminal dictionary/input files and botholderroots",
-      "retry_authorization": "primary approved within existing operator completion scope and original deadlines"
+      "retry_authorization": "primary approved within existing operator completion scope and original deadlines",
+      "root": "/home/ubuntu/codex-profile-lab/upgrade453-retry-20261101",
+      "job_id": "9e709dff983a423886954202a739351d",
+      "job_monotonic_start": 84455.241567116,
+      "job_monotonic_deadline": 87666.241567116,
+      "overall_monotonic_deadline": 88566.241567116,
+      "actual_duration_seconds": 3211,
+      "freeze_sha256": "53de7da884e6d69b1bdd27651fdea6d0ed980269a5ef8f3e973f943ee6104398",
+      "config_sha256": "9e0befe0229d141e118265f5165601dcb38257c9250a703e653438707c0fd330",
+      "recipe_sha256": "e6ea265fac4a02ca86dedfe0ffbc55d3e2b81eef1327308e4703d41bb3023ac3",
+      "cached_generation_evidence_sha256": "0df000fa76e8a8b870c60f80b9dea29edce85b10c5232201e1b39a3d6742afbe",
+      "last_observation_monotonic": 85142.547748107,
+      "last_observation": "actual Rust verification running; cached generation validated; coding0/reviewer0; no native package",
+      "host_evidence": "/home/ecochran76/.local/state/codex-wake/testing/ticket453/fresh-verification-20261101/retry",
+      "post_supervisor_pid": 10330,
+      "post_acceptance_sha256": "67065949128323197ebecda52cce8b667a1b7248df1bc7a4774c7edc8344b2a3"
     }
   }
 }
