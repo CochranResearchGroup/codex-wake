@@ -544,5 +544,64 @@
     "primary_acceptance_seam": "existing public durable upgrade-job CLI/API/MCP; actual complete package in disposable WSL",
     "runtime_authority": "unchanged; no expired job revival or renewed allowance",
     "ticket_reconciliation": "447-452 remain validated/closed;453 remains blocked/open; no new tickets created by specification revision"
+  },
+  "delivery_revision": {
+    "id": "working-build-first-20261101",
+    "base": "8ada67c196871f64361cc9433a6fa0caefd622f0",
+    "review_base": "289bb97ecf8a0382089819e4c4119bc5462e48d0",
+    "review_rounds": 0,
+    "remediation_rounds": 0,
+    "tickets": [
+      {
+        "number": 455,
+        "state": "running",
+        "tracker_state": "open",
+        "blockers": [],
+        "owner": "/root",
+        "owned_scope": "new disposable direct166 build; private native source/package and455 evidence",
+        "worktree": "codex-wake-upgrade-bot-spec"
+      },
+      {
+        "number": 456,
+        "state": "running",
+        "tracker_state": "open",
+        "blockers": [],
+        "owner": "/root/cache456",
+        "owned_scope": "compiler cache integration and public regressions; no live WSL mutation",
+        "branch": "feat/456-compatible-compiler-cache",
+        "worktree": "/home/ecochran76/workspace.local/codex-wake-cache456",
+        "base": "8ada67c196871f64361cc9433a6fa0caefd622f0"
+      },
+      {
+        "number": 457,
+        "state": "pending",
+        "tracker_state": "open",
+        "blockers": [
+          455,
+          456
+        ],
+        "owner": "unassigned"
+      },
+      {
+        "number": 453,
+        "state": "blocked",
+        "tracker_state": "open",
+        "blockers": [
+          457
+        ],
+        "owner": "/root"
+      }
+    ],
+    "runtime_mode": "manual; old jobs frozen; no production effects",
+    "direct_build_packet": {
+      "ticket": 455,
+      "max_seconds": 14400,
+      "cleanup_reserve_seconds": 900,
+      "compiler_jobs": 2,
+      "compiler_cache_limit_bytes": 25769803776,
+      "semantic_owner": "primary; no native job worker/reviewer admission until separately recorded",
+      "bound_scope": "new direct package delivery; does not alter or replay expired job9e"
+    },
+    "write_ownership": "primary ledger/docs/integration/native455; cache456 code/tests in isolated worktree"
   }
 }

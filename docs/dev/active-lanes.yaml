@@ -1021,12 +1021,12 @@ lanes:
     plan: docs/dev/plans/0193-2026-10-31-autonomous-codex-upgrade-bot.md
     branch: feat/autonomous-upgrade-bot-spec
     target: origin/main
-    plan_state: BLOCKED
+    plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
     dependencies: []
     overlaps: [P179, P190]
     updated_at: 2026-11-01
-    disposition: Tickets447–452 validated/closed;453 blocked/open after bounded retry9e deadline; protocol4pass/1ignored and app-server tui_health3pass; no166 package/review/qualification; fixture disabled, owned census empty,165 retained; final review/TDD0; no third attempt or production activation
+    disposition: Primary455 direct complete166 build active; isolated cache456 worker active;457 blocked455+456;453 final acceptance blocked457;447–452 validated/closed; one final review/TDD pending; no production effects
 
   - id: P193-RETRO439
     owner: primary / ecochran76
@@ -1042,3 +1042,17 @@ lanes:
     overlaps: []
     updated_at: 2026-10-31
     disposition: Tickets440–443 closed viaPR445; one review and one TDD pass resolve private-receipt P2; final PR/ref readback pending; no working runtime or historical cleanup
+
+  - id: P193-CACHE456
+    owner: cache456 / ecochran76
+    objective: Compatible bounded compiler reuse through public upgrade jobs
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/456]
+    plan: docs/dev/plans/0193-2026-10-31-autonomous-codex-upgrade-bot.md
+    branch: feat/456-compatible-compiler-cache
+    target: feat/autonomous-upgrade-bot-spec
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P193]
+    updated_at: 2026-11-01
+    disposition: Owned isolated code/test changes; primary retains ledger/docs/native runtime; integrate serially

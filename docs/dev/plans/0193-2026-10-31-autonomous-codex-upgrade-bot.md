@@ -1,6 +1,6 @@
 # Keep modified Codex current through deterministic patching and semantic completion
 
-State: BLOCKED
+State: OPEN
 Owner: primary upgrade-bot coordinator
 Specification: https://github.com/CochranResearchGroup/codex-wake/issues/444
 Execution evidence: 0193-453-acceptance.md and 0193-upgrade-bot-ledger.json
@@ -98,3 +98,13 @@ Next bounded planning action: reconcile unfinished #453 work with the measured b
 
 <!-- idempotency:codex-wake-autonomous-upgrade-bot-spec-20261031 -->
 <!-- revision:working-modified-build-first-20261101 -->
+
+
+## Approved delivery graph | 2026-11-01
+
+#455 direct complete166 package (primary; no blockers) and #456 compatible
+compiler reuse (cache456; no blockers) start in parallel. #457 automated
+patch-to-package is blocked by both; existing #453 final installed qualification
+is blocked by #457. Native tracker edges are published. Existing447–452 retain
+closure. One final broad review and one TDD findings pass remain after acceptance.
+Old native jobs remain expired/frozen; new direct455 work does not mutate them.
