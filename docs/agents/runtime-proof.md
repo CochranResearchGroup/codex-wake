@@ -32,3 +32,13 @@ prior qualification hold, revalidates these identities and pinned acceptance
 artifacts, and readmits only qualification under the same job, policy, counters
 and original deadline. It runs no coding worker or rebuild and grants no new
 allowance; fresh qualification and promotion remain separate gates.
+
+A current scoped administrator can observe an interrupted promotion with
+`upgrades.reconcile` mode `promotion_observe`. It reads the retained intent and
+actual selected registry/package through the existing promotion owner. It never
+replays selection, rebuilds, resumes a worker or changes the original deadline,
+policy, limits or spent attempts. A disabled or expired terminal job retains its
+stop state while publishing the observed selection under `promotion_observation`;
+an interrupted nonterminal promotion settles from actual registry evidence. An
+uncommitted intent remains held. Current caller authorization and exact target
+are required even when the original work allowance has ended.

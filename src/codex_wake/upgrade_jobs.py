@@ -507,11 +507,28 @@ class UpgradeJobs:
 
     def reconcile(self, actor, arguments, authorize):
         mode=arguments['mode']
-        if mode not in ('verify_only','verify_review_only','qualification_only'):
-            raise InventoryError('invalid_argument','explicit verification-only reconciliation mode required')
+        if mode not in ('verify_only','verify_review_only','qualification_only','promotion_observe'):
+            raise InventoryError('invalid_argument','explicit upgrade reconciliation mode required')
         with self.locked():
             config=self.config();state=self.load();job=self.job(state,arguments['job_id'])
             self.guard(actor,job['target'],arguments,authorize,write=True)
+            if mode=='promotion_observe':
+                # Observation never replays selection or renews the original work.
+                # A later disable/expiry cannot hide an already committed effect.
+                if not job.get('selection_intent'):
+                    raise InventoryError('reconciliation_required','existing promotion intent required')
+                if job.get('worker') or job.get('active_phase') not in (None,'promote'):
+                    raise InventoryError('reconciliation_refused','owned worker observation unresolved')
+                from .upgrade_promotion import UpgradePromotion
+                observed=UpgradePromotion(self.root,now=self.now).reconcile(job,config)
+                job['results']['promotion_observation']=observed
+                job.setdefault('reconciliations',[]).append(dict(mode=mode,at=self.now(),receipt=observed))
+                if job['state'] not in TERMINAL:
+                    job.update(state='succeeded' if observed.get('status')=='selected' else 'held',
+                        reason='promotion_outcome_observed',active_phase=None)
+                self.event(state,'promotion_observed',job,reason=observed.get('reason','committed_selection_observed'))
+                self.save(state)
+                return dict(job=job)
             evidence=self.store/job['id']/'repair'/'repair-state.json'
             if job['state']!='held' or not config.get('repair') or not evidence.is_file():
                 raise InventoryError('reconciliation_required','held repair evidence required')

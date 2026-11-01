@@ -248,3 +248,59 @@ class PromotionReadbackTests(unittest.TestCase):
             duplicate=owner.rollback(config,operation_id='explicit-rollback',guard=lambda:None,commit=lambda action:action())
             self.assertEqual(duplicate['status'],'already_selected',duplicate)
             self.assertEqual(load_build(manifest,'modded',home).revision,'baseline')
+
+class PublicPromotionObservationTests(unittest.TestCase):
+    def test_operator_observes_committed_selection_after_lost_result_without_renewal(self):
+        """Filesystem failure after selection must be observable through the public owner."""
+        import os
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from codex_wake.upgrade_jobs import UpgradeJobs, policy_digest
+        for stopped in ('disabled', 'expired', 'interrupted', 'not_committed'):
+            with self.subTest(stopped=stopped), tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);job,config,home,manifest=promotion_fixture(root)
+                from codex_profiles.upgrades import select_future
+                stage_fixture(manifest.parent,'baseline','0.165.0')
+                select_future(manifest.parent,home,identifier='baseline',operation_id='initial')
+                now=[time.time()]
+                config['recipes']={'release':job['recipe_path']}
+                config['limits']=dict(repair_attempts=3,total_seconds=100,compiler_jobs=2,temporary_bytes=24*1024**3)
+                _atomic(root/'upgrade-bot.json',config)
+                owner=UpgradeJobs(root,now=lambda:now[0]);clock=owner.clock()
+                job.update(recipe='release',last_seen=now[0],repair_attempts=1,limits=config['limits'],
+                    policy_sha256=policy_digest(config),worker=None,
+                    clock_anchor=dict(boot_id=clock['boot_id'],monotonic_start=clock['seconds'],
+                        monotonic_latest=clock['seconds'],monotonic_deadline=clock['seconds']+100,
+                        wall_high_water=now[0]))
+                _atomic(root/'upgrade-jobs/state.json',dict(schema_version=1,enabled=True,generation=1,jobs={job['id']:job},events=[]))
+                actor=SimpleNamespace(subject='operator',scopes=['admin','observe'],targets=[job['target']],expires_at=now[0]+1000)
+                args=dict(expected_target=job['target'],job_id=job['id'])
+                replace=os.replace
+                def lost_result(source,destination):
+                    if stopped=='not_committed' and Path(destination)==manifest:
+                        raise KeyboardInterrupt('simulated controller loss before registry commit')
+                    if Path(destination)==root/'upgrade-jobs/state.json':
+                        value=json.loads(Path(source).read_text())
+                        if value['jobs'][job['id']]['state']=='succeeded':
+                            raise KeyboardInterrupt('simulated controller loss after registry commit')
+                    return replace(source,destination)
+                with patch('os.replace',side_effect=lost_result):
+                    with self.assertRaises(KeyboardInterrupt):owner.execute(actor,'upgrades.advance',args)
+                version='0.165.0' if stopped=='not_committed' else '0.166.0'
+                self.assertEqual(load_build(manifest,'modded',home).upstream_version,version)
+                if stopped=='disabled':owner.execute(actor,'upgrades.disable',dict(expected_target=job['target']))
+                elif stopped=='expired':
+                    now[0]=job['deadline']+1
+                    owner.execute(actor,'upgrades.advance',args)
+                before=owner.execute(actor,'upgrades.show',args)['result']['job']
+                registry=manifest.read_bytes()
+                result=owner.execute(actor,'upgrades.reconcile',dict(args,mode='promotion_observe'))['result']['job']
+                observation=result['results']['promotion_observation']
+                self.assertEqual(observation['status'],'held' if stopped=='not_committed' else 'selected')
+                self.assertEqual(observation['reconciled'],stopped!='not_committed')
+                expected_state=before['state'] if stopped in ('disabled','expired') else ('held' if stopped=='not_committed' else 'succeeded')
+                self.assertEqual(result['state'],expected_state)
+                for key in ('deadline','limits','repair_attempts','generation','policy_sha256','clock_anchor'):
+                    self.assertEqual(result[key],before[key],key)
+                self.assertEqual(manifest.read_bytes(),registry)
+                self.assertEqual(load_build(manifest,'modded',home).upstream_version,version)
