@@ -480,3 +480,40 @@ First runtime evidence: clean patch replay and metadata normalizer pass, then
 actual regeneration8 runs two Rust compiler processes without a dependency-fetch
 loop. Atmonotonic80774.945, worker/reviewer counts0/0 and115minutes job remain.
 No native166 package, qualification or promotion is yet claimed.
+
+
+### Host Git drift after successful regeneration
+
+Job72 completed full regeneration8 with exit0: standard/experimental fixtures
+passed1each and configuration-schema build/run completed. Before verification,
+the host tool guard correctly held on `/usr/bin/git` SHA mismatch. Ubuntu's
+unattended updater independently upgraded git/git-man from7.3to7.4; actual
+Git1:2.43.0-1ubuntu7.4 is root-owned0755 and matches dpkg's installed checksum.
+Pinned SHA2a8c18fbf43da9f692d75474c72bea9dfd796c260b0f3dfe456376abc3bbd668
+changed toeb54b535467e0975c1284d4c4d08eea779aeb248a5d34b02e2ee171382e22201.
+Configuration7715 and all frozen inputs were unchanged. No verification command,
+reviewer, coding worker or package ran. Passive supervisor disabled the new
+fixture, preserved the held job and closed its witness; post-acceptance did not run.
+
+Actual post-generation sourcece74/tests1c7 contains9785files: all9784 retained
+files have identical bytes/modes, with only one additional Ruff cache file
+`sdk/python/.ruff_cache/0.15.12/618090957912755795`. Original source is untouched.
+Completed generation is retained primary evidence; the Git drift is a separate
+failed environment gate, not a Rust compiler error. Terminal GC reclaimed
+3,831,735,307bytes and removed that job's compiler target.
+
+Primary authorizes one bounded retry, still under original monotonic job87676
+and overall88576 limits, with zero coding/one unspent native source review. Use
+a private immutable trusted Git7.4 copy and component manifest instead of
+restoring/changing system Git or weakening the guard. A pinned cache validator
+may reuse actual completed generation only after verifying report hashes and
+exact retained source parity, explicitly retaining the Ruff cache difference.
+Actual Rust verification, review, package, qualification and post checks remain
+mandatory. Share the new owned compiler target between verification/package
+through the canonical builder's supported CARGO_TARGET_DIR; no flags/tests waived.
+No7200second restart, third attempt, global update, old goal/resource renewal or
+extra model review. Retry duration is computed from remaining original deadline
+immediately before public start. Native acceptance and final review/TDD remain open.
+
+Private diagnostic SHA033b9390d134d0b6b35ea11ee1081d6b976954da74981b43064f8bdda1121598;
+source diff SHAf7de0de1237b61a80d16518150ce9204a5f6954b7dbffe48e4eb240bf3073324.
