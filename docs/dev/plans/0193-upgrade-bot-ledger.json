@@ -190,11 +190,11 @@
         "Source integration and test qualification are reported separately from production activation."
       ],
       "number": 453,
-      "state": "blocked",
+      "state": "running",
       "worker": "/root",
-      "ready": false,
-      "remaining": "Complete turn-admission/TUI verification, native B review, complete166 package, installed qualification and future-launch/rollback; final broad review/TDD only after acceptance",
-      "reason": "Actual retry9e held deadline_exhausted; no further native attempt authorized in this packet",
+      "ready": true,
+      "remaining": "fresh installedqualification, publicfuturelaunch/pinning/rollback/census, then finalreview/TDD",
+      "reason": "reviewed complete public166package delivered457; installedqualification provenance/readmission correction integratedc13e793",
       "tracker_state": "open",
       "runtime_helper": "/root/accept453"
     }
@@ -733,7 +733,9 @@
         ],
         "owner": "/root",
         "remaining": "Same-job source-build provenance/readmission fix, fresh installed A-B-A qualification, actual future-launch/pinning/public rollback, final census",
-        "reason": "actual reviewed package complete; Q held descriptive provenance classification; no production effects"
+        "reason": "actual reviewed package complete; Q held descriptive provenance classification; no production effects",
+        "source_fix": "c13e793",
+        "source_validation": "qualification public seam11PASS3.855s integration;worker4readmission12promotion14publicjobsPASS;ruff0.14.2compile/diffPASS"
       }
     ],
     "runtime_mode": "manual; old jobs frozen; no production effects",
