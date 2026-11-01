@@ -836,5 +836,9 @@
     "final_review": "docs/dev/evidence/issue0444/final-review.md"
   },
   "state": "validated_closed_delivery",
-  "final_evidence": "docs/dev/evidence/issue0444/native453-acceptance.md"
+  "final_evidence": "docs/dev/evidence/issue0444/native453-acceptance.md",
+  "spec_tracker_state": "closed",
+  "spec_closed_at": "2026-11-01T18:59:09Z",
+  "final_tracker_readback": "all444/447-453/455-457confirmedclosed",
+  "delivery_evidence_commit": "fde415124fe5cbc4a09df18fa9d5c12cf7e5ffd2"
 }
