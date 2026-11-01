@@ -3,8 +3,8 @@
   "spec": 444,
   "branch": "feat/autonomous-upgrade-bot-spec",
   "base": "5df7c811b4cd9b95a06d3ac4f6f92e84e3ec4f65",
-  "review_rounds": 0,
-  "remediation_rounds": 0,
+  "review_rounds": 1,
+  "remediation_rounds": 1,
   "tickets": [
     {
       "n": 1,
@@ -190,16 +190,19 @@
         "Source integration and test qualification are reported separately from production activation."
       ],
       "number": 453,
-      "state": "running",
+      "state": "validated",
       "worker": "/root",
       "ready": true,
-      "remaining": "fresh installedqualification, publicfuturelaunch/pinning/rollback/census, then finalreview/TDD",
-      "reason": "reviewed complete public166package delivered457; installedqualification provenance/readmission correction integratedc13e793",
-      "tracker_state": "open",
-      "runtime_helper": "/root/accept453"
+      "remaining": null,
+      "reason": "actual qualified promotion and public futurelaunch/rollback accepted",
+      "tracker_state": "closed",
+      "runtime_helper": "/root/accept453",
+      "closed_at": "2026-11-01T18:44:14Z",
+      "evidence": "docs/dev/evidence/issue0444/native453-acceptance.md",
+      "acceptance_receipt_sha256": "354e1650529391decdb63c6603404ebacc5f617c4110204213e414f4348dc40f"
     }
   ],
-  "integration_tip": "c9aafa4367ee98159cd3e8c8316a2d6ffd3199a7",
+  "integration_tip": "9d045b1",
   "working_runtime_changed": false,
   "runtime_checkpoint": {
     "state": "original_held_disabled",
@@ -282,6 +285,17 @@
       "collection_guard": "complete ordered test-ID digest matches standard discovery",
       "public_launcher_tests": "4PASS each3.11/3.12",
       "native_actions": 0
+    },
+    "final_delivery": {
+      "full_source": "15f247e",
+      "full_python312": "7gatesPASS;2026tests/1skip;493.341s;RAMfunctional",
+      "final_source": "9d045b1",
+      "final_python312": "93upgradePASS46.029s",
+      "final_python311": "93upgradePASS37.718s",
+      "packaging": "freshsdist/wheelPASS",
+      "lint": "ruff0.14.2PASS",
+      "native_acceptance": "wsl-testactualpackage48ed;A-B-A/all11checks/promotion/pinning/publicrollback/census0",
+      "historical_failures": "retained; checker missingdevdeps fixedisolatedbeforechecks"
     }
   },
   "successor_authorization": {
@@ -549,8 +563,8 @@
     "id": "working-build-first-20261101",
     "base": "8ada67c196871f64361cc9433a6fa0caefd622f0",
     "review_base": "289bb97ecf8a0382089819e4c4119bc5462e48d0",
-    "review_rounds": 0,
-    "remediation_rounds": 0,
+    "review_rounds": 1,
+    "remediation_rounds": 1,
     "tickets": [
       {
         "number": 455,
@@ -726,16 +740,20 @@
       },
       {
         "number": 453,
-        "state": "running",
-        "tracker_state": "open",
+        "state": "validated",
+        "tracker_state": "closed",
         "blockers": [
           457
         ],
         "owner": "/root",
-        "remaining": "Same-job source-build provenance/readmission fix, fresh installed A-B-A qualification, actual future-launch/pinning/public rollback, final census",
-        "reason": "actual reviewed package complete; Q held descriptive provenance classification; no production effects",
+        "remaining": null,
+        "reason": "actual qualified promotion and public futurelaunch/rollback accepted",
         "source_fix": "c13e793",
-        "source_validation": "qualification public seam11PASS3.855s integration;worker4readmission12promotion14publicjobsPASS;ruff0.14.2compile/diffPASS"
+        "source_validation": "qualification public seam11PASS3.855s integration;worker4readmission12promotion14publicjobsPASS;ruff0.14.2compile/diffPASS",
+        "ready": true,
+        "closed_at": "2026-11-01T18:44:14Z",
+        "evidence": "docs/dev/evidence/issue0444/native453-acceptance.md",
+        "acceptance_receipt_sha256": "354e1650529391decdb63c6603404ebacc5f617c4110204213e414f4348dc40f"
       }
     ],
     "runtime_mode": "manual; old jobs frozen; no production effects",
@@ -813,6 +831,10 @@
       }
     },
     "write_ownership": "primary ledger/docs/integration/native455; cache456 code/tests in isolated worktree",
-    "integration_tip": "f893b20"
-  }
+    "integration_tip": "9d045b1",
+    "state": "validated_closed",
+    "final_review": "docs/dev/evidence/issue0444/final-review.md"
+  },
+  "state": "validated_closed_delivery",
+  "final_evidence": "docs/dev/evidence/issue0444/native453-acceptance.md"
 }

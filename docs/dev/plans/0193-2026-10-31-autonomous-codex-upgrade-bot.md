@@ -1,6 +1,6 @@
 # Keep modified Codex current through deterministic patching and semantic completion
 
-State: OPEN
+State: CLOSED
 Owner: primary upgrade-bot coordinator
 Specification: https://github.com/CochranResearchGroup/codex-wake/issues/444
 Execution evidence: 0193-453-acceptance.md and 0193-upgrade-bot-ledger.json
@@ -112,16 +112,16 @@ Old native jobs remain expired/frozen; new direct455 work does not mutate them.
 
 ## Current State
 
-#455, #456 and #457 are validated and closed. The actual public semantic job
-completed two coding contexts, one independent approved review, real locked
-Rust verification and canonical complete0.166 package construction. Its exact
-package passed all11 native stage capability/history checks. See
-[package acceptance](../evidence/issue0444/semantic457-package.md).
+Delivery accepted and closed2026-11-01: #455/#456/#457/#453 are closed. The
+actual public semantic job produced and independently reviewed complete166;
+fresh installed A-B-A/all11 native checks, future selection, old-session pinning,
+public future launch/reconnect and actual compatible rollback passed in WSL.
+See [native acceptance](../evidence/issue0444/native453-acceptance.md).
 
-#453 remains active: installed qualification held on the recipe's descriptive
-provenance category, before account metadata/probes. A generic same-job
-provenance/readmission correction is being tested without changing the sealed
-recipe, original deadline, policy or spent attempts. Future launch, pinning and
-actual public rollback acceptance remain required. Final broad review/TDD are
-0/0 until that acceptance. The ledger owns exact identities and clocks;
-production165 and the separate #413/#380 boundaries remain unchanged.
+One final broad review and one bounded TDD findings pass resolved twoP2 issues;
+[review evidence](../evidence/issue0444/final-review.md) identifies frozen base,
+source commits and passing local checks. No second review or allowance renewal.
+Final disposable selection is retained165 after deliberate successful rollback;
+qualified166 remains available. Production and the separate #413/#380/raw-orphan/
+recurrence/HF-20 boundaries remain outside this closed delivery. Older baseline
+and failed-run text above is retained history, superseded by this current state.

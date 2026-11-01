@@ -1,6 +1,9 @@
 # Upgrade bot source and acceptance checkpoint
 
-Specification444 / Plan0193; children447–452 closed. Ticket453 remains open.
+Specification444 / Plan0193: all delivery children447–453 and455–457 closed.
+Current acceptance: [native453](native453-acceptance.md); finalreview1/TDD1:
+[review](final-review.md). All older failure checkpoints below are retained
+history, not the current result. Production and #413/#380 remain separate.
 
 The original actual166 job `6ca6cce33db1406db89087c3b9fe54c0` is held and
 disabled after three coding contexts. Stable/experimental protocol, SDK and

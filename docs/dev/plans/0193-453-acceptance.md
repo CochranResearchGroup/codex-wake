@@ -1,12 +1,12 @@
 # Integrated actual 0.166 acceptance (#453)
 
-State: BLOCKED. Latest bounded retry9e HELD and DISABLED at its deadline; no166 package.
-Original job HELD and DISABLED after two genuine 0.166 Rust compile errors.
-The separately authorized successor is HELD after its unchanged job deadline expired.
-Neither job has a qualified 0.166 package yet. The original job remains preserved.
-Plan0193 and specification #444 remain the scope authority.
-This record distinguishes source verification, the actual disposable job and
-production activation. No production activation is authorized or claimed.
+State: CLOSED / ACCEPTED2026-11-01. Actual public semantic166 package, independent
+review, installed A-B-A/all11 native checks, future selection/pinning, public
+future launch/reconnect and actual compatible rollback passed. See
+[final native acceptance](../evidence/issue0444/native453-acceptance.md) and
+[one final review/TDD](../evidence/issue0444/final-review.md).
+Working production is unchanged; the disposable final165 selection is intentional
+rollback acceptance. The old failed/expired runs below remain frozen history.
 
 ## Frozen run
 

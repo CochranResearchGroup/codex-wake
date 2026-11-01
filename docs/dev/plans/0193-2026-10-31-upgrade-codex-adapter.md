@@ -1,17 +1,20 @@
 # Native Codex coding adapter for #448
 
-State: OPEN
+State: CLOSED
 Owner: upgrade-bot coordinator
 Specification: #444 / Plan0193
 
 ## Current State
 
-The coding adapter can invoke a pinned native Codex CLI in a fresh ephemeral
-worker or reviewer context using an explicitly configured, already authenticated
-disposable account. Command construction and refusals are fixture-qualified;
-actual model repair/review quality remains the integrated #453 acceptance.
-The adapter does not claim that a configured identity is a verified provider
-account. Account identity acceptance belongs to the designated test environment.
+Actual disposable native source maintenance is accepted: two coding contexts and
+one independently authenticated native reviewer completed the original69-path
+port with valid reports, real Rust verification and canonical complete166 package.
+Fresh installed A-B-A metadata/account qualification and native journeys passed.
+See [package](../evidence/issue0444/semantic457-package.md) and
+[installed acceptance](../evidence/issue0444/native453-acceptance.md).
+This closes the adapter delivery; configured labels alone still do not establish
+provider account identity. Source-maintenance usage and zero-turn qualification
+remain separate. No production activation is included.
 
 ## Host configuration
 
