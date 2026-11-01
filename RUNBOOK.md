@@ -8444,3 +8444,14 @@ f2aa followsinitial6e7clockprepfreeze. Actualrunner765/monitor766/host2509302
 verified; old165witness/private/noticeready, expiryunchanged. Completionwake
 a7e296107c6543b69a85bfa83bd1c2fa armed+monitorready, exacthostartifact.
 No newcandidatepackage/Qsuccess claimed;457/453remainopen, finalreview/TDD0/0.
+
+## Turn | 2026-11-01 | Same-job deterministic host-artifact repair
+
+457nativeworkers2 completedrealport; strictcachedgenerationfailedONLYmissing
+3Ruffcacheentries. Explicitexacthostrestoration leaves9781sourcefiles/tests/
+workerreports unchanged, currentBBsnapshot. No validator/Qpolicy or counters/
+deadline edited. Publicverify_only samejob queues/advances withfreshwitness2;
+no codingworker3. Newrunner824/monitor825/host2750454 originalbounds, fresh
+terminalwake486b0de583a54116b61ade26eab2977a armed, oldwakea7cancelled. Native
+Rustverification/independentreview/package/Q/promotion remainpending; source
+semanticcompletion evidence distinctfromhostcachedartifactfailure.
