@@ -8369,3 +8369,12 @@ Detached collector739105 writes the unique observed completion artifact.
 Wake5135e785a48c44dc9c84ed6c74bba339 armed, monitor ready, file-exists predicate
 and exact native caller/resume target read back. Ledger owns full paths/clocks.
 Build pending; final broad review/TDD0/0. No production effects/governor activation.
+
+## Turn | 2026-11-01 | Working modified166 delivered (#455)
+
+Actual canonical complete166 package builds35m01s, total2296s includingsetup,
+public profile launcher/version and exactbinary native capabilities pass.
+Evidence issue0444/direct166-package.md owns SHA/packageinventory, original
+deadline, compilerusage, zero external model/provider effects and empty census.
+Broader historyharness tmux setup failure retained; notclaimed aspassed.
+#455 validated;456 runtime proofactive,457/453 stillblocked. Outcome_progress.

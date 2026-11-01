@@ -554,12 +554,15 @@
     "tickets": [
       {
         "number": 455,
-        "state": "running",
-        "tracker_state": "open",
+        "state": "validated",
+        "tracker_state": "close_pending",
         "blockers": [],
         "owner": "/root",
         "owned_scope": "new disposable direct166 build; private native source/package and455 evidence",
-        "worktree": "codex-wake-upgrade-bot-spec"
+        "worktree": "codex-wake-upgrade-bot-spec",
+        "evidence": "docs/dev/evidence/issue0444/direct166-package.md",
+        "native_sha256": "fa09be30351d253712e375e46301d2721aa542e4189ad80ee856504f8d70f482",
+        "package_inventory_sha256": "b1804452749407f3a13d0a2ccb8d1078cfd71b15884b0f93af0b48ad7f653127"
       },
       {
         "number": 456,
@@ -610,7 +613,7 @@
       "supervisor_pid": 447,
       "cargo_group_pid": 451,
       "wrapper_setup_failure": "attempt1 env only child, fixed in supervisor before import; source unchanged and same deadline",
-      "actual_state": "Cargo full canonical package build compiling",
+      "actual_state": "complete package built, public launcher/version and claimed native capabilities verified",
       "retained_source_parity": "9784bytes validated; no source changes",
       "host_evidence": "/home/ecochran76/.local/state/codex-wake/testing/upgrade-bot444/primary/direct455",
       "collector_pid": 739105,
@@ -634,7 +637,12 @@
         "endpoint": "unix:///tmp/codex-daemon-1000/4963f4777989e594396b1095fe104d96c531418f7db4a8f572e4aee86502b9e6",
         "wake_endpoint_sentinel": "unix:// resolves through existing native shared endpoint locator",
         "registration_receipt": "direct455/native-wake-registration.json in private primary evidence"
-      }
+      },
+      "completion_monotonic": 94310.907615507,
+      "elapsed_seconds": 2296.0248591900017,
+      "owned_processes_remaining": [],
+      "package_inventory_sha256": "b1804452749407f3a13d0a2ccb8d1078cfd71b15884b0f93af0b48ad7f653127",
+      "private_closeout_sha256": "b4f14b3f1f549750cd391e286b547671931dfb1d29b932a308babceeb83ab77c"
     },
     "write_ownership": "primary ledger/docs/integration/native455; cache456 code/tests in isolated worktree",
     "integration_tip": "f893b20"
