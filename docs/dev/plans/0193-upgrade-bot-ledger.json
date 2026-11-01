@@ -642,8 +642,8 @@
       },
       {
         "number": 457,
-        "state": "running",
-        "tracker_state": "open",
+        "state": "validated",
+        "tracker_state": "closure_pending",
         "blockers": [
           455,
           456
@@ -663,7 +663,7 @@
           "max_source_coding_contexts": 2,
           "max_native_independent_review_contexts": 2
         },
-        "remaining": "actualbot deterministic/semantic originalstack completion, independentreview, realverification+completepackage; installedfinal453 remains",
+        "remaining": null,
         "worker_result": "6e7fbcab5d3288007c3a657c3660eac4025b6431",
         "source_fix_integrated": "5c9583b",
         "history_fix_integrated": "8c1bd27aa93c8a102dd1defadc62e90087b68634",
@@ -693,11 +693,11 @@
           "old165_witness_pid": 422,
           "private165_pid": 582,
           "notice_tui_pid": 521,
-          "last_observed_monotonic": 102409.468467516,
-          "last_phase": "samejob verify_only running; worker_count2/reviewer0; unmodifiedcachedgen15intent",
+          "last_observed_monotonic": 106600.176557999,
+          "last_phase": "native review approved; canonical completepackage and11stagechecks passed; installedQ held provenance classification",
           "host_completion": "/home/ecochran76/.local/state/codex-wake/testing/upgrade-bot444/upgrade457-20261101/verify-only-completion.json",
           "wake_id": "wake_intent_486b0de583a54116b61ade26eab2977a",
-          "wake_armed": true,
+          "wake_armed": false,
           "monitor_ready": true,
           "wake_expires_at": "2026-11-01T21:47:27.643675Z",
           "first_terminal": "held repair_attempts_exhausted after2 validworkers; cachedgenerationinventory failedonly3missingRuffcachefiles",
@@ -707,22 +707,31 @@
           "source_after_host_reconciliation": "bb296cbefc1f576acc54f8aae153708b2911c732f6555538e4aab7dddc2012fe",
           "tests_after_host_reconciliation": "1c7a648508a8bb315369694668458664ef36c3d9dd8a110ef29162ff58ed66bc",
           "reconciliation_mode": "verify_only",
-          "state": "samejobverificationrunning",
+          "state": "reviewed_complete_package_453_qualification_held",
           "new_job_admission": false,
           "repair_attempts": 2,
           "old_wake_id": "wake_intent_a7e296107c6543b69a85bfa83bd1c2fa",
-          "old_wake_state": "cancelled obsoleteoriginalterminal"
+          "old_wake_state": "cancelled obsoleteoriginalterminal",
+          "reviewer_contexts_spent": 1,
+          "final_owned_processes": []
         },
-        "reconciliation_evidence": "docs/dev/evidence/issue0444/semantic457-reconciliation.md"
+        "reconciliation_evidence": "docs/dev/evidence/issue0444/semantic457-reconciliation.md",
+        "evidence": "docs/dev/evidence/issue0444/semantic457-package.md",
+        "acceptance_receipt_sha256": "0269e98c4f6c7e975814294f737a159dca1e33741d472b5d3bf0a5cf2001fa5a",
+        "package_inventory_sha256": "fe4266c33a9c2e71b08bb09df0aa5359d59d16b1307cea0bc536e2fd5a852003",
+        "native_sha256": "48ed489ceed144d277c44a505ef5cbcb63250fa361fe132bed1fdab3f7cfb7d5",
+        "independent_review_sha256": "9934c189c6e4739044027408554c19139ffb69d27e2beff86c9cef645a2088a8"
       },
       {
         "number": 453,
-        "state": "blocked",
+        "state": "running",
         "tracker_state": "open",
         "blockers": [
           457
         ],
-        "owner": "/root"
+        "owner": "/root",
+        "remaining": "Same-job source-build provenance/readmission fix, fresh installed A-B-A qualification, actual future-launch/pinning/public rollback, final census",
+        "reason": "actual reviewed package complete; Q held descriptive provenance classification; no production effects"
       }
     ],
     "runtime_mode": "manual; old jobs frozen; no production effects",
