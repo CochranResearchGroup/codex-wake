@@ -132,8 +132,12 @@ Without the option, behavior is unchanged. For RAM-backed functional checks on
 Linux, an explicit existing parent such as `/dev/shm` may be selected; no mount
 or global environment is changed. Keep disk-backed durability/runtime acceptance.
 
-Issue453 profiling at8595293 measured the same first150 tests at64.760seconds
-on disk,25.895seconds with RAM temporary files, then68.495seconds on disk again.
+Issue453 exploratory profiling at8595293 measured a matched145 valid-test subset
+at64.757seconds on disk,25.895seconds with RAM temporary files, then68.495seconds
+on disk again. The initial helper omitted the repository import root and had five
+additional import errors; those runs are not passing150-test selections. Corrected
+profiling requires the complete collected test-ID digest to match standard
+unittest discovery before execution.
 A matched scheduler test made217fsync calls in each case, taking1.033202seconds
 on disk and0.006431seconds in RAM. This identifies fixture storage overhead in
 that selection; it does not prove every full-suite cost or justify a higher gate.
