@@ -58,7 +58,7 @@
   "git_custody": "isolatedworktree",
   "working_runtime_changed": false,
   "strategy_decision": "Prefer in-place isolation of inactive named homes, preserving global legacy store and current clients; no relocation of live global data. Any unknown dependency remains held; interruption requires operator approval.",
-  "implementation_source": "abdb91d3091fc8cba1cb7c83c7c22d4257563410",
+  "implementation_source": "051027fb8dbea398b907320dae18af73515e5f7b",
   "source_validation": {
     "focused_tests": 58,
     "focused_result": "PASS",
@@ -67,7 +67,8 @@
     "full_suite": "running diagnostic pre-remediation source; final source needs separate qualification",
     "focused_seconds": 17.367,
     "package_build": "PASS; wheel and sdist",
-    "staged_stock_version": "PASS; exact registered b93f6811 stock0.164 in neutral home; live aliases unchanged"
+    "staged_stock_version": "PASS; exact registered b93f6811 stock0.164 in neutral home; live aliases unchanged",
+    "python311_focused": "58 PASS in15.307s"
   },
   "live_preview": {
     "status": "held",

@@ -7,6 +7,29 @@ Production activation and unattributed legacy writer dependencies remain
 exclusively issue 380. Base `c8c483cf24da8e235a33e3e015096309e5e56292`;
 worker `feat/controller-migration398`, `/tmp/codex-wake-migration398`.
 
+## #380 in-place isolation extension
+
+Plan0194 extends the same owner with host policy
+`strategy="isolate_in_place"`. The default remains `relocate`, whose effects
+retain the disposable-marker gate described below. In-place isolation backs up
+only qualified shared mutable aliases and creates empty private mutable paths
+without relocating account homes, copying credentials or assigning mixed history.
+`protected_roots` names runtime homes whose direct/indirect dependencies must be
+preserved. Omitted roots default to the configured source root. Unknown process
+coverage and protected dependencies hold effects; the census also checks bounded
+runtime-home environment metadata, including symlink aliases, without opening
+credential bodies or reading command lines.
+
+An unmarked host may request this strategy's effects only with explicit
+`live_activation=true` in an owned host policy protected from other writers.
+That flag is effect admission, not approval to interrupt operator work. Exact
+preview targets and existing API/MCP authorization remain required. Candidate
+backup and provenance stay outside runtime roots. Every step rechecks ownership;
+rollback refuses new private work, including changes after its initial check.
+An uncertain receipt is not retry permission. The current live #380 preview is
+held and production activation/acceptance remains incomplete. See
+[Plan0194](../plans/0194-2026-11-01-live-account-acceptance.md).
+
 ## Stable public owner and configuration
 
 `ControllerMigration(config_path, *, root, host, environment,

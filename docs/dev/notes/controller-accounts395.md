@@ -128,3 +128,13 @@ as edits to the Wake config. Both use the same focused command above.
 
 Worker memory disposition: `not_durable`; this is an unintegrated worker result,
 and the coordinator owns the single integrated outcome and durable closeout.
+
+## #380 pure version inspection
+
+Exact `--version` or `-V` through a pinned profile/stock/modded launcher inspects
+the registered executable in a neutral temporary home without an account lock,
+account layout changes, inherited credentials or backend attachment. The label
+reports build channel/hash and explicitly leaves account identity unverified.
+Other arguments retain normal private-state and ownership protections. This
+allows identity inspection while migration or another client holds an account;
+it does not prove authentication, usable stock fallback or live acceptance.

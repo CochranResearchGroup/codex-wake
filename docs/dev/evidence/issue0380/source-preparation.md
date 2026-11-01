@@ -63,3 +63,8 @@ The live PATH launchers, account stores and shared daemon were not replaced.
 This proves staged package version inspection, not a usable live fallback or
 account authentication. See source-review.md for the one findings pass and
 final58-test focused result.
+
+Post-review implementation source:051027fb8dbea398b907320dae18af73515e5f7b.
+The same58 focused tests also PASS on Python3.11.15 in15.307s.
+The broad pre-remediation run is diagnostic only because source changed while
+it was running; do not attribute its result to an immutable final-source tree.
