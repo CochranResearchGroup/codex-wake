@@ -1,6 +1,6 @@
 # Account sign-in through Wake | #380
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Ticket: https://github.com/CochranResearchGroup/codex-wake/issues/380
 Branch: feat/product-acceptance-380
@@ -9,9 +9,13 @@ WIP limit: one primary lane
 
 ## Current State
 
-The operator found manual home/executable resolution and native login cumbersome.
-Plan0195 is closed for its frozen isolated product scope. This additive packet
-owns local human sign-in, without reopening that review or claiming live acceptance.
+Implemented and locally qualified at source2a8261997f3bf700adf630bdecc020450efe2ed8.
+Native login/status resolve names and builds; login creates a missing account and
+persists an account-scoped file-storage policy for future launches. Installed
+UID1017 synthetic login/stdin/alias checks and actual native signed-out status pass.
+Forty-two affected tests pass on each Python3.11/3.12 runtime. Real authenticated
+sign-in was not attempted; source remains local/unmerged and working deployment
+is unchanged. Plan0195's frozen product evidence and #380 live gates are separate.
 
 ## Contract and scope
 
@@ -51,3 +55,27 @@ writes. Done: one-command local login/status implemented, focused regressions an
 installed native-status checks pass, and concise user documentation is updated.
 Graphiti discovery skipped: supplied conversation and current sources suffice.
 Memory disposition forbidden under the retained handoff boundary.
+
+## Validation and closeout
+
+Public CLI red: login was an unsupported verb. First green proves named creation
+and native sign-in/status. Persistence red: explained account credential mode was
+missing. Final green verifies `file` and `account:codex-alice` provenance, private
+credential mode, stdin-only synthetic key, aliases/peer preservation, active-runtime
+holds and changed-build refusal. Account storage policy is metadata, with only
+recognized native enum values exempted from credential-value redaction.
+
+Focused checks at qualified source2a82619:19account +14build +6controller auth
++3product authorization tests =42per version, PASS on Python3.11.15 and3.12.13.
+Ruff F821/F822/F823, policy wiring, active planning audit and diff checks PASS.
+Hosted CI skipped under cost policy. No full-suite rerun is claimed for this slice.
+
+Installed prefix under UID1017 passed browser/device stand-in and synthetic stdin
+login, account creation/alias/status and peer preservation. Actual modified166
+native status on a fresh home returned1/"Not logged in", created no credentials or
+daemon, and made no model turn. Source/wheel/installed231Python members match;
+wheel SHA3efb612d49d8778921737f61b93ab98aa62285190086061c361ae9db7b3e0630.
+Fresh test-user OS census is empty. Shared-kernel limitations remain.
+Curated receipt:docs/dev/evidence/issue0380/product196-account-auth.json. Private
+raw red/green and installed receipts remain under user-scoped product196 artifacts.
+Memory disposition: forbidden; no memory update was requested or attempted.

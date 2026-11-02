@@ -8221,3 +8221,14 @@ sessions were preserved; working-account activation stays withdrawn.
 Operator found manual OpenAI provisioning cumbersome. Plan0196 owns a bounded
 local login/status adapter using the existing account/build owners and native
 credential storage. No working-account authentication or daemon changes.
+
+## Turn | 2026-11-02 | Named account sign-in qualified
+
+Plan0196 source2a82619 implements local accounts login/status with automatic named
+home creation, registered executable pinning, native credential stdin/stdio and
+persisted account-scoped file policy. Login holds active clients/daemons; status
+remains read-only.42focused tests per Python3.11/3.12 pass, plus lint/policy/planning.
+UID1017 installed synthetic login and actual native signed-out status pass;231
+payload members match source, wheel3efb612d; final user process census empty.
+Real OpenAI sign-in was not attempted. Working credentials/install remain unchanged;
+source stays local/unmerged. Memory forbidden; no graph writes.

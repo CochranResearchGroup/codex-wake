@@ -1412,3 +1412,8 @@ retain their separate gates. No memory write or old-job/goal resume.
 2026-11-02 account-onboarding follow-up: Plan0196 adds local `accounts login/status`
 after the operator rejected manual native-home/executable steps. Existing #380
 live gates and Plan0195 frozen acceptance remain separate.
+
+2026-11-02 Plan0196 complete: named local account login/status wraps native sign-in
+and persists account credential-store provenance. Source2a82619;42focused checks
+per supported Python plus installed UID1017 status/synthetic login pass. Human
+OpenAI confirmation and working-account activation retain their own gates.

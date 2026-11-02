@@ -1,0 +1,49 @@
+{
+  "status": "passed",
+  "host_uid": 1017,
+  "namespace_uid": 0,
+  "source": "2a8261997f3bf700adf630bdecc020450efe2ed8",
+  "synthetic_login_and_api_key": true,
+  "alias_resolution": true,
+  "auto_create_missing": true,
+  "peer_auth_preserved": true,
+  "account_storage_policy_persisted": true,
+  "native_signed_out_exit": 1,
+  "native_status_message": "Not logged in",
+  "actual_openai_login_performed": false,
+  "provider_model_turns": 0,
+  "working_effects": false,
+  "wheel_sha256": "3efb612d49d8778921737f61b93ab98aa62285190086061c361ae9db7b3e0630",
+  "python_payload_members": 231,
+  "source_wheel_installed_equal": true,
+  "schema_version": 1,
+  "tests": {
+    "tier": "focused",
+    "python_versions": [
+      "3.11.15",
+      "3.12.13"
+    ],
+    "cases_per_version": 42,
+    "selections": {
+      "test_controller_account*.py": 19,
+      "test_controller_build*.py": 14,
+      "test_controller_auth.py": 6,
+      "test_controller_product_authorization.py": 3
+    }
+  },
+  "commands": [
+    "PYTHONPATH=src <python> -m unittest discover -s tests -p test_controller_account*.py",
+    "PYTHONPATH=src <python> -m unittest discover -s tests -p test_controller_build*.py",
+    "PYTHONPATH=src <python> -m unittest discover -s tests -p test_controller_auth.py",
+    "PYTHONPATH=src <python> -m unittest discover -s tests -p test_controller_product_authorization.py"
+  ],
+  "hosted_ci": "skipped_by_operator_cost_policy",
+  "owned_processes_remaining": [],
+  "memory_disposition": "forbidden",
+  "limits": [
+    "local Linux/WSL human CLI only; no remote credential endpoint",
+    "real OpenAI browser/device login not performed",
+    "working installation and operator credentials unchanged",
+    "prior Plan0195 full-suite evidence remains scoped to its source; full suite not repeated for this bounded change"
+  ]
+}
