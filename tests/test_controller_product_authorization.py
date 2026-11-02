@@ -59,7 +59,7 @@ class ProductAuthorizationTests(unittest.TestCase):
             root = Path(tmp)
             authority = OAuthAuthority(root/'auth.sqlite', issuer='http://localhost:1234', resource='http://localhost:1234/controller')
             accounts = ControllerAccounts(root/'controller-accounts.toml',host='test',environment='linux')
-            operations = ControllerOperations(ManagedInventory(root),host='test',environment='linux',accounts=accounts)
+            operations = ControllerOperations(ManagedInventory(root),host='test',environment='linux')
             server = ControllerHTTPServer(('127.0.0.1',0),authority,operations)
             worker = threading.Thread(target=server.serve_forever,daemon=True);worker.start()
             client = authority.register({'redirect_uris':['http://localhost:1234/callback']})

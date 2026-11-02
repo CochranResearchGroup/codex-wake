@@ -274,10 +274,17 @@ class ProtectedOperations:
                 runtime=ControllerRuntime(self.operations.inventory.root)).execute(token, operation, arguments)
         elif operation in ('accounts.init', 'accounts.create'):
             from .account_management import execute
-            if self.operations.accounts is None or self.operations.inventory is None:
+            if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host account owner unavailable')
+            accounts = self.operations.accounts
+            if accounts is None:
+                from .controller_accounts import ControllerAccounts
+                accounts = ControllerAccounts(self.operations.inventory.root / 'controller-accounts.toml',
+                    host=self.operations.host, environment=self.operations.environment)
             result = execute(self.operations.inventory.root, operation, arguments, actor,
-                lambda: self.authority.authenticate(token), self.operations.accounts)
+                lambda: self.authority.authenticate(token), accounts)
+            if result['result']['operation']['execution'] == 'completed':
+                self.operations.accounts = accounts
         elif operation == 'history.import':
             from .history_commands import protected_import
             if self.operations.inventory is None:
@@ -481,6 +488,7 @@ class ControllerHandler(BaseHTTPRequestHandler):
                 for name, (operation, schema) in TOOLS.items()
                 if ProtectedOperations.READ_POLICIES[operation][0] in actor.scopes
                 and (operation.startswith('inventory.')
+                     or (operation == 'accounts.init' and self.server.operations.operations.inventory is not None)
                      or (operation.startswith('operations.') and self.server.operations.operations.inventory is not None)
                      or (operation.startswith('hosts.') and self.server.operations.operations.hosts is not None)
                      or (operation.startswith('migration.') and self.server.operations.operations.migration is not None)

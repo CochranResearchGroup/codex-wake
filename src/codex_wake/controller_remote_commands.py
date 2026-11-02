@@ -74,8 +74,7 @@ def command(args):
     host, environment = socket.gethostname(), os.environ.get('WSL_DISTRO_NAME') or os.name
     account_config = Path(args.wake_root) / 'controller-accounts.toml'
     from .host_commands import owner as host_owner
-    from .controller_accounts import ControllerAccounts
-    options = {'hosts': host_owner(args.wake_root), 'accounts': ControllerAccounts(account_config, host=host, environment=environment)}
+    options = {'hosts': host_owner(args.wake_root)}
     if account_config.is_file():
         # The account owner is delivered by ticket395; no caller-selected path.
         from .controller_accounts import ControllerAccounts

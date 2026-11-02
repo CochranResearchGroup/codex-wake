@@ -24,6 +24,7 @@ class NoRedirect(HTTPRedirectHandler):
 
 
 def main():
+    os.umask(0o077)
     import codex_wake
     env = dict(os.environ)
     env.pop('PYTHONPATH', None)
@@ -93,7 +94,10 @@ def main():
             assert initialization['result']['capabilities']['tools'] == {'listChanged': False}
             assert http('/mcp', dict(jsonrpc='2.0', method='notifications/initialized'), token)[0] == 202
             tools = json.loads(http('/mcp', dict(jsonrpc='2.0', id=2, method='tools/list'), token)[2])
-            assert len(tools['result']['tools']) == 2
+            assert {tool['name'] for tool in tools['result']['tools']} == {
+                'wake_controller_list', 'wake_controller_resolve', 'wake_hosts_list',
+                'wake_hosts_resolve', 'wake_hosts_route', 'wake_operations_result',
+                'wake_operations_wait', 'wake_operations_stream'}
             call = dict(jsonrpc='2.0', id=3, method='tools/call', params={'name': 'wake_controller_list', 'arguments': {}})
             assert canonical(json.loads(http('/mcp', call, token)[2])['result']['structuredContent']) == canonical(api)
             assert http('/operations', dict(operation='runtime.input', arguments={}), token)[0] == 403
