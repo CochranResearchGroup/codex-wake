@@ -49,8 +49,9 @@ channel, with `--channel stock` available. Status returns native exit code1 when
 signed out. Interactive sign-in is local CLI only, with native stdio and exit status.
 
 For an API key, pass `--with-api-key` and supply the key on stdin. Wake strips
-inherited account-auth overrides, forces native credential storage to the selected
-home's `auth.json`, and never captures credential input. A private client, existing
+inherited account-auth overrides, persists the account-scoped file-store policy
+for future daemon/client launches, and never captures credential input. Native
+credentials are stored in that home's `auth.json`. A private client, existing
 managed endpoint or active daemon operation holds login until the operator closes
 or stops that selected account explicitly. Status remains readable while clients
 run. These commands do not start or restart a daemon. Browser/device confirmation

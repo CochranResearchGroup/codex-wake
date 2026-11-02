@@ -1,6 +1,7 @@
 """Local human sign-in delegates credential handling to the registered native CLI."""
 from contextlib import contextmanager, nullcontext
 import fcntl
+import json
 import os
 from pathlib import Path
 import stat
@@ -48,10 +49,17 @@ def run(root, selector, verb, *, channel='modded', device_auth=False, with_api_k
         raise BuildError('registered build belongs to another account')
     custody = _login_custody(home, channel) if verb == 'login' else nullcontext(())
     with custody as locks, _pinned_executable(build) as executable:
-        builds.accounts.execute('accounts.resolve', dict(selector=selector, expected_target=account['target']))
+        if verb == 'login':
+            account = builds.accounts.prepare_login(selector, account['target'])
+        else:
+            builds.accounts.execute('accounts.resolve', dict(selector=selector, expected_target=account['target']))
         if load_build(builds.manifest, channel, home) != build:
             raise InventoryError('stale_target', 'registered authentication executable changed')
-        arguments = ['-c', 'cli_auth_credentials_store="file"', 'login']
+        view = builds.accounts.execute('configuration.explain', dict(selector=selector, expected_target=account['target']))
+        mode = view['effective'].get('cli_auth_credentials_store', 'auto')
+        if mode not in ('file', 'keyring', 'auto', 'ephemeral'):
+            raise InventoryError('unsupported_target', 'account credential storage mode is unsupported')
+        arguments = ['-c', 'cli_auth_credentials_store=' + json.dumps(mode), 'login']
         if verb == 'status':
             arguments.append('status')
         elif device_auth:

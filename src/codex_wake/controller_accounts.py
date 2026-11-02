@@ -87,6 +87,9 @@ def account_inventory(settings, data):
     return admitted, sorted(set(names) - set(admitted))
 
 def _redact(value, key=''):
+    # Storage policy is public configuration, not a credential value.
+    if key == 'cli_auth_credentials_store' and isinstance(value, str) and value in ('file', 'keyring', 'auto', 'ephemeral'):
+        return value
     if any(word in key.lower() for word in ('token', 'secret', 'password', 'api_key', 'credential', 'authorization')) or 'env' in key.lower().split('.'):
         return '[redacted]'
     if isinstance(value, dict):
@@ -254,6 +257,46 @@ class ControllerAccounts:
             raise
         except (OSError, ValueError, TypeError, KeyError, AttributeError):
             raise InventoryError('configuration_unavailable', 'host account configuration cannot be qualified') from None
+
+    def prepare_login(self, selector, expected_target):
+        """Persist this account's native credential mode without changing shared assets."""
+        path = self.path.absolute()
+        if path.is_symlink() or path != path.resolve():
+            raise InventoryError('stale_target', 'login requires the fixed real account registry')
+        with _registry_lock(path):
+            account = self.execute('accounts.resolve', dict(selector=selector, expected_target=expected_target))['account']
+            raw = path.read_text()
+            info = path.stat()
+            if info.st_uid != os.getuid() or info.st_mode & 0o077:
+                raise InventoryError('unauthorized_target', 'account registry must be private and user-owned')
+            data = tomllib.loads(raw)
+            expected = copy.deepcopy(data)
+            policy = expected
+            for key in ('configuration', 'account', account['id']):
+                policy = policy.setdefault(key, {})
+                if not isinstance(policy, dict):
+                    raise InventoryError('configuration_unavailable', 'account configuration scopes must be tables')
+            if policy.get('cli_auth_credentials_store') == 'file':
+                return account
+            policy['cli_auth_credentials_store'] = 'file'
+            bare = 'configuration.account.' + account['id']
+            table = bare if re.fullmatch(r'[A-Za-z0-9_-]+', account['id']) and ('[' + bare + ']') in raw else 'configuration.account.' + json.dumps(account['id'])
+            updated = _set_registry_value(raw, table, 'cli_auth_credentials_store', 'file')
+            if tomllib.loads(updated) != expected:
+                raise InventoryError('unsupported_target', 'login configuration cannot be edited without changing unrelated values')
+            descriptor, temporary = tempfile.mkstemp(prefix='.accounts-auth-', dir=path.parent)
+            try:
+                with os.fdopen(descriptor, 'w') as output:
+                    output.write(updated)
+                    output.flush()
+                    os.fsync(output.fileno())
+                if path.read_text() != raw or path.stat().st_ino != info.st_ino:
+                    raise InventoryError('stale_target', 'account registry changed before login configuration')
+                os.replace(temporary, path)
+            finally:
+                if os.path.exists(temporary):
+                    os.unlink(temporary)
+            return self.execute('accounts.resolve', {'selector': selector})['account']
 
     def _manage(self, operation, arguments):
         allowed = set() if operation == 'accounts.init' else {'selector', 'alias'}

@@ -44,6 +44,10 @@ class AccountAuthTests(unittest.TestCase):
             self.assertIsNone(invoked['inherited_key'])
             self.assertEqual(self.cli(root,'status','alice').returncode,0)
             self.assertFalse((root/'accounts/shared/auth.json').exists())
+            from codex_wake.account_commands import execute
+            view=execute('configuration.explain',{'selector':'alice'},root)['result']
+            self.assertEqual(view['effective']['cli_auth_credentials_store'],'file')
+            self.assertEqual(view['provenance']['cli_auth_credentials_store'],'account:codex-alice')
 
     def test_api_key_enters_only_native_stdin_and_alias_preserves_peer(self):
         with tempfile.TemporaryDirectory() as tmp:
