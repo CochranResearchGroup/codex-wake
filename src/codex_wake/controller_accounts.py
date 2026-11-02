@@ -1,15 +1,20 @@
 """Wake account/configuration owner, reusing the absorbed Profiles implementation.
 
-This owner selects existing homes and explains configuration. It never opens
+This owner creates private homes, selects them and explains configuration. It never opens
 credential files, changes the selected account, or launches provider work.
 """
 from __future__ import annotations
 
 import hashlib
+import fcntl
+from contextlib import contextmanager
+import copy
 import json
 import os
 from pathlib import Path
 import re
+import stat
+import tempfile
 import tomllib
 
 from codex_profiles.config import load_settings
@@ -91,12 +96,74 @@ def _redact(value, key=''):
     return value
 
 
+def _private_directory(path):
+    if (not path.is_absolute() or path != path.resolve() or not path.is_dir()
+            or path.stat().st_uid != os.getuid() or path.stat().st_mode & 0o077):
+        raise InventoryError('unauthorized_target', 'account management requires real private user-owned directories')
+
+
+@contextmanager
+def _registry_lock(path):
+    _private_directory(path.parent)
+    descriptor = os.open(path.parent / '.accounts.lock',
+                         os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    try:
+        info = os.fstat(descriptor)
+        if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+            raise InventoryError('unauthorized_target', 'account registry lock is not private')
+        try:
+            fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise InventoryError('operation_in_progress', 'another account registry mutation is in progress') from None
+        yield
+    finally:
+        os.close(descriptor)
+
+
+def _set_registry_value(text, table, key, value):
+    """Change one conventional TOML assignment, retaining unrelated source text.
+
+    Ambiguous/inline-table layouts are rejected by the caller's semantic diff
+    before any filesystem changes rather than rewritten by a second serializer.
+    """
+    lines = text.splitlines(keepends=True)
+    header = '[' + table + ']'
+    headings = [index for index, line in enumerate(lines) if line.lstrip().startswith('[')]
+    starts = [index for index in headings if lines[index].strip().split('#', 1)[0].strip() == header]
+    assignment = json.dumps(key) + ' = ' + json.dumps(value) + '\n'
+    if not starts:
+        return text.rstrip() + '\n\n' + header + '\n' + assignment
+    if len(starts) != 1:
+        raise InventoryError('unsupported_target', 'ambiguous account registry table')
+    start = starts[0]
+    end = next((index for index in headings if index > start), len(lines))
+    for index in range(start + 1, end):
+        matched = re.match(r'\s*(?:' + re.escape(key) + '|' + re.escape(json.dumps(key)) + r')\s*=\s*(.*)', lines[index])
+        if not matched:
+            continue
+        for stop in range(index + 1, end + 1):
+            try:
+                tomllib.loads('value = ' + matched[1] + '\n' + ''.join(lines[index + 1:stop]))
+            except ValueError:
+                continue
+            return ''.join(lines[:index]) + assignment + ''.join(lines[stop:])
+        raise InventoryError('unsupported_target', 'account registry assignment cannot be safely edited')
+    return ''.join(lines[:end]).rstrip() + '\n' + assignment + ''.join(lines[end:])
+
+
 class ControllerAccounts:
     def __init__(self, config_path, *, host, environment):
         self.path = Path(config_path)
         self.host, self.environment = host, environment
 
     def execute(self, operation, arguments):
+        if operation in ('accounts.init', 'accounts.create'):
+            try:
+                return self._manage(operation, arguments)
+            except InventoryError:
+                raise
+            except (OSError, ValueError, TypeError, KeyError, AttributeError):
+                raise InventoryError('configuration_unavailable', 'account registry mutation could not be qualified') from None
         if operation not in ('accounts.list', 'accounts.resolve', 'configuration.explain'):
             raise InventoryError('unsupported_operation', 'unsupported account operation')
         allowed = set() if operation == 'accounts.list' else {'selector', 'expected_target'}
@@ -187,3 +254,125 @@ class ControllerAccounts:
             raise
         except (OSError, ValueError, TypeError, KeyError, AttributeError):
             raise InventoryError('configuration_unavailable', 'host account configuration cannot be qualified') from None
+
+    def _manage(self, operation, arguments):
+        allowed = set() if operation == 'accounts.init' else {'selector', 'alias'}
+        if not isinstance(arguments, dict) or set(arguments) - allowed:
+            raise InventoryError('invalid_argument', 'unsupported account management arguments')
+        path = self.path.absolute()
+        # Management never follows a migration pointer or an alternate registry.
+        if path.is_symlink() or path != path.resolve():
+            raise InventoryError('stale_target', 'account management requires the fixed real registry')
+        if operation == 'accounts.init' and not path.parent.exists():
+            path.parent.mkdir(mode=0o700)
+        with _registry_lock(path):
+            if operation == 'accounts.init':
+                return self._initialize(path)
+            return self._create(path, arguments)
+
+    def _initialize(self, path):
+        state = path.parent / 'accounts'
+        shared = state / 'shared'
+        if path.exists():
+            data = tomllib.loads(path.read_text())
+            if (data.get('accounts', {}).get('managed_by') != 'codex-wake'
+                    or data.get('profiles', {}).get('state_root') != str(state)
+                    or data['profiles'].get('source_root') != str(shared)):
+                raise InventoryError('conflict', 'existing account registry is preserved; initialization will not overwrite it')
+            _private_directory(state)
+            _private_directory(shared)
+            return dict(owner='codex-wake', registry=str(path), state_root=str(state), created=False)
+        if state.exists() or state.is_symlink():
+            raise InventoryError('conflict', 'existing account storage is preserved; choose a new isolated Wake root')
+        state.mkdir(mode=0o700)
+        shared.mkdir(mode=0o700)
+        for relative in ('skills', 'rules'):
+            (shared / relative).mkdir(mode=0o700)
+        (shared / 'config.toml').touch(mode=0o600)
+        content = ('[profiles]\nstate_root = ' + json.dumps(str(state))
+                   + '\nsource_root = ' + json.dumps(str(shared))
+                   + '\nselection_mode = "launcher"\nknown_profiles = []\ncheck_upstream_releases = false\n'
+                   + '\n[accounts]\nmanaged_by = "codex-wake"\n')
+        with path.open('x') as output:
+            os.chmod(path, 0o600)
+            output.write(content)
+            output.flush()
+            os.fsync(output.fileno())
+        return dict(owner='codex-wake', registry=str(path), state_root=str(state), created=True)
+
+    def _create(self, path, arguments):
+        selector = _safe_name(arguments.get('selector'))
+        alias = arguments.get('alias')
+        if alias is not None:
+            _safe_name(alias)
+        if not path.is_file():
+            raise InventoryError('configuration_unavailable', 'initialize the account registry first')
+        info = path.stat()
+        if info.st_uid != os.getuid() or info.st_mode & 0o077:
+            raise InventoryError('unauthorized_target', 'account registry must be private and user-owned')
+        raw = path.read_text()
+        data = tomllib.loads(raw)
+        if 'migration' in data:
+            raise InventoryError('unsupported_target', 'account creation in a migration registry requires its migration owner')
+        settings = load_settings(path)
+        if not data.get('profiles', {}).get('state_root') or settings.selection_mode != 'launcher':
+            raise InventoryError('unsupported_target', 'account creation requires an explicit private launcher state root')
+        if set(settings.shared_links) - {'config.toml', 'skills', 'rules'}:
+            raise InventoryError('unsupported_target', 'private runtime state cannot be shared')
+        _private_directory(settings.state_root)
+        _private_directory(settings.shared_root)
+        name = _safe_name(settings.normalize_profile_name(selector))
+        if selector in settings.aliases and settings.resolve_profile_name(selector) != name:
+            raise InventoryError('conflict', 'account name is already an alias')
+        home = settings.state_root / name
+        if alias is not None:
+            if alias in settings.aliases and settings.resolve_profile_name(alias) != name:
+                raise InventoryError('conflict', 'alias belongs to another account')
+            names, inactive = account_inventory(settings, data)
+            if settings.normalize_profile_name(alias) in set(names + inactive) - {name}:
+                raise InventoryError('conflict', 'alias shadows an existing account')
+        known = list(settings.known_profiles)
+        configured = {settings.normalize_profile_name(value) for value in known}
+        if home.exists() or home.is_symlink():
+            if name not in configured or home.is_symlink():
+                raise InventoryError('conflict', 'existing account directory is never adopted or overwritten')
+            _private_directory(home)
+            if alias is not None and settings.aliases.get(alias) != name:
+                raise InventoryError('conflict', 'existing account creation arguments differ')
+            return dict(self.execute('accounts.resolve', {'selector': name}), created=False, authentication='not_checked')
+        if len(known) >= 256:
+            raise InventoryError('unsupported_target', 'account registry exceeds bounded capacity')
+        if 'enabled' in data.get('accounts', {}):
+            raise InventoryError('unsupported_target', 'account creation under restricted admission requires the host policy workflow; no admission changed')
+        # Qualify existing homes before effects: a rejected peer must not leave
+        # an apparently failed creation published into the registry.
+        self.execute('accounts.list', {})
+        expected = copy.deepcopy(data)
+        expected['profiles']['known_profiles'] = known + [name]
+        updated = _set_registry_value(raw, 'profiles', 'known_profiles', known + [name])
+        if alias is not None:
+            expected['profiles'].setdefault('aliases', {})[alias] = name
+            updated = _set_registry_value(updated, 'profiles.aliases', alias, name)
+        if tomllib.loads(updated) != expected:
+            raise InventoryError('unsupported_target', 'registry layout cannot be edited without changing unrelated configuration')
+        # Shared assets are selected explicitly; no auth or historical files are copied.
+        for relative in settings.shared_links:
+            source = settings.shared_root / relative
+            if not source.exists() or source.is_symlink() or source.resolve() != source:
+                raise InventoryError('unsupported_target', 'shared configuration asset is unavailable or indirect')
+        home.mkdir(mode=0o700)
+        for relative in settings.shared_links:
+            (home / relative).symlink_to(settings.shared_root / relative)
+        descriptor, temporary = tempfile.mkstemp(prefix='.accounts-', dir=path.parent)
+        try:
+            with os.fdopen(descriptor, 'w') as output:
+                output.write(updated)
+                output.flush()
+                os.fsync(output.fileno())
+            if path.read_text() != raw or path.stat().st_ino != info.st_ino:
+                raise InventoryError('stale_target', 'registry changed during account creation; new private home retained')
+            os.replace(temporary, path)
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
+        return dict(self.execute('accounts.resolve', {'selector': name}), created=True, authentication='not_configured')

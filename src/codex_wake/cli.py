@@ -108,6 +108,8 @@ def build_parser() -> argparse.ArgumentParser:
     register_accounts(subparsers)
     from .build_commands import register_parser as register_builds
     register_builds(subparsers)
+    from .daemon_commands import register_parser as register_daemons
+    register_daemons(subparsers)
     from .history_commands import register_parser as register_history
     register_history(subparsers)
     from .migration_commands import register_parser as register_migration
@@ -2972,6 +2974,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         return command(args, root)
     if args.command == "history":
         from .history_commands import command
+        return command(args, args.wake_root)
+    if args.command == "daemons":
+        from .daemon_commands import command
         return command(args, args.wake_root)
     if args.command == "builds":
         from .build_commands import command, owner_from_root

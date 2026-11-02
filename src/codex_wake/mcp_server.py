@@ -200,6 +200,14 @@ for tool_name, (operation, schema) in controller_public_tools.items():
             schema['properties'], schema.get('required', []), False)
 
 
+from .daemon_commands import tool_specs as daemon_specs
+SPECS.update(daemon_specs())
+from .account_management import tool_specs as account_management_specs
+from .history_commands import import_tool_specs
+SPECS.update(account_management_specs())
+SPECS.update(import_tool_specs())
+
+
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
@@ -319,6 +327,24 @@ class CommandRunner:
             from .agent_resume_commands import mcp_call
             result = mcp_call(self, arguments, native_context)
             return result, result.get('status') != 'resumed'
+        if group in ('controller-account-management', 'controller-history-import'):
+            try:
+                if group == 'controller-account-management':
+                    from .account_management import protected_execute
+                    value = protected_execute(verb, arguments, self.wake_root)
+                else:
+                    from .history_commands import protected_import
+                    value = protected_import(arguments, self.wake_root)
+                return value, value['status'] != 'completed' or value.get('result', {}).get('operation', {}).get('execution') != 'completed'
+            except (ValueError, OSError) as error:
+                return {'error': {'code': getattr(error, 'code', 'operation_held'), 'message': str(error)}}, True
+        if group == 'controller-daemons':
+            from .daemon_commands import protected_execute
+            try:
+                value = protected_execute(verb, arguments, self.wake_root)
+                return value, value['status'] != 'completed' or value.get('result', {}).get('operation', {}).get('phase', 'terminal') != 'terminal'
+            except (ValueError, OSError) as error:
+                return {'error': {'code': getattr(error, 'code', 'daemon_held'), 'message': str(error)}}, True
         if group == 'controller-accounts':
             from .account_commands import execute
             from .managed_inventory import InventoryError

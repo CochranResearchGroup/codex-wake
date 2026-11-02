@@ -115,7 +115,24 @@ class OAuthAuthority:
         if not isinstance(subject, str) or not subject or principal_kind not in ('owner', 'service'):
             raise AuthError('invalid_request')
         if not scopes or not set(scopes) <= SCOPES: raise AuthError('invalid_scope')
-        if not isinstance(targets, list) or not targets or any(not isinstance(t, dict) or not t or set(t) - {'host', 'environment', 'runtime', 'namespace', 'conversation_id', 'provider', 'account', 'home', 'home_generation', 'configuration_revision', 'rollout_revision', 'build_channel', 'build_sha256', 'build_revision', 'executable', 'recipe', 'recipe_sha256', 'authority', 'generation', 'workspace', 'presentation', 'fixture_id', 'migration_revision', 'migration_id', 'flow_id', 'backend_id', 'channel', 'connection_generation', 'process_pid', 'process_start_ticks', 'process_boot_id'} or any(not isinstance(v, str) or not v for v in t.values()) for t in targets):
+        def valid_target(target):
+            if not isinstance(target, dict) or not target or set(target) - {'host', 'environment', 'runtime', 'namespace', 'conversation_id', 'provider', 'account', 'home', 'home_generation', 'configuration_revision', 'rollout_revision', 'build_channel', 'build_sha256', 'build_revision', 'executable', 'recipe', 'recipe_sha256', 'authority', 'generation', 'workspace', 'presentation', 'fixture_id', 'migration_revision', 'migration_id', 'flow_id', 'backend_id', 'channel', 'connection_generation', 'process_pid', 'process_start_ticks', 'process_boot_id', 'registry', 'registry_revision', 'process', 'socket_generation'}:
+                return False
+            for key, value in target.items():
+                if key == 'process':
+                    if value is None:
+                        continue
+                    if (not isinstance(value, dict) or set(value) != {'pid', 'start_ticks', 'boot_id'}
+                            or type(value['pid']) is not int or value['pid'] <= 0
+                            or not isinstance(value['start_ticks'], str) or not value['start_ticks'].isdigit()
+                            or not isinstance(value['boot_id'], str) or not re.fullmatch(r'[0-9a-f-]{36}', value['boot_id'])):
+                        return False
+                elif key == 'socket_generation' and value is None:
+                    continue
+                elif not isinstance(value, str) or not value:
+                    return False
+            return True
+        if not isinstance(targets, list) or not targets or any(not valid_target(t) for t in targets):
             raise AuthError('invalid_target')
         if not isinstance(code_challenge, str) or not re.fullmatch(r'[A-Za-z0-9_-]{43}', code_challenge):
             raise AuthError('invalid_request', 'S256 challenge required')

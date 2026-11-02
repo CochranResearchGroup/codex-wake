@@ -1042,3 +1042,20 @@ lanes:
     overlaps: [P193]
     updated_at: 2026-11-01
     disposition: Read-only current setup and isolated repairs authorized; ask operator before any interruption or mutation of storage used by active work
+
+  - id: P195-PRODUCT380
+    owner: primary / ecochran76
+    objective: Demonstrate Wake-owned account management, daemon lifecycle and native history import
+    work_items: [380]
+    plan: docs/dev/plans/0195-2026-11-02-product-acceptance.md
+    plan_ref: feat/product-acceptance-380
+    branch: feat/product-acceptance-380
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    integration: review_pr
+    dependencies: []
+    overlaps: [P194-LIVE380]
+    reconciled_overlaps: [P194-LIVE380]
+    updated_at: 2026-11-02
+    disposition: Isolated implementation under current main; working activation withdrawn; no provider calls or memory writes

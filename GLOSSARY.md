@@ -315,3 +315,13 @@ held for reconciliation rather than authorizing another attempt.
 
 **Upgrade resource authority**:
 Host-owned evidence binding a recovery to the original goal, tenant/account, policy, cumulative accounting and limits. The trusted TUI user action establishes original native policy when creating a native goal, and may carry already verified native policy through later controls without changing its grant. A later status action cannot convert an existing unknown or externally controlled goal into native-only authority. Model handoffs cannot establish this declaration; absent or unverifiable authority keeps recovery held.
+
+**Conversation import**:
+A source-preserving copy into a distinct destination account conversation, with
+source identity and revision provenance. It transfers no credentials, goals,
+grants or resource allowance and does not change exact-owner resume.
+
+**Account daemon**:
+A native daemon bound to one private account home, identified by its socket,
+process birth/boot and executable build. It is separate from both the Wake
+scheduler daemon and an attached native client.

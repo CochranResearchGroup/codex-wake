@@ -1397,3 +1397,8 @@ stacked PR327 on PR326. One broad Standards/Spec review and one bounded TDD
 pass repaired assignment revocation checks and contextual approval inspection.
 Installed acceptance #310 and runtime gaps #318/#319 remain open; no production
 policy changes, deployment or resource renewal.
+
+2026-11-02 product correction #380: [Plan0195](docs/dev/plans/0195-2026-11-02-product-acceptance.md)
+owns Wake public account/daemon/import implementation and UID1017 demonstration.
+Plan0190 source acceptance remains historical; Plan0194 live acceptance stays
+open. Working-account activation is withdrawn; no working runtime effects.

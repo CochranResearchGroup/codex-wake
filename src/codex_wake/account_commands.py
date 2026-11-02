@@ -22,8 +22,14 @@ def execute(operation, arguments, root):
 
 
 def register_parser(subparsers):
-    accounts = subparsers.add_parser('accounts', help='select existing isolated accounts')
+    accounts = subparsers.add_parser('accounts', help='create and select isolated accounts')
     verbs = accounts.add_subparsers(dest='account_verb', required=True)
+    initialize = verbs.add_parser('init', help='initialize a new isolated account registry')
+    initialize.add_argument('--json', dest='as_json', action='store_true')
+    create = verbs.add_parser('create', help='create a private account home without credentials')
+    create.add_argument('selector')
+    create.add_argument('--alias')
+    create.add_argument('--json', dest='as_json', action='store_true')
     for verb in ('list', 'resolve'):
         parser = verbs.add_parser(verb)
         parser.add_argument('--json', dest='as_json', action='store_true')
@@ -41,6 +47,8 @@ def register_parser(subparsers):
 def command(args, root):
     operation = args.command + '.' + args.account_verb
     arguments = {'selector': args.selector} if hasattr(args, 'selector') else {}
+    if getattr(args, 'alias', None) is not None:
+        arguments['alias'] = args.alias
     if getattr(args, 'expected_target', None) is not None:
         arguments['expected_target'] = args.expected_target
     value = execute(operation, arguments, root)

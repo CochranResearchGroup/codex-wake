@@ -45,6 +45,15 @@ def register_parser(subparsers):
     search.add_argument('--owner', action='append', dest='owners')
     search.add_argument('--query', default='')
     search.add_argument('--json', dest='as_json', action='store_true')
+    transfer = verbs.add_parser('import', help='copy a pinned saved conversation into another account through native fork')
+    transfer.add_argument('thread_id')
+    transfer.add_argument('--owner', required=True)
+    transfer.add_argument('--destination', required=True)
+    transfer.add_argument('--channel', choices=('stock', 'modded'), default='modded')
+    transfer.add_argument('--expected-source', type=json.loads, required=True)
+    transfer.add_argument('--expected-target', type=json.loads, required=True)
+    transfer.add_argument('--idempotency-key', required=True)
+    transfer.add_argument('--json', dest='as_json', action='store_true')
     for verb in ('read', 'resume'):
         command = verbs.add_parser(verb)
         command.add_argument('thread_id')
@@ -61,6 +70,8 @@ def register_parser(subparsers):
 
 
 def command(args, root, *, runtime=None, now=None):
+    if args.history_verb == 'import':
+        return import_command(args, root)
     try:
         allowed = policy(root).get('readable_accounts', [])
         principal = None
@@ -118,3 +129,43 @@ def mcp_call(runner, arguments, native_context, verb, *, runtime=None, now=None)
         result = dict(schema_version=1, operation='history.' + verb, status='failed',
             error=dict(code=getattr(error, 'code', 'unauthorized_target'), message='history caller could not be authorized'))
     return result, result['status'] != 'completed'
+
+
+def import_tool_specs():
+    text = {'type': 'string', 'minLength': 1, 'maxLength': 200}
+    properties = dict(owner=text, thread_id=text, destination=text,
+        channel={'type': 'string', 'enum': ['stock', 'modded']}, expected_source={'type': 'object'},
+        expected_target={'type': 'object'}, _request={'type': 'object'})
+    return {'wake_controller_history_import': ('controller-history-import', 'history.import',
+        'Copy a pinned goal-free saved conversation into another account; source remains unchanged. No model turn or allowance renewal.',
+        properties, list(properties), False)}
+
+
+def protected_import(arguments, root, *, actor=None, authorize=None):
+    from .controller_history_import import ControllerHistoryImport
+    from .operation_commands import local_actor
+    if actor is None:
+        actor = local_actor(root)
+        authorize = lambda: local_actor(root)
+    return ControllerHistoryImport(root).execute(actor, 'history.import', arguments, authorize=authorize)
+
+
+def import_command(args, root):
+    try:
+        from dataclasses import replace
+        import hashlib
+        from .daemon_commands import local_operator
+        arguments = {key: getattr(args, key) for key in (
+            'owner', 'thread_id', 'destination', 'channel', 'expected_source', 'expected_target')}
+        key = args.idempotency_key
+        identifier = 'history-import-' + hashlib.sha256(key.encode()).hexdigest()[:32]
+        arguments['_request'] = dict(operation_id=identifier, idempotency_key=key,
+            correlation_id=identifier, binding='local-cli', target=args.expected_target)
+        actor = local_operator(args.expected_target, {'control', 'observe', 'history.observe'})
+        actor = replace(actor, targets=[args.expected_source, args.expected_target])
+        value = protected_import(arguments, root, actor=actor, authorize=lambda: actor)
+    except (WakeError, ValueError, OSError, TypeError) as error:
+        value = dict(schema_version=1, operation='history.import', status='failed',
+            error=dict(code=getattr(error, 'code', 'invalid_argument'), message=str(error)))
+    print(json.dumps(value, sort_keys=True))
+    return 0 if value['status'] == 'completed' and value.get('result', {}).get('operation', {}).get('execution') == 'completed' else 2

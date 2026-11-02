@@ -188,6 +188,13 @@ This writes or checks this `.codex/hooks.json` shape:
 
 Codex may require a one-time `/hooks` review before a new repo-local hook runs. Codex Wake reports that prerequisite, but it does not bypass Codex hook trust. If `/hooks` does not list this repo hook source, the active TUI has not loaded the repo hook file; restart or resume Codex in this repo, then review hooks before testing wake ack behavior.
 
+## Accounts and native daemons
+
+Use Wake to create isolated accounts, explain shared configuration, manage exact
+account daemon instances, and import completed saved conversations into another
+account. See the [account and daemon workflow](docs/agents/accounts-and-daemons.md)
+for public commands, target pins, supported rollback and transfer limits.
+
 ## Native Usage
 
 Choose the exact thread UUID returned by `sessions resolve` or `sessions open`.

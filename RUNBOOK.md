@@ -8194,3 +8194,10 @@ are byte-identical. Controller remains masked and current caller has no host
 refresh grant. Prepared scope/service proposals are not applied. Shared cutover
 and actual requesting-session proof remain open; 318/310 are not closed.
 Memory disposition: forbidden because no memory write was authorized.
+
+## Turn | 2026-11-02 | Product acceptance reconciliation
+
+Read operator handoff and refreshed remote main318f985; primary289bb97 and
+live380a56d8a7 clean and preserved. Opened feat/product-acceptance-380 from main.
+Plan0195 records the missing public account creation, multi-daemon lifecycle and
+cross-account import criteria under #380. No live activation or memory write.

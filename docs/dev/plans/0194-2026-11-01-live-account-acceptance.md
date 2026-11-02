@@ -10,6 +10,12 @@ WIP limit: one implementation lane; primary plus at most two read-only discovery
 
 ## Current State
 
+2026-11-02 correction: the activation recommendation below is WITHDRAWN.
+Do not apply its prepared cutover or request another sudo census. Plan0195 owns
+isolated public product acceptance first; this plan remains OPEN for separately
+authorized live acceptance. Historical implementation/preview descriptions below
+are retained as evidence, not current effect authority.
+
 Disposable modified166 qualification and Plan0193 delivery are complete. They
 are not live-account acceptance. Production stock/modded launchers are staged
 refusals and account homes still share mutable legacy history/database paths.

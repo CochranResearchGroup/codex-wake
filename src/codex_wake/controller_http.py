@@ -104,6 +104,16 @@ for name, spec in grok_specs().items():
     TOOLS[name] = (spec[1], dict(type='object',properties=spec[3],required=spec[4],additionalProperties=False))
 
 
+from .account_management import tool_specs as account_management_specs
+from .history_commands import import_tool_specs
+for name, spec in {**account_management_specs(), **import_tool_specs()}.items():
+    TOOLS[name] = (spec[1], dict(type="object", properties=spec[3], required=spec[4], additionalProperties=False))
+
+from .daemon_commands import tool_specs as daemon_specs
+for name, spec in daemon_specs().items():
+    TOOLS[name] = (spec[1], dict(type='object', properties=spec[3], required=spec[4], additionalProperties=False))
+
+
 def operation_failure(operation, error):
     return {'schema_version': 1, 'operation': operation, 'status': 'failed',
             'error': {'code': error.code, 'message': str(error)}}
@@ -143,6 +153,8 @@ class ProtectedOperations:
         'hosts.list': ('observe', 'environments', None),
         'hosts.resolve': ('observe', None, 'environment'),
         'hosts.route': ('observe', None, None),
+        **{'daemons.' + verb: ('observe' if verb in ('list', 'status') else 'control', None, None)
+           for verb in ('list', 'status', 'start', 'restart', 'update', 'stop')},
         'history.search': ('history.observe', None, None),
         'history.read': ('history.observe', None, None),
         'history.resume': ('history.resume', None, None),
@@ -153,6 +165,9 @@ class ProtectedOperations:
         'builds.list': ('account.observe', 'builds', None),
         'inventory.list': ('observe', 'resources', None),
         'inventory.resolve': ('observe', None, 'resource'),
+        'accounts.init': ('admin', None, None),
+        'accounts.create': ('admin', None, None),
+        'history.import': ('control', None, None),
         'accounts.list': ('account.observe', 'accounts', None),
         'accounts.resolve': ('account.observe', None, 'account'),
         'configuration.explain': ('configuration.observe', None, 'account'),
@@ -257,6 +272,24 @@ class ProtectedOperations:
                     recipe=name, recipe_sha256=hashlib.sha256(raw).hexdigest())
             result = BuildAuthorization(self.authority, self.operations.builds, recipe_targets=recipes,
                 runtime=ControllerRuntime(self.operations.inventory.root)).execute(token, operation, arguments)
+        elif operation in ('accounts.init', 'accounts.create'):
+            from .account_management import execute
+            if self.operations.accounts is None or self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host account owner unavailable')
+            result = execute(self.operations.inventory.root, operation, arguments, actor,
+                lambda: self.authority.authenticate(token), self.operations.accounts)
+        elif operation == 'history.import':
+            from .history_commands import protected_import
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host history owner unavailable')
+            result = protected_import(arguments, self.operations.inventory.root, actor=actor,
+                authorize=lambda: self.authority.authenticate(token))
+        elif operation.startswith('daemons.'):
+            from .daemon_commands import execute
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host daemon owner unavailable')
+            result = execute(self.operations.inventory.root, operation, arguments, actor=actor,
+                authorize=lambda: self.authority.authenticate(token))
         elif operation.startswith('history.'):
 
             from .controller_history_authorization import HistoryAuthorization

@@ -222,6 +222,20 @@
         ]
       },
       {
+        "name": "controller public regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_controller*.py"
+        ]
+      },
+      {
         "name": "package build",
         "axis": "packaging",
         "argv": [
