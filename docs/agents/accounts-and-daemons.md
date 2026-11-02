@@ -32,6 +32,30 @@ catalog/promotion behavior. This registry is host configuration, not a second
 account database. Creation preserves unrelated configuration; unsafe existing
 homes, shared mutable runtime state and restricted account admission are refused.
 
+## Sign in by account name
+
+After the host's build manifest is configured, Wake selects the private home and
+registered native executable for you:
+
+```sh
+codex-wake --wake-root "$LAB" accounts login alice
+codex-wake --wake-root "$LAB" accounts status alice
+```
+
+Login creates a missing named account through the existing account owner and opens
+native browser sign-in. For headless use, add `--device-auth`; device login must
+be allowed by your OpenAI account/workspace. Both commands default to the modded
+channel, with `--channel stock` available. Status returns native exit code1 when
+signed out. Interactive sign-in is local CLI only, with native stdio and exit status.
+
+For an API key, pass `--with-api-key` and supply the key on stdin. Wake strips
+inherited account-auth overrides, forces native credential storage to the selected
+home's `auth.json`, and never captures credential input. A private client, existing
+managed endpoint or active daemon operation holds login until the operator closes
+or stops that selected account explicitly. Status remains readable while clients
+run. These commands do not start or restart a daemon. Browser/device confirmation
+is still the human account owner's action; simulated tests are not real sign-in.
+
 ## Manage exact daemon instances
 
 ```sh

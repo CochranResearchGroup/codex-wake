@@ -8215,3 +8215,9 @@ Curated receipt:docs/dev/evidence/issue0380/product195-installed.json. One revie
 and closed-world finding verification; local branch remains unmerged. Memory
 forbidden, zero Graphiti writes. Primary/old feature checkouts and operator native
 sessions were preserved; working-account activation stays withdrawn.
+
+## Turn | 2026-11-02 | Native account sign-in adapter
+
+Operator found manual OpenAI provisioning cumbersome. Plan0196 owns a bounded
+local login/status adapter using the existing account/build owners and native
+credential storage. No working-account authentication or daemon changes.

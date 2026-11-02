@@ -30,6 +30,14 @@ def register_parser(subparsers):
     create.add_argument('selector')
     create.add_argument('--alias')
     create.add_argument('--json', dest='as_json', action='store_true')
+    for verb in ('login', 'status'):
+        item = verbs.add_parser(verb, help='sign in or inspect native authentication for a named account')
+        item.add_argument('selector')
+        item.add_argument('--channel', choices=('stock', 'modded'), default='modded')
+        if verb == 'login':
+            modes = item.add_mutually_exclusive_group()
+            modes.add_argument('--device-auth', action='store_true')
+            modes.add_argument('--with-api-key', action='store_true')
     for verb in ('list', 'resolve'):
         parser = verbs.add_parser(verb)
         parser.add_argument('--json', dest='as_json', action='store_true')
@@ -45,6 +53,15 @@ def register_parser(subparsers):
 
 
 def command(args, root):
+    if args.command == 'accounts' and args.account_verb in ('login', 'status'):
+        from .account_auth import run
+        try:
+            return run(root, args.selector, args.account_verb, channel=args.channel,
+                device_auth=getattr(args, 'device_auth', False), with_api_key=getattr(args, 'with_api_key', False))
+        except (ValueError, OSError) as error:
+            import sys
+            print('Account sign-in unavailable: ' + str(error), file=sys.stderr)
+            return 2
     operation = args.command + '.' + args.account_verb
     arguments = {'selector': args.selector} if hasattr(args, 'selector') else {}
     if getattr(args, 'alias', None) is not None:

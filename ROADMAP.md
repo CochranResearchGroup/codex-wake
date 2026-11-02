@@ -1408,3 +1408,7 @@ UID1017 accounts/daemons/TUIs/import/peer-preserving lifecycle and explicit roll
 pass, with local3.12 full and3.11 presubmit qualification. Source remains local and
 unmerged; Plan0194/#380 authenticated live acceptance and any working-host effects
 retain their separate gates. No memory write or old-job/goal resume.
+
+2026-11-02 account-onboarding follow-up: Plan0196 adds local `accounts login/status`
+after the operator rejected manual native-home/executable steps. Existing #380
+live gates and Plan0195 frozen acceptance remain separate.
