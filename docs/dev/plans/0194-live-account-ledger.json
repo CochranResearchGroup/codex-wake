@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "ticket": 380,
+  "plan": "0194-2026-11-01-live-account-acceptance.md",
+  "branch": "fix/live-acceptance-380",
+  "base": "289bb97ecf8a0382089819e4c4119bc5462e48d0",
+  "resource_mode": "manual",
+  "review_rounds": 1,
+  "remediation_rounds": 1,
+  "live_acceptance": false,
+  "interruption_approval": "required_before_any_affected_operator_work",
+  "units": [
+    {
+      "id": "launcher-owner",
+      "owner": "/root/final_standards",
+      "state": "validated",
+      "blockers": [],
+      "receipt_sha256": "daf5bfee0c4142b8cbcce3d3ed43153d6e7d16a96adc9ba5aca2698db673998d"
+    },
+    {
+      "id": "live-store-inventory",
+      "owner": "primary",
+      "state": "validated_metadata_with_declared_uncertainty",
+      "blockers": [],
+      "receipt_sha256": "a5a279042c50bb4fb893de8e20c4da499e33c36651e195454fa962b9c2de4d91",
+      "protected_native_clients": 26,
+      "protected_home": "global legacy home; names and exact PIDs private",
+      "unknown_process_inspections": 17,
+      "secondary_worker": "unavailable threadslot; primary owns"
+    },
+    {
+      "id": "repair-and-isolated-qualification",
+      "owner": "primary",
+      "state": "source_validated_live_qualification_pending",
+      "blockers": [
+        "launcher-owner",
+        "live-store-inventory"
+      ]
+    },
+    {
+      "id": "live-activation",
+      "owner": "primary",
+      "state": "pending",
+      "blockers": [
+        "repair-and-isolated-qualification"
+      ]
+    },
+    {
+      "id": "actual-account-acceptance",
+      "owner": "primary",
+      "state": "pending",
+      "blockers": [
+        "live-activation"
+      ]
+    }
+  ],
+  "private_evidence": "/home/ecochran76/.local/state/codex-wake/testing/live-acceptance380",
+  "git_custody": "isolatedworktree",
+  "working_runtime_changed": false,
+  "strategy_decision": "Prefer in-place isolation of inactive named homes, preserving global legacy store and current clients; no relocation of live global data. Any unknown dependency remains held; interruption requires operator approval.",
+  "implementation_source": "5f8c467",
+  "source_validation": {
+    "focused_tests": 58,
+    "focused_result": "PASS",
+    "undefined_names": "PASS",
+    "policy_wiring": "PASS",
+    "full_suite": {
+      "result": "PASS",
+      "tests": 1941,
+      "skipped": 1,
+      "seconds": 376.18,
+      "python": "3.12.13",
+      "source": "83b3032993179e4013260f3adca409a8ca955fb9",
+      "receipt_sha256": "53b7fe0e945c221a1396c8c34d04a29ca0c12524ff7492eaa050a79d4828af3e",
+      "environment": "isolated XDG configuration/state, RAM-backed TMPDIR; inherited Profiles config unset"
+    },
+    "focused_seconds": 17.367,
+    "package_build": "PASS; wheel and sdist",
+    "staged_stock_version": "PASS; exact registered b93f6811 stock0.164 in neutral home; live aliases unchanged",
+    "python311_focused": "58 PASS in15.307s",
+    "final_wheel_sha256": "d93ea6fef6ff3cfdc6e589064a0b539367466fdd911ecd99d5bff596350330f5",
+    "stock166_identity": "official asset digest validated; extracted binary matches existing plain codex b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8; public pinned version rc0",
+    "selective_focused": {
+      "python312": "60 PASS in12.965s",
+      "python311": "60 PASS in12.812s",
+      "public_seams": "migration preservation plus CLI/MCP parity and invalid admission refusal"
+    },
+    "selected_full_suite": {
+      "source": "5f8c467",
+      "tests": 1943,
+      "skipped": 1,
+      "result": "PASS",
+      "seconds": 356.771,
+      "python": "3.12.13",
+      "focused312": "60 PASS in12.965s",
+      "focused311": "60 PASS in12.812s",
+      "log_sha256": "b00e4fbf75edb7c046b7816b0c40cc08f6272b517170823acfd95676846e2a60",
+      "wheel_sha256": "60e82e7394eb05e56b1f24e60c43ba9355835eea62d80044196d2eae6fcbb2ef",
+      "installed_help": "PASS with declared base dependencies",
+      "live_changes": false,
+      "receipt_sha256": "bfc528784d4206cc24d2d704f35f0eeb7f0db9d082d5d6dac41f398078bf410c"
+    }
+  },
+  "live_preview": {
+    "status": "held",
+    "holds": [
+      "protected_runtime_depends_on_account_alias",
+      "writer_census_unknown"
+    ],
+    "accounts": 7,
+    "planned_aliases": 35,
+    "effect_authorization": "not_authorized",
+    "receipt_sha256": "5077106e58a7dd6d7ece1da59c2f9c45168b12d6184e75928a11be2a8156f0e2"
+  },
+  "review_source": "abdb91d3091fc8cba1cb7c83c7c22d4257563410",
+  "remediation_state": "complete_S1_S2_red_green",
+  "source_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/459",
+  "source_pr_state": "local source and disposable native qualified; source-only integration pending",
+  "runtime_stage": "native disposable qualification complete; five-account live cutover preparation; no live activation",
+  "post_review_changes": {
+    "scope": "explicit host account admission for noninterrupting incremental activation",
+    "reviewed_by_previous_frozen_broad_review": false,
+    "state": "targeted and full source validated; outside prior frozen broad review; installed live acceptance pending"
+  },
+  "selected_live_preview": {
+    "accounts": 6,
+    "inactive_accounts": 1,
+    "planned_aliases": 30,
+    "holds": [
+      "writer_census_unknown"
+    ],
+    "production_effect_status": "not_authorized",
+    "receipt_sha256": "9b23209d6387d64069a2caec63039c7273709e80c04a3f5b67f297aba1ff35b1"
+  },
+  "privileged_snapshot": {
+    "status": "complete",
+    "processes": 1687,
+    "unknown": 0,
+    "selected_dependencies": 0,
+    "receipt_sha256": "d30767894b1510985e5b0eae5ffaef84a61896402313aeebd46a58e176e7ee7f",
+    "freshness": "snapshot only; actual effects require fresh privileged probe per guard"
+  },
+  "native_qualification": {
+    "history": "PASS; current wheel with complete modified166",
+    "concurrency_stock": "PASS; actual two native homes, official stock fallback and return with peer pinned",
+    "model_requests": 0,
+    "scripted_local_requests_per_case": 3,
+    "external_provider_transport": "blocked by owned proxy",
+    "final_owned_processes": 0,
+    "current_wheel_sha256": "60e82e7394eb05e56b1f24e60c43ba9355835eea62d80044196d2eae6fcbb2ef"
+  },
+  "planned_live_admission": {
+    "accounts": 5,
+    "aliases": 25,
+    "deferred_accounts": 2,
+    "deferred_reasons": [
+      "protected global mutable-directory dependency",
+      "retained managed daemon and goal state; no recovery authorized"
+    ],
+    "effect_authorization": "not executed"
+  }
+}

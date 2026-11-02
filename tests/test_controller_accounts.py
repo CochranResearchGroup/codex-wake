@@ -183,3 +183,49 @@ model = "account"
             with self.assertRaises(InventoryError) as raised:
                 owner.execute('configuration.explain', {'selector': 'alice', 'expected_target': target})
             self.assertEqual(raised.exception.code, 'stale_target')
+
+    def test_explicit_admission_is_shared_by_cli_and_mcp_and_rejects_unknown_accounts(
+        self,
+    ):
+        import contextlib
+        import io
+        from codex_wake.cli import main
+        from codex_wake.mcp_server import CommandRunner
+        from codex_wake.controller_accounts import ControllerAccounts
+        from codex_wake.managed_inventory import InventoryError
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            state = root / "homes"
+            alice = state / "codex-alice"
+            bob = state / "codex-bob"
+            alice.mkdir(parents=True)
+            bob.mkdir()
+            shared = state / "shared"
+            shared.mkdir()
+            (shared / "sessions").mkdir()
+            (bob / "sessions").symlink_to(shared / "sessions")
+            config = root / "controller-accounts.toml"
+            policy = f'[profiles]\nstate_root="{state}"\nknown_profiles=["alice","bob"]\n[accounts]\nenabled=["alice"]\n'
+            config.write_text(policy)
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                code = main(["--wake-root", str(root), "accounts", "list", "--json"])
+            self.assertEqual(code, 0)
+            cli = json.loads(output.getvalue())
+            mcp, failed = CommandRunner(wake_root=root).call(
+                "wake_controller_accounts", {}
+            )
+            self.assertFalse(failed, mcp)
+            self.assertEqual(cli, mcp)
+            self.assertEqual(
+                [row["id"] for row in cli["result"]["accounts"]], ["codex-alice"]
+            )
+            self.assertEqual(cli["result"]["inactive_accounts"], ["codex-bob"])
+            owner = ControllerAccounts(config, host="local", environment="test")
+            for value in ("[]", '["unknown"]', "true"):
+                with self.subTest(value=value):
+                    config.write_text(policy.replace('["alice"]', value))
+                    with self.assertRaises(InventoryError) as error:
+                        owner.execute("accounts.list", {})
+                    self.assertEqual(error.exception.code, "configuration_unavailable")

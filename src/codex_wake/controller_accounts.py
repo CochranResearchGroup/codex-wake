@@ -39,6 +39,48 @@ def _safe_name(value):
     return value
 
 
+def account_inventory(settings, data):
+    """Apply explicit host admission without touching inactive legacy homes."""
+    configured = list(settings.known_profiles) + list(settings.aliases.values())
+    if settings.default_profile:
+        configured.append(settings.default_profile)
+    discovered = list(settings.state_root.glob(settings.account_prefix + "*"))
+    if len(discovered) > 256 or len(configured) > 256:
+        raise InventoryError(
+            "unsupported_target", "account discovery exceeds bounded capacity"
+        )
+    configured += [path.name for path in discovered if path.is_dir()]
+    names = sorted(
+        {
+            _safe_name(settings.resolve_profile_name(_safe_name(name)))
+            for name in configured
+        }
+    )
+    policy = data.get("accounts", {})
+    if not isinstance(policy, dict):
+        raise InventoryError(
+            "configuration_unavailable", "account admission must be a host table"
+        )
+    if "enabled" not in policy:
+        return names, []
+    enabled = policy["enabled"]
+    if not isinstance(enabled, list) or not 1 <= len(enabled) <= 256:
+        raise InventoryError(
+            "configuration_unavailable",
+            "enabled accounts require a nonempty bounded host list",
+        )
+    admitted = sorted(
+        {
+            _safe_name(settings.resolve_profile_name(_safe_name(name)))
+            for name in enabled
+        }
+    )
+    if set(admitted) - set(names):
+        raise InventoryError(
+            "configuration_unavailable", "enabled account is not configured"
+        )
+    return admitted, sorted(set(names) - set(admitted))
+
 def _redact(value, key=''):
     if any(word in key.lower() for word in ('token', 'secret', 'password', 'api_key', 'credential', 'authorization')) or 'env' in key.lower().split('.'):
         return '[redacted]'
@@ -72,14 +114,7 @@ class ControllerAccounts:
             # inventory must never silently discover the operator home.
             if not data.get('profiles', {}).get('state_root'):
                 raise ValueError('explicit state_root required')
-            configured = list(settings.known_profiles) + list(settings.aliases.values())
-            if settings.default_profile:
-                configured.append(settings.default_profile)
-            discovered = list(settings.state_root.glob(settings.account_prefix + '*'))
-            if len(discovered) > 256:
-                raise ValueError('account discovery exceeds bounded capacity')
-            configured += [path.name for path in discovered if path.is_dir()]
-            names = sorted({_safe_name(settings.resolve_profile_name(_safe_name(name))) for name in configured})
+            names, inactive = account_inventory(settings, data)
             if settings.selection_mode != 'launcher' or set(settings.shared_links) - {'config.toml', 'skills', 'rules'}:
                 raise InventoryError('unsupported_target', 'concurrent accounts require private launcher mode')
             accounts = []
@@ -110,12 +145,15 @@ class ControllerAccounts:
                                      aliases=sorted(k for k, v in settings.aliases.items()
                                                     if settings.resolve_profile_name(v) == name)))
             if operation == 'accounts.list':
-                return dict(owner='codex-wake', accounts=accounts)
+                result = dict(owner='codex-wake', accounts=accounts)
+                if 'enabled' in data.get('accounts', {}):
+                    result['inactive_accounts'] = inactive
+                return result
             selector = _safe_name(arguments.get('selector'))
             name = _safe_name(settings.resolve_profile_name(selector))
             matches = [account for account in accounts if account['id'] == name]
             if not matches:
-                raise InventoryError('target_not_found', 'account is not configured')
+                raise InventoryError('target_not_found', 'account is not enabled for private operation')
             account = matches[0]
             if arguments.get('expected_target') is not None and arguments['expected_target'] != account['target']:
                 raise InventoryError('stale_target', 'account or configuration generation changed')

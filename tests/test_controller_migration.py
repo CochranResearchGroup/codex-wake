@@ -249,3 +249,316 @@ legacy_config="{self.legacy}"
         with self.assertRaises(InventoryError) as error:
             consumer.execute('accounts.list', {})
         self.assertEqual(error.exception.code, 'stale_target')
+
+class InPlaceIsolationTests(unittest.TestCase):
+    setUp = ControllerMigrationTests.setUp
+    owner = ControllerMigrationTests.owner
+    """Reuse the owned synthetic layout; exercise only public migration operations."""
+
+    def legacy_links(self):
+        (self.accounts / "shared").symlink_to(self.source, target_is_directory=True)
+        import shutil
+
+        shutil.rmtree(self.home / "sessions")
+        (self.home / "sessions").symlink_to(self.source / "sessions")
+        (self.home / "state_5.sqlite").unlink()
+        (self.source / "state_5.sqlite").write_bytes(
+            b"synthetic legacy database; not opened"
+        )
+        (self.home / "state_5.sqlite").symlink_to(self.source / "state_5.sqlite")
+        self.global_home = self.lab / "global-home"
+        self.global_home.mkdir()
+        (self.global_home / "sessions").symlink_to(self.source / "sessions")
+        (self.global_home / "state_5.sqlite").symlink_to(self.source / "state_5.sqlite")
+        self.path.write_text(
+            self.path.read_text()
+            + 'strategy="isolate_in_place"\nprotected_roots=['
+            + json.dumps(str(self.global_home))
+            + "]\n"
+        )
+
+    def test_isolation_preserves_global_history_and_credentials_without_account_relocation(
+        self,
+    ):
+        self.legacy_links()
+        credential_inode = (self.home / "auth.json").stat().st_ino
+        home_inode = self.home.stat().st_ino
+        global_link = (self.global_home / "sessions").readlink()
+        before = (self.source / "sessions/unassigned.jsonl").read_bytes()
+        owner = self.owner()
+        preview = owner.execute("migration.preview", {})
+        self.assertEqual(preview["status"], "ready", preview.get("holds"))
+        self.assertEqual(preview["strategy"], "isolate_in_place")
+        applied = owner.execute(
+            "migration.apply", {"expected_target": preview["target"]}
+        )
+        self.assertEqual(applied["status"], "applied")
+        self.assertEqual(self.home.stat().st_ino, home_inode)
+        self.assertEqual((self.home / "auth.json").stat().st_ino, credential_inode)
+        self.assertFalse((self.home / "sessions").is_symlink())
+        self.assertEqual(list((self.home / "sessions").iterdir()), [])
+        self.assertFalse((self.home / "state_5.sqlite").exists())
+        self.assertEqual((self.global_home / "sessions").readlink(), global_link)
+        self.assertEqual(
+            (self.source / "sessions/unassigned.jsonl").read_bytes(), before
+        )
+        from codex_wake.controller_accounts import ControllerAccounts
+
+        self.assertEqual(
+            ControllerAccounts(
+                self.path, host="fixture-host", environment="fixture-env"
+            ).execute("accounts.list", {})["accounts"][0]["home"],
+            str(self.home),
+        )
+        rolled = owner.execute(
+            "migration.rollback",
+            {"expected_target": applied["target"], "receipt_id": applied["receipt_id"]},
+        )
+        self.assertEqual(rolled["status"], "rolled_back")
+        self.assertTrue((self.home / "sessions").is_symlink())
+        self.assertEqual((self.home / "auth.json").stat().st_ino, credential_inode)
+
+    def test_protected_runtime_indirect_dependency_holds_before_any_effect(self):
+        self.legacy_links()
+        protected = self.global_home / "sessions"
+        protected.unlink()
+        protected.symlink_to(self.home / "sessions")
+        owner = self.owner()
+        preview = owner.execute("migration.preview", {})
+        self.assertIn("protected_runtime_depends_on_account_alias", preview["holds"])
+        from codex_wake.managed_inventory import InventoryError
+
+        with self.assertRaises(InventoryError) as error:
+            owner.execute("migration.apply", {"expected_target": preview["target"]})
+        self.assertEqual(error.exception.code, "migration_held")
+        self.assertFalse((self.lab / "candidate").exists())
+        self.assertTrue((self.home / "sessions").is_symlink())
+
+    def test_rollback_retains_new_private_session_and_original_shared_history(self):
+        self.legacy_links()
+        owner = self.owner()
+        applied = owner.execute(
+            "migration.apply",
+            {"expected_target": owner.execute("migration.preview", {})["target"]},
+        )
+        session = self.home / "sessions" / "new.jsonl"
+        session.write_text("new private work\n")
+        from codex_wake.managed_inventory import InventoryError
+
+        with self.assertRaises(InventoryError) as error:
+            owner.execute(
+                "migration.rollback",
+                {
+                    "expected_target": owner.execute("migration.preview", {})["target"],
+                    "receipt_id": applied["receipt_id"],
+                },
+            )
+        self.assertEqual(error.exception.code, "target_changed")
+        self.assertEqual(session.read_text(), "new private work\n")
+        self.assertFalse((self.home / "sessions").is_symlink())
+        self.assertEqual(
+            (self.source / "sessions" / "unassigned.jsonl").read_text(),
+            '{"unassigned":true}\n',
+        )
+
+    def test_account_home_process_dependency_holds_even_without_open_history_files(
+        self,
+    ):
+        import os
+        import subprocess
+        import sys
+
+        self.legacy_links()
+        child = subprocess.Popen(
+            [
+                sys.executable,
+                "-c",
+                'import time; print("ready", flush=True); time.sleep(30)',
+            ],
+            env={**os.environ, "CODEX_HOME": str(self.home)},
+            stdout=subprocess.PIPE,
+            text=True,
+        )
+        try:
+            self.assertEqual(child.stdout.readline().strip(), "ready")
+            from codex_wake.controller_migration import probe_writers
+
+            preview = self.owner(writer_probe=probe_writers).execute(
+                "migration.preview", {}
+            )
+            self.assertTrue(
+                any(
+                    row["pid"] == child.pid
+                    and row["evidence"] == "configured_account_home"
+                    for row in preview["writers"]["writers"]
+                ),
+                preview["writers"],
+            )
+            self.assertIn("competing_writer", preview["holds"])
+            self.assertFalse((self.lab / "candidate").exists())
+        finally:
+            child.terminate()
+            child.wait(timeout=5)
+            child.stdout.close()
+
+    def test_unmarked_host_isolation_requires_explicit_live_policy(self):
+        self.legacy_links()
+        (self.lab / ".codex-wake-migration-fixture.json").unlink()
+        from codex_wake.managed_inventory import InventoryError
+
+        owner = self.owner()
+        with self.assertRaises(InventoryError) as error:
+            owner.execute(
+                "migration.apply",
+                {"expected_target": owner.execute("migration.preview", {})["target"]},
+            )
+        self.assertEqual(error.exception.code, "production_not_authorized")
+        self.assertTrue((self.home / "sessions").is_symlink())
+        self.path.write_text(self.path.read_text() + "live_activation=true\n")
+        applied = owner.execute(
+            "migration.apply",
+            {"expected_target": owner.execute("migration.preview", {})["target"]},
+        )
+        self.assertEqual(applied["status"], "applied")
+        self.assertFalse((self.home / "sessions").is_symlink())
+
+    def test_new_protected_dependency_during_isolation_stops_further_effects(self):
+        self.legacy_links()
+        owner = self.owner()
+        preview = owner.execute("migration.preview", {})
+        changed = False
+
+        def authorize():
+            nonlocal changed
+            if not changed and not (self.home / "sessions").is_symlink():
+                protected = self.global_home / "sessions"
+                protected.unlink()
+                protected.symlink_to(self.home / "sessions")
+                changed = True
+
+        from codex_wake.managed_inventory import InventoryError
+
+        with self.assertRaises(InventoryError) as error:
+            owner.execute(
+                "migration.apply",
+                {"expected_target": preview["target"]},
+                authorize=authorize,
+            )
+        self.assertEqual(error.exception.code, "migration_held")
+        self.assertTrue((self.home / "state_5.sqlite").is_symlink())
+        receipt = json.loads(
+            next((self.root / "controller-migration").glob("*.json")).read_text()
+        )
+        self.assertEqual(receipt["state"], "uncertain")
+
+    def test_idle_process_using_account_home_alias_holds_isolation(self):
+        import os
+        import subprocess
+        import sys
+
+        self.legacy_links()
+        alias = self.lab / "account-home-alias"
+        alias.symlink_to(self.home, target_is_directory=True)
+        child = subprocess.Popen(
+            [
+                sys.executable,
+                "-c",
+                'import time; print("ready", flush=True); time.sleep(30)',
+            ],
+            env={**os.environ, "CODEX_HOME": str(alias)},
+            stdout=subprocess.PIPE,
+            text=True,
+        )
+        try:
+            self.assertEqual(child.stdout.readline().strip(), "ready")
+            from codex_wake.controller_migration import probe_writers
+
+            preview = self.owner(writer_probe=probe_writers).execute(
+                "migration.preview", {}
+            )
+            self.assertTrue(
+                any(
+                    row["pid"] == child.pid
+                    and row["evidence"] == "configured_account_home"
+                    for row in preview["writers"]["writers"]
+                ),
+                preview["writers"],
+            )
+            self.assertIn("competing_writer", preview["holds"])
+            self.assertTrue((self.home / "sessions").is_symlink())
+        finally:
+            child.terminate()
+            child.wait(timeout=5)
+            child.stdout.close()
+
+    def test_rollback_rechecks_new_private_file_after_authorization(self):
+        self.legacy_links()
+        owner = self.owner()
+        applied = owner.execute(
+            "migration.apply",
+            {"expected_target": owner.execute("migration.preview", {})["target"]},
+        )
+        calls = 0
+
+        def authorize():
+            nonlocal calls
+            calls += 1
+            if calls == 3:
+                (self.home / "state_5.sqlite").write_bytes(
+                    b"new native state after initial rollback check"
+                )
+
+        from codex_wake.managed_inventory import InventoryError
+
+        with self.assertRaises(InventoryError) as error:
+            owner.execute(
+                "migration.rollback",
+                {
+                    "expected_target": owner.execute("migration.preview", {})["target"],
+                    "receipt_id": applied["receipt_id"],
+                },
+                authorize=authorize,
+            )
+        self.assertEqual(error.exception.code, "target_changed")
+        self.assertEqual(
+            (self.home / "state_5.sqlite").read_bytes(),
+            b"new native state after initial rollback check",
+        )
+
+    def test_selected_account_isolation_leaves_protected_legacy_peer_untouched(self):
+        self.legacy_links()
+        peer = self.accounts / "codex-bob"
+        peer.mkdir()
+        (peer / "auth.json").write_text('{"synthetic_account":"bob"}')
+        (peer / "sessions").symlink_to(self.source / "sessions")
+        (peer / "cache").mkdir()
+        (self.global_home / "cache").symlink_to(peer / "cache")
+        self.path.write_text(
+            self.path.read_text().replace(
+                'known_profiles=["alice"]', 'known_profiles=["alice","bob"]'
+            )
+            + '\n[accounts]\nenabled=["alice"]\n'
+        )
+        peer_link = (peer / "sessions").lstat().st_ino
+        protected_link = (self.global_home / "cache").readlink()
+        owner = self.owner()
+        preview = owner.execute("migration.preview", {})
+        self.assertEqual(preview["status"], "ready", preview["holds"])
+        self.assertEqual(preview["accounts"], ["codex-alice"])
+        owner.execute("migration.apply", {"expected_target": preview["target"]})
+        self.assertFalse((self.home / "sessions").is_symlink())
+        self.assertEqual((peer / "sessions").lstat().st_ino, peer_link)
+        self.assertEqual((self.global_home / "cache").readlink(), protected_link)
+        from codex_wake.controller_accounts import ControllerAccounts
+
+        consumer = ControllerAccounts(
+            self.path, host="fixture-host", environment="fixture-env"
+        )
+        listing = consumer.execute("accounts.list", {})
+        self.assertEqual([row["id"] for row in listing["accounts"]], ["codex-alice"])
+        self.assertEqual(listing["inactive_accounts"], ["codex-bob"])
+        from codex_wake.managed_inventory import InventoryError
+
+        with self.assertRaises(InventoryError) as error:
+            consumer.execute("accounts.resolve", {"selector": "bob"})
+        self.assertEqual(error.exception.code, "target_not_found")
