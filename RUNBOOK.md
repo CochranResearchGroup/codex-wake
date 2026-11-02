@@ -8194,3 +8194,41 @@ are byte-identical. Controller remains masked and current caller has no host
 refresh grant. Prepared scope/service proposals are not applied. Shared cutover
 and actual requesting-session proof remain open; 318/310 are not closed.
 Memory disposition: forbidden because no memory write was authorized.
+
+## Turn | 2026-11-02 | Product acceptance reconciliation
+
+Read operator handoff and refreshed remote main318f985; primary289bb97 and
+live380a56d8a7 clean and preserved. Opened feat/product-acceptance-380 from main.
+Plan0195 records the missing public account creation, multi-daemon lifecycle and
+cross-account import criteria under #380. No live activation or memory write.
+
+## Turn | 2026-11-02 | Isolated account/daemon product accepted
+
+Plan0195 source3f4052b is isolated-product accepted: Wake account setup, two actual
+managed daemons/native TUIs, source-preserving destination import, scoped restart,
+stock fallback and explicit compatible stop/update/start return. UID1017 demo7
+and installed OAuth/native MCP checks pass; fresh OS census empty. Wheel6025d33f
+and all230Python payload hashes match source. Qualified local3.12 comprehensive
+1959tests/1skip and3.11 presubmit207tests pass. Retain timed-out, invalidated and
+wrapper-import failures; no full3.11 or live-account acceptance is claimed.
+Curated receipt:docs/dev/evidence/issue0380/product195-installed.json. One review
+and closed-world finding verification; local branch remains unmerged. Memory
+forbidden, zero Graphiti writes. Primary/old feature checkouts and operator native
+sessions were preserved; working-account activation stays withdrawn.
+
+## Turn | 2026-11-02 | Native account sign-in adapter
+
+Operator found manual OpenAI provisioning cumbersome. Plan0196 owns a bounded
+local login/status adapter using the existing account/build owners and native
+credential storage. No working-account authentication or daemon changes.
+
+## Turn | 2026-11-02 | Named account sign-in qualified
+
+Plan0196 source2a82619 implements local accounts login/status with automatic named
+home creation, registered executable pinning, native credential stdin/stdio and
+persisted account-scoped file policy. Login holds active clients/daemons; status
+remains read-only.42focused tests per Python3.11/3.12 pass, plus lint/policy/planning.
+UID1017 installed synthetic login and actual native signed-out status pass;231
+payload members match source, wheel3efb612d; final user process census empty.
+Real OpenAI sign-in was not attempted. Working credentials/install remain unchanged;
+source stays local/unmerged. Memory forbidden; no graph writes.

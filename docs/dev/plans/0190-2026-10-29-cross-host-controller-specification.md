@@ -57,6 +57,18 @@ Organize commands by resources: hosts/environments, accounts/configuration/build
 
 Wake absorbs Profiles package/configuration ownership; old commands become compatibility aliases. Shared base configuration accepts explicit host/provider/account overrides and reports provenance. Native credential stores remain in their execution environment; caller OAuth is separate. Cross-account permitted history is searchable/readable, resumed only through its owner. Migration inventories indirect links and competing writers, previews effects, validates disposable candidates and retains explicit rollback before separately authorized activation. Immutable named builds are pinned per runtime; promotion affects future launches. Existing activation follow-up and closed-tab/reboot recovery retain their own unresolved evidence boundaries.
 
+### Operator product correction (2026-11-02, #380)
+
+[Plan0195](0195-2026-11-02-product-acceptance.md) adds explicit public account
+creation, account-scoped native daemon lifecycle, and source-preserving cross-account
+session import before any working-account migration. Import is a new destination
+conversation with source provenance, distinct from exact-owner resume. The source
+remains unchanged; repeat/conflict behavior uses the existing operation journal.
+Initial transfer qualification is completed, goal-free legacy JSONL history through
+the actual native persisted fork owner. Paginated/compressed source import is
+unsupported until separately qualified. Prior source acceptance is not installed
+product acceptance; the working-account activation recommendation is withdrawn.
+
 ### Cross-host authority and remote access
 
 Each operation has one execution authority. Register hosts and environments; authorized fleet inventory retains stale/offline observations. Offline mutation queueing is explicit, preserving pinned target, authority and expiry. Reconnect does not create work or renew allowances.

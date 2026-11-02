@@ -24,6 +24,14 @@ OPERATIONS=OPERATIONS|frozenset(['grok.capabilities', 'grok.create', 'grok.load'
 MCP_TOOLS.update({"grok."+verb:"wake_controller_grok_"+verb for verb in ('capabilities', 'create', 'load', 'prompt', 'wait', 'cancel', 'health', 'checkpoint', 'fork')})
 
 
+OPERATIONS = OPERATIONS | frozenset('daemons.' + verb for verb in ('list', 'status', 'start', 'restart', 'update', 'stop'))
+MCP_TOOLS.update({'daemons.' + verb: 'wake_daemons_' + verb for verb in ('list', 'status', 'start', 'restart', 'update', 'stop')})
+
+
+OPERATIONS = OPERATIONS | frozenset(('accounts.init', 'accounts.create', 'history.import'))
+MCP_TOOLS.update({'accounts.init': 'wake_controller_account_init', 'accounts.create': 'wake_controller_account_create', 'history.import': 'wake_controller_history_import'})
+
+
 class ClientError(ValueError):
     def __init__(self,code,message):super().__init__(message);self.code=code
 

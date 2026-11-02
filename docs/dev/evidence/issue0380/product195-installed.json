@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "status": "ISOLATED_PRODUCT_ACCEPTED",
+  "source_commit": "3f4052b8ba39ad68c91b1b1fb51439720a39c617",
+  "wheel_sha256": "6025d33ff5858f77ec9502345c763e1e4c3a1da44220f9b8f03fe313256fbc7d",
+  "python_payload_members": 230,
+  "source_installed_payload_equal": true,
+  "environment": {
+    "host_uid": 1017,
+    "namespace_uid": 0,
+    "shared_kernel": true,
+    "accounts": "synthetic_unverified",
+    "external_network": "blocked"
+  },
+  "native_cli_sha256": {
+    "modded": "48ed489ceed144d277c44a505ef5cbcb63250fa361fe132bed1fdab3f7cfb7d5",
+    "stock": "b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8"
+  },
+  "checks": {
+    "actual_daemons": 2,
+    "concurrent_native_tuis": true,
+    "import": {
+      "destination": "01a19d59-0ad1-7312-ad00-eb8c1ed08eca",
+      "native_destination_opened": true,
+      "native_destination_visible": true,
+      "repeat_same_child": true,
+      "source": "01a19d59-0303-7be3-976b-20a845dce894",
+      "source_unchanged": true
+    },
+    "native_stdio_mcp_parity": true,
+    "oauth_api_mcp_parity": true,
+    "restart_reconnect_peer_preserved": true,
+    "stock_modded_rollback": true,
+    "owned_processes_remaining": []
+  },
+  "provider_model_turns": 0,
+  "real_authenticated_accounts": false,
+  "working_account_effects": false,
+  "validation": [
+    {
+      "tier": "comprehensive",
+      "python": "3.12.13 (main, Mar 20 2026, 00:33:26) [Clang 22.1.1 ]",
+      "status": "PASS",
+      "qualified": true,
+      "test_cases": 1959,
+      "axes": [
+        {
+          "name": "setup preflight",
+          "status": "PASS"
+        },
+        {
+          "name": "pinned lint",
+          "status": "PASS"
+        },
+        {
+          "name": "policy wiring",
+          "status": "PASS"
+        },
+        {
+          "name": "active planning audit",
+          "status": "PASS"
+        },
+        {
+          "name": "compilation",
+          "status": "PASS"
+        },
+        {
+          "name": "public Python suite",
+          "status": "PASS"
+        },
+        {
+          "name": "package build",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "tier": "presubmit",
+      "python": "3.11.15 (main, Mar 20 2026, 00:32:49) [Clang 22.1.1 ]",
+      "status": "PASS",
+      "qualified": true,
+      "test_cases": 207,
+      "axes": [
+        {
+          "name": "setup preflight",
+          "status": "PASS"
+        },
+        {
+          "name": "pinned lint",
+          "status": "PASS"
+        },
+        {
+          "name": "policy wiring",
+          "status": "PASS"
+        },
+        {
+          "name": "active planning audit",
+          "status": "PASS"
+        },
+        {
+          "name": "compilation",
+          "status": "PASS"
+        },
+        {
+          "name": "runner public regressions",
+          "status": "PASS"
+        },
+        {
+          "name": "local profile public regressions",
+          "status": "PASS"
+        },
+        {
+          "name": "cleanup public regressions",
+          "status": "PASS"
+        },
+        {
+          "name": "summary public regressions",
+          "status": "PASS"
+        },
+        {
+          "name": "controller public regressions",
+          "status": "PASS"
+        },
+        {
+          "name": "package build",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "hosted_differences": [
+    "local WSL/Linux host, not ubuntu-latest hosted runner",
+    "Python3.12 full suite; Python3.11 presubmit/185 affected controller tests, not a completed full suite",
+    "no OpenClaw JavaScript/plugin checks; those files untouched",
+    "installed native and OAuth acceptance run separately under UID1017",
+    "full suite used equivalent logged unittest discovery with explicit repository import path and retained per-test durations"
+  ],
+  "skip": {
+    "test": "test_host_execution.HostExecutionTests.test_live_deadline_stops_service_without_controller",
+    "reason": "opt-in disposable systemd test"
+  },
+  "local_budget": {
+    "full_check_seconds": 900,
+    "reason": "600-second attempts timed out; measured slow fixture cycles and retained full per-test logs",
+    "review_date": "2026-11-09"
+  },
+  "memory_disposition": "forbidden",
+  "unresolved": [
+    "full Python3.11 suite not completed; final Python3.11 presubmit207cases passed",
+    "paginated/compressed, active/incomplete or goal-bearing imports unsupported",
+    "hot coordinated stock-to-modified return refused; explicit stop/update/start passed",
+    "live authenticated accounts and working-host migration remain separate gates"
+  ]
+}

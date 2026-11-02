@@ -22,8 +22,22 @@ def execute(operation, arguments, root):
 
 
 def register_parser(subparsers):
-    accounts = subparsers.add_parser('accounts', help='select existing isolated accounts')
+    accounts = subparsers.add_parser('accounts', help='create and select isolated accounts')
     verbs = accounts.add_subparsers(dest='account_verb', required=True)
+    initialize = verbs.add_parser('init', help='initialize a new isolated account registry')
+    initialize.add_argument('--json', dest='as_json', action='store_true')
+    create = verbs.add_parser('create', help='create a private account home without credentials')
+    create.add_argument('selector')
+    create.add_argument('--alias')
+    create.add_argument('--json', dest='as_json', action='store_true')
+    for verb in ('login', 'status'):
+        item = verbs.add_parser(verb, help='sign in or inspect native authentication for a named account')
+        item.add_argument('selector')
+        item.add_argument('--channel', choices=('stock', 'modded'), default='modded')
+        if verb == 'login':
+            modes = item.add_mutually_exclusive_group()
+            modes.add_argument('--device-auth', action='store_true')
+            modes.add_argument('--with-api-key', action='store_true')
     for verb in ('list', 'resolve'):
         parser = verbs.add_parser(verb)
         parser.add_argument('--json', dest='as_json', action='store_true')
@@ -39,8 +53,19 @@ def register_parser(subparsers):
 
 
 def command(args, root):
+    if args.command == 'accounts' and args.account_verb in ('login', 'status'):
+        from .account_auth import run
+        try:
+            return run(root, args.selector, args.account_verb, channel=args.channel,
+                device_auth=getattr(args, 'device_auth', False), with_api_key=getattr(args, 'with_api_key', False))
+        except (ValueError, OSError) as error:
+            import sys
+            print('Account sign-in unavailable: ' + str(error), file=sys.stderr)
+            return 2
     operation = args.command + '.' + args.account_verb
     arguments = {'selector': args.selector} if hasattr(args, 'selector') else {}
+    if getattr(args, 'alias', None) is not None:
+        arguments['alias'] = args.alias
     if getattr(args, 'expected_target', None) is not None:
         arguments['expected_target'] = args.expected_target
     value = execute(operation, arguments, root)

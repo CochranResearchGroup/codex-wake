@@ -1397,3 +1397,23 @@ stacked PR327 on PR326. One broad Standards/Spec review and one bounded TDD
 pass repaired assignment revocation checks and contextual approval inspection.
 Installed acceptance #310 and runtime gaps #318/#319 remain open; no production
 policy changes, deployment or resource renewal.
+
+2026-11-02 product correction #380: [Plan0195](docs/dev/plans/0195-2026-11-02-product-acceptance.md)
+owns Wake public account/daemon/import implementation and UID1017 demonstration.
+Plan0190 source acceptance remains historical; Plan0194 live acceptance stays
+open. Working-account activation is withdrawn; no working runtime effects.
+
+2026-11-02 Plan0195 isolated-product acceptance complete at3f4052b: actual native
+UID1017 accounts/daemons/TUIs/import/peer-preserving lifecycle and explicit rollback
+pass, with local3.12 full and3.11 presubmit qualification. Source remains local and
+unmerged; Plan0194/#380 authenticated live acceptance and any working-host effects
+retain their separate gates. No memory write or old-job/goal resume.
+
+2026-11-02 account-onboarding follow-up: Plan0196 adds local `accounts login/status`
+after the operator rejected manual native-home/executable steps. Existing #380
+live gates and Plan0195 frozen acceptance remain separate.
+
+2026-11-02 Plan0196 complete: named local account login/status wraps native sign-in
+and persists account credential-store provenance. Source2a82619;42focused checks
+per supported Python plus installed UID1017 status/synthetic login pass. Human
+OpenAI confirmation and working-account activation retain their own gates.

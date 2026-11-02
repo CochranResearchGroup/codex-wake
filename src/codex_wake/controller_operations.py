@@ -40,7 +40,7 @@ class ControllerOperations:
                 raise InventoryError('configuration_unavailable', 'host build owner is unavailable')
             return dict(schema_version=1, operation=operation, status='completed',
                         result=self.builds.execute(operation, arguments))
-        if operation in ('accounts.list', 'accounts.resolve', 'configuration.explain'):
+        if operation in ('accounts.init', 'accounts.create', 'accounts.list', 'accounts.resolve', 'configuration.explain'):
             if self.accounts is None:
                 raise InventoryError('configuration_unavailable', 'host account owner is unavailable')
             return dict(schema_version=1, operation=operation, status='completed',
