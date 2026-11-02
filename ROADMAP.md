@@ -1402,3 +1402,9 @@ policy changes, deployment or resource renewal.
 owns Wake public account/daemon/import implementation and UID1017 demonstration.
 Plan0190 source acceptance remains historical; Plan0194 live acceptance stays
 open. Working-account activation is withdrawn; no working runtime effects.
+
+2026-11-02 Plan0195 isolated-product acceptance complete at3f4052b: actual native
+UID1017 accounts/daemons/TUIs/import/peer-preserving lifecycle and explicit rollback
+pass, with local3.12 full and3.11 presubmit qualification. Source remains local and
+unmerged; Plan0194/#380 authenticated live acceptance and any working-host effects
+retain their separate gates. No memory write or old-job/goal resume.

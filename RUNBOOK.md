@@ -8201,3 +8201,17 @@ Read operator handoff and refreshed remote main318f985; primary289bb97 and
 live380a56d8a7 clean and preserved. Opened feat/product-acceptance-380 from main.
 Plan0195 records the missing public account creation, multi-daemon lifecycle and
 cross-account import criteria under #380. No live activation or memory write.
+
+## Turn | 2026-11-02 | Isolated account/daemon product accepted
+
+Plan0195 source3f4052b is isolated-product accepted: Wake account setup, two actual
+managed daemons/native TUIs, source-preserving destination import, scoped restart,
+stock fallback and explicit compatible stop/update/start return. UID1017 demo7
+and installed OAuth/native MCP checks pass; fresh OS census empty. Wheel6025d33f
+and all230Python payload hashes match source. Qualified local3.12 comprehensive
+1959tests/1skip and3.11 presubmit207tests pass. Retain timed-out, invalidated and
+wrapper-import failures; no full3.11 or live-account acceptance is claimed.
+Curated receipt:docs/dev/evidence/issue0380/product195-installed.json. One review
+and closed-world finding verification; local branch remains unmerged. Memory
+forbidden, zero Graphiti writes. Primary/old feature checkouts and operator native
+sessions were preserved; working-account activation stays withdrawn.

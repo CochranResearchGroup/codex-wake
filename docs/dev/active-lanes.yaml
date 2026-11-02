@@ -1051,11 +1051,13 @@ lanes:
     plan_ref: feat/product-acceptance-380
     branch: feat/product-acceptance-380
     target: origin/main
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: ACTIVE_WORKTREE
     integration: review_pr
     dependencies: []
     overlaps: [P194-LIVE380]
     reconciled_overlaps: [P194-LIVE380]
     updated_at: 2026-11-02
-    disposition: Isolated implementation under current main; working activation withdrawn; no provider calls or memory writes
+    checkpoint: 3f4052b8ba39ad68c91b1b1fb51439720a39c617
+    validation_status: isolated_product_passed
+    disposition: Local unmerged source; installed UID1017 demo7 and local3.12 full/3.11 presubmit PASS; live380 remains open; no working activation or memory writes

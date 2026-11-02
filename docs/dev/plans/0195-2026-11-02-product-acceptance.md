@@ -1,6 +1,6 @@
 # Wake-owned account and daemon product acceptance | #380
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Ticket: https://github.com/CochranResearchGroup/codex-wake/issues/380
 Branch: feat/product-acceptance-380
@@ -9,11 +9,16 @@ WIP limit: one integration lane; primary plus two bounded workers
 
 ## Current State
 
-Plan0190 source acceptance and Plan0194 native compatibility are narrower than
-product acceptance. Account commands list/resolve existing homes; no public
-account creation or explicit multi-daemon lifecycle exists. History reads and
-owner-bound resume do not import into a destination account. The live activation
-recommendation is withdrawn. This packet reconciles those gaps on current main.
+Isolated source/product acceptance is complete at qualified source3f4052b.
+Public account creation, explicit multi-daemon lifecycle and native destination
+import are implemented. Installed UID1017 demo7 passed using exact stock/modded
+packages and actual native TUIs; final test-user OS census is empty. Python3.12
+full1959tests/1skip and Python3.11 presubmit207tests pass. Full3.11 did not complete
+within its preliminary600-second attempt and is not claimed. This branch remains
+local/unmerged. #380/Plan0194 live authenticated-account acceptance remains OPEN;
+working-account activation is withdrawn. Import supports completed goal-free
+legacy JSONL; active, incomplete, compressed/paginated and goal-bearing sources
+remain unsupported.
 
 ## Scope and contract
 
@@ -111,3 +116,40 @@ receipt locations; sanitized evidence/report will bind final source and payload
 identities after local checks. Source regression suite and package qualification
 remain distinct from working-host activation. Memory disposition: forbidden under
 the handoff's explicit no-write boundary.
+
+## Final validation and evidence
+
+Qualified source:3f4052b8ba39ad68c91b1b1fb51439720a39c617. Curated receipt:
+`docs/dev/evidence/issue0380/product195-installed.json`. Installed wheel SHA:
+6025d33ff5858f77ec9502345c763e1e4c3a1da44220f9b8f03fe313256fbc7d;
+all230Python payload members match source and installed test prefix.
+
+- Python3.12.13 comprehensive:1959tests,0failures,0errors,1opt-in systemd skip;
+  lint/policy/planning/compile/build PASS. Equivalent logged discovery asserted
+  wrapper hash, included repository import path and collected1959/0import errors.
+  Monotonic discovery+suite679.33s; per-check bound900s. The local bound follows
+  retained600s timeouts; review performance on2026-11-09 rather than weaken tests.
+- Python3.11.15 presubmit:207tests including185controller cases; all11profile
+  checks PASS, including package build. Complete3.11 suite is not claimed.
+- Installed final demo7, native stdio MCP, OAuth API/MCP, dependency/version and
+  all230Python payload identity checks PASS. Test user had no remaining processes.
+- Existing installed OAuth smoke was repaired from its stale2-tool assertion to
+  the8baseline tools and explicit private fixture umask. Its actual discovery,
+  consent, scope, rotation/reconnect and revocation acceptance PASS. Unconfigured
+  account initialization now preserves unavailable-capability discovery;3HTTP
+  authorization tests pass on both Python versions. One consolidated review and
+  one closed-world findings verification remain the review bounds.
+
+Retain additional failed validation receipts: dependency preflight lacked wheel;
+initial guarded source changed; preliminary3.11/3.12 suites timed out at600s; a
+logging wrapper omitted repository import path and yielded39import errors.
+Corrected collection and final guarded validation passed; no failed receipt was
+removed. A profiled existing watcher fault test takes32–39s for six replacement
+cycles. No governor/runtime change was made to improve test timing.
+
+Hosted differences: local WSL/Linux and Python3.11.15/3.12.13, no paid Actions,
+full3.12 plus presubmit3.11, no untouched OpenClaw JavaScript/plugin checks, and
+separate installed-native acceptance under UID1017. Dependency versions and exact
+commands are retained in private machine receipts and the sanitized report.
+No source/native/journal schema migration or working-host activation was applied.
+Memory disposition: forbidden; machine non-write receipt records0Graphiti writes.
