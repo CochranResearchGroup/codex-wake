@@ -8321,3 +8321,27 @@ synthetic notLoaded stayed idle; retained as failed qualification attempts,
 not runtime failures. Real unloaded-source retest remains after deployment.
 Focused primary Standards/Spec inspection found no further changes needed;
 no broad review of previously closed0197/0198 slices. Hosted CI skipped.
+
+## Turn | 2026-11-03 | Unloaded import deployed and real copy reconciled
+
+PR464 source5079f2a deployed to immutable prefix
+~/.local/share/codex-wake/releases/0.22.0.dev2-5079f2a;238Python files match
+qualified source/wheel/installation. Launcher replaced atomically; prior76ac7d9
+prefix retained for rollback. Completion/default-root remain configured.
+
+Recovery precheck stopped before a new effect when an old deterministic snapshot
+was found. Its timestamp predates the failed test; initial before-fork inference
+was not proven. Native listing omitted parent UUID, but exact native reads found
+an existing child with correct fork ancestry and identical saved turns. Verified
+source revision, destination target/home, both completed/full persisted sources
+and child, no goals. Supported ControllerRuntime.reconcile_result retained an
+owner-observed result for the original intent, with no new native fork. Two
+installed `history import-recent --batch ID --yes --json` retries now completed
+and return the same child. Installed native `resume soylei UUID` visibly rendered
+the saved source answer. No model turn. Both real daemon targets and stock codex
+hash unchanged; test clients exited and fresh fixture UID process census empty.
+
+LOCAL-0199 CLOSED. Private evidence: testing/importfix/{recovered-operation.json,
+recovered-batch-0.json,recovered-batch-1.json,reopen.json,closeout.json} under
+~/.local/state/codex-wake. Curated evidence: plan0199/deployment.json. Memory
+disposition forbidden, explicit write request absent, zero Graphiti writes.

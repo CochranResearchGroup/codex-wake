@@ -1,0 +1,21 @@
+{
+  "status": "passed_reconciled_existing_copy",
+  "source_commit": "5079f2a0f7ce73231a09c4a98d7ce203500e2767",
+  "installed_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5079f2a",
+  "python_members_equal": 238,
+  "source_and_child_native_status": "notLoaded",
+  "existing_copy_content_equal": true,
+  "same_original_batch_retries": 2,
+  "new_live_forks": 0,
+  "saved_answer_visible": true,
+  "daemon_targets_unchanged": {
+    "ecochran76": true,
+    "soylei": true
+  },
+  "stock_codex_sha256": "b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8",
+  "owned_test_clients_remaining": [],
+  "fixture_uid_processes_remaining": [],
+  "model_turns": 0,
+  "qualification_limitation": "Actual real copy reconciled from existing qualified child; no fresh live fork was issued. Native fresh forks tested under UID1017.",
+  "correction": "Snapshot predates failed test; its existence did not establish whether that attempt reached fork. Native read, not listing metadata, established matching child ancestry."
+}
