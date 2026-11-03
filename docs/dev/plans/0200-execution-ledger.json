@@ -107,15 +107,17 @@
         "Live output arrives before completion; transcript has ordered model/tool/lifecycle events and resumable cursor with explicit retention/truncation.",
         "Silent success has no normal output; failures nonzero; timeout/disconnect preserves retrievable original operation."
       ],
-      "state": "implemented",
+      "state": "validated",
       "worker": "/root/local_health_469",
       "worktree": "/home/ecochran76/workspace.local/codex-wake-output-modes",
-      "result_sha": "687c7c8",
+      "result_sha": "3decfdd",
       "validation": [
-        "19localtests perPython",
-        "actualstream qualification exposed subscription gap; fixb72dcbe pending integration and actualreplacementmarkerqualification",
-        "read-only native attach preserves fullturns/settings/goals/queue/frontendbinding;live deltas observed beforeterminal;originalpartialtrace remains partial;knowntelemetry fix pending"
-      ]
+        "19localtests/version;final3changedseamtests/version",
+        "actualnative live deltas beforeterminal;15orderedretainedevents;final/silent/cursor/retry/visibleTUIproof",
+        "oldpartialtracehonestlypartial;knowntelemetryschemafixturequalified;finalgenerationcompletefreshtrace #475"
+      ],
+      "tracker_state": "closed",
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/output471/qualification471.json"
     },
     {
       "key": "T6",
@@ -153,7 +155,8 @@
         "CLI/API/local MCP share target,submit,result,event,cancel and output-mode semantics without manual OAuth enrollment for same-owner local use.",
         "Use transport-appropriate streams or operation/event handles; verify no required operation is available only through CLI."
       ],
-      "state": "pending"
+      "state": "running",
+      "owner": "primary"
     },
     {
       "key": "T8",
@@ -168,7 +171,8 @@
         "Daemon restart/stale generations do not retarget or repeat native work; busy session behavior is explicit.",
         "Retain unknown effects and reconcile original intent without blind replay; preserve unrelated sessions."
       ],
-      "state": "pending"
+      "state": "running",
+      "worker": "/root/local_health_469"
     },
     {
       "key": "T9",
@@ -220,5 +224,21 @@
     "powershell": "actual Windows PowerShell client sends UTF8 JSON to same WSL server; WSL bootstrap captures private connection receipt without token arguments/output",
     "api_mcp": "shared local.* owner schemas and slash/health/self-limit hooks; bounded event retrieval for MCP, streaming CLI/API presentation",
     "consumer_gate": "Current canonical codex-bots status route hardcodes unknown; separate narrow adapter scope question pending"
+  },
+  "integration_regressions": {
+    "source": "687c7c8",
+    "selection": "test_local_*.py",
+    "311": {
+      "passed": 25,
+      "seconds": 110.717
+    },
+    "312": {
+      "passed": 25,
+      "seconds": 116.864
+    },
+    "final_output312": {
+      "source": "3decfdd",
+      "passed": 3
+    }
   }
 }
