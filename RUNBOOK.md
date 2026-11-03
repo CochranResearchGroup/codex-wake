@@ -8253,3 +8253,24 @@ review froze cd12497: Standards0,Spec2accepted. One TDD pass fixed both completi
 findings at24e4cc1;25focused tests/version and rebuilt installed236member equality
 passed. Final fixture census empty, worker worktrees clean/retained. No working
 launcher/account changes, hosted CI, merge, deployment or memory write.
+
+## Turn | 2026-11-02 | Account shortcut follow-up
+
+Operator requested open/resume and clarified skim means recent conversation
+copying; recents browsing is also desired. Plan0198 records bounded local
+shortcut orchestration over existing launch/history/import owners. Plain codex
+stays stock. Stacked from validated6a290ee; previous review counts unchanged.
+
+## Turn | 2026-11-02 | Account shortcuts accepted
+
+LOCAL0198 sourcebdb2114 delivers open/resume/default-root and recent browsing/copy
+batch shortcuts; history.search gains optional bounded recent ordering through
+existing admission. Legacy bare emergency resume remains intact. Both3.11/3.12
+presubmit245/16checks passed ate3a61e7; final storage guard regression red/green
+and53focused checks/version passed. Exact final wheel5d11258688 and238Python
+payload members match installed UID1017 prefix. Actual native UUID/last/open,
+two-session copying, same/new batch dedup and changed-source partial retry passed
+under network isolation. Six-file qualified native package matched; owned daemon
+cleanup and fresh OS census empty. No operator launcher/home/credentials effects,
+provider model work, hosted CI, merge, deployment or memory write. Plan0197 stays
+closed; acceptance and review bounds are not rewritten.

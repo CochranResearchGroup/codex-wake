@@ -44,6 +44,8 @@ def register_parser(subparsers):
     search = verbs.add_parser('search')
     search.add_argument('--owner', action='append', dest='owners')
     search.add_argument('--query', default='')
+    search.add_argument('--sort', choices=('recent',), help='sort by latest activity')
+    search.add_argument('--limit', type=int, help='bound results to1–100 conversations before opening rollouts')
     search.add_argument('--json', dest='as_json', action='store_true')
     transfer = verbs.add_parser('import', help='copy a pinned saved conversation into another account through native fork')
     transfer.add_argument('thread_id')
@@ -80,7 +82,7 @@ def command(args, root, *, runtime=None, now=None):
             from .permission_commands import verified_cli_principal
             principal = verified_cli_principal(args)
         arguments = {key: value for key, value in vars(args).items()
-            if key in ('owners', 'query', 'owner', 'thread_id', 'expected_target', 'intent', 'expires_at') and value is not None}
+            if key in ('owners', 'query', 'owner', 'thread_id', 'expected_target', 'intent', 'expires_at', 'sort', 'limit') and value is not None}
         value = execute('history.' + args.history_verb, arguments, root,
                         authorized_accounts=allowed, principal=principal, runtime=runtime, now=now)
     except (WakeError, ValueError, OSError) as error:

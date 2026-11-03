@@ -203,6 +203,9 @@ The [generated command reference](docs/agents/command-reference.md) and
 [coverage report](docs/agents/command-coverage.json) describe the first migrated
 CLI/API/MCP slice and its explicit exceptions.
 
+The [everyday shortcuts](docs/agents/account-shortcuts.md) add `open ACCOUNT`,
+`resume ACCOUNT`, recent browsing and frozen recent-conversation copies.
+
 ## Native Usage
 
 Choose the exact thread UUID returned by `sessions resolve` or `sessions open`.

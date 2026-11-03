@@ -22,6 +22,6 @@ class CommandParityTests(unittest.TestCase):
         from codex_wake.command_contract import coverage_report
         from codex_wake.cli import build_parser
         report = coverage_report(build_parser())
-        self.assertEqual(report['local_only'], ['accounts.login'])
+        self.assertIn('accounts.login', report['local_only'])
         self.assertIn('after', report['deferred_commands'])
         self.assertIn('accounts.status', report['migrated_operations'])

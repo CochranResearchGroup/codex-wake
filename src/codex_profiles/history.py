@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -56,13 +57,21 @@ def discover(settings: Settings, profiles: list[str] | None = None) -> dict:
                 columns = {r[1] for r in connection.execute('pragma table_info(threads)')}
                 if not {'id', 'cwd', 'title', 'rollout_path'} <= columns:
                     raise HistoryError('unsupported native history schema')
-                rows = connection.execute('select id, cwd, title, rollout_path from threads order by id limit 10001').fetchall()
+                stamp = 'updated_at' if 'updated_at' in columns else 'created_at' if 'created_at' in columns else 'NULL'
+                rows = connection.execute('select id, cwd, title, rollout_path, '+stamp+' from threads order by id limit 10001').fetchall()
                 if len(rows) > 10000:
                     raise HistoryError('tenant history exceeds bounded discovery limit')
-                for thread_id, cwd, title, rollout_path in rows:
+                for thread_id, cwd, title, rollout_path, updated_at in rows:
+                    origin = 'native_' + stamp if stamp != 'NULL' else 'rollout_mtime'
+                    if type(updated_at) not in (int, float) or not math.isfinite(updated_at) or updated_at < 0:
+                        path = Path(rollout_path)
+                        updated_at = path.stat().st_mtime if path.is_file() and path.resolve().is_relative_to(home.resolve()) else 0
+                        origin = 'rollout_mtime'
+                    elif updated_at > 100000000000:
+                        updated_at /= 1000
                     sessions.append({'profile': profile, 'namespace': str(home.resolve()),
                                      'thread_id': thread_id, 'cwd': cwd, 'title': title,
-                                     'rollout_path': rollout_path})
+                                     'rollout_path': rollout_path, 'updated_at': updated_at, 'recency_source': origin})
         except (sqlite3.Error, HistoryError) as exc:
             holds.append({'profile': profile, 'reason': str(exc)})
     return {'status': 'partial' if holds else 'complete', 'sessions': sessions, 'holds': holds}

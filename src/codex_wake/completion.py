@@ -66,6 +66,11 @@ def candidates(words, cursor, *, parser=None):
         parser = build_parser()
     prefix = words[cursor] if cursor < len(words) else ''
     root = Path.cwd() / '.codex' / 'wake'
+    try:
+        from .shortcut_store import default_root
+        root = default_root()
+    except (ValueError, OSError):
+        pass
     pending = None
     position = 0
     for word in words[:cursor]:

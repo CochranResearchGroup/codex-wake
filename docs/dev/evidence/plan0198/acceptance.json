@@ -1,0 +1,97 @@
+{
+  "ticket": "LOCAL-0198",
+  "source_commit": "bdb2114b0fd9932301549817db660a84faac6b9b",
+  "presubmit": {
+    "311": {
+      "source": "e3a61e79721e6829227190aee9ac73a160c745de",
+      "qualified": true,
+      "tests": 245,
+      "checks": 16
+    },
+    "312": {
+      "source": "e3a61e79721e6829227190aee9ac73a160c745de",
+      "qualified": true,
+      "tests": 245,
+      "checks": 16
+    }
+  },
+  "final_focused": {
+    "python311": 53,
+    "python312": 53,
+    "status": "PASS",
+    "selection": [
+      "test_command*.py",
+      "test_*completion.py",
+      "test_wake_control*.py"
+    ]
+  },
+  "installed": {
+    "status": "passed",
+    "source_commit": "bdb2114b0fd9932301549817db660a84faac6b9b",
+    "wheel_sha256": "5d112586882d8683d9dd215fe1d39a23a10f53d4cf7c6e81af118d5a0e4f09e3",
+    "matched_source_wheel_installed_python_members": 238,
+    "checks": [
+      "actual native resume UUID and --last show saved answer through configured default root",
+      "actual two-thread batch copy, same-batch and new-batch dedup return same native children",
+      "source change after preview holds that exact entry; peer entry copies and retry creates no duplicate",
+      "actual native open attaches the selected managed account"
+    ],
+    "cleanup": [
+      {
+        "account": "bob",
+        "stopped": true
+      },
+      {
+        "account": "alice",
+        "stopped": true
+      }
+    ],
+    "owned_fixture_processes": [],
+    "default_root_account_completion": "PASS",
+    "prefix": "/home/codex-daemon-test/shortcut198-prefix",
+    "executable": "/home/codex-daemon-test/shortcut198-prefix/bin/codex-wake"
+  },
+  "native_package_sha256": {
+    "codex-package.json": "85ca1bb2afa3795b0750ce43c796cecc536781a415672661a78f06e8ac58dbd7",
+    "codex-path/rg": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+    "codex-resources/bwrap": "8b6679d62120e60335aac2bfe141f60237710ff0897e658113d1e039987a78db",
+    "bin/codex-code-mode-host": "6a108aba87415e164ba553999aee2a1d47b0a917fabd22da721d6add4127b387",
+    "bin/codex-exec-server": "c9d1cde61deeed1c2f4d6543ad406328d16a3a6777b276c12fb365fbf4da8c44",
+    "bin/codex": "48ed489ceed144d277c44a505ef5cbcb63250fa361fe132bed1fdab3f7cfb7d5"
+  },
+  "environment": "Separate host UID1017 with user/network namespace, Python3.12.3 installed prefix; source tests3.11.15/3.12.13 on Cooper WSL share host kernel/resources; external model access blocked",
+  "model_turns": 0,
+  "retained_red_evidence": [
+    "history.search limit/sort initially unsupported; recent ordering regression red then green",
+    "top-level resume parser collision caught; legacy bare emergency resume retained and24wake-control regressions/version pass",
+    "linked root created an empty batch directory before refusal; new public CLI regression red then green before final qualification"
+  ],
+  "boundaries": [
+    "No global launcher or operator shell/preferences installed",
+    "No real-account history, credentials or daemons changed",
+    "No GitHub hosted CI, merge or deployment",
+    "Plan0197 remains closed; its prior review/remediation counters and evidence are unchanged"
+  ],
+  "evidence_directory": "/home/ecochran76/.local/state/codex-wake/testing/shortcuts198",
+  "validation_commands": [
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv311/bin/python scripts/local_validation.py --repo /home/ecochran76/workspace.local/codex-wake-shortcuts --runtime /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv311/bin/python --tier presubmit --receipt /tmp/c198/p311.json",
+      "result": "PASS:245 tests,16 checks",
+      "source_commit": "e3a61e79721e6829227190aee9ac73a160c745de",
+      "retained_receipt": "/home/ecochran76/.local/state/codex-wake/testing/shortcuts198/presubmit311.json"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python scripts/local_validation.py --repo /home/ecochran76/workspace.local/codex-wake-shortcuts --runtime /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python --tier presubmit --receipt /tmp/c198/p312.json",
+      "result": "PASS:245 tests,16 checks",
+      "source_commit": "e3a61e79721e6829227190aee9ac73a160c745de",
+      "retained_receipt": "/home/ecochran76/.local/state/codex-wake/testing/shortcuts198/presubmit312.json"
+    },
+    {
+      "command": "sudo -n -H -u codex-daemon-test env OUTER_NETNS=<invoking process network namespace> TASK_SOURCE_COMMIT=bdb2114b0fd9932301549817db660a84faac6b9b unshare -Urn /home/codex-daemon-test/shortcut198-prefix/bin/python /tmp/c198/qualify.py",
+      "result": "PASS: native open/resume, copy, dedup, held-source retry; zero model turns; both daemons stopped",
+      "retained_script": "/home/ecochran76/.local/state/codex-wake/testing/shortcuts198/qualify.py",
+      "retained_receipt": "/home/ecochran76/.local/state/codex-wake/testing/shortcuts198/installed-final.json",
+      "original_receipt": "/home/codex-daemon-test/shortcuts198-ed3796a0/receipt.json"
+    }
+  ]
+}

@@ -12,6 +12,7 @@
     "builds.rollback",
     "builds.select",
     "builds.stage",
+    "configuration.default-root",
     "configuration.explain",
     "daemons.list",
     "daemons.restart",
@@ -20,12 +21,21 @@
     "daemons.stop",
     "daemons.update",
     "history.import",
+    "history.import-recent",
     "history.read",
+    "history.recent",
     "history.resume",
-    "history.search"
+    "history.search",
+    "open",
+    "resume"
   ],
   "local_only": [
-    "accounts.login"
+    "accounts.login",
+    "open",
+    "resume",
+    "configuration.default-root",
+    "history.recent",
+    "history.import-recent"
   ],
   "deferred_commands": [
     "a2a.ack-projections",
@@ -268,7 +278,6 @@
     "resources.release",
     "resources.show",
     "resources.transfer",
-    "resume",
     "schema",
     "service.install",
     "service.logs",
@@ -326,6 +335,7 @@
     "accounts.login": "Local native credential stdin/stdio only.",
     "accounts.status": "Human CLI uses native login status; structured transports observe unverified local cache only.",
     "history.search/read/resume": "Native MCP additionally verifies caller_thread_id; API/OAuth use scoped grants.",
+    "resume": "ACCOUNT selects local conversation reopening; bare resume retains existing emergency-pause controls outside the shortcut contract.",
     "local_cli": "Host operator admission differs from scoped remote authorization; no implicit remote privilege."
   },
   "mcp_tools": {

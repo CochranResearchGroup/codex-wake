@@ -35,8 +35,7 @@ Creates only an empty isolated registry; preserves existing state.
 
 options:
   -h, --help  show this help message and exit
-  --json      Emit the structured result; authentication status uses local
-              cache evidence without provider verification.
+  --json      Emit structured results for this command.
 
 Examples:
   codex-wake --wake-root ROOT accounts init
@@ -73,8 +72,7 @@ positional arguments:
 options:
   -h, --help     show this help message and exit
   --alias ALIAS  Optional alternate name for the newly created account.
-  --json         Emit the structured result; authentication status uses local
-                 cache evidence without provider verification.
+  --json         Emit structured results for this command.
 
 Examples:
   codex-wake --wake-root ROOT accounts create work --alias office
@@ -109,8 +107,7 @@ Read-only observation; no model turn.
 
 options:
   -h, --help  show this help message and exit
-  --json      Emit the structured result; authentication status uses local
-              cache evidence without provider verification.
+  --json      Emit structured results for this command.
 
 Examples:
   codex-wake --wake-root ROOT accounts list
@@ -144,8 +141,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
   --expected-target EXPECTED_TARGET
                         Exact target JSON from the corresponding resolve, list
                         or status command; replacement is refused.
@@ -228,8 +224,7 @@ options:
   -h, --help            show this help message and exit
   --channel {stock,modded}
                         Registered native build channel (default: modded).
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
   --expected-target EXPECTED_TARGET
                         Exact target JSON from the corresponding resolve, list
                         or status command; replacement is refused.
@@ -275,8 +270,7 @@ options:
   --expected-target EXPECTED_TARGET
                         Exact target JSON from the corresponding resolve, list
                         or status command; replacement is refused.
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
 
 Examples:
   codex-wake --wake-root ROOT configuration explain work
@@ -527,19 +521,23 @@ codex-wake --wake-root ROOT history search --owner work --query test
 
 ```text
 usage: codex-wake history search [-h] [--owner OWNERS] [--query QUERY]
-                                 [--json]
+                                 [--sort {recent}] [--limit LIMIT] [--json]
 
 Search explicitly permitted saved conversation metadata.
 
 Read-only observation; no model turn.
 
 options:
-  -h, --help      show this help message and exit
-  --owner OWNERS  Limit search to these explicitly permitted owning accounts;
-                  repeat --owner.
-  --query QUERY   Filter permitted saved conversation metadata (default: all).
-  --json          Emit the structured result; authentication status uses local
-                  cache evidence without provider verification.
+  -h, --help       show this help message and exit
+  --owner OWNERS   Limit search to these explicitly permitted owning accounts;
+                   repeat --owner.
+  --query QUERY    Filter permitted saved conversation metadata (default:
+                   all).
+  --sort {recent}  Order by recent activity when set to recent; default
+                   preserves existing discovery order.
+  --limit LIMIT    Maximum recent conversations, from1 to100 (default:10 for
+                   shortcuts).
+  --json           Emit structured results for this command.
 
 Examples:
   codex-wake --wake-root ROOT history search --owner work --query test
@@ -549,6 +547,8 @@ Examples:
 |---|---|---|
 | `owners` | no | Limit search to these explicitly permitted owning accounts; repeat --owner. |
 | `query` | no | Filter permitted saved conversation metadata (default: all). |
+| `limit` | no | Maximum recent conversations, from1 to100 (default:10 for shortcuts). |
+| `sort` | no | Order by recent activity when set to recent; default preserves existing discovery order. |
 
 ## history read
 
@@ -583,8 +583,7 @@ options:
   --expected-target EXPECTED_TARGET
                         Exact target JSON from the corresponding resolve, list
                         or status command; replacement is refused.
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
 
 Examples:
   codex-wake --wake-root ROOT history read THREAD --owner work
@@ -632,8 +631,7 @@ options:
   --expected-target EXPECTED_TARGET
                         Exact target JSON from the corresponding resolve, list
                         or status command; replacement is refused.
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
   --intent INTENT       Existing exact-owner resume intent; does not grant new
                         work authority.
   --expires-at EXPIRES_AT
@@ -708,8 +706,7 @@ options:
                         uncertain result. Different inputs conflict.
   --yes                 Confirm the displayed scoped effect; does not override
                         a changed target.
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
 
 Examples:
   codex-wake --wake-root ROOT history import THREAD --owner work --destination personal --expected-source "$SOURCE" --expected-target "$TARGET" --idempotency-key copy-1
@@ -750,8 +747,7 @@ options:
   -h, --help            show this help message and exit
   --channel {stock,modded}
                         Registered native build channel (default: modded).
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
 
 Examples:
   codex-wake --wake-root ROOT daemons list
@@ -790,8 +786,7 @@ options:
   -h, --help            show this help message and exit
   --channel {stock,modded}
                         Registered native build channel (default: modded).
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
 
 Examples:
   codex-wake --wake-root ROOT daemons status work
@@ -833,8 +828,7 @@ options:
   -h, --help            show this help message and exit
   --channel {stock,modded}
                         Registered native build channel (default: modded).
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
   --expected-target EXPECTED_TARGET
                         Exact target JSON from the corresponding resolve, list
                         or status command; replacement is refused.
@@ -887,8 +881,7 @@ options:
   -h, --help            show this help message and exit
   --channel {stock,modded}
                         Registered native build channel (default: modded).
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
   --expected-target EXPECTED_TARGET
                         Exact target JSON from the corresponding resolve, list
                         or status command; replacement is refused.
@@ -941,8 +934,7 @@ options:
   -h, --help            show this help message and exit
   --channel {stock,modded}
                         Registered native build channel (default: modded).
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
   --expected-target EXPECTED_TARGET
                         Exact target JSON from the corresponding resolve, list
                         or status command; replacement is refused.
@@ -995,8 +987,7 @@ options:
   -h, --help            show this help message and exit
   --channel {stock,modded}
                         Registered native build channel (default: modded).
-  --json                Emit the structured result; authentication status uses
-                        local cache evidence without provider verification.
+  --json                Emit structured results for this command.
   --expected-target EXPECTED_TARGET
                         Exact target JSON from the corresponding resolve, list
                         or status command; replacement is refused.
@@ -1017,4 +1008,191 @@ Examples:
 | `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
 | `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
 | `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## open
+
+Open the registered native client for one private account.
+
+Local human shortcut over builds.launch; internally pins the selected build and starts or attaches its daemon. No model prompt.
+
+Transport: Local human CLI only.
+
+```sh
+codex-wake --wake-root ROOT open work
+```
+
+### CLI help
+
+```text
+usage: codex-wake open [-h] [--channel {stock,modded}] account
+
+Open the registered native client for one private account.
+
+Local human shortcut over builds.launch; internally pins the selected build and starts or attaches its daemon. No model prompt.
+
+positional arguments:
+  account               Account name or configured alias.
+
+options:
+  -h, --help            show this help message and exit
+  --channel {stock,modded}
+                        Registered native build channel (default: modded).
+
+Examples:
+  codex-wake --wake-root ROOT open work
+```
+
+## resume
+
+Reopen a conversation in its named account; bare resume retains emergency-pause release.
+
+ACCOUNT selects the native conversation chooser; --last or UUID selects saved account history. Never mixes account and emergency scope flags.
+
+Transport: Local human CLI only.
+
+```sh
+codex-wake --wake-root ROOT resume work --last
+```
+
+### CLI help
+
+```text
+usage: codex-wake resume [-h] [--all-roots] [--registry-dir REGISTRY_DIR]
+                         [--json] [--channel {stock,modded}] [--last]
+                         [account] [thread_id]
+
+Reopen a conversation in its named account; bare resume retains emergency-pause release.
+
+ACCOUNT selects the native conversation chooser; --last or UUID selects saved account history. Never mixes account and emergency scope flags.
+
+positional arguments:
+  account               Account name or configured alias.
+  thread_id             Native saved conversation identifier in its owning
+                        account.
+
+options:
+  -h, --help            show this help message and exit
+  --all-roots           snapshot all registered roots, including disabled
+                        roots
+  --registry-dir REGISTRY_DIR
+                        operator-selected root registry
+  --json                Emit structured results for this command.
+  --channel {stock,modded}
+                        Registered native build channel (default: modded).
+  --last                Reopen the most recently active saved conversation for
+                        the selected account.
+
+Examples:
+  codex-wake --wake-root ROOT resume work --last
+```
+
+## configuration default-root
+
+Save an explicit user-local root for account shortcuts.
+
+Changes only local shortcut preferences; explicit --wake-root wins. Does not change stock codex or unrelated legacy root defaults.
+
+Transport: Local human CLI only.
+
+```sh
+codex-wake --wake-root ROOT configuration default-root ROOT
+```
+
+### CLI help
+
+```text
+usage: codex-wake configuration default-root [-h] root
+
+Save an explicit user-local root for account shortcuts.
+
+Changes only local shortcut preferences; explicit --wake-root wins. Does not change stock codex or unrelated legacy root defaults.
+
+positional arguments:
+  root        Existing private Wake account root saved only for local
+              shortcuts.
+
+options:
+  -h, --help  show this help message and exit
+
+Examples:
+  codex-wake --wake-root ROOT configuration default-root ROOT
+```
+
+## history recent
+
+View the latest saved conversations for one permitted account.
+
+Local shortcut to history.search with sort=recent and a bounded limit; API/MCP can use those same search arguments. Partial evidence stays visible.
+
+Transport: Local human CLI only.
+
+```sh
+codex-wake --wake-root ROOT history recent --owner work --limit 10
+```
+
+### CLI help
+
+```text
+usage: codex-wake history recent [-h] --owner OWNER [--limit LIMIT] [--json]
+
+View the latest saved conversations for one permitted account.
+
+Local shortcut to history.search with sort=recent and a bounded limit; API/MCP can use those same search arguments. Partial evidence stays visible.
+
+options:
+  -h, --help     show this help message and exit
+  --owner OWNER  Exact account that owns the saved conversation.
+  --limit LIMIT  Maximum recent conversations, from1 to100 (default:10 for
+                 shortcuts).
+  --json         Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT history recent --owner work --limit 10
+```
+
+## history import-recent
+
+Preview and copy a frozen recent-conversation selection.
+
+Local batch orchestration over protected history.import. Retains exact intents and per-entry outcomes; same source revision/destination reuses the original copy. Requires both account daemons running; preview starts none.
+
+Transport: Local human CLI only.
+
+```sh
+codex-wake --wake-root ROOT history import-recent --owner work --destination personal --limit 10
+```
+
+### CLI help
+
+```text
+usage: codex-wake history import-recent [-h] [--owner OWNER] [--limit LIMIT]
+                                        [--json] [--destination DESTINATION]
+                                        [--channel {stock,modded}]
+                                        [--batch BATCH] [--yes] [--preview]
+
+Preview and copy a frozen recent-conversation selection.
+
+Local batch orchestration over protected history.import. Retains exact intents and per-entry outcomes; same source revision/destination reuses the original copy. Requires both account daemons running; preview starts none.
+
+options:
+  -h, --help            show this help message and exit
+  --owner OWNER         Exact account that owns the saved conversation.
+  --limit LIMIT         Maximum recent conversations, from1 to100 (default:10
+                        for shortcuts).
+  --json                Emit structured results for this command.
+  --destination DESTINATION
+                        Destination account for a distinct source-preserving
+                        conversation copy.
+  --channel {stock,modded}
+                        Registered native build channel (default: modded).
+  --batch BATCH         Exact frozen copy-batch ID to preview or retry without
+                        selecting newer sessions.
+  --yes                 Explicitly confirm the frozen source-preserving batch
+                        copy.
+  --preview             Show/save the frozen selection without native copying
+                        or daemon starts.
+
+Examples:
+  codex-wake --wake-root ROOT history import-recent --owner work --destination personal --limit 10
+```
 

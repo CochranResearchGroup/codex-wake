@@ -753,6 +753,8 @@ def build_parser() -> argparse.ArgumentParser:
     readiness.add_argument("--openclaw-timeout", type=float, default=30.0, help="seconds for OpenClaw readiness probes")
     readiness.add_argument("--json", action="store_true", dest="as_json")
 
+    from .account_shortcuts import register as register_shortcuts
+    register_shortcuts(parser)
     from .command_contract import apply_help
     return apply_help(parser)
 
@@ -2791,6 +2793,9 @@ def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
 def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    from .account_shortcuts import handles as shortcut_handles, command as shortcut_command
+    if shortcut_handles(args):
+        return shortcut_command(args)
     if permission_principal is not None:
         from .session_permissions import Principal
         if not isinstance(permission_principal,Principal):raise WakeError('permission_identity_unverified')
