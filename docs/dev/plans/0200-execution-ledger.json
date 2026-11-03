@@ -92,7 +92,8 @@
         "Public CLI/native Unix wire test PASS Python3.11/3.12",
         "Dedicated signed-in native conversation: submitted exact existing thread,final response retrieved,actual target TUI renders unique answer;retry same intent;3 bounded marker-only provider turns cumulative, no tools"
       ],
-      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/prompt-live.json"
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/prompt-live.json",
+      "tracker_state": "closed"
     },
     {
       "key": "T5",
@@ -109,10 +110,11 @@
       "state": "implemented",
       "worker": "/root/local_health_469",
       "worktree": "/home/ecochran76/workspace.local/codex-wake-output-modes",
-      "result_sha": "4212b5c",
+      "result_sha": "687c7c8",
       "validation": [
         "19localtests perPython",
-        "actualstream qualification exposed subscription gap; fixb72dcbe pending integration and actualreplacementmarkerqualification"
+        "actualstream qualification exposed subscription gap; fixb72dcbe pending integration and actualreplacementmarkerqualification",
+        "read-only native attach preserves fullturns/settings/goals/queue/frontendbinding;live deltas observed beforeterminal;originalpartialtrace remains partial;knowntelemetry fix pending"
       ]
     },
     {
@@ -203,5 +205,14 @@
       ],
       "state": "pending"
     }
-  ]
+  ],
+  "integration_tip": "687c7c8",
+  "resource_accounting": {
+    "effective_model": "inherited;runtime reported identity unavailable",
+    "aggregate_allocation": "unknown",
+    "provider_turns_known": 5,
+    "provider_work": "bounded synthetic marker replies only;no tools;one failed-stream turn retained and reconciled",
+    "review_broad_count": 0,
+    "review_remediation_count": 0
+  }
 }
