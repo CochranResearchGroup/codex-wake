@@ -149,11 +149,40 @@
         "MCP text observed before terminal"
       ],
       "failed": [
-        "WSL,PowerShell,API pre-terminal receive timing was not established by later observers"
+        "WSL,PowerShell,API pre-terminal text receive timing was not established for the very short final-answer burst; API did receive nonterminal lifecycle and tool frames"
       ],
       "second_intent": "not submitted; held for timing diagnosis",
       "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-1.json",
       "packet_maximum_new_intents": 2
+    },
+    "native_packet2_result": {
+      "status": "passed",
+      "provider_intents_consumed": 2,
+      "known_cumulative_provider_turns": 7,
+      "checks": [
+        "one successful pwd and exact saved WSL prompt",
+        "complete native transcript:33ordered events,no gaps,truncation or unsupported kinds",
+        "visible target TUI",
+        "all four actual client paths receive text before direct native completion witness",
+        "four modes and same-key retry"
+      ],
+      "receive_before_native_completion_seconds": {
+        "api": 5.923,
+        "local_mcp": 5.935,
+        "ps": 5.976,
+        "wsl": 5.937
+      },
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-2.json",
+      "receipt_sha256": "ef92963ecdc2ff233eb38048517476a2c0eb964120315789a5bc6e62d7e81c32",
+      "first_failed_timing_receipt": "retained unchanged",
+      "fresh_api_mcp_submissions": "not yet qualified; distinct from same-key retry"
+    },
+    "delayed_event_probe": {
+      "status": "passed",
+      "provider_turns": 0,
+      "native_evidence": "scripted Unix protocol peer with completion held until all four actual clients received lead text",
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/delayed-probe/receipt.json",
+      "receipt_sha256": "c53cf35b069b64a1c8273fa83b3be1648612daf807e86051acd10ef08f5d67f6"
     }
   },
   "milestone_b": {
