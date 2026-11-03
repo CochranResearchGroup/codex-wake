@@ -82,6 +82,11 @@ def launch(args, root):
         raise ValueError('conversation resume requires an account name')
     if args.command == 'resume' and any(getattr(args, key, None) for key in ('all_roots','registry_dir','authorized_root','caller_wake_subject','as_json')):
         raise ValueError('account resume cannot be mixed with emergency-pause scope flags')
+    owner = owner_from_root(root)
+    account_pin = owner.accounts.execute('accounts.resolve', {'selector':args.account})['account']['target']
+    def same_account(target):
+        if any(target.get(key) != value for key,value in account_pin.items()):
+            raise InventoryError('stale_target', 'account binding changed while selecting its conversation or build')
     native = []
     if args.command == 'resume':
         identifier = args.thread_id
@@ -89,20 +94,26 @@ def launch(args, root):
             found = recent(root, args.account, 1)
             if found.get('holds') or not found['sessions']:
                 raise ValueError('latest conversation unavailable; inspect history recent')
-            identifier = found['sessions'][0]['thread_id']
+            selected_session = found['sessions'][0]
+            same_account(selected_session['target'])
+            identifier = selected_session['thread_id']
         if identifier is not None:
             if str(UUID(identifier)) != identifier:
                 raise ValueError('exact native conversation UUID required')
             from .history_commands import execute, policy
-            value = execute('history.read', {'owner':args.account,'thread_id':identifier}, root,
+            read_arguments = {'owner':args.account,'thread_id':identifier}
+            if args.last:
+                read_arguments['expected_target'] = selected_session['target']
+            value = execute('history.read', read_arguments, root,
                             authorized_accounts=policy(root).get('readable_accounts', []))
             if value['status'] != 'completed':
                 raise InventoryError(value['error']['code'], value['error']['message'])
+            same_account(value['result']['session']['target'])
         native = ['resume'] + ([identifier] if identifier else [])
     channel = args.channel or 'modded'
-    owner = owner_from_root(root)
     builds = owner.execute('builds.list', {'account':args.account})['builds']
     selected = next(row for row in builds if row['name'] == channel)
+    same_account(selected['target'])
     if selected.get('status') == 'held':
         raise ValueError(selected['reason'])
     print('Opening '+channel+' / '+selected['target']['account'], file=sys.stderr)
