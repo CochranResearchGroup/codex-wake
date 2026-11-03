@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/466",
+  "status": "in_progress",
+  "product_source": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+  "branch": "feat/wsl-session-control-0200",
+  "hosted_ci": "skipped under repository cost policy",
+  "installed_transport": {
+    "status": "passed",
+    "native_evidence": "synthetic owned Unix protocol peer; zero provider turns",
+    "prefix": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8",
+    "wheel_sha256": "5d9a6626239177b28b2696d0ce2d13cc968a3e2e28deee23507dff102db46f60",
+    "matching_python_members": 252,
+    "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/run-4de6f47a/receipt.json",
+    "receipt_sha256": "37d2156b965ff6d34cdad712fbbd0595306a6894ffbbc89a343d1dfb8474f4c3",
+    "windows_powershell": "5.1.26100.9711",
+    "checks": [
+      "Unicode and multiline prompt preserved",
+      "four response modes",
+      "same operation across WSL CLI, actual PowerShell, REST and MCP HTTP/stdio SDK",
+      "equals-form initial key and space-form retry submit once",
+      "negative HTTP access and structured MCP error",
+      "owned process census empty"
+    ]
+  },
+  "checks": [
+    {
+      "command": "XDG_CONFIG_HOME=/tmp/wake0200-ci311-config XDG_STATE_HOME=/tmp/wake0200-ci311-state CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv311/bin/python -m unittest discover -s tests -p 'test_*.py'",
+      "status": "running",
+      "log": "/tmp/wake0200-full311.log",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
+    },
+    {
+      "command": "XDG_CONFIG_HOME=/tmp/wake0200-ci312-config XDG_STATE_HOME=/tmp/wake0200-ci312-state CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m unittest discover -s tests -p 'test_*.py'",
+      "status": "running",
+      "log": "/tmp/wake0200-full312.log",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m unittest discover -s tests -p 'test_local_*.py'",
+      "status": "passed",
+      "tests": 34,
+      "seconds": 170.757,
+      "source_commit": "d1a696687b56255941d14f4a59ac6e27a796680f"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m unittest discover -s tests -p test_cli.py",
+      "status": "passed",
+      "tests": 66,
+      "seconds": 13.701,
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m unittest discover -s tests -p test_shell_completion.py",
+      "status": "passed",
+      "tests": 6,
+      "seconds": 3.359,
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m unittest discover -s tests -p test_command_contract.py",
+      "status": "passed",
+      "tests": 3,
+      "seconds": 0.768,
+      "source_commit": "d1a696687b56255941d14f4a59ac6e27a796680f"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m unittest discover -s tests -p test_lifecycle_mcp.py",
+      "status": "passed",
+      "tests": 3,
+      "seconds": 3.312,
+      "source_commit": "d1a696687b56255941d14f4a59ac6e27a796680f"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m unittest discover -s tests -p test_local_controller_server.py",
+      "status": "passed",
+      "tests": 1,
+      "seconds": 24.936,
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m ruff check --select F821,F822,F823 src scripts tests .codex/hooks",
+      "status": "passed",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m compileall -q src tests .codex/hooks",
+      "status": "passed",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python scripts/check_policy_wiring.py",
+      "status": "passed",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python scripts/generate_command_reference.py --check",
+      "status": "passed",
+      "source_commit": "d1a696687b56255941d14f4a59ac6e27a796680f"
+    }
+  ],
+  "milestone_a": {
+    "status": "in_progress",
+    "ticket": 475,
+    "consumer_gate": "Current codex-bots route explicitly reports unknown TUI responsiveness; narrow adapter scope question pending",
+    "partial_native": {
+      "provider_intents_consumed": 1,
+      "additional_intent_cap": 2,
+      "native_package_sha256": "48ed489ceed144d277c44a505ef5cbcb63250fa361fe132bed1fdab3f7cfb7d5",
+      "passed": [
+        "exact saved multiline Unicode PowerShell prompt",
+        "one actual read-only pwd tool",
+        "complete ordered native transcript",
+        "visible target TUI question and answer",
+        "four-mode retrieval across WSL,PowerShell,API,MCP",
+        "same-key retry reuses original operation",
+        "MCP text observed before terminal"
+      ],
+      "failed": [
+        "WSL,PowerShell,API pre-terminal receive timing was not established by later observers"
+      ],
+      "second_intent": "not submitted; held for timing diagnosis",
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-1.json"
+    }
+  },
+  "milestone_b": {
+    "status": "blocked",
+    "ticket": 476,
+    "blocked_by": 475
+  },
+  "review": {
+    "broad_reviews": 0,
+    "remediation_passes": 0
+  },
+  "deployment": "working installation unchanged",
+  "environment_differences": [
+    "Local WSL shared kernel rather than hosted Ubuntu runner",
+    "Actual Windows PowerShell interop available locally",
+    "Python3.11.15 and3.12.13 from private development environments",
+    "Full matrix and installed native acceptance are separate from the passing synthetic transport fixture"
+  ]
+}

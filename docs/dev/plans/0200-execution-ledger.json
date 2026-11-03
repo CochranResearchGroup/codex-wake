@@ -213,7 +213,18 @@
       ],
       "state": "running",
       "worker": "/root/local_health_469",
-      "owner": "worker with primary integration"
+      "owner": "worker with primary integration",
+      "partial_validation": {
+        "provider_intent1": "completed; exact Unicode/multiline input, actual pwd, complete ordered native transcript, visible TUI, four modes across entrypoints and same-key retry passed",
+        "live_stream_before_terminal": {
+          "local_mcp": "passed",
+          "wsl": "failed timing evidence",
+          "powershell": "failed timing evidence",
+          "api": "failed timing evidence"
+        },
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-1.json",
+        "next": "read-only observer timing diagnosis and deterministic delayed-event fixture before considering unused second intent"
+      }
     },
     {
       "key": "T10",
@@ -234,10 +245,19 @@
   "resource_accounting": {
     "effective_model": "inherited;runtime reported identity unavailable",
     "aggregate_allocation": "unknown",
-    "provider_turns_known": 5,
+    "provider_turns_known": 6,
     "provider_work": "bounded synthetic marker replies only;no tools;one failed-stream turn retained and reconciled",
     "review_broad_count": 0,
-    "review_remediation_count": 0
+    "review_remediation_count": 0,
+    "current_acceptance_packet": {
+      "maximum_new_intents": 2,
+      "consumed": 1,
+      "second_intent": "held pending observer timing diagnosis",
+      "first_operation_id": "local-prompt-592abc9685601c7fc0953c12a406354c",
+      "first_key": "plan0200-475-P475_PS_bf51c97e",
+      "native_work": "one successful read-only pwd and a short marker reply",
+      "state": "completed; never replay with a new key"
+    }
   },
   "shared_contract_decisions": {
     "local_server": "WSL same-user local controller; automatic private connection receipt, no manual OAuth enrollment",
