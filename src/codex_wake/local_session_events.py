@@ -140,8 +140,16 @@ def collect(root,identifier):
                 if metadata.get('codexHome')!=target['home']:raise InventoryError('stale_target','native account home changed')
                 ws.send(encoded(dict(method='initialized')))
                 current=call('thread/read',dict(threadId=thread,includeTurns=False))['thread']
-                if current.get('id')!=thread or current.get('status',{}).get('type') not in ('idle','notLoaded'):
+                if current.get('id')!=thread or current.get('status',{}).get('type')!='idle':
                     raise InventoryError('session_busy','target is busy; no implicit queue or steer')
+                # Native events are connection-scoped: rejoin ONLY the already
+                # loaded idle conversation, with no configuration/history overrides.
+                attached=call('thread/resume',dict(threadId=thread,excludeTurns=True))['thread']
+                if attached.get('id')!=thread:raise InventoryError('stale_target','native event attachment changed conversation')
+                after=call('thread/read',dict(threadId=thread,includeTurns=False))['thread']
+                settings=('id','model','modelProvider','reasoningEffort','cwd','environments')
+                if any(after.get(key)!=current.get(key) for key in settings):
+                    raise InventoryError('stale_target','native event attachment changed session settings')
                 transmitted=True
                 turn=call('turn/start',dict(threadId=thread,input=[dict(type='text',text=record['payload']['prompt'])]))['turn']
                 turn_id=turn.get('id')

@@ -25,6 +25,7 @@ class LocalSessionTests(unittest.TestCase):
                     if method=='initialize':value={'codexHome':str(home)}
                     elif method=='thread/loaded/list':value={'data':['one','two'],'nextCursor':None}
                     elif method=='thread/read':value={'thread':{'id':message['params']['threadId'],'name':'same-name','cwd':str(root),'status':{'type':'idle'},'modelProvider':'openai','turns':[{'id':'turn-one','status':'completed','items':[{'type':'agentMessage','text':'known answer'}]}]}}
+                    elif method=='thread/resume':value={'thread':{'id':message['params']['threadId']}}
                     elif method=='turn/start':value={'turn':{'id':'turn-one'}}
                     else:raise AssertionError(method)
                     ws.send(json.dumps({'id':message['id'],'result':value}))
