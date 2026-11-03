@@ -77,6 +77,23 @@ class SelfLimitsTests(unittest.TestCase):
                         self.assertEqual(result['watcher_setup']['reason'],'permission_deny')
                         self.assertFalse(result['watcher_setup']['start_attempted'])
 
+    def test_configured_watcher_starts_without_claiming_readiness(self):
+        from codex_wake.self_limits import execute
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,_,_=self.fixture(directory)
+            context=dict(threadId=THREAD,sessionId=THREAD,callId='self-test',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+            with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW), patch(
+                    'codex_wake.goal_watcher.watcher_status', side_effect=[
+                        dict(reason='watcher_not_running'),dict(reason='watcher_not_running'),dict(reason='watcher_running')]), patch(
+                    'codex_wake.self_limits.subprocess.run',return_value=SimpleNamespace(returncode=0)) as runner:
+                result=execute(root,policy,'set',dict(token_limit=100,time_limit_seconds=120),native_context=context)
+                self.assertEqual(runner.call_args.args[0],['systemctl','--user','start','codex-wake-goal-limits.service'])
+                self.assertTrue(result['watcher_setup']['start_attempted'])
+                self.assertFalse(result['engagement']['engaged'])
+                self.assertFalse(result['controller']['fresh'])
+
     def test_fresh_usage_has_no_goal_or_grant_requirement(self):
         from codex_wake.goal_usage import observe_session_usage
         with tempfile.TemporaryDirectory() as directory:

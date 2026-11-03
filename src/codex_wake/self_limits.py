@@ -32,7 +32,7 @@ def ensure_watcher(root, thread):
         inherited = store.evaluate('enforcement.watcher_start', Principal(thread))
         if inherited['permission'] != 'allow' and inherited['rule'] != 'profile:permissive':
             raise PermissionDenied('permission_' + inherited['permission'], inherited)
-    from .goal_watcher import watcher_status, start_watcher
+    from .goal_watcher import watcher_status, SERVICE
     try:
         service = watcher_status(root)
     except (OSError, subprocess.SubprocessError):
@@ -40,9 +40,20 @@ def ensure_watcher(root, thread):
     if service['reason'] != 'watcher_not_installed':
         # Never bypass a service mask, scope mismatch or configured controller.
         if service['reason'] == 'watcher_not_running':
-            if store.active():
-                return start_watcher(root, principal=Principal(thread))
-            return dict(service, reason='configured_watcher_requires_authorized_start')
+            from .goal_maintenance import admission_guard
+            with supervision._lock(directory, 'maintenance'):
+                admission_guard(directory)
+                current = watcher_status(root)
+                if current['reason'] != 'watcher_not_running':
+                    return current
+                started = subprocess.run(['systemctl', '--user', 'start', SERVICE],
+                    capture_output=True, text=True, timeout=10, check=False)
+            result = watcher_status(root)
+            result['start_attempted'] = True
+            if started.returncode:
+                result.update(reason='watcher_start_failed',
+                    next_action='Inspect the configured service journal; no restart or unmask was attempted.')
+            return result
         return service
     with supervision._lock(directory, 'self-watcher-start'):
         if supervision._heartbeat(directory).get('fresh'):
