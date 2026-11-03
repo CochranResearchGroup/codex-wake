@@ -2,7 +2,7 @@
   "spec": "docs/dev/plans/0197-2026-11-02-command-contract.md",
   "integration_branch": "feat/command-contract-0197",
   "base": "6fb4fe7a9b6511a6bca4d090298cb85daf59ebf3",
-  "integration_tip": "3c91e4241b79b560542eeced04a77b11c82924ff",
+  "integration_tip": "410b2ac",
   "review_limit": 1,
   "remediation_limit": 1,
   "review_base": "6fb4fe7a9b6511a6bca4d090298cb85daf59ebf3",
@@ -61,8 +61,8 @@
       "id": "LOCAL-0197-T3",
       "title": "Bash/Zsh completion and automatic installer activation",
       "blockers": [],
-      "state": "running",
-      "tracker_state": "IN_PROGRESS",
+      "state": "validated",
+      "tracker_state": "DONE",
       "owner": "completion worker",
       "owned_paths": [
         "src/codex_wake/completion.py",
@@ -71,8 +71,17 @@
         "tests/test_completion.py",
         "tests/test_shell_completion.py"
       ],
-      "evidence": [],
-      "worker": "/root/completion_install"
+      "evidence": [
+        "Integration Python3.12:5 completion +6 shell installer tests PASS; actual Bash/Zsh Tab and startup activation",
+        "Generated bash/zsh CLI output syntax checks PASS; installer default, opt-out and failure path",
+        "Worker red/green: missing generator then implementation; PTY quoted-root defect caught and repaired",
+        "No live shell or operator home writes"
+      ],
+      "worker": "/root/completion_install",
+      "worker_branch": "feat/0197-completion",
+      "worker_base": "5eaa215",
+      "result_sha": "3f760dc31ddaeae8d5d4ae060a8ecfebed2a59f7",
+      "integrated_sha": "bfedc25"
     },
     {
       "id": "LOCAL-0197-T4",

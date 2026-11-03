@@ -96,6 +96,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="wake runtime root; defaults to .codex/wake under the current directory",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+    from .completion import register_parser as register_completion
+    register_completion(subparsers)
     from .wake_control import add_control_parsers
     add_control_parsers(subparsers)
     from .time_inspection import add_time_parser
@@ -2793,6 +2795,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         from .session_permissions import Principal
         if not isinstance(permission_principal,Principal):raise WakeError('permission_identity_unverified')
         args._permission_principal=permission_principal
+    if args.command == "completion":
+        from .completion import command as completion_command
+        return completion_command(args, args.wake_root)
     if args.command == "time":
         from .time_inspection import time_command
         return time_command(args)
