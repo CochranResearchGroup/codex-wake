@@ -23,7 +23,8 @@ class LocalSessionTests(unittest.TestCase):
                     method=message['method']
                     if method=='initialize':value={'codexHome':str(home)}
                     elif method=='thread/loaded/list':value={'data':['one','two'],'nextCursor':None}
-                    elif method=='thread/read':value={'thread':{'id':message['params']['threadId'],'name':'same-name','cwd':str(root),'status':{'type':'idle'},'modelProvider':'openai'}}
+                    elif method=='thread/read':value={'thread':{'id':message['params']['threadId'],'name':'same-name','cwd':str(root),'status':{'type':'idle'},'modelProvider':'openai','turns':[{'id':'turn-one','status':'completed','items':[{'type':'agentMessage','text':'known answer'}]}]}}
+                    elif method=='turn/start':value={'turn':{'id':'turn-one'}}
                     else:raise AssertionError(method)
                     ws.send(json.dumps({'id':message['id'],'result':value}))
             with unix_serve(handler,str(root/'native.sock')) as server:
@@ -41,4 +42,14 @@ class LocalSessionTests(unittest.TestCase):
                 stale=dict(chosen['target'],socket_generation='replaced')
                 p,failure=call('resolve','thread:one','--expected-target',json.dumps(stale));self.assertEqual(p.returncode,2)
                 self.assertEqual(failure['error']['code'],'stale_target')
+                p,submitted=call('prompt','thread:one','known question','--idempotency-key','test-intent')
+                self.assertEqual(p.returncode,0,p.stderr)
+                operation=submitted['result']['operation']
+                self.assertEqual(operation['execution'],'queued')
+                p,finished=call('result',operation['operation_id'])
+                self.assertEqual(p.returncode,0,p.stderr)
+                self.assertEqual(finished['result']['operation']['answer']['text'],'known answer')
+                p,repeated=call('prompt','thread:one','known question','--idempotency-key','test-intent')
+                self.assertEqual(p.returncode,0,p.stderr)
+                self.assertEqual(repeated['result']['operation']['operation_id'],operation['operation_id'])
                 server.shutdown()

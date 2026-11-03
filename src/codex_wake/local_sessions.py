@@ -50,7 +50,7 @@ def discover(root, endpoint='unix://', socket_path=None):
                     if not row.get('thread_id'):continue
                     h=home.stat()
                     target=dict(host=socket.gethostname(),environment=os.environ.get('WSL_DISTRO_NAME') or os.name,provider='codex',uid=uid,account=home.name,home=str(home),home_generation=f'{h.st_dev}:{h.st_ino}',executable=executable,build_sha256=digest,process=dict(pid=pid,start_ticks=birth['start_time_ticks'],boot_id=birth['boot_id']),socket_generation=generation,conversation_id=row['thread_id'])
-                    rows.append(dict(row,target=target,endpoint='unix://'+str(reader.path),codex_cmd=executable))
+                    rows.append(dict(row,target=target,endpoint='unix://'+str(reader.path),codex_cmd=[executable]))
         except (ValueError,OSError,KeyError,TypeError) as error:
             holds.append(dict(endpoint=address,reason=getattr(error,'code','source_unavailable')))
     return dict(schema_version=1,status='complete' if not holds else 'partial',sessions=rows,holds=holds)
