@@ -1089,3 +1089,17 @@ lanes:
     overlaps: [P197]
     updated_at: 2026-11-02
     disposition: LOCAL0198 DONE; both-version presubmit and final focused checks; actual UID1017 native open resume batch copy dedup and partial-result proof; no working deployment
+
+  - id: P200
+    owner: primary / ecochran76
+    objective: Qualify WSL session control for codex-bots
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/466]
+    plan: docs/dev/plans/0200-2026-11-03-wsl-session-control.md
+    branch: feat/wsl-session-control-0200
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P179]
+    updated_at: 2026-11-03
+    disposition: Three bounded implementation lanes; primary integrates serially

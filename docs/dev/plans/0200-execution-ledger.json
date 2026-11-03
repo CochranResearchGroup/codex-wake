@@ -19,7 +19,15 @@
         "Friendly selectors resolve uniquely; ambiguous, stale and foreign-user targets fail clearly.",
         "No hand-authored session profiles or manual grants needed for ordinary local discovery; preserve existing interfaces."
       ],
-      "state": "pending"
+      "state": "validated",
+      "owner": "primary",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-session-control",
+      "validation": [
+        "test_local_sessions.py PASS3.11/3.12",
+        "test_sessions.py PASS3.12",
+        "public source CLI native discovery:76sessions,0holds"
+      ],
+      "result_sha": "next implementation commit"
     },
     {
       "key": "T2",
@@ -31,7 +39,9 @@
         "Limit setup starts or explicitly arranges enforcement and reports real readiness; demonstrate bounded stop.",
         "Inherited external ceilings cannot be raised or disabled through self-service; preserve lifetime usage."
       ],
-      "state": "pending"
+      "state": "running",
+      "worker": "/root/self_limits_468",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-self-limits"
     },
     {
       "key": "T3",
@@ -43,7 +53,9 @@
         "Distinguish responsive,stuck,offline and unsupported/unknown without treating process liveness as TUI health.",
         "Ordinary same-user observation requires no manual grants; preserve qualified native probe safeguards."
       ],
-      "state": "pending"
+      "state": "running",
+      "worker": "/root/local_health_469",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-local-health"
     },
     {
       "key": "T4",

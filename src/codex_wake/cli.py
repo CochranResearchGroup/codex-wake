@@ -98,6 +98,8 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
     from .completion import register_parser as register_completion
     register_completion(subparsers)
+    from .local_control_commands import register_parser as register_local_control
+    register_local_control(subparsers)
     from .wake_control import add_control_parsers
     add_control_parsers(subparsers)
     from .time_inspection import add_time_parser
@@ -2822,6 +2824,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     if args.command == "a2a":
         from .a2a_cli import a2a_command
         return a2a_command(args)
+    if args.command == 'control':
+        from .local_control_commands import command
+        return command(args, resolve_root(args))
     if args.command == "sessions":
         if args.sessions_command == 'target':
             from .tab_targets import target_command

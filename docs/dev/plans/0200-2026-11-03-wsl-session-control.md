@@ -4,7 +4,7 @@ State: OPEN
 Owner: primary / ecochran76
 Ticket: GitHub466 and children467-476
 Branch: feat/wsl-session-control-0200
-Base:171befbaf1be833f55eb0627c802279cf0fbf35
+Base:171befbaf1be833f55eb0627c802e279cf0fbf35
 WIP limit:3implementation lanes
 
 ## Current State
@@ -30,3 +30,11 @@ Readiness requires every blocker validated at integration tip. Integrate seriall
 workers own disjoint source/test paths, shared contracts primary-owned. Keep
 tracker closure separate from implemented/integrated/validated ledger states.
 No skipped required acceptance can close a ticket.
+
+## Shared contract
+
+`control` is the convenient local/remote session-control namespace, retaining
+existing `sessions` and `flow-sessions` interfaces. local_sessions.discover/resolve
+own internal target pinning; local health constructs separate TUI binding, never
+confusing daemon process with controlling UI. Local controls reuse native owners
+and durable operation journal. No hard-coded profile/grant setup on local path.
