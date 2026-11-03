@@ -34,7 +34,7 @@ def _accounts(root):
             return []
         admitted = data.get('accounts', {}).get('enabled')
         normalize = lambda value: value if value.startswith(prefix) else prefix + value
-        allowed = {normalize(n) for n in admitted if isinstance(n, str)} if isinstance(admitted, list) else None
+        allowed = {normalize(aliases.get(n, n)) for n in admitted if isinstance(n, str)} if isinstance(admitted, list) else None
         result = set()
         for name in known:
             if isinstance(name, str) and _NAME.fullmatch(name) and (allowed is None or normalize(name) in allowed):
@@ -96,9 +96,10 @@ def candidates(words, cursor, *, parser=None):
     if prefix.startswith('-') and '=' in prefix:
         flag, unused, value_prefix = prefix.partition('=')
         action = next((a for a in parser._actions if flag in a.option_strings), None)
-        if action is not None and action.choices:
-            return sorted(flag + '=' + str(v) for v in action.choices if str(v).startswith(value_prefix))
-        return []
+        values = [str(v) for v in action.choices] if action is not None and action.choices else []
+        if action is not None and action.dest in ('account', 'owner', 'destination', 'owners', 'selector'):
+            values += _accounts(root)
+        return sorted({flag + '=' + v for v in values if v.startswith(value_prefix) and '\n' not in v and '\r' not in v})
     if pending is not None:
         values = [str(v) for v in pending.choices] if pending.choices else []
         if pending.dest in ('account', 'owner', 'destination', 'owners', 'selector'):

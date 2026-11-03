@@ -30,6 +30,22 @@ class CompletionTests(unittest.TestCase):
             words = ['--wake-root', str(root), 'accounts', 'login', '']
             self.assertEqual(candidates(words, len(words)-1), [])
 
+    def test_enabled_alias_uses_the_same_account_admission_as_owner(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'controller-accounts.toml').write_text('[profiles]\nknown_profiles=["alice"]\n[profiles.aliases]\nwork="alice"\n[accounts]\nenabled=["work"]\n')
+            words = ['--wake-root', directory, 'accounts', 'login', '']
+            self.assertEqual(candidates(words, len(words)-1), ['alice', 'work'])
+
+    def test_equal_form_account_flag_completes_names_and_aliases(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'controller-accounts.toml').write_text('[profiles]\nknown_profiles=["alice"]\n[profiles.aliases]\nwork="alice"\n')
+            for flag, value in [('--account', 'al'), ('--account', 'wo')]:
+                words = ['--wake-root', directory, 'builds', 'list', flag + '=' + value]
+                expected = flag + '=' + ('alice' if value == 'al' else 'work')
+                self.assertEqual(candidates(words, len(words)-1), [expected])
+
     def test_scripts_execute_in_bash_and_zsh_with_space_containing_root(self):
         import shlex
         import sys
@@ -93,6 +109,10 @@ class CompletionTests(unittest.TestCase):
                     os.write(master,line.encode()+b'\t\x18\x16')
                     captured=until(b'\x1f')
                     self.assertIn(b'accounts login alice',captured,(shell,captured))
+                    line='codex-wake --wake-root='+shlex.quote(str(root))+' builds list --account=al'
+                    os.write(master,b'\x15'+line.encode()+b'\t\x18\x16')
+                    captured=until(b'\x1f')
+                    self.assertIn(b'builds list --account=alice',captured,(shell,captured))
                 finally:
                     os.killpg(process.pid,signal.SIGTERM)
                     try:
