@@ -19,7 +19,7 @@ PARAMETERS = {
     'expected_source': ('Exact source session target JSON from history read.', {'type': 'object'}),
     'idempotency_key': ('Stable key for this intent; retain it to reconcile an uncertain result. Different inputs conflict.', {'type': 'string'}),
     '_request': ('Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.', {'type': 'object'}),
-    'confirm': ('Confirm interruption of the exact selected daemon; does not override a changed target.', {'type': 'boolean'}),
+    'confirm': ('Confirm the displayed scoped effect; does not override a changed target.', {'type': 'boolean'}),
     'as_json': ('Emit the structured result; authentication status uses local cache evidence without provider verification.', {'type': 'boolean'}),
     'device_auth': ('Sign in using a one-time device code approved in your browser.', {'type': 'boolean'}),
     'with_api_key': ('Read the API key from standard input; never put it in command arguments.', {'type': 'boolean'}),
@@ -63,11 +63,11 @@ OPERATIONS = (
     Operation('accounts.login', 'Sign into a named private account through native login.', None, effect='Local human CLI only. Writes native credentials; active account clients or daemons hold login.', example='accounts login work --device-auth'),
     Operation('accounts.status', 'Observe sanitized local authentication evidence.', 'wake_controller_account_status', ('selector', 'expected_target'), ('selector',), 'No provider verification or refresh in --json/API/MCP. Human CLI retains native login status.', 'accounts status work --json'),
     Operation('configuration.explain', 'Explain effective settings, skills and configuration provenance.', 'wake_controller_configuration', ('selector', 'expected_target'), ('selector',), example='configuration explain work'),
-    Operation('builds.list', 'List registered builds and their exact targets.', 'wake_builds_list', ('account',), ('account',), example='builds list --arguments \'{"account":"work"}\''),
-    Operation('builds.launch', 'Open a native client using an exact registered account build.', 'wake_builds_launch', ('account','channel','expected_target','_request','args'), ('account','channel','expected_target','_request'), 'Attaches a client; no provider turn unless explicitly requested through client arguments.', 'builds launch --arguments \'{"account":"work","channel":"modded","expected_target":{}}\''),
+    Operation('builds.list', 'List registered builds and their exact targets.', 'wake_builds_list', ('account',), ('account',), example='builds list --account work'),
+    Operation('builds.launch', 'Open a native client using an exact registered account build.', 'wake_builds_launch', ('account','channel','expected_target','_request','args'), ('account','channel','expected_target','_request'), 'Attaches a client; no provider turn unless explicitly requested through client arguments.', 'builds launch --account work --channel modded --expected-target "$TARGET"'),
     Operation('builds.stage', 'Stage one host-registered immutable build recipe.', 'wake_builds_stage', ('recipe','_request'), ('recipe','_request'), 'Runs the configured build recipe under existing build authority.', 'builds stage --arguments \'{"recipe":"candidate"}\''),
-    Operation('builds.select', 'Select a staged immutable artifact for an account.', 'wake_builds_select', ('account','channel','expected_target','_request','identifier'), ('account','channel','expected_target','_request','identifier'), 'Changes future build selection; does not imply a running daemon changed.', 'builds select --arguments \'{"account":"work","identifier":"ARTIFACT","expected_target":{}}\''),
-    Operation('builds.rollback', 'Restore the prior registered account build selection.', 'wake_builds_rollback', ('account','channel','expected_target','_request'), ('account','channel','expected_target','_request'), 'Changes selected build under existing rollback policy.', 'builds rollback --arguments \'{"account":"work","channel":"modded","expected_target":{}}\''),
+    Operation('builds.select', 'Select a staged immutable artifact for an account.', 'wake_builds_select', ('account','channel','expected_target','_request','identifier'), ('account','channel','expected_target','_request','identifier'), 'Changes future build selection; does not imply a running daemon changed.', 'builds select --account work --channel modded --expected-target "$TARGET" --identifier ARTIFACT'),
+    Operation('builds.rollback', 'Restore the prior registered account build selection.', 'wake_builds_rollback', ('account','channel','expected_target','_request'), ('account','channel','expected_target','_request'), 'Changes selected build under existing rollback policy.', 'builds rollback --account work --channel modded --expected-target "$TARGET"'),
     Operation('history.search', 'Search explicitly permitted saved conversation metadata.', 'wake_controller_history_search', ('owners','query'), example='history search --owner work --query test'),
     Operation('history.read', 'Read a saved conversation from its exact permitted owner.', 'wake_controller_history_read', ('owner','thread_id','expected_target'), ('owner','thread_id'), example='history read THREAD --owner work'),
     Operation('history.resume', 'Resume a saved conversation under existing exact-owner authority.', 'wake_controller_history_resume', ('owner','thread_id','expected_target','intent','expires_at'), ('owner','thread_id','expected_target','intent','expires_at'), 'Requires existing enrolled caller permission; does not renew work or allowance.', 'history resume THREAD --owner work --expected-target "$TARGET" --intent INTENT --expires-at TIME --bus-root ROOT --operator-capability FILE'),
@@ -135,3 +135,32 @@ def render_reference():
                 lines.append('| `'+key+'` | '+('yes' if key in op.required else 'no')+' | '+PARAMETERS[key][0]+' |')
             lines.append('')
     return '\n'.join(lines)+'\n'
+
+
+def describe(operation):
+    op = BY_NAME.get(operation)
+    return op.summary + ' ' + op.effect if op else 'Controller operation ' + operation
+
+
+def apply_native_contract(specs):
+    """Keep native dispatch and verified-caller admission; share domain arguments."""
+    for op in OPERATIONS:
+        if op.tool not in specs:
+            continue
+        old = specs[op.tool]
+        schema = op.schema()
+        extras = {key: value for key, value in old[3].items() if key == 'caller_thread_id'}
+        required = list(op.required) + [key for key in old[4] if key in extras]
+        specs[op.tool] = (*old[:2], describe(op.name), {**schema['properties'], **extras}, required, old[5])
+
+
+def coverage_report(parser):
+    paths = ['.'.join(path) for path, item in parser_paths(parser) if path and not any(isinstance(a, argparse._SubParsersAction) for a in item._actions)]
+    return {'schema_version': 1, 'migrated_operations': sorted(BY_NAME),
+            'local_only': [op.name for op in OPERATIONS if op.tool is None],
+            'deferred_commands': sorted(path for path in paths if path not in BY_NAME and not path.startswith('completion.')),
+            'adapter_exceptions': {'accounts.login': 'Local native credential stdin/stdio only.',
+                'accounts.status': 'Human CLI uses native login status; structured transports observe unverified local cache only.',
+                'history.search/read/resume': 'Native MCP additionally verifies caller_thread_id; API/OAuth use scoped grants.',
+                'local_cli': 'Host operator admission differs from scoped remote authorization; no implicit remote privilege.'},
+            'mcp_tools': {op.name: op.tool for op in OPERATIONS if op.tool}}

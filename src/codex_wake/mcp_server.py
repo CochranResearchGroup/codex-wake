@@ -211,6 +211,9 @@ from .account_observation import tool_specs as account_observation_specs
 SPECS.update(account_observation_specs())
 
 
+from .command_contract import apply_native_contract
+apply_native_contract(SPECS)
+
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,

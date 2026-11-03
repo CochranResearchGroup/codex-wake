@@ -77,8 +77,13 @@ mailbox operations; installing the server does not enroll threads or start worke
 From a checked-out repo:
 
 ```bash
-uv tool install --force .
+bash scripts/install.sh
 ```
+
+The supported installer also installs and activates Bash/Zsh completion. Use
+`--no-completion` to opt out. Plain `uv tool install` or `pip install` remains
+supported for package installation; follow it with `codex-wake completion install`
+for shell setup. See [completion installation](docs/agents/shell-completion.md).
 
 After the first release tag exists, a fresh machine can install from GitHub:
 
@@ -194,6 +199,9 @@ Use Wake to create isolated accounts, explain shared configuration, manage exact
 account daemon instances, and import completed saved conversations into another
 account. See the [account and daemon workflow](docs/agents/accounts-and-daemons.md)
 for public commands, target pins, supported rollback and transfer limits.
+The [generated command reference](docs/agents/command-reference.md) and
+[coverage report](docs/agents/command-coverage.json) describe the first migrated
+CLI/API/MCP slice and its explicit exceptions.
 
 ## Native Usage
 

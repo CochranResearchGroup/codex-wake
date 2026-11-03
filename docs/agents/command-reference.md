@@ -296,13 +296,13 @@ Read-only observation; no model turn.
 Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_list`).
 
 ```sh
-codex-wake --wake-root ROOT builds list --arguments '{"account":"work"}'
+codex-wake --wake-root ROOT builds list --account work
 ```
 
 ### CLI help
 
 ```text
-usage: codex-wake builds list [-h] [--arguments ARGUMENTS]
+usage: codex-wake builds list [-h] [--arguments ARGUMENTS] [--account ACCOUNT]
 
 List registered builds and their exact targets.
 
@@ -313,9 +313,10 @@ options:
   --arguments ARGUMENTS
                         Advanced JSON object of operation arguments; preserved
                         for scripts. See generated command reference.
+  --account ACCOUNT     Account name or configured alias.
 
 Examples:
-  codex-wake --wake-root ROOT builds list --arguments '{"account":"work"}'
+  codex-wake --wake-root ROOT builds list --account work
 ```
 
 | Argument | Required remotely | Meaning |
@@ -331,13 +332,16 @@ Attaches a client; no provider turn unless explicitly requested through client a
 Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_launch`).
 
 ```sh
-codex-wake --wake-root ROOT builds launch --arguments '{"account":"work","channel":"modded","expected_target":{}}'
+codex-wake --wake-root ROOT builds launch --account work --channel modded --expected-target "$TARGET"
 ```
 
 ### CLI help
 
 ```text
 usage: codex-wake builds launch [-h] [--arguments ARGUMENTS]
+                                [--account ACCOUNT] [--channel {stock,modded}]
+                                [--expected-target EXPECTED_TARGET]
+                                [--arg NATIVE_ARGS | --args NATIVE_ARGS_JSON]
 
 Open a native client using an exact registered account build.
 
@@ -348,9 +352,19 @@ options:
   --arguments ARGUMENTS
                         Advanced JSON object of operation arguments; preserved
                         for scripts. See generated command reference.
+  --account ACCOUNT     Account name or configured alias.
+  --channel {stock,modded}
+                        Registered native build channel (default: modded).
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --arg NATIVE_ARGS     Repeat for each native client argument; use
+                        --arg=--flag for options.
+  --args NATIVE_ARGS_JSON
+                        Native client arguments as a JSON array of strings.
 
 Examples:
-  codex-wake --wake-root ROOT builds launch --arguments '{"account":"work","channel":"modded","expected_target":{}}'
+  codex-wake --wake-root ROOT builds launch --account work --channel modded --expected-target "$TARGET"
 ```
 
 | Argument | Required remotely | Meaning |
@@ -376,7 +390,7 @@ codex-wake --wake-root ROOT builds stage --arguments '{"recipe":"candidate"}'
 ### CLI help
 
 ```text
-usage: codex-wake builds stage [-h] [--arguments ARGUMENTS]
+usage: codex-wake builds stage [-h] [--arguments ARGUMENTS] [--recipe RECIPE]
 
 Stage one host-registered immutable build recipe.
 
@@ -387,6 +401,8 @@ options:
   --arguments ARGUMENTS
                         Advanced JSON object of operation arguments; preserved
                         for scripts. See generated command reference.
+  --recipe RECIPE       Host-registered build recipe name, never an arbitrary
+                        executable or path.
 
 Examples:
   codex-wake --wake-root ROOT builds stage --arguments '{"recipe":"candidate"}'
@@ -406,13 +422,16 @@ Changes future build selection; does not imply a running daemon changed.
 Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_select`).
 
 ```sh
-codex-wake --wake-root ROOT builds select --arguments '{"account":"work","identifier":"ARTIFACT","expected_target":{}}'
+codex-wake --wake-root ROOT builds select --account work --channel modded --expected-target "$TARGET" --identifier ARTIFACT
 ```
 
 ### CLI help
 
 ```text
 usage: codex-wake builds select [-h] [--arguments ARGUMENTS]
+                                [--account ACCOUNT] [--channel {stock,modded}]
+                                [--expected-target EXPECTED_TARGET]
+                                [--identifier IDENTIFIER]
 
 Select a staged immutable artifact for an account.
 
@@ -423,9 +442,18 @@ options:
   --arguments ARGUMENTS
                         Advanced JSON object of operation arguments; preserved
                         for scripts. See generated command reference.
+  --account ACCOUNT     Account name or configured alias.
+  --channel {stock,modded}
+                        Registered native build channel (default: modded).
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --identifier IDENTIFIER
+                        Existing immutable build artifact identifier to
+                        select.
 
 Examples:
-  codex-wake --wake-root ROOT builds select --arguments '{"account":"work","identifier":"ARTIFACT","expected_target":{}}'
+  codex-wake --wake-root ROOT builds select --account work --channel modded --expected-target "$TARGET" --identifier ARTIFACT
 ```
 
 | Argument | Required remotely | Meaning |
@@ -445,13 +473,16 @@ Changes selected build under existing rollback policy.
 Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_rollback`).
 
 ```sh
-codex-wake --wake-root ROOT builds rollback --arguments '{"account":"work","channel":"modded","expected_target":{}}'
+codex-wake --wake-root ROOT builds rollback --account work --channel modded --expected-target "$TARGET"
 ```
 
 ### CLI help
 
 ```text
 usage: codex-wake builds rollback [-h] [--arguments ARGUMENTS]
+                                  [--account ACCOUNT]
+                                  [--channel {stock,modded}]
+                                  [--expected-target EXPECTED_TARGET]
 
 Restore the prior registered account build selection.
 
@@ -462,9 +493,15 @@ options:
   --arguments ARGUMENTS
                         Advanced JSON object of operation arguments; preserved
                         for scripts. See generated command reference.
+  --account ACCOUNT     Account name or configured alias.
+  --channel {stock,modded}
+                        Registered native build channel (default: modded).
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
 
 Examples:
-  codex-wake --wake-root ROOT builds rollback --arguments '{"account":"work","channel":"modded","expected_target":{}}'
+  codex-wake --wake-root ROOT builds rollback --account work --channel modded --expected-target "$TARGET"
 ```
 
 | Argument | Required remotely | Meaning |
@@ -638,10 +675,11 @@ codex-wake --wake-root ROOT history import THREAD --owner work --destination per
 
 ```text
 usage: codex-wake history import [-h] --owner OWNER --destination DESTINATION
-                                 [--channel {stock,modded}] --expected-source
-                                 EXPECTED_SOURCE --expected-target
-                                 EXPECTED_TARGET --idempotency-key
-                                 IDEMPOTENCY_KEY [--json]
+                                 [--channel {stock,modded}]
+                                 [--expected-source EXPECTED_SOURCE]
+                                 [--expected-target EXPECTED_TARGET]
+                                 [--idempotency-key IDEMPOTENCY_KEY] [--yes]
+                                 [--json]
                                  thread_id
 
 Copy a completed saved conversation into another account.
@@ -668,6 +706,8 @@ options:
   --idempotency-key IDEMPOTENCY_KEY
                         Stable key for this intent; retain it to reconcile an
                         uncertain result. Different inputs conflict.
+  --yes                 Confirm the displayed scoped effect; does not override
+                        a changed target.
   --json                Emit the structured result; authentication status uses
                         local cache evidence without provider verification.
 
@@ -778,8 +818,8 @@ codex-wake --wake-root ROOT daemons start work --expected-target "$TARGET" --ide
 
 ```text
 usage: codex-wake daemons start [-h] [--channel {stock,modded}] [--json]
-                                --expected-target EXPECTED_TARGET
-                                --idempotency-key IDEMPOTENCY_KEY [--yes]
+                                [--expected-target EXPECTED_TARGET]
+                                [--idempotency-key IDEMPOTENCY_KEY] [--yes]
                                 account
 
 Start the selected account daemon.
@@ -801,8 +841,8 @@ options:
   --idempotency-key IDEMPOTENCY_KEY
                         Stable key for this intent; retain it to reconcile an
                         uncertain result. Different inputs conflict.
-  --yes                 Confirm interruption of the exact selected daemon;
-                        does not override a changed target.
+  --yes                 Confirm the displayed scoped effect; does not override
+                        a changed target.
 
 Examples:
   codex-wake --wake-root ROOT daemons start work --expected-target "$TARGET" --idempotency-key start-1
@@ -813,7 +853,7 @@ Examples:
 | `account` | yes | Account name or configured alias. |
 | `channel` | no | Registered native build channel (default: modded). |
 | `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
-| `confirm` | no | Confirm interruption of the exact selected daemon; does not override a changed target. |
+| `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
 | `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
 
 ## daemons restart
@@ -832,8 +872,8 @@ codex-wake --wake-root ROOT daemons restart work --expected-target "$TARGET" --i
 
 ```text
 usage: codex-wake daemons restart [-h] [--channel {stock,modded}] [--json]
-                                  --expected-target EXPECTED_TARGET
-                                  --idempotency-key IDEMPOTENCY_KEY [--yes]
+                                  [--expected-target EXPECTED_TARGET]
+                                  [--idempotency-key IDEMPOTENCY_KEY] [--yes]
                                   account
 
 Restart one exact account daemon.
@@ -855,8 +895,8 @@ options:
   --idempotency-key IDEMPOTENCY_KEY
                         Stable key for this intent; retain it to reconcile an
                         uncertain result. Different inputs conflict.
-  --yes                 Confirm interruption of the exact selected daemon;
-                        does not override a changed target.
+  --yes                 Confirm the displayed scoped effect; does not override
+                        a changed target.
 
 Examples:
   codex-wake --wake-root ROOT daemons restart work --expected-target "$TARGET" --idempotency-key restart-1 --yes
@@ -867,7 +907,7 @@ Examples:
 | `account` | yes | Account name or configured alias. |
 | `channel` | no | Registered native build channel (default: modded). |
 | `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
-| `confirm` | no | Confirm interruption of the exact selected daemon; does not override a changed target. |
+| `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
 | `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
 
 ## daemons update
@@ -886,8 +926,8 @@ codex-wake --wake-root ROOT daemons update work --expected-target "$TARGET" --id
 
 ```text
 usage: codex-wake daemons update [-h] [--channel {stock,modded}] [--json]
-                                 --expected-target EXPECTED_TARGET
-                                 --idempotency-key IDEMPOTENCY_KEY [--yes]
+                                 [--expected-target EXPECTED_TARGET]
+                                 [--idempotency-key IDEMPOTENCY_KEY] [--yes]
                                  account
 
 Update one exact account daemon to a registered build.
@@ -909,8 +949,8 @@ options:
   --idempotency-key IDEMPOTENCY_KEY
                         Stable key for this intent; retain it to reconcile an
                         uncertain result. Different inputs conflict.
-  --yes                 Confirm interruption of the exact selected daemon;
-                        does not override a changed target.
+  --yes                 Confirm the displayed scoped effect; does not override
+                        a changed target.
 
 Examples:
   codex-wake --wake-root ROOT daemons update work --expected-target "$TARGET" --idempotency-key update-1 --yes
@@ -921,7 +961,7 @@ Examples:
 | `account` | yes | Account name or configured alias. |
 | `channel` | no | Registered native build channel (default: modded). |
 | `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
-| `confirm` | no | Confirm interruption of the exact selected daemon; does not override a changed target. |
+| `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
 | `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
 
 ## daemons stop
@@ -940,8 +980,8 @@ codex-wake --wake-root ROOT daemons stop work --expected-target "$TARGET" --idem
 
 ```text
 usage: codex-wake daemons stop [-h] [--channel {stock,modded}] [--json]
-                               --expected-target EXPECTED_TARGET
-                               --idempotency-key IDEMPOTENCY_KEY [--yes]
+                               [--expected-target EXPECTED_TARGET]
+                               [--idempotency-key IDEMPOTENCY_KEY] [--yes]
                                account
 
 Stop one exact account daemon.
@@ -963,8 +1003,8 @@ options:
   --idempotency-key IDEMPOTENCY_KEY
                         Stable key for this intent; retain it to reconcile an
                         uncertain result. Different inputs conflict.
-  --yes                 Confirm interruption of the exact selected daemon;
-                        does not override a changed target.
+  --yes                 Confirm the displayed scoped effect; does not override
+                        a changed target.
 
 Examples:
   codex-wake --wake-root ROOT daemons stop work --expected-target "$TARGET" --idempotency-key stop-1 --yes
@@ -975,6 +1015,6 @@ Examples:
 | `account` | yes | Account name or configured alias. |
 | `channel` | no | Registered native build channel (default: modded). |
 | `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
-| `confirm` | no | Confirm interruption of the exact selected daemon; does not override a changed target. |
+| `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
 | `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
 

@@ -236,6 +236,71 @@
         ]
       },
       {
+        "name": "command contract and workflow regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_command*.py"
+        ]
+      },
+      {
+        "name": "account observation regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_account_observation.py"
+        ]
+      },
+      {
+        "name": "completion public regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_completion.py"
+        ]
+      },
+      {
+        "name": "shell installer public regressions",
+        "axis": "tests",
+        "argv": [
+          "{runtime}",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_shell_completion.py"
+        ]
+      },
+      {
+        "name": "generated command reference",
+        "axis": "docs",
+        "argv": [
+          "{runtime}",
+          "scripts/generate_command_reference.py",
+          "--check"
+        ]
+      },
+      {
         "name": "package build",
         "axis": "packaging",
         "argv": [

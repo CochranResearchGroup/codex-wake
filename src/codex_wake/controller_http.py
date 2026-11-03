@@ -118,6 +118,9 @@ for name, spec in daemon_specs().items():
     TOOLS[name] = (spec[1], dict(type='object', properties=spec[3], required=spec[4], additionalProperties=False))
 
 
+from .command_contract import public_tools, describe as describe_operation
+TOOLS.update(public_tools())
+
 def operation_failure(operation, error):
     return {'schema_version': 1, 'operation': operation, 'status': 'failed',
             'error': {'code': error.code, 'message': str(error)}}
@@ -495,7 +498,7 @@ class ControllerHandler(BaseHTTPRequestHandler):
         elif method == 'ping': result = {}
         elif method == 'tools/list':
             actor = self.server.authority.authenticate(token)
-            result = {'tools': [dict(name=name, description='Read scoped controller resource', inputSchema=schema)
+            result = {'tools': [dict(name=name, description=describe_operation(operation), inputSchema=schema)
                 for name, (operation, schema) in TOOLS.items()
                 if ProtectedOperations.READ_POLICIES[operation][0] in actor.scopes
                 and (operation.startswith('inventory.')
