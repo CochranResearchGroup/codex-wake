@@ -305,7 +305,7 @@ def _allocation_admit(directory,receipt,old):
         allocation['time_limit_seconds']=min(receipt['time_limit_seconds'],allocation['time_limit_seconds'])
         allocation['deadline']=min(allocation['deadline'],allocation['time_origin']+allocation['time_limit_seconds'])
         allocation['members'].setdefault(receipt['thread_id'],dict(goal_created_at=receipt['goal_created_at'],reset_anchor=anchor,
-            **{key:receipt[key] for key in ('usage_thread_id','usage_goal_created_at','usage_reset_anchor') if key in receipt}))
+            **{key:receipt[key] for key in ('usage_thread_id','usage_goal_created_at','usage_reset_anchor','session_scope') if key in receipt}))
         member=allocation['members'][receipt['thread_id']]
         if renewal and member.get('reset_anchor')!=anchor:
             raise ValueError('renewal boundary changed; reconcile the persisted target allocation before continuing')
@@ -369,7 +369,8 @@ def _usage(receipt):
     from .goal_usage import observe_usage
     if not receipt.get('grant',{}).get('host_delegated'):
         return observe_usage(receipt['grant']['codex_home'],receipt['thread_id'],receipt['goal_created_at'],
-            reset_anchor=receipt.get('reset_anchor'),token_accounting=receipt.get('token_accounting','cache_inclusive'))
+            reset_anchor=receipt.get('reset_anchor'),token_accounting=receipt.get('token_accounting','cache_inclusive'),
+            session_scope=receipt.get('session_scope',False))
     path=Path(receipt['allocation_path']);_private(path)
     with _lock(path.parent,path.stem):
         allocation=json.loads(path.read_text());charges={}
@@ -382,7 +383,8 @@ def _usage(receipt):
                 observation=observe_usage(receipt['grant']['codex_home'],member.get('usage_thread_id',thread),
                     member.get('usage_goal_created_at',member['goal_created_at']),
                     token_accounting=allocation['token_accounting'],
-                    reset_anchor=member.get('usage_reset_anchor',member.get('reset_anchor')))
+                    reset_anchor=member.get('usage_reset_anchor',member.get('reset_anchor')),
+                    session_scope=member.get('session_scope',False))
                 if member.get('usage_thread_id') and thread not in observation.get('thread_ids',[]):
                     return dict(state='unknown',used_tokens=None,reason='successor_lineage_unavailable')
             if observation['state']!='qualified':
@@ -554,7 +556,7 @@ def diagnose(root,policy_path,caller_thread_id,allocation_id=None,*,permission_p
 
 def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
            checkpoint_token_percent=5,checkpoint_seconds=60,token_accounting=None,
-           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None):
+           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None,session_scope=False):
     from .permission_enforcement import principal_for,authorize,enrollment_action
     principal=principal_for(root,caller_thread_id,native_context=native_context,principal=permission_principal)
     name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
@@ -615,6 +617,8 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             started_upper=now,started_boottime=boottime,boot_id=boot_id_value(),
             time_origin=now if old else created,effects={},checkpoint=None,
             prior_allocation=old if old else None)
+        if session_scope and not old:
+            receipt['session_scope']=True
         receipt.update(caller_binding=binding,grant=grant,policy_path=str(Path(policy_path).absolute()),token_limit=token_limit,
             time_limit_seconds=time_limit_seconds,checkpoint_token_percent=checkpoint_token_percent,
             checkpoint_seconds=checkpoint_seconds)
@@ -634,7 +638,8 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             if native.get('id')!=caller_thread_id:raise ValueError('native thread identity changed')
             parent=native.get('parentThreadId')
             if not parent:
-                first=observe_usage(grant['codex_home'],caller_thread_id,created,token_accounting=basis)
+                first=observe_usage(grant['codex_home'],caller_thread_id,created,token_accounting=basis,
+                    session_scope=receipt.get('session_scope',False))
                 if first.get('state')!='qualified':raise AccountingUnavailable('first enrollment requires qualified original history',first)
                 parent=first.get('parent_thread_id')
             if parent:

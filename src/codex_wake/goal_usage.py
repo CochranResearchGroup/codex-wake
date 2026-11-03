@@ -151,7 +151,7 @@ def _index_timed_out(check_time):
         return 1
 
 
-def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, token_accounting="fresh"):
+def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, token_accounting="fresh", session_scope=False):
     """Observe original-goal response spending, or an explicitly authorized anchor."""
     try:
         if token_accounting not in ("fresh", "cache_inclusive"):
@@ -256,17 +256,28 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, 
             if r.get('type') == 'event_msg'
             and r['payload'].get('type') == 'thread_goal_updated'
             and r['payload'].get('goal', {}).get('createdAt') == goal_created_at]
-        if not boundaries:
-            raise ValueError('goal_start_missing')
-        boundary = boundaries[0]
-        creation = rows[boundary]
-        if (creation['payload'].get('threadId') != thread_id
-                or creation['payload']['goal'].get('threadId') != thread_id):
-            raise ValueError('goal_identity_mismatch')
-        if int(_epoch(creation['timestamp'])) != goal_created_at:
-            raise ValueError('goal_start_not_original')
+        if session_scope:
+            # A session boundary is its original history, including work before
+            # voluntary enrollment or a native goal created during an active turn.
+            boundary = -1
+            stamp = sessions[thread_id][0].get('timestamp')
+            if not stamp and rows:
+                stamp = rows[0]['timestamp']
+            if not stamp:
+                raise ValueError('session_start_missing')
+            creation = dict(timestamp=stamp)
+        else:
+            if not boundaries:
+                raise ValueError('goal_start_missing')
+            boundary = boundaries[0]
+            creation = rows[boundary]
+            if (creation['payload'].get('threadId') != thread_id
+                    or creation['payload']['goal'].get('threadId') != thread_id):
+                raise ValueError('goal_identity_mismatch')
+            if int(_epoch(creation['timestamp'])) != goal_created_at:
+                raise ValueError('goal_start_not_original')
         active = set()
-        for r in rows[:boundary]:
+        for r in rows[:max(0, boundary)]:
             if r.get('type') != 'event_msg':
                 continue
             p = r['payload']
@@ -329,7 +340,7 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, 
                 records[key] = p
                 if p['root_turn_id'] in turns:
                     charged.add(key)
-        prior_turns = {r['payload']['root_turn_id'] for r in rows[:boundary]
+        prior_turns = {r['payload']['root_turn_id'] for r in rows[:max(0, boundary)]
                        if r.get('type') == 'token_usage_record'}
         for identity in owned:
             _, history = sessions[identity]
@@ -353,7 +364,7 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, 
                         raise ValueError('response_usage_mismatch')
             if pending_spawns:
                 raise ValueError('descendant_spawn_incomplete')
-        if turns and not charged:
+        if turns and not charged and not session_scope:
             raise ValueError('first_usage_unavailable')
         check_time()
         anchor = dict(version=1, thread_id=thread_id, goal_created_at=goal_created_at,
@@ -393,3 +404,9 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, 
     except (ValueError, KeyError, TypeError, OSError, OverflowError) as exc:
         return dict(state='unknown', used_tokens=None, anchor=None,
                     reason=str(exc), sampled=True)
+
+
+def observe_session_usage(codex_home, thread_id, *, token_accounting="fresh"):
+    """Read lifetime response charges from original session history, without a goal."""
+    return observe_usage(codex_home, thread_id, None,
+        token_accounting=token_accounting, session_scope=True)

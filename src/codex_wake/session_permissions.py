@@ -17,7 +17,7 @@ ACTIONS = {
     'session.inspect': 'allow', 'refresh.self': 'allow',
     'refresh.connection': 'allow', 'refresh.shared': 'approval_required',
     'handoff.self': 'allow', 'resume.self': 'allow', 'resume.recover': 'approval_required',
-    'enforcement.enroll': 'allow', 'enforcement.watcher_start': 'approval_required', 'enforcement.increase': 'approval_required',
+    'enforcement.self_watch': 'allow', 'enforcement.enroll': 'allow', 'enforcement.watcher_start': 'approval_required', 'enforcement.increase': 'approval_required',
     'enforcement.disable': 'approval_required', 'enforcement.recover': 'approval_required',
     'a2a.send': 'allow', 'a2a.receive': 'allow', 'a2a.claim': 'allow', 'a2a.reply': 'allow',
     'wake.background': 'allow', 'wake.existing_tab': 'allow',
@@ -316,7 +316,7 @@ class PermissionStore:
                 decision = value['decision'] if matches else 'deny'
                 source, scope_failed = name, not matches
         # Self-control actions cannot be converted into peer control by a profile.
-        if action in ('session.inspect','refresh.self','refresh.connection','handoff.self','resume.self') and relation != 'self':
+        if action in ('session.inspect','refresh.self','refresh.connection','handoff.self','resume.self','enforcement.self_watch') and relation != 'self':
             decision, source = 'deny', 'exact_self_required'
         if action == 'refresh.shared' and relation != 'shared':
             decision, source = 'deny', 'shared_scope_required'
