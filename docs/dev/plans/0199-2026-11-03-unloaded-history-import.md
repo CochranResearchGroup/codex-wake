@@ -9,6 +9,12 @@ Priority: regression blocker
 
 ## Current State
 
+Regression red confirmed at public history.import seam; minimal predicate fix
+passes14 history tests on each Python3.11/3.12 and4shortcut tests on3.12.
+Installed UID1017 qualification passed;238 source/wheel/installed Python files
+match. Synthetic native source remains idle; real notLoaded acceptance is next.
+See ../evidence/plan0199/acceptance.json.
+
 Live Plan0198 copy failed before native fork: persisted completed/full source
 reports notLoaded after its client exits; import requires idle. Old uncertain
 intent remains immutable. User authorized fix, deploy and real-account retest.

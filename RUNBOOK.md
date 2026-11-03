@@ -8308,3 +8308,16 @@ No live conversation copies or model turns were issued. Raw private receipts
 are under ~/.local/state/codex-wake/testing/deploy198; curated deployment.json
 records the public evidence. Memory disposition forbidden: no memory write
 requested; machine receipt recorded with zero Graphiti writes. Hosted CI skipped.
+
+## Turn | 2026-11-03 | Completed unloaded history import repair
+
+LOCAL-0199 fixes observed live notLoaded rejection with one predicate change;
+all complete/full persisted-turn, goal, account and revision guards remain.
+Public history.import regression red before fix, then14affected history tests
+passed on3.11/3.12 and4shortcut tests on3.12. Exact sourcead3d2bb wheel and238
+installed Python members match UID1017 prefix. Native isolated copy/dedup/partial
+qualification passed and both fixture daemons stopped. Two attempts to force
+synthetic notLoaded stayed idle; retained as failed qualification attempts,
+not runtime failures. Real unloaded-source retest remains after deployment.
+Focused primary Standards/Spec inspection found no further changes needed;
+no broad review of previously closed0197/0198 slices. Hosted CI skipped.

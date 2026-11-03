@@ -1,0 +1,46 @@
+{
+  "source_commit": "ad3d2bb37165626bc00d8af24017b9861d142e3e",
+  "wheel_sha256": "7d0c4d3e6bcb249defeffa64538d2fdf71d74f930a926091246b13b6ca1c5be1",
+  "installed_prefix": "/home/codex-daemon-test/importfix199-prefix",
+  "python_members_equal": 238,
+  "history_tests": {
+    "311": 14,
+    "312": 14
+  },
+  "shortcut_tests312": 4,
+  "red_log": "/home/ecochran76/.local/state/codex-wake/testing/importfix/red.log",
+  "command_template": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv{311|312}/bin/python -m unittest discover -s tests -p \"test_controller_history*.py\"",
+  "review": {
+    "standards": "Primary focused inspection: minimal predicate change at existing seam; no findings",
+    "spec": "Persisted notLoaded with completed/full nonempty turns accepted. Active,unknown,incomplete rejected. Journal unchanged."
+  },
+  "limits": [
+    "Affected suites only; one predicate change",
+    "Synthetic native source remains idle; notLoaded regression uses recorded real native response",
+    "Separate UID/network namespace shares host kernel/resources",
+    "Hosted CI skipped under cost policy"
+  ],
+  "native": {
+    "status": "passed",
+    "receipt": "/home/codex-daemon-test/importfix199-71e50a54/receipt.json",
+    "checks": [
+      "actual native resume UUID and --last show saved answer through configured default root",
+      "persisted source status recorded before copying",
+      "actual two-thread batch copy, same-batch and new-batch dedup return same native children",
+      "source change after preview holds that exact entry; peer entry copies and retry creates no duplicate",
+      "actual native open attaches the selected managed account"
+    ],
+    "cleanup": [
+      {
+        "account": "bob",
+        "stopped": true
+      },
+      {
+        "account": "alice",
+        "stopped": true
+      }
+    ],
+    "source_status_before_copy": "idle",
+    "command": "sudo -n -H -u codex-daemon-test env OUTER_NETNS=<invoking namespace> TASK_SOURCE_COMMIT=ad3d2bb37165626bc00d8af24017b9861d142e3e unshare -Urn /home/codex-daemon-test/importfix199-prefix/bin/python /tmp/c199/qualify.py"
+  }
+}
