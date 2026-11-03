@@ -26,15 +26,27 @@
   "checks": [
     {
       "command": "XDG_CONFIG_HOME=/tmp/wake0200-ci311-config XDG_STATE_HOME=/tmp/wake0200-ci311-state CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv311/bin/python -m unittest discover -s tests -p 'test_*.py'",
-      "status": "running",
-      "log": "/tmp/wake0200-full311.log",
-      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
+      "status": "passed",
+      "log": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/receipts/wake0200-full311.log",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "tests": 2030,
+      "skipped": 1,
+      "seconds": 958.014,
+      "log_sha256": "be748115cd6e15bcb1e56a8dbef4c24cb5b28e96f054367823a2e530c61e6c46",
+      "checkout_head_at_start": "90670d4177bf6b53797b1a334588ca7be58e93f6",
+      "skip_reason": "existing opt-in disposable systemd test: test_host_execution.HostExecutionTests.test_live_deadline_stops_service_without_controller"
     },
     {
       "command": "XDG_CONFIG_HOME=/tmp/wake0200-ci312-config XDG_STATE_HOME=/tmp/wake0200-ci312-state CODEX_WAKE_STABLE_TIME_CONFIG='' PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m unittest discover -s tests -p 'test_*.py'",
-      "status": "running",
-      "log": "/tmp/wake0200-full312.log",
-      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
+      "status": "passed",
+      "log": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/receipts/wake0200-full312.log",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "tests": 2030,
+      "skipped": 1,
+      "seconds": 954.923,
+      "log_sha256": "f07c9003de4acedd016d2169d38e584cf57d9f8c8174017969f90b5aa7436b8a",
+      "checkout_head_at_start": "90670d4177bf6b53797b1a334588ca7be58e93f6",
+      "skip_reason": "existing opt-in disposable systemd test: test_host_execution.HostExecutionTests.test_live_deadline_stops_service_without_controller"
     },
     {
       "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m unittest discover -s tests -p 'test_local_*.py'",
@@ -97,6 +109,27 @@
       "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python scripts/generate_command_reference.py --check",
       "status": "passed",
       "source_commit": "d1a696687b56255941d14f4a59ac6e27a796680f"
+    },
+    {
+      "command": "env -u PYTHONPATH XDG_CONFIG_HOME=/tmp/wake0200-smoke-config XDG_STATE_HOME=/tmp/wake0200-smoke-state /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/python scripts/source_registry_smoke.py --json",
+      "status": "passed",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "log": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/receipts/wake0200-smoke-source-registry.log",
+      "log_sha256": "3a710062e2ab662ee54d67842d04564ee371e962831eabb8668bddce59811f91"
+    },
+    {
+      "command": "env -u PYTHONPATH XDG_CONFIG_HOME=/tmp/wake0200-smoke-config XDG_STATE_HOME=/tmp/wake0200-smoke-state /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/python scripts/session_discovery_smoke.py --cli /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/codex-wake",
+      "status": "passed",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "log": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/receipts/wake0200-smoke-session-discovery.log",
+      "log_sha256": "fd4218193de4af8bddbb36e015d22679b7b51878bf895dc5507807cd9c61c2b8"
+    },
+    {
+      "command": "env -u PYTHONPATH XDG_CONFIG_HOME=/tmp/wake0200-smoke-config XDG_STATE_HOME=/tmp/wake0200-smoke-state /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/python scripts/a2a_mailbox_smoke.py --scheduler --operations --cli /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/codex-wake",
+      "status": "passed",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "log": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/receipts/wake0200-smoke-mailbox.log",
+      "log_sha256": "511997c6eaf9890c222e3c4550037c042809d4eb96510e00ae200723a7c22aab"
     }
   ],
   "milestone_a": {
@@ -105,7 +138,6 @@
     "consumer_gate": "Current codex-bots route explicitly reports unknown TUI responsiveness; narrow adapter scope question pending",
     "partial_native": {
       "provider_intents_consumed": 1,
-      "additional_intent_cap": 2,
       "native_package_sha256": "48ed489ceed144d277c44a505ef5cbcb63250fa361fe132bed1fdab3f7cfb7d5",
       "passed": [
         "exact saved multiline Unicode PowerShell prompt",
@@ -120,7 +152,8 @@
         "WSL,PowerShell,API pre-terminal receive timing was not established by later observers"
       ],
       "second_intent": "not submitted; held for timing diagnosis",
-      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-1.json"
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-1.json",
+      "packet_maximum_new_intents": 2
     }
   },
   "milestone_b": {

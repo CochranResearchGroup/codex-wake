@@ -284,6 +284,23 @@
       "source": "d1a696687b56255941d14f4a59ac6e27a796680f",
       "passed": 34,
       "seconds": 170.757
+    },
+    "full_unit_matrix": {
+      "product_source": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "checkout_head_at_start": "90670d4177bf6b53797b1a334588ca7be58e93f6",
+      "311": {
+        "passed": 2030,
+        "skipped": 1,
+        "seconds": 958.014
+      },
+      "312": {
+        "passed": 2030,
+        "skipped": 1,
+        "seconds": 954.923
+      },
+      "skip_reason": "existing opt-in disposable systemd test",
+      "commands_and_logs": "docs/dev/evidence/plan0200/qualification.json",
+      "post_run_goal_watchers_or_collectors": "none in fresh process readback"
     }
   }
 }

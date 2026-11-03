@@ -8362,3 +8362,13 @@ interruption qualification retained. Existing stockcodex and signed-in daemons
 unchanged. No paid hosted CI. codex-bots current responsiveness route explicitly
 returns unknown; separate narrow adapter scope question remains pending. Final
 one broad review and one remediation pass remain unused until tickets validate.
+
+Plan0200 product ad41df8 also passed the full local unit matrix: 2,030 tests each
+on Python3.11.15 (958.014s) and3.12.13 (954.923s), one existing opt-in disposable
+systemd test skipped per version. CLI66, shell completion6 and three installed
+registry/discovery/mailbox smoke checks passed. Fresh process readback found no
+remaining test goal watchers or turn collectors. Commands, installed identity and
+private log hashes are retained in docs/dev/evidence/plan0200/qualification.json.
+Native intent1 completed with actual pwd, complete transcript and visible TUI;
+three live-stream receive-timing rows remain failed pending a delayed-event
+probe and the unused second bounded intent. No failed receipt is overwritten.
