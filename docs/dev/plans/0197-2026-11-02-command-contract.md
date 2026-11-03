@@ -1,6 +1,6 @@
 # Command contract and discoverability
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Ticket: LOCAL-0197 (this file; GitHub publication not requested)
 Priority: next product usability slice
@@ -10,17 +10,17 @@ WIP limit: one primary implementation slice
 
 ## Current State
 
-The operator confirmed all eight interview decisions in conversation, including
-completion installation and shell activation. Design interview complete;
-implementation packet is open. This file is the local work item and execution
-contract; it does not claim integration, release or runtime activation.
-
-Installed source6fb4fe7 has369 parser nodes whose help renders, with1575 of2020
-argument definitions lacking explanatory help text. The portable controller has78
-operations and78 matching OAuth MCP aliases, with no missing/mismatched entries.
-These are structural observations, not complete behavioral parity proof. Legacy
-profile helpers have handwritten Bash/Zsh completion; the Wake command tree does
-not. Existing owners and account/daemon workflow docs are authoritative inputs.
+Five local tickets are implemented, integrated and validated on
+feat/command-contract-0197. Product source24e4cc1; all local tracker states DONE.
+Shared help/reference/coverage, first22operation schemas, sanitized status,
+typed/interactive workflows and auto-installed completion are delivered.
+Both Python versions passed240presubmit tests/16checks atc0fafa2. One broad
+Standards/Spec review accepted two completion blockers; one bounded TDD pass
+resolved both, followed by25focused checks/version and exact final installed
+wheel qualification (236Python members equal). No merge/release/deployment or
+working shell/account changes. See [ledger](0197-execution-ledger.json) and
+[acceptance](../evidence/plan0197/acceptance.json). Earlier environment failures
+remain recorded; this is not a claim of clean first-pass comprehensive testing.
 
 ## Desired outcome and confirmed decisions
 
@@ -115,11 +115,9 @@ owns the outcome until deliberate tracker publication avoids duplication.
 - Final artifacts distinguish source completion, integration and installation.
   No ordinary operator sessions or unrelated services are interrupted.
 
-## Next bounded action
+## Terminal state
 
-Locate existing operation/tool metadata and installer ownership, choose the
-smallest shared-definition seam for Slice A, and name its observable acceptance
-before implementation. Test no-refresh auth observation at a valid seam; native
-account/read can involve remote workspace routing, so refreshToken=false alone
-is not proof of a purely local probe. Do not promise stronger evidence than the
-selected observation mechanism establishes.
+All five local tickets DONE; no unresolved accepted findings. Review1 and
+remediation1 are consumed. Keep worker worktrees clean and recoverable. A later
+integration/release decision is separate from local ticket closure; do not reopen
+broad review or start additional hardening merely because the branch is local.

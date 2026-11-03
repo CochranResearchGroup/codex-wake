@@ -1069,9 +1069,9 @@ lanes:
     plan: docs/dev/plans/0197-2026-11-02-command-contract.md
     branch: feat/command-contract-0197
     target: origin/main
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: ACTIVE_WORKTREE
     dependencies: []
     overlaps: [P179]
     updated_at: 2026-11-02
-    disposition: Isolated command contract lane; no working account or native runtime changes
+    disposition: Five local tickets DONE; both-version presubmit and installed acceptance; review1 and TDD1 resolved two findings; local branch only, no live activation
