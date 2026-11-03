@@ -13,6 +13,9 @@ def execute(operation, arguments, root):
     if root is None:
         raise InventoryError('host_wake_root_required', 'host Wake root is required')
     try:
+        if operation == 'accounts.status':
+            from .account_observation import execute as observe
+            return observe(root, arguments)
         host, environment = socket.gethostname(), os.environ.get('WSL_DISTRO_NAME') or os.name
         owner = ControllerAccounts(Path(root) / 'controller-accounts.toml', host=host, environment=environment)
         return ControllerOperations(None, host=host, environment=environment, accounts=owner).execute(operation, arguments)
@@ -34,6 +37,9 @@ def register_parser(subparsers):
         item = verbs.add_parser(verb, help='sign in or inspect native authentication for a named account')
         item.add_argument('selector')
         item.add_argument('--channel', choices=('stock', 'modded'), default='modded')
+        if verb == 'status':
+            item.add_argument('--json', dest='as_json', action='store_true', help='show sanitized local cached identity; no provider check or refresh')
+            item.add_argument('--expected-target', type=json.loads, help='require this exact account generation; selects structured cached status')
         if verb == 'login':
             modes = item.add_mutually_exclusive_group()
             modes.add_argument('--device-auth', action='store_true')
@@ -53,7 +59,7 @@ def register_parser(subparsers):
 
 
 def command(args, root):
-    if args.command == 'accounts' and args.account_verb in ('login', 'status'):
+    if args.command == 'accounts' and args.account_verb in ('login', 'status') and not getattr(args, 'as_json', False) and getattr(args, 'expected_target', None) is None:
         from .account_auth import run
         try:
             return run(root, args.selector, args.account_verb, channel=args.channel,
