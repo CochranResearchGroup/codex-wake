@@ -193,6 +193,10 @@ trust_level = "trusted"
         service=ControllerHealth(wake)
         def observe(timeout=2):
             if args.local_health:
+                if args.wake_cli:
+                    value=json.loads(subprocess.check_output([str(args.wake_cli),'--wake-root',str(wake),'control','health','thread:'+thread,'--endpoint',endpoint,'--timeout',str(timeout),'--json'],env=env,cwd=cwd,text=True))
+                    require(value['status']=='completed','installed local health CLI failed')
+                    return value['result']['observation']
                 from codex_wake.local_health import observe_row
                 row=dict(target=dict(target,executable=str(binary),process=dict(pid=daemon.pid)),
                     endpoint=endpoint,codex_cmd=[str(binary)],attachments=[dict(client_pid=ui.pid)])

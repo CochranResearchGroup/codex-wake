@@ -20,16 +20,17 @@ from .controller_health import _image_hash
 INPUT_SCHEMA = {'type': 'object', 'properties': {
     'selector': {'type': 'string', 'minLength': 1, 'maxLength': 4096},
     'expected_target': {'type': 'object'},
+    'endpoint': {'type': 'string'},
     'timeout': {'type': 'number', 'minimum': .05, 'maximum': 5}},
     'required': ['selector'], 'additionalProperties': False}
 
 
-def observe(root, selector, *, expected_target=None, timeout=1):
+def observe(root, selector, *, expected_target=None, timeout=1, endpoint='unix://'):
     """Resolve one pinned local session and freshly challenge its controlling TUI."""
     from .local_sessions import resolve
     if type(timeout) not in (int, float) or not .05 <= timeout <= 5:
         raise InventoryError('invalid_argument', 'timeout must be 0.05..5 seconds')
-    row = resolve(root, selector, expected_target=expected_target)
+    row = resolve(root, selector, expected_target=expected_target, endpoint=endpoint)
     return observe_row(root, row, timeout=timeout)
 
 
@@ -114,7 +115,7 @@ def execute(operation, arguments, root):
         selector = arguments.get('selector')
         if not isinstance(selector, str) or not selector or len(selector) > 4096:
             raise InventoryError('invalid_argument', 'bounded session selector required')
-        result = observe(root, selector, expected_target=arguments.get('expected_target'), timeout=arguments.get('timeout', 1))
+        result = observe(root, selector, expected_target=arguments.get('expected_target'), timeout=arguments.get('timeout', 1), endpoint=arguments.get('endpoint', 'unix://'))
         return dict(schema_version=1, operation=operation, status='completed', result=result)
     except (WakeError, ValueError, OSError, TypeError, KeyError) as error:
         return dict(schema_version=1, operation=operation, status='failed',
@@ -126,13 +127,14 @@ def register_parser(subparsers):
     parser.add_argument('selector')
     parser.add_argument('--expected-target', type=json.loads)
     parser.add_argument('--timeout', type=float, default=1)
+    parser.add_argument('--endpoint', default='unix://')
     parser.add_argument('--json', dest='as_json', action='store_true')
     return parser
 
 
 def command(args, root=None):
     value = execute('local.health', dict(selector=args.selector, expected_target=args.expected_target,
-        timeout=args.timeout), root or args.wake_root)
+        timeout=args.timeout, endpoint=args.endpoint), root or args.wake_root)
     print(json.dumps(value, sort_keys=True))
     return 0 if value['status'] == 'completed' else 2
 

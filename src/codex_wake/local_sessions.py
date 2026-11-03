@@ -42,7 +42,8 @@ def discover(root, endpoint='unix://', socket_path=None):
                 birth=process_identity(pid)
                 if not birth:raise InventoryError('stale_target','native peer exited during discovery')
                 executable=str(Path('/proc',str(pid),'exe').resolve(strict=True))
-                digest=hashlib.sha256(Path(executable).read_bytes()).hexdigest()
+                from .controller_health import _image_hash
+                digest=_image_hash(pid)
                 info=reader.path.stat();generation=f'{info.st_dev}:{info.st_ino}'
                 threads=reader.loaded_threads(maximum=1000)
                 snapshot=build_snapshot(threads,panes,{'app_server':{'availability':'available'},'tmux':{'availability':'available'}})
