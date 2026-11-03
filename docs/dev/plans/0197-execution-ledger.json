@@ -89,8 +89,8 @@
       "blockers": [
         "LOCAL-0197-T1"
       ],
-      "state": "running",
-      "tracker_state": "IN_PROGRESS",
+      "state": "validated",
+      "tracker_state": "DONE",
       "owner": "pending worker",
       "owned_paths": [
         "src/codex_wake/daemon_commands.py",
@@ -98,10 +98,16 @@
         "src/codex_wake/history_commands.py",
         "tests/test_command_workflows.py"
       ],
-      "evidence": [],
+      "evidence": [
+        "Integration Python3.12 test_command_workflows.py7PASS, real PTY subprocess + target replacement and declined mutation",
+        "Worker daemon1/builds6/history-import5PASS, lint/diff PASS; native seam is owned scripted executable, no real accounts",
+        "Typed --arguments compatibility/conflict and noninteractive pins/key refusal proved"
+      ],
       "worker": "/root/cli_workflows",
       "worker_branch": "feat/0197-workflows",
-      "worker_base": "3c91e4241b79b560542eeced04a77b11c82924ff"
+      "worker_base": "3c91e4241b79b560542eeced04a77b11c82924ff",
+      "result_sha": "0b12bf4995ef527bf5699186a1cba16e3b1600e2",
+      "integrated_sha": "5cdf1f9"
     },
     {
       "id": "LOCAL-0197-T5",
@@ -112,15 +118,17 @@
         "LOCAL-0197-T3",
         "LOCAL-0197-T4"
       ],
-      "state": "pending",
-      "tracker_state": "BLOCKED",
+      "state": "running",
+      "tracker_state": "IN_PROGRESS",
       "owner": "primary",
       "owned_paths": [
         "docs/agents/accounts-and-daemons.md",
         "README.md",
         "tests/test_command_parity.py"
       ],
-      "evidence": []
+      "evidence": [],
+      "worker": "primary",
+      "worker_base": "5cdf1f9"
     }
   ]
 }
