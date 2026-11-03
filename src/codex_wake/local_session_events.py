@@ -59,7 +59,7 @@ class TurnEvents:
             db.execute('BEGIN IMMEDIATE')
             row=db.execute('SELECT state FROM native_turn_collectors WHERE operation_id=?',(identifier,)).fetchone()
             state=json.loads(row[0]);sequence=state['sequence']+1
-            value=encoded(dict(sequence=sequence,kind=kind,params=params,truncated=cut))
+            value=encoded(dict(sequence=sequence,kind=kind,params=params,truncated=cut,provenance='native_protocol_notification'))
             db.execute('INSERT INTO native_turn_events VALUES(?,?,?,?)',(identifier,sequence,value,len(value.encode())))
             count,total=db.execute('SELECT COUNT(*),COALESCE(SUM(size),0) FROM native_turn_events WHERE operation_id=?',(identifier,)).fetchone()
             while count>MAX_EVENTS or total>MAX_BYTES:
@@ -172,7 +172,7 @@ def collect(root,identifier):
                     if params.get('threadId')!=thread:continue
                     event_turn=params.get('turnId') or (params.get('turn') or {}).get('id')
                     if event_turn!=turn_id:continue
-                    allowed=('turn/started','turn/completed','item/started','item/completed','item/agentMessage/delta','item/commandExecution/outputDelta','item/mcpToolCall/progress','error')
+                    allowed=('turn/started','turn/completed','item/started','item/completed','item/agentMessage/delta','item/commandExecution/outputDelta','item/mcpToolCall/progress','turn/moderationMetadata','thread/tokenUsage/updated','error')
                     if method not in allowed:
                         if not method.startswith(('codex/event/','item/reasoning/')):
                             omitted=store.state(identifier).get('unsupported_event_kinds',[])
@@ -180,7 +180,7 @@ def collect(root,identifier):
                         continue
                     item=params.get('item',{})
                     if item.get('type') in ('reasoning','userMessage') or item.get('phase')=='analysis':continue
-                    clean={key:params[key] for key in ('threadId','turnId','itemId','delta') if key in params}
+                    clean={key:params[key] for key in ('threadId','turnId','itemId','delta','metadata','tokenUsage') if key in params}
                     if 'turn' in params:clean['turn']={key:params['turn'][key] for key in ('id','status','error') if key in params['turn']}
                     if 'item' in params:clean['item']={key:item[key] for key in ('id','type','phase','text','command','status','exitCode','tool','server','name','arguments','result','changes') if key in item}
                     if method=='error':clean['error']=params.get('error');clean['willRetry']=params.get('willRetry')
@@ -196,7 +196,7 @@ def collect(root,identifier):
                         record=runtime._load(identifier)
                         record.update(phase='terminal',execution=execution,delivery='retained',acceptance='owner_observed',reason=None,
                             answer=dict(text=raw[:32768].decode(errors='replace'),truncated=final_truncated or len(raw)>32768,source='native_turn_events',turn_id=turn_id))
-                        runtime._save(record);store.update(identifier,status='completed');return
+                        store.update(identifier,status='completed');runtime._save(record);return
         except Exception as error:
             store.update(identifier,status='uncertain' if transmitted else 'failed',reason=getattr(error,'code','native_event_connection_lost'))
             record=runtime._load(identifier)

@@ -149,3 +149,7 @@ def present_receipt(envelope,mode='final',*,cursor=0):
     if mode=='silent' and not value['terminal']:code=3
     if code:print(json.dumps(dict(operation_id=value['operation_id'],execution=value['execution'],reason=value['reason'] or 'command_interaction_or_failure',result=envelope['result']['operation'].get('result'))),file=sys.stderr)
     return code
+
+
+# Shared transports need status semantics without invoking CLI printing.
+output_exit_code = _exit

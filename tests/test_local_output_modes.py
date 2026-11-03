@@ -38,12 +38,16 @@ class OutputModesTests(unittest.TestCase):
                         if not subscribed:return
                         def event(method,**params):ws.send(json.dumps(dict(method=method,params=dict(threadId='one',turnId='native-turn',**params))))
                         event('turn/started',turn={'id':'native-turn','status':'inProgress'})
+                        # Schema-shaped telemetry from the qualified native protocol; not a live capture.
+                        event('turn/moderationMetadata',metadata={'decision':'allowed'})
                         event('item/agentMessage/delta',itemId='answer',delta='Hello ');delta.set()
                         if not release.wait(10):return
                         event('item/started',item={'id':'tool','type':'commandExecution','command':'echo fixture'})
                         event('item/completed',item={'id':'tool','type':'commandExecution','exitCode':0})
                         event('item/agentMessage/delta',itemId='answer',delta='world')
                         event('item/completed',item={'id':'answer','type':'agentMessage','phase':'final_answer','text':'Hello world'})
+                        counts=dict(cachedInputTokens=0,inputTokens=10,outputTokens=2,reasoningOutputTokens=0,totalTokens=12)
+                        event('thread/tokenUsage/updated',tokenUsage={'last':counts,'total':counts,'modelContextWindow':32000})
                         event('turn/completed',turn={'id':'native-turn','status':'completed'})
                         return
             with unix_serve(handler,str(root/'native.sock')) as server:
@@ -77,7 +81,8 @@ class OutputModesTests(unittest.TestCase):
                     final=owner.output(identifier,mode='final',timeout=3)
                     self.assertEqual(final['text'],'Hello world')
                     transcript=owner.output(identifier,mode='transcript')
-                    self.assertEqual([event['kind'] for event in transcript['events']],['turn/started','item/agentMessage/delta','item/started','item/completed','item/agentMessage/delta','item/completed','turn/completed'])
+                    self.assertEqual([event['kind'] for event in transcript['events']],['turn/started','turn/moderationMetadata','item/agentMessage/delta','item/started','item/completed','item/agentMessage/delta','item/completed','thread/tokenUsage/updated','turn/completed'])
+                    self.assertTrue(transcript['retention']['history_complete'])
                     tail=owner.output(identifier,mode='transcript',cursor=live['next_cursor'])
                     self.assertEqual(tail['events'][0]['kind'],'item/started')
                     silent=owner.output(identifier,mode='silent')
