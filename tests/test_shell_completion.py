@@ -96,3 +96,16 @@ class ShellCompletionTests(unittest.TestCase):
             self.assertEqual(rc.read_text(), original)
             configure('uninstall', shell='bash', home=home)
             self.assertEqual(rc.read_text(), original)
+
+    def test_fresh_shells_load_installed_completion_automatically(self):
+        import os
+        import subprocess
+        with tempfile.TemporaryDirectory() as temporary:
+            home = Path(temporary)
+            configure('install', home=home)
+            env = dict(os.environ, HOME=str(home), ZDOTDIR=str(home))
+            p = subprocess.run(['bash','--noprofile','-i','-c','complete -p codex-wake'],env=env,capture_output=True,text=True,check=True)
+            self.assertIn('_codex_wake codex-wake', p.stdout)
+            p = subprocess.run(['zsh','-i','-c','whence -w _codex_wake; print -r -- "${_comps[codex-wake]}"'],env=env,capture_output=True,text=True,check=True)
+            self.assertIn('_codex_wake: function', p.stdout)
+            self.assertTrue(p.stdout.rstrip().endswith('_codex_wake'), p.stdout)
