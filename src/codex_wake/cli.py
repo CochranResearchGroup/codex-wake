@@ -100,6 +100,12 @@ def build_parser() -> argparse.ArgumentParser:
     register_completion(subparsers)
     from .local_control_commands import register_parser as register_local_control
     register_local_control(subparsers)
+    import argparse as _argparse
+    _control_verbs = next(a for a in subparsers.choices['control']._actions if isinstance(a, _argparse._SubParsersAction))
+    from .local_health import register_parser as register_local_health
+    register_local_health(_control_verbs)
+    from .local_self_limits import register_parser as register_local_self_limits
+    register_local_self_limits(subparsers)
     from .wake_control import add_control_parsers
     add_control_parsers(subparsers)
     from .time_inspection import add_time_parser
@@ -2824,7 +2830,13 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     if args.command == "a2a":
         from .a2a_cli import a2a_command
         return a2a_command(args)
+    if args.command == 'self-limits':
+        from .local_self_limits import command
+        return command(args, resolve_root(args))
     if args.command == 'control':
+        if args.control_verb == 'health':
+            from .local_health import command
+            return command(args, resolve_root(args))
         from .local_control_commands import command
         return command(args, resolve_root(args))
     if args.command == "sessions":
