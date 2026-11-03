@@ -1,6 +1,6 @@
 # Copy completed unloaded native histories
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Ticket: LOCAL-0199
 Branch: fix/unloaded-history-import
@@ -9,15 +9,25 @@ Priority: regression blocker
 
 ## Current State
 
-Regression red confirmed at public history.import seam; minimal predicate fix
-passes14 history tests on each Python3.11/3.12 and4shortcut tests on3.12.
-Installed UID1017 qualification passed;238 source/wheel/installed Python files
-match. Synthetic native source remains idle; real notLoaded acceptance is next.
-See ../evidence/plan0199/acceptance.json.
+LOCAL-0199 DONE. PR464 merged at5079f2a and exact matching238-member package
+installed at ~/.local/share/codex-wake/releases/0.22.0.dev2-5079f2a.
+Fourteen affected history tests/version plus four shortcut tests on3.12 pass;
+UID1017 native installed qualification passed. Real source and existing matching
+child both report notLoaded and qualify under the fixed predicate. Existing copy
+content, ancestry, goal-free state and source revision verified; supported journal
+reconcile_result recorded owner-observed result. Original batch then completed,
+and two retries return that same child. Native resume displays saved answer.
+No new live fork or model turn; daemon targets and stock executable unchanged;
+fixture UID process census and final test-client census empty. See acceptance.json
+and deployment.json under ../evidence/plan0199; raw private evidence under
+~/.local/state/codex-wake/testing/importfix. No memory write requested.
 
-Live Plan0198 copy failed before native fork: persisted completed/full source
-reports notLoaded after its client exits; import requires idle. Old uncertain
-intent remains immutable. User authorized fix, deploy and real-account retest.
+Initial failure-stage inference was too strong: existing deterministic snapshot
+predated failed test, so it did not establish whether that attempt reached fork.
+Native listing omitted fork ancestry; exact native reads established the existing
+matching child. The recovery precheck stopped without issuing a new fork. No
+uncertain journal was reset or blindly redispatched. Qualification distinguishes
+fresh synthetic native forks from reconciled real existing copy.
 
 ## Scope and acceptance
 
