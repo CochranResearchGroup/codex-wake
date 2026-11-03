@@ -214,5 +214,11 @@
     "provider_work": "bounded synthetic marker replies only;no tools;one failed-stream turn retained and reconciled",
     "review_broad_count": 0,
     "review_remediation_count": 0
+  },
+  "shared_contract_decisions": {
+    "local_server": "WSL same-user local controller; automatic private connection receipt, no manual OAuth enrollment",
+    "powershell": "actual Windows PowerShell client sends UTF8 JSON to same WSL server; WSL bootstrap captures private connection receipt without token arguments/output",
+    "api_mcp": "shared local.* owner schemas and slash/health/self-limit hooks; bounded event retrieval for MCP, streaming CLI/API presentation",
+    "consumer_gate": "Current canonical codex-bots status route hardcodes unknown; separate narrow adapter scope question pending"
   }
 }
