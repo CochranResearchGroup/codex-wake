@@ -223,13 +223,18 @@
           "api": "failed timing evidence"
         },
         "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-1.json",
-        "next": "zero-provider UID1017 health,slash,enforcement,recovery; reconcile remaining fresh API/MCP and Bots consumer rows",
+        "next": "zero-provider UID1017 health,slash,enforcement,recovery; Bots adapter scope decision",
         "provider_intent2": {
           "status": "passed",
           "events": 33,
           "all_four_live_text_paths": "passed before direct native completion witness",
           "receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-2.json",
           "fresh_api_mcp_submissions": "unqualified"
+        },
+        "fresh_api_mcp_submissions": {
+          "status": "passed",
+          "receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/fresh-api-mcp/receipt.json",
+          "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
         }
       }
     },
@@ -252,7 +257,7 @@
   "resource_accounting": {
     "effective_model": "inherited;runtime reported identity unavailable",
     "aggregate_allocation": "unknown",
-    "provider_turns_known": 7,
+    "provider_turns_known": 9,
     "provider_work": "bounded synthetic marker replies only;no tools;one failed-stream turn retained and reconciled",
     "review_broad_count": 0,
     "review_remediation_count": 0,
@@ -266,6 +271,18 @@
       "state": "completed; never replay with a new key",
       "second_operation_id": "local-prompt-f912a0728e28dc6788f28f8cd3d66415",
       "second_key": "plan0200-475-P475_WSL_8fad192a"
+    },
+    "fresh_api_mcp_packet": {
+      "maximum_new_intents": 2,
+      "attempted": 2,
+      "confirmed": 2,
+      "state": "closed at cap; all checks passed",
+      "native_work": "short markers only; no tools",
+      "receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/fresh-api-mcp/receipt.json",
+      "operations": [
+        "local-prompt-ebbd7bc11c08d2225fc3d39bf2e75391",
+        "local-prompt-6a2679cee1a7b810a4d7553d490382b1"
+      ]
     }
   },
   "shared_contract_decisions": {

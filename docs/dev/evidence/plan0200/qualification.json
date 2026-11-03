@@ -182,13 +182,33 @@
       "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-2.json",
       "receipt_sha256": "ef92963ecdc2ff233eb38048517476a2c0eb964120315789a5bc6e62d7e81c32",
       "first_failed_timing_receipt": "retained unchanged",
-      "fresh_api_mcp_submissions": "not yet qualified; distinct from same-key retry"
+      "fresh_api_mcp_submissions": "qualified separately in fresh_api_mcp_admission"
     },
     "native_packet": {
       "maximum_new_intents": 2,
       "consumed": 2,
       "state": "closed at cap",
       "known_cumulative_provider_turns": 7
+    },
+    "fresh_api_mcp_admission": {
+      "status": "passed",
+      "maximum_new_intents": 2,
+      "attempted_intents": 2,
+      "confirmed_provider_turns": 2,
+      "known_cumulative_after": 9,
+      "native_turn_count_before": 7,
+      "native_turn_count_after": 9,
+      "tool_work": "none",
+      "checks": [
+        "fresh typed API prompt and fresh local MCP SDK prompt",
+        "exact native saved Unicode/multiline input and clientId",
+        "exact native final answer and visible target TUI question/answer",
+        "four modes per entrypoint and same-key retry without another native turn",
+        "controller and presentation process generations unchanged"
+      ],
+      "command": "env -u PYTHONPATH /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/python /home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/qualify_api_mcp_fresh.py",
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/fresh-api-mcp/receipt.json",
+      "receipt_sha256": "e328442ef4bdc82851e6613f2b6f1420e4f09f4e820adf6479c3975e20ecb5ae"
     }
   },
   "milestone_b": {
