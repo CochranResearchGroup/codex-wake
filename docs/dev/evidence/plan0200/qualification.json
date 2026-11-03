@@ -136,7 +136,14 @@
     "status": "in_progress",
     "ticket": 475,
     "consumer_gate": "Current codex-bots route explicitly reports unknown TUI responsiveness; narrow adapter scope question pending",
-    "partial_native": {
+    "delayed_event_probe": {
+      "status": "passed",
+      "provider_turns": 0,
+      "native_evidence": "scripted Unix protocol peer with completion held until all four actual clients received lead text",
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/delayed-probe/receipt.json",
+      "receipt_sha256": "c53cf35b069b64a1c8273fa83b3be1648612daf807e86051acd10ef08f5d67f6"
+    },
+    "native_intent1_snapshot": {
       "provider_intents_consumed": 1,
       "native_package_sha256": "48ed489ceed144d277c44a505ef5cbcb63250fa361fe132bed1fdab3f7cfb7d5",
       "passed": [
@@ -151,11 +158,11 @@
       "failed": [
         "WSL,PowerShell,API pre-terminal text receive timing was not established for the very short final-answer burst; API did receive nonterminal lifecycle and tool frames"
       ],
-      "second_intent": "not submitted; held for timing diagnosis",
+      "second_intent": "held at this first-intent snapshot; see native_intent2_result",
       "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-1.json",
       "packet_maximum_new_intents": 2
     },
-    "native_packet2_result": {
+    "native_intent2_result": {
       "status": "passed",
       "provider_intents_consumed": 2,
       "known_cumulative_provider_turns": 7,
@@ -177,12 +184,11 @@
       "first_failed_timing_receipt": "retained unchanged",
       "fresh_api_mcp_submissions": "not yet qualified; distinct from same-key retry"
     },
-    "delayed_event_probe": {
-      "status": "passed",
-      "provider_turns": 0,
-      "native_evidence": "scripted Unix protocol peer with completion held until all four actual clients received lead text",
-      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/delayed-probe/receipt.json",
-      "receipt_sha256": "c53cf35b069b64a1c8273fa83b3be1648612daf807e86051acd10ef08f5d67f6"
+    "native_packet": {
+      "maximum_new_intents": 2,
+      "consumed": 2,
+      "state": "closed at cap",
+      "known_cumulative_provider_turns": 7
     }
   },
   "milestone_b": {
