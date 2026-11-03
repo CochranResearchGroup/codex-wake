@@ -63,7 +63,7 @@ class ControllerHistoryImport:
     def _thread(value, identifier):
         thread = value.get('thread', {})
         if (thread.get('id') != identifier or thread.get('ephemeral') is not False
-                or thread.get('status', {}).get('type') != 'idle'):
+                or thread.get('status', {}).get('type') not in ('idle', 'notLoaded')):
             raise InventoryError('unsupported_target', 'import requires an idle persisted native conversation')
         turns = thread.get('turns')
         if not isinstance(turns, list) or not turns or any(
