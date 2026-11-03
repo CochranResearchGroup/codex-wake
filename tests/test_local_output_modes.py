@@ -21,6 +21,7 @@ class OutputModesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root=Path(temporary);home=root/'home';home.mkdir();endpoint='unix://'+str(root/'native.sock')
             def handler(ws):
+                subscribed=False
                 for raw in ws:
                     message=json.loads(raw)
                     if 'id' not in message:continue
@@ -28,10 +29,13 @@ class OutputModesTests(unittest.TestCase):
                     if method=='initialize':value={'codexHome':str(home)}
                     elif method=='thread/loaded/list':value={'data':['one'],'nextCursor':None}
                     elif method=='thread/read':value={'thread':{'id':'one','cwd':str(root),'status':{'type':'idle'},'turns':[]}}
+                    elif method=='thread/resume':
+                        subscribed=True;value={'thread':{'id':'one'}}
                     elif method=='turn/start':value={'turn':{'id':'native-turn','status':'inProgress'}};submissions.append(message)
                     else:raise AssertionError(method)
                     ws.send(json.dumps(dict(id=message['id'],result=value)))
                     if method=='turn/start':
+                        if not subscribed:return
                         def event(method,**params):ws.send(json.dumps(dict(method=method,params=dict(threadId='one',turnId='native-turn',**params))))
                         event('turn/started',turn={'id':'native-turn','status':'inProgress'})
                         event('item/agentMessage/delta',itemId='answer',delta='Hello ');delta.set()
@@ -107,6 +111,7 @@ class OutputModesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);home=root/'home';home.mkdir();endpoint='unix://'+str(root/'native.sock')
             def handler(ws):
+                subscribed=False
                 for raw in ws:
                     message=json.loads(raw)
                     if 'id' not in message:continue
@@ -114,6 +119,7 @@ class OutputModesTests(unittest.TestCase):
                     if method=='initialize':result={'codexHome':str(home)}
                     elif method=='thread/loaded/list':result={'data':['one'],'nextCursor':None}
                     elif method=='thread/read':result={'thread':{'id':'one','cwd':str(root),'status':{'type':'idle'},'turns':[]}}
+                    elif method=='thread/resume':result={'thread':{'id':'one'}}
                     elif method=='turn/start':result={'turn':{'id':'failed-turn'}}
                     else:raise AssertionError(method)
                     ws.send(json.dumps(dict(id=message['id'],result=result)))
