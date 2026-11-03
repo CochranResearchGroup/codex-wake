@@ -2,7 +2,7 @@
   "spec": "docs/dev/plans/0197-2026-11-02-command-contract.md",
   "integration_branch": "feat/command-contract-0197",
   "base": "6fb4fe7a9b6511a6bca4d090298cb85daf59ebf3",
-  "integration_tip": "pending checkpoint",
+  "integration_tip": "3c91e4241b79b560542eeced04a77b11c82924ff",
   "review_limit": 1,
   "remediation_limit": 1,
   "review_base": "6fb4fe7a9b6511a6bca4d090298cb85daf59ebf3",
@@ -28,14 +28,15 @@
       ],
       "worker": "primary",
       "worker_branch": "feat/command-contract-0197",
-      "worker_base": "5eaa215"
+      "worker_base": "5eaa215",
+      "result_sha": "3c91e4241b79b560542eeced04a77b11c82924ff"
     },
     {
       "id": "LOCAL-0197-T2",
       "title": "Sanitized authorized authentication observation across transports",
       "blockers": [],
-      "state": "running",
-      "tracker_state": "IN_PROGRESS",
+      "state": "validated",
+      "tracker_state": "DONE",
       "owner": "auth worker",
       "owned_paths": [
         "src/codex_wake/account_observation.py",
@@ -45,8 +46,16 @@
         "src/codex_wake/mcp_server.py",
         "tests/test_account_observation.py"
       ],
-      "evidence": [],
-      "worker": "/root/auth_status"
+      "evidence": [
+        "Integration Python3.12: test_account_observation.py6PASS and test_controller_account*.py19PASS",
+        "Worker both Python3.11/3.12:6observation+19account+6authPASS, lint/diff PASS; real loopback API/OAuth MCP parity and revocation; native host grant",
+        "No provider/process/login/refresh in structured status; cache claims explicitly unverified"
+      ],
+      "worker": "/root/auth_status",
+      "worker_branch": "feat/0197-auth",
+      "worker_base": "5eaa215",
+      "result_sha": "3e1f663d24fd0ec64c639775ec348d37dd91872a",
+      "integrated_sha": "de50ff7"
     },
     {
       "id": "LOCAL-0197-T3",
@@ -71,8 +80,8 @@
       "blockers": [
         "LOCAL-0197-T1"
       ],
-      "state": "pending",
-      "tracker_state": "READY",
+      "state": "running",
+      "tracker_state": "IN_PROGRESS",
       "owner": "pending worker",
       "owned_paths": [
         "src/codex_wake/daemon_commands.py",
@@ -80,7 +89,10 @@
         "src/codex_wake/history_commands.py",
         "tests/test_command_workflows.py"
       ],
-      "evidence": []
+      "evidence": [],
+      "worker": "/root/cli_workflows",
+      "worker_branch": "feat/0197-workflows",
+      "worker_base": "3c91e4241b79b560542eeced04a77b11c82924ff"
     },
     {
       "id": "LOCAL-0197-T5",

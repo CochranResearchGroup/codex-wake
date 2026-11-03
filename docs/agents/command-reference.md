@@ -213,7 +213,9 @@ codex-wake --wake-root ROOT accounts status work --json
 ### CLI help
 
 ```text
-usage: codex-wake accounts status [-h] [--channel {stock,modded}] selector
+usage: codex-wake accounts status [-h] [--channel {stock,modded}] [--json]
+                                  [--expected-target EXPECTED_TARGET]
+                                  selector
 
 Observe sanitized local authentication evidence.
 
@@ -226,6 +228,11 @@ options:
   -h, --help            show this help message and exit
   --channel {stock,modded}
                         Registered native build channel (default: modded).
+  --json                Emit the structured result; authentication status uses
+                        local cache evidence without provider verification.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
 
 Examples:
   codex-wake --wake-root ROOT accounts status work --json
