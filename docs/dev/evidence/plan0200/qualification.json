@@ -130,6 +130,30 @@
       "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0",
       "log": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/receipts/wake0200-smoke-mailbox.log",
       "log_sha256": "511997c6eaf9890c222e3c4550037c042809d4eb96510e00ae200723a7c22aab"
+    },
+    {
+      "command": "env -u PYTHONPATH XDG_CONFIG_HOME=/tmp/wake0200-smoke-config XDG_STATE_HOME=/tmp/wake0200-smoke-state timeout 60s /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/python scripts/a2a_mcp_smoke.py --cli /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/codex-wake --mcp /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/codex-wake-mcp",
+      "status": "blocked_by_host_clock_guard",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "checkout_head_at_run": "2d1039faff129a32f2a9559affd5ea4f50b969e3",
+      "log": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/receipts/wake0200-smoke-mcp.log",
+      "log_sha256": "295346c8b82d4cecce51e8f2f5a49e5ecedfd835ab7d52f1f2003025dfbf8d39"
+    },
+    {
+      "command": "env -u PYTHONPATH CODEX_WAKE_STABLE_TIME_CONFIG='' XDG_CONFIG_HOME=/tmp/wake0200-smoke-config XDG_STATE_HOME=/tmp/wake0200-smoke-state timeout 60s /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/python scripts/a2a_mcp_smoke.py --cli /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/codex-wake --mcp /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/codex-wake-mcp",
+      "status": "passed",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "checkout_head_at_run": "2d1039faff129a32f2a9559affd5ea4f50b969e3",
+      "log": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/receipts/wake0200-smoke-mcp-isolated.log",
+      "log_sha256": "3dc2f3a4a1deae46c7309b0c998b609ba41239ae150d4ef04d46ca775fa82d4f"
+    },
+    {
+      "command": "env -u PYTHONPATH XDG_CONFIG_HOME=/tmp/wake0200-smoke-config XDG_STATE_HOME=/tmp/wake0200-smoke-state timeout 40s /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/python scripts/wake_control_qualification.py --prefix /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8 --output /tmp/wake0200-controls-installed.json",
+      "status": "passed",
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "checkout_head_at_run": "2d1039faff129a32f2a9559affd5ea4f50b969e3",
+      "log": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/receipts/wake0200-controls-installed.log",
+      "log_sha256": "2d9024871f3559fa5dc898df7a2256208bd15fb84a28c88761e4087fc9072b10"
     }
   ],
   "milestone_a": {
@@ -226,5 +250,8 @@
     "Actual Windows PowerShell interop available locally",
     "Python3.11.15 and3.12.13 from private development environments",
     "Full matrix and installed native acceptance are separate from the passing synthetic transport fixture"
+  ],
+  "environment_findings": [
+    "Legacy installed mailbox MCP smoke selected the operator HOME StableTime profile despite XDG isolation and refused one acknowledgment with clock_anomaly. It passed after explicit CODEX_WAKE_STABLE_TIME_CONFIG empty selection, matching CI unit-test isolation. Production clock configuration was not changed; the first failed log is retained."
   ]
 }
