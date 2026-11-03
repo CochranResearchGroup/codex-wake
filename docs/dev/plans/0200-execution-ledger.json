@@ -27,7 +27,8 @@
         "test_sessions.py PASS3.12",
         "public source CLI native discovery:76sessions,0holds"
       ],
-      "result_sha": "next implementation commit"
+      "result_sha": "d731515",
+      "tracker_state": "closed"
     },
     {
       "key": "T2",
@@ -39,9 +40,13 @@
         "Limit setup starts or explicitly arranges enforcement and reports real readiness; demonstrate bounded stop.",
         "Inherited external ceilings cannot be raised or disabled through self-service; preserve lifetime usage."
       ],
-      "state": "running",
+      "state": "integrated",
       "worker": "/root/self_limits_468",
-      "worktree": "/home/ecochran76/workspace.local/codex-wake-self-limits"
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-self-limits",
+      "result_sha": "9e4d5b2",
+      "validation": [
+        "worker actualUID1017 bounded3s native paused+stop proof;64focused tests perPython plusfinal4selftests"
+      ]
     },
     {
       "key": "T3",
@@ -53,9 +58,13 @@
         "Distinguish responsive,stuck,offline and unsupported/unknown without treating process liveness as TUI health.",
         "Ordinary same-user observation requires no manual grants; preserve qualified native probe safeguards."
       ],
-      "state": "running",
+      "state": "integrated",
       "worker": "/root/local_health_469",
-      "worktree": "/home/ecochran76/workspace.local/codex-wake-local-health"
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-local-health",
+      "result_sha": "6f0c6d8",
+      "validation": [
+        "worker34healthtests/version,2protocoltests;actualUID1017 run pending"
+      ]
     },
     {
       "key": "T4",
@@ -69,7 +78,14 @@
         "Retain operation ID and distinct submitted/accepted/running/terminal/uncertain states; show response in actual tab.",
         "Prompt final result,wait and exact cancellation reuse existing operation/native owners and never silently retarget or start another conversation."
       ],
-      "state": "pending"
+      "state": "validated",
+      "owner": "primary",
+      "result_sha": "0225347",
+      "validation": [
+        "Public CLI/native Unix wire test PASS Python3.11/3.12",
+        "Dedicated signed-in native conversation: submitted exact existing thread,final response retrieved,actual target TUI renders unique answer;retry same intent;3 bounded marker-only provider turns cumulative, no tools"
+      ],
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/prompt-live.json"
     },
     {
       "key": "T5",
