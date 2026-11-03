@@ -273,7 +273,7 @@ def register(subparsers):
             item.add_argument('--endpoint', default='unix://')
             item.add_argument('--expected-target', type=json.loads)
         if verb == 'run':
-            item.add_argument('command')
+            item.add_argument('slash_command', metavar='command')
             item.add_argument('--arguments', default='')
             item.add_argument('--idempotency-key', required=True)
     return parser

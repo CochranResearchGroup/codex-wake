@@ -104,6 +104,8 @@ def build_parser() -> argparse.ArgumentParser:
     _control_verbs = next(a for a in subparsers.choices['control']._actions if isinstance(a, _argparse._SubParsersAction))
     from .local_health import register_parser as register_local_health
     register_local_health(_control_verbs)
+    from .local_slash_commands import register as register_local_slash
+    register_local_slash(_control_verbs)
     from .local_self_limits import register_parser as register_local_self_limits
     register_local_self_limits(subparsers)
     from .wake_control import add_control_parsers
@@ -2834,6 +2836,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         from .local_self_limits import command
         return command(args, resolve_root(args))
     if args.command == 'control':
+        if args.control_verb == 'slash':
+            from .local_slash_cli import command
+            return command(args, resolve_root(args))
         if args.control_verb == 'health':
             from .local_health import command
             return command(args, resolve_root(args))

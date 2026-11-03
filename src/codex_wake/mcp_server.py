@@ -215,6 +215,10 @@ from .self_limits import tool_specs as self_limits_specs
 SPECS.update(self_limits_specs())
 from .local_health import tool_specs as local_health_specs
 SPECS.update(local_health_specs())
+from .local_control_commands import tool_specs as local_control_specs
+SPECS.update(local_control_specs())
+from .local_slash_commands import tool_specs as local_slash_specs
+SPECS.update(local_slash_specs())
 
 from .command_contract import apply_native_contract
 apply_native_contract(SPECS)
@@ -328,6 +332,19 @@ class CommandRunner:
                   "properties": properties, "required": required}
         if not Draft202012Validator(schema).is_valid(arguments):
             return {"error": {"code": "invalid_argument", "message": "Arguments do not match the tool schema."}}, True
+        if group == 'local-slash':
+            try:
+                from .local_slash_commands import execute
+                return execute(self.wake_root, verb, arguments), False
+            except (ValueError, OSError) as error:
+                return {'error': {'code': getattr(error, 'code', 'slash_unavailable'), 'message': str(error)}}, True
+        if group == 'local' and verb != 'health':
+            try:
+                from .local_control_commands import execute
+                value = execute('local.'+verb, arguments, self.wake_root)
+                return value, value.get('status') == 'failed'
+            except (ValueError, OSError) as error:
+                return {'error': {'code': getattr(error, 'code', 'local_control_unavailable'), 'message': str(error)}}, True
         if group == 'local' and verb == 'health':
             from .local_health import execute
             value = execute('local.health', arguments, self.wake_root)
