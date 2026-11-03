@@ -47,7 +47,9 @@
       }
     ],
     "owned_fixture_processes": [],
-    "default_root_account_completion": "PASS"
+    "default_root_account_completion": "PASS",
+    "prefix": "/home/codex-daemon-test/shortcut198-prefix",
+    "executable": "/home/codex-daemon-test/shortcut198-prefix/bin/codex-wake"
   },
   "native_package_sha256": {
     "codex-package.json": "85ca1bb2afa3795b0750ce43c796cecc536781a415672661a78f06e8ac58dbd7",
@@ -69,5 +71,27 @@
     "No real-account history, credentials or daemons changed",
     "No GitHub hosted CI, merge or deployment",
     "Plan0197 remains closed; its prior review/remediation counters and evidence are unchanged"
+  ],
+  "evidence_directory": "/home/ecochran76/.local/state/codex-wake/testing/shortcuts198",
+  "validation_commands": [
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv311/bin/python scripts/local_validation.py --repo /home/ecochran76/workspace.local/codex-wake-shortcuts --runtime /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv311/bin/python --tier presubmit --receipt /tmp/c198/p311.json",
+      "result": "PASS:245 tests,16 checks",
+      "source_commit": "e3a61e79721e6829227190aee9ac73a160c745de",
+      "retained_receipt": "/home/ecochran76/.local/state/codex-wake/testing/shortcuts198/presubmit311.json"
+    },
+    {
+      "command": "PYTHONPATH=src /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python scripts/local_validation.py --repo /home/ecochran76/workspace.local/codex-wake-shortcuts --runtime /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python --tier presubmit --receipt /tmp/c198/p312.json",
+      "result": "PASS:245 tests,16 checks",
+      "source_commit": "e3a61e79721e6829227190aee9ac73a160c745de",
+      "retained_receipt": "/home/ecochran76/.local/state/codex-wake/testing/shortcuts198/presubmit312.json"
+    },
+    {
+      "command": "sudo -n -H -u codex-daemon-test env OUTER_NETNS=<invoking process network namespace> TASK_SOURCE_COMMIT=bdb2114b0fd9932301549817db660a84faac6b9b unshare -Urn /home/codex-daemon-test/shortcut198-prefix/bin/python /tmp/c198/qualify.py",
+      "result": "PASS: native open/resume, copy, dedup, held-source retry; zero model turns; both daemons stopped",
+      "retained_script": "/home/ecochran76/.local/state/codex-wake/testing/shortcuts198/qualify.py",
+      "retained_receipt": "/home/ecochran76/.local/state/codex-wake/testing/shortcuts198/installed-final.json",
+      "original_receipt": "/home/codex-daemon-test/shortcuts198-ed3796a0/receipt.json"
+    }
   ]
 }
