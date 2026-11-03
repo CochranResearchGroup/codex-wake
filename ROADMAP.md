@@ -1417,3 +1417,13 @@ live gates and Plan0195 frozen acceptance remain separate.
 and persists account credential-store provenance. Source2a82619;42focused checks
 per supported Python plus installed UID1017 status/synthetic login pass. Human
 OpenAI confirmation and working-account activation retain their own gates.
+
+Command discoverability and CLI/API/MCP consistency: operator-confirmed design in
+[Plan0197](docs/dev/plans/0197-2026-11-02-command-contract.md), LOCAL-0197.
+State PLANNED; accounts/daemons/history first, with generated help/reference,
+automatically installed Bash/Zsh completion and explicit transport exceptions.
+
+Plan0197 complete on local integration branch feat/command-contract-0197: five
+local tickets DONE, review1/TDD1 complete, exact final installed fixture passed.
+Accounts/configuration/builds/daemons/history are the first22operation contract;
+remaining command families are explicitly deferred. Merge/release remain separate.

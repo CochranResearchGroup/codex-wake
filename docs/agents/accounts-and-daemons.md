@@ -151,3 +151,38 @@ blocks external network access. Only its own processes may be cleaned. UID1017
 shares the host kernel/resources; this is not real authenticated-account or
 working-host acceptance. [Plan0195](../dev/plans/0195-2026-11-02-product-acceptance.md)
 owns the product demonstration; live migration remains separately gated.
+
+## Discovery and interactive shortcuts
+
+Use `--help` at any command level. The [generated reference](command-reference.md)
+includes arguments, examples, effects and transport contracts. The
+[coverage report](command-coverage.json) explicitly identifies commands outside
+the first shared-contract slice. Bash/Zsh [completion](shell-completion.md)
+suggests commands, flags, choices and account aliases from the selected root
+without providers, credentials or daemon startup.
+
+`accounts status NAME --json` observes sanitized local credential-cache evidence
+through the same scoped owner as API/OAuth MCP/native MCP. Cached identity and
+plan are unverified; credentials present does not prove current provider access.
+An unobservable credential store reports unknown. Human `accounts status NAME`
+retains native status output and exit behavior. Interactive login stays local.
+
+In a human terminal, `daemons restart NAME` resolves one exact target, displays
+impact and intent key, and asks for confirmation. Start/update/stop and history
+import have equivalent scoped conveniences. Changed targets are refused; an
+unknown result requires reconciliation with the original key and inputs.
+Noninteractive scripts must supply explicit target pins and idempotency keys.
+Existing advanced invocations continue to work. `--yes` confirms the displayed
+scoped effect; it does not override identity or stale-target checks.
+
+Build commands also accept named flags:
+
+```sh
+codex-wake --wake-root "$LAB" builds list --account work
+codex-wake --wake-root "$LAB" builds launch --account work --channel modded \
+  --expected-target "$BUILD_TARGET" --arg=--no-alt-screen
+```
+
+`--arguments JSON` remains available; contradictory named fields are rejected.
+Remote mutations continue to require scoped grants and durable `_request`
+metadata. Native history MCP additionally requires verified caller identity.

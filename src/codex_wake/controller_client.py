@@ -32,6 +32,15 @@ OPERATIONS = OPERATIONS | frozenset(('accounts.init', 'accounts.create', 'histor
 MCP_TOOLS.update({'accounts.init': 'wake_controller_account_init', 'accounts.create': 'wake_controller_account_create', 'history.import': 'wake_controller_history_import'})
 
 
+OPERATIONS = OPERATIONS | frozenset(('accounts.status',))
+MCP_TOOLS['accounts.status'] = 'wake_controller_account_status'
+
+
+from .command_contract import public_tools
+for _tool, (_operation, _schema) in public_tools().items():
+    MCP_TOOLS[_operation] = _tool
+OPERATIONS = OPERATIONS | frozenset(MCP_TOOLS)
+
 class ClientError(ValueError):
     def __init__(self,code,message):super().__init__(message);self.code=code
 

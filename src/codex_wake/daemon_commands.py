@@ -95,8 +95,8 @@ def register_parser(subparsers):
         item.add_argument('--channel', choices=('stock', 'modded'), default='modded')
         item.add_argument('--json', action='store_true', dest='as_json')
         if verb not in ('list', 'status'):
-            item.add_argument('--expected-target', required=True, type=json.loads)
-            item.add_argument('--idempotency-key', required=True)
+            item.add_argument('--expected-target', type=json.loads)
+            item.add_argument('--idempotency-key')
             item.add_argument('--yes', action='store_true', dest='confirm')
 
 
@@ -105,12 +105,24 @@ def command(args, root):
     arguments = {'channel': args.channel}
     if hasattr(args, 'account'):
         arguments['account'] = args.account
-    if hasattr(args, 'expected_target'):
-        arguments.update(expected_target=args.expected_target, confirm=args.confirm)
-        key = args.idempotency_key
-        arguments['_request'] = dict(operation_id='daemon-' + hashlib.sha256(key.encode()).hexdigest(), idempotency_key=key,
-            correlation_id=key, binding='local-cli', target=args.expected_target)
     try:
+        if args.daemon_verb not in ('list', 'status'):
+            from .cli_targets import require_terminal, show_intent, confirm_intent, intent_key
+            target = args.expected_target
+            key = args.idempotency_key
+            missing = [flag for flag, value in (('--expected-target', target), ('--idempotency-key', key)) if value is None]
+            require_terminal(missing)
+            confirmed = args.confirm
+            if missing:
+                if target is None:
+                    target = execute(root, 'daemons.status', arguments)['result']['daemon']['target']
+                key = key if key is not None else intent_key()
+                show_intent(operation, target, key)
+                if args.daemon_verb in ('restart', 'update', 'stop'):
+                    confirmed = confirm_intent('This may interrupt clients on only the selected account daemon.', confirmed)
+            arguments.update(expected_target=target, confirm=confirmed)
+            arguments['_request'] = dict(operation_id='daemon-' + hashlib.sha256(key.encode()).hexdigest(), idempotency_key=key,
+                correlation_id=key, binding='local-cli', target=target)
         value = execute(root, operation, arguments)
     except (ValueError, OSError) as error:
         value = dict(schema_version=1, operation=operation, status='failed',

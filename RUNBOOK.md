@@ -8232,3 +8232,24 @@ UID1017 installed synthetic login and actual native signed-out status pass;231
 payload members match source, wheel3efb612d; final user process census empty.
 Real OpenAI sign-in was not attempted. Working credentials/install remain unchanged;
 source stays local/unmerged. Memory forbidden; no graph writes.
+
+## Turn | 2026-11-02 | Command contract interview settled
+
+Operator confirmed eight command-contract decisions, including automatic
+completion installation/activation and sanitized authorized auth observation.
+Plan0197 / LOCAL-0197 records outcome, backward compatibility, first vertical
+slice and acceptance. New docs/command-contract worktree starts from merged
+main6fb4fe7; no implementation, shell installation, runtime changes or provider
+experiments in this planning turn. Existing source/glossary authority preserved.
+
+## Turn | 2026-11-02 | Command contract tickets closed
+
+Implemented Plan0197 on feat/command-contract-0197, base6fb4fe7. Primary tookT1;
+separate workers deliveredT2auth status,T3completion installer,T4typed workflows;
+primary integrated serially and completedT5parity/installed qualification. Five
+local tickets DONE. Sourcec0fafa2 qualified240presubmit tests/16checks per3.11/3.12;
+initial long socket-path errors and one clock anomaly retained. One Standards/Spec
+review froze cd12497: Standards0,Spec2accepted. One TDD pass fixed both completion
+findings at24e4cc1;25focused tests/version and rebuilt installed236member equality
+passed. Final fixture census empty, worker worktrees clean/retained. No working
+launcher/account changes, hosted CI, merge, deployment or memory write.

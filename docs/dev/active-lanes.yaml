@@ -1061,3 +1061,17 @@ lanes:
     checkpoint: 3f4052b8ba39ad68c91b1b1fb51439720a39c617
     validation_status: isolated_product_passed
     disposition: Local unmerged source; installed UID1017 demo7 and local3.12 full/3.11 presubmit PASS; live380 remains open; no working activation or memory writes
+
+  - id: P197
+    owner: primary / ecochran76
+    objective: Deliver generated command discovery and CLI API MCP contracts
+    work_items: [docs/dev/plans/0197-2026-11-02-command-contract.md]
+    plan: docs/dev/plans/0197-2026-11-02-command-contract.md
+    branch: feat/command-contract-0197
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P179]
+    updated_at: 2026-11-02
+    disposition: Five local tickets DONE; both-version presubmit and installed acceptance; review1 and TDD1 resolved two findings; local branch only, no live activation

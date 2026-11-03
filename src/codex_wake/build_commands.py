@@ -11,12 +11,47 @@ def register_parser(subparsers):
     commands = parser.add_subparsers(dest='build_command', required=True)
     for verb in ('list', 'launch', 'stage', 'select', 'rollback'):
         item = commands.add_parser(verb)
-        item.add_argument('--arguments', type=json.loads, default={})
+        item.add_argument('--arguments', type=json.loads, default=None)
+        if verb == 'stage':
+            item.add_argument('--recipe')
+        else:
+            item.add_argument('--account')
+        if verb not in ('list', 'stage'):
+            item.add_argument('--channel', choices=('stock', 'modded'))
+            item.add_argument('--expected-target', type=json.loads)
+        if verb == 'select':
+            item.add_argument('--identifier')
+        if verb == 'launch':
+            native = item.add_mutually_exclusive_group()
+            native.add_argument('--arg', action='append', dest='native_args', help='Repeat for each native client argument; use --arg=--flag for options.')
+            native.add_argument('--args', type=json.loads, dest='native_args_json', help='Native client arguments as a JSON array of strings.')
     return parser
 
 
 def command(args, owner):
-    result = execute(owner, args.build_command, args.arguments)
+    from .managed_inventory import InventoryError
+    try:
+        arguments = {} if args.arguments is None else args.arguments
+        if not isinstance(arguments, dict):
+            raise InventoryError('invalid_argument', '--arguments must be a JSON object')
+        arguments = dict(arguments)
+        typed = {key: getattr(args, key) for key in ('account', 'channel', 'expected_target', 'recipe', 'identifier')
+                 if getattr(args, key, None) is not None}
+        native = getattr(args, 'native_args', None)
+        native_json = getattr(args, 'native_args_json', None)
+        if native is not None or native_json is not None:
+            typed['args'] = native if native is not None else native_json
+        if typed and args.arguments is None and args.build_command not in ('list', 'stage'):
+            typed.setdefault('channel', 'modded')
+        for key, value in typed.items():
+            if key in arguments and arguments[key] != value:
+                raise InventoryError('invalid_argument', 'named flag conflicts with --arguments field: ' + key)
+            arguments[key] = value
+        result = execute(owner, args.build_command, arguments)
+    except (ValueError, OSError) as error:
+        print(json.dumps({'schema_version': 1, 'operation': 'builds.' + args.build_command,
+                          'status': 'failed', 'error': {'code': getattr(error, 'code', 'build_held'), 'message': str(error)}}, sort_keys=True))
+        return 2
     print(json.dumps({'schema_version': 1, 'operation': 'builds.' + args.build_command,
                       'status': 'completed', 'result': result}, sort_keys=True))
     return 0

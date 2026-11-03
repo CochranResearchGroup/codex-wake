@@ -207,6 +207,12 @@ from .history_commands import import_tool_specs
 SPECS.update(account_management_specs())
 SPECS.update(import_tool_specs())
 
+from .account_observation import tool_specs as account_observation_specs
+SPECS.update(account_observation_specs())
+
+
+from .command_contract import apply_native_contract
+apply_native_contract(SPECS)
 
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
@@ -345,6 +351,13 @@ class CommandRunner:
                 return value, value['status'] != 'completed' or value.get('result', {}).get('operation', {}).get('phase', 'terminal') != 'terminal'
             except (ValueError, OSError) as error:
                 return {'error': {'code': getattr(error, 'code', 'daemon_held'), 'message': str(error)}}, True
+        if group == 'controller-account-status':
+            from .account_observation import protected_execute
+            try:
+                value = protected_execute(arguments, self.wake_root)
+                return value, False
+            except (ValueError, OSError) as error:
+                return {'error': {'code': getattr(error, 'code', 'account_observation_unavailable'), 'message': str(error)}}, True
         if group == 'controller-accounts':
             from .account_commands import execute
             from .managed_inventory import InventoryError

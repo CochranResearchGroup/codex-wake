@@ -50,9 +50,10 @@ def register_parser(subparsers):
     transfer.add_argument('--owner', required=True)
     transfer.add_argument('--destination', required=True)
     transfer.add_argument('--channel', choices=('stock', 'modded'), default='modded')
-    transfer.add_argument('--expected-source', type=json.loads, required=True)
-    transfer.add_argument('--expected-target', type=json.loads, required=True)
-    transfer.add_argument('--idempotency-key', required=True)
+    transfer.add_argument('--expected-source', type=json.loads)
+    transfer.add_argument('--expected-target', type=json.loads)
+    transfer.add_argument('--idempotency-key')
+    transfer.add_argument('--yes', action='store_true', dest='confirm', help='Confirm the displayed interactive source-preserving copy; does not relax target pins.')
     transfer.add_argument('--json', dest='as_json', action='store_true')
     for verb in ('read', 'resume'):
         command = verbs.add_parser(verb)
@@ -155,14 +156,33 @@ def import_command(args, root):
         from dataclasses import replace
         import hashlib
         from .daemon_commands import local_operator
+        from .cli_targets import require_terminal, show_intent, confirm_intent, intent_key
         arguments = {key: getattr(args, key) for key in (
             'owner', 'thread_id', 'destination', 'channel', 'expected_source', 'expected_target')}
         key = args.idempotency_key
+        missing = [flag for flag, value in (('--expected-source', args.expected_source),
+            ('--expected-target', args.expected_target), ('--idempotency-key', key)) if value is None]
+        require_terminal(missing)
+        if missing:
+            if arguments['expected_source'] is None:
+                view = execute('history.read', dict(owner=args.owner, thread_id=args.thread_id), root,
+                               authorized_accounts=policy(root).get('readable_accounts', []))
+                if view['status'] != 'completed':
+                    raise InventoryError(view['error']['code'], view['error']['message'])
+                arguments['expected_source'] = view['result']['session']['target']
+            if arguments['expected_target'] is None:
+                from .daemon_commands import execute as daemon_execute
+                view = daemon_execute(root, 'daemons.status', dict(account=args.destination, channel=args.channel))
+                arguments['expected_target'] = view['result']['daemon']['target']
+            key = key if key is not None else intent_key()
+            show_intent('history.import', arguments['expected_target'], key, source=arguments['expected_source'])
+            confirm_intent('Copy this saved conversation to the selected destination; preserve the source and transfer no credentials or allowance.',
+                           getattr(args, 'confirm', False))
         identifier = 'history-import-' + hashlib.sha256(key.encode()).hexdigest()[:32]
         arguments['_request'] = dict(operation_id=identifier, idempotency_key=key,
-            correlation_id=identifier, binding='local-cli', target=args.expected_target)
-        actor = local_operator(args.expected_target, {'control', 'observe', 'history.observe'})
-        actor = replace(actor, targets=[args.expected_source, args.expected_target])
+            correlation_id=identifier, binding='local-cli', target=arguments['expected_target'])
+        actor = local_operator(arguments['expected_target'], {'control', 'observe', 'history.observe'})
+        actor = replace(actor, targets=[arguments['expected_source'], arguments['expected_target']])
         value = protected_import(arguments, root, actor=actor, authorize=lambda: actor)
     except (WakeError, ValueError, OSError, TypeError) as error:
         value = dict(schema_version=1, operation='history.import', status='failed',

@@ -1,0 +1,182 @@
+{
+  "spec": "docs/dev/plans/0197-2026-11-02-command-contract.md",
+  "integration_branch": "feat/command-contract-0197",
+  "base": "6fb4fe7a9b6511a6bca4d090298cb85daf59ebf3",
+  "integration_tip": "24e4cc1b884338077afe9585fc8b4cc7ee665557",
+  "review_limit": 1,
+  "remediation_limit": 1,
+  "review_base": "6fb4fe7a9b6511a6bca4d090298cb85daf59ebf3",
+  "tickets": [
+    {
+      "id": "LOCAL-0197-T1",
+      "title": "Shared command definitions and generated help/reference",
+      "blockers": [],
+      "state": "validated",
+      "tracker_state": "DONE",
+      "owner": "primary",
+      "owned_paths": [
+        "src/codex_wake/command_contract.py",
+        "scripts/generate_command_reference.py",
+        "docs/agents/command-reference.md",
+        "tests/test_command_contract.py",
+        "src/codex_wake/cli.py"
+      ],
+      "evidence": [
+        "Python3.12: unittest discover -s tests -p test_command_contract.py:3PASS; red missing device help then green; red missing generator then green",
+        "ruff F821,F822,F823 changed files PASS",
+        "policy wiring PASS"
+      ],
+      "worker": "primary",
+      "worker_branch": "feat/command-contract-0197",
+      "worker_base": "5eaa215",
+      "result_sha": "3c91e4241b79b560542eeced04a77b11c82924ff"
+    },
+    {
+      "id": "LOCAL-0197-T2",
+      "title": "Sanitized authorized authentication observation across transports",
+      "blockers": [],
+      "state": "validated",
+      "tracker_state": "DONE",
+      "owner": "auth worker",
+      "owned_paths": [
+        "src/codex_wake/account_observation.py",
+        "src/codex_wake/account_commands.py",
+        "src/codex_wake/controller_http.py",
+        "src/codex_wake/controller_client.py",
+        "src/codex_wake/mcp_server.py",
+        "tests/test_account_observation.py"
+      ],
+      "evidence": [
+        "Integration Python3.12: test_account_observation.py6PASS and test_controller_account*.py19PASS",
+        "Worker both Python3.11/3.12:6observation+19account+6authPASS, lint/diff PASS; real loopback API/OAuth MCP parity and revocation; native host grant",
+        "No provider/process/login/refresh in structured status; cache claims explicitly unverified"
+      ],
+      "worker": "/root/auth_status",
+      "worker_branch": "feat/0197-auth",
+      "worker_base": "5eaa215",
+      "result_sha": "3e1f663d24fd0ec64c639775ec348d37dd91872a",
+      "integrated_sha": "de50ff7",
+      "worker_worktree": "/home/ecochran76/workspace.local/codex-wake-command-auth"
+    },
+    {
+      "id": "LOCAL-0197-T3",
+      "title": "Bash/Zsh completion and automatic installer activation",
+      "blockers": [],
+      "state": "validated",
+      "tracker_state": "DONE",
+      "owner": "completion worker",
+      "owned_paths": [
+        "src/codex_wake/completion.py",
+        "src/codex_wake/shell_completion.py",
+        "scripts/install.sh",
+        "tests/test_completion.py",
+        "tests/test_shell_completion.py"
+      ],
+      "evidence": [
+        "Integration Python3.12:5 completion +6 shell installer tests PASS; actual Bash/Zsh Tab and startup activation",
+        "Generated bash/zsh CLI output syntax checks PASS; installer default, opt-out and failure path",
+        "Worker red/green: missing generator then implementation; PTY quoted-root defect caught and repaired",
+        "No live shell or operator home writes"
+      ],
+      "worker": "/root/completion_install",
+      "worker_branch": "feat/0197-completion",
+      "worker_base": "5eaa215",
+      "result_sha": "3f760dc31ddaeae8d5d4ae060a8ecfebed2a59f7",
+      "integrated_sha": "bfedc25",
+      "worker_worktree": "/home/ecochran76/workspace.local/codex-wake-command-completion",
+      "review_followup": {
+        "findings": [
+          "S1",
+          "S2"
+        ],
+        "tracker_state": "DONE",
+        "validated_source": "24e4cc1b884338077afe9585fc8b4cc7ee665557",
+        "evidence": "Both Python versions13completion regressions +12command regressions; final installed wheel qualification"
+      }
+    },
+    {
+      "id": "LOCAL-0197-T4",
+      "title": "Typed CLI arguments and safe interactive target resolution",
+      "blockers": [
+        "LOCAL-0197-T1"
+      ],
+      "state": "validated",
+      "tracker_state": "DONE",
+      "owner": "pending worker",
+      "owned_paths": [
+        "src/codex_wake/daemon_commands.py",
+        "src/codex_wake/build_commands.py",
+        "src/codex_wake/history_commands.py",
+        "tests/test_command_workflows.py"
+      ],
+      "evidence": [
+        "Integration Python3.12 test_command_workflows.py7PASS, real PTY subprocess + target replacement and declined mutation",
+        "Worker daemon1/builds6/history-import5PASS, lint/diff PASS; native seam is owned scripted executable, no real accounts",
+        "Typed --arguments compatibility/conflict and noninteractive pins/key refusal proved"
+      ],
+      "worker": "/root/cli_workflows",
+      "worker_branch": "feat/0197-workflows",
+      "worker_base": "3c91e4241b79b560542eeced04a77b11c82924ff",
+      "result_sha": "0b12bf4995ef527bf5699186a1cba16e3b1600e2",
+      "integrated_sha": "5cdf1f9",
+      "worker_worktree": "/home/ecochran76/workspace.local/codex-wake-command-workflows"
+    },
+    {
+      "id": "LOCAL-0197-T5",
+      "title": "Installed parity, generated coverage and first-slice closeout",
+      "blockers": [
+        "LOCAL-0197-T1",
+        "LOCAL-0197-T2",
+        "LOCAL-0197-T3",
+        "LOCAL-0197-T4"
+      ],
+      "state": "validated",
+      "tracker_state": "DONE",
+      "owner": "primary",
+      "owned_paths": [
+        "docs/agents/accounts-and-daemons.md",
+        "README.md",
+        "tests/test_command_parity.py"
+      ],
+      "evidence": [
+        "Both Python versions:16presubmit checks,240tests,PASS qualified sourcec0fafa2",
+        "Disposable scripts/install.sh exact wheel:236Python members source/wheel/installed equal; fresh Bash/Zsh activation, scoped account suggestions and preserving uninstall PASS",
+        "375parser nodes help render,22migrated operations with no missing argument descriptions",
+        "Schema mapping/native caller exceptions generated; existing owner regressions cover authorization, replay/conflict/uncertainty; new loopback statusAPI/MCP result/denial parity",
+        "Retained initial AF_UNIX path failures and3.11clock anomaly; short private path + serial repeat; no skipped acceptance",
+        "Final source24e4cc1: one review/one TDD pass, both findings resolved;25focused tests/version and rebuilt installed236member qualification PASS"
+      ],
+      "worker": "primary",
+      "worker_base": "5cdf1f9",
+      "result_sha": "c0fafa2687d24db3aab7a318103137e79ba16098",
+      "worker_branch": "feat/command-contract-0197"
+    }
+  ],
+  "review_state": "complete: Standards0 accepted; Spec2 blocking accepted and resolved",
+  "tip_authority": "Git HEAD includes the final documentation-only closeout; integration_tip identifies final product source.",
+  "review": {
+    "base": "6fb4fe7a9b6511a6bca4d090298cb85daf59ebf3",
+    "frozen_tip": "cd1249711213453fa8aeafa1a6a35636aa3938cc",
+    "workers": [
+      "/root/review_standards",
+      "/root/review_spec"
+    ],
+    "runs": 1,
+    "remediation_passes": 1,
+    "findings": [
+      {
+        "id": "S1",
+        "disposition": "blocking",
+        "status": "resolved",
+        "fixed_at": "24e4cc1b884338077afe9585fc8b4cc7ee665557"
+      },
+      {
+        "id": "S2",
+        "disposition": "blocking",
+        "status": "resolved",
+        "fixed_at": "24e4cc1b884338077afe9585fc8b4cc7ee665557"
+      }
+    ],
+    "report": "docs/dev/evidence/plan0197/review.md"
+  }
+}

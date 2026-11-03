@@ -25,6 +25,10 @@ TOOLS = {
 }
 
 
+from .account_observation import tool_specs as account_observation_specs
+for name, spec in account_observation_specs().items():
+    TOOLS[name] = (spec[1], {'type': 'object', 'properties': spec[3], 'required': spec[4], 'additionalProperties': False})
+
 # Native-MCP caller identity is not part of the OAuth-MCP argument schema.
 from .history_commands import tool_specs as history_specs
 for name, spec in history_specs().items():
@@ -114,6 +118,9 @@ for name, spec in daemon_specs().items():
     TOOLS[name] = (spec[1], dict(type='object', properties=spec[3], required=spec[4], additionalProperties=False))
 
 
+from .command_contract import public_tools, describe as describe_operation
+TOOLS.update(public_tools())
+
 def operation_failure(operation, error):
     return {'schema_version': 1, 'operation': operation, 'status': 'failed',
             'error': {'code': error.code, 'message': str(error)}}
@@ -168,6 +175,7 @@ class ProtectedOperations:
         'accounts.init': ('admin', None, None),
         'accounts.create': ('admin', None, None),
         'history.import': ('control', None, None),
+        'accounts.status': ('account.observe', None, None),
         'accounts.list': ('account.observe', 'accounts', None),
         'accounts.resolve': ('account.observe', None, 'account'),
         'configuration.explain': ('configuration.observe', None, 'account'),
@@ -272,6 +280,12 @@ class ProtectedOperations:
                     recipe=name, recipe_sha256=hashlib.sha256(raw).hexdigest())
             result = BuildAuthorization(self.authority, self.operations.builds, recipe_targets=recipes,
                 runtime=ControllerRuntime(self.operations.inventory.root)).execute(token, operation, arguments)
+        elif operation == 'accounts.status':
+            from .account_observation import execute
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host account owner unavailable')
+            result = execute(self.operations.inventory.root, arguments, actor=actor,
+                authorize=lambda: self.authority.authenticate(token), accounts=self.operations.accounts)
         elif operation in ('accounts.init', 'accounts.create'):
             from .account_management import execute
             if self.operations.inventory is None:
@@ -484,7 +498,7 @@ class ControllerHandler(BaseHTTPRequestHandler):
         elif method == 'ping': result = {}
         elif method == 'tools/list':
             actor = self.server.authority.authenticate(token)
-            result = {'tools': [dict(name=name, description='Read scoped controller resource', inputSchema=schema)
+            result = {'tools': [dict(name=name, description=describe_operation(operation), inputSchema=schema)
                 for name, (operation, schema) in TOOLS.items()
                 if ProtectedOperations.READ_POLICIES[operation][0] in actor.scopes
                 and (operation.startswith('inventory.')
