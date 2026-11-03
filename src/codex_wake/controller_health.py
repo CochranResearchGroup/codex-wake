@@ -17,7 +17,7 @@ import time
 from uuid import uuid4
 from websockets.exceptions import WebSocketException
 
-from .native_protocol import native_request, NativeCapabilityUnavailable
+from .native_protocol import native_request, NativeCapabilityUnavailable, NativeHealthDeadline
 from .process import process_identity
 from .managed_inventory import InventoryError
 from .records import WakeError
@@ -74,6 +74,15 @@ class ControllerHealth:
         if not isinstance(arguments,dict) or set(arguments)-{'expected_target','timeout'}:
             raise InventoryError('invalid_argument','health observation requires an exact pinned target and bounded timeout')
         target,timeout=arguments.get('expected_target'),arguments.get('timeout',1)
+        matches=[row for row in self.bindings() if row.get('target')==target]
+        return self.observe_binding(target, matches[0] if len(matches)==1 else None, timeout=timeout)
+
+    def observe_binding(self,target,binding,*,timeout=1):
+        """Challenge one host-discovered same-user binding without an action grant.
+
+        Callers must resolve the binding from trusted local discovery, never from
+        caller-supplied endpoint or command data. All native identity checks apply.
+        """
         if not isinstance(target,dict) or set(target)!=_TARGET_FIELDS or type(timeout) not in (int,float) or not .05<=timeout<=5:
             raise InventoryError('invalid_argument','complete native health identity and timeout0.05..5 seconds required')
         if any(not isinstance(target[key],str) or not target[key] or len(target[key])>4096 for key in _TARGET_FIELDS-{'process'}):
@@ -83,9 +92,8 @@ class ControllerHealth:
         def unknown(reason,status='unknown'):
             observation.update(reason=reason,status=status)
             return result
-        matches=[row for row in self.bindings() if row.get('target')==target]
-        if len(matches)!=1:return unknown('stale_or_ambiguous_binding')
-        binding=matches[0]
+        if not isinstance(binding,dict) or binding.get('target')!=target:
+            return unknown('stale_or_ambiguous_binding')
         if target['runtime']!='codex' or sys.platform!='linux':return unknown('native_health_unsupported','unsupported')
         endpoint,command=binding.get('endpoint'),binding.get('codex_cmd')
         if not isinstance(endpoint,str) or not endpoint.startswith('unix:///') or not isinstance(command,list) or not command or any(not isinstance(arg,str) for arg in command):
@@ -116,6 +124,7 @@ class ControllerHealth:
             observation.update(status='responsive',responsive=True,evidence='tui_main_loop_ack',reason=None,
                 challenge=challenge,latency_seconds=time.monotonic()-started,loop_tid=tid)
             return result
+        except NativeHealthDeadline:return unknown('native_foreground_deadline')
         except NativeCapabilityUnavailable:return unknown('native_health_capability_unavailable','unsupported')
         except (ValueError,OSError,TimeoutError,WakeError,WebSocketException):return unknown('native_loop_unobserved')
         finally:_SLOTS.release()

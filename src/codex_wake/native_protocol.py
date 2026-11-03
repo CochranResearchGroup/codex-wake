@@ -15,6 +15,10 @@ class NativeCapabilityUnavailable(WakeError):
     """The server explicitly rejected an unknown protocol method."""
 
 
+class NativeHealthDeadline(WakeError):
+    """An exact native foreground challenge expired in the daemon."""
+
+
 def native_request(endpoint, codex, method, params, timeout, *, verify_connection=None):
     from .shared_app_server import locate_shared_endpoint
     from websockets.sync.client import unix_connect
@@ -51,6 +55,8 @@ def native_request(endpoint, codex, method, params, timeout, *, verify_connectio
                 if 'error' in result:
                     if isinstance(result['error'],dict) and result['error'].get('code')==-32601:
                         raise NativeCapabilityUnavailable('native lifecycle method unavailable: '+name)
+                    if name == 'tui/health/probe' and isinstance(result['error'], dict) and result['error'].get('code') == -32001 and result['error'].get('message') == 'foreground loop deadline expired':
+                        raise NativeHealthDeadline('native foreground loop deadline expired')
                     raise WakeError('native lifecycle request rejected: ' + name)
                 return result['result']
         initialization = request(1, 'initialize', {'clientInfo': {'name': 'codex_wake_lifecycle', 'version': __version__},
