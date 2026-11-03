@@ -7,6 +7,7 @@ import sys
 import tempfile
 import threading
 import unittest
+import time
 from websockets.sync.server import unix_serve
 
 
@@ -27,6 +28,10 @@ class LocalSessionTests(unittest.TestCase):
                     elif method=='turn/start':value={'turn':{'id':'turn-one'}}
                     else:raise AssertionError(method)
                     ws.send(json.dumps({'id':message['id'],'result':value}))
+                    if method=='turn/start':
+                        for method,params in [('item/completed',{'item':{'id':'answer','type':'agentMessage','phase':'final_answer','text':'known answer'}}),('turn/completed',{'turn':{'id':'turn-one','status':'completed'}})]:
+                            ws.send(json.dumps({'method':method,'params':dict(threadId="one",turnId="turn-one",**params)}))
+                        return
             with unix_serve(handler,str(root/'native.sock')) as server:
                 thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
                 def call(*args):
@@ -45,11 +50,14 @@ class LocalSessionTests(unittest.TestCase):
                 p,submitted=call('prompt','thread:one','known question','--idempotency-key','test-intent')
                 self.assertEqual(p.returncode,0,p.stderr)
                 operation=submitted['result']['operation']
-                self.assertEqual(operation['execution'],'queued')
+                self.assertEqual(operation['result']['turn_id'],'turn-one')
                 p,finished=call('result',operation['operation_id'])
                 self.assertEqual(p.returncode,0,p.stderr)
                 self.assertEqual(finished['result']['operation']['answer']['text'],'known answer')
                 p,repeated=call('prompt','thread:one','known question','--idempotency-key','test-intent')
                 self.assertEqual(p.returncode,0,p.stderr)
                 self.assertEqual(repeated['result']['operation']['operation_id'],operation['operation_id'])
+                from codex_wake.local_session_events import TurnEvents
+                state=TurnEvents(root).state(operation['operation_id']);deadline=time.monotonic()+3
+                while Path('/proc',str(state.get('pid'))).exists() and time.monotonic()<deadline:time.sleep(.01)
                 server.shutdown()
