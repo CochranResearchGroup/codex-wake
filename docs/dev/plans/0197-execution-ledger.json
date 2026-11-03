@@ -55,7 +55,8 @@
       "worker_branch": "feat/0197-auth",
       "worker_base": "5eaa215",
       "result_sha": "3e1f663d24fd0ec64c639775ec348d37dd91872a",
-      "integrated_sha": "de50ff7"
+      "integrated_sha": "de50ff7",
+      "worker_worktree": "/home/ecochran76/workspace.local/codex-wake-command-auth"
     },
     {
       "id": "LOCAL-0197-T3",
@@ -81,7 +82,8 @@
       "worker_branch": "feat/0197-completion",
       "worker_base": "5eaa215",
       "result_sha": "3f760dc31ddaeae8d5d4ae060a8ecfebed2a59f7",
-      "integrated_sha": "bfedc25"
+      "integrated_sha": "bfedc25",
+      "worker_worktree": "/home/ecochran76/workspace.local/codex-wake-command-completion"
     },
     {
       "id": "LOCAL-0197-T4",
@@ -107,7 +109,8 @@
       "worker_branch": "feat/0197-workflows",
       "worker_base": "3c91e4241b79b560542eeced04a77b11c82924ff",
       "result_sha": "0b12bf4995ef527bf5699186a1cba16e3b1600e2",
-      "integrated_sha": "5cdf1f9"
+      "integrated_sha": "5cdf1f9",
+      "worker_worktree": "/home/ecochran76/workspace.local/codex-wake-command-workflows"
     },
     {
       "id": "LOCAL-0197-T5",
@@ -118,17 +121,26 @@
         "LOCAL-0197-T3",
         "LOCAL-0197-T4"
       ],
-      "state": "running",
-      "tracker_state": "IN_PROGRESS",
+      "state": "validated",
+      "tracker_state": "DONE",
       "owner": "primary",
       "owned_paths": [
         "docs/agents/accounts-and-daemons.md",
         "README.md",
         "tests/test_command_parity.py"
       ],
-      "evidence": [],
+      "evidence": [
+        "Both Python versions:16presubmit checks,240tests,PASS qualified sourcec0fafa2",
+        "Disposable scripts/install.sh exact wheel:236Python members source/wheel/installed equal; fresh Bash/Zsh activation, scoped account suggestions and preserving uninstall PASS",
+        "375parser nodes help render,22migrated operations with no missing argument descriptions",
+        "Schema mapping/native caller exceptions generated; existing owner regressions cover authorization, replay/conflict/uncertainty; new loopback statusAPI/MCP result/denial parity",
+        "Retained initial AF_UNIX path failures and3.11clock anomaly; short private path + serial repeat; no skipped acceptance"
+      ],
       "worker": "primary",
-      "worker_base": "5cdf1f9"
+      "worker_base": "5cdf1f9",
+      "result_sha": "c0fafa2687d24db3aab7a318103137e79ba16098",
+      "worker_branch": "feat/command-contract-0197"
     }
-  ]
+  ],
+  "review_state": "ready; all local tickets DONE"
 }
