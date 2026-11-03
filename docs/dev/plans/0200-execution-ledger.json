@@ -106,9 +106,14 @@
         "Live output arrives before completion; transcript has ordered model/tool/lifecycle events and resumable cursor with explicit retention/truncation.",
         "Silent success has no normal output; failures nonzero; timeout/disconnect preserves retrievable original operation."
       ],
-      "state": "running",
+      "state": "implemented",
       "worker": "/root/local_health_469",
-      "worktree": "/home/ecochran76/workspace.local/codex-wake-output-modes"
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-output-modes",
+      "result_sha": "4212b5c",
+      "validation": [
+        "19localtests perPython",
+        "actualstream qualification exposed subscription gap; fixb72dcbe pending integration and actualreplacementmarkerqualification"
+      ]
     },
     {
       "key": "T6",
@@ -122,9 +127,16 @@
         "Qualify noninteractive and interactive commands, receipt versus execution/completion and explicit interaction handles.",
         "Unsupported commands fail before model submission; same durable tracking/output choices apply."
       ],
-      "state": "running",
+      "state": "validated",
       "worker": "/root/self_limits_468",
-      "worktree": "/home/ecochran76/workspace.local/codex-wake-slash-commands"
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-slash-commands",
+      "result_sha": "c00a90b",
+      "tracker_state": "closed",
+      "validation": [
+        "actualUID1017installedCLI15calls;4modes sameoperation;visibleTUIrename;health;peerpreserved;0modelturns",
+        "247source/wheel/installedPythonmembers equal"
+      ],
+      "private_receipt": "/home/codex-daemon-test/slash472-cli-a418415b/receipt.json"
     },
     {
       "key": "T7",
