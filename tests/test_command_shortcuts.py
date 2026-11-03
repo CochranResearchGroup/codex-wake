@@ -86,3 +86,10 @@ class ShortcutTests(unittest.TestCase):
         self.assertFalse((bob/'packages').exists())
         code,out,err=self.cli('history','import-recent','--batch','../escape','--preview','--json')
         self.assertEqual(code,2)
+
+    def test_unsafe_root_symlink_is_refused_before_creating_batch_storage(self):
+        outside=self.root/'outside';outside.mkdir(mode=0o700)
+        link=self.root/'linked';link.symlink_to(outside,target_is_directory=True)
+        code,out,err=self.cli('--wake-root',str(link),'history','import-recent','--batch','0'*32,'--preview')
+        self.assertEqual(code,2,(out,err))
+        self.assertFalse((outside/'controller-history-batches').exists())

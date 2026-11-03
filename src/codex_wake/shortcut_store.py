@@ -10,6 +10,8 @@ from contextlib import contextmanager
 
 def private_directory(path):
     path = Path(path).absolute()
+    if path != path.resolve():
+        raise ValueError('real canonical shortcut directory required before creation')
     path.mkdir(mode=0o700, parents=True, exist_ok=True)
     info = path.lstat()
     if path != path.resolve() or not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
