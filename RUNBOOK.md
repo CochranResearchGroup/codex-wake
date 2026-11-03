@@ -8253,3 +8253,10 @@ review froze cd12497: Standards0,Spec2accepted. One TDD pass fixed both completi
 findings at24e4cc1;25focused tests/version and rebuilt installed236member equality
 passed. Final fixture census empty, worker worktrees clean/retained. No working
 launcher/account changes, hosted CI, merge, deployment or memory write.
+
+## Turn | 2026-11-02 | Account shortcut follow-up
+
+Operator requested open/resume and clarified skim means recent conversation
+copying; recents browsing is also desired. Plan0198 records bounded local
+shortcut orchestration over existing launch/history/import owners. Plain codex
+stays stock. Stacked from validated6a290ee; previous review counts unchanged.

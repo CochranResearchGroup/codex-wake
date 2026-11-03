@@ -1075,3 +1075,17 @@ lanes:
     overlaps: [P179]
     updated_at: 2026-11-02
     disposition: Five local tickets DONE; both-version presubmit and installed acceptance; review1 and TDD1 resolved two findings; local branch only, no live activation
+
+  - id: P198
+    owner: primary / ecochran76
+    objective: Deliver account open resume and recent conversation copying shortcuts
+    work_items: [docs/dev/plans/0198-2026-11-02-account-shortcuts.md]
+    plan: docs/dev/plans/0198-2026-11-02-account-shortcuts.md
+    branch: feat/account-shortcuts-0198
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P197]
+    overlaps: [P197]
+    updated_at: 2026-11-02
+    disposition: Local successor on validated Plan0197; plain codex and working account homes unchanged

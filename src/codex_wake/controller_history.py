@@ -24,7 +24,7 @@ class ControllerHistory:
         self.authorization_guard = authorization_guard
 
     def execute(self, operation, arguments):
-        schemas = {'history.search': {'owners', 'query'},
+        schemas = {'history.search': {'owners', 'query', 'sort', 'limit'},
                    'history.read': {'owner', 'thread_id', 'expected_target'},
                    'history.resume': {'owner', 'thread_id', 'expected_target', 'intent', 'expires_at'}}
         if operation not in schemas:
@@ -68,9 +68,18 @@ class ControllerHistory:
                 if not isinstance(query, str) or len(query) > 1024:
                     raise InventoryError('invalid_argument', 'history query must be bounded text')
                 result = discover(settings, owners)
+                limit = arguments.get('limit')
+                ordering = arguments.get('sort')
+                if (limit is not None and (type(limit) is not int or not 1 <= limit <= 100)) or ordering not in (None, 'recent'):
+                    raise InventoryError('invalid_argument', 'limit must be1–100 and sort must be recent')
+                if ordering == 'recent':
+                    result['sessions'].sort(key=lambda row: (row['updated_at'], row['thread_id']), reverse=True)
+                selected = [row for row in result['sessions'] if not query or any(query.casefold() in str(row.get(key, '')).casefold() for key in ('thread_id', 'cwd', 'title'))]
+                if limit is not None:
+                    selected = selected[:limit]
                 sessions = []
                 remaining = 8 * 1024 * 1024
-                for row in result['sessions']:
+                for row in selected:
                     if query and not any(query.casefold() in str(row.get(key, '')).casefold()
                                          for key in ('thread_id', 'cwd', 'title')):
                         continue
@@ -79,7 +88,7 @@ class ControllerHistory:
                         remaining -= session['provenance']['byte_length']
                         sessions.append(session)
                     except InventoryError as error:
-                        result['holds'].append(dict(profile=row['profile'], reason=error.code))
+                        result['holds'].append(dict(profile=row['profile'], thread_id=row['thread_id'], reason=error.code))
                 return dict(status='partial' if result['holds'] else 'complete', sessions=sessions, holds=result['holds'])
             row = select_session(settings, arguments['thread_id'], owners[0])
             session = self._session(row, accounts[owners[0]])
@@ -125,7 +134,7 @@ class ControllerHistory:
         target = dict(account['target'], conversation_id=row['thread_id'],
                       rollout_revision=hashlib.sha256(content).hexdigest())
         return dict(owner=row['profile'], thread_id=row['thread_id'], cwd=row['cwd'], title=row['title'],
-                    rollout_path=str(path), target=target,
+                    rollout_path=str(path), target=target, updated_at=row.get('updated_at'), recency_source=row.get('recency_source'),
                     provenance=dict(native_schema=5, namespace=row['namespace'],
                                     source='codex_profiles.history', rollout_sha256=target['rollout_revision'], byte_length=len(content)))
 

@@ -11,6 +11,13 @@ from dataclasses import dataclass
 
 
 PARAMETERS = {
+    'limit': ('Maximum recent conversations, from1 to100 (default:10 for shortcuts).', {'type': 'integer', 'minimum': 1, 'maximum': 100}),
+    'sort': ('Order by recent activity when set to recent; default preserves existing discovery order.', {'type': 'string', 'enum': ['recent']}),
+    'root': ('Existing private Wake account root saved only for local shortcuts.', {'type':'string'}),
+    'last': ('Reopen the most recently active saved conversation for the selected account.', {'type':'boolean'}),
+    'batch': ('Exact frozen copy-batch ID to preview or retry without selecting newer sessions.', {'type':'string'}),
+    'yes': ('Explicitly confirm the frozen source-preserving batch copy.', {'type':'boolean'}),
+    'preview': ('Show/save the frozen selection without native copying or daemon starts.', {'type':'boolean'}),
     'selector': ('Account name or configured alias.', {'type': 'string'}),
     'account': ('Account name or configured alias.', {'type': 'string'}),
     'alias': ('Optional alternate name for the newly created account.', {'type': 'string'}),
@@ -20,7 +27,7 @@ PARAMETERS = {
     'idempotency_key': ('Stable key for this intent; retain it to reconcile an uncertain result. Different inputs conflict.', {'type': 'string'}),
     '_request': ('Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.', {'type': 'object'}),
     'confirm': ('Confirm the displayed scoped effect; does not override a changed target.', {'type': 'boolean'}),
-    'as_json': ('Emit the structured result; authentication status uses local cache evidence without provider verification.', {'type': 'boolean'}),
+    'as_json': ('Emit structured results for this command.', {'type': 'boolean'}),
     'device_auth': ('Sign in using a one-time device code approved in your browser.', {'type': 'boolean'}),
     'with_api_key': ('Read the API key from standard input; never put it in command arguments.', {'type': 'boolean'}),
     'arguments': ('Advanced JSON object of operation arguments; preserved for scripts. See generated command reference.', {'type': 'object'}),
@@ -68,7 +75,7 @@ OPERATIONS = (
     Operation('builds.stage', 'Stage one host-registered immutable build recipe.', 'wake_builds_stage', ('recipe','_request'), ('recipe','_request'), 'Runs the configured build recipe under existing build authority.', 'builds stage --arguments \'{"recipe":"candidate"}\''),
     Operation('builds.select', 'Select a staged immutable artifact for an account.', 'wake_builds_select', ('account','channel','expected_target','_request','identifier'), ('account','channel','expected_target','_request','identifier'), 'Changes future build selection; does not imply a running daemon changed.', 'builds select --account work --channel modded --expected-target "$TARGET" --identifier ARTIFACT'),
     Operation('builds.rollback', 'Restore the prior registered account build selection.', 'wake_builds_rollback', ('account','channel','expected_target','_request'), ('account','channel','expected_target','_request'), 'Changes selected build under existing rollback policy.', 'builds rollback --account work --channel modded --expected-target "$TARGET"'),
-    Operation('history.search', 'Search explicitly permitted saved conversation metadata.', 'wake_controller_history_search', ('owners','query'), example='history search --owner work --query test'),
+    Operation('history.search', 'Search explicitly permitted saved conversation metadata.', 'wake_controller_history_search', ('owners','query','limit','sort'), example='history search --owner work --query test'),
     Operation('history.read', 'Read a saved conversation from its exact permitted owner.', 'wake_controller_history_read', ('owner','thread_id','expected_target'), ('owner','thread_id'), example='history read THREAD --owner work'),
     Operation('history.resume', 'Resume a saved conversation under existing exact-owner authority.', 'wake_controller_history_resume', ('owner','thread_id','expected_target','intent','expires_at'), ('owner','thread_id','expected_target','intent','expires_at'), 'Requires existing enrolled caller permission; does not renew work or allowance.', 'history resume THREAD --owner work --expected-target "$TARGET" --intent INTENT --expires-at TIME --bus-root ROOT --operator-capability FILE'),
     Operation('history.import', 'Copy a completed saved conversation into another account.', 'wake_controller_history_import', ('owner','thread_id','destination','channel','expected_source','expected_target','_request'), ('owner','thread_id','destination','channel','expected_source','expected_target','_request'), 'Creates a new destination UUID; source remains unchanged. Idle, goal-free legacy JSONL only; transfers no credentials, grants or allowance.', 'history import THREAD --owner work --destination personal --expected-source "$SOURCE" --expected-target "$TARGET" --idempotency-key copy-1'),
@@ -79,6 +86,13 @@ OPERATIONS = (
               'Read-only process/socket/build observation; unavailable is not orphan-free proof.' if verb in ('list','status') else 'Exact target and durable intent required. Restart/update/stop interrupt only the selected daemon and require confirmation. Uncertain results require reconciliation.',
               'daemons '+verb+('' if verb=='list' else ' work')+('' if verb in ('list','status') else ' --expected-target "$TARGET" --idempotency-key '+verb+'-1'+('' if verb=='start' else ' --yes')))
     for verb,summary in [('list','List account-scoped native daemon observations.'),('status','Inspect the exact account daemon and selected build.'),('start','Start the selected account daemon.'),('restart','Restart one exact account daemon.'),('update','Update one exact account daemon to a registered build.'),('stop','Stop one exact account daemon.')]
+)
+OPERATIONS += (
+    Operation('open', 'Open the registered native client for one private account.', None, effect='Local human shortcut over builds.launch; internally pins the selected build and starts or attaches its daemon. No model prompt.', example='open work'),
+    Operation('resume', 'Reopen a conversation in its named account; bare resume retains emergency-pause release.', None, effect='ACCOUNT selects the native conversation chooser; --last or UUID selects saved account history. Never mixes account and emergency scope flags.', example='resume work --last'),
+    Operation('configuration.default-root', 'Save an explicit user-local root for account shortcuts.', None, effect='Changes only local shortcut preferences; explicit --wake-root wins. Does not change stock codex or unrelated legacy root defaults.', example='configuration default-root ROOT'),
+    Operation('history.recent', 'View the latest saved conversations for one permitted account.', None, effect='Local shortcut to history.search with sort=recent and a bounded limit; API/MCP can use those same search arguments. Partial evidence stays visible.', example='history recent --owner work --limit 10'),
+    Operation('history.import-recent', 'Preview and copy a frozen recent-conversation selection.', None, effect='Local batch orchestration over protected history.import. Retains exact intents and per-entry outcomes; same source revision/destination reuses the original copy. Requires both account daemons running; preview starts none.', example='history import-recent --owner work --destination personal --limit 10'),
 )
 BY_NAME = {op.name: op for op in OPERATIONS}
 
@@ -162,5 +176,6 @@ def coverage_report(parser):
             'adapter_exceptions': {'accounts.login': 'Local native credential stdin/stdio only.',
                 'accounts.status': 'Human CLI uses native login status; structured transports observe unverified local cache only.',
                 'history.search/read/resume': 'Native MCP additionally verifies caller_thread_id; API/OAuth use scoped grants.',
+                'resume': 'ACCOUNT selects local conversation reopening; bare resume retains existing emergency-pause controls outside the shortcut contract.',
                 'local_cli': 'Host operator admission differs from scoped remote authorization; no implicit remote privilege.'},
             'mcp_tools': {op.name: op.tool for op in OPERATIONS if op.tool}}
