@@ -74,12 +74,14 @@ class LocalSlashCommands(LocalSessionControl):
             dict(session=row, command=command, arguments=arguments, _request=request),
             authorize=lambda: actor, dispatch=dispatch)
         record = value['result']['operation']
-        if (record['phase'] == 'waiting' and record.get('result', {}).get('kind') == 'controller_interaction'
-                and record['result'].get('state') == 'input_required'):
-            retained = self.runtime._load(record['operation_id'])
-            retained.update(execution='not_started', delivery='retained', acceptance='interaction_required')
-            self.runtime._save(retained)
-            value = self.runtime.envelope('sessions.slash', retained)
+        if record.get('result', {}).get('kind') == 'controller_interaction':
+            with self._interaction_lock(record['operation_id']):
+                retained = self.runtime._load(record['operation_id'])
+                if (retained['phase'] == 'waiting' and
+                        retained.get('result', {}).get('state') == 'input_required'):
+                    retained.update(execution='not_started', delivery='retained', acceptance='interaction_required')
+                    self.runtime._save(retained)
+                value = self.runtime.envelope('sessions.slash', retained)
         return value
 
     def _perform(self, row, command, arguments):
