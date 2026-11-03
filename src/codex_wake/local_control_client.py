@@ -88,8 +88,10 @@ def remote(root,arguments):
     command=arguments if arguments[:1]==['control'] else ['control',*arguments]
     retry_key=None
     if command[:2]==['control','prompt']:
-        if '--idempotency-key' in arguments:retry_key=arguments[arguments.index('--idempotency-key')+1]
-        else:
+        for index,argument in enumerate(arguments):
+            if argument.startswith('--idempotency-key='):retry_key=argument.split('=',1)[1]
+            elif argument=='--idempotency-key' and index+1<len(arguments):retry_key=arguments[index+1]
+        if retry_key is None:
             retry_key=uuid4().hex;arguments.extend(['--idempotency-key',retry_key])
     request=Request(info['url']+'/cli',json.dumps({'arguments':arguments}).encode(),headers={'Content-Type':'application/json','Authorization':'Bearer '+info['token']})
     try:

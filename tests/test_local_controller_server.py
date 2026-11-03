@@ -104,9 +104,12 @@ class LocalControllerServerTests(unittest.TestCase):
                             command='& '+literal(windows)+' '+ ' '.join(literal(w) for w in words)+'; exit $LASTEXITCODE'
                             encoded=base64.b64encode(command.encode('utf-16-le')).decode()
                             return subprocess.run([str(powershell),'-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',encoded],capture_output=True,timeout=30)
-                        sent=ps('control','prompt','thread:owned-one',prompt,'--mode','final','--timeout','10','--idempotency-key','powershell-fixture')
+                        sent=ps('control','prompt','thread:owned-one',prompt,'--mode','final','--timeout','10','--idempotency-key=powershell-fixture')
                         self.assertEqual(sent.returncode,0,sent.stderr.decode(errors='replace'))
                         self.assertEqual(sent.stdout.decode('utf-8'),answer)
+                        self.assertEqual(received,[prompt])
+                        retry=ps('control','prompt','thread:owned-one',prompt,'--mode','final','--timeout','10','--idempotency-key','powershell-fixture')
+                        self.assertEqual(retry.returncode,0,retry.stderr.decode(errors='replace'))
                         self.assertEqual(received,[prompt])
                         import hashlib
                         operation='local-prompt-'+hashlib.sha256(b'powershell-fixture').hexdigest()[:32]

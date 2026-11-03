@@ -35,8 +35,11 @@ try {
  if ($command.Count -gt 0 -and $command[0] -ne 'control') { $command=@('control')+$command }
  $retryKey=$null
  if ($command.Count -ge 2 -and $command[0] -eq 'control' -and $command[1] -eq 'prompt') {
-  $position=[Array]::IndexOf($Arguments,'--idempotency-key')
-  if ($position -ge 0) { $retryKey=$Arguments[$position+1] } else {
+  for ($index=0;$index -lt $Arguments.Count;$index++) {
+   if ($Arguments[$index].StartsWith('--idempotency-key=')) { $retryKey=$Arguments[$index].Substring(18) }
+   elseif ($Arguments[$index] -eq '--idempotency-key' -and $index+1 -lt $Arguments.Count) { $retryKey=$Arguments[$index+1] }
+  }
+  if ($null -eq $retryKey) {
    $retryKey=[Guid]::NewGuid().ToString('N');$Arguments=@($Arguments)+@('--idempotency-key',$retryKey)
   }
  }
