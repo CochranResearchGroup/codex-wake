@@ -83,7 +83,7 @@ def observe_row(root, row, *, timeout=1, request=native_request):
             if not isinstance(bindings, list) or len(bindings) > 256: return unknown('invalid_native_description')
             for binding in bindings:
                 if not isinstance(binding, dict) or binding.get('pid') != pid: continue
-                if binding.get('home') != target['home'] or binding.get('provider') != target['provider']: continue
+                if binding.get('home') != target['home'] or binding.get('provider') != row.get('model_provider', target['provider']): continue
                 try:
                     native = dict(host=target['host'], environment=target['environment'], runtime='codex',
                         namespace='codex:' + hashlib.sha256(json.dumps([str(Path(binding['home']).resolve()), binding['provider']], separators=(',', ':')).encode()).hexdigest(),

@@ -43,7 +43,7 @@ class LocalHealthTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             binding = self.binding(directory)
             target = dict(binding['target'], executable=str(Path('/proc/self/exe').resolve()))
-            row = dict(target=target, endpoint=binding['endpoint'], codex_cmd=binding['codex_cmd'],
+            row = dict(model_provider='test', target=dict(target, provider='codex'), endpoint=binding['endpoint'], codex_cmd=binding['codex_cmd'],
                        attachments=[dict(client_pid=os.getpid())])
             result = observe_row(directory, row, timeout=1, request=request)
             self.assertEqual(result['observation']['status'], 'responsive', result)
