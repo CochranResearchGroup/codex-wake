@@ -8345,3 +8345,20 @@ LOCAL-0199 CLOSED. Private evidence: testing/importfix/{recovered-operation.json
 recovered-batch-0.json,recovered-batch-1.json,reopen.json,closeout.json} under
 ~/.local/state/codex-wake. Curated evidence: plan0199/deployment.json. Memory
 disposition forbidden, explicit write request absent, zero Graphiti writes.
+
+## Turn 403 | 2026-11-03
+
+Plan0200 implements spec466 on `feat/wsl-session-control-0200`, recorded base
+171befb. Child467–472 and474 closed from branch acceptance. Source d1a6966
+adds one private same-user WSL server, shared typed operations, actual Windows
+PowerShell client, HTTP/stdio MCP and generated local contract documentation.
+Actual Windows5.1 Unicode/multiline/four-mode source transport qualification
+passed on Python3.11/3.12; MCP SDK HTTP/stdio and structured business failures
+passed. Installed-wheel parity verification remains in progress; synthetic native
+wire results are not real-provider or complete installed milestone acceptance.
+
+Resilience source21d8ac7 passed12integrated fault cases; native isolated echo and
+interruption qualification retained. Existing stockcodex and signed-in daemons
+unchanged. No paid hosted CI. codex-bots current responsiveness route explicitly
+returns unknown; separate narrow adapter scope question remains pending. Final
+one broad review and one remediation pass remain unused until tickets validate.

@@ -155,8 +155,16 @@
         "CLI/API/local MCP share target,submit,result,event,cancel and output-mode semantics without manual OAuth enrollment for same-owner local use.",
         "Use transport-appropriate streams or operation/event handles; verify no required operation is available only through CLI."
       ],
-      "state": "running",
-      "owner": "primary"
+      "state": "integrated",
+      "owner": "primary",
+      "result_sha": "d1a696687b56255941d14f4a59ac6e27a796680f",
+      "worker_verification": "/root/self_limits_468",
+      "validation": [
+        "actual Windows PowerShell5.1 Unicode/multiline,4modes;MCP SDK HTTP+stdio PASS3.11/3.12",
+        "34integrated local tests PASS3.12 170.757s",
+        "3commandcontract+3existingMCP lifecycletests PASS3.12;ruff/generator/diff PASS",
+        "dropped HTTP response retains generated original key;installed wheel verification running"
+      ]
     },
     {
       "key": "T8",
@@ -217,7 +225,7 @@
       "state": "pending"
     }
   ],
-  "integration_tip": "21d8ac7",
+  "integration_tip": "d1a696687b56255941d14f4a59ac6e27a796680f",
   "resource_accounting": {
     "effective_model": "inherited;runtime reported identity unavailable",
     "aggregate_allocation": "unknown",
@@ -246,6 +254,11 @@
     "final_output312": {
       "source": "3decfdd",
       "passed": 3
+    },
+    "parity312": {
+      "source": "d1a696687b56255941d14f4a59ac6e27a796680f",
+      "passed": 34,
+      "seconds": 170.757
     }
   }
 }
