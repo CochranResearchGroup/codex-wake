@@ -78,6 +78,42 @@ readable_accounts=["alice","bob"]
         self.assertEqual(second['result']['operation']['result'],result)
         self.assertEqual(self.forks,1)
 
+    def test_completed_unloaded_saved_source_can_be_copied_and_replayed(self):
+        original = self.request
+        def unloaded(endpoint, executable, method, params, timeout, **kwargs):
+            value = original(endpoint, executable, method, params, timeout, **kwargs)
+            if method == 'thread/read' and params['threadId'] == SOURCE:
+                value['thread']['status'] = {'type': 'notLoaded'}
+            return value
+        owner = self.owner()
+        owner.request = unloaded
+        first = owner.execute(self.actor, 'history.import', self.arguments, authorize=lambda: self.actor)['result']['operation']
+        self.assertEqual(first['execution'], 'completed')
+        self.assertEqual(first['result']['thread_id'], CHILD)
+        second = owner.execute(self.actor, 'history.import', self.arguments, authorize=lambda: self.actor)['result']['operation']
+        self.assertEqual(second, first)
+        self.assertEqual(self.forks, 1)
+
+    def test_active_unknown_and_incomplete_unloaded_sources_never_fork(self):
+        for status, turn_status in [('active', 'completed'), ('unknown', 'completed'), ('notLoaded', 'inProgress')]:
+            with self.subTest(status=status, turn_status=turn_status):
+                original = self.request
+                def unsafe(endpoint, executable, method, params, timeout, **kwargs):
+                    value = copy.deepcopy(original(endpoint, executable, method, params, timeout, **kwargs))
+                    if method == 'thread/read' and params['threadId'] == SOURCE:
+                        value['thread']['status'] = {'type': status}
+                        value['thread']['turns'][0]['status'] = turn_status
+                    return value
+                owner = self.owner()
+                owner.request = unsafe
+                args = copy.deepcopy(self.arguments)
+                key = status + turn_status
+                args['_request'].update(operation_id=key, idempotency_key=key)
+                result = owner.execute(self.actor, 'history.import', args, authorize=lambda: self.actor)['result']['operation']
+                self.assertEqual(result['reason'], 'unsupported_target')
+                self.assertIsNone(result['result'])
+                self.assertEqual(self.forks, 0)
+
     def test_conflicting_intent_and_changed_native_goal_never_create_another_copy(self):
         from codex_wake.managed_inventory import InventoryError
         owner=self.owner()
