@@ -1,0 +1,29 @@
+{
+  "source_commit": "76ac7d918f414becc97e23b7212c3ac2422d114c",
+  "installed_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-76ac7d9",
+  "python_members_matched": 238,
+  "accounts": {
+    "ecochran76": {
+      "daemon_target_unchanged": true,
+      "recent_status": "complete",
+      "recent_count": 1,
+      "holds": 0
+    },
+    "soylei": {
+      "daemon_target_unchanged": true,
+      "recent_status": "complete",
+      "recent_count": 1,
+      "holds": 0
+    }
+  },
+  "checks": [
+    "installed open/resume help",
+    "source-qualified-wheel-installed238 Python equality",
+    "default root saved",
+    "bash and zsh completion installed",
+    "both existing native daemon targets unchanged",
+    "stock codex hash unchanged",
+    "read-only recents both real accounts"
+  ],
+  "stock_sha256": "b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8"
+}

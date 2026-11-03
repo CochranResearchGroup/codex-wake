@@ -8274,3 +8274,37 @@ under network isolation. Six-file qualified native package matched; owned daemon
 cleanup and fresh OS census empty. No operator launcher/home/credentials effects,
 provider model work, hosted CI, merge, deployment or memory write. Plan0197 stays
 closed; acceptance and review bounds are not rewritten.
+
+## Turn | 2026-11-02 | Command contract and shortcuts deployed
+
+PR461 integrated Plan0197 with preserved review-base ancestry; PR462 integrated
+Plan0198 at76ac7d918f414becc97e23b7212c3ac2422d114c. One new two-axis review
+accepted one Standards evidence omission, corrected without runtime changes;
+Spec0. Existing Plan0197 review remains closed. No extra behavioral TDD cycle
+was needed. See plan0198/review.md.
+
+Built that exact merged source using `venv312/bin/python -m build --wheel`,
+created prefix `/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-76ac7d9`
+with `uv venv`, installed its wheel with `[mcp]` using `uv pip install --python`,
+and verified all238Python members equal source, previously qualified source,
+wheel and installation. Activated only the ~/.local/bin/codex-wake symlink.
+Rollback is atomically restoring its previous target
+`/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-0ab5a3a/bin/codex-wake`.
+No native build/package or daemon was replaced.
+
+Ran installed `configuration default-root /home/ecochran76/.local/state/codex-wake/real460`
+and `completion install --shell all`. Initial setup refused pre-existing broad
+directory permissions. Narrowed six affected owned directories (private config
+0700; completion parents remove group/world write), then both commands passed.
+`completion _candidates --cursor 2 -- codex-wake open eco` returns ecochran76;
+Bash `complete -p codex-wake` and Zsh compinit/_comps registration pass, along
+with shell startup syntax. Open a new shell to load activation.
+
+Installed `history recent --owner ACCOUNT --limit 1 --json` passed for both
+ecochran76 and soylei, complete with no holds. Before/after explicit-root
+`daemons status ACCOUNT --json` targets equal, including process generation and
+socket identity; plain stock codex SHA remains b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8.
+No live conversation copies or model turns were issued. Raw private receipts
+are under ~/.local/state/codex-wake/testing/deploy198; curated deployment.json
+records the public evidence. Memory disposition forbidden: no memory write
+requested; machine receipt recorded with zero Graphiti writes. Hosted CI skipped.
