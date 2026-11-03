@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/466",
+  "base": "171befbaf1be833f55eb0627c802e279cf0fbf35",
+  "branch": "feat/wsl-session-control-0200",
+  "review": {
+    "base": "171befbaf1be833f55eb0627c802e279cf0fbf35",
+    "broad_reviews": 0,
+    "remediation_passes": 0
+  },
+  "tickets": [
+    {
+      "key": "T1",
+      "issue": 467,
+      "title": "Discover and resolve local owned WSL sessions without manual profiles",
+      "blockers": [],
+      "acceptance": [
+        "Discover existing same-user Codex sessions and presentation bindings with account,host,environment,conversation and process generation.",
+        "Friendly selectors resolve uniquely; ambiguous, stale and foreign-user targets fail clearly.",
+        "No hand-authored session profiles or manual grants needed for ordinary local discovery; preserve existing interfaces."
+      ],
+      "state": "pending"
+    },
+    {
+      "key": "T2",
+      "issue": 468,
+      "title": "Make own-session resource limits usable with automatic enforcement readiness",
+      "blockers": [],
+      "acceptance": [
+        "Fresh own session can inspect usage and set/tighten voluntary limits without manual per-thread grant setup.",
+        "Limit setup starts or explicitly arranges enforcement and reports real readiness; demonstrate bounded stop.",
+        "Inherited external ceilings cannot be raised or disabled through self-service; preserve lifetime usage."
+      ],
+      "state": "pending"
+    },
+    {
+      "key": "T3",
+      "issue": 469,
+      "title": "Expose fresh exact-TUI health for local sessions and codex-bots",
+      "blockers": [],
+      "acceptance": [
+        "Observe exact controlling TUI-loop identity and freshness through public CLI and machine-readable owner interface.",
+        "Distinguish responsive,stuck,offline and unsupported/unknown without treating process liveness as TUI health.",
+        "Ordinary same-user observation requires no manual grants; preserve qualified native probe safeguards."
+      ],
+      "state": "pending"
+    },
+    {
+      "key": "T4",
+      "issue": 470,
+      "title": "Submit and retrieve one durable prompt in an existing WSL Codex tab",
+      "blockers": [
+        "T1"
+      ],
+      "acceptance": [
+        "Submit to exact discovered existing conversation with automatic same-user authority/profile binding.",
+        "Retain operation ID and distinct submitted/accepted/running/terminal/uncertain states; show response in actual tab.",
+        "Prompt final result,wait and exact cancellation reuse existing operation/native owners and never silently retarget or start another conversation."
+      ],
+      "state": "pending"
+    },
+    {
+      "key": "T5",
+      "issue": 471,
+      "title": "Deliver live text transcript final and silent response modes",
+      "blockers": [
+        "T4"
+      ],
+      "acceptance": [
+        "Support stream,transcript,final,silent caller modes through shared operation contract.",
+        "Live output arrives before completion; transcript has ordered model/tool/lifecycle events and resumable cursor with explicit retention/truncation.",
+        "Silent success has no normal output; failures nonzero; timeout/disconnect preserves retrievable original operation."
+      ],
+      "state": "pending"
+    },
+    {
+      "key": "T6",
+      "issue": 472,
+      "title": "Execute supported native slash commands and surface interactive actions",
+      "blockers": [
+        "T4"
+      ],
+      "acceptance": [
+        "Discover supported slash commands and preserve arguments; use native/harness-specific execution, never ordinary prompt substitution.",
+        "Qualify noninteractive and interactive commands, receipt versus execution/completion and explicit interaction handles.",
+        "Unsupported commands fail before model submission; same durable tracking/output choices apply."
+      ],
+      "state": "pending"
+    },
+    {
+      "key": "T7",
+      "issue": 473,
+      "title": "Use equivalent local session control through PowerShell API and MCP",
+      "blockers": [
+        "T5",
+        "T6"
+      ],
+      "acceptance": [
+        "Actual PowerShell client talks to same WSL server and preserves multiline Unicode input and exit status.",
+        "CLI/API/local MCP share target,submit,result,event,cancel and output-mode semantics without manual OAuth enrollment for same-owner local use.",
+        "Use transport-appropriate streams or operation/event handles; verify no required operation is available only through CLI."
+      ],
+      "state": "pending"
+    },
+    {
+      "key": "T8",
+      "issue": 474,
+      "title": "Reconcile disconnect restart busy-state and uncertain delivery safely",
+      "blockers": [
+        "T5",
+        "T6"
+      ],
+      "acceptance": [
+        "Fault-inject lost acknowledgement,duplicate retry,disconnect,event cursor resume,timeout/late result and exact cancellation through public operations.",
+        "Daemon restart/stale generations do not retarget or repeat native work; busy session behavior is explicit.",
+        "Retain unknown effects and reconcile original intent without blind replay; preserve unrelated sessions."
+      ],
+      "state": "pending"
+    },
+    {
+      "key": "T9",
+      "issue": 475,
+      "title": "Qualify installed WSL session control and codex-bots consumer acceptance",
+      "blockers": [
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7",
+        "T8"
+      ],
+      "acceptance": [
+        "Run confirmed end-to-end seam against installed server from WSL,actual PowerShell,API,local MCP with actual target tab evidence.",
+        "Qualify every required output mode,slash interaction,recovery and own-session enforcement row; fixtures alone are insufficient.",
+        "Identify codex-bots real consumer contract and qualify machine-readable identity,fresh health,acknowledgement and final result. Record exact source,prefix,builds,commands and final process census."
+      ],
+      "state": "pending"
+    },
+    {
+      "key": "T10",
+      "issue": 476,
+      "title": "Qualify Grok on the same session-control contract",
+      "blockers": [
+        "T9"
+      ],
+      "acceptance": [
+        "Grok discovery,prompt,slash capabilities,health,output modes and operation recovery use shared interface.",
+        "Truthful per-harness capabilities; qualify supported noninteractive and interactive commands without silent terminal typing fallback.",
+        "Installed native acceptance distinguishes true Grok evidence from injected fixtures; no Windows-native or Claude expansion."
+      ],
+      "state": "pending"
+    }
+  ]
+}
