@@ -18,8 +18,9 @@ codex-wake resume ecochran76 EXACT_UUID
 
 The preference is private under `$XDG_CONFIG_HOME/codex-wake/shortcuts.json`
 (or `~/.config/codex-wake/shortcuts.json`). Global `--wake-root ROOT` takes
-precedence. These shortcut preferences do not change unrelated legacy command
-root defaults. Completion uses the same preference unless explicitly overridden.
+precedence. The saved default applies to open, account resume, history recent/import-recent
+and completion. Existing raw account/daemon/build/history commands retain their
+root rules; pass --wake-root for those commands. Completion uses the same preference unless explicitly overridden.
 Open/resume select and pin registered build bytes internally; the existing launch
 owner starts/attaches the matching managed daemon and refuses an incompatible
 selected package. No automatic hot update, new model prompt, goal enrollment or
@@ -69,7 +70,7 @@ codex-wake history import-recent --batch BATCH_ID --yes --json
 Noninteractive calls without --yes only preview. Retries reuse that frozen
 selection, source revisions, destination pins and per-entry intent keys; newer
 source histories cannot sneak into an approved batch. Repeated new batches for
-the same source revision/destination home also reuse the original transfer intent
+the same source revision/destination home/channel also reuse the original transfer intent
 and return existing children, rather than duplicating copies. A changed source
 revision or destination home generation represents a different transfer.
 

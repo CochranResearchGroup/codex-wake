@@ -1,6 +1,6 @@
 # Account open/resume and recent conversation copying
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Ticket: LOCAL-0198 (this file)
 Branch: feat/account-shortcuts-0198
@@ -11,10 +11,16 @@ WIP limit: one primary slice
 
 ## Current State
 
-Operator clarified skim means source-preserving copy/transfer, with convenient
-recent-history viewing as well. Requested open and resume shortcuts preserve
-plain codex as stock with separate private account daemons. Implementation
-starting; Plan0197 remains closed, its review/remediation counts unchanged.
+LOCAL-0198 DONE on feat/account-shortcuts-0198. Sourcebdb2114 implements
+open/resume, explicit shortcut default root, read-only recents and frozen recent
+copy batches through existing owners. Both Python versions passed245presubmit
+tests/16checks ate3a61e7; the final private-directory guard fix then passed53
+focused tests/version. Exact final wheel and238Python members match source and
+installed UID1017 prefix. Actual native reopen/last/open, multi-copy, same/new
+batch dedup, changed-source partial outcome and no-repeat behavior passed with
+external networking blocked. Both owned daemons stopped; fresh process census
+empty. Plan0197 remains closed with its consumed review/remediation counts.
+See [acceptance](../evidence/plan0198/acceptance.json). No working deployment.
 
 ## Scope and acceptance
 
@@ -54,8 +60,9 @@ on3.11/3.12, installed provider-free command qualification and applicable local
 presubmit. No paid hosted CI, working installation, real histories/credentials,
 provider model turns, old-job resume, merge, deployment or memory write.
 
-## Next action
+## Terminal state
 
-Implement source-compatible recent ordering, then root/launch shortcuts and
-frozen batch orchestration. Preserve unsupported import behavior rather than
-silently expanding native format support.
+Implementation and source/disposable-installed acceptance complete. Local ticket
+DONE. Keep the stacked dependency on validated Plan0197 visible until integration;
+merge, release, operator default-root selection and working installation remain
+separate. Older source histories/formats remain constrained by existing owners.

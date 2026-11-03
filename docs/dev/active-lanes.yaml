@@ -1083,9 +1083,9 @@ lanes:
     plan: docs/dev/plans/0198-2026-11-02-account-shortcuts.md
     branch: feat/account-shortcuts-0198
     target: origin/main
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: ACTIVE_WORKTREE
     dependencies: [P197]
     overlaps: [P197]
     updated_at: 2026-11-02
-    disposition: Local successor on validated Plan0197; plain codex and working account homes unchanged
+    disposition: LOCAL0198 DONE; both-version presubmit and final focused checks; actual UID1017 native open resume batch copy dedup and partial-result proof; no working deployment

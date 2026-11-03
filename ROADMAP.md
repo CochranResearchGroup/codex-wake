@@ -1431,3 +1431,7 @@ remaining command families are explicitly deferred. Merge/release remain separat
 [Plan0198](docs/dev/plans/0198-2026-11-02-account-shortcuts.md) / LOCAL-0198 owns
 open/resume, recent-history viewing and source-preserving recent batch copying.
 Stacked on validated Plan0197; no working launcher or plain codex replacement.
+
+Plan0198 / LOCAL-0198 DONE locally: open/resume shortcuts and recent copies
+qualified with actual native UID1017 clients/daemons; sourcebdb2114. Plain codex
+stays stock. Stacked feature branch remains unmerged and not deployed.
