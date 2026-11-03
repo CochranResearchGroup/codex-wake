@@ -150,8 +150,9 @@ def collect(root,identifier):
                 settings=('id','model','modelProvider','reasoningEffort','cwd','environments')
                 if any(after.get(key)!=current.get(key) for key in settings):
                     raise InventoryError('stale_target','native event attachment changed session settings')
+                store.update(identifier,native_client_id=identifier)
                 transmitted=True
-                turn=call('turn/start',dict(threadId=thread,input=[dict(type='text',text=record['payload']['prompt'])]))['turn']
+                turn=call('turn/start',dict(threadId=thread,clientUserMessageId=identifier,input=[dict(type='text',text=record['payload']['prompt'])]))['turn']
                 turn_id=turn.get('id')
                 if not isinstance(turn_id,str) or not turn_id:raise InventoryError('uncertain_effect','native turn acknowledgement missing')
                 handle=dict(kind='native_turn',local_control=True,turn_id=turn_id,target=target)
