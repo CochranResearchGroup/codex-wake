@@ -106,6 +106,8 @@ def build_parser() -> argparse.ArgumentParser:
     register_local_health(_control_verbs)
     from .local_slash_commands import register as register_local_slash
     register_local_slash(_control_verbs)
+    from .local_control_lifecycle import register as register_local_lifecycle
+    register_local_lifecycle(_control_verbs)
     from .local_self_limits import register_parser as register_local_self_limits
     register_local_self_limits(subparsers)
     from .wake_control import add_control_parsers
@@ -2834,16 +2836,22 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         return a2a_command(args)
     if args.command == 'self-limits':
         from .local_self_limits import command
-        return command(args, resolve_root(args))
+        from .local_control_lifecycle import root_for
+        return command(args, root_for(args))
     if args.command == 'control':
+        from .local_control_lifecycle import root_for
+        local_root = root_for(args)
+        if args.control_verb in ('server','remote','connection','powershell','mcp'):
+            from .local_control_lifecycle import command
+            return command(args, local_root)
         if args.control_verb == 'slash':
             from .local_slash_cli import command
-            return command(args, resolve_root(args))
+            return command(args, local_root)
         if args.control_verb == 'health':
             from .local_health import command
-            return command(args, resolve_root(args))
+            return command(args, local_root)
         from .local_control_commands import command
-        return command(args, resolve_root(args))
+        return command(args, local_root)
     if args.command == "sessions":
         if args.sessions_command == 'target':
             from .tab_targets import target_command

@@ -171,8 +171,15 @@
         "Daemon restart/stale generations do not retarget or repeat native work; busy session behavior is explicit.",
         "Retain unknown effects and reconcile original intent without blind replay; preserve unrelated sessions."
       ],
-      "state": "running",
-      "worker": "/root/local_health_469"
+      "state": "validated",
+      "worker": "/root/local_health_469",
+      "result_sha": "21d8ac7",
+      "tracker_state": "closed",
+      "validation": [
+        "12resilience tests/version worker;12integrated PASS3.12 89.196s",
+        "actual isolatednative clientId echo and interruption;0externalproviderturns"
+      ],
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/resilience474/qualification474.json"
     },
     {
       "key": "T9",
@@ -210,7 +217,7 @@
       "state": "pending"
     }
   ],
-  "integration_tip": "687c7c8",
+  "integration_tip": "21d8ac7",
   "resource_accounting": {
     "effective_model": "inherited;runtime reported identity unavailable",
     "aggregate_allocation": "unknown",

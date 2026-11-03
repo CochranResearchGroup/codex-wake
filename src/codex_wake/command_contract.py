@@ -170,7 +170,7 @@ def apply_native_contract(specs):
 
 def coverage_report(parser):
     paths = ['.'.join(path) for path, item in parser_paths(parser) if path and not any(isinstance(a, argparse._SubParsersAction) for a in item._actions)]
-    return {'schema_version': 1, 'migrated_operations': sorted(BY_NAME),
+    result = {'schema_version': 1, 'migrated_operations': sorted(BY_NAME),
             'local_only': [op.name for op in OPERATIONS if op.tool is None],
             'deferred_commands': sorted(path for path in paths if path not in BY_NAME and not path.startswith('completion.')),
             'adapter_exceptions': {'accounts.login': 'Local native credential stdin/stdio only.',
@@ -179,3 +179,11 @@ def coverage_report(parser):
                 'resume': 'ACCOUNT selects local conversation reopening; bare resume retains existing emergency-pause controls outside the shortcut contract.',
                 'local_cli': 'Host operator admission differs from scoped remote authorization; no implicit remote privilege.'},
             'mcp_tools': {op.name: op.tool for op in OPERATIONS if op.tool}}
+
+    from .local_control_service import contract
+    local=contract()
+    result['local_controller']=local
+    covered={'.'.join(value['cli']) for value in local['operations'].values()}|set(local['local_only'])
+    result['deferred_commands']=[name for name in result['deferred_commands'] if name not in covered]
+    result['adapter_exceptions']['local_controller']=local['admission']
+    return result

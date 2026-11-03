@@ -206,6 +206,13 @@ CLI/API/MCP slice and its explicit exceptions.
 The [everyday shortcuts](docs/agents/account-shortcuts.md) add `open ACCOUNT`,
 `resume ACCOUNT`, recent browsing and frozen recent-conversation copies.
 
+## Local WSL session control
+
+Use the [local controller workflow](docs/agents/local-session-control.md) for WSL,
+native PowerShell, REST and local MCP clients with automatic same-user setup.
+The command and operation owners share durable prompt delivery, four output
+modes, qualified slash actions, exact TUI health and voluntary self-limits.
+
 ## Native Usage
 
 Choose the exact thread UUID returned by `sessions resolve` or `sessions open`.

@@ -141,12 +141,16 @@ def receipt_output(envelope,mode='final',*,cursor=0):
     return value
 
 
+def receipt_exit_code(value):
+    code=2 if value['execution'] in ('failed','cancelled') else 3 if value['phase']=='uncertain' else 0
+    return 3 if value['mode']=='silent' and not value['terminal'] else code
+
+
 def present_receipt(envelope,mode='final',*,cursor=0):
     value=receipt_output(envelope,mode,cursor=cursor)
     if mode in ('stream','final'):print(value['text'],end='',flush=True)
     elif mode=='transcript':print(json.dumps(value,sort_keys=True),flush=True)
-    code=2 if value['execution'] in ('failed','cancelled') else 3 if value['phase']=='uncertain' else 0
-    if mode=='silent' and not value['terminal']:code=3
+    code=receipt_exit_code(value)
     if code:print(json.dumps(dict(operation_id=value['operation_id'],execution=value['execution'],reason=value['reason'] or 'command_interaction_or_failure',result=envelope['result']['operation'].get('result'))),file=sys.stderr)
     return code
 

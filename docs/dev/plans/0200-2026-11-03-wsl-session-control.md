@@ -9,14 +9,11 @@ WIP limit:3implementation lanes
 
 ## Current State
 
-Five child tickets closed:467discovery,468self-limits,469TUIhealth,470prompt,
-472slash. Output471 source integrated687c7c8; native streaming-before-terminal
-passed after explicit existing-thread attachment. Retained old partial transcript
-is not backfilled; known telemetry schema correction/qualification finishing.
-473PowerShell/API/MCP and474resilience unlock only after471validated.475installed
-consumer proof followsallMilestoneA;476Grok follows475. Two workers own471/472
-qualification; primary coordinates shared interfaces. Installed self-limitCLI and
-healthCLI qualified under UID1017; stockcodex/operator daemons unchanged.
+Seven child tickets closed:467discovery,468self-limits,469TUIhealth,470prompt,
+471output,472slash,474resilience. Parity473 source qualification passed actual
+Windows PowerShell and real MCP HTTP/stdio clients; installed-prefix verification
+is next. Installed consumer475 followsallMilestoneA;476Grok follows475. Ledger
+owns exact custody and validation evidence. Stockcodex/operator daemons unchanged.
 
 Native health deadline remains unknown unless exact foreground loop ack exists.
 A working actual Windows PowerShell5.1 executable is verified. codex-bots current
