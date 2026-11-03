@@ -11,8 +11,8 @@
       "id": "LOCAL-0197-T1",
       "title": "Shared command definitions and generated help/reference",
       "blockers": [],
-      "state": "pending",
-      "tracker_state": "READY",
+      "state": "validated",
+      "tracker_state": "DONE",
       "owner": "primary",
       "owned_paths": [
         "src/codex_wake/command_contract.py",
@@ -21,14 +21,21 @@
         "tests/test_command_contract.py",
         "src/codex_wake/cli.py"
       ],
-      "evidence": []
+      "evidence": [
+        "Python3.12: unittest discover -s tests -p test_command_contract.py:3PASS; red missing device help then green; red missing generator then green",
+        "ruff F821,F822,F823 changed files PASS",
+        "policy wiring PASS"
+      ],
+      "worker": "primary",
+      "worker_branch": "feat/command-contract-0197",
+      "worker_base": "5eaa215"
     },
     {
       "id": "LOCAL-0197-T2",
       "title": "Sanitized authorized authentication observation across transports",
       "blockers": [],
-      "state": "pending",
-      "tracker_state": "READY",
+      "state": "running",
+      "tracker_state": "IN_PROGRESS",
       "owner": "auth worker",
       "owned_paths": [
         "src/codex_wake/account_observation.py",
@@ -38,14 +45,15 @@
         "src/codex_wake/mcp_server.py",
         "tests/test_account_observation.py"
       ],
-      "evidence": []
+      "evidence": [],
+      "worker": "/root/auth_status"
     },
     {
       "id": "LOCAL-0197-T3",
       "title": "Bash/Zsh completion and automatic installer activation",
       "blockers": [],
-      "state": "pending",
-      "tracker_state": "READY",
+      "state": "running",
+      "tracker_state": "IN_PROGRESS",
       "owner": "completion worker",
       "owned_paths": [
         "src/codex_wake/completion.py",
@@ -54,7 +62,8 @@
         "tests/test_completion.py",
         "tests/test_shell_completion.py"
       ],
-      "evidence": []
+      "evidence": [],
+      "worker": "/root/completion_install"
     },
     {
       "id": "LOCAL-0197-T4",
@@ -63,7 +72,7 @@
         "LOCAL-0197-T1"
       ],
       "state": "pending",
-      "tracker_state": "BLOCKED",
+      "tracker_state": "READY",
       "owner": "pending worker",
       "owned_paths": [
         "src/codex_wake/daemon_commands.py",

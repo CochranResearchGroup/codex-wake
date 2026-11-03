@@ -751,7 +751,8 @@ def build_parser() -> argparse.ArgumentParser:
     readiness.add_argument("--openclaw-timeout", type=float, default=30.0, help="seconds for OpenClaw readiness probes")
     readiness.add_argument("--json", action="store_true", dest="as_json")
 
-    return parser
+    from .command_contract import apply_help
+    return apply_help(parser)
 
 
 def add_target_options(parser: argparse.ArgumentParser) -> None:
