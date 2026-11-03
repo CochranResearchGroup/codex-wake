@@ -40,13 +40,17 @@
         "Limit setup starts or explicitly arranges enforcement and reports real readiness; demonstrate bounded stop.",
         "Inherited external ceilings cannot be raised or disabled through self-service; preserve lifetime usage."
       ],
-      "state": "integrated",
+      "state": "validated",
       "worker": "/root/self_limits_468",
       "worktree": "/home/ecochran76/workspace.local/codex-wake-self-limits",
-      "result_sha": "9e4d5b2",
+      "result_sha": "066bd34",
       "validation": [
-        "worker actualUID1017 bounded3s native paused+stop proof;64focused tests perPython plusfinal4selftests"
-      ]
+        "64related tests/version +5final selftests/version",
+        "actualUID1017 public owner stop proof3s",
+        "installed automatic self-limits CLI passed fresh\u2192engaged\u2192stopped;peerpreserved;zero model turns"
+      ],
+      "tracker_state": "closed",
+      "private_receipt": "/home/codex-daemon-test/self468-5b5f8e61/receipt.json"
     },
     {
       "key": "T3",
@@ -58,13 +62,16 @@
         "Distinguish responsive,stuck,offline and unsupported/unknown without treating process liveness as TUI health.",
         "Ordinary same-user observation requires no manual grants; preserve qualified native probe safeguards."
       ],
-      "state": "integrated",
+      "state": "validated",
       "worker": "/root/local_health_469",
       "worktree": "/home/ecochran76/workspace.local/codex-wake-local-health",
-      "result_sha": "6f0c6d8",
+      "result_sha": "310072c",
       "validation": [
-        "worker34healthtests/version,2protocoltests;actualUID1017 run pending"
-      ]
+        "34health tests/version,2protocoltests,5localhealthtests",
+        "installedactualUID1017 control health CLI responsive33ms;stalled exactmainloop unknown;postresume freshack;zero model turns"
+      ],
+      "tracker_state": "closed",
+      "private_receipt": "/tmp/w0200-healthcli-run2/receipt.json"
     },
     {
       "key": "T4",
@@ -99,7 +106,9 @@
         "Live output arrives before completion; transcript has ordered model/tool/lifecycle events and resumable cursor with explicit retention/truncation.",
         "Silent success has no normal output; failures nonzero; timeout/disconnect preserves retrievable original operation."
       ],
-      "state": "pending"
+      "state": "running",
+      "worker": "/root/local_health_469",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-output-modes"
     },
     {
       "key": "T6",
@@ -113,7 +122,9 @@
         "Qualify noninteractive and interactive commands, receipt versus execution/completion and explicit interaction handles.",
         "Unsupported commands fail before model submission; same durable tracking/output choices apply."
       ],
-      "state": "pending"
+      "state": "running",
+      "worker": "/root/self_limits_468",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-slash-commands"
     },
     {
       "key": "T7",
