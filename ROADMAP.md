@@ -1435,3 +1435,17 @@ Stacked on validated Plan0197; no working launcher or plain codex replacement.
 Plan0198 / LOCAL-0198 DONE locally: open/resume shortcuts and recent copies
 qualified with actual native UID1017 clients/daemons; sourcebdb2114. Plain codex
 stays stock. Stacked feature branch remains unmerged and not deployed.
+
+## P200 | WSL Session Control For codex-bots
+
+State: OPEN
+
+Current State: Spec #466 prioritizes usable WSL session control before platform
+expansion. Children #467–#474 are validated and closed on the integration branch.
+Installed native and real consumer acceptance #475 is in progress; Grok #476
+follows that milestone. The narrow codex-bots adapter scope question remains
+pending. Final review and remediation follow ticket validation. The working
+installation remains unchanged.
+
+Plan: [WSL session control](docs/dev/plans/0200-2026-11-03-wsl-session-control.md)
+Execution custody: [dependency ledger](docs/dev/plans/0200-execution-ledger.json)
