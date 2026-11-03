@@ -8232,3 +8232,12 @@ UID1017 installed synthetic login and actual native signed-out status pass;231
 payload members match source, wheel3efb612d; final user process census empty.
 Real OpenAI sign-in was not attempted. Working credentials/install remain unchanged;
 source stays local/unmerged. Memory forbidden; no graph writes.
+
+## Turn | 2026-11-02 | Command contract interview settled
+
+Operator confirmed eight command-contract decisions, including automatic
+completion installation/activation and sanitized authorized auth observation.
+Plan0197 / LOCAL-0197 records outcome, backward compatibility, first vertical
+slice and acceptance. New docs/command-contract worktree starts from merged
+main6fb4fe7; no implementation, shell installation, runtime changes or provider
+experiments in this planning turn. Existing source/glossary authority preserved.

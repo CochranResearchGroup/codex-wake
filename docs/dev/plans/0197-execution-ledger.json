@@ -1,0 +1,96 @@
+{
+  "spec": "docs/dev/plans/0197-2026-11-02-command-contract.md",
+  "integration_branch": "feat/command-contract-0197",
+  "base": "6fb4fe7a9b6511a6bca4d090298cb85daf59ebf3",
+  "integration_tip": "pending checkpoint",
+  "review_limit": 1,
+  "remediation_limit": 1,
+  "review_base": "6fb4fe7a9b6511a6bca4d090298cb85daf59ebf3",
+  "tickets": [
+    {
+      "id": "LOCAL-0197-T1",
+      "title": "Shared command definitions and generated help/reference",
+      "blockers": [],
+      "state": "pending",
+      "tracker_state": "READY",
+      "owner": "primary",
+      "owned_paths": [
+        "src/codex_wake/command_contract.py",
+        "scripts/generate_command_reference.py",
+        "docs/agents/command-reference.md",
+        "tests/test_command_contract.py",
+        "src/codex_wake/cli.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "LOCAL-0197-T2",
+      "title": "Sanitized authorized authentication observation across transports",
+      "blockers": [],
+      "state": "pending",
+      "tracker_state": "READY",
+      "owner": "auth worker",
+      "owned_paths": [
+        "src/codex_wake/account_observation.py",
+        "src/codex_wake/account_commands.py",
+        "src/codex_wake/controller_http.py",
+        "src/codex_wake/controller_client.py",
+        "src/codex_wake/mcp_server.py",
+        "tests/test_account_observation.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "LOCAL-0197-T3",
+      "title": "Bash/Zsh completion and automatic installer activation",
+      "blockers": [],
+      "state": "pending",
+      "tracker_state": "READY",
+      "owner": "completion worker",
+      "owned_paths": [
+        "src/codex_wake/completion.py",
+        "src/codex_wake/shell_completion.py",
+        "scripts/install.sh",
+        "tests/test_completion.py",
+        "tests/test_shell_completion.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "LOCAL-0197-T4",
+      "title": "Typed CLI arguments and safe interactive target resolution",
+      "blockers": [
+        "LOCAL-0197-T1"
+      ],
+      "state": "pending",
+      "tracker_state": "BLOCKED",
+      "owner": "pending worker",
+      "owned_paths": [
+        "src/codex_wake/daemon_commands.py",
+        "src/codex_wake/build_commands.py",
+        "src/codex_wake/history_commands.py",
+        "tests/test_command_workflows.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "LOCAL-0197-T5",
+      "title": "Installed parity, generated coverage and first-slice closeout",
+      "blockers": [
+        "LOCAL-0197-T1",
+        "LOCAL-0197-T2",
+        "LOCAL-0197-T3",
+        "LOCAL-0197-T4"
+      ],
+      "state": "pending",
+      "tracker_state": "BLOCKED",
+      "owner": "primary",
+      "owned_paths": [
+        "docs/agents/accounts-and-daemons.md",
+        "README.md",
+        "tests/test_command_parity.py"
+      ],
+      "evidence": []
+    }
+  ]
+}
