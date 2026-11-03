@@ -9,10 +9,10 @@ WIP limit:3implementation lanes
 
 ## Current State
 
-Seven child tickets closed:467discovery,468self-limits,469TUIhealth,470prompt,
-471output,472slash,474resilience. Parity473 source qualification passed actual
-Windows PowerShell and real MCP HTTP/stdio clients; installed-prefix verification
-is next. Installed consumer475 followsallMilestoneA;476Grok follows475. Ledger
+Eight child tickets closed:467–474. Parity473 installed qualification passed
+actual Windows PowerShell, API and real MCP HTTP/stdio clients on exact product
+ad41df8;252Python files match source/wheel/installed. Worker owns475 installed
+native/consumer acceptance.476Grok remains blocked until475 validates. Ledger
 owns exact custody and validation evidence. Stockcodex/operator daemons unchanged.
 
 Native health deadline remains unknown unless exact foreground loop ack exists.
