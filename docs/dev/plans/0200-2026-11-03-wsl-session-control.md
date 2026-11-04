@@ -10,7 +10,7 @@ WIP limit: 3 implementation lanes
 ## Current State
 
 Milestone A passed. Child tickets #467–#475 are validated and closed; Grok #476
-is ready. Installed #475 acceptance exposed an effectful failed own-limit
+is in progress in an isolated ACP adapter lane. Installed #475 acceptance exposed an effectful failed own-limit
 admission in #468. The integrated repair at `f4f77a2` passed 48 installed
 UID1017 checks before primary reclosed #468 and #475. The ledger and curated
 qualification retain the failed admission and earlier harness/timing failures.
@@ -78,3 +78,15 @@ UTC deadlines, objective allocations, external ceilings and stop latches retain
 their strict authority. Clock continuity loss fails closed. No guest-clock or
 fabricated-UTC fallback is authorized. Installed positive and no-effect negative
 qualification must pass before reclosing #468 and accepting #475.
+
+## Milestone B execution boundary
+
+Grok #476 uses the existing sole-owner ACP transport and operation journal. A
+headless owned ACP session is an explicit supported mode; arbitrary existing TUI
+ownership is unproven. The shared local operations retain Codex defaults and
+select Grok explicitly. Native capabilities, command RPCs and authentication
+readiness require fresh native evidence before advertisement. Primary owns
+shared routing/contracts; worker self_limits_468 owns the isolated Grok adapter
+and focused tests. Native fixture creation and existing cached authentication
+may be qualified without copying credentials; model intents require a separate
+bounded packet. No working daemon/package change is included.

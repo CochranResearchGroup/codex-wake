@@ -277,8 +277,12 @@
         "Truthful per-harness capabilities; qualify supported noninteractive and interactive commands without silent terminal typing fallback.",
         "Installed native acceptance distinguishes true Grok evidence from injected fixtures; no Windows-native or Claude expansion."
       ],
-      "state": "ready",
-      "tracker_state": "open"
+      "state": "running",
+      "tracker_state": "open",
+      "worker": "/root/self_limits_468",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-grok-local-control",
+      "branch": "feat/476-grok-local-control",
+      "owner": "ecochran76"
     }
   ],
   "integration_tip": "f4f77a2546e22525040db8b08debea12c3aaca8c",
