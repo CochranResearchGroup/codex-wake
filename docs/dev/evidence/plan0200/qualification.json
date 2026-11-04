@@ -401,7 +401,7 @@
       "repair": "Preserve successful creation, activate through retained stable-key load, report created_not_ready if activation fails; never create again on retry",
       "cumulative_native_fixture_creations": 2
     },
-    "current_gate": "Known metadata classification repair, explicit same-session resume without creation, then remaining one genuine provider intent",
+    "current_gate": "Lossless metadata fragmentation under unchanged per-event/aggregate caps, then bounded successor native verification; original packets closed at2",
     "installed_bootstrap_repaired": {
       "status": "passed",
       "source": "49350db4cda29c39e5d56f346b61c781062e281c",
@@ -442,6 +442,34 @@
       "provider_intents_consumed": 1,
       "remaining_of_max2": 1,
       "repair": "retain known ordered native metadata; exclude it only from assistant-text projection; unknown kinds stay partial"
+    },
+    "native_intent2": {
+      "status": "native completed; all4live text passed; full retention failed",
+      "source": "f4ffabee07176a9f2bfe0bdffb5cfb2977038d12",
+      "prefix": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/prefix-f4ffabe",
+      "wheel_sha256": "4c296f9888bec9149475a02787daf86b664bf356a219fcc90895115d1d9e5d07",
+      "operation_id": "local-grok-40aaa282ee5de78c5b8f5c94857440b3",
+      "idempotency_key": "qualification476-2-7abe90aaabd2",
+      "live_before_terminal": [
+        "WSL",
+        "actual Windows PowerShell",
+        "API",
+        "local MCP"
+      ],
+      "retained_events": 171,
+      "unsupported_event_kinds": [],
+      "metadata_original_bytes": 81724,
+      "per_event_cap": 16384,
+      "history_complete": false,
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/installed-0df50f01/provider-slot2/receipt.json",
+      "receipt_sha256": "1a490ff14aafa0b51a299e3c21934a6c257246388c55dcfeb2ea1fa87db1be4a",
+      "matrix_sha256": "a39b639955664fbaa01a15647efcee1d03cf9347f556e570fb9aa818f7eba5bf",
+      "census_sha256": "cfdac4f3520105343874592a6b041f4ebd4b1b6137feee920dda15206c1dadb9",
+      "not_run_after_failure": [
+        "full16mode matrix",
+        "same-key4client retry/result/cursor"
+      ],
+      "owned_processes": "all owned host/native/controller/collector gone"
     }
   },
   "review": {

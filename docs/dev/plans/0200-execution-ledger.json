@@ -285,7 +285,7 @@
       "owner": "ecochran76",
       "result_sha": "31db14666032509b2560b734a05f65c1fe73686b",
       "integrated_product_source": "910531f1f23a48b7d07f7a64c5835231d08f8c0c",
-      "installed_state": "Bootstrap qualified; first native prompt completed/liveAPI+MCP, transcript partial due available_commands_update classification; repair underway",
+      "installed_state": "Native output witnessed live on all4paths; full metadata retention failed per-event bound; lossless fragmentation repair in progress",
       "validation": [
         "24 affected tests/version plus focused followups passed",
         "40 installed retained Codex regression rows passed through all four entrypoints; zero provider calls",
@@ -328,12 +328,13 @@
       ]
     },
     "grok": {
-      "external_provider_intents": 1,
-      "provider_packet": "STOPPED after first completed actualPS intent; one of maximum2 remains. Metadata repair and explicit resume readiness required before final intent.",
+      "external_provider_intents": 2,
+      "provider_packet": "Original two-intent packet CLOSED at2; both native turns completed. Full retention failed on normal81724-byte metadata against16384/event cap.",
       "native_fixture_creations": 3,
       "replacement_fixture_packet": "closed at cumulative creation ceiling3; reuse same loaded native host/session for provider packet",
       "first_operation_id": "local-grok-7af468b6f64525d9df021956c0893924",
-      "first_key": "qualification476-1-e64877c0c080"
+      "first_key": "qualification476-1-e64877c0c080",
+      "successor": "Bounded lossless-metadata repair/retest under standing task authority and policy0009; at most1 further prompt after source/native readiness, honest cumulative ceiling3; no new creation. Not a renewal/reset of original packet."
     }
   },
   "shared_contract_decisions": {

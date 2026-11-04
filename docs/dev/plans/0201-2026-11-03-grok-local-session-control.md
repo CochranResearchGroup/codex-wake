@@ -9,16 +9,21 @@ Branch: feat/476-grok-local-control.
 
 ## Current State
 
-Grok source and bootstrap repair are integrated at `49350db`. Direct native
-readiness proved the sole ACP owner, cached authentication, session loading and
-model selection/readback. The first installed creation check exposed missing
-activation; the repair preserves creation and stable load IDs. Replacement
-installed qualification is running with one additional fixture allowed, three
-cumulative. The first actual PowerShell provider prompt completed, with API/MCP live
-output before terminal. Retention remained partial because known native command
-metadata was misclassified. All owned processes were cleaned; one provider slot
-remains for a repaired exact-prefix run after explicit same-session resume. The
-final broad review/remediation remain unopened. Plan0200 and its ledger own parent sequencing.
+Grok source and explicit grant-free load are integrated at `f4ffabe`. Both
+provider prompts completed; all four entrypoints witnessed live text before
+terminal in the second run. Full retention remains unqualified: normal native
+command metadata is 81,724 bytes, beyond the 16,384-byte event cap. Lossless
+metadata fragmentation is the next bounded repair; total retention caps stay
+unchanged. Both historical partial receipts remain immutable. All owned
+processes were cleaned and three synthetic sessions have been created.
+
+The original two-prompt packet is closed at two consumed intents. Under the
+standing implementation/qualification task and policy0009, a bounded successor
+may use at most one additional prompt after source/native readiness, giving an
+honest cumulative ceiling of three. There is no user resource ceiling to renew;
+this repairs a demonstrated output boundary within the same account/mutation
+class and does not authorize any new creation or login. Final broad review and
+remediation remain unused. Plan0200 and its ledger own parent sequencing.
 
 ## Scope and acceptance
 
