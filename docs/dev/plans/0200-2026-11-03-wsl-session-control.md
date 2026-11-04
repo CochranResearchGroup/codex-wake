@@ -9,11 +9,19 @@ WIP limit: 3 implementation lanes
 
 ## Current State
 
-Milestone A passed. Child tickets #467–#475 are validated and closed; Grok #476
-is in progress in an isolated ACP adapter lane. Installed #475 acceptance exposed an effectful failed own-limit
-admission in #468. The integrated repair at `f4f77a2` passed 48 installed
-UID1017 checks before primary reclosed #468 and #475. The ledger and curated
-qualification retain the failed admission and earlier harness/timing failures.
+Milestones A and B passed; all children #467–#476 are validated and closed.
+Grok final native acceptance uses `a3b8c65`: exact256 Python payloads,16 output-mode
+rows, all four live client paths, duplicate-safe retry/result/cursor, and lossless
+81,196-byte native metadata reassembly. Headless ACP is explicit; exact TUI
+health, turn cancellation custody and metering remain unsupported. Three Grok
+marker prompts plus nine Codex turns and three fixture creations are cumulative.
+Both historical Grok partial traces are unchanged; final owned-process census
+is empty and working daemons/installations remain unchanged.
+
+Parent plans stay OPEN only for the primary frozen final review/checks. Broad
+review/remediation counters remain0/0. Installed #468 repair at `f4f77a2` retains
+its 48 UID1017 rows; retained Codex 40 rows stay on `86d4780`, and original A transport
+receipts stay on `ad41df8`. Final Grok proof does not relabel those sources.
 
 Transport, live-provider and original native health/slash/resilience receipts
 retain source `ad41df8`. The repaired wheel has 253 matching source/wheel/installed

@@ -1440,12 +1440,13 @@ stays stock. Stacked feature branch remains unmerged and not deployed.
 
 State: OPEN
 
-Current State: Codex Milestone A and children #467–#475 are validated and closed.
-The actual codex-bots adapter is qualified on draft PR74, pending shared review
-and source integration. Grok #476 is in progress: source is integrated, and the
-installed creation/activation repair is under qualification. The first Grok prompt completed with live output; metadata
-classification requires repair before the remaining one of two allowed intents. Final review/remediation follow ticket validation. Working
-installations and native daemon packages remain unchanged.
+Current State: Milestones A/B and children #467–#476 are validated and closed.
+Actual headless Grok native acceptance at `a3b8c65` passed all four live paths,
+16 output-mode rows, full metadata reassembly and cached retry/result/cursor.
+Cumulative work is3 Grok prompts plus9 Codex turns and3 fixture creations; prior
+partial traces remain unchanged. Parent plans remain OPEN only for final
+review/checks; broad review/remediation0/0. The qualified codex-bots draft PR74
+still awaits review/integration. Working installations/native packages unchanged.
 
 Plan: [WSL session control](docs/dev/plans/0200-2026-11-03-wsl-session-control.md)
 Execution custody: [dependency ledger](docs/dev/plans/0200-execution-ledger.json)

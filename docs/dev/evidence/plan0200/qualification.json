@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/466",
-  "status": "milestone_a_passed_review_pending",
-  "product_source": "f4f77a2546e22525040db8b08debea12c3aaca8c",
+  "status": "milestones_a_b_passed_review_pending",
+  "product_source": "a3b8c656f6b85b7c0c44e27969a89e3577f2093a",
   "branch": "feat/wsl-session-control-0200",
   "hosted_ci": "skipped under repository cost policy",
   "installed_transport": {
@@ -380,18 +380,18 @@
     "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/475#issuecomment-6620850037"
   },
   "milestone_b": {
-    "status": "in_progress",
+    "status": "passed",
     "ticket": 476,
     "prerequisite": 475,
-    "prerequisite_state": "validated and closed; runtime qualification not yet started",
+    "prerequisite_state": "validated and closed",
     "source_routing_checkpoint": {
       "source": "70111a9c87576ce3e421a29bcae53d7d4b0de45d",
       "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/shared-routing/receipt.json",
       "receipt_sha256": "ce9a5ffe165bb8c76a699d7e0768779d237c9c15ca40de94a6086438b28d0448",
       "source_checks": "81passed311;312focusedrouting/CLI/contract/MCP/retry/resiliencepassed",
-      "installed": "pending new Grok adapter integration; no native/Grok acceptance inferred"
+      "installed": "Historical source checkpoint; installed Grok acceptance is separately source-attributed below."
     },
-    "source_integrated": "86d4780341be765ec42d3873439e99cac9a1f6d0",
+    "source_integrated": "a3b8c656f6b85b7c0c44e27969a89e3577f2093a",
     "installed_bootstrap": {
       "status": "failed",
       "reason": "Native session/new returned a session but same-owner list remained empty until load",
@@ -401,7 +401,7 @@
       "repair": "Preserve successful creation, activate through retained stable-key load, report created_not_ready if activation fails; never create again on retry",
       "cumulative_native_fixture_creations": 2
     },
-    "current_gate": "Lossless metadata fragmentation under unchanged per-event/aggregate caps, then bounded successor native verification; original packets closed at2",
+    "current_gate": "Source/native acceptance complete; parent plans OPEN only for primary final review/checks. Broad review/remediation0/0.",
     "installed_bootstrap_repaired": {
       "status": "passed",
       "source": "49350db4cda29c39e5d56f346b61c781062e281c",
@@ -444,7 +444,7 @@
       "repair": "retain known ordered native metadata; exclude it only from assistant-text projection; unknown kinds stay partial"
     },
     "native_intent2": {
-      "status": "native completed; all4live text passed; full retention failed",
+      "status": "native completed; all four live text passed; full retention failed",
       "source": "f4ffabee07176a9f2bfe0bdffb5cfb2977038d12",
       "prefix": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/prefix-f4ffabe",
       "wheel_sha256": "4c296f9888bec9149475a02787daf86b664bf356a219fcc90895115d1d9e5d07",
@@ -466,10 +466,115 @@
       "matrix_sha256": "a39b639955664fbaa01a15647efcee1d03cf9347f556e570fb9aa818f7eba5bf",
       "census_sha256": "cfdac4f3520105343874592a6b041f4ebd4b1b6137feee920dda15206c1dadb9",
       "not_run_after_failure": [
-        "full16mode matrix",
+        "full16 mode matrix",
         "same-key4client retry/result/cursor"
       ],
       "owned_processes": "all owned host/native/controller/collector gone"
+    },
+    "tracker_state": "closed",
+    "tracker_confirmation": "https://github.com/CochranResearchGroup/codex-wake/issues/476#issuecomment-6621882498",
+    "native_successor": {
+      "status": "passed",
+      "source": "a3b8c656f6b85b7c0c44e27969a89e3577f2093a",
+      "prefix": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/prefix-a3b8c65",
+      "wheel": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/build-a3b8c65/dist/codex_wake-0.22.0.dev2-py3-none-any.whl",
+      "wheel_sha256": "5d775168e6b9743323f48040e450ce360c29ad59311d00d34ed1ac7bc3c9f920",
+      "source_archive_wheel_install_python_matches": 256,
+      "delta_from_f4ffabe": [
+        "codex_wake/local_grok_events.py"
+      ],
+      "common_prompt_transport_owners": "unchanged from f4ffabe",
+      "native_version": "1.0.70",
+      "native_sha256": "22d281c5964c5444147328096ba2a221f3f0874c6858e27c825656a80f6e58e9",
+      "operation_id": "local-grok-1b37147f52cd484f6f361bcde1a7315e",
+      "idempotency_key": "qualification476-3-d1d916fed6d1",
+      "native_work": "actual MCP SDK marker-only prompt; native end_turn;80words; no tools requested",
+      "baseline_provider_intents": 2,
+      "new_provider_intents": 1,
+      "cumulative_grok_provider_intents": 3,
+      "cumulative_codex_provider_intents": 9,
+      "cumulative_native_fixture_creations": 3,
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/installed-0df50f01/provider-successor/receipt.json",
+      "receipt_sha256": "e254bdc0a30e38543d8dd077fb63f68f5d43f258ede2f0be519e3cf2b1f15479",
+      "readiness_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/installed-0df50f01/successor-readiness.json",
+      "readiness_sha256": "c757aeba88d264ce775aa9ff39876a21512bde76cb239c0fbe9374b8904f1d31",
+      "census_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/installed-0df50f01/provider-successor/census.json",
+      "census_sha256": "865904790f69349ccc6ffaa55198feefb5ca5a2c33aeb7cb4875f98e36cb44b4",
+      "native_witness": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/installed-0df50f01/provider-successor/slot3-native-witness.json",
+      "entrypoints": [
+        "WSL CLI",
+        "actual Windows PowerShell",
+        "HTTP API",
+        "actual MCP SDK"
+      ],
+      "live_text_before_terminal": "all four  independently verified; PowerShell qualifier ready sentinel excluded",
+      "output_modes": [
+        "stream",
+        "transcript",
+        "final",
+        "silent"
+      ],
+      "output_matrix_rows": 16,
+      "checks": [
+        "all four identical paginated transcripts/text",
+        "all four same-key prompt retry retains original operation",
+        "all four result retrieval without resubmission",
+        "cursor drain/resume without duplication",
+        "public grant-free load of same persisted conversation",
+        "native history replay preserves first2marker replies",
+        "both historical partial receipts unchanged"
+      ],
+      "metadata": {
+        "retained_events": 180,
+        "assistant_chunks": 170,
+        "fragments": 10,
+        "first_fragment_sequence": 171,
+        "reassembled_utf8_bytes": 81196,
+        "available_commands": 203,
+        "sha256": "1ea65dde9177123992d0699f4ba73f8ad842ee601bd4c395a1ccccbd63749cf5",
+        "exact_json_hash_and_native_provenance_verified": true
+      },
+      "retention": {
+        "history_complete": true,
+        "truncated": false,
+        "cursor_gap": false,
+        "unsupported_event_kinds": [],
+        "max_events": 2048,
+        "max_bytes": 2097152,
+        "max_event_bytes": 16384
+      },
+      "supported_mode": "sole-owned headless ACP loaded session; arbitrary TUI control unqualified",
+      "supported_slash": [
+        "/status native session/load metadata",
+        "/model controller_interaction via native set_model plus readback; not native popup"
+      ],
+      "unsupported": [
+        "exact controlling-TUI health/recovery authority",
+        "exact-original-turn cancellation custody",
+        "exact metering/tool isolation/parallel-session qualification",
+        "Windows-native and Claude expansion"
+      ],
+      "cleanup": "owned host/native/controller/collector/WSL/PowerShell clients absent; exact-root remaining processes empty; working Codex daemons unchanged",
+      "commands": {
+        "archive": "git archive a3b8c656f6b85b7c0c44e27969a89e3577f2093a | tar -x -C /home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/build-a3b8c65/source",
+        "wheel": "python3 -m pip wheel --no-deps --wheel-dir /home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/build-a3b8c65/dist /home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/build-a3b8c65/source",
+        "install": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/prefix-a3b8c65/bin/python -m pip install '/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/build-a3b8c65/dist/codex_wake-0.22.0.dev2-py3-none-any.whl[mcp]'",
+        "readiness": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/prefix-a3b8c65/bin/python /home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/qualify-successor-readiness.py",
+        "native_packet": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/prefix-a3b8c65/bin/python /home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/qualify-provider-successor.py",
+        "working_directory": "/home/ecochran76/workspace.local/codex-wake-session-control",
+        "venv": "python3 -m venv /home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/prefix-a3b8c65"
+      },
+      "local_fragment_checks": {
+        "source": "96622f5bcaf3c08bd58f76a91839c072181165ce",
+        "311": "19 PASS 17.080s",
+        "312": "19 PASS 18.742s",
+        "receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/fragment-source-receipt.json",
+        "receipt_sha256": "37f84af6ed1aff81d419d2ba5334e33342b4a9d6abda8aa52f691be06da959ef",
+        "commands": [
+          "PYTHONPATH=src:tests /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv311/bin/python -m unittest test_local_grok_control test_grok_stdio_host test_controller_grok test_local_output_modes",
+          "PYTHONPATH=src:tests /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m unittest test_local_grok_control test_grok_stdio_host test_controller_grok test_local_output_modes"
+        ]
+      }
     }
   },
   "review": {
@@ -524,6 +629,12 @@
         "receipt_sha256": "7c1c848838de7887d655a53653fbcc42ffc6e8d835ad5a35bdf8e726fd21cd38"
       },
       "acceptance_transfer": "Primary approved retained acceptance for the 248 byte-identical Python modules. Earlier live/provider receipts are not relabeled as fresh f4f77a2 runs."
+    },
+    "final_grok": {
+      "source_commit": "a3b8c656f6b85b7c0c44e27969a89e3577f2093a",
+      "wheel_sha256": "5d775168e6b9743323f48040e450ce360c29ad59311d00d34ed1ac7bc3c9f920",
+      "matching_python_members": 256,
+      "scope": "Actual headless Grok native acceptance only. Codex 40 rows remain86d4780; repaired limits 48 rows remainf4f77a2; original A transport/provider evidence remainsad41df8. No earlier receipt is relabeled as a fresh a3b8c65 run."
     }
   },
   "memory_disposition": {

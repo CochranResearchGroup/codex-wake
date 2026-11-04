@@ -9,21 +9,20 @@ Branch: feat/476-grok-local-control.
 
 ## Current State
 
-Grok source and explicit grant-free load are integrated at `f4ffabe`. Both
-provider prompts completed; all four entrypoints witnessed live text before
-terminal in the second run. Full retention remains unqualified: normal native
-command metadata is 81,724 bytes, beyond the 16,384-byte event cap. Lossless
-metadata fragmentation is the next bounded repair; total retention caps stay
-unchanged. Both historical partial receipts remain immutable. All owned
-processes were cleaned and three synthetic sessions have been created.
+Source/native acceptance is complete at `a3b8c65`; #476 is validated and closed
+([tracker confirmation](https://github.com/CochranResearchGroup/codex-wake/issues/476#issuecomment-6621882498)).
+The exact installed 256-payload wheel passed16 mode rows, all four native live text paths,
+full metadata/hash reassembly, cursor and all four same-key retry/result checks.
+Actual native Grok1.0.70 uses the supported sole-owned headless ACP mode; arbitrary
+TUI control, exact TUI health/cancellation custody/metering remain unsupported.
 
-The original two-prompt packet is closed at two consumed intents. Under the
-standing implementation/qualification task and policy0009, a bounded successor
-may use at most one additional prompt after source/native readiness, giving an
-honest cumulative ceiling of three. There is no user resource ceiling to renew;
-this repairs a demonstrated output boundary within the same account/mutation
-class and does not authorize any new creation or login. Final broad review and
-remediation remain unused. Plan0200 and its ledger own parent sequencing.
+The original2prompt packet remains closed with both partial traces immutable.
+One authorized repair/retest successor completed, giving cumulative 3 Grok prompts,
+9 Codex turns and3 fixture creations. No user ceiling was reset, new login performed,
+or working daemon changed. All owned processes are absent. See the source-bound
+[qualification](../evidence/plan0200/qualification.json) for exact prefix/wheel,
+commands, receipt/hash and census. This plan remains OPEN only for primary final
+review/checks; broad review/remediation counters remain0/0.
 
 ## Scope and acceptance
 
@@ -56,7 +55,7 @@ agent-instance identity. Retained operation IDs route by original custody.
 Use feature TDD one slice at a time. Local focused Python3.11/3.12 checks replace
 hosted CI. Final broad review/remediation remains with primary and unused.
 
-## Native qualification gates
+## Historical native readiness gate
 
 Exact installed binary is grok1.0.70, SHA256
 22d281c5964c5444147328096ba2a221f3f0874c6858e27c825656a80f6e58e9.
@@ -75,11 +74,11 @@ native acceptance must distinguish genuine Grok responses from protocol fixtures
 Memory disposition: forbidden; this task prohibits memory writes.
 
 
-## Installed bootstrap repair
+## Historical installed bootstrap repair
 
 Exact installed86d4780 wheel exposed native create completed followed by empty
 same-owner discovery. Preserve private failed receipt installed-db986d5a; it
-consumed one additional native fixture, cumulative2, zero provider intents.
+consumed one additional native fixture, cumulative 2, zero provider intents.
 Repair creates then activates through stable existing grok.load custody; persist
 both IDs before activation I/O. Expose created_not_ready without relabeling native
 creation, cache successful readiness, and reconcile uncertain activation with
@@ -105,4 +104,5 @@ as a narrow convenience over the existing grok.load owner, with automatic owned
 profile pinning and a stable retained key. It creates no session or model turn
 and never silently retargets an old operation to a replacement process. Reuse the
 same persisted synthetic session; the cumulative creation ceiling stays three
-and only one of the original two provider slots remains.
+and all provider packets are now closed at cumulative 3. The grant-free local.load
+workflow and same persisted native history passed installed acceptance.
