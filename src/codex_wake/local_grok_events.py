@@ -1,5 +1,8 @@
 """One detached ACP prompt owner; original journal intent is never redispatched."""
 import argparse
+import base64
+import hashlib
+import json
 import fcntl
 import os
 from pathlib import Path
@@ -11,7 +14,8 @@ import time
 from .controller_grok import ControllerGrok
 from .daemon_commands import local_operator
 from .grok_acp import ACPRefusal
-from .local_session_events import TurnEvents
+from .local_session_events import TurnEvents, MAX_EVENT_BYTES
+from .controller_runtime import encoded
 from .process import process_identity
 
 
@@ -22,6 +26,29 @@ def launch(root, identifier):
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, close_fds=True, start_new_session=True)
     threading.Thread(target=process.wait, daemon=True).start()
     return dict(kind='grok_acp_collecting', collector_pid=process.pid, collector_process=process_identity(process.pid), native_request_id=identifier)
+
+
+def _metadata(store, identifier, event):
+    if len(encoded(event).encode()) <= MAX_EVENT_BYTES:
+        store.append(identifier, 'grok/session/metadata', event)
+        return
+    # Native event identity is the occurrence, not its content hash: identical
+    # consecutive catalog updates must remain independently reconstructable.
+    payload = json.dumps(event, sort_keys=True, separators=(',', ':'),
+                         ensure_ascii=False, allow_nan=False).encode('utf-8')
+    first = store.state(identifier)['sequence'] + 1
+    group = hashlib.sha256((identifier + ':' + str(first)).encode()).hexdigest()
+    digest = hashlib.sha256(payload).hexdigest()
+    count = (len(payload) + 8191) // 8192
+    for index in range(count):
+        fragment = dict(operation_id=identifier, group_id=group,
+            occurrence_first_sequence=first, part_index=index, part_count=count,
+            encoding='base64', serialization='canonical_json_utf8',
+            native_kind='available_commands_update', total_bytes=len(payload), sha256=digest,
+            data=base64.b64encode(payload[index * 8192:(index + 1) * 8192]).decode('ascii'))
+        if len(encoded(fragment).encode()) > MAX_EVENT_BYTES:
+            raise ValueError('native metadata fragment exceeds unchanged event bound')
+        store.append(identifier, 'grok/session/metadata_fragment', fragment)
 
 
 def collect(root, identifier):
@@ -55,7 +82,7 @@ def collect(root, identifier):
                 if kind == 'agent_message_chunk' and change.get('content', {}).get('type') == 'text':
                     store.append(identifier, 'grok/session/update', event)
                 elif kind == 'available_commands_update':
-                    store.append(identifier, 'grok/session/metadata', event)
+                    _metadata(store, identifier, event)
                 elif kind not in ('agent_thought_chunk', 'user_message_chunk'):
                     state = store.state(identifier)
                     store.update(identifier, unsupported_event_kinds=sorted(set(state.get('unsupported_event_kinds', []) + [str(kind)])))

@@ -1,5 +1,5 @@
 """Explicit sole-owned ACP stdio host through actual subprocess/socket seams."""
-import json,os,subprocess,sys,tempfile,threading,time,unittest
+import base64,hashlib,json,os,subprocess,sys,tempfile,threading,time,unittest
 from pathlib import Path
 from codex_wake.controller_auth import Actor
 from codex_wake.managed_inventory import InventoryError
@@ -13,8 +13,10 @@ for line in sys.stdin:
  with (root/'native-methods.jsonl').open('a') as f:f.write(json.dumps(dict(method=method,params=p))+'\\n')
  if method=='initialize':v=dict(protocolVersion=1,agentCapabilities=dict(loadSession=True,sessionCapabilities=dict(list={})),authMethods=[],_meta=dict(agentVersion='fixture-ACP-v1',agentId='fixture-native-agent',agentInstanceId='fixture-native-instance',currentWorkingDirectory=str(root)))
  elif method=='session/prompt':
+  if p['prompt'][0]['text'] in ('lead','overflow'):
+   metadata=dict(sessionId=p['sessionId'],update=dict(sessionUpdate='available_commands_update',availableCommands=[dict(name='session-info',description='Native metadata Δ🧪 café /'*3000)]))
+   for unused in range(2 if p['prompt'][0]['text']=='lead' else 20):print(json.dumps(dict(jsonrpc='2.0',method='session/update',params=metadata)),flush=True)
   if p['prompt'][0]['text']=='lead':
-   print(json.dumps(dict(jsonrpc='2.0',method='session/update',params=dict(sessionId=p['sessionId'],update=dict(sessionUpdate='available_commands_update',availableCommands=[dict(name='session-info',description='Fixture metadata')])))),flush=True)
    print(json.dumps(dict(jsonrpc='2.0',method='session/update',params=dict(sessionId=p['sessionId'],update=dict(sessionUpdate='agent_message_chunk',content=dict(type='text',text='before-final'))))),flush=True)
   if p['prompt'][0]['text']=='future':
    print(json.dumps(dict(jsonrpc='2.0',method='session/update',params=dict(sessionId=p['sessionId'],update=dict(sessionUpdate='future_content_update',content=dict(type='text',text='not qualified assistant text'))))),flush=True)
@@ -87,10 +89,9 @@ class StdioHostTests(unittest.TestCase):
                 page=local.output(identifier,mode='transcript',timeout=5)
                 self.assertFalse(page['terminal'])
                 first=page['events'][0]
-                self.assertEqual(first['params']['update']['sessionUpdate'],'available_commands_update')
-                self.assertEqual(first['params']['update']['availableCommands'][0]['name'],'session-info')
+                self.assertFalse(first['truncated'])
+                self.assertEqual(first['kind'],'grok/session/metadata_fragment')
                 self.assertEqual(first['provenance'],'native_protocol_notification')
-                self.assertEqual(first['kind'],'grok/session/metadata')
                 self.assertEqual(local.prompt('grok:existing','lead',key='live-grok')['result']['operation']['operation_id'],identifier)
                 waiting=threading.Event(); waited=[]
                 def wait_for_original():
@@ -106,9 +107,36 @@ class StdioHostTests(unittest.TestCase):
                 self.assertTrue(final['terminal'])
                 self.assertEqual(final['text'],'before-finalowned-stdio-answer')
                 self.assertTrue(final['retention']['history_complete'])
-                transcript=local.output(identifier,mode='transcript')
-                self.assertEqual([event['params']['update']['sessionUpdate'] for event in transcript['events']],
-                    ['available_commands_update','agent_message_chunk','agent_message_chunk'])
+                events=[];cursor=0
+                while True:
+                    transcript=local.output(identifier,mode='transcript',cursor=cursor,limit=3)
+                    events+=transcript['events'];cursor=transcript['next_cursor']
+                    if cursor==transcript['latest_cursor']:break
+                self.assertEqual([event['sequence'] for event in events],list(range(1,len(events)+1)))
+                groups={}
+                for event in events:
+                    if event['kind']=='grok/session/metadata_fragment':
+                        self.assertEqual(event['provenance'],'native_protocol_notification')
+                        self.assertLessEqual(len(json.dumps(event['params'],sort_keys=True,separators=(',',':')).encode()),16384)
+                        groups.setdefault(event['params']['group_id'],[]).append(event)
+                self.assertEqual(len(groups),2)  # Identical native occurrences must remain distinct.
+                expected=dict(sessionId='existing',update=dict(sessionUpdate='available_commands_update',
+                    availableCommands=[dict(name='session-info',description='Native metadata Δ🧪 café /'*3000)]))
+                hashes=[]
+                for fragments in groups.values():
+                    params=[event['params'] for event in fragments]
+                    self.assertEqual([part['part_index'] for part in params],list(range(params[0]['part_count'])))
+                    self.assertEqual(params[0]['occurrence_first_sequence'],fragments[0]['sequence'])
+                    pieces=[base64.b64decode(part['data'],validate=True) for part in params]
+                    self.assertTrue(all(len(piece)<=8192 for piece in pieces))
+                    payload=b''.join(pieces)
+                    self.assertGreater(len(payload),81*1024)
+                    self.assertEqual(json.loads(payload),expected)
+                    digest=hashlib.sha256(payload).hexdigest();hashes.append(digest)
+                    self.assertTrue(all(part['sha256']==digest and part['total_bytes']==len(payload) for part in params))
+                self.assertEqual(hashes[0],hashes[1])
+                self.assertEqual([event['params']['update']['sessionUpdate'] for event in events if event['kind']=='grok/session/update'],
+                    ['agent_message_chunk','agent_message_chunk'])
                 self.assertEqual(local.output(identifier,mode='stream')['text'],'before-finalowned-stdio-answer')
                 native_prompts=[json.loads(line) for line in (work/'native-methods.jsonl').read_text().splitlines() if json.loads(line)['method']=='session/prompt']
                 self.assertEqual(len(native_prompts),2)
@@ -121,6 +149,19 @@ class StdioHostTests(unittest.TestCase):
                 self.assertFalse(partial['retention']['history_complete'])
                 self.assertEqual(partial['retention']['unsupported_event_kinds'],['future_content_update'])
                 self.assertEqual(local.output(future_id,mode='stream')['text'],'owned-stdio-answer')
+                overflow=local.prompt('grok:existing','overflow',key='bounded-metadata')
+                overflow_id=overflow['result']['operation']['operation_id']
+                bounded=local.output(overflow_id,mode='final',timeout=10)
+                self.assertTrue(bounded['terminal'])
+                self.assertEqual(bounded['text'],'owned-stdio-answer')
+                self.assertFalse(bounded['retention']['history_complete'])
+                self.assertTrue(bounded['retention']['truncated'])
+                self.assertEqual(bounded['retention']['max_events'],2048)
+                self.assertEqual(bounded['retention']['max_bytes'],2*1024*1024)
+                self.assertEqual(bounded['retention']['max_event_bytes'],16384)
+                gap=local.output(overflow_id,mode='transcript',cursor=0)
+                self.assertTrue(gap['retention']['cursor_gap'])
+                self.assertGreater(gap['retention']['earliest_cursor'],0)
                 (work/'release').unlink()
                 lost=local.prompt('grok:existing','lead',key='lost-collector')
                 lost_id=lost['result']['operation']['operation_id']
@@ -135,7 +176,7 @@ class StdioHostTests(unittest.TestCase):
                 self.assertEqual(uncertain['phase'],'uncertain')
                 local.prompt('grok:existing','lead',key='lost-collector')
                 native_prompts=[json.loads(line) for line in (work/'native-methods.jsonl').read_text().splitlines() if json.loads(line)['method']=='session/prompt']
-                self.assertEqual(len(native_prompts),4)
+                self.assertEqual(len(native_prompts),5)
                 (work/'release').write_text('release')
 
             finally:

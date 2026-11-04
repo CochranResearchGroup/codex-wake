@@ -78,3 +78,21 @@ are unsupported. Health never grants recovery. A cancellation request cannot sto
 an unrelated later turn. Existing retained final answers remain retrievable, and
 unknown outcomes remain unknown. Native metadata, protocol fixtures and genuine
 provider acceptance are separate evidence boundaries.
+
+
+Oversized known metadata is losslessly represented by ordered
+`grok/session/metadata_fragment` events within the existing 16 KiB per-event
+limit. Group by `group_id`, order zero-based `part_index`, require `part_count`
+parts, base64-decode each `data` field, concatenate raw bytes, verify `total_bytes`
+and `sha256`, then decode UTF-8 JSON. Each raw piece is at most 8 KiB. The encoding
+is canonical JSON with Unicode preserved; fragments may split a Unicode byte
+sequence, so decode text only after concatenation. The reconstructed object is
+the original native metadata event.
+
+`occurrence_first_sequence` and the operation ID identify each occurrence;
+identical repeated native events have distinct groups and the same content hash.
+Normal cursors preserve fragment ordering and allow resuming a group across
+pages. Metadata fragments never become assistant stream text. The 2 MiB total
+and 2048-event retention limits remain unchanged: exhausted retention, missing
+parts, or unknown native kinds remain explicitly partial. Historical partial
+receipts are retained unchanged.
