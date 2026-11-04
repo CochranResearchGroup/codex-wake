@@ -14,7 +14,10 @@ for line in sys.stdin:
  if method=='initialize':v=dict(protocolVersion=1,agentCapabilities=dict(loadSession=True,sessionCapabilities=dict(list={})),authMethods=[],_meta=dict(agentVersion='fixture-ACP-v1',agentId='fixture-native-agent',agentInstanceId='fixture-native-instance',currentWorkingDirectory=str(root)))
  elif method=='session/prompt':
   if p['prompt'][0]['text']=='lead':
+   print(json.dumps(dict(jsonrpc='2.0',method='session/update',params=dict(sessionId=p['sessionId'],update=dict(sessionUpdate='available_commands_update',availableCommands=[dict(name='session-info',description='Fixture metadata')])))),flush=True)
    print(json.dumps(dict(jsonrpc='2.0',method='session/update',params=dict(sessionId=p['sessionId'],update=dict(sessionUpdate='agent_message_chunk',content=dict(type='text',text='before-final'))))),flush=True)
+  if p['prompt'][0]['text']=='future':
+   print(json.dumps(dict(jsonrpc='2.0',method='session/update',params=dict(sessionId=p['sessionId'],update=dict(sessionUpdate='future_content_update',content=dict(type='text',text='not qualified assistant text'))))),flush=True)
   if p['prompt'][0]['text'] in ('hold','lead'):
    (root/'started').write_text('started');deadline=time.monotonic()+10
    while not (root/'release').exists() and time.monotonic()<deadline:time.sleep(.01)
@@ -83,7 +86,11 @@ class StdioHostTests(unittest.TestCase):
                 identifier=admitted['result']['operation']['operation_id']
                 page=local.output(identifier,mode='transcript',timeout=5)
                 self.assertFalse(page['terminal'])
-                self.assertEqual(page['events'][0]['params']['update']['content']['text'],'before-final')
+                first=page['events'][0]
+                self.assertEqual(first['params']['update']['sessionUpdate'],'available_commands_update')
+                self.assertEqual(first['params']['update']['availableCommands'][0]['name'],'session-info')
+                self.assertEqual(first['provenance'],'native_protocol_notification')
+                self.assertEqual(first['kind'],'grok/session/metadata')
                 self.assertEqual(local.prompt('grok:existing','lead',key='live-grok')['result']['operation']['operation_id'],identifier)
                 waiting=threading.Event(); waited=[]
                 def wait_for_original():
@@ -98,10 +105,22 @@ class StdioHostTests(unittest.TestCase):
                 final=LocalGrokControl(wake).output(identifier,mode='final',timeout=5)
                 self.assertTrue(final['terminal'])
                 self.assertEqual(final['text'],'before-finalowned-stdio-answer')
+                self.assertTrue(final['retention']['history_complete'])
+                transcript=local.output(identifier,mode='transcript')
+                self.assertEqual([event['params']['update']['sessionUpdate'] for event in transcript['events']],
+                    ['available_commands_update','agent_message_chunk','agent_message_chunk'])
+                self.assertEqual(local.output(identifier,mode='stream')['text'],'before-finalowned-stdio-answer')
                 native_prompts=[json.loads(line) for line in (work/'native-methods.jsonl').read_text().splitlines() if json.loads(line)['method']=='session/prompt']
                 self.assertEqual(len(native_prompts),2)
                 self.assertEqual(local.output(identifier,mode='stream',cursor=final['latest_cursor'])['text'],'')
                 self.assertNotIn('text',local.output(identifier,mode='silent'))
+                future=local.prompt('grok:existing','future',key='unknown-kind')
+                future_id=future['result']['operation']['operation_id']
+                partial=local.output(future_id,mode='final',timeout=5)
+                self.assertEqual(partial['text'],'owned-stdio-answer')
+                self.assertFalse(partial['retention']['history_complete'])
+                self.assertEqual(partial['retention']['unsupported_event_kinds'],['future_content_update'])
+                self.assertEqual(local.output(future_id,mode='stream')['text'],'owned-stdio-answer')
                 (work/'release').unlink()
                 lost=local.prompt('grok:existing','lead',key='lost-collector')
                 lost_id=lost['result']['operation']['operation_id']
@@ -116,7 +135,7 @@ class StdioHostTests(unittest.TestCase):
                 self.assertEqual(uncertain['phase'],'uncertain')
                 local.prompt('grok:existing','lead',key='lost-collector')
                 native_prompts=[json.loads(line) for line in (work/'native-methods.jsonl').read_text().splitlines() if json.loads(line)['method']=='session/prompt']
-                self.assertEqual(len(native_prompts),3)
+                self.assertEqual(len(native_prompts),4)
                 (work/'release').write_text('release')
 
             finally:
