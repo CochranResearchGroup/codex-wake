@@ -20,7 +20,7 @@ retain source `ad41df8`. The repaired wheel has 253 matching source/wheel/instal
 Python members: 248 are byte-identical to that earlier wheel; four limits-related
 modules changed and `goal_time.py` was added. Exact new-wheel limits and consumer
 proof qualify `f4f77a2`; approved unchanged-byte acceptance transfer is explicit.
-All provider packets are closed at nine known cumulative signed-in turns.
+Codex provider packets remain closed at nine known cumulative signed-in turns.
 Subsequent limits work used only the isolated UID1017 offline fixture.
 
 The narrow codex-bots adapter passed read-only actual-native consumer acceptance
