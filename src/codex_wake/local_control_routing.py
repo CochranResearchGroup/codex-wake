@@ -76,6 +76,11 @@ class LocalSessionRouter:
         if harness!='grok':raise InventoryError('unsupported_operation','local create is supported for owned Grok ACP profiles; Codex controls existing sessions')
         return _grok(self.root).create(profile=profile,key=key)
 
+    def load(self,selector,*,harness='codex',profile=None,key=None,expected_target=None):
+        harness,profile,_=_selection(dict(selector=selector,harness=harness,profile=profile))
+        if harness!='grok':raise InventoryError('unsupported_operation','local load is supported for owned Grok ACP profiles; use Codex account resume for Codex')
+        return _grok(self.root).load(selector,profile=profile,key=key,expected_target=expected_target)
+
     def prompt(self,selector,prompt,key=None,*,endpoint='unix://',expected_target=None,harness='codex',profile=None):
         harness,profile,_=_selection(dict(selector=selector,harness=harness,profile=profile))
         if harness=='grok':return _grok(self.root).prompt(selector,prompt,key,profile=profile,expected_target=expected_target)

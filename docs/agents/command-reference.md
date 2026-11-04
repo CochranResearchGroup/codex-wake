@@ -1204,6 +1204,7 @@ See [workflow](local-session-control.md) and generated [transport contract](loca
 | CLI | API operation | Local MCP |
 |---|---|---|
 | `control create` | `local.create` | `wake_local_create` |
+| `control load` | `local.load` | `wake_local_load` |
 | `control prompt` | `local.prompt` | `wake_local_prompt` |
 | `control output` | `local.output` | `wake_local_output` |
 | `control result` | `local.result` | `wake_local_result` |

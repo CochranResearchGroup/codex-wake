@@ -89,3 +89,15 @@ native command interaction, duplicate-safe retries, honest unsupported
 capabilities and final owned-process cleanup. This excludes arbitrary TUI
 ownership, Windows-native workers, public OAuth, new provider logins and working
 installation changes. Parent Plan0200 owns the single final review/remediation.
+
+## Explicit loaded-session recovery
+
+The first provider packet completed before cleanup. Restarting its owned ACP
+host requires explicit session/load before it appears in loaded discovery. The
+legacy raw grok load interface requires a manual caller grant, which conflicts
+with ordinary local-owner usability. Add local.load / control load --harness grok
+as a narrow convenience over the existing grok.load owner, with automatic owned
+profile pinning and a stable retained key. It creates no session or model turn
+and never silently retargets an old operation to a replacement process. Reuse the
+same persisted synthetic session; the cumulative creation ceiling stays three
+and only one of the original two provider slots remains.

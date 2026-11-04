@@ -17,6 +17,7 @@ def operation_schemas():
         return dict(type='object',properties=properties,required=required,additionalProperties=False)
     return {
         'local.create':schema(dict(HARNESS_PROPERTIES,idempotency_key={'type':'string'}),[]),
+        'local.load':schema(dict(HARNESS_PROPERTIES,selector={'type':'string'},idempotency_key={'type':'string'},expected_target={'type':'object'}),['selector']),
         'local.prompt':schema(dict(_COMMON,**HARNESS_PROPERTIES,selector={'type':'string'},prompt={'type':'string'},
             idempotency_key={'type':'string'},expected_target={'type':'object'}),['selector','prompt']),
         'local.output':schema(dict(_COMMON,operation_id={'type':'string'}),['operation_id']),
@@ -26,8 +27,8 @@ def operation_schemas():
 
 def tool_specs():
     return {'wake_'+name.replace('.','_'):('local',name.split('.')[1],
-        ('Create an owned headless Grok ACP session with harness=grok; Codex creation is unsupported.' if name=='local.create' else 'Same-user durable session operation; output observes the original turn without replay.'),
-        schema['properties'],schema['required'],name not in ('local.prompt','local.create','local.cancel'))
+        ('Create an owned headless Grok ACP session with harness=grok; Codex creation is unsupported.' if name=='local.create' else 'Load an explicitly selected owned Grok conversation through its fresh ACP profile; Codex load is unsupported.' if name=='local.load' else 'Same-user durable session operation; output observes the original turn without replay.'),
+        schema['properties'],schema['required'],name not in ('local.prompt','local.create','local.load','local.cancel'))
         for name,schema in operation_schemas().items()}
 
 
@@ -45,6 +46,7 @@ def execute(operation,arguments,root):
     if type(timeout) not in (int,float) or not 0<=timeout<=30 or type(cursor) is not int or cursor<0 or type(limit) is not int or not 1<=limit<=100:
         raise InventoryError('invalid_argument','bounded output timeout, cursor and limit required')
     if operation=='local.create':return owner.create(harness=arguments.get('harness','codex'),profile=arguments.get('profile'),key=arguments.get('idempotency_key'))
+    if operation=='local.load':return owner.load(arguments['selector'],harness=arguments.get('harness','codex'),profile=arguments.get('profile'),key=arguments.get('idempotency_key'),expected_target=arguments.get('expected_target'))
     if operation=='local.prompt':
         value=owner.prompt(arguments['selector'],arguments['prompt'],arguments.get('idempotency_key'),
             endpoint=arguments.get('endpoint','unix://'),expected_target=arguments.get('expected_target'),harness=arguments.get('harness','codex'),profile=arguments.get('profile'))
@@ -60,14 +62,14 @@ def execute(operation,arguments,root):
 def register_parser(subparsers):
     parser=subparsers.add_parser('control',help='control existing same-user sessions without manual profiles')
     verbs=parser.add_subparsers(dest='control_verb',required=True)
-    for verb in ('list','resolve','create','prompt','result','output','cancel'):
-        item=verbs.add_parser(verb,**({'help':'create an owned headless Grok ACP session (select --harness grok)'} if verb=='create' else {}))
-        if verb in ('list','resolve','prompt','create'):parser_options(item)
+    for verb in ('list','resolve','create','load','prompt','result','output','cancel'):
+        item=verbs.add_parser(verb,**({'help':'create an owned headless Grok ACP session (select --harness grok)'} if verb=='create' else {'help':'explicitly load a persisted owned Grok conversation'} if verb=='load' else {}))
+        if verb in ('list','resolve','prompt','create','load'):parser_options(item)
         item.add_argument('--endpoint',default='unix://',help='existing native Unix endpoint; default discovers running local daemons')
-        if verb in ('resolve','prompt'):
+        if verb in ('resolve','prompt','load'):
             item.add_argument('selector');item.add_argument('--expected-target',type=json.loads)
         if verb=='prompt':item.add_argument('prompt')
-        if verb in ('prompt','create'):item.add_argument('--idempotency-key')
+        if verb in ('prompt','create','load'):item.add_argument('--idempotency-key')
         if verb in ('result','output','cancel'):item.add_argument('operation_id')
         if verb in ('prompt','result','output'):
             item.add_argument('--mode',choices=MODES,default='transcript' if verb=='output' else None)

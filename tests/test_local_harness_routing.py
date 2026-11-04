@@ -14,12 +14,12 @@ class LocalHarnessRoutingTests(unittest.TestCase):
     def test_shared_cli_and_machine_contract_select_grok_explicitly(self):
         args=build_parser().parse_args(['control','resolve','grok:session-one','--harness','grok','--profile','owned'])
         self.assertEqual((args.harness,args.profile),('grok','owned'))
-        for verb in ('list','resolve','create','prompt','health','slash.list','slash.run'):
+        for verb in ('list','resolve','create','load','prompt','health','slash.list','slash.run'):
             schema=LocalOperations(Path('/tmp/unused-routing-schema')).definitions['local.'+verb][2]
             self.assertEqual(schema['properties']['harness']['enum'],['codex','grok'])
             self.assertIn('profile',schema['properties'])
         from codex_wake.mcp_server import SPECS
-        for tool in ('wake_local_create','wake_local_prompt','wake_local_health','wake_control_slash_run'):
+        for tool in ('wake_local_create','wake_local_load','wake_local_prompt','wake_local_health','wake_control_slash_run'):
             self.assertEqual(SPECS[tool][3]['harness']['enum'],['codex','grok'])
             self.assertIn('profile',SPECS[tool][3])
 
@@ -37,6 +37,14 @@ class LocalHarnessRoutingTests(unittest.TestCase):
             value=LocalOperations(Path(directory)).execute('local.resolve',dict(selector='grok:session-one',harness='grok',profile='owned',expected_target={'runtime':'grok'}))
         self.assertEqual(value['target']['runtime'],'grok')
         grok.resolve.assert_called_once_with('grok:session-one',{'runtime':'grok'},profile='owned')
+
+    def test_public_load_pins_owned_profile_without_manual_grant_arguments(self):
+        grok=Mock();grok.load.return_value={'status':'completed','result':{}}
+        module=types.SimpleNamespace(LocalGrokControl=Mock(return_value=grok))
+        args=build_parser().parse_args(['control','load','grok:session-one','--harness','grok','--profile','owned','--idempotency-key','resume-one'])
+        with tempfile.TemporaryDirectory() as directory,patch.dict('sys.modules',{'codex_wake.local_grok_control':module}):
+            LocalOperations(Path(directory)).execute('local.load',dict(selector=args.selector,harness=args.harness,profile=args.profile,idempotency_key=args.idempotency_key))
+        grok.load.assert_called_once_with('grok:session-one',profile='owned',key='resume-one',expected_target=None)
 
     def test_retained_grok_result_routes_from_journal_without_fresh_profile(self):
         grok=Mock();grok.result.return_value={'status':'completed','result':{'operation':{'operation_id':'opaque-id'}}}

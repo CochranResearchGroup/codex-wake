@@ -24,7 +24,7 @@ class RetryTests(unittest.TestCase):
                 threading.Thread(target=server.serve_forever,daemon=True).start()
                 private_directory(root/'local-controller')
                 write(root/'local-controller'/'connection.json',dict(version=1,url='http://127.0.0.1:'+str(server.server_port),token='x'*43,uid=os.getuid(),pid=os.getpid(),process=process_identity(os.getpid())))
-                for command in (['prompt','owned','hello'],['create','--harness','grok','--profile','owned']):
+                for command in (['prompt','owned','hello'],['create','--harness','grok','--profile','owned'],['load','grok:fixture','--harness','grok','--profile','owned']):
                     for supplied in (['--idempotency-key=explicit-equals'],['--idempotency-key','explicit-space'],[]):
                         with self.subTest(supplied=supplied):
                             with self.assertRaises(ValueError) as failed:

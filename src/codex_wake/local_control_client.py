@@ -57,7 +57,7 @@ def cli_frames(owner,arguments):
             if args.slash_verb=='list':yield {'stdout':json.dumps(value,sort_keys=True)+'\n'};yield {'exit_code':0}
             else:yield from _receipt_frames(value,args.mode,getattr(args,'cursor',0))
             return
-        if verb in ('list','resolve','health','create'):
+        if verb in ('list','resolve','health','create','load'):
             schema=owner.definitions['local.'+verb][2]
             values={k:v for k,v in vars(args).items() if k in schema['properties'] and v is not None}
             value=owner.execute('local.'+verb,values);yield {'stdout':json.dumps(value,sort_keys=True)+'\n'};yield {'exit_code':operation_exit_code(value)};return
@@ -86,7 +86,7 @@ def remote(root,arguments):
     arguments=list(arguments)
     command=arguments if arguments[:1]==['control'] else ['control',*arguments]
     retry_key=None
-    if len(command)>1 and command[0]=='control' and command[1] in ('prompt','create'):
+    if len(command)>1 and command[0]=='control' and command[1] in ('prompt','create','load'):
         for index,argument in enumerate(arguments):
             if argument.startswith('--idempotency-key='):retry_key=argument.split('=',1)[1]
             elif argument=='--idempotency-key' and index+1<len(arguments):retry_key=arguments[index+1]

@@ -395,6 +395,44 @@
         },
         "readonly": false
       },
+      "local.load": {
+        "cli": [
+          "control",
+          "load"
+        ],
+        "mcp_tool": "wake_local_load",
+        "description": "Load an explicitly selected owned Grok conversation through its fresh ACP profile; Codex load is unsupported.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "selector": {
+              "type": "string"
+            },
+            "idempotency_key": {
+              "type": "string"
+            },
+            "expected_target": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "selector"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
       "local.prompt": {
         "cli": [
           "control",

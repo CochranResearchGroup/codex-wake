@@ -111,7 +111,9 @@ policy remains authoritative when selected.
 Codex remains the default harness. Use `--harness grok` and, when needed,
 `--profile NAME` for an owned headless Grok ACP session. Public `grok stdio-host`
 creates the private profile, and `control create --harness grok` creates a session
-without hand-written target or grant JSON. See [Grok workflow](local-grok-control.md)
+without hand-written target or grant JSON. After an owned host restart,
+`control load grok:SESSION_ID --harness grok --profile NAME` explicitly loads a
+persisted conversation without creating another session. See [Grok workflow](local-grok-control.md)
 for the exact bootstrap, loaded-session discovery, command interactions and native
 capability limits. Retained operation handles select their original owner; result
 retrieval does not change harness or require a fresh profile.
