@@ -24,8 +24,8 @@ BASE_FIELDS=frozenset(('host','environment','runtime','provider','account','home
 
 
 class ControllerGrok:
-    def __init__(self,root,*,request=None):
-        self.root,self.request=Path(root),request
+    def __init__(self,root,*,request=None,on_update=None):
+        self.root,self.request,self.on_update=Path(root),request,on_update
         self.runtime=ControllerRuntime(root,adapter=self)
 
     def profile(self,name):
@@ -80,7 +80,7 @@ class ControllerGrok:
             yield Connection()
         else:
             from .grok_acp import GrokACPConnection
-            with GrokACPConnection(profile,guard=guard) as connection:yield connection
+            with GrokACPConnection(profile,guard=guard,on_update=self.on_update) as connection:yield connection
 
     @staticmethod
     def _negotiation(connection,profile):
@@ -142,19 +142,7 @@ class ControllerGrok:
                 if operation=='grok.load':
                     value=connection.call('session/load',dict(sessionId=session,cwd=profile['cwd'],mcpServers=[]),identifier)
                     return dict(session_id=session,native_result=value,history_replay='native ACP only')
-                value=connection.call('session/prompt',dict(sessionId=session,prompt=[dict(type='text',text=args['prompt'])]),identifier)
-                text=[];size=0;truncated=value.pop('_wake_truncated',False)
-                for item in value.pop('_wake_updates',[]):
-                    if item.get('sessionId')!=session:continue
-                    update=item.get('update',{});content=update.get('content',{})
-                    if update.get('sessionUpdate')!='agent_message_chunk' or content.get('type')!='text' or not isinstance(content.get('text'),str):continue
-                    raw=content['text'].encode();remaining=32768-size
-                    if len(raw)>remaining:truncated=True
-                    chunk=raw[:max(0,remaining)].decode(errors='ignore');text.append(chunk);size+=len(chunk.encode())
-                stop=value.get('stopReason')
-                if stop not in ('end_turn','max_tokens','max_turn_requests','refusal','cancelled'):raise InventoryError('effect_uncertain','native prompt final stop reason is not qualified')
-                return dict(_pending=True,handle=dict(kind='grok_acp_final',session_id=session,text=''.join(text),stop_reason=stop,native_result=value,output_truncated=truncated,
-                    native_request_id=identifier,peer_content_trust='untrusted',allocation_created=False,authority='inherited',execution='cancelled' if stop=='cancelled' else 'completed'))
+                return dict(_pending=True,handle=self.prompt_native(connection,session,args['prompt'],identifier))
             def retained_dispatch(name,payload):
                 from .grok_acp import ACPRefusal
                 try:return dispatch(name,payload)
@@ -186,3 +174,19 @@ class ControllerGrok:
         # ACP has session/cancel, but no qualified exact original-turn target.
         # Opening another connection could stop unrelated later session work.
         return 'uncertain'
+
+    @staticmethod
+    def prompt_native(connection,session,prompt,identifier):
+        value=connection.call('session/prompt',dict(sessionId=session,prompt=[dict(type='text',text=prompt)]),identifier)
+        text=[];size=0;truncated=value.pop('_wake_truncated',False)
+        for item in value.pop('_wake_updates',[]):
+            if item.get('sessionId')!=session:continue
+            update=item.get('update',{});content=update.get('content',{})
+            if update.get('sessionUpdate')!='agent_message_chunk' or content.get('type')!='text' or not isinstance(content.get('text'),str):continue
+            raw=content['text'].encode();remaining=32768-size
+            if len(raw)>remaining:truncated=True
+            chunk=raw[:max(0,remaining)].decode(errors='ignore');text.append(chunk);size+=len(chunk.encode())
+        stop=value.get('stopReason')
+        if stop not in ('end_turn','max_tokens','max_turn_requests','refusal','cancelled'):raise InventoryError('effect_uncertain','native prompt final stop reason is not qualified')
+        return dict(kind='grok_acp_final',session_id=session,text=''.join(text),stop_reason=stop,native_result=value,output_truncated=truncated,
+            native_request_id=identifier,peer_content_trust='untrusted',allocation_created=False,authority='inherited',execution='cancelled' if stop=='cancelled' else 'completed')
