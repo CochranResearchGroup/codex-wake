@@ -40,7 +40,7 @@
         "Limit setup starts or explicitly arranges enforcement and reports real readiness; demonstrate bounded stop.",
         "Inherited external ceilings cannot be raised or disabled through self-service; preserve lifetime usage."
       ],
-      "state": "validated",
+      "state": "running",
       "worker": "/root/self_limits_468",
       "worktree": "/home/ecochran76/workspace.local/codex-wake-self-limits",
       "result_sha": "066bd34",
@@ -49,8 +49,9 @@
         "actualUID1017 public owner stop proof3s",
         "installed automatic self-limits CLI passed fresh\u2192engaged\u2192stopped;peerpreserved;zero model turns"
       ],
-      "tracker_state": "closed",
-      "private_receipt": "/home/codex-daemon-test/self468-5b5f8e61/receipt.json"
+      "tracker_state": "open",
+      "private_receipt": "/home/codex-daemon-test/self468-5b5f8e61/receipt.json",
+      "regression": "Installed fresh self-limit rejected trusted time after active native goal creation and a local-trap turn; earlier positive source-helper clock provenance incomplete"
     },
     {
       "key": "T3",
@@ -211,7 +212,7 @@
         "Qualify every required output mode,slash interaction,recovery and own-session enforcement row; fixtures alone are insufficient.",
         "Identify codex-bots real consumer contract and qualify machine-readable identity,fresh health,acknowledgement and final result. Record exact source,prefix,builds,commands and final process census."
       ],
-      "state": "running",
+      "state": "blocked",
       "worker": "/root/local_health_469",
       "owner": "worker with primary integration",
       "partial_validation": {
@@ -236,7 +237,11 @@
           "receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/fresh-api-mcp/receipt.json",
           "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
         }
-      }
+      },
+      "blockers_current": [
+        "reopened468 admission and clock-basis repair",
+        "actual codex-bots consumer proof"
+      ]
     },
     {
       "key": "T10",
@@ -289,7 +294,8 @@
     "local_server": "WSL same-user local controller; automatic private connection receipt, no manual OAuth enrollment",
     "powershell": "actual Windows PowerShell client sends UTF8 JSON to same WSL server; WSL bootstrap captures private connection receipt without token arguments/output",
     "api_mcp": "shared local.* owner schemas and slash/health/self-limit hooks; bounded event retrieval for MCP, streaming CLI/API presentation",
-    "consumer_gate": "Current canonical codex-bots status route hardcodes unknown; separate narrow adapter scope question pending"
+    "consumer_gate": "User continue authorizes narrow codex-bots public Wake adapter in separate checkout; no unrelated Bots recovery or deployment",
+    "self_limits_repair": "No native goal creation; preserve existing goal/queue; fresh voluntary durations may use existing authenticated counter-only same-epoch elapsed authority, immutable across tighten/retry; inherited UTC deadlines stay strict; missing/failed admission has no active native effects"
   },
   "integration_regressions": {
     "source": "687c7c8",
@@ -330,5 +336,6 @@
       "commands_and_logs": "docs/dev/evidence/plan0200/qualification.json",
       "post_run_goal_watchers_or_collectors": "none in fresh process readback"
     }
-  }
+  },
+  "integration_tip_kind": "last validated product commit; documentation checkpoints follow"
 }
