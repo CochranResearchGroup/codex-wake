@@ -54,6 +54,8 @@ def collect(root, identifier):
                 change = event.get('update', {}); kind = change.get('sessionUpdate')
                 if kind == 'agent_message_chunk' and change.get('content', {}).get('type') == 'text':
                     store.append(identifier, 'grok/session/update', event)
+                elif kind == 'available_commands_update':
+                    store.append(identifier, 'grok/session/metadata', event)
                 elif kind not in ('agent_thought_chunk', 'user_message_chunk'):
                     state = store.state(identifier)
                     store.update(identifier, unsupported_event_kinds=sorted(set(state.get('unsupported_event_kinds', []) + [str(kind)])))

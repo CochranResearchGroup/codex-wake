@@ -45,7 +45,11 @@ Use the shared `control prompt`, `result`, `output`, `cancel`, `health`, and
 route through retained custody without a new profile lookup. The four output
 modes are `stream`, `transcript`, `final`, and `silent`. Live stream/transcript
 chunks come only from correlated native ACP `session/update` notifications;
-reasoning and user-message content are excluded. Retained cursors resume bounded
+reasoning and user-message content are excluded. Native
+`available_commands_update` notifications remain ordered transcript metadata with
+native provenance and never become assistant stream text. Unknown native kinds
+make retention explicitly partial. Historical partial receipts are not rewritten
+when a later collector learns a known metadata kind. Retained cursors resume bounded
 history. A detached collector owns the original request when a caller disconnects.
 Collector loss means unknown work, not permission to submit it again.
 
