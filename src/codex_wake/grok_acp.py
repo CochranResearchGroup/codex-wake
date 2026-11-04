@@ -57,8 +57,8 @@ def owned_listener(profile):
 
 
 class GrokACPConnection:
-    def __init__(self,profile,*,guard):
-        self.profile,self.guard=profile,guard
+    def __init__(self,profile,*,guard,on_update=None):
+        self.profile,self.guard,self.on_update=profile,guard,on_update
         self.connection=None;self.deadline=0
 
     def __enter__(self):
@@ -117,6 +117,7 @@ class GrokACPConnection:
                 event=value.get('params',{})
                 if event.get('sessionId')==params.get('sessionId'):
                     progress_seen=True
+                    if self.on_update is not None:self.on_update(event)
                     update=event.get('update',{})
                     if update.get('sessionUpdate')=='agent_message_chunk':
                         content=update.get('content',{})

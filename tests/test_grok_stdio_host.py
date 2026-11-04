@@ -11,15 +11,19 @@ root=Path.cwd()
 for line in sys.stdin:
  r=json.loads(line);method=r['method'];p=r.get('params',{})
  with (root/'native-methods.jsonl').open('a') as f:f.write(json.dumps(dict(method=method,params=p))+'\\n')
- if method=='initialize':v=dict(protocolVersion=1,agentCapabilities=dict(loadSession=True),authMethods=[],_meta=dict(agentVersion='fixture-ACP-v1',agentId='fixture-native-agent',agentInstanceId='fixture-native-instance',currentWorkingDirectory=str(root)))
+ if method=='initialize':v=dict(protocolVersion=1,agentCapabilities=dict(loadSession=True,sessionCapabilities=dict(list={})),authMethods=[],_meta=dict(agentVersion='fixture-ACP-v1',agentId='fixture-native-agent',agentInstanceId='fixture-native-instance',currentWorkingDirectory=str(root)))
  elif method=='session/prompt':
-  if p['prompt'][0]['text']=='hold':
+  if p['prompt'][0]['text']=='lead':
+   print(json.dumps(dict(jsonrpc='2.0',method='session/update',params=dict(sessionId=p['sessionId'],update=dict(sessionUpdate='agent_message_chunk',content=dict(type='text',text='before-final'))))),flush=True)
+  if p['prompt'][0]['text'] in ('hold','lead'):
    (root/'started').write_text('started');deadline=time.monotonic()+10
    while not (root/'release').exists() and time.monotonic()<deadline:time.sleep(.01)
   print(json.dumps(dict(jsonrpc='2.0',method='session/update',params=dict(sessionId=p['sessionId'],update=dict(sessionUpdate='agent_message_chunk',content=dict(type='text',text='owned-stdio-answer'))))),flush=True)
   v=dict(stopReason='end_turn')
  elif method=='session/new':v=dict(sessionId='created-native')
  elif method=='session/load':v={}
+ elif method=='session/list':v=dict(sessions=[dict(sessionId='existing',cwd=str(root),title='Fixture')])
+ elif method=='session/set_model':v=dict(_meta=dict(model=dict(Ok=p['modelId'])))
  else:raise AssertionError(method)
  print(json.dumps(dict(jsonrpc='2.0',id=r['id'],result=v)),flush=True)
 '''
@@ -52,6 +56,11 @@ class StdioHostTests(unittest.TestCase):
                     self.assertEqual(caps['result']['native_identity']['agent_instance_id'],'fixture-native-instance')
                 lines=[json.loads(line) for line in (work/'native-methods.jsonl').read_text().splitlines()]
                 self.assertEqual([r['method'] for r in lines],['initialize'])
+                profile=owner.profile('fixture')
+                with owner._connection(profile,lambda:None) as connection:
+                    self.assertEqual(connection.call('session/list',dict(cwd=str(work)),'list')['sessions'][0]['sessionId'],'existing')
+                    self.assertEqual(connection.call('session/set_model',dict(sessionId='existing',modelId='fixture-model'),'model')['_meta']['model']['Ok'],'fixture-model')
+                    with self.assertRaises(InventoryError):connection.call('session/unknown',{},'unknown')
                 def args(key,prompt):
                     selected=dict(target,conversation_id='existing')
                     return dict(profile='fixture',expected_target=selected,prompt=prompt,_request=dict(operation_id=key,idempotency_key=key,correlation_id=key,binding='fixture',target=selected))
@@ -65,8 +74,42 @@ class StdioHostTests(unittest.TestCase):
                 (work/'release').write_text('release');task.join(5);self.assertFalse(task.is_alive())
                 self.assertEqual(replies[0]['result']['operation']['answer']['text'],'owned-stdio-answer')
                 lines=[json.loads(line) for line in (work/'native-methods.jsonl').read_text().splitlines()]
-                self.assertEqual([r['method'] for r in lines],['initialize','session/prompt'])
+                self.assertEqual([r['method'] for r in lines],['initialize','session/list','session/set_model','session/prompt'])
                 self.assertFalse((wake/'goal-supervision').exists())
+                from codex_wake.local_grok_control import LocalGrokControl
+                local=LocalGrokControl(wake)
+                (work/'release').unlink()
+                admitted=local.prompt('grok:existing','lead',key='live-grok')
+                identifier=admitted['result']['operation']['operation_id']
+                page=local.output(identifier,mode='transcript',timeout=5)
+                self.assertFalse(page['terminal'])
+                self.assertEqual(page['events'][0]['params']['update']['content']['text'],'before-final')
+                self.assertEqual(local.prompt('grok:existing','lead',key='live-grok')['result']['operation']['operation_id'],identifier)
+                (work/'release').write_text('release')
+                final=LocalGrokControl(wake).output(identifier,mode='final',timeout=5)
+                self.assertTrue(final['terminal'])
+                self.assertEqual(final['text'],'before-finalowned-stdio-answer')
+                native_prompts=[json.loads(line) for line in (work/'native-methods.jsonl').read_text().splitlines() if json.loads(line)['method']=='session/prompt']
+                self.assertEqual(len(native_prompts),2)
+                self.assertEqual(local.output(identifier,mode='stream',cursor=final['latest_cursor'])['text'],'')
+                self.assertNotIn('text',local.output(identifier,mode='silent'))
+                (work/'release').unlink()
+                lost=local.prompt('grok:existing','lead',key='lost-collector')
+                lost_id=lost['result']['operation']['operation_id']
+                local.output(lost_id,mode='transcript',timeout=5)
+                collector=lost['result']['operation']['result']['collector_pid']
+                os.kill(collector,15)
+                deadline=time.monotonic()+5
+                while process_identity(collector) is not None:
+                    self.assertLess(time.monotonic(),deadline);time.sleep(.01)
+                uncertain=LocalGrokControl(wake).result(lost_id)['result']['operation']
+                self.assertEqual(uncertain['execution'],'unknown')
+                self.assertEqual(uncertain['phase'],'uncertain')
+                local.prompt('grok:existing','lead',key='lost-collector')
+                native_prompts=[json.loads(line) for line in (work/'native-methods.jsonl').read_text().splitlines() if json.loads(line)['method']=='session/prompt']
+                self.assertEqual(len(native_prompts),3)
+                (work/'release').write_text('release')
+
             finally:
                 host.terminate()
                 try:host.wait(timeout=6)
