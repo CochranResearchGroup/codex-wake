@@ -171,3 +171,46 @@ class LocalGrokTests(unittest.TestCase):
             self.assertEqual(sum(method == 'session/new' for method, _, _ in calls), 1)
             (root / 'controller-grok.json').unlink()
             self.assertTrue(owner.create(profile='selected', key='lost-activation')['result']['readiness']['ready'])
+
+    def test_load_recovers_explicit_session_without_creation_or_manual_grants(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); owner, calls = self.fixture(root)
+            original = owner.owner.request; loads = []
+            def native(profile, method, params, identifier, guard):
+                if method == 'session/load':loads.append((params, identifier))
+                return original(profile, method, params, identifier, guard)
+            owner.owner.request = native
+            loaded = owner.load('grok:persisted-session', profile='selected', key='explicit-load')
+            record = loaded['result']['operation'];identifier = record['operation_id']
+            self.assertEqual(record['operation'], 'grok.load')
+            self.assertEqual(record['target']['conversation_id'], 'persisted-session')
+            self.assertEqual(record['execution'], 'completed')
+            self.assertEqual(loads[0][0]['sessionId'], 'persisted-session')
+            (root / 'controller-grok.json').unlink()
+            self.assertEqual(owner.load('grok:persisted-session', profile='selected', key='explicit-load')['result']['operation']['operation_id'], identifier)
+            self.assertEqual(owner.result(identifier)['result']['operation']['execution'], 'completed')
+            self.assertEqual(len(loads), 1)
+            self.assertFalse(any(method in ('session/new', 'session/prompt') for method, _, _ in calls))
+            with self.assertRaises(InventoryError):owner.load('grok:other', key='explicit-load')
+            with self.assertRaises(InventoryError):owner.load('grok:persisted-session', profile='replacement', key='explicit-load')
+
+    def test_uncertain_load_retry_does_not_bind_replacement_or_repeat_native_io(self):
+        import json
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); owner, calls = self.fixture(root)
+            original = owner.owner.request; loads = []
+            def native(profile, method, params, identifier, guard):
+                if method == 'session/load':
+                    guard(); loads.append(identifier); raise TimeoutError('load response unavailable')
+                return original(profile, method, params, identifier, guard)
+            owner.owner.request = native
+            first = owner.load('grok:persisted-session', profile='selected', key='lost-load')
+            self.assertEqual(first['result']['operation']['phase'], 'uncertain')
+            path = root / 'controller-grok.json'; registry = json.loads(path.read_text())
+            registry['profiles']['selected']['target']['connection_generation'] = 'replacement'
+            path.write_text(json.dumps(registry))
+            retry = owner.load('grok:persisted-session', profile='selected', key='lost-load')
+            self.assertEqual(retry['result']['operation']['target']['connection_generation'], 'instance-one')
+            self.assertEqual(retry['result']['operation']['phase'], 'uncertain')
+            self.assertEqual(len(loads), 1)
+            with self.assertRaises(InventoryError):owner.load('grok:persisted-session', profile='selected', key='lost-load', expected_target=dict(retry['result']['operation']['target'], connection_generation='replacement'))
