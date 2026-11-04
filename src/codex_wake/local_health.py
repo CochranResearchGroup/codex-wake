@@ -136,7 +136,8 @@ def register_parser(subparsers):
 
 def command(args, root=None):
     from .local_control_service import LocalOperations
-    value = LocalOperations(root or args.wake_root).execute('local.health',dict(selector=args.selector,expected_target=args.expected_target,timeout=args.timeout,endpoint=args.endpoint,harness=args.harness,**({'profile':args.profile} if args.profile else {})))
+    values=dict(selector=args.selector,expected_target=args.expected_target,timeout=args.timeout,endpoint=args.endpoint,harness=args.harness,profile=args.profile)
+    value = LocalOperations(root or args.wake_root).execute('local.health',{key:value for key,value in values.items() if value is not None})
     print(json.dumps(value, sort_keys=True))
     return 0 if value['status'] == 'completed' else 2
 

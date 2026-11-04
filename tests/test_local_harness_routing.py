@@ -1,5 +1,6 @@
 """Shared public routes preserve explicit harness and retained operation custody."""
 import tempfile
+import io
 import types
 import unittest
 from pathlib import Path
@@ -21,6 +22,13 @@ class LocalHarnessRoutingTests(unittest.TestCase):
         for tool in ('wake_local_create','wake_local_prompt','wake_local_health','wake_control_slash_run'):
             self.assertEqual(SPECS[tool][3]['harness']['enum'],['codex','grok'])
             self.assertIn('profile',SPECS[tool][3])
+
+    def test_health_cli_omits_an_unsupplied_optional_target(self):
+        from codex_wake.local_health import command
+        args=build_parser().parse_args(['control','health','thread:one'])
+        with tempfile.TemporaryDirectory() as directory,patch('codex_wake.local_control_routing.health',return_value={'status':'completed','result':{}}) as health,patch('sys.stdout',new=io.StringIO()):
+            self.assertEqual(command(args,Path(directory)),0)
+        self.assertNotIn('expected_target',health.call_args.args[0])
 
     def test_public_resolve_uses_explicit_grok_owner_and_preserves_target_pin(self):
         grok=Mock();grok.resolve.return_value={'thread_id':'session-one','target':{'runtime':'grok'}}
