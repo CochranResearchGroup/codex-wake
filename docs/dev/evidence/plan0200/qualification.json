@@ -401,7 +401,27 @@
       "repair": "Preserve successful creation, activate through retained stable-key load, report created_not_ready if activation fails; never create again on retry",
       "cumulative_native_fixture_creations": 2
     },
-    "current_gate": "Installed creation/activation repair, then bounded native provider qualification"
+    "current_gate": "Exact910531f prefix validation and maximum2 genuine marker-only provider intents; same fixture, no new creation",
+    "installed_bootstrap_repaired": {
+      "status": "passed",
+      "source": "49350db4cda29c39e5d56f346b61c781062e281c",
+      "prefix": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/prefix-49350db",
+      "wheel_sha256": "ef06ecce13c17a97edef49d66846ffa132c354a986c82499c1fde836cbde8385",
+      "source_archive_wheel_install_python_matches": 256,
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/installed-0df50f01/receipt-resumed.json",
+      "receipt_sha256": "66631b1af2c20e40bc331ed636d4b2ff6a4cfdce0a3498d1c5e71320e8a07f02",
+      "checks": [
+        "public create plus retained activation readiness",
+        "loaded session list and exact resolve",
+        "same-key creation through all four entrypoints",
+        "native status/model selection and readback",
+        "durable model interaction/cancel before response",
+        "health unsupported without recovery authority"
+      ],
+      "external_provider_prompts": 0,
+      "native_fixture_creations_cumulative": 3,
+      "owned_processes": "Retained inactive with exact custody for provider packet; not a cleanup claim"
+    }
   },
   "review": {
     "broad_reviews": 0,
