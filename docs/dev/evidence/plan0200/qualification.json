@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/466",
-  "status": "in_progress",
-  "product_source": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+  "status": "milestone_a_passed_review_pending",
+  "product_source": "f4f77a2546e22525040db8b08debea12c3aaca8c",
   "branch": "feat/wsl-session-control-0200",
   "hosted_ci": "skipped under repository cost policy",
   "installed_transport": {
@@ -157,9 +157,9 @@
     }
   ],
   "milestone_a": {
-    "status": "in_progress",
+    "status": "passed",
     "ticket": 475,
-    "consumer_gate": "Current codex-bots route explicitly reports unknown TUI responsiveness; narrow adapter scope question pending",
+    "consumer_gate": "Qualified narrow codex-bots branch consumer; draft PR74 remains open for review/integration. No consumer deployment claimed.",
     "delayed_event_probe": {
       "status": "passed",
       "provider_turns": 0,
@@ -233,25 +233,214 @@
       "command": "env -u PYTHONPATH /home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/prefix-ad41df8/bin/python /home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/qualify_api_mcp_fresh.py",
       "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/fresh-api-mcp/receipt.json",
       "receipt_sha256": "e328442ef4bdc82851e6613f2b6f1420e4f09f4e820adf6479c3975e20ecb5ae"
-    }
+    },
+    "tracker_state": "closed",
+    "required_acceptance_row_gaps": [],
+    "native_uid1017": {
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "installed_prefix": "/tmp/w475-uid1017-prefix",
+      "native_package_sha256": "48ed489ceed144d277c44a505ef5cbcb63250fa361fe132bed1fdab3f7cfb7d5",
+      "health_and_slash": {
+        "status": "passed",
+        "curated_rows": 45,
+        "checks": [
+          "All four entrypoints: exact fresh TUI health; slash list/status, controller interaction, respond/result/cancel.",
+          "Actual native TUI rename; cancellation CLI exit2 is the expected contract.",
+          "No model turns; peer preserved."
+        ],
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/uid1017/matrix-remaining.json",
+        "receipt_sha256": "7cd242c7ea9d554146fb15053bafa87c62eb3de0c833b3857498c7a28cc0a7b3"
+      },
+      "health_pause_resume": {
+        "status": "passed",
+        "curated_rows": 8,
+        "checks": [
+          "All four entrypoints report unknown while the whole owned TUI process is paused, then responsive from fresh native-loop acknowledgements after resume.",
+          "This packet pauses the whole TUI process; earlier exact-single-loop evidence is separate."
+        ],
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/uid1017/health-paused.json",
+        "receipt_sha256": "c22c09c22eca30a547414a848fa83f840cafcf4125fbe14dc4dfcfd630c7a487"
+      },
+      "cancellation_busy_timeout_retry": {
+        "status": "passed",
+        "curated_rows": 9,
+        "checks": [
+          "Actual offline native turn admitted through API; known busy refusal; actual WSL silent timeout124 does not cancel.",
+          "Actual delegated PowerShell exact cancellation; all four original-key retries; native original turn interrupted once."
+        ],
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/uid1017/cancel.json",
+        "receipt_sha256": "2a9de0518ff021010bdb77a189bd64f8cbc162c67d26f39a9be13f2c515d15ad"
+      },
+      "daemon_controller_replacement": {
+        "status": "passed",
+        "curated_rows": 12,
+        "checks": [
+          "Actual isolated native daemon and Wake controller process generations replaced.",
+          "All four entrypoints retain cancelled terminal result, pending stale generation stays phase uncertain/execution unknown, original-key retries never redispatch.",
+          "Saved native turn count stays2."
+        ],
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/uid1017/replacement.json",
+        "receipt_sha256": "8607941cc5a1b257dc48c2e4e94063623153ecd40cc24ee72e5f9e6842d5f1b6"
+      },
+      "commands": {
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/uid1017/commands.json",
+        "receipt_sha256": "317f8aa353d569f281707425b8a687c1703ea19095e3301b26a14a38bbdb0ed4"
+      },
+      "census": {
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/census-final.json",
+        "receipt_sha256": "db37a728cb7be6ab1b104942fea5b3c36d67ad64dc59cd283434812cb0fedb82"
+      },
+      "classification_boundary": "These health rows use an offline-provider fixture; no public status=offline claim is inferred after discovery loss. Deadline or unavailable target stays truthful unknown/error; process liveness never establishes TUI health."
+    },
+    "reopened468_repair": {
+      "status": "passed",
+      "tracker_state": "closed",
+      "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/468#issuecomment-6620793011",
+      "source_commit": "f4f77a2546e22525040db8b08debea12c3aaca8c",
+      "implementation_source": "481a4aebb877d68913fcc81b877f7090cff8126a",
+      "wheel_sha256": "edd3fccfa7c36ab123164695b20b3608b0ec19610b7293d819ad992bb5666c56",
+      "matching_source_wheel_primary_uid1017_python_members": 253,
+      "primary_prefix": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/repaired468/prefix-f4f77a2",
+      "uid1017_prefix": "/tmp/w475-f4f77a2-prefix",
+      "curated_rows": 48,
+      "row_counts": {
+        "unavailable_clock_four_entrypoints": 4,
+        "actual_old_watcher_fresh_and_stale": 8,
+        "positive_limits_four_entrypoints": 25,
+        "inherited_host_ceiling_and_utc": 2,
+        "epoch_loss_latch": 9
+      },
+      "checks": [
+        "Deterministically unavailable private clock rejects with unchanged native goal/turn/queue and no published enrollment/allocation or new watcher.",
+        "Fresh voluntary setup creates no native goal or model request; compatible automatic watcher advertises counter/no-goal capabilities and holds singleton.",
+        "Actual WindowsQPC authenticated counter-only durations; UTC remains unavailable. Original anchor, generation, cumulative usage and stop latch survive tightening/retry.",
+        "Four explicit offline native turns stop exactly for allocation_exhausted; distinct epoch-loss intent stops exactly for counter_continuity_lost; peer preserved.",
+        "Old installed watcher rejects new semantics both fresh and stale; inherited host ceiling and UTC authority remain strict."
+      ],
+      "prior_failure": {
+        "status": "retained",
+        "description": "Old installed set rejected admissible time after creating active native goal and an offline native turn. Exact synthetic goal paused; repair required before reclosure.",
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/uid1017/limits.json",
+        "receipt_sha256": "610c8af8103d79d0006becfa83a895a835618d2e2e33986634bccabfa4ba34e9"
+      },
+      "clock_provenance": {
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/clock-provenance-followup.json",
+        "receipt_sha256": "b420e1595f560f6d83d613d955e2f5bcc745807386de9f469c44cdcaaa40101f"
+      },
+      "clock_assessment": {
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/clock-service-assessment.json",
+        "receipt_sha256": "f8251479792adbb290025ddcc61689b41765a3953382044af42e191cf3d071cf"
+      },
+      "counter_bootstrap": {
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/counter-clock/receipt.json",
+        "receipt_sha256": "6ff0219f400c912de642ab76ccb083965114ce543966d60b84f1139493f0180e"
+      },
+      "limitations": [
+        "Offline no-response cumulative usage is zero; preservation is checked without manufacturing nonzero provider usage.",
+        "Governor notice_* projection records are explicit native/UI evidence and are excluded from model-turn counts; initial harness expectation failure retained."
+      ],
+      "census": {
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/repaired468/census-final.json",
+        "receipt_sha256": "57a4f2025080a51dfd82ffa35bf160e54b8691fc5ca67d2d681c44487ab11216"
+      },
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/repaired468/matrix.json",
+      "receipt_sha256": "b8c655314172b5ed52e36279383f022e2abc69fa8966191a9b50d4843d219a39"
+    },
+    "codex_bots_consumer": {
+      "status": "passed_branch_acceptance",
+      "wake_source": "f4f77a2546e22525040db8b08debea12c3aaca8c",
+      "bots_product_source": "39d62b0bd7940376da168bbf41fee80aad8e55f9",
+      "bots_review_head": "763056b",
+      "issue": "https://github.com/CochranResearchGroup/codex-bots/issues/73",
+      "tracker_state": "open; review/integration pending",
+      "pull_request": "https://github.com/CochranResearchGroup/codex-bots/pull/74",
+      "pull_request_state": "draft; integration pending",
+      "provider_turns": 0,
+      "native_history_turn_count_before_after": 9,
+      "checks": [
+        "Actual branch adapter consumes public installed Wake machine-readable health and retained operation/final-result contracts.",
+        "Exact controlling TUI responsive, owned pause unknown without recovery authority, resume yields fresh responsive acknowledgement.",
+        "Two preexisting API/MCP operations retain submitted acknowledgement and exact user/final history; no fresh Bots prompt submission claimed.",
+        "Before/after native history hash, goalNone, queue[] and settings unchanged; owned presentation exits, working daemon preserved."
+      ],
+      "independent_receipt_checks": "Parent receipt node_result equals node-receipt; before_attach equals baseline equals after; exact TUI identity and no recovery grants verified.",
+      "preliminary_observations": "Initial same-byte/different-inode alias harness failure retained. Direct preliminary sample discovery_deadline/unknown retained; successful later observations do not establish universal timing reliability.",
+      "node_receipt": {
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/bots-consumer/node-receipt.json",
+        "receipt_sha256": "86f800415c8c57b265ad2cd3d6b456352b6b9c202426baf79be6e949cb2935aa"
+      },
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/bots-consumer/receipt.json",
+      "receipt_sha256": "23f1a767ab87d87c735154de18dd4cfef169aed0c93652ce3647c584371a69f5"
+    },
+    "delivery_state": {
+      "wake": "qualified on integration branch; review/integration decisions remain with primary",
+      "bots": "qualified branch plus draft PR74; issue73 stays open for review/integration",
+      "working_installation": "unchanged; no deployment or native package upgrade"
+    },
+    "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/475#issuecomment-6620850037"
   },
   "milestone_b": {
-    "status": "blocked",
+    "status": "ready",
     "ticket": 476,
-    "blocked_by": 475
+    "prerequisite": 475,
+    "prerequisite_state": "validated and closed; runtime qualification not yet started"
   },
   "review": {
     "broad_reviews": 0,
-    "remediation_passes": 0
+    "remediation_passes": 0,
+    "status": "pending; broad review and remediation pass remain unused"
   },
   "deployment": "working installation unchanged",
   "environment_differences": [
     "Local WSL shared kernel rather than hosted Ubuntu runner",
     "Actual Windows PowerShell interop available locally",
     "Python3.11.15 and3.12.13 from private development environments",
-    "Full matrix and installed native acceptance are separate from the passing synthetic transport fixture"
+    "Full matrix and installed native acceptance are separate from the passing synthetic transport fixture",
+    "Repaired UID1017 prefix uses Python3.12.3; companion private prefix uses Python3.12.13. Actual delegated PowerShell uses approved sudo WakeCli bootstrap and unmodified generated client.",
+    "UID1017 native worker and offline trap use isolated user/network namespaces on the shared WSL kernel; Wake controller and private counter-only test service use host loopback.",
+    "Private test-only HTTPS clock uses fresh UID1017 TLS/token and actual installed WindowsQPC producer; it reports UTC unavailable, never synthetic finite UTC."
   ],
   "environment_findings": [
-    "Legacy installed mailbox MCP smoke selected the operator HOME StableTime profile despite XDG isolation and refused one acknowledgment with clock_anomaly. It passed after explicit CODEX_WAKE_STABLE_TIME_CONFIG empty selection, matching CI unit-test isolation. Production clock configuration was not changed; the first failed log is retained."
-  ]
+    "Legacy installed mailbox MCP smoke selected the operator HOME StableTime profile despite XDG isolation and refused one acknowledgment with clock_anomaly. It passed after explicit CODEX_WAKE_STABLE_TIME_CONFIG empty selection, matching CI unit-test isolation. Production clock configuration was not changed; the first failed log is retained.",
+    "Earlier source-helper positive self468 receipt did not retain initial clock acquisition provenance; it cannot prove current installed authenticated UTC acceptance.",
+    "All worker fixture processes and actual fixture Windows counter producer exited; preexisting counter producer and working daemon generations preserved. Exact census receipts remain private."
+  ],
+  "source_generations": {
+    "transport_provider_and_original_native_acceptance": {
+      "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "wheel_sha256": "5d9a6626239177b28b2696d0ce2d13cc968a3e2e28deee23507dff102db46f60",
+      "matching_python_members": 252,
+      "scope": "Installed synthetic transport, live provider admissions/modes, actual UID1017 health/slash/cancellation/replacement receipts retain their original source attribution."
+    },
+    "repaired_limits_and_consumer": {
+      "source_commit": "f4f77a2546e22525040db8b08debea12c3aaca8c",
+      "wheel_sha256": "edd3fccfa7c36ab123164695b20b3608b0ec19610b7293d819ad992bb5666c56",
+      "matching_python_members": 253,
+      "primary_prefix": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/repaired468/prefix-f4f77a2",
+      "uid1017_prefix": "/tmp/w475-f4f77a2-prefix",
+      "scope": "Exact new installed no-goal limits qualification and actual codex-bots consumer proof."
+    },
+    "delta": {
+      "unchanged_python_members": 248,
+      "changed_python_members": [
+        "codex_wake/goal_notices.py",
+        "codex_wake/goal_readiness.py",
+        "codex_wake/goal_supervision.py",
+        "codex_wake/self_limits.py"
+      ],
+      "new_python_members": [
+        "codex_wake/goal_time.py"
+      ],
+      "removed_python_members": [],
+      "evidence": {
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/repaired468/wheel-delta.json",
+        "receipt_sha256": "7c1c848838de7887d655a53653fbcc42ffc6e8d835ad5a35bdf8e726fd21cd38"
+      },
+      "acceptance_transfer": "Primary approved retained acceptance for the 248 byte-identical Python modules. Earlier live/provider receipts are not relabeled as fresh f4f77a2 runs."
+    }
+  },
+  "memory_disposition": {
+    "status": "forbidden",
+    "reason": "Plan0200 and task explicitly prohibit memory writes; no writes attempted."
+  }
 }

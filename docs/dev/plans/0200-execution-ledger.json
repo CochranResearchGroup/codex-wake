@@ -40,18 +40,26 @@
         "Limit setup starts or explicitly arranges enforcement and reports real readiness; demonstrate bounded stop.",
         "Inherited external ceilings cannot be raised or disabled through self-service; preserve lifetime usage."
       ],
-      "state": "running",
+      "state": "validated",
       "worker": "/root/self_limits_468",
       "worktree": "/home/ecochran76/workspace.local/codex-wake-self-limits",
-      "result_sha": "066bd34",
-      "validation": [
+      "result_sha": "f4f77a2546e22525040db8b08debea12c3aaca8c",
+      "tracker_state": "closed",
+      "regression": "Installed fresh self-limit rejected trusted time after active native goal creation and a local-trap turn; earlier positive source-helper clock provenance incomplete",
+      "historical_validation_superseded": [
         "64related tests/version +5final selftests/version",
         "actualUID1017 public owner stop proof3s",
         "installed automatic self-limits CLI passed fresh\u2192engaged\u2192stopped;peerpreserved;zero model turns"
       ],
-      "tracker_state": "open",
-      "private_receipt": "/home/codex-daemon-test/self468-5b5f8e61/receipt.json",
-      "regression": "Installed fresh self-limit rejected trusted time after active native goal creation and a local-trap turn; earlier positive source-helper clock provenance incomplete"
+      "historical_private_receipt": "/home/codex-daemon-test/self468-5b5f8e61/receipt.json",
+      "repair_source_sha": "481a4aebb877d68913fcc81b877f7090cff8126a",
+      "validation": [
+        "Exact installed f4f77a2 wheel:253 source/wheel/both-prefix Python payloads equal.",
+        "48 curated actual installed rows: unavailable clock4, old-watcher8, positive limits25, inherited ceilings/UTC2, epoch-loss9; zero external provider calls.",
+        "No active native goal/model work from setup; actual real-QPC counter-only enforcement, immutable anchor and exact owned-turn stop; all fixtures cleaned."
+      ],
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/repaired468/matrix.json",
+      "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/468#issuecomment-6620793011"
     },
     {
       "key": "T3",
@@ -212,7 +220,7 @@
         "Qualify every required output mode,slash interaction,recovery and own-session enforcement row; fixtures alone are insufficient.",
         "Identify codex-bots real consumer contract and qualify machine-readable identity,fresh health,acknowledgement and final result. Record exact source,prefix,builds,commands and final process census."
       ],
-      "state": "blocked",
+      "state": "validated",
       "worker": "/root/local_health_469",
       "owner": "worker with primary integration",
       "partial_validation": {
@@ -224,13 +232,13 @@
           "api": "failed timing evidence"
         },
         "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-1.json",
-        "next": "zero-provider UID1017 health,slash,enforcement,recovery; Bots adapter scope decision",
+        "next": "Historical partial snapshot retained; current acceptance passed, final review/integration separate.",
         "provider_intent2": {
           "status": "passed",
           "events": 33,
           "all_four_live_text_paths": "passed before direct native completion witness",
           "receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-2.json",
-          "fresh_api_mcp_submissions": "unqualified"
+          "fresh_api_mcp_submissions": "qualified separately in fresh_api_mcp_submissions"
         },
         "fresh_api_mcp_submissions": {
           "status": "passed",
@@ -238,10 +246,24 @@
           "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
         }
       },
-      "blockers_current": [
+      "blockers_current": [],
+      "tracker_state": "closed",
+      "acceptance_status": "passed; tracker closed by primary",
+      "historical_blockers_resolved": [
         "reopened468 admission and clock-basis repair",
         "actual codex-bots consumer proof"
-      ]
+      ],
+      "validation": [
+        "MilestoneA required rows passed; canonical source-attributed matrix is docs/dev/evidence/plan0200/qualification.json.",
+        "Actual installed UID1017 native health/slash45, pause/resume8, cancellation9 and daemon/controller replacement12 rows; retained ad41df8 attribution.",
+        "Repaired f4f77a2 installed limits48 rows; actual Bots consumer branch39d62b0 read-only native proof; issue73/draftPR74 integration pending."
+      ],
+      "curated_evidence": "docs/dev/evidence/plan0200/qualification.json",
+      "remaining_gates": [
+        "Planned final broad review/remediation and integration; no deployment claimed"
+      ],
+      "required_acceptance_row_gaps": [],
+      "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/475#issuecomment-6620850037"
     },
     {
       "key": "T10",
@@ -255,15 +277,16 @@
         "Truthful per-harness capabilities; qualify supported noninteractive and interactive commands without silent terminal typing fallback.",
         "Installed native acceptance distinguishes true Grok evidence from injected fixtures; no Windows-native or Claude expansion."
       ],
-      "state": "pending"
+      "state": "ready",
+      "tracker_state": "open"
     }
   ],
-  "integration_tip": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+  "integration_tip": "f4f77a2546e22525040db8b08debea12c3aaca8c",
   "resource_accounting": {
     "effective_model": "inherited;runtime reported identity unavailable",
     "aggregate_allocation": "unknown",
     "provider_turns_known": 9,
-    "provider_work": "bounded synthetic marker replies only;no tools;one failed-stream turn retained and reconciled",
+    "provider_work": "Nine known cumulative bounded signed-in turns: prior marker turns, two dedicated WSL/PowerShell intents with one read-only pwd each, two fresh API/MCP marker-only intents. All provider packets closed; subsequent UID1017 effects use isolated offline traps; consumer proof read-only.",
     "review_broad_count": 0,
     "review_remediation_count": 0,
     "current_acceptance_packet": {
@@ -294,7 +317,7 @@
     "local_server": "WSL same-user local controller; automatic private connection receipt, no manual OAuth enrollment",
     "powershell": "actual Windows PowerShell client sends UTF8 JSON to same WSL server; WSL bootstrap captures private connection receipt without token arguments/output",
     "api_mcp": "shared local.* owner schemas and slash/health/self-limit hooks; bounded event retrieval for MCP, streaming CLI/API presentation",
-    "consumer_gate": "User continue authorizes narrow codex-bots public Wake adapter in separate checkout; no unrelated Bots recovery or deployment",
+    "consumer_gate": "Narrow adapter authorized by user continue and qualified at Bots product39d62b0; draftPR74 head763056b and issue73 await review/integration.",
     "self_limits_repair": "No native goal creation; preserve existing goal/queue; fresh voluntary durations may use existing authenticated counter-only same-epoch elapsed authority, immutable across tighten/retry; inherited UTC deadlines stay strict; missing/failed admission has no active native effects"
   },
   "integration_regressions": {
@@ -337,5 +360,15 @@
       "post_run_goal_watchers_or_collectors": "none in fresh process readback"
     }
   },
-  "integration_tip_kind": "last validated product commit; documentation checkpoints follow"
+  "integration_tip_kind": "last validated product commit; documentation checkpoints follow",
+  "acceptance_summary": {
+    "milestone_a": "passed",
+    "ticket475_tracker": "closed",
+    "required_row_gaps": [],
+    "wake_product_source": "f4f77a2546e22525040db8b08debea12c3aaca8c",
+    "bots_product_source": "39d62b0bd7940376da168bbf41fee80aad8e55f9",
+    "bots_pr": "https://github.com/CochranResearchGroup/codex-bots/pull/74",
+    "review": "planned single broad review and remediation pass unused",
+    "deployment": "working installation unchanged"
+  }
 }

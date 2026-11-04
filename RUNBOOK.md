@@ -8372,3 +8372,33 @@ private log hashes are retained in docs/dev/evidence/plan0200/qualification.json
 Native intent1 completed with actual pwd, complete transcript and visible TUI;
 three live-stream receive-timing rows remain failed pending a delayed-event
 probe and the unused second bounded intent. No failed receipt is overwritten.
+
+## Turn 404 | 2026-11-03
+
+Plan0200 Milestone A passed; primary closed repaired #468 and installed #475.
+Grok #476 is ready. Source `f4f77a2` repaired voluntary limits without creating
+native goals. Its exact wheel (`edd3fccfa7c36ab123164695b20b3608b0ec19610b7293d819ad992bb5666c56`)
+matched all 253 Python payloads in source and both installed prefixes. The
+repaired installed packet passed 48 rows: no-effect clock rejection, actual old
+watcher refusal, four-entrypoint no-goal limits, inherited ceilings/UTC rejection,
+exact offline native stops and fail-closed epoch loss. Original anchors and stop
+latches remained intact. Counter-only proof sampled actual Windows QPC with UTC
+explicitly unavailable; no synthetic UTC or copied credentials supplied authority.
+
+Original `ad41df8` receipts retain actual installed health/slash, paused/resumed
+TUI health, exact cancellation/busy/timeout/retry and native daemon/controller
+replacement evidence. Earlier signed-in WSL/PowerShell/API/MCP admissions and
+output modes remain attributed to that source; 248 unchanged Python modules
+support the approved transfer. Failed first timing, clock-admission and harness
+receipts remain retained. All provider packets stay closed at nine cumulative
+turns; subsequent UID1017 work used offline traps. All fixture processes and the
+actual fixture Windows counter producer exited; preexisting producer and working
+daemon generations remained intact.
+
+The actual codex-bots consumer passed at product `39d62b0` against the new Wake
+prefix without new turns; native history, goal, queue and settings were unchanged.
+Bots issue73 and draft PR74 head `763056b` still await review/integration. No
+working deployment occurred. Commands, exact prefixes, hashes, source deltas and
+private census receipts are linked from
+`docs/dev/evidence/plan0200/qualification.json`. Final broad review and remediation
+remain unused. Memory disposition: forbidden by Plan0200; zero memory writes.

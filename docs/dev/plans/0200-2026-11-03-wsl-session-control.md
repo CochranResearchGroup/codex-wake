@@ -9,26 +9,33 @@ WIP limit: 3 implementation lanes
 
 ## Current State
 
-Seven child tickets remain closed. Installed #475 acceptance reopened #468:
-fresh self-limit setup could create active native work before trusted-time
-admission failed. The limits worker owns the repair. Provider admission and four
-modes have now qualified through WSL, actual PowerShell, API and local MCP; the
-bounded packets are closed at nine known cumulative provider turns. The ledger
-records exact custody and immutable failed and successful receipts.
+Milestone A passed. Child tickets #467–#475 are validated and closed; Grok #476
+is ready. Installed #475 acceptance exposed an effectful failed own-limit
+admission in #468. The integrated repair at `f4f77a2` passed 48 installed
+UID1017 checks before primary reclosed #468 and #475. The ledger and curated
+qualification retain the failed admission and earlier harness/timing failures.
 
-The user's subsequent “continue” authorizes the narrow codex-bots adapter needed
-for consumer acceptance. Primary owns that companion checkout; unrelated Bots
-recovery and deployment remain outside this slice. #475 awaits both the limits
-repair and actual consumer proof; Grok #476 follows its validation.
+Transport, live-provider and original native health/slash/resilience receipts
+retain source `ad41df8`. The repaired wheel has 253 matching source/wheel/installed
+Python members: 248 are byte-identical to that earlier wheel; four limits-related
+modules changed and `goal_time.py` was added. Exact new-wheel limits and consumer
+proof qualify `f4f77a2`; approved unchanged-byte acceptance transfer is explicit.
+All provider packets are closed at nine known cumulative signed-in turns.
+Subsequent limits work used only the isolated UID1017 offline fixture.
 
-Health remains unknown without a fresh exact foreground TUI-loop acknowledgment.
-Actual Windows PowerShell 5.1 transport is qualified. The current codex-bots
-status route explicitly returns unknown responsiveness; the narrow
-consumer-adapter scope is now authorized and implementation is in progress.
+The narrow codex-bots adapter passed read-only actual-native consumer acceptance
+at product `39d62b0`, with unchanged nine-turn history, goal, queue and settings.
+Bots issue73 and draft PR74 (review head `763056b`) remain open for review and
+integration. No consumer deployment, Wake working installation or native package
+upgrade is claimed. Health stays unknown without a fresh exact foreground
+TUI-loop acknowledgement; preliminary discovery deadlines remain in evidence.
 
-The final review base is `171befb`; the user has been offered a chance to change
-it. The requested single broad review and single remediation pass remain unused
-until all tickets validate. No skipped required acceptance can close a ticket.
+The final review base is `171befb`; the planned single broad review and single
+remediation pass remain unused. Acceptance, tracker closure, review, integration
+and deployment retain separate states. See
+[qualification](../evidence/plan0200/qualification.json) and the
+[execution ledger](0200-execution-ledger.json) for source-attributed commands,
+installed identities, runtime receipts and final process census.
 
 ## Scope and acceptance
 
