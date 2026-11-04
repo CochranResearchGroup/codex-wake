@@ -37,6 +37,16 @@ Successful readiness is retained and needs no new profile lookup on retry.
 Use `control list --harness grok --profile disposable` to discover sessions loaded
 in that exact owner. Select `grok:SESSION_ID`; the selector pins provider, native
 agent instance, process generation, executable build, account home and profile.
+After an owner restart, load an explicit persisted conversation with
+`control load grok:SESSION_ID --harness grok --profile NAME --idempotency-key KEY`.
+This uses the existing native `grok.load` owner with automatic same-user custody;
+it does not create a session, submit a prompt or require a manual grant file.
+The first request pins that fresh profile/process generation and explicit session.
+Repeating its key returns the original completed or uncertain receipt, without
+replaying load or rebinding a replacement process. A completed receipt remains
+readable after the original profile disappears. Use a fresh key only for a
+separately authorized new load intent, never to retry an unknown outcome.
+
 Native session listing is window/owner scoped. It is not complete persisted
 history discovery. A different owner or restarted process requires fresh identity.
 

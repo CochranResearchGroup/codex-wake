@@ -118,6 +118,38 @@ class LocalGrokControl:
             _request=request), authorize=lambda: actor)
         return self._activate_created(self.runtime._load(created['result']['operation']['operation_id']))
 
+    def load(self, selector, profile=None, key=None, expected_target=None):
+        from .controller_runtime import bounded_id
+        if not isinstance(selector, str) or not selector.startswith('grok:'):
+            raise InventoryError('invalid_selector', 'explicit grok:SESSION_ID required for native load')
+        bounded_id(selector[5:])
+        request = self._request({}, key, 'local-grok-resume-')
+        try:
+            retained = self.runtime._load(request['operation_id'])
+        except InventoryError as error:
+            if error.code != 'operation_not_found':
+                raise
+        else:
+            actor = self._actor(request['operation_id'])
+            if (retained['operation'] != 'grok.load'
+                    or retained['target'].get('conversation_id') != selector[5:]
+                    or profile is not None and profile != retained['payload']['profile']
+                    or expected_target is not None and expected_target != retained['target']):
+                raise InventoryError('idempotency_conflict', 'load key retains its original session, profile and process pin')
+            # A lost acknowledgement is not authority to load again. Completed
+            # receipts remain readable even after that original profile disappears.
+            return self.runtime.envelope('grok.load', self.runtime._owned(actor, retained, lambda: actor))
+        names = self._profiles(profile)
+        if len(names) != 1:
+            raise InventoryError('ambiguous_target' if names else 'target_unavailable', 'select exactly one owned Grok profile')
+        selected = self._profile(names[0])
+        target = dict(selected['target'], conversation_id=selector[5:])
+        if expected_target is not None and target != expected_target:
+            raise InventoryError('stale_target', 'load target differs from the fresh owned profile')
+        actor = local_operator(target); request['target'] = target
+        return self.owner.execute(actor, 'grok.load', dict(profile=names[0], expected_target=target,
+            _request=request), authorize=lambda: actor)
+
     def _activation_view(self, record):
         value = self.runtime.envelope('grok.create', record)
         readiness = record['local_readiness']
