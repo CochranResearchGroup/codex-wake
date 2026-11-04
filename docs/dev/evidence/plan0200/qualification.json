@@ -380,10 +380,17 @@
     "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/475#issuecomment-6620850037"
   },
   "milestone_b": {
-    "status": "ready",
+    "status": "in_progress",
     "ticket": 476,
     "prerequisite": 475,
-    "prerequisite_state": "validated and closed; runtime qualification not yet started"
+    "prerequisite_state": "validated and closed; runtime qualification not yet started",
+    "source_routing_checkpoint": {
+      "source": "70111a9c87576ce3e421a29bcae53d7d4b0de45d",
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/shared-routing/receipt.json",
+      "receipt_sha256": "ce9a5ffe165bb8c76a699d7e0768779d237c9c15ca40de94a6086438b28d0448",
+      "source_checks": "81passed311;312focusedrouting/CLI/contract/MCP/retry/resiliencepassed",
+      "installed": "pending new Grok adapter integration; no native/Grok acceptance inferred"
+    }
   },
   "review": {
     "broad_reviews": 0,
