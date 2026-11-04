@@ -85,7 +85,16 @@ class StdioHostTests(unittest.TestCase):
                 self.assertFalse(page['terminal'])
                 self.assertEqual(page['events'][0]['params']['update']['content']['text'],'before-final')
                 self.assertEqual(local.prompt('grok:existing','lead',key='live-grok')['result']['operation']['operation_id'],identifier)
+                waiting=threading.Event(); waited=[]
+                def wait_for_original():
+                    waiting.set()
+                    waited.append(LocalGrokControl(wake).result(identifier,timeout=5))
+                waiter=threading.Thread(target=wait_for_original)
+                waiter.start();self.assertTrue(waiting.wait(2));self.assertTrue(waiter.is_alive())
                 (work/'release').write_text('release')
+                waiter.join(5);self.assertFalse(waiter.is_alive())
+                self.assertEqual(waited[0]['result']['operation']['phase'],'terminal')
+                self.assertEqual(waited[0]['result']['operation']['execution'],'completed')
                 final=LocalGrokControl(wake).output(identifier,mode='final',timeout=5)
                 self.assertTrue(final['terminal'])
                 self.assertEqual(final['text'],'before-finalowned-stdio-answer')
