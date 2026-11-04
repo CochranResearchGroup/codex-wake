@@ -1108,7 +1108,7 @@ lanes:
     owner: ecochran76 / self_limits_468
     objective: Qualify Grok through shared local session control
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/476]
-    plan: docs/dev/plans/0200-2026-11-03-wsl-session-control.md
+    plan: docs/dev/plans/0201-2026-11-03-grok-local-session-control.md
     branch: feat/476-grok-local-control
     target: feat/wsl-session-control-0200
     plan_state: OPEN

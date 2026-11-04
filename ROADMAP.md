@@ -1440,12 +1440,14 @@ stays stock. Stacked feature branch remains unmerged and not deployed.
 
 State: OPEN
 
-Current State: Spec #466 prioritizes usable WSL session control before platform
-expansion. Children #467–#474 are validated and closed on the integration branch.
-Installed native and real consumer acceptance #475 is in progress; Grok #476
-follows that milestone. The narrow codex-bots adapter scope question remains
-pending. Final review and remediation follow ticket validation. The working
-installation remains unchanged.
+Current State: Codex Milestone A and children #467–#475 are validated and closed.
+The actual codex-bots adapter is qualified on draft PR74, pending shared review
+and source integration. Grok #476 is in progress: source is integrated, and the
+installed creation/activation repair is under qualification. No Grok provider
+prompt has run. Final review/remediation follow ticket validation. Working
+installations and native daemon packages remain unchanged.
 
 Plan: [WSL session control](docs/dev/plans/0200-2026-11-03-wsl-session-control.md)
 Execution custody: [dependency ledger](docs/dev/plans/0200-execution-ledger.json)
+
+Grok execution slice: [owned ACP session control](docs/dev/plans/0201-2026-11-03-grok-local-session-control.md).

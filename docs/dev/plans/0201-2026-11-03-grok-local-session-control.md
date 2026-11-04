@@ -1,9 +1,23 @@
 # #476 Grok local session control
 
-State: IMPLEMENTING; accountable owner: ecochran76; worker: self_limits_468.
+State: OPEN
+Owner: ecochran76
+Worker: self_limits_468
 Parent: Plan0200 and GitHub #466; work item: #476; dependency #475 closed.
 Base: f4f77a2546e22525040db8b08debea12c3aaca8c.
 Branch: feat/476-grok-local-control.
+
+## Current State
+
+Grok source and bootstrap repair are integrated at `49350db`. Direct native
+readiness proved the sole ACP owner, cached authentication, session loading and
+model selection/readback. The first installed creation check exposed missing
+activation; the repair preserves creation and stable load IDs. Replacement
+installed qualification is running with one additional fixture allowed, three
+cumulative. No provider prompt has run. The provider packet and final broad
+review/remediation remain unopened. Plan0200 and its ledger own parent sequencing.
+
+## Scope and acceptance
 
 Deliver Grok through the existing local.* operation registry and CLI verbs.
 Add the agreed local.create convenience verb for Grok only: validate one existing
@@ -63,3 +77,12 @@ both IDs before activation I/O. Expose created_not_ready without relabeling nati
 creation, cache successful readiness, and reconcile uncertain activation with
 read-only native list only. Primary separately opens replacement fixture ceiling3
 once repaired source and exact installation are qualified. Provider packet closed.
+
+## Definition of done and non-goals
+
+Close #476 after the shared WSL/actual PowerShell/API/local MCP workflow is
+qualified against the exact installed Grok owner, with genuine provider output,
+native command interaction, duplicate-safe retries, honest unsupported
+capabilities and final owned-process cleanup. This excludes arbitrary TUI
+ownership, Windows-native workers, public OAuth, new provider logins and working
+installation changes. Parent Plan0200 owns the single final review/remediation.
