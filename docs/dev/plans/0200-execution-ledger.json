@@ -282,7 +282,15 @@
       "worker": "/root/self_limits_468",
       "worktree": "/home/ecochran76/workspace.local/codex-wake-grok-local-control",
       "branch": "feat/476-grok-local-control",
-      "owner": "ecochran76"
+      "owner": "ecochran76",
+      "result_sha": "31db14666032509b2560b734a05f65c1fe73686b",
+      "integrated_product_source": "86d4780341be765ec42d3873439e99cac9a1f6d0",
+      "installed_state": "bootstrap failed; source repair in progress",
+      "validation": [
+        "24 affected tests/version plus focused followups passed",
+        "40 installed retained Codex regression rows passed through all four entrypoints; zero provider calls",
+        "Actual native Grok initialization/cached authentication/model set-load readback passed; no prompt yet"
+      ]
     }
   ],
   "integration_tip": "f4f77a2546e22525040db8b08debea12c3aaca8c",
@@ -315,6 +323,12 @@
         "local-prompt-ebbd7bc11c08d2225fc3d39bf2e75391",
         "local-prompt-6a2679cee1a7b810a4d7553d490382b1"
       ]
+    },
+    "grok": {
+      "external_provider_intents": 0,
+      "provider_packet": "closed; maximum2 only after explicit source/installed readiness",
+      "native_fixture_creations": 2,
+      "replacement_fixture_packet": "pending repaired source; cumulative ceiling3; no model work"
     }
   },
   "shared_contract_decisions": {

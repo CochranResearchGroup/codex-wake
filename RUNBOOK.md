@@ -8402,3 +8402,20 @@ working deployment occurred. Commands, exact prefixes, hashes, source deltas and
 private census receipts are linked from
 `docs/dev/evidence/plan0200/qualification.json`. Final broad review and remediation
 remain unused. Memory disposition: forbidden by Plan0200; zero memory writes.
+
+## Turn 405 | 2026-11-03
+
+Grok #476 source integrated at86d4780 with explicit headless ACP mode, shared
+CLI/API/MCP routing, native model interaction and detached correlated output.
+Source checks passed; the installed no-provider bootstrap exposed session/new
+not publishing loaded inventory until session/load. The successful created ID
+is retained; worker repair separates creation from stable-key activation and
+reports created_not_ready instead of creating again. No Grok prompt has run;
+two native fixture sessions have been created across readiness/installed checks.
+
+Shared routing retained Codex regression passed40 installed rows on exact86
+wheel: WSL, actual PowerShell, API and actual MCP SDK, both original completed
+operations/four modes, zero new model calls and unchanged nine-turn native
+history/goal/queue/settings. Owned controller/clients exited and working daemon
+generations stayed unchanged. Exact commands/hashes/census are linked from
+plan0200 qualification. Broad review/remediation remain unused.

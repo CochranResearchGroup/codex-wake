@@ -390,6 +390,16 @@
       "receipt_sha256": "ce9a5ffe165bb8c76a699d7e0768779d237c9c15ca40de94a6086438b28d0448",
       "source_checks": "81passed311;312focusedrouting/CLI/contract/MCP/retry/resiliencepassed",
       "installed": "pending new Grok adapter integration; no native/Grok acceptance inferred"
+    },
+    "source_integrated": "86d4780341be765ec42d3873439e99cac9a1f6d0",
+    "installed_bootstrap": {
+      "status": "failed",
+      "reason": "Native session/new returned a session but same-owner list remained empty until load",
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/installed-db986d5a/receipt.json",
+      "receipt_sha256": "ed2c6077410112cf8284d1549c950930fb90ff09017774a027ea7dcc15ae3b12",
+      "new_provider_prompts": 0,
+      "repair": "Preserve successful creation, activate through retained stable-key load, report created_not_ready if activation fails; never create again on retry",
+      "cumulative_native_fixture_creations": 2
     }
   },
   "review": {
@@ -449,5 +459,23 @@
   "memory_disposition": {
     "status": "forbidden",
     "reason": "Plan0200 and task explicitly prohibit memory writes; no writes attempted."
+  },
+  "shared_routing_codex_regression": {
+    "status": "passed",
+    "source": "86d4780341be765ec42d3873439e99cac9a1f6d0",
+    "wheel_sha256": "b8e75e7684fe202d2b49d0faa320e749d1f32874661bfe0fe72a60d50a116499",
+    "source_wheel_installed_python_matches": 256,
+    "rows": 40,
+    "entrypoints": [
+      "WSL",
+      "actual Windows PowerShell",
+      "API",
+      "actual MCP SDK"
+    ],
+    "checks": "Two retained original completed operations; four output modes each; identical operation IDs/native history/goal/queue/settings; owned controller and clients cleaned; working daemon generations unchanged",
+    "new_provider_turns": 0,
+    "known_codex_provider_turns": 9,
+    "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/new-codex-regression/receipt.json",
+    "receipt_sha256": "0bb521cc69c44a1e2f0e9f5778ed1f967ea036ad7982c3a2bdf48d49346916c8"
   }
 }
