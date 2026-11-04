@@ -578,9 +578,12 @@
     }
   },
   "review": {
-    "broad_reviews": 0,
+    "broad_reviews": 1,
     "remediation_passes": 0,
-    "status": "pending; broad review and remediation pass remain unused"
+    "status": "running one frozen Standards/Spec review",
+    "wake_base": "171befbaf1be833f55eb0627c802e279cf0fbf35",
+    "bots_base": "9ec0e7a5d8542d936f64b5409322c62393ebb694",
+    "bots_tip": "763056b168db54a7a68b8d34b7595896e71cf384"
   },
   "deployment": "working installation unchanged",
   "environment_differences": [
