@@ -51,3 +51,15 @@ source/wheel/install identity, failed attempts and cleanup census. Installed
 native acceptance must distinguish genuine Grok responses from protocol fixtures.
 
 Memory disposition: forbidden; this task prohibits memory writes.
+
+
+## Installed bootstrap repair
+
+Exact installed86d4780 wheel exposed native create completed followed by empty
+same-owner discovery. Preserve private failed receipt installed-db986d5a; it
+consumed one additional native fixture, cumulative2, zero provider intents.
+Repair creates then activates through stable existing grok.load custody; persist
+both IDs before activation I/O. Expose created_not_ready without relabeling native
+creation, cache successful readiness, and reconcile uncertain activation with
+read-only native list only. Primary separately opens replacement fixture ceiling3
+once repaired source and exact installation are qualified. Provider packet closed.

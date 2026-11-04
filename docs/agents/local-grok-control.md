@@ -22,6 +22,18 @@ creates a session through the existing retained Grok owner, without manually
 writing target JSON or grants. Repeating the same key returns the original
 creation. A different profile cannot replace its target.
 
+Creation retains two separate receipts: native `grok.create`, then a stable
+`grok.load` activation derived from the original creation ID. Both IDs are bound
+before activation I/O. The public response includes `readiness` with `ready`,
+`state`, `creation_operation_id`, `load_operation_id`, and `reason`. Successful
+native creation stays completed even if activation fails: the workflow returns
+`created_not_ready` and preserves the original operation. Retrieve those IDs or
+retry the same creation key; never manufacture a replacement key. An uncertain
+load is reconciled only by native loaded-session listing, without replaying load.
+Only `readiness.ready=true` means the created session is usable.
+`control result CREATION_ID` exposes cached readiness without activation effects.
+Successful readiness is retained and needs no new profile lookup on retry.
+
 Use `control list --harness grok --profile disposable` to discover sessions loaded
 in that exact owner. Select `grok:SESSION_ID`; the selector pins provider, native
 agent instance, process generation, executable build, account home and profile.
