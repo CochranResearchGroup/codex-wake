@@ -221,8 +221,6 @@ from .local_control_service import definitions as local_definitions
 for _operation, (_tool, _description, _schema, _handler, _readonly) in local_definitions().items():
     if not _operation.startswith('local.self_limits.'):
         SPECS[_tool]=('local',_operation.removeprefix('local.'),_description,_schema['properties'],_schema['required'],_readonly)
-from .local_slash_commands import tool_specs as local_slash_specs
-# Local slash schemas and routing come from the shared local registry.
 
 from .command_contract import apply_native_contract
 apply_native_contract(SPECS)

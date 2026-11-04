@@ -105,3 +105,13 @@ start enforcement and report actual engagement. They can tighten an allowance,
 but cannot raise inherited caps or disable external enforcement. Ordinary
 self-service does not require hand-written policy; an existing explicit host
 policy remains authoritative when selected.
+
+## Grok ACP sessions
+
+Codex remains the default harness. Use `--harness grok` and, when needed,
+`--profile NAME` for an owned headless Grok ACP session. Public `grok stdio-host`
+creates the private profile, and `control create --harness grok` creates a session
+without hand-written target or grant JSON. See [Grok workflow](local-grok-control.md)
+for the exact bootstrap, loaded-session discovery, command interactions and native
+capability limits. Retained operation handles select their original owner; result
+retrieval does not change harness or require a fresh profile.

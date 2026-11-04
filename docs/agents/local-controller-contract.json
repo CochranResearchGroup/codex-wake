@@ -7,7 +7,7 @@
         "create"
       ],
       "mcp_tool": "wake_local_create",
-      "description": "Same-user durable session operation; output observes the original turn without replay.",
+      "description": "Create an owned headless Grok ACP session with harness=grok; Codex creation is unsupported.",
       "input_schema": {
         "type": "object",
         "properties": {

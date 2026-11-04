@@ -26,7 +26,7 @@ def operation_schemas():
 
 def tool_specs():
     return {'wake_'+name.replace('.','_'):('local',name.split('.')[1],
-        'Same-user durable session operation; output observes the original turn without replay.',
+        ('Create an owned headless Grok ACP session with harness=grok; Codex creation is unsupported.' if name=='local.create' else 'Same-user durable session operation; output observes the original turn without replay.'),
         schema['properties'],schema['required'],name not in ('local.prompt','local.create','local.cancel'))
         for name,schema in operation_schemas().items()}
 
@@ -61,7 +61,7 @@ def register_parser(subparsers):
     parser=subparsers.add_parser('control',help='control existing same-user sessions without manual profiles')
     verbs=parser.add_subparsers(dest='control_verb',required=True)
     for verb in ('list','resolve','create','prompt','result','output','cancel'):
-        item=verbs.add_parser(verb)
+        item=verbs.add_parser(verb,**({'help':'create an owned headless Grok ACP session (select --harness grok)'} if verb=='create' else {}))
         if verb in ('list','resolve','prompt','create'):parser_options(item)
         item.add_argument('--endpoint',default='unix://',help='existing native Unix endpoint; default discovers running local daemons')
         if verb in ('resolve','prompt'):
