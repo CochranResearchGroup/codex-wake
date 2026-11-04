@@ -1,6 +1,6 @@
 # WSL session control for codex-bots
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Ticket: GitHub #466 and children #467–#476
 Branch: feat/wsl-session-control-0200
@@ -9,41 +9,33 @@ WIP limit: 3 implementation lanes
 
 ## Current State
 
-Milestones A and B passed; all children #467–#476 are validated and closed.
-Grok final native acceptance uses `a3b8c65`: exact256 Python payloads,16 output-mode
-rows, all four live client paths, duplicate-safe retry/result/cursor, and lossless
-81,196-byte native metadata reassembly. Headless ACP is explicit; exact TUI
-health, turn cancellation custody and metering remain unsupported. Three Grok
-marker prompts plus nine Codex turns and three fixture creations are cumulative.
-Both historical Grok partial traces are unchanged; final owned-process census
-is empty and working daemons/installations remain unchanged.
+All children #467–#476 are validated and closed. Codex Milestone A and Grok
+Milestone B passed their installed workflows. Grok is explicitly owned headless
+ACP; arbitrary TUI ownership and unsupported exact health/cancellation/metering
+are not claimed. Earlier failed/partial receipts remain immutable.
 
-Parent plans stay OPEN only for the primary frozen final review/checks. Broad
-review/remediation counters remain0/0. Installed #468 repair at `f4f77a2` retains
-its 48 UID1017 rows; retained Codex 40 rows stay on `86d4780`, and original A transport
-receipts stay on `ad41df8`. Final Grok proof does not relabel those sources.
+One broad Standards/Spec review and one bounded TDD pass are complete. The one
+accepted P2 judgement finding is resolved by a shared output polling/diagnostic
+generator. Spec found no concrete gaps. Final product source `7d0a930` passed
+2,052 unit tests and one existing opt-in skip per Python version, 16 installed
+CI commands per runtime and 144 cached presentation cells. The final wheel has
+256 matching source/wheel/installed Python members on both versions.
 
-Transport, live-provider and original native health/slash/resilience receipts
-retain source `ad41df8`. The repaired wheel has 253 matching source/wheel/installed
-Python members: 248 are byte-identical to that earlier wheel; four limits-related
-modules changed and `goal_time.py` was added. Exact new-wheel limits and consumer
-proof qualify `f4f77a2`; approved unchanged-byte acceptance transfer is explicit.
-Codex provider packets remain closed at nine known cumulative signed-in turns.
-Subsequent limits work used only the isolated UID1017 offline fixture.
+Native Grok acceptance is attributed to `a3b8c65`; the final source changes only
+two shared presentation modules, with focused and installed cached verification.
+Older Codex transport, limits and consumer evidence retains its original source
+and approved byte-identical transfer. Known native test accounting is nine Codex
+and three Grok prompts; all packets are closed. All owned processes are cleaned,
+working daemons/binaries preserved and the installed Wake prefix unchanged.
 
-The narrow codex-bots adapter passed read-only actual-native consumer acceptance
-at product `39d62b0`, with unchanged nine-turn history, goal, queue and settings.
-Bots issue73 and draft PR74 (review head `763056b`) remain open for review and
-integration. No consumer deployment, Wake working installation or native package
-upgrade is claimed. Health stays unknown without a fresh exact foreground
-TUI-loop acknowledgement; preliminary discovery deadlines remain in evidence.
+One original PowerShell bootstrap failure remains unattributed. Instrumented
+missing-only continuation passed; no source fix or universal reliability claim
+is made for that event. See the qualification and review artifacts for commands,
+source deltas, retained failures, prefixes, hashes and fresh census.
 
-The final review base is `171befb`; the planned single broad review and single
-remediation pass remain unused. Acceptance, tracker closure, review, integration
-and deployment retain separate states. See
-[qualification](../evidence/plan0200/qualification.json) and the
-[execution ledger](0200-execution-ledger.json) for source-attributed commands,
-installed identities, runtime receipts and final process census.
+Source integration is tracked by Wake PR477 and companion Bots PR74. This plan
+closes implementation/qualification/review; no working deployment is included.
+Memory disposition is forbidden, with a recorded zero-write receipt.
 
 ## Scope and acceptance
 

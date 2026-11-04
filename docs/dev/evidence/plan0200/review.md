@@ -36,7 +36,10 @@ moving bounded polling/page draining/diagnostics into one shared generator.
 Direct and framed writers now consume that same generator. Focused critical
 regressions passed33 tests on Python3.11 (66.769s) and3.12 (67.706s), including
 actual Windows PowerShell fixture behavior. Ruff/generator/diff checks passed.
-S1 is **resolved**. Final applicable local CI is pending; no second broad review
+S1 is **resolved**. Final local CI passed:2052 unit tests plus one existing opt-in skip per Python
+version,16 installed smoke commands per runtime and144 cached presentation cells.
+One original intermittent PowerShell bootstrap failure remains unattributed;
+successful continuation is not a source-fix claim. No second broad review
 or additional provider intent is authorized by this remediation.
 
 Exact red/green/critical-regression commands and log hashes are retained in

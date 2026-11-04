@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/466",
-  "status": "milestones_a_b_passed_review_pending",
+  "status": "validated",
   "product_source": "a3b8c656f6b85b7c0c44e27969a89e3577f2093a",
   "branch": "feat/wsl-session-control-0200",
   "hosted_ci": "skipped under repository cost policy",
@@ -580,7 +580,7 @@
   "review": {
     "broad_reviews": 1,
     "remediation_passes": 1,
-    "status": "single broad review and bounded TDD remediation complete; final local CI pending",
+    "status": "complete; S1 resolved, no remaining accepted blockers, final applicable checks passed",
     "wake_base": "171befbaf1be833f55eb0627c802e279cf0fbf35",
     "bots_base": "9ec0e7a5d8542d936f64b5409322c62393ebb694",
     "bots_tip": "763056b168db54a7a68b8d34b7595896e71cf384",
@@ -655,8 +655,10 @@
     }
   },
   "memory_disposition": {
-    "status": "forbidden",
-    "reason": "Plan0200 and task explicitly prohibit memory writes; no writes attempted."
+    "disposition": "forbidden",
+    "reason": "Plan0200 prohibits memory writes; no explicit request to remember",
+    "receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/final-ci/7d0a930/memory-disposition.json",
+    "graphiti_writes_attempted": 0
   },
   "shared_routing_codex_regression": {
     "status": "passed",
@@ -675,5 +677,104 @@
     "known_codex_provider_turns": 9,
     "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/new-codex-regression/receipt.json",
     "receipt_sha256": "0bb521cc69c44a1e2f0e9f5778ed1f967ea036ad7982c3a2bdf48d49346916c8"
+  },
+  "final_product_source": "7d0a9304d4f3d8503a3ca06282fa0990f71c4d09",
+  "final_full_unit_matrix": [
+    {
+      "source_commit": "7d0a9304d4f3d8503a3ca06282fa0990f71c4d09",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/testing/command-contract/venv311/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_*.py"
+      ],
+      "cwd": "/home/ecochran76/workspace.local/codex-wake-validate-0200-7d0a930",
+      "environment": {
+        "PYTHONPATH": "/home/ecochran76/workspace.local/codex-wake-validate-0200-7d0a930/src",
+        "XDG_CONFIG_HOME": "/tmp/p200-ci311-s1dzjt8r/config",
+        "XDG_STATE_HOME": "/tmp/p200-ci311-s1dzjt8r/state",
+        "TMUX_TMPDIR": "/tmp/p200-ci311-s1dzjt8r/tmux",
+        "CODEX_WAKE_STABLE_TIME_CONFIG": ""
+      },
+      "unset": [
+        "TMUX"
+      ],
+      "python": "311",
+      "tests": 2053,
+      "passed": 2052,
+      "skipped": 1,
+      "seconds": 706.676,
+      "log": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/final-ci/7d0a930/full311.log",
+      "log_sha256": "35b92814a77f269c7cabcfbe51de67a5e95ee9c1ab99af59c47f3e269f0b112e"
+    },
+    {
+      "source_commit": "7d0a9304d4f3d8503a3ca06282fa0990f71c4d09",
+      "command": [
+        "/home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_*.py"
+      ],
+      "cwd": "/home/ecochran76/workspace.local/codex-wake-validate-0200-7d0a930",
+      "environment": {
+        "PYTHONPATH": "/home/ecochran76/workspace.local/codex-wake-validate-0200-7d0a930/src",
+        "XDG_CONFIG_HOME": "/tmp/p200-ci312-_wa6q3p1/config",
+        "XDG_STATE_HOME": "/tmp/p200-ci312-_wa6q3p1/state",
+        "TMUX_TMPDIR": "/tmp/p200-ci312-_wa6q3p1/tmux",
+        "CODEX_WAKE_STABLE_TIME_CONFIG": ""
+      },
+      "unset": [
+        "TMUX"
+      ],
+      "python": "312",
+      "tests": 2053,
+      "passed": 2052,
+      "skipped": 1,
+      "seconds": 685.464,
+      "log": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/final-ci/7d0a930/full312.log",
+      "log_sha256": "972140354475e7a4846b589a693a69a6bf034f3c71a4a815cbcf955cd7afa83b"
+    }
+  ],
+  "final_installed": {
+    "status": "passed with retained intermittent bootstrap limitation",
+    "source": "7d0a9304d4f3d8503a3ca06282fa0990f71c4d09",
+    "wheel_sha256": "c5eeb662db3294cde302c03a04f5bffdd30fd17f72b64a524641c06c21dc6872",
+    "prefix311": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/final-7d0a930/prefix311",
+    "prefix312": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/final-7d0a930/prefix312",
+    "matching_python_members_each": 256,
+    "installed_ci_commands_per_runtime": 16,
+    "cached_presentation_cells": 144,
+    "native_qualified_a3_delta": "254 unchanged Python members; only local_control_commands.py and local_control_client.py changed for S1",
+    "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/final-7d0a930/receipt.json",
+    "receipt_sha256": "277c8911119ce8c4158cf65156e334fc62c6f325c059e97a0ce1f43dffd23789",
+    "provider_calls": 0
+  },
+  "known_limitations": [
+    "One original cached PowerShell bootstrap failed before transmission; underlying error was not retained by the generated client. Direct diagnostic and instrumented missing-only continuation passed. Cause remains unattributed and is not claimed fixed.",
+    "Grok supported mode is owned headless ACP; arbitrary TUI ownership, exact TUI health/cancellation/metering remain unsupported.",
+    "Existing opt-in disposable systemd test skipped once per Python version, matching default CI."
+  ],
+  "final_census": {
+    "path": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/final-ci/7d0a930/final-census.json",
+    "sha256": "d47999d6f88a62182bf53c8b6a983297a296e0630e553113ab34945149ed0f73",
+    "owned_fixture_root_processes": 0,
+    "working_daemons": "1209642/birth578311 and1273205/birth620497 preserved; image48ed489... unchanged",
+    "stock_codex_sha256": "b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8",
+    "stock_grok_sha256": "22d281c5964c5444147328096ba2a221f3f0874c6858e27c825656a80f6e58e9",
+    "working_wake_prefix": "0.22.0.dev2-5079f2a"
+  },
+  "node_plugin_ci": {
+    "command": "npm --prefix plugins/openclaw-codex-wake test; node --check index.js; node --check lib/scheduler.js",
+    "passed": 12,
+    "scope": "Isolated Wake plugin CI only; no OpenClaw runtime/project work",
+    "receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/final-ci/7d0a930/node-plugin-result.json"
   }
 }

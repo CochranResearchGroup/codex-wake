@@ -1097,12 +1097,12 @@ lanes:
     plan: docs/dev/plans/0200-2026-11-03-wsl-session-control.md
     branch: feat/wsl-session-control-0200
     target: origin/main
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: ACTIVE_WORKTREE
     dependencies: []
     overlaps: [P179]
     updated_at: 2026-11-03
-    disposition: Three bounded implementation lanes; primary integrates serially
+    disposition: Validated source with one review and one TDD pass; PR477 source integration; no working deployment
 
   - id: P200G
     owner: ecochran76 / self_limits_468
@@ -1111,9 +1111,9 @@ lanes:
     plan: docs/dev/plans/0201-2026-11-03-grok-local-session-control.md
     branch: feat/476-grok-local-control
     target: feat/wsl-session-control-0200
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: ACTIVE_WORKTREE
     dependencies: [P200]
     overlaps: [P200]
     updated_at: 2026-11-03
-    disposition: Isolated adapter and tests; primary owns shared routing and serial integration
+    disposition: Grok accepted and integrated into P200; native packets closed; owned processes cleaned

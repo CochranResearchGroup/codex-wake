@@ -1,6 +1,6 @@
 # #476 Grok local session control
 
-State: OPEN
+State: CLOSED
 Owner: ecochran76
 Worker: self_limits_468
 Parent: Plan0200 and GitHub #466; work item: #476; dependency #475 closed.
@@ -9,20 +9,23 @@ Branch: feat/476-grok-local-control.
 
 ## Current State
 
-Source/native acceptance is complete at `a3b8c65`; #476 is validated and closed
-([tracker confirmation](https://github.com/CochranResearchGroup/codex-wake/issues/476#issuecomment-6621882498)).
-The exact installed 256-payload wheel passed16 mode rows, all four native live text paths,
-full metadata/hash reassembly, cursor and all four same-key retry/result checks.
-Actual native Grok1.0.70 uses the supported sole-owned headless ACP mode; arbitrary
-TUI control, exact TUI health/cancellation custody/metering remain unsupported.
+Grok #476 is validated and closed. The exact installed native workflow passed
+public create/activation, explicit grant-free persisted-session load, discovery,
+native command interaction, all four live-text paths, all 16 response-mode rows,
+ordered metadata reconstruction, cursor paging and same-key retries/results.
+Native acceptance source is `a3b8c65`; final shared-presentation source is
+`7d0a930`, with 254 unchanged Python members and two verified presentation changes.
 
-The original2prompt packet remains closed with both partial traces immutable.
-One authorized repair/retest successor completed, giving cumulative 3 Grok prompts,
-9 Codex turns and3 fixture creations. No user ceiling was reset, new login performed,
-or working daemon changed. All owned processes are absent. See the source-bound
-[qualification](../evidence/plan0200/qualification.json) for exact prefix/wheel,
-commands, receipt/hash and census. This plan remains OPEN only for primary final
-review/checks; broad review/remediation counters remain0/0.
+Nine Codex and three Grok test prompts are accounted for; no packet is open.
+Three Grok fixture sessions were created, with no further creation. Both earlier
+partial traces remain unchanged. The final trace reconstructs 81,196 bytes of
+native command metadata within unchanged retention caps. Owned processes are
+cleaned and working account daemons/binaries are preserved.
+
+Parent Plan0200 owns the completed single review/TDD pass and final passing local
+checks. One original cached PowerShell bootstrap failure remains unattributed;
+its later successful continuation is not a fix claim. Source integration is
+tracked by PR477; deployment and arbitrary Grok TUI control are outside this plan.
 
 ## Scope and acceptance
 
