@@ -5,6 +5,7 @@ import time
 
 from .local_session_events import MODES
 from .managed_inventory import InventoryError
+from .local_control_routing import HARNESS_PROPERTIES,parser_options
 
 _COMMON={'endpoint':{'type':'string'},'mode':{'type':'string','enum':list(MODES)},
     'timeout':{'type':'number','minimum':0,'maximum':30},'cursor':{'type':'integer','minimum':0},
@@ -15,7 +16,8 @@ def operation_schemas():
     def schema(properties,required):
         return dict(type='object',properties=properties,required=required,additionalProperties=False)
     return {
-        'local.prompt':schema(dict(_COMMON,selector={'type':'string'},prompt={'type':'string'},
+        'local.create':schema(dict(HARNESS_PROPERTIES,idempotency_key={'type':'string'}),[]),
+        'local.prompt':schema(dict(_COMMON,**HARNESS_PROPERTIES,selector={'type':'string'},prompt={'type':'string'},
             idempotency_key={'type':'string'},expected_target={'type':'object'}),['selector','prompt']),
         'local.output':schema(dict(_COMMON,operation_id={'type':'string'}),['operation_id']),
         'local.result':schema(dict(_COMMON,operation_id={'type':'string'}),['operation_id']),
@@ -25,26 +27,27 @@ def operation_schemas():
 def tool_specs():
     return {'wake_'+name.replace('.','_'):('local',name.split('.')[1],
         'Same-user durable session operation; output observes the original turn without replay.',
-        schema['properties'],schema['required'],name not in ('local.prompt','local.cancel'))
+        schema['properties'],schema['required'],name not in ('local.prompt','local.create','local.cancel'))
         for name,schema in operation_schemas().items()}
 
 
 def execute(operation,arguments,root):
-    from .local_session_operations import LocalSessionControl
+    from .local_control_routing import LocalSessionRouter
     if operation not in operation_schemas():raise InventoryError('unsupported_operation','unsupported local session operation')
     schema=operation_schemas()[operation]
     if not isinstance(arguments,dict) or set(arguments)-set(schema['properties']) or any(key not in arguments for key in schema['required']):
         raise InventoryError('invalid_argument','unsupported or missing local operation arguments')
-    owner=LocalSessionControl(root)
+    owner=LocalSessionRouter(root)
     mode=arguments.get('mode')
     if mode is not None and mode not in MODES:raise InventoryError('invalid_argument','unknown output mode')
     # Validate all presentation inputs before admitting any effect.
     timeout=arguments.get('timeout',0);cursor=arguments.get('cursor',0);limit=arguments.get('limit',100)
     if type(timeout) not in (int,float) or not 0<=timeout<=30 or type(cursor) is not int or cursor<0 or type(limit) is not int or not 1<=limit<=100:
         raise InventoryError('invalid_argument','bounded output timeout, cursor and limit required')
+    if operation=='local.create':return owner.create(harness=arguments.get('harness','codex'),profile=arguments.get('profile'),key=arguments.get('idempotency_key'))
     if operation=='local.prompt':
         value=owner.prompt(arguments['selector'],arguments['prompt'],arguments.get('idempotency_key'),
-            endpoint=arguments.get('endpoint','unix://'),expected_target=arguments.get('expected_target'))
+            endpoint=arguments.get('endpoint','unix://'),expected_target=arguments.get('expected_target'),harness=arguments.get('harness','codex'),profile=arguments.get('profile'))
         identifier=value['result']['operation']['operation_id']
     elif operation=='local.cancel':return owner.cancel(arguments['operation_id'])
     elif operation=='local.result' and mode is None:return owner.result(arguments['operation_id'],timeout)
@@ -57,17 +60,26 @@ def execute(operation,arguments,root):
 def register_parser(subparsers):
     parser=subparsers.add_parser('control',help='control existing same-user sessions without manual profiles')
     verbs=parser.add_subparsers(dest='control_verb',required=True)
-    for verb in ('list','resolve','prompt','result','output','cancel'):
+    for verb in ('list','resolve','create','prompt','result','output','cancel'):
         item=verbs.add_parser(verb)
+        if verb in ('list','resolve','prompt','create'):parser_options(item)
         item.add_argument('--endpoint',default='unix://',help='existing native Unix endpoint; default discovers running local daemons')
         if verb in ('resolve','prompt'):
             item.add_argument('selector');item.add_argument('--expected-target',type=json.loads)
-        if verb=='prompt':item.add_argument('prompt');item.add_argument('--idempotency-key')
+        if verb=='prompt':item.add_argument('prompt')
+        if verb in ('prompt','create'):item.add_argument('--idempotency-key')
         if verb in ('result','output','cancel'):item.add_argument('operation_id')
         if verb in ('prompt','result','output'):
             item.add_argument('--mode',choices=MODES,default='transcript' if verb=='output' else None)
             item.add_argument('--timeout',type=float,default=30 if verb=='prompt' else 0)
             item.add_argument('--cursor',type=int,default=0);item.add_argument('--limit',type=int,default=100)
+
+
+def operation_exit_code(value):
+    record=value.get('result',{}).get('operation',{})
+    if record.get('phase')=='uncertain':return 3
+    if value.get('status')=='failed' or record.get('execution') in ('failed','cancelled','not_started'):return 2
+    return 0
 
 
 def _exit(output):
@@ -98,11 +110,12 @@ def present(owner,identifier,*,mode,timeout,cursor=0,limit=100):
 
 
 def command(args,root):
-    from .local_sessions import discover,resolve
-    from .local_session_operations import LocalSessionControl
+    from .local_control_service import LocalOperations
+    from .local_control_routing import LocalSessionRouter
     try:
-        if args.control_verb=='list':value=discover(root,args.endpoint)
-        elif args.control_verb=='resolve':value=resolve(root,args.selector,args.expected_target,endpoint=args.endpoint)
+        if args.control_verb in ('list','resolve'):
+            owner=LocalOperations(root);operation='local.'+args.control_verb
+            value=owner.execute(operation,{key:value for key,value in vars(args).items() if key in owner.definitions[operation][2]['properties'] and value is not None})
         else:
             arguments={key:value for key,value in vars(args).items() if key in operation_schemas()['local.'+args.control_verb]['properties'] and value is not None}
             mode=arguments.pop('mode',None)
@@ -112,11 +125,10 @@ def command(args,root):
                     submitted=execute('local.prompt',dict(arguments,timeout=0),root)
                     identifier=submitted['result']['operation']['operation_id']
                 else:identifier=args.operation_id
-                return present(LocalSessionControl(root),identifier,mode=mode,timeout=args.timeout,cursor=args.cursor,limit=args.limit)
+                return present(LocalSessionRouter(root),identifier,mode=mode,timeout=args.timeout,cursor=args.cursor,limit=args.limit)
             value=execute('local.'+args.control_verb,arguments,root)
         print(json.dumps(value,sort_keys=True))
-        record=value.get('result',{}).get('operation',{}) if isinstance(value,dict) else {}
-        return 2 if record.get('execution') in ('failed','cancelled') else 3 if record.get('phase')=='uncertain' else 0
+        return operation_exit_code(value)
     except (ValueError,OSError) as error:
         print(json.dumps({'status':'failed','error':{'code':getattr(error,'code','control_unavailable'),'message':str(error)}}),file=sys.stderr if getattr(args,'mode',None) else sys.stdout);return 2
 

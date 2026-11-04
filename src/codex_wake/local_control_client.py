@@ -6,8 +6,8 @@ import time
 from uuid import uuid4
 from urllib.request import Request,build_opener,ProxyHandler
 
-from .local_control_commands import output_exit_code,receipt_output,operation_schemas
-from .local_session_operations import LocalSessionControl
+from .local_control_commands import output_exit_code,operation_exit_code,receipt_output,operation_schemas
+from .local_control_routing import LocalSessionRouter
 
 
 def _parsed(arguments):
@@ -57,10 +57,10 @@ def cli_frames(owner,arguments):
             if args.slash_verb=='list':yield {'stdout':json.dumps(value,sort_keys=True)+'\n'};yield {'exit_code':0}
             else:yield from _receipt_frames(value,args.mode,getattr(args,'cursor',0))
             return
-        if verb in ('list','resolve','health'):
+        if verb in ('list','resolve','health','create'):
             schema=owner.definitions['local.'+verb][2]
             values={k:v for k,v in vars(args).items() if k in schema['properties'] and v is not None}
-            value=owner.execute('local.'+verb,values);yield {'stdout':json.dumps(value,sort_keys=True)+'\n'};yield {'exit_code':0 if value.get('status')!='failed' else 2};return
+            value=owner.execute('local.'+verb,values);yield {'stdout':json.dumps(value,sort_keys=True)+'\n'};yield {'exit_code':operation_exit_code(value)};return
         if verb not in ('prompt','output','result','cancel'):raise ValueError('this command is managed locally, not through a client connection')
         schema=operation_schemas()['local.'+verb]
         values={k:v for k,v in vars(args).items() if k in schema['properties'] and v is not None}
@@ -70,8 +70,7 @@ def cli_frames(owner,arguments):
         if not mode:
             value=owner.execute('local.'+verb,dict(values,**({'timeout':min(30,timeout)} if 'timeout' in schema['properties'] else {})))
             yield {'stdout':json.dumps(value,sort_keys=True)+'\n'}
-            record=value.get('result',{}).get('operation',{})
-            yield {'exit_code':3 if record.get('phase')=='uncertain' else 2 if record.get('execution') in ('failed','cancelled') else 0};return
+            yield {'exit_code':operation_exit_code(value)};return
         if verb=='prompt':
             submitted=owner.execute('local.prompt',dict(values,timeout=0));identifier=submitted['result']['operation']['operation_id']
         else:identifier=values['operation_id']
@@ -87,7 +86,7 @@ def remote(root,arguments):
     arguments=list(arguments)
     command=arguments if arguments[:1]==['control'] else ['control',*arguments]
     retry_key=None
-    if command[:2]==['control','prompt']:
+    if len(command)>1 and command[0]=='control' and command[1] in ('prompt','create'):
         for index,argument in enumerate(arguments):
             if argument.startswith('--idempotency-key='):retry_key=argument.split('=',1)[1]
             elif argument=='--idempotency-key' and index+1<len(arguments):retry_key=arguments[index+1]
@@ -110,7 +109,7 @@ def remote(root,arguments):
 
 def output_frames(owner,identifier,mode,timeout,cursor=0,limit=100):
     yield {'operation_id':identifier}
-    session=LocalSessionControl(owner.root);deadline=time.monotonic()+timeout
+    session=LocalSessionRouter(owner.root);deadline=time.monotonic()+timeout
     while True:
         output=session.output(identifier,mode=mode,cursor=cursor,limit=limit,timeout=max(0,min(30,deadline-time.monotonic())))
         yield {'output':output}
@@ -138,7 +137,8 @@ def operation_frames(owner,operation,arguments):
         elif operation.startswith('local.slash.') and operation!='local.slash.list':
             yield from _receipt_frames(owner.execute(operation,arguments),mode,cursor);return
         else:
-            yield {'result':owner.execute(operation,arguments)};yield {'exit_code':0};return
+            value=owner.execute(operation,arguments)
+            yield {'result':value};yield {'exit_code':operation_exit_code(value)};return
         yield from output_frames(owner,identifier,mode,timeout,cursor,limit)
     except (ValueError,OSError,TypeError,KeyError) as error:
         yield {'error':dict(code=getattr(error,'code','invalid_argument'),message=str(error))}

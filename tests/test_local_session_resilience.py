@@ -14,6 +14,7 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
 from websockets.exceptions import ConnectionClosed
 from websockets.sync.server import unix_serve
@@ -23,7 +24,9 @@ from codex_wake.local_session_events import TurnEvents
 
 @contextlib.contextmanager
 def peer(*,lost_ack=False,echo_id=True,busy=False,hold_ack=False,hold_observation=False):
-    with tempfile.TemporaryDirectory() as directory:
+    with tempfile.TemporaryDirectory() as directory,patch.dict(os.environ):
+        # Wire fixtures own no operator panes; inherit isolation in collectors.
+        os.environ.pop('TMUX',None);os.environ['TMUX_TMPDIR']=directory
         root=Path(directory);home=root/'home';home.mkdir();endpoint='unix://'+str(root/'native.sock')
         accepted=threading.Event();finish=threading.Event();drop=threading.Event()
         state=dict(starts=[],interrupts=[],finish=finish,drop=drop,accepted=accepted,status='inProgress')

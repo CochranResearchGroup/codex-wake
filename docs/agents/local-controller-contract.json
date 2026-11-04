@@ -1,6 +1,36 @@
 {
   "schema_version": 1,
   "operations": {
+    "local.create": {
+      "cli": [
+        "control",
+        "create"
+      ],
+      "mcp_tool": "wake_local_create",
+      "description": "Same-user durable session operation; output observes the original turn without replay.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "harness": {
+            "type": "string",
+            "enum": [
+              "codex",
+              "grok"
+            ]
+          },
+          "profile": {
+            "type": "string",
+            "minLength": 1
+          },
+          "idempotency_key": {
+            "type": "string"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "readonly": false
+    },
     "local.prompt": {
       "cli": [
         "control",
@@ -36,6 +66,17 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 100
+          },
+          "harness": {
+            "type": "string",
+            "enum": [
+              "codex",
+              "grok"
+            ]
+          },
+          "profile": {
+            "type": "string",
+            "minLength": 1
           },
           "selector": {
             "type": "string"
@@ -187,6 +228,17 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4096
+          },
+          "harness": {
+            "type": "string",
+            "enum": [
+              "codex",
+              "grok"
+            ]
+          },
+          "profile": {
+            "type": "string",
+            "minLength": 1
           }
         },
         "required": [],
@@ -216,6 +268,17 @@
           },
           "expected_target": {
             "type": "object"
+          },
+          "harness": {
+            "type": "string",
+            "enum": [
+              "codex",
+              "grok"
+            ]
+          },
+          "profile": {
+            "type": "string",
+            "minLength": 1
           }
         },
         "required": [
@@ -250,6 +313,17 @@
             "type": "number",
             "minimum": 0.05,
             "maximum": 5
+          },
+          "harness": {
+            "type": "string",
+            "enum": [
+              "codex",
+              "grok"
+            ]
+          },
+          "profile": {
+            "type": "string",
+            "minLength": 1
           }
         },
         "required": [
@@ -280,6 +354,17 @@
           },
           "expected_target": {
             "type": "object"
+          },
+          "harness": {
+            "type": "string",
+            "enum": [
+              "codex",
+              "grok"
+            ]
+          },
+          "profile": {
+            "type": "string",
+            "minLength": 1
           }
         },
         "required": [
@@ -310,6 +395,17 @@
           },
           "expected_target": {
             "type": "object"
+          },
+          "harness": {
+            "type": "string",
+            "enum": [
+              "codex",
+              "grok"
+            ]
+          },
+          "profile": {
+            "type": "string",
+            "minLength": 1
           },
           "command": {
             "type": "string",

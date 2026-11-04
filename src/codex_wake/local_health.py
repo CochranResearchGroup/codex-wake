@@ -124,6 +124,8 @@ def execute(operation, arguments, root):
 
 def register_parser(subparsers):
     parser = subparsers.add_parser('health', help='fresh read-only health of one local controlling TUI')
+    from .local_control_routing import parser_options
+    parser_options(parser)
     parser.add_argument('selector')
     parser.add_argument('--expected-target', type=json.loads)
     parser.add_argument('--timeout', type=float, default=1)
@@ -133,8 +135,8 @@ def register_parser(subparsers):
 
 
 def command(args, root=None):
-    value = execute('local.health', dict(selector=args.selector, expected_target=args.expected_target,
-        timeout=args.timeout, endpoint=args.endpoint), root or args.wake_root)
+    from .local_control_service import LocalOperations
+    value = LocalOperations(root or args.wake_root).execute('local.health',dict(selector=args.selector,expected_target=args.expected_target,timeout=args.timeout,endpoint=args.endpoint,harness=args.harness,**({'profile':args.profile} if args.profile else {})))
     print(json.dumps(value, sort_keys=True))
     return 0 if value['status'] == 'completed' else 2
 

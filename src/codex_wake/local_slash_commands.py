@@ -263,6 +263,8 @@ def register(subparsers):
         if verb == 'result':
             item.add_argument('--cursor', type=int, default=0)
         if verb in ('list', 'run'):
+            from .local_control_routing import parser_options
+            parser_options(item)
             item.add_argument('selector')
         elif verb == 'result':
             item.add_argument('operation_id')
@@ -283,7 +285,8 @@ def register(subparsers):
 
 def tool_specs():
     text = dict(type='string', minLength=1)
-    common = dict(selector=text, endpoint=text, expected_target=dict(type='object'))
+    from .local_control_routing import HARNESS_PROPERTIES
+    common = dict(selector=text, endpoint=text, expected_target=dict(type='object'),**HARNESS_PROPERTIES)
     result = {
         'wake_control_slash_list': ('local-slash', 'list',
             'Discover qualified same-user native slash mappings and interaction support.',

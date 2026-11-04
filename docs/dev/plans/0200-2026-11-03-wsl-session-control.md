@@ -90,3 +90,10 @@ shared routing/contracts; worker self_limits_468 owns the isolated Grok adapter
 and focused tests. Native fixture creation and existing cached authentication
 may be qualified without copying credentials; model intents require a separate
 bounded packet. No working daemon/package change is included.
+
+The existing Grok stdio-host publishes its own private profile automatically.
+Add `local.create` / `control create --harness grok` as the narrow convenience
+entrypoint over existing Grok create ownership, because the old raw create
+interface required manual target/request JSON. Creation uses a retained intent
+key across CLI/PowerShell/API/MCP retries. Codex existing-session control stays
+the default; Codex creation is not added by this slice.

@@ -219,10 +219,10 @@ from .local_control_commands import tool_specs as local_control_specs
 SPECS.update(local_control_specs())
 from .local_control_service import definitions as local_definitions
 for _operation, (_tool, _description, _schema, _handler, _readonly) in local_definitions().items():
-    if _operation in ('local.list', 'local.resolve'):
-        SPECS[_tool]=('local',_operation.split('.')[1],_description,_schema['properties'],_schema['required'],_readonly)
+    if not _operation.startswith('local.self_limits.'):
+        SPECS[_tool]=('local',_operation.removeprefix('local.'),_description,_schema['properties'],_schema['required'],_readonly)
 from .local_slash_commands import tool_specs as local_slash_specs
-SPECS.update(local_slash_specs())
+# Local slash schemas and routing come from the shared local registry.
 
 from .command_contract import apply_native_contract
 apply_native_contract(SPECS)
@@ -341,23 +341,13 @@ class CommandRunner:
             from .local_control_lifecycle import root_for
             from types import SimpleNamespace
             local_root = root_for(SimpleNamespace(wake_root=None))
-        if group == 'local-slash':
-            try:
-                from .local_slash_commands import execute
-                return execute(local_root, verb, arguments), False
-            except (ValueError, OSError) as error:
-                return {'error': {'code': getattr(error, 'code', 'slash_unavailable'), 'message': str(error)}}, True
-        if group == 'local' and verb != 'health':
+        if group == 'local':
             try:
                 from .local_control_service import LocalOperations
                 value = LocalOperations(local_root,native_endpoint=self.app_server).execute('local.'+verb,arguments)
                 return value, value.get('status') == 'failed'
             except (ValueError, OSError) as error:
                 return {'error': {'code': getattr(error, 'code', 'local_control_unavailable'), 'message': str(error)}}, True
-        if group == 'local' and verb == 'health':
-            from .local_health import execute
-            value = execute('local.health', arguments, local_root)
-            return value, value['status'] == 'failed'
         if group == 'self-limits':
             try:
                 from .goal_supervision import verified_native_caller

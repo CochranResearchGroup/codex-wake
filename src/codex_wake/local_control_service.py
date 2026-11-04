@@ -7,21 +7,20 @@ from .managed_inventory import InventoryError
 
 def definitions():
     from .local_control_commands import operation_schemas,tool_specs,execute
-    from .local_health import INPUT_SCHEMA,execute as health
-    from .local_slash_commands import tool_specs as slash_specs,execute as slash
-    from .local_sessions import discover,resolve
+    from .local_health import INPUT_SCHEMA
+    from .local_slash_commands import tool_specs as slash_specs
+    from .local_control_routing import HARNESS_PROPERTIES,observation,health as routed_health,slash as routed_slash
     result={}
     for tool,(_,verb,description,properties,required,readonly) in tool_specs().items():
         name='local.'+verb
         result[name]=(tool,description,operation_schemas()[name],partial(execute,name),readonly)
-    def observation(function,arguments,root):return function(root,**arguments)
     text={'type':'string','minLength':1,'maxLength':4096}
     def schema(properties,required=()):return dict(type='object',properties=properties,required=list(required),additionalProperties=False)
-    result['local.list']=('wake_local_list','Discover running owned conversations and presentation bindings.',schema(dict(endpoint=text)),partial(observation,discover),True)
-    result['local.resolve']=('wake_local_resolve','Resolve one owned conversation and pin its generation.',schema(dict(selector=text,endpoint=text,expected_target={'type':'object'}),['selector']),partial(observation,resolve),True)
-    result['local.health']=('wake_local_health','Fresh exact controlling-TUI loop health, never inferred from process liveness.',INPUT_SCHEMA,partial(health,'local.health'),True)
+    result['local.list']=('wake_local_list','Discover running owned conversations and presentation bindings.',schema(dict(endpoint=text,**HARNESS_PROPERTIES)),partial(observation,'list'),True)
+    result['local.resolve']=('wake_local_resolve','Resolve one owned conversation and pin its generation.',schema(dict(selector=text,endpoint=text,expected_target={'type':'object'},**HARNESS_PROPERTIES),['selector']),partial(observation,'resolve'),True)
+    result['local.health']=('wake_local_health','Fresh exact controlling-TUI loop health, never inferred from process liveness.',dict(INPUT_SCHEMA,properties=dict(INPUT_SCHEMA['properties'],**HARNESS_PROPERTIES)),lambda arguments,root:routed_health(arguments,root),True)
     for tool,(_,verb,description,properties,required,readonly) in slash_specs().items():
-        def action(verb,arguments,root):return slash(root,verb,arguments)
+        def action(verb,arguments,root):return routed_slash(verb,arguments,root)
         result['local.slash.'+verb]=(tool,description,schema(properties,required),partial(action,verb),readonly)
     for verb in ('show','set'):
         def limits(verb,arguments,root):
@@ -45,7 +44,7 @@ class LocalOperations:
         tool,description,schema,handler,readonly=self.definitions[operation]
         if not Draft202012Validator(schema).is_valid(arguments):raise InventoryError('invalid_argument','arguments do not match the operation schema')
         arguments=dict(arguments)
-        if 'endpoint' in schema['properties'] and arguments.get('endpoint','unix://')=='unix://':arguments['endpoint']=self.native_endpoint
+        if 'endpoint' in schema['properties'] and arguments.get('harness','codex')=='codex' and arguments.get('endpoint','unix://')=='unix://':arguments['endpoint']=self.native_endpoint
         return arguments
 
     def execute(self,operation,arguments):
