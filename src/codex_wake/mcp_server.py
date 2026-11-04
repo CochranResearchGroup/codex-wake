@@ -211,6 +211,17 @@ from .account_observation import tool_specs as account_observation_specs
 SPECS.update(account_observation_specs())
 
 
+from .self_limits import tool_specs as self_limits_specs
+SPECS.update(self_limits_specs())
+from .local_health import tool_specs as local_health_specs
+SPECS.update(local_health_specs())
+from .local_control_commands import tool_specs as local_control_specs
+SPECS.update(local_control_specs())
+from .local_control_service import definitions as local_definitions
+for _operation, (_tool, _description, _schema, _handler, _readonly) in local_definitions().items():
+    if not _operation.startswith('local.self_limits.'):
+        SPECS[_tool]=('local',_operation.removeprefix('local.'),_description,_schema['properties'],_schema['required'],_readonly)
+
 from .command_contract import apply_native_contract
 apply_native_contract(SPECS)
 
@@ -323,6 +334,32 @@ class CommandRunner:
                   "properties": properties, "required": required}
         if not Draft202012Validator(schema).is_valid(arguments):
             return {"error": {"code": "invalid_argument", "message": "Arguments do not match the tool schema."}}, True
+        local_root = self.wake_root
+        if group in ('local', 'local-slash', 'self-limits') and local_root is None:
+            from .local_control_lifecycle import root_for
+            from types import SimpleNamespace
+            local_root = root_for(SimpleNamespace(wake_root=None))
+        if group == 'local':
+            try:
+                from .local_control_service import LocalOperations
+                value = LocalOperations(local_root,native_endpoint=self.app_server).execute('local.'+verb,arguments)
+                return value, value.get('status') == 'failed'
+            except (ValueError, OSError) as error:
+                return {'error': {'code': getattr(error, 'code', 'local_control_unavailable'), 'message': str(error)}}, True
+        if group == 'self-limits':
+            try:
+                from .goal_supervision import verified_native_caller
+                verified_native_caller(native_context, (native_context or {}).get('threadId'))
+                root = self.goal_limits_root or local_root
+                if root is None:
+                    return {'error': {'code': 'local_root_unavailable'}}, True
+                if self.goal_limits_policy is not None:
+                    from .self_limits import execute
+                    return execute(root, self.goal_limits_policy, verb, arguments, native_context=native_context), False
+                from .local_self_limits import execute
+                return execute(root, verb, arguments, selector='thread:'+native_context['threadId'], endpoint=self.app_server), False
+            except (ValueError, OSError) as error:
+                return {'error': {'code': 'self_limits_unavailable', 'message': str(error)}}, True
         if group == 'frontier':
             try:
                 from .frontier_mcp import call as frontier_call

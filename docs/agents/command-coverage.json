@@ -336,7 +336,8 @@
     "accounts.status": "Human CLI uses native login status; structured transports observe unverified local cache only.",
     "history.search/read/resume": "Native MCP additionally verifies caller_thread_id; API/OAuth use scoped grants.",
     "resume": "ACCOUNT selects local conversation reopening; bare resume retains existing emergency-pause controls outside the shortcut contract.",
-    "local_cli": "Host operator admission differs from scoped remote authorization; no implicit remote privilege."
+    "local_cli": "Host operator admission differs from scoped remote authorization; no implicit remote privilege.",
+    "local_controller": "Automatic same-user private connection; external OAuth connector grants are separate."
   },
   "mcp_tools": {
     "accounts.init": "wake_controller_account_init",
@@ -360,5 +361,680 @@
     "daemons.restart": "wake_daemons_restart",
     "daemons.update": "wake_daemons_update",
     "daemons.stop": "wake_daemons_stop"
+  },
+  "local_controller": {
+    "schema_version": 1,
+    "operations": {
+      "local.create": {
+        "cli": [
+          "control",
+          "create"
+        ],
+        "mcp_tool": "wake_local_create",
+        "description": "Create an owned headless Grok ACP session with harness=grok; Codex creation is unsupported.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "idempotency_key": {
+              "type": "string"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.load": {
+        "cli": [
+          "control",
+          "load"
+        ],
+        "mcp_tool": "wake_local_load",
+        "description": "Load an explicitly selected owned Grok conversation through its fresh ACP profile; Codex load is unsupported.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "selector": {
+              "type": "string"
+            },
+            "idempotency_key": {
+              "type": "string"
+            },
+            "expected_target": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "selector"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.prompt": {
+        "cli": [
+          "control",
+          "prompt"
+        ],
+        "mcp_tool": "wake_local_prompt",
+        "description": "Same-user durable session operation; output observes the original turn without replay.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            },
+            "timeout": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 30
+            },
+            "cursor": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "selector": {
+              "type": "string"
+            },
+            "prompt": {
+              "type": "string"
+            },
+            "idempotency_key": {
+              "type": "string"
+            },
+            "expected_target": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "selector",
+            "prompt"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.output": {
+        "cli": [
+          "control",
+          "output"
+        ],
+        "mcp_tool": "wake_local_output",
+        "description": "Same-user durable session operation; output observes the original turn without replay.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            },
+            "timeout": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 30
+            },
+            "cursor": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "operation_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "local.result": {
+        "cli": [
+          "control",
+          "result"
+        ],
+        "mcp_tool": "wake_local_result",
+        "description": "Same-user durable session operation; output observes the original turn without replay.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            },
+            "timeout": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 30
+            },
+            "cursor": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "operation_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "local.cancel": {
+        "cli": [
+          "control",
+          "cancel"
+        ],
+        "mcp_tool": "wake_local_cancel",
+        "description": "Same-user durable session operation; output observes the original turn without replay.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "operation_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.list": {
+        "cli": [
+          "control",
+          "list"
+        ],
+        "mcp_tool": "wake_local_list",
+        "description": "Discover running owned conversations and presentation bindings.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "local.resolve": {
+        "cli": [
+          "control",
+          "resolve"
+        ],
+        "mcp_tool": "wake_local_resolve",
+        "description": "Resolve one owned conversation and pin its generation.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "selector"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "local.health": {
+        "cli": [
+          "control",
+          "health"
+        ],
+        "mcp_tool": "wake_local_health",
+        "description": "Fresh exact controlling-TUI loop health, never inferred from process liveness.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "endpoint": {
+              "type": "string"
+            },
+            "timeout": {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 5
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "selector"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "local.slash.list": {
+        "cli": [
+          "control",
+          "slash",
+          "list"
+        ],
+        "mcp_tool": "wake_control_slash_list",
+        "description": "Discover qualified same-user native slash mappings and interaction support.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "selector"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "local.slash.run": {
+        "cli": [
+          "control",
+          "slash",
+          "run"
+        ],
+        "mcp_tool": "wake_control_slash_run",
+        "description": "Execute a supported native slash action with durable tracking; never submits command text as a prompt.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "command": {
+              "type": "string",
+              "minLength": 1
+            },
+            "arguments": {
+              "type": "string"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            }
+          },
+          "required": [
+            "selector",
+            "command",
+            "idempotency_key"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.slash.result": {
+        "cli": [
+          "control",
+          "slash",
+          "result"
+        ],
+        "mcp_tool": "wake_control_slash_result",
+        "description": "Inspect, explicitly answer, or cancel an exact controller-owned native slash interaction.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "operation_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            },
+            "cursor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "local.slash.respond": {
+        "cli": [
+          "control",
+          "slash",
+          "respond"
+        ],
+        "mcp_tool": "wake_control_slash_respond",
+        "description": "Inspect, explicitly answer, or cancel an exact controller-owned native slash interaction.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "interaction_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "interaction_id",
+            "value",
+            "idempotency_key"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.slash.cancel": {
+        "cli": [
+          "control",
+          "slash",
+          "cancel"
+        ],
+        "mcp_tool": "wake_control_slash_cancel",
+        "description": "Inspect, explicitly answer, or cancel an exact controller-owned native slash interaction.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "interaction_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            }
+          },
+          "required": [
+            "interaction_id"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.self_limits.show": {
+        "cli": [
+          "self-limits",
+          "show"
+        ],
+        "mcp_tool": "wake_self_limits_show",
+        "description": "Inspect or tighten voluntary own-session limits with automatic enforcement readiness.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "local.self_limits.set": {
+        "cli": [
+          "self-limits",
+          "set"
+        ],
+        "mcp_tool": "wake_self_limits_set",
+        "description": "Inspect or tighten voluntary own-session limits with automatic enforcement readiness.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "token_limit": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "time_limit_seconds": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "token_limit",
+            "time_limit_seconds"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      }
+    },
+    "local_only": [
+      "control.server.start",
+      "control.server.run",
+      "control.server.status",
+      "control.server.stop",
+      "control.connection",
+      "control.remote",
+      "control.powershell",
+      "control.mcp"
+    ],
+    "admission": "Automatic same-user private connection; external OAuth connector grants are separate.",
+    "output_modes": [
+      "stream",
+      "transcript",
+      "final",
+      "silent"
+    ],
+    "transport_notes": {
+      "api": "POST /operations; Accept application/x-ndjson for incremental frames.",
+      "mcp": "POST /mcp or control mcp stdio bridge; bounded event batches and durable cursors.",
+      "native_mcp": "Legacy full native tool server additionally binds self-limits to attested native caller context."
+    }
   }
 }

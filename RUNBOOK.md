@@ -5693,7 +5693,7 @@ instructions, but preflight fails. Harness stopped on transient time hold during
 ongoing task; native resource then unavailable during teardown. Receiver161111
 also exceeds preflight150000. No successor goal/activation. Original source goal
 paused; read-only exact-history reconciliation and fresh private census pass.
-40443+161111 adds external201554, cumulative326895. Root1505800/17056s ACTIVE,
+40443+161111 adds external201554, cumulative 326895. Root1505800/17056s ACTIVE,
 conservative1832695; original caps unchanged. Checkpoint14 and curated failure
 retain full incomplete program gates. No new model replay. Memory unavailable;
 retained non-write receipt. Global package/services untouched.
@@ -5931,7 +5931,7 @@ Memory disposition unavailable; no write performed.
 ## Turn 304 | 2026-10-14 UTC
 
 Operator explicitly renewed resources after the expired-window gate. Window
-10:38:06–16:38:06 UTC, 2,000,000 tokens; native thread baseline28,639 retained
+10:38:06–16:38:06 UTC, 2,000,000 tokens; native thread baseline 28,639 retained
 alongside previous-window accounting. ACTIVE goal readback confirmed. Verified
 feat/agent-lifecycle at c9ec8c2 and draft OPEN PR253 at the same full SHA; issues
 254–257 OPEN. Reviewed approved pending terminology/specification amendments;
@@ -6009,7 +6009,7 @@ files compare byte-for-byte with source, zero mismatches. Global installation
 unchanged. Admit one revised configured-review new-tab sample in a fresh isolated
 root, existing fixture250,000tokens/600seconds and preflight150,000 ceiling,
 source100,000 suballowance, no allowance increases. Original outer window remains
-10:38:06–16:38:06UTC. Latest native counter394,740 minus renewal baseline28,639,
+10:38:06–16:38:06UTC. Latest native counter394,740 minus renewal baseline 28,639,
 plus conservative200,000 for two completed external lanes; reserve250,000 for
 this native sample pending settlement. Total conservative use/reservation816,101
 is below2,000,000. Primary owns exact native handles, receipt readback and cleanup.
@@ -6087,7 +6087,7 @@ Provider-free supervision9 tests, syntax, policy wiring and diff checks pass.
 Updated product skill guidance reflects configurable instruction selection,
 separate work/readiness verdicts, reserved-turn observation, budget authorization
 and bounded correction, with remaining installed/general-actor gaps explicit.
-Latest primary native counter516,302 at12:01:33UTC, renewal baseline28,639;
+Latest primary native counter516,302 at12:01:33UTC, renewal baseline 28,639;
 known new-window native sample spend374,031 plus conservative200,000 external
 reservations gives1,061,694 before further root work. Deadline16:38:06UTC and
 2,000,000 ceiling remain. Full objective OPEN; standalone spawn/refresh ledger,
@@ -6300,7 +6300,7 @@ Another public CLI regression demonstrates source goal alias had deadline1020
 but replacement received2000. Admission now clips to the recorded original
 session deadline before reservation. Existing native goal token limits already
 clip transferred allowance. Stable ledger contract test proves two correction
-cycles survive replacement/controller restart with cumulative30 spend charged
+cycles survive replacement/controller restart with cumulative 30 spend charged
 once, session deadline140 and original objective deadline200 retained.
 Focused124 tests pass39.179s; fresh installed18 affected67 pass25.231s, package
 byte parity95 files/zero mismatches. Curated context-preservation-installed18.json
@@ -8345,3 +8345,133 @@ LOCAL-0199 CLOSED. Private evidence: testing/importfix/{recovered-operation.json
 recovered-batch-0.json,recovered-batch-1.json,reopen.json,closeout.json} under
 ~/.local/state/codex-wake. Curated evidence: plan0199/deployment.json. Memory
 disposition forbidden, explicit write request absent, zero Graphiti writes.
+
+## Turn 403 | 2026-11-03
+
+Plan0200 implements spec466 on `feat/wsl-session-control-0200`, recorded base
+171befb. Child467–472 and474 closed from branch acceptance. Source d1a6966
+adds one private same-user WSL server, shared typed operations, actual Windows
+PowerShell client, HTTP/stdio MCP and generated local contract documentation.
+Actual Windows5.1 Unicode/multiline/four-mode source transport qualification
+passed on Python3.11/3.12; MCP SDK HTTP/stdio and structured business failures
+passed. Installed-wheel parity verification remains in progress; synthetic native
+wire results are not real-provider or complete installed milestone acceptance.
+
+Resilience source21d8ac7 passed12integrated fault cases; native isolated echo and
+interruption qualification retained. Existing stockcodex and signed-in daemons
+unchanged. No paid hosted CI. codex-bots current responsiveness route explicitly
+returns unknown; separate narrow adapter scope question remains pending. Final
+one broad review and one remediation pass remain unused until tickets validate.
+
+Plan0200 product ad41df8 also passed the full local unit matrix: 2,030 tests each
+on Python3.11.15 (958.014s) and3.12.13 (954.923s), one existing opt-in disposable
+systemd test skipped per version. CLI66, shell completion6 and three installed
+registry/discovery/mailbox smoke checks passed. Fresh process readback found no
+remaining test goal watchers or turn collectors. Commands, installed identity and
+private log hashes are retained in docs/dev/evidence/plan0200/qualification.json.
+Native intent1 completed with actual pwd, complete transcript and visible TUI;
+three live-stream receive-timing rows remain failed pending a delayed-event
+probe and the unused second bounded intent. No failed receipt is overwritten.
+
+## Turn 404 | 2026-11-03
+
+Plan0200 Milestone A passed; primary closed repaired #468 and installed #475.
+Grok #476 is ready. Source `f4f77a2` repaired voluntary limits without creating
+native goals. Its exact wheel (`edd3fccfa7c36ab123164695b20b3608b0ec19610b7293d819ad992bb5666c56`)
+matched all 253 Python payloads in source and both installed prefixes. The
+repaired installed packet passed 48 rows: no-effect clock rejection, actual old
+watcher refusal, four-entrypoint no-goal limits, inherited ceilings/UTC rejection,
+exact offline native stops and fail-closed epoch loss. Original anchors and stop
+latches remained intact. Counter-only proof sampled actual Windows QPC with UTC
+explicitly unavailable; no synthetic UTC or copied credentials supplied authority.
+
+Original `ad41df8` receipts retain actual installed health/slash, paused/resumed
+TUI health, exact cancellation/busy/timeout/retry and native daemon/controller
+replacement evidence. Earlier signed-in WSL/PowerShell/API/MCP admissions and
+output modes remain attributed to that source; 248 unchanged Python modules
+support the approved transfer. Failed first timing, clock-admission and harness
+receipts remain retained. All provider packets stay closed at nine cumulative
+turns; subsequent UID1017 work used offline traps. All fixture processes and the
+actual fixture Windows counter producer exited; preexisting producer and working
+daemon generations remained intact.
+
+The actual codex-bots consumer passed at product `39d62b0` against the new Wake
+prefix without new turns; native history, goal, queue and settings were unchanged.
+Bots issue73 and draft PR74 head `763056b` still await review/integration. No
+working deployment occurred. Commands, exact prefixes, hashes, source deltas and
+private census receipts are linked from
+`docs/dev/evidence/plan0200/qualification.json`. Final broad review and remediation
+remain unused. Memory disposition: forbidden by Plan0200; zero memory writes.
+
+## Turn 405 | 2026-11-03
+
+Grok #476 source integrated at `86d4780` with explicit headless ACP mode, shared
+CLI/API/MCP routing, native model interaction and detached correlated output.
+Source checks passed; the installed no-provider bootstrap exposed session/new
+not publishing loaded inventory until session/load. The successful created ID
+is retained; worker repair separates creation from stable-key activation and
+reports created_not_ready instead of creating again. No Grok prompt has run;
+two native fixture sessions have been created across readiness/installed checks.
+
+Shared routing retained Codex regression passed 40 installed rows on the exact `86d4780`
+wheel: WSL, actual PowerShell, API and actual MCP SDK, both original completed
+operations/four modes, zero new model calls and unchanged nine-turn native
+history/goal/queue/settings. Owned controller/clients exited and working daemon
+generations stayed unchanged. Exact commands/hashes/census are linked from
+plan0200 qualification. Broad review/remediation remain unused.
+
+
+## Turn 406 | 2026-11-03
+
+Primary validated and closed #476 after actual headless Grok acceptance at
+`a3b8c656f6b85b7c0c44e27969a89e3577f2093a`. Exact prefix
+`~/.local/state/codex-wake/testing/plan0200/grok476/prefix-a3b8c65` and immutable
+wheel SHA`5d775168e6b9743323f48040e450ce360c29ad59311d00d34ed1ac7bc3c9f920`
+matched all 256 committed/archive/installed Python payloads. The common prompt
+and transport owners were unchanged from f4ffabe; only collector representation
+changed. The successor receipt SHA`e254bdc0a30e38543d8dd077fb63f68f5d43f258ede2f0be519e3cf2b1f15479`
+records16 output-mode rows, all four live text paths, exact paginated transcripts,
+all four same-key retry/result and cursor checks. Ten fragments reconstruct 81,196bytes
+of native command JSON with SHA`1ea65dde9177123992d0699f4ba73f8ad842ee601bd4c395a1ccccbd63749cf5`.
+
+The original two partial traces remain immutable. Baseline 2+one authorized
+repair/retest successor gives3 Grok prompts, alongside9 Codex turns; creation
+count stays3. Exact native witness, build/install/public commands and source
+transfer are curated in plan0200 qualification. Codex40 retained rows stay on86,
+limits 48 rows onf4f77a2, original A transport onad41; none are relabeled fresh.
+Fresh census SHA`865904790f69349ccc6ffaa55198feefb5ca5a2c33aeb7cb4875f98e36cb44b4`
+confirms owned host/native/controller/collector/clients absent and exact-root
+remaining processes empty; working Codex daemons remain unchanged. Exact TUI
+health, exact-turn cancellation and metering are unsupported in headless Grok.
+Parent plans remain OPEN only for final review/checks; counters0/0. Memory
+disposition: forbidden; no memory writes or working installation changes.
+
+## Turn 406 | 2026-11-03
+
+Plan0200/0201 implementation and qualification closed. All ten child issues are
+closed. Frozen review `85eeb7e` against `171befb` and Bots `763056b` against
+`9ec0e7a` ran once along independent Standards/Spec axes. Spec found no concrete
+gap. One accepted P2 duplication/diagnostic judgement was resolved in the single
+TDD pass: public reasonless native-failure diagnostics first failed, then passed
+through one shared output generator. Final code `7d0a930` passed 33 focused checks
+per Python version, then 2,052 full-unit passes and one existing opt-in skip per
+version.
+
+The exact final wheel passed 16 installed CI commands per runtime and 144 cached
+result/mode/cursor cells, with 256 source/wheel/installed payload matches each.
+Earlier archive Git-metadata, private-prefix pip and paging-reference failures
+are retained with diagnosed harness corrections. One original PowerShell WSL
+bootstrap failure remains unattributed; direct diagnosis and instrumented
+missing-only continuation passed, without claiming a source fix.
+
+Native final Grok source `a3b8c65` passed all four live paths and 16 response modes;
+81,196-byte native metadata reconstructed from ten bounded fragments. Both earlier
+partial traces are unchanged. Final accounting: nine Codex and three Grok prompts,
+three Grok fixture sessions, all packets closed. The final source changes only two
+shared presentation modules from that native-qualified wheel. All owned processes
+are gone; working daemon generations and stock binary hashes remain unchanged.
+
+Source integration is tracked by PR477 and companion Bots PR74. No working
+installation or deployment was changed. Qualification/review artifacts retain
+exact commands, source/prefix/wheel/log/census hashes and environment differences.
+Memory disposition: forbidden by Plan0200; recorded no-write receipt, zero writes.

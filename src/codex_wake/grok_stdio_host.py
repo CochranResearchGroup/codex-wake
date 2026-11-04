@@ -105,7 +105,7 @@ class StdioOwner:
             if method=='initialize':
                 if params.get('protocolVersion')!=1 or params.get('clientCapabilities',{})!={}:self._send(client,dict(jsonrpc='2.0',id=identifier,error=dict(code=-32602,message='Only cached ACPv1 baseline client capabilities are available.')));continue
                 self._send(client,dict(self.metadata,id=identifier));continue
-            if method not in ('session/new','session/load','session/prompt'):
+            if method not in ('session/new','session/load','session/prompt','session/list','session/set_model'):
                 self._send(client,dict(jsonrpc='2.0',id=identifier,error=dict(code=-32601,message='No qualified stdio-host method.')));continue
             with self.lock:
                 if self.failure:self._send(client,dict(jsonrpc='2.0',id=identifier,error=dict(code=-32099,message='Native owner unavailable.')));continue

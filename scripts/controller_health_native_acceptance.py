@@ -38,6 +38,7 @@ def main():
     parser.add_argument('--models',type=Path,required=True)
     parser.add_argument('--artifacts',type=Path,required=True)
     parser.add_argument('--expect-unsupported',action='store_true')
+    parser.add_argument('--local-health',action='store_true',help='qualify same-user discovery/health owner without a binding registry')
     parser.add_argument('--core-only',action='store_true',help='first qualify only actual UI ack/mainloop-only stop/fresh post-stop ack')
     parser.add_argument('--wake-cli',type=Path,help='private installed candidate CLI; enables all public adapters')
     parser.add_argument('--bots-app',type=Path,help='explicit immutable Bots candidate for actual consumer proof')
@@ -180,7 +181,8 @@ trust_level = "trusted"
                 return {str(p.relative_to(home)):hashlib.sha256(p.read_bytes()).hexdigest() for p in home.rglob('*') if p.is_file() and (p.suffix=='.jsonl' or p.name=='history.jsonl')}
             before_history=history();before_queue=rpc('thread/queue/list',{'threadId':thread});before_turns=rpc('thread/read',{'threadId':thread,'includeTurns':True})['thread']['turns']
         target=dict(host='synthetic-linux',environment='disposable',runtime='codex',namespace='codex:'+hashlib.sha256(json.dumps([str(home),binding['provider']],separators=(',',':')).encode()).hexdigest(),build_sha256=receipt['native_sha256'],conversation_id=thread,home=binding['home'],provider=binding['provider'],backend_id=binding['backendId'],channel=binding['channel'],process=dict(pid=binding['pid'],start_ticks=binding['startTicks'],boot_id=binding['bootId']),connection_generation=binding['connectionGeneration'])
-        registry=wake/'controller-health.json';registry.write_text(json.dumps({'version':1,'bindings':[{'target':target,'endpoint':endpoint,'codex_cmd':[str(binary)]}]}));registry.chmod(0o600)
+        if not args.local_health:
+            registry=wake/'controller-health.json';registry.write_text(json.dumps({'version':1,'bindings':[{'target':target,'endpoint':endpoint,'codex_cmd':[str(binary)]}]}));registry.chmod(0o600)
         startup_requests=list(requests)
         receipt['blocked_startup_requests']=startup_requests
         if args.wake_cli and not args.core_only:
@@ -189,7 +191,18 @@ trust_level = "trusted"
             drain(.3)
             require(snapshot==composer_snapshot(),'public health calls changed private draft/cursor')
         service=ControllerHealth(wake)
-        def observe(timeout=2):return service.execute('health.observe',{'expected_target':target,'timeout':timeout})['observation']
+        def observe(timeout=2):
+            if args.local_health:
+                if args.wake_cli:
+                    value=json.loads(subprocess.check_output([str(args.wake_cli),'--wake-root',str(wake),'control','health','thread:'+thread,'--endpoint',endpoint,'--timeout',str(timeout),'--json'],env=env,cwd=cwd,text=True))
+                    require(value['status']=='completed','installed local health CLI failed')
+                    return value['result']['observation']
+                from codex_wake.local_health import observe_row
+                row=dict(target=dict(target,executable=str(binary),process=dict(pid=daemon.pid)),
+                    endpoint=endpoint,codex_cmd=[str(binary)],attachments=[dict(client_pid=ui.pid)])
+                return observe_row(wake,row,timeout=timeout)['observation']
+            return service.execute('health.observe',{'expected_target':target,'timeout':timeout})['observation']
+        receipt['local_health_without_registry']=args.local_health
         if not args.core_only:require(len(before_queue['data'])==1,'synthetic native queue fixture unavailable')
         from codex_wake.process import process_identity
         if args.bots_app:

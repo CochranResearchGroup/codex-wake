@@ -1196,3 +1196,26 @@ Examples:
   codex-wake --wake-root ROOT history import-recent --owner work --destination personal --limit 10
 ```
 
+
+## Local session controller
+
+See [workflow](local-session-control.md) and generated [transport contract](local-controller-contract.json).
+
+| CLI | API operation | Local MCP |
+|---|---|---|
+| `control create` | `local.create` | `wake_local_create` |
+| `control load` | `local.load` | `wake_local_load` |
+| `control prompt` | `local.prompt` | `wake_local_prompt` |
+| `control output` | `local.output` | `wake_local_output` |
+| `control result` | `local.result` | `wake_local_result` |
+| `control cancel` | `local.cancel` | `wake_local_cancel` |
+| `control list` | `local.list` | `wake_local_list` |
+| `control resolve` | `local.resolve` | `wake_local_resolve` |
+| `control health` | `local.health` | `wake_local_health` |
+| `control slash list` | `local.slash.list` | `wake_control_slash_list` |
+| `control slash run` | `local.slash.run` | `wake_control_slash_run` |
+| `control slash result` | `local.slash.result` | `wake_control_slash_result` |
+| `control slash respond` | `local.slash.respond` | `wake_control_slash_respond` |
+| `control slash cancel` | `local.slash.cancel` | `wake_control_slash_cancel` |
+| `self-limits show` | `local.self_limits.show` | `wake_self_limits_show` |
+| `self-limits set` | `local.self_limits.set` | `wake_self_limits_set` |

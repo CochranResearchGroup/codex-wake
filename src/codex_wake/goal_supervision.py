@@ -177,6 +177,8 @@ def _public(receipt):
         receipt.update(campaign_state=receipt.get('state'),state='inactive')
     if type(receipt.get('used_tokens')) is int:
         receipt['lifetime_used_tokens']=receipt.get('lifetime_tokens_before_window',0)+receipt['used_tokens']
+    from .goal_time import public_time
+    receipt.update(public_time(receipt))
     return dict({key:value for key,value in receipt.items() if key not in ('grant','policy_path','prior_allocation')},
         stop_scope='registered_goal_campaign',descendant_stop_verified=False)
 
@@ -249,7 +251,7 @@ def _save_request_accounting(path, receipt):
     _save(path, receipt)
 
 
-def _allocation_admit(directory,receipt,old):
+def _allocation_admit(directory,receipt,old,*,commit=True):
     renewal=bool(old and old['allocation_id']!=receipt['allocation_id'])
     anchor=None
     if renewal:
@@ -299,13 +301,17 @@ def _allocation_admit(directory,receipt,old):
                 token_limit=receipt['token_limit'],time_limit_seconds=receipt['time_limit_seconds'],
                 token_accounting=receipt['token_accounting'],time_origin=origin,
                 deadline=origin+receipt['time_limit_seconds'],members=members,charges={},used_tokens=0,stop_latched=False,boot_id=boot_id_value())
+        from .goal_time import relative, FIELDS, merge_allocation
+        if not allocation['members'] and relative(receipt) and 'time_basis' not in allocation:
+            allocation.update({key:receipt[key] for key in FIELDS})
+        merge_allocation(receipt,allocation)
         if receipt['thread_id'] not in allocation['members'] and len(allocation['members'])>=32:
             raise ValueError('allocation member limit reached')
         allocation['token_limit']=min(receipt['token_limit'],allocation['token_limit'])
         allocation['time_limit_seconds']=min(receipt['time_limit_seconds'],allocation['time_limit_seconds'])
         allocation['deadline']=min(allocation['deadline'],allocation['time_origin']+allocation['time_limit_seconds'])
         allocation['members'].setdefault(receipt['thread_id'],dict(goal_created_at=receipt['goal_created_at'],reset_anchor=anchor,
-            **{key:receipt[key] for key in ('usage_thread_id','usage_goal_created_at','usage_reset_anchor') if key in receipt}))
+            **{key:receipt[key] for key in ('usage_thread_id','usage_goal_created_at','usage_reset_anchor','session_scope') if key in receipt}))
         member=allocation['members'][receipt['thread_id']]
         if renewal and member.get('reset_anchor')!=anchor:
             raise ValueError('renewal boundary changed; reconcile the persisted target allocation before continuing')
@@ -322,8 +328,8 @@ def _allocation_admit(directory,receipt,old):
             receipt['active_stop_id']=allocation['pending_recovery'].get('stop_episode_id')
         if 'winddown_deadline' in allocation:
             receipt['allocation_winddown_deadline']=allocation['winddown_deadline']
-        _save(path,allocation)
-    if renewal:
+        if commit:_save(path,allocation)
+    if renewal and commit:
         # Finalize the departed member, not the entire previous allocation.
         # Its qualified snapshot remains chargeable without charging new work
         # to both allowances. A crash before the caller receipt is replaced
@@ -369,7 +375,8 @@ def _usage(receipt):
     from .goal_usage import observe_usage
     if not receipt.get('grant',{}).get('host_delegated'):
         return observe_usage(receipt['grant']['codex_home'],receipt['thread_id'],receipt['goal_created_at'],
-            reset_anchor=receipt.get('reset_anchor'),token_accounting=receipt.get('token_accounting','cache_inclusive'))
+            reset_anchor=receipt.get('reset_anchor'),token_accounting=receipt.get('token_accounting','cache_inclusive'),
+            session_scope=receipt.get('session_scope',False))
     path=Path(receipt['allocation_path']);_private(path)
     with _lock(path.parent,path.stem):
         allocation=json.loads(path.read_text());charges={}
@@ -382,7 +389,8 @@ def _usage(receipt):
                 observation=observe_usage(receipt['grant']['codex_home'],member.get('usage_thread_id',thread),
                     member.get('usage_goal_created_at',member['goal_created_at']),
                     token_accounting=allocation['token_accounting'],
-                    reset_anchor=member.get('usage_reset_anchor',member.get('reset_anchor')))
+                    reset_anchor=member.get('usage_reset_anchor',member.get('reset_anchor')),
+                    session_scope=member.get('session_scope',False))
                 if member.get('usage_thread_id') and thread not in observation.get('thread_ids',[]):
                     return dict(state='unknown',used_tokens=None,reason='successor_lineage_unavailable')
             if observation['state']!='qualified':
@@ -396,6 +404,8 @@ def _usage(receipt):
             return dict(state='unknown',used_tokens=None,reason='allocation_history_changed')
         used=sum(value['tokens'] for value in charges.values())
         allocation.update(charges=charges,used_tokens=used)
+        from .goal_time import merge_allocation
+        merge_allocation(receipt,allocation)
         _save(path,allocation)
         receipt.update(token_limit=allocation['token_limit'],deadline=allocation['deadline'])
         if allocation.get('first_stop'):
@@ -554,7 +564,7 @@ def diagnose(root,policy_path,caller_thread_id,allocation_id=None,*,permission_p
 
 def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
            checkpoint_token_percent=5,checkpoint_seconds=60,token_accounting=None,
-           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None):
+           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None,session_scope=False,prepare_only=False):
     from .permission_enforcement import principal_for,authorize,enrollment_action
     principal=principal_for(root,caller_thread_id,native_context=native_context,principal=permission_principal)
     name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
@@ -573,7 +583,7 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             _private(path);retained=json.loads(path.read_text())
             if sync(retained):return _public(retained)
     watcher_setup=None
-    if principal and not _heartbeat(directory).get('fresh'):
+    if not session_scope and principal and not _heartbeat(directory).get('fresh'):
         from .session_permissions import PermissionStore
         store=PermissionStore(root)
         if store.active() and store.evaluate('enforcement.watcher_start',principal,
@@ -604,17 +614,59 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         if same and (token_limit>old['token_limit'] or time_limit_seconds>old['time_limit_seconds']):
             raise ValueError('same allocation may only tighten limits')
         goal,active=_native(grant,caller_thread_id)
-        if not goal:raise ValueError('existing native goal required')
-        created=old['goal_created_at'] if old else goal['createdAt']
-        if type(created) not in (int,float) or not math.isfinite(created):raise ValueError('native goal start unavailable')
-        from .lifecycle_budget import trusted_upper
-        now=trusted_upper();boottime=time.clock_gettime(time.CLOCK_BOOTTIME)
-        if created>now:raise ValueError('native goal start is after qualified current time')
+        if not goal and not session_scope:raise ValueError('existing native goal required')
+        created=old['goal_created_at'] if old else goal['createdAt'] if goal else None
+        if created is not None and (type(created) not in (int,float) or not math.isfinite(created)):raise ValueError('native goal start unavailable')
+        # Qualify original history and time before persisting enrollment or
+        # starting enforcement. Session scope does not require a native goal.
+        fresh_usage=None;native_session=None
+        if session_scope and not old:
+            from .goal_usage import observe_session_usage
+            fresh_usage=observe_session_usage(grant['codex_home'],caller_thread_id,token_accounting=basis)
+            if fresh_usage.get('state')!='qualified':
+                raise AccountingUnavailable('initial session accounting unavailable',fresh_usage)
+            native_session=_request(grant,'thread/read',dict(threadId=caller_thread_id,includeTurns=False))['thread']
+            if native_session.get('id')!=caller_thread_id:raise ValueError('native thread identity changed')
+        allocation_path=directory/'allocations'/(hashlib.sha256(grant['allocation_id'].encode()).hexdigest()+'.json')
+        allow_counter=bool(session_scope and not old and grant.get('auto_enrolled')
+            and grant['allocation_id']=='native-'+caller_thread_id and not allocation_path.exists()
+            and not grant.get('initial_boundary') and not (native_session or {}).get('parentThreadId')
+            and not (fresh_usage or {}).get('parent_thread_id'))
+        # A crash may publish the allocation before its session projection.
+        # Its existing clock remains authoritative; retry never creates a window.
+        clock_previous=old
+        if session_scope and not old and allocation_path.exists():
+            _private(allocation_path);retained_allocation=json.loads(allocation_path.read_text())
+            if (retained_allocation.get('allocation_id')!=grant['allocation_id']
+                    or retained_allocation.get('grant')!=grant
+                    or caller_thread_id not in retained_allocation.get('members',{})):
+                raise ValueError('qualified existing allocation clock required')
+            clock_previous=retained_allocation
+        from .goal_time import admit, relative
+        now,time_fields=admit(clock_previous,allow_counter=allow_counter)
+        from .goal_time import controller_compatible, singleton_held
+        controller=_heartbeat(directory)
+        new_semantics=relative(time_fields) or session_scope and goal is None
+        if new_semantics:
+            held=singleton_held(directory)
+            compatible=controller_compatible(dict(time_fields,session_scope=session_scope,
+                native_goal_status=goal.get('status') if goal else None),controller)
+            if held or controller.get('process_alive'):
+                if not controller.get('fresh') or not compatible or not held:
+                    raise ValueError('existing watcher owner is stale or lacks required session/time capabilities; upgrade its exact owner without starting a competing watcher')
+            elif not prepare_only:
+                raise ValueError('compatible watcher must be qualified before publishing session/time enrollment')
+        boottime=time.clock_gettime(time.CLOCK_BOOTTIME)
+        if not relative(time_fields) and created is not None and created>now:
+            raise ValueError('native goal start is after qualified current time')
         receipt=dict(old) if same else dict(thread_id=caller_thread_id,generation=uuid4().hex,
             allocation_id=grant['allocation_id'],goal_created_at=created,used_tokens=0,
             started_upper=now,started_boottime=boottime,boot_id=boot_id_value(),
-            time_origin=now if old else created,effects={},checkpoint=None,
+            time_origin=now if old or created is None or allow_counter else created,effects={},checkpoint=None,
             prior_allocation=old if old else None)
+        receipt.update(time_fields)
+        if session_scope and not old:
+            receipt['session_scope']=True
         receipt.update(caller_binding=binding,grant=grant,policy_path=str(Path(policy_path).absolute()),token_limit=token_limit,
             time_limit_seconds=time_limit_seconds,checkpoint_token_percent=checkpoint_token_percent,
             checkpoint_seconds=checkpoint_seconds)
@@ -634,7 +686,8 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             if native.get('id')!=caller_thread_id:raise ValueError('native thread identity changed')
             parent=native.get('parentThreadId')
             if not parent:
-                first=observe_usage(grant['codex_home'],caller_thread_id,created,token_accounting=basis)
+                first=observe_usage(grant['codex_home'],caller_thread_id,created,token_accounting=basis,
+                    session_scope=receipt.get('session_scope',False))
                 if first.get('state')!='qualified':raise AccountingUnavailable('first enrollment requires qualified original history',first)
                 parent=first.get('parent_thread_id')
             if parent:
@@ -668,12 +721,14 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                     receipt['token_accounting']=basis
                 receipt.update(grant=grant,allocation_id=grant['allocation_id'],
                     continuation_source_thread_id=parent)
-        if grant.get('host_delegated'):_allocation_admit(directory,receipt,old)
-        if sync(receipt):
-            _record_supervision_notice(path,receipt,'deactivation')
-            _save(path,receipt)
+        if grant.get('host_delegated'):_allocation_admit(directory,receipt,old,commit=not prepare_only)
+        retained_allocation=not receipt.get('allocation_path') or Path(receipt['allocation_path']).exists()
+        if retained_allocation and sync(receipt):
+            if not prepare_only:
+                _record_supervision_notice(path,receipt,'deactivation')
+                _save(path,receipt)
             return _public(receipt)
-        observation=_usage(receipt)
+        observation=fresh_usage if prepare_only and not retained_allocation else _usage(receipt)
         # Enrollment is not admitted until the first complete observation is
         # qualified. A transient setup scan must not publish a stop receipt that
         # only a resource renewal could clear. Existing campaigns still fail
@@ -690,6 +745,14 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                 raise ValueError('explicit reset requires qualified response history')
             receipt['reset_anchor']=observation['anchor']
             observation=_usage(receipt)
+        if prepare_only:
+            if observation.get('state')!='qualified' or _accounting_decreased(receipt,observation):
+                raise AccountingUnavailable('initial session accounting unavailable',observation)
+            if receipt.get('stop_latched'):
+                return dict(_public(old or receipt),state='held',reason=receipt.get('reason') or 'continuation_held')
+            receipt.update(accounting=observation,used_tokens=observation['used_tokens'],
+                native_goal_status=goal.get('status') if goal else None)
+            return dict(_public(receipt),state='prepared',reason=None,admitted=False,effect_attempted=False)
         def hold(reason):
             _first_stop(path,receipt,reason)
             receipt.update(state='held',reason=reason,stop_latched=True)
@@ -711,9 +774,9 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         if permission:
             receipt['enforcement_permission']=permission
             receipt['permission_subject']=principal.subject
-        receipt['native_goal_status']=goal.get('status')
+        receipt['native_goal_status']=goal.get('status') if goal else None
         if watcher_setup is not None:receipt['watcher_setup']=watcher_setup
-        if goal.get('status') not in NATIVE_GOAL_STATUSES:
+        if (goal is not None or not session_scope) and (goal or {}).get('status') not in NATIVE_GOAL_STATUSES:
             hold('native_goal_state_unknown')
         _record_supervision_notice(path,receipt,'activation',controller)
         _save(path,receipt)
@@ -780,6 +843,8 @@ def _stop_episode(path,receipt,reason):
         token_limit=receipt['token_limit'],deadline=receipt['deadline'],
         native_method=receipt.get('observation_method') if reason=='observation_unavailable' else None,
         cause=receipt.get('observation_error') if reason=='observation_unavailable' else None)
+    from .goal_time import public_time
+    event.update(public_time(receipt))
     episodes.append(event);receipt['active_stop_id']=event['id']
 
 
@@ -818,6 +883,13 @@ def _first_stop(path,receipt,reason):
         native_method=receipt.get('observation_method') if reason=='observation_unavailable' else None,
         cause=receipt.get('observation_error') if reason=='observation_unavailable' else None,
         observation_duration_seconds=receipt.get('observation_duration_seconds') if reason=='observation_unavailable' else None)
+    from .goal_time import relative, public_time
+    if relative(receipt):
+        diagnostic=receipt['first_stop']
+        diagnostic.update(public_time(receipt), observed_upper=None,
+            observed_elapsed_upper=receipt.get('clock_elapsed_upper'),
+            clock_qualified=qualified and reason not in ('counter_continuity_lost','authenticated_elapsed_unavailable'),
+            clock_reason=reason if reason in ('counter_continuity_lost','authenticated_elapsed_unavailable') else 'authenticated_host_counter')
     receipt.update(stop_latched=True,state='stop_unverified',reason=reason)
     # The shared ledger is the authority for successor admission. Commit its
     # latch first, so a crash during the caller receipt write cannot reopen it.
@@ -852,8 +924,9 @@ def _stop(path,receipt,reason,goal=None,active=None):
             legacy_turns = {effect.get('params', {}).get('turnId') or
                 effect.get('params', {}).get('expectedTurnId') for effect in receipt.get('effects', {}).values()
                 if effect.get('method') in ('turn/interrupt', 'turn/steer')}
-            receipt['stop_scope_observed']=bool(goal and goal.get('status')=='active')
-            receipt['stop_turns']=list(active) if goal and goal.get('status')=='active' else sorted(legacy_turns - {None})
+            owned_scope=bool(receipt.get('session_scope') or goal and goal.get('status')=='active')
+            receipt['stop_scope_observed']=owned_scope
+            receipt['stop_turns']=list(active) if owned_scope else sorted(legacy_turns - {None})
             _save(path,receipt)
         if receipt.get('pause_observed') and goal and goal.get('status')!='paused':
             # Observed paused -> active is a new enforcement event, even if a
@@ -891,7 +964,7 @@ def _wind_down(path, receipt, reason, goal, active, upper):
         _first_stop(path,receipt,reason)
         deadline=min(receipt['deadline'],upper+min(60,receipt['checkpoint_seconds']))
         receipt['winddown_deadline']=_allocation_latch(receipt,reason,deadline)
-        receipt['stop_turns'] = list(active) if goal and goal.get('status') == 'active' else []
+        receipt['stop_turns'] = list(active) if receipt.get('session_scope') or goal and goal.get('status') == 'active' else []
         receipt['winddown_reason'] = reason
         _save(path, receipt)
     owned = set(active).intersection(receipt['stop_turns'])
@@ -946,10 +1019,11 @@ def poll(root):
                     results.append(_stop(path,receipt,'host_policy_changed'));continue
                 if boot_id_value()!=receipt['boot_id']:
                     results.append(_stop(path,receipt,'boot_identity_changed'));continue
-                elapsed=time.clock_gettime(time.CLOCK_BOOTTIME)-receipt['started_boottime']
-                if elapsed<0:
-                    results.append(_stop(path,receipt,'elapsed_time_invalid'));continue
-                upper=receipt['started_upper']+elapsed
+                from .goal_time import upper as time_upper, GoalTimeUnavailable
+                try:
+                    upper=time_upper(receipt)
+                except GoalTimeUnavailable as error:
+                    results.append(_stop(path,receipt,error.code));continue
                 goal,active=_native(grant,receipt['thread_id'])
                 receipt['native_goal_status']=goal.get('status') if goal else None
                 if 'winddown_deadline' in receipt:
@@ -1027,7 +1101,8 @@ def watch(root,interval=1):
             running=False
         prior={sig:signal.signal(sig,finish) for sig in (signal.SIGTERM,signal.SIGINT)}
         heartbeat=dict(generation=generation,pid=os.getpid(),identity=process_identity(os.getpid()),
-            boot_id=boot_id_value(),interval=interval)
+            boot_id=boot_id_value(),interval=interval,time_bases=['qualified_utc','authenticated_host_counter'],
+            session_scope_without_goal=True)
         import threading
         from .goal_notices import run_presenter
         presentation_stop=threading.Event()

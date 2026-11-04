@@ -1089,3 +1089,31 @@ lanes:
     overlaps: [P197]
     updated_at: 2026-11-02
     disposition: LOCAL0198 DONE; both-version presubmit and final focused checks; actual UID1017 native open resume batch copy dedup and partial-result proof; no working deployment
+
+  - id: P200
+    owner: primary / ecochran76
+    objective: Qualify WSL session control for codex-bots
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/466]
+    plan: docs/dev/plans/0200-2026-11-03-wsl-session-control.md
+    branch: feat/wsl-session-control-0200
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P179]
+    updated_at: 2026-11-03
+    disposition: Validated source with one review and one TDD pass; PR477 source integration; no working deployment
+
+  - id: P200G
+    owner: ecochran76 / self_limits_468
+    objective: Qualify Grok through shared local session control
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/476]
+    plan: docs/dev/plans/0201-2026-11-03-grok-local-session-control.md
+    branch: feat/476-grok-local-control
+    target: feat/wsl-session-control-0200
+    plan_state: CLOSED
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P200]
+    overlaps: [P200]
+    updated_at: 2026-11-03
+    disposition: Grok accepted and integrated into P200; native packets closed; owned processes cleaned

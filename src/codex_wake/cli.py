@@ -98,6 +98,18 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
     from .completion import register_parser as register_completion
     register_completion(subparsers)
+    from .local_control_commands import register_parser as register_local_control
+    register_local_control(subparsers)
+    import argparse as _argparse
+    _control_verbs = next(a for a in subparsers.choices['control']._actions if isinstance(a, _argparse._SubParsersAction))
+    from .local_health import register_parser as register_local_health
+    register_local_health(_control_verbs)
+    from .local_slash_commands import register as register_local_slash
+    register_local_slash(_control_verbs)
+    from .local_control_lifecycle import register as register_local_lifecycle
+    register_local_lifecycle(_control_verbs)
+    from .local_self_limits import register_parser as register_local_self_limits
+    register_local_self_limits(subparsers)
     from .wake_control import add_control_parsers
     add_control_parsers(subparsers)
     from .time_inspection import add_time_parser
@@ -2822,6 +2834,24 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     if args.command == "a2a":
         from .a2a_cli import a2a_command
         return a2a_command(args)
+    if args.command == 'self-limits':
+        from .local_self_limits import command
+        from .local_control_lifecycle import root_for
+        return command(args, root_for(args))
+    if args.command == 'control':
+        from .local_control_lifecycle import root_for
+        local_root = root_for(args)
+        if args.control_verb in ('server','remote','connection','powershell','mcp'):
+            from .local_control_lifecycle import command
+            return command(args, local_root)
+        if args.control_verb == 'slash':
+            from .local_slash_cli import command
+            return command(args, local_root)
+        if args.control_verb == 'health':
+            from .local_health import command
+            return command(args, local_root)
+        from .local_control_commands import command
+        return command(args, local_root)
     if args.command == "sessions":
         if args.sessions_command == 'target':
             from .tab_targets import target_command

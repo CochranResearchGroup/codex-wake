@@ -1,0 +1,447 @@
+{
+  "schema_version": 1,
+  "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/466",
+  "base": "171befbaf1be833f55eb0627c802e279cf0fbf35",
+  "branch": "feat/wsl-session-control-0200",
+  "review": {
+    "base": "171befbaf1be833f55eb0627c802e279cf0fbf35",
+    "broad_reviews": 1,
+    "remediation_passes": 1,
+    "status": "complete; one broad review and one TDD pass; S1 resolved; no accepted blockers",
+    "wake_base": "171befbaf1be833f55eb0627c802e279cf0fbf35",
+    "bots_base": "9ec0e7a5d8542d936f64b5409322c62393ebb694",
+    "bots_tip": "763056b168db54a7a68b8d34b7595896e71cf384",
+    "accepted_findings": [
+      {
+        "id": "S1",
+        "axis": "Standards",
+        "classification": "blocking",
+        "priority": "P2",
+        "type": "judgement, not hard violation",
+        "scope": "Shared output loop and reasonless native-failure diagnostic parity",
+        "resolution": "resolved by shared output generator; public red/green and33focused tests/version passed"
+      }
+    ],
+    "spec_findings": [],
+    "report": "docs/dev/evidence/plan0200/review.md",
+    "remediation_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/final-review/S1-remediation.json"
+  },
+  "tickets": [
+    {
+      "key": "T1",
+      "issue": 467,
+      "title": "Discover and resolve local owned WSL sessions without manual profiles",
+      "blockers": [],
+      "acceptance": [
+        "Discover existing same-user Codex sessions and presentation bindings with account,host,environment,conversation and process generation.",
+        "Friendly selectors resolve uniquely; ambiguous, stale and foreign-user targets fail clearly.",
+        "No hand-authored session profiles or manual grants needed for ordinary local discovery; preserve existing interfaces."
+      ],
+      "state": "validated",
+      "owner": "primary",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-session-control",
+      "validation": [
+        "test_local_sessions.py PASS3.11/3.12",
+        "test_sessions.py PASS3.12",
+        "public source CLI native discovery:76sessions,0holds"
+      ],
+      "result_sha": "d731515",
+      "tracker_state": "closed"
+    },
+    {
+      "key": "T2",
+      "issue": 468,
+      "title": "Make own-session resource limits usable with automatic enforcement readiness",
+      "blockers": [],
+      "acceptance": [
+        "Fresh own session can inspect usage and set/tighten voluntary limits without manual per-thread grant setup.",
+        "Limit setup starts or explicitly arranges enforcement and reports real readiness; demonstrate bounded stop.",
+        "Inherited external ceilings cannot be raised or disabled through self-service; preserve lifetime usage."
+      ],
+      "state": "validated",
+      "worker": "/root/self_limits_468",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-self-limits-reopened",
+      "result_sha": "f4f77a2546e22525040db8b08debea12c3aaca8c",
+      "tracker_state": "closed",
+      "regression": "Installed fresh self-limit rejected trusted time after active native goal creation and a local-trap turn; earlier positive source-helper clock provenance incomplete",
+      "historical_validation_superseded": [
+        "64related tests/version +5final selftests/version",
+        "actualUID1017 public owner stop proof3s",
+        "installed automatic self-limits CLI passed fresh\u2192engaged\u2192stopped;peerpreserved;zero model turns"
+      ],
+      "historical_private_receipt": "/home/codex-daemon-test/self468-5b5f8e61/receipt.json",
+      "repair_source_sha": "481a4aebb877d68913fcc81b877f7090cff8126a",
+      "validation": [
+        "Exact installed f4f77a2 wheel:253 source/wheel/both-prefix Python payloads equal.",
+        "48 curated actual installed rows: unavailable clock4, old-watcher8, positive limits25, inherited ceilings/UTC2, epoch-loss9; zero external provider calls.",
+        "No active native goal/model work from setup; actual real-QPC counter-only enforcement, immutable anchor and exact owned-turn stop; all fixtures cleaned."
+      ],
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/repaired468/matrix.json",
+      "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/468#issuecomment-6620793011"
+    },
+    {
+      "key": "T3",
+      "issue": 469,
+      "title": "Expose fresh exact-TUI health for local sessions and codex-bots",
+      "blockers": [],
+      "acceptance": [
+        "Observe exact controlling TUI-loop identity and freshness through public CLI and machine-readable owner interface.",
+        "Distinguish responsive,stuck,offline and unsupported/unknown without treating process liveness as TUI health.",
+        "Ordinary same-user observation requires no manual grants; preserve qualified native probe safeguards."
+      ],
+      "state": "validated",
+      "worker": "/root/local_health_469",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-local-health",
+      "result_sha": "310072c",
+      "validation": [
+        "34health tests/version,2protocoltests,5localhealthtests",
+        "installedactualUID1017 control health CLI responsive33ms;stalled exactmainloop unknown;postresume freshack;zero model turns"
+      ],
+      "tracker_state": "closed",
+      "private_receipt": "/tmp/w0200-healthcli-run2/receipt.json"
+    },
+    {
+      "key": "T4",
+      "issue": 470,
+      "title": "Submit and retrieve one durable prompt in an existing WSL Codex tab",
+      "blockers": [
+        "T1"
+      ],
+      "acceptance": [
+        "Submit to exact discovered existing conversation with automatic same-user authority/profile binding.",
+        "Retain operation ID and distinct submitted/accepted/running/terminal/uncertain states; show response in actual tab.",
+        "Prompt final result,wait and exact cancellation reuse existing operation/native owners and never silently retarget or start another conversation."
+      ],
+      "state": "validated",
+      "owner": "primary",
+      "result_sha": "0225347",
+      "validation": [
+        "Public CLI/native Unix wire test PASS Python3.11/3.12",
+        "Dedicated signed-in native conversation: submitted exact existing thread,final response retrieved,actual target TUI renders unique answer;retry same intent;3 bounded marker-only provider turns cumulative, no tools"
+      ],
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/prompt-live.json",
+      "tracker_state": "closed"
+    },
+    {
+      "key": "T5",
+      "issue": 471,
+      "title": "Deliver live text transcript final and silent response modes",
+      "blockers": [
+        "T4"
+      ],
+      "acceptance": [
+        "Support stream,transcript,final,silent caller modes through shared operation contract.",
+        "Live output arrives before completion; transcript has ordered model/tool/lifecycle events and resumable cursor with explicit retention/truncation.",
+        "Silent success has no normal output; failures nonzero; timeout/disconnect preserves retrievable original operation."
+      ],
+      "state": "validated",
+      "worker": "/root/local_health_469",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-output-modes",
+      "result_sha": "3decfdd",
+      "validation": [
+        "19localtests/version;final3changedseamtests/version",
+        "actualnative live deltas beforeterminal;15orderedretainedevents;final/silent/cursor/retry/visibleTUIproof",
+        "oldpartialtracehonestlypartial;knowntelemetryschemafixturequalified;finalgenerationcompletefreshtrace #475"
+      ],
+      "tracker_state": "closed",
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/output471/qualification471.json"
+    },
+    {
+      "key": "T6",
+      "issue": 472,
+      "title": "Execute supported native slash commands and surface interactive actions",
+      "blockers": [
+        "T4"
+      ],
+      "acceptance": [
+        "Discover supported slash commands and preserve arguments; use native/harness-specific execution, never ordinary prompt substitution.",
+        "Qualify noninteractive and interactive commands, receipt versus execution/completion and explicit interaction handles.",
+        "Unsupported commands fail before model submission; same durable tracking/output choices apply."
+      ],
+      "state": "validated",
+      "worker": "/root/self_limits_468",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-slash-commands",
+      "result_sha": "c00a90b",
+      "tracker_state": "closed",
+      "validation": [
+        "actualUID1017installedCLI15calls;4modes sameoperation;visibleTUIrename;health;peerpreserved;0modelturns",
+        "247source/wheel/installedPythonmembers equal"
+      ],
+      "private_receipt": "/home/codex-daemon-test/slash472-cli-a418415b/receipt.json"
+    },
+    {
+      "key": "T7",
+      "issue": 473,
+      "title": "Use equivalent local session control through PowerShell API and MCP",
+      "blockers": [
+        "T5",
+        "T6"
+      ],
+      "acceptance": [
+        "Actual PowerShell client talks to same WSL server and preserves multiline Unicode input and exit status.",
+        "CLI/API/local MCP share target,submit,result,event,cancel and output-mode semantics without manual OAuth enrollment for same-owner local use.",
+        "Use transport-appropriate streams or operation/event handles; verify no required operation is available only through CLI."
+      ],
+      "state": "validated",
+      "owner": "primary",
+      "result_sha": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "worker_verification": "/root/self_limits_468",
+      "validation": [
+        "actual Windows PowerShell5.1 Unicode/multiline,4modes;MCP SDK HTTP+stdio PASS3.11/3.12",
+        "34integrated local tests PASS3.12 170.757s",
+        "3commandcontract+3existingMCP lifecycletests PASS3.12;ruff/generator/diff PASS",
+        "dropped HTTP response retains generated original key;installed wheel verification running",
+        "exactinstalledad41df8:252members match;actualPS/API/MCP4modes;equals/spacekeyretry1nativefixtureturn;0providerturns;ownedcensusempty"
+      ],
+      "tracker_state": "closed",
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/parity473/run-4de6f47a/receipt.json"
+    },
+    {
+      "key": "T8",
+      "issue": 474,
+      "title": "Reconcile disconnect restart busy-state and uncertain delivery safely",
+      "blockers": [
+        "T5",
+        "T6"
+      ],
+      "acceptance": [
+        "Fault-inject lost acknowledgement,duplicate retry,disconnect,event cursor resume,timeout/late result and exact cancellation through public operations.",
+        "Daemon restart/stale generations do not retarget or repeat native work; busy session behavior is explicit.",
+        "Retain unknown effects and reconcile original intent without blind replay; preserve unrelated sessions."
+      ],
+      "state": "validated",
+      "worker": "/root/local_health_469",
+      "result_sha": "21d8ac7",
+      "tracker_state": "closed",
+      "validation": [
+        "12resilience tests/version worker;12integrated PASS3.12 89.196s",
+        "actual isolatednative clientId echo and interruption;0externalproviderturns"
+      ],
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/resilience474/qualification474.json"
+    },
+    {
+      "key": "T9",
+      "issue": 475,
+      "title": "Qualify installed WSL session control and codex-bots consumer acceptance",
+      "blockers": [
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7",
+        "T8"
+      ],
+      "acceptance": [
+        "Run confirmed end-to-end seam against installed server from WSL,actual PowerShell,API,local MCP with actual target tab evidence.",
+        "Qualify every required output mode,slash interaction,recovery and own-session enforcement row; fixtures alone are insufficient.",
+        "Identify codex-bots real consumer contract and qualify machine-readable identity,fresh health,acknowledgement and final result. Record exact source,prefix,builds,commands and final process census."
+      ],
+      "state": "validated",
+      "worker": "/root/local_health_469",
+      "owner": "worker with primary integration",
+      "partial_validation": {
+        "provider_intent1": "completed; exact Unicode/multiline input, actual pwd, complete ordered native transcript, visible TUI, four modes across entrypoints and same-key retry passed",
+        "live_stream_before_terminal": {
+          "local_mcp": "passed",
+          "wsl": "failed timing evidence",
+          "powershell": "failed timing evidence",
+          "api": "failed timing evidence"
+        },
+        "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-1.json",
+        "next": "Historical partial snapshot retained; current acceptance passed, final review/integration separate.",
+        "provider_intent2": {
+          "status": "passed",
+          "events": 33,
+          "all_four_live_text_paths": "passed before direct native completion witness",
+          "receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/run-ad41df8/provider-intent-2.json",
+          "fresh_api_mcp_submissions": "qualified separately in fresh_api_mcp_submissions"
+        },
+        "fresh_api_mcp_submissions": {
+          "status": "passed",
+          "receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/fresh-api-mcp/receipt.json",
+          "source_commit": "ad41df8683c06467a3a792979c635a3cca31a9d0"
+        }
+      },
+      "blockers_current": [],
+      "tracker_state": "closed",
+      "acceptance_status": "passed; tracker closed by primary",
+      "historical_blockers_resolved": [
+        "reopened468 admission and clock-basis repair",
+        "actual codex-bots consumer proof"
+      ],
+      "validation": [
+        "MilestoneA required rows passed; canonical source-attributed matrix is docs/dev/evidence/plan0200/qualification.json.",
+        "Actual installed UID1017 native health/slash45, pause/resume8, cancellation9 and daemon/controller replacement12 rows; retained ad41df8 attribution.",
+        "Repaired f4f77a2 installed limits 48 rows; actual Bots consumer branch39d62b0 read-only native proof; issue73/draftPR74 integration pending."
+      ],
+      "curated_evidence": "docs/dev/evidence/plan0200/qualification.json",
+      "remaining_gates": [
+        "Planned final broad review/remediation and integration; no deployment claimed"
+      ],
+      "required_acceptance_row_gaps": [],
+      "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/475#issuecomment-6620850037"
+    },
+    {
+      "key": "T10",
+      "issue": 476,
+      "title": "Qualify Grok on the same session-control contract",
+      "blockers": [
+        "T9"
+      ],
+      "acceptance": [
+        "Grok discovery,prompt,slash capabilities,health,output modes and operation recovery use shared interface.",
+        "Truthful per-harness capabilities; qualify supported noninteractive and interactive commands without silent terminal typing fallback.",
+        "Installed native acceptance distinguishes true Grok evidence from injected fixtures; no Windows-native or Claude expansion."
+      ],
+      "state": "validated",
+      "tracker_state": "closed",
+      "worker": "/root/self_limits_468",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-grok-local-control",
+      "branch": "feat/476-grok-local-control",
+      "owner": "ecochran76",
+      "result_sha": "96622f5bcaf3c08bd58f76a91839c072181165ce",
+      "integrated_product_source": "a3b8c656f6b85b7c0c44e27969a89e3577f2093a",
+      "installed_state": "PASS actual headless Grok native workflow;16 mode/all four live/retry/result/cursor/fullmetadata; unsupported TUI/cancel/metering explicit",
+      "validation": [
+        "24 affected tests/version plus focused followups passed",
+        "40 installed retained Codex regression rows passed through all four entrypoints; zero provider calls",
+        "Actual native Grok initialization/cached authentication/model set-load readback passed; no prompt yet",
+        "Creation/activation repair27 affected tests/version passed",
+        "Repaired integrated37 tests/version passed; finalization10 focused tests passed312",
+        "49350db all 256 payloads matched; actual public four-entrypoint no-provider bootstrap/control acceptance passed",
+        "a3b8c65 exact256 commit/archive/wheel/install payloads; successor native receipt e254bdc0a30e38543d8dd077fb63f68f5d43f258ede2f0be519e3cf2b1f15479",
+        "19 fragment affected tests passed each311/312; all four live text/16 mode rows, native81196-byte metadata JSON reassembled from10fragments/hash, cached same-key retry/result/cursor passed",
+        "3cumulativeGrok prompts plus9 Codex;3 fixture creations; prior2partial traces unchanged; exact cleanup census865904790f69349ccc6ffaa55198feefb5ca5a2c33aeb7cb4875f98e36cb44b4"
+      ],
+      "tracker_confirmation": "https://github.com/CochranResearchGroup/codex-wake/issues/476#issuecomment-6621882498"
+    }
+  ],
+  "integration_tip": "7d0a9304d4f3d8503a3ca06282fa0990f71c4d09",
+  "resource_accounting": {
+    "effective_model": "inherited;runtime reported identity unavailable",
+    "aggregate_allocation": "unknown",
+    "provider_turns_known": 9,
+    "provider_work": "Nine known cumulative bounded signed-in turns: prior marker turns, two dedicated WSL/PowerShell intents with one read-only pwd each, two fresh API/MCP marker-only intents. All provider packets closed; subsequent UID1017 effects use isolated offline traps; consumer proof read-only.",
+    "review_broad_count": 1,
+    "review_remediation_count": 1,
+    "current_acceptance_packet": {
+      "maximum_new_intents": 2,
+      "consumed": 2,
+      "second_intent": "completed; all four live client paths passed; packet closed at cap",
+      "first_operation_id": "local-prompt-592abc9685601c7fc0953c12a406354c",
+      "first_key": "plan0200-475-P475_PS_bf51c97e",
+      "native_work": "one successful read-only pwd and a short marker reply",
+      "state": "completed; never replay with a new key",
+      "second_operation_id": "local-prompt-f912a0728e28dc6788f28f8cd3d66415",
+      "second_key": "plan0200-475-P475_WSL_8fad192a"
+    },
+    "fresh_api_mcp_packet": {
+      "maximum_new_intents": 2,
+      "attempted": 2,
+      "confirmed": 2,
+      "state": "closed at cap; all checks passed",
+      "native_work": "short markers only; no tools",
+      "receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/acceptance475/fresh-api-mcp/receipt.json",
+      "operations": [
+        "local-prompt-ebbd7bc11c08d2225fc3d39bf2e75391",
+        "local-prompt-6a2679cee1a7b810a4d7553d490382b1"
+      ]
+    },
+    "grok": {
+      "external_provider_intents": 3,
+      "provider_packet": "Original2 plus bounded metadata successor1 complete; all windows closed, no more prompts",
+      "native_fixture_creations": 3,
+      "replacement_fixture_packet": "closed at cumulative creation ceiling3; reuse same loaded native host/session for provider packet",
+      "first_operation_id": "local-grok-7af468b6f64525d9df021956c0893924",
+      "first_key": "qualification476-1-e64877c0c080",
+      "successor": "PASS at a3b8c65; baseline 2+1=3, no reset/newcreation/login",
+      "successor_operation_id": "local-grok-1b37147f52cd484f6f361bcde1a7315e",
+      "successor_key": "qualification476-3-d1d916fed6d1",
+      "final_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/installed-0df50f01/provider-successor/receipt.json",
+      "final_receipt_sha256": "e254bdc0a30e38543d8dd077fb63f68f5d43f258ede2f0be519e3cf2b1f15479",
+      "owned_processes": "all owned host/native/controller/collector/clients absent; working daemons unchanged"
+    },
+    "provider_turns_known_scope": "Codex only; Grok separately attributed",
+    "provider_turns_by_harness": {
+      "codex": 9,
+      "grok": 3
+    },
+    "provider_turns_total_known": 12
+  },
+  "shared_contract_decisions": {
+    "local_server": "WSL same-user local controller; automatic private connection receipt, no manual OAuth enrollment",
+    "powershell": "actual Windows PowerShell client sends UTF8 JSON to same WSL server; WSL bootstrap captures private connection receipt without token arguments/output",
+    "api_mcp": "shared local.* owner schemas and slash/health/self-limit hooks; bounded event retrieval for MCP, streaming CLI/API presentation",
+    "consumer_gate": "Narrow adapter authorized by user continue and qualified at Bots product39d62b0; draftPR74 head763056b and issue73 await review/integration.",
+    "self_limits_repair": "No native goal creation; preserve existing goal/queue; fresh voluntary durations may use existing authenticated counter-only same-epoch elapsed authority, immutable across tighten/retry; inherited UTC deadlines stay strict; missing/failed admission has no active native effects"
+  },
+  "integration_regressions": {
+    "source": "687c7c8",
+    "selection": "test_local_*.py",
+    "311": {
+      "passed": 25,
+      "seconds": 110.717
+    },
+    "312": {
+      "passed": 25,
+      "seconds": 116.864
+    },
+    "final_output312": {
+      "source": "3decfdd",
+      "passed": 3
+    },
+    "parity312": {
+      "source": "d1a696687b56255941d14f4a59ac6e27a796680f",
+      "passed": 34,
+      "seconds": 170.757
+    },
+    "full_unit_matrix": {
+      "product_source": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+      "checkout_head_at_start": "90670d4177bf6b53797b1a334588ca7be58e93f6",
+      "311": {
+        "skipped": 1,
+        "seconds": 958.014,
+        "tests_run": 2030,
+        "passed": 2029
+      },
+      "312": {
+        "skipped": 1,
+        "seconds": 954.923,
+        "tests_run": 2030,
+        "passed": 2029
+      },
+      "skip_reason": "existing opt-in disposable systemd test",
+      "commands_and_logs": "docs/dev/evidence/plan0200/qualification.json",
+      "post_run_goal_watchers_or_collectors": "none in fresh process readback"
+    }
+  },
+  "integration_tip_kind": "last validated product commit; closure documentation follows",
+  "acceptance_summary": {
+    "milestone_a": "passed",
+    "ticket475_tracker": "closed",
+    "required_row_gaps": [],
+    "wake_product_source": "a3b8c656f6b85b7c0c44e27969a89e3577f2093a",
+    "bots_product_source": "39d62b0bd7940376da168bbf41fee80aad8e55f9",
+    "bots_pr": "https://github.com/CochranResearchGroup/codex-bots/pull/74",
+    "review": "one broad review and one TDD pass complete; S1 resolved",
+    "deployment": "working installation unchanged",
+    "milestone_b": "passed",
+    "ticket476_tracker": "closed",
+    "grok_product_source": "a3b8c656f6b85b7c0c44e27969a89e3577f2093a",
+    "codex_retained_regression_source": "86d4780341be765ec42d3873439e99cac9a1f6d0",
+    "codex_limits_source": "f4f77a2546e22525040db8b08debea12c3aaca8c",
+    "original_a_transport_source": "ad41df8683c06467a3a792979c635a3cca31a9d0",
+    "final_product_source": "7d0a9304d4f3d8503a3ca06282fa0990f71c4d09"
+  },
+  "final_validation": {
+    "source": "7d0a9304d4f3d8503a3ca06282fa0990f71c4d09",
+    "full_unit_each": "2053 tests,2052 passed,1 existing opt-in skip onPython3.11/3.12",
+    "installed": "16 CIcommands/runtime;256payloadmatches/runtime;144cachedpresentationcells",
+    "evidence": "docs/dev/evidence/plan0200/qualification.json",
+    "known_limitation": "One original intermittent PowerShell bootstrap failure remains unattributed; instrumented missing-only continuation passed; no source fix claimed.",
+    "deployment": "unchanged",
+    "source_integration": "PR477"
+  }
+}

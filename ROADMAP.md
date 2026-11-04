@@ -1435,3 +1435,20 @@ Stacked on validated Plan0197; no working launcher or plain codex replacement.
 Plan0198 / LOCAL-0198 DONE locally: open/resume shortcuts and recent copies
 qualified with actual native UID1017 clients/daemons; sourcebdb2114. Plain codex
 stays stock. Stacked feature branch remains unmerged and not deployed.
+
+## P200 | WSL Session Control For codex-bots
+
+State: CLOSED
+
+Current State: Children #467–#476 are validated and closed. Installed Codex and
+owned headless Grok workflows passed. One broad review and one TDD remediation
+pass are complete; final local Python matrices, installed compatibility checks
+and cached four-entrypoint presentation checks passed. One original intermittent
+PowerShell bootstrap failure remains unattributed and is retained. Source
+integration is tracked by Wake PR477 and Bots PR74; working deployments remain
+unchanged. Qualification and review artifacts carry exact evidence and limits.
+
+Plan: [WSL session control](docs/dev/plans/0200-2026-11-03-wsl-session-control.md)
+Execution custody: [dependency ledger](docs/dev/plans/0200-execution-ledger.json)
+
+Grok execution slice: [owned ACP session control](docs/dev/plans/0201-2026-11-03-grok-local-session-control.md).
