@@ -23,7 +23,7 @@ class SelfLimitsTests(unittest.TestCase):
                 allocations={}, self_enrollment=grant)))
             context = dict(threadId=THREAD, sessionId=THREAD, callId='self-test',
                 **{'x-codex-turn-metadata': dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
-            with patch('codex_wake.lifecycle_budget.trusted_upper', return_value=NOW), patch('codex_wake.goal_watcher.watcher_status', return_value=dict(reason='watcher_not_installed')):
+            with patch('codex_wake.lifecycle_budget.trusted_upper', return_value=NOW), patch('codex_wake.native_clock.snapshot', return_value=dict(utc=dict(status='network',sources=['fixture-a','fixture-b'],lower=NOW,upper=NOW),counter=None,reason='bounded_utc')), patch('codex_wake.goal_watcher.watcher_status', return_value=dict(reason='watcher_not_installed')):
                 first = execute(root, policy, 'set', dict(token_limit=100,time_limit_seconds=120), native_context=context)
                 self.assertIn('pid', first['controller'], (first, (root/'goal-supervision/self-watcher.log').read_text() if (root/'goal-supervision/self-watcher.log').exists() else 'no log'))
                 pid = first['controller']['pid']
@@ -115,3 +115,134 @@ class SelfLimitsTests(unittest.TestCase):
                     process.terminate()
                 process.wait(timeout=5)
                 del _CHILDREN[pid]
+
+
+class SelfLimitsAdmissionTests(unittest.TestCase):
+    fixture = fixtures.GoalSupervisionTests.fixture
+    controller = fixtures.GoalSupervisionTests.controller
+
+    def test_missing_clock_rejects_before_creating_native_goal_or_work(self):
+        from codex_wake.self_limits import execute
+        from test_goal_time import ANCHOR
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,_,_=self.fixture(directory)
+            context=dict(threadId=THREAD,sessionId=THREAD,callId='rejected-self-set',
+                **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='caller')})
+            calls=[];goal=None
+            def native(endpoint,executable,method,params,timeout):
+                nonlocal goal
+                calls.append(method)
+                if method=='thread/goal/get':return dict(goal=goal)
+                if method=='thread/read':return dict(thread=dict(id=THREAD,path=str(log),parentThreadId=None))
+                if method=='thread/turns/list':return dict(data=[],nextCursor=None)
+                if method=='thread/goal/set':
+                    goal=dict(threadId=THREAD,createdAt=NOW,status=params['status'])
+                    return dict(goal=goal)
+                raise AssertionError(method)
+            with patch('codex_wake.goal_supervision.native_request',side_effect=native), patch(
+                    'codex_wake.lifecycle_budget.trusted_upper',side_effect=ValueError('admissible time unavailable')), patch(
+                    'codex_wake.native_clock.snapshot',return_value=dict(utc=None,counter=ANCHOR,reason='authenticated_counter_only')):
+                with self.assertRaisesRegex(ValueError,'admissible time unavailable'):
+                    execute(root,policy,'set',dict(token_limit=100,time_limit_seconds=120),native_context=context)
+            self.assertNotIn('thread/goal/set',calls)
+            self.assertNotIn('turn/start',calls)
+            self.assertNotIn('turn/steer',calls)
+            self.assertIsNone(goal)
+
+    def test_counter_only_session_enrolls_without_goal_and_stops_exact_owned_turn(self):
+        from codex_wake.goal_supervision import enroll,poll
+        from test_goal_time import ANCHOR
+        for fault,existing_goal in [('exhaustion',None),('continuity',None),('exhaustion',dict(threadId=THREAD,createdAt=NOW,status='paused',tokenBudget=50))]:
+            with self.subTest(fault=fault,existing_goal=existing_goal),tempfile.TemporaryDirectory() as directory:
+                root,policy,log,_,_=self.fixture(directory)
+                template=json.loads(policy.read_text())['callers'][THREAD];template.pop('allocation_id')
+                policy.write_text(json.dumps(dict(version=2,native_caller_binding=True,allocations={},self_enrollment=template)))
+                context=dict(threadId=THREAD,sessionId=THREAD,callId='counter-self-set',
+                    **{'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='work')})
+                calls=[];active=['work'];clock=dict(utc=None,counter=dict(ANCHOR),reason='authenticated_counter_only')
+                def native(endpoint,executable,method,params,timeout):
+                    calls.append(method)
+                    if method=='thread/goal/get':return dict(goal=existing_goal)
+                    if method=='thread/read':return dict(thread=dict(id=THREAD,path=str(log),parentThreadId=None))
+                    if method=='thread/turns/list':return dict(data=[dict(id=t,status='inProgress') for t in active],nextCursor=None)
+                    if method=='turn/interrupt':active.remove(params['turnId']);return {}
+                    raise AssertionError(method)
+                with self.controller(root),patch('codex_wake.goal_supervision.native_request',side_effect=native),patch(
+                        'codex_wake.lifecycle_budget.trusted_upper',side_effect=ValueError('admissible time unavailable')),patch(
+                        'codex_wake.native_clock.snapshot',side_effect=lambda:clock):
+                    if fault=='exhaustion' and existing_goal is None:
+                        path=root/'goal-supervision/controller.json';compatible=json.loads(path.read_text())
+                        stale=dict(compatible);stale.pop('time_bases');stale.pop('session_scope_without_goal')
+                        stale['observed_boottime']-=30
+                        for missing_heartbeat in (False,True):
+                            if missing_heartbeat:path.unlink()
+                            else:path.write_text(json.dumps(stale))
+                            with self.assertRaisesRegex(ValueError,'existing watcher owner is stale'):
+                                enroll(root,policy,THREAD,100,120,native_context=context,session_scope=True,prepare_only=True)
+                            self.assertEqual([p.name for p in (root/'goal-supervision').glob('*.json')],[] if missing_heartbeat else ['controller.json'])
+                            self.assertFalse(list((root/'goal-supervision/allocations').glob('*.json')))
+                            path.write_text(json.dumps(compatible))
+                    first=enroll(root,policy,THREAD,100,120,native_context=context,session_scope=True)
+                    self.assertEqual(first['state'],'armed')
+                    self.assertEqual(first['time_basis'],'authenticated_host_counter')
+                    self.assertIsNone(first['deadline'])
+                    self.assertEqual(first['lifetime_used_tokens'],40)
+                    if fault=='exhaustion' and existing_goal is None:
+                        # Interrupted publication: allocation committed but its
+                        # session projection was not retained. Reuse its anchor.
+                        for path in (root/'goal-supervision').glob('*.json'):
+                            if json.loads(path.read_text()).get('thread_id')==THREAD:path.unlink()
+                        clock['counter']=dict(ANCHOR,counter=2000)
+                        recovered=enroll(root,policy,THREAD,100,120,native_context=context,session_scope=True)
+                        self.assertEqual(recovered['clock_anchor'],first['clock_anchor'])
+                        self.assertEqual(recovered['elapsed_limit_seconds'],120)
+                        self.assertGreaterEqual(recovered['elapsed_upper_seconds'],1)
+                        self.assertEqual(recovered['lifetime_used_tokens'],40)
+                        first=recovered
+                    clock['counter']=dict(ANCHOR,counter=2000)
+                    tightened=enroll(root,policy,THREAD,90,110,native_context=context,session_scope=True)
+                    self.assertEqual(tightened['clock_anchor'],first['clock_anchor'])
+                    self.assertEqual(tightened['generation'],first['generation'])
+                    self.assertEqual(tightened['lifetime_used_tokens'],40)
+                    self.assertGreaterEqual(tightened['elapsed_upper_seconds'],1)
+                    self.assertEqual(tightened['elapsed_limit_seconds'],110)
+                    clock['counter']=dict(ANCHOR,epoch='replacement') if fault=='continuity' else dict(ANCHOR,counter=112000)
+                    stopped=poll(root)[0]
+                    self.assertEqual(stopped['state'],'stopped')
+                    self.assertTrue(stopped['stop_proof'])
+                    if fault=='continuity':
+                        self.assertEqual(stopped['reason'],'counter_continuity_lost')
+                        self.assertFalse(stopped['first_stop']['clock_qualified'])
+                        self.assertIsNone(stopped['first_stop']['observed_upper'])
+                    if existing_goal is not None:self.assertEqual(existing_goal['status'],'paused')
+                    self.assertEqual(active,[])
+                    clock['counter']=dict(ANCHOR,counter=3000 if fault=='continuity' else 113000)
+                    retry=enroll(root,policy,THREAD,90,110,native_context=context,session_scope=True)
+                    self.assertTrue(retry['stop_latched'])
+                    self.assertEqual(retry['state'],'held')
+                    self.assertEqual(retry['clock_anchor'],first['clock_anchor'])
+                    self.assertEqual(retry['generation'],first['generation'])
+                    self.assertNotIn('thread/goal/set',calls)
+                    self.assertNotIn('turn/start',calls)
+                    self.assertNotIn('turn/steer',calls)
+                    if fault=='exhaustion' and existing_goal is None:
+                        from codex_wake.goal_governance import change
+                        from codex_wake.session_permissions import Principal
+                        change(root,THREAD,enabled=False,principal=Principal(THREAD,'operator'))
+                        for path in (root/'goal-supervision').glob('*.json'):
+                            if json.loads(path.read_text()).get('thread_id')==THREAD:path.unlink()
+                        prepared=enroll(root,policy,THREAD,90,110,native_context=context,session_scope=True,prepare_only=True)
+                        self.assertEqual(prepared['state'],'inactive')
+                        self.assertFalse(any(json.loads(path.read_text()).get('thread_id')==THREAD for path in (root/'goal-supervision').glob('*.json')))
+
+    def test_existing_external_utc_origin_and_native_goal_are_preserved(self):
+        from codex_wake.goal_supervision import enroll
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,_=self.fixture(directory)
+            before=dict(native['goal'])
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+60):
+                first=enroll(root,policy,THREAD,100,120,session_scope=True)
+                self.assertEqual(first['deadline'],NOW+120)
+                self.assertEqual(native['goal'],before)
+                self.assertEqual(native['active'],['work'])
+                self.assertFalse(any(method in ('thread/goal/set','turn/start','turn/steer','turn/interrupt') for method,_ in native['calls']))

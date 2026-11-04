@@ -102,7 +102,9 @@ def record_notice(root, receipt, kind, *, controller=None):
         if sum(1 for _ in directory.glob('notice_*.json')) >= 10000:
             raise ValueError('supervision notice capacity reached; history retained')
         snapshot = {key: receipt.get(key) for key in ('used_tokens', 'token_limit', 'token_accounting',
-            'deadline', 'checkpoint_token_percent', 'checkpoint_seconds', 'state', 'reason', 'lifetime_tokens_before_window','governor_enabled')}
+            'deadline', 'checkpoint_token_percent', 'checkpoint_seconds', 'state', 'reason', 'lifetime_tokens_before_window','governor_enabled','session_scope','native_goal_status')}
+        from .goal_time import public_time
+        snapshot.update(public_time(receipt))
         event = dict(version=1, event_id=event_id, identity=identity, snapshot=snapshot,
             recorded_at=datetime.now(timezone.utc).isoformat(),
             controller_generation=(controller or {}).get('generation', receipt.get('controller_generation')),
@@ -161,7 +163,7 @@ def render_notice(event):
         if len(text.encode())>768:raise ValueError('governor notice exceeds native bound')
         return text
     if kind == 'stop':
-        title = 'Goal paused' if event['proof']['control']['stop_verified'] else 'Stop requested; interruption unverified'
+        title = ('Session stopped' if snapshot.get('session_scope') and snapshot.get('native_goal_status') is None else 'Goal paused') if event['proof']['control']['stop_verified'] else 'Stop requested; interruption unverified'
     elif kind == 'checkpoint':
         title = 'Checkpoint now within the remaining allowance'
     elif kind == 'activation':
@@ -170,11 +172,16 @@ def render_notice(event):
         title = 'External goal watcher engaged'
     else:
         title = 'Supervision recovered; goal remains paused'
-    deadline = snapshot.get('deadline')
-    deadline_text = datetime.fromtimestamp(deadline, timezone.utc).isoformat() if type(deadline) in (int, float) else 'unknown'
+    from .goal_time import relative
+    if relative(snapshot):
+        deadline_text=f"Elapsed limit {snapshot['elapsed_limit_seconds']:g}s (authenticated host elapsed; UTC deadline unavailable)."
+    else:
+        deadline = snapshot.get('deadline')
+        stamp = datetime.fromtimestamp(deadline, timezone.utc).isoformat() if type(deadline) in (int, float) else 'unknown'
+        deadline_text=f"Deadline {stamp} (UTC)."
     text = (f"{title}. Reason: {snapshot.get('reason') or kind}. Used {usage} tokens "
         f"({snapshot.get('token_accounting') or 'unknown'}); remaining {remaining}. "
-        f"Deadline {deadline_text} (UTC). Scope {identity['allocation_id']}; session {identity['thread_id']}. ")
+        f"{deadline_text} Scope {identity['allocation_id']}; session {identity['thread_id']}. ")
     lifetime=(snapshot.get('lifetime_tokens_before_window') or 0)+(used if type(used) is int else 0)
     text += f'Current window; lifetime used {lifetime:,}. '
     if kind == 'engagement':

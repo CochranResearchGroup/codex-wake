@@ -100,23 +100,25 @@ def execute(root, policy, verb, arguments, *, native_context):
     for value, cap in ((tokens, grant['max_tokens']), (seconds, grant['max_seconds'])):
         if type(value) is not int or not 0 < value <= cap:
             raise ValueError('positive limits within inherited host ceilings required')
-    goal, _ = supervision._native(grant, thread)
-    if not goal:
-        # This is native goal metadata only; it submits no provider turn and
-        # neither overwrites a goal nor clears an external allocation.
-        supervision._request(grant, 'thread/goal/set', dict(threadId=thread,
-            objective='Voluntary own-session resource limits', status='active'))
+    # A voluntary session allowance observes existing native goals; creating or
+    # activating a goal can start autonomous work and is never setup authority.
     # Enrollment owns lifetime accounting and rejects increases, scope changes,
     # successor renewal and stop clearing under its maintenance/allocation locks.
-    result = supervision.enroll(root, policy, thread, tokens, seconds,
-        native_context=native_context, session_scope=True)
-    if result.get('state') == 'inactive':
-        return result
+    prepared = supervision.enroll(root, policy, thread, tokens, seconds,
+        native_context=native_context, session_scope=True, prepare_only=True)
+    if prepared.get('state') != 'prepared':
+        return prepared
     try:
         setup = ensure_watcher(root, thread)
     except PermissionDenied as error:
         setup = dict(reason=str(error), start_attempted=False,
             permission=error.decision, next_action='Respect the inherited watcher restriction; inspect host policy.')
+    if setup.get('reason') != 'watcher_running':
+        from .goal_readiness import engagement
+        return dict(prepared,state='held',reason=setup.get('reason'),watcher_setup=setup,
+            engagement=engagement(prepared,supervision._heartbeat(supervision._directory(root))))
+    result = supervision.enroll(root, policy, thread, tokens, seconds,
+        native_context=native_context, session_scope=True)
     end = time.monotonic() + 3
     while True:
         result = supervision.show(root, policy, thread, native_context=native_context)
