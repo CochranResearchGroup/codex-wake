@@ -123,3 +123,51 @@ class LocalGrokTests(unittest.TestCase):
             with self.assertRaises(InventoryError):
                 owner.slash('respond', dict(interaction_id=identifier, value='grok-fixture', idempotency_key='refused'))
             self.assertFalse(any(method == 'session/set_model' for method, _, _ in calls))
+
+    def test_created_session_is_loaded_before_usable_discovery(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); owner, calls = self.fixture(root)
+            original = owner.owner.request; loaded = set()
+            def native(profile, method, params, identifier, guard):
+                if method == 'session/list':
+                    guard(); return {'sessions': [{'sessionId': value, 'cwd': str(root)} for value in loaded]}
+                if method == 'session/load':
+                    loaded.add(params['sessionId'])
+                return original(profile, method, params, identifier, guard)
+            owner.owner.request = native
+            created = owner.create(profile='selected', key='usable-create')
+            session = created['result']['operation']['result']['session_id']
+            row = owner.resolve('grok:' + session, profile='selected')
+            self.assertEqual(row['thread_id'], 'new-conversation')
+            self.assertEqual(sum(method == 'session/new' for method, _, _ in calls), 1)
+
+    def test_uncertain_activation_retains_creation_and_never_replays_load(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); owner, calls = self.fixture(root)
+            original = owner.owner.request; loads = []; visible = [False]
+            def native(profile, method, params, identifier, guard):
+                if method == 'session/list':
+                    guard(); return {'sessions': [{'sessionId': 'new-conversation', 'cwd': str(root)}] if visible[0] else []}
+                if method == 'session/load':
+                    guard(); loads.append(identifier); raise TimeoutError('native load reply lost')
+                return original(profile, method, params, identifier, guard)
+            owner.owner.request = native
+            first = owner.create(profile='selected', key='lost-activation')
+            self.assertEqual(first['status'], 'failed')
+            self.assertEqual(first['error']['code'], 'created_not_ready')
+            self.assertEqual(first['result']['operation']['execution'], 'completed')
+            readiness = first['result']['readiness']
+            self.assertFalse(readiness['ready'])
+            self.assertEqual(owner.result(readiness['creation_operation_id'])['error']['code'], 'created_not_ready')
+            self.assertEqual(readiness['creation_operation_id'], first['result']['operation']['operation_id'])
+            retry = owner.create(profile='selected', key='lost-activation')
+            self.assertEqual(retry['status'], 'failed')
+            self.assertEqual(retry['result']['readiness']['load_operation_id'], readiness['load_operation_id'])
+            self.assertEqual(len(loads), 1)
+            visible[0] = True
+            reconciled = owner.create(profile='selected', key='lost-activation')
+            self.assertTrue(reconciled['result']['readiness']['ready'])
+            self.assertEqual(len(loads), 1)
+            self.assertEqual(sum(method == 'session/new' for method, _, _ in calls), 1)
+            (root / 'controller-grok.json').unlink()
+            self.assertTrue(owner.create(profile='selected', key='lost-activation')['result']['readiness']['ready'])

@@ -108,14 +108,76 @@ class LocalGrokControl:
             actor = self._actor(request['operation_id'])
             if retained['operation'] != 'grok.create' or profile is not None and retained['payload']['profile'] != profile:
                 raise InventoryError('idempotency_conflict', 'creation key already belongs to another profile or operation')
-            return self.runtime.envelope('grok.create', self.runtime._owned(actor, retained, lambda: actor))
+            return self._activate_created(retained)
         names = self._profiles(profile)
         if len(names) != 1:
             raise InventoryError('ambiguous_target' if names else 'target_unavailable', 'select exactly one owned Grok profile')
         selected = self._profile(names[0]); actor = local_operator(selected['target'])
         request['target'] = selected['target']
-        return self.owner.execute(actor, 'grok.create', dict(profile=names[0], expected_target=selected['target'],
+        created = self.owner.execute(actor, 'grok.create', dict(profile=names[0], expected_target=selected['target'],
             _request=request), authorize=lambda: actor)
+        return self._activate_created(self.runtime._load(created['result']['operation']['operation_id']))
+
+    def _activation_view(self, record):
+        value = self.runtime.envelope('grok.create', record)
+        readiness = record['local_readiness']
+        value['result']['readiness'] = readiness
+        if not readiness['ready']:
+            value.update(status='failed', error=dict(code='created_not_ready',
+                message='Native creation retained; session activation is not ready. Retrieve the original operation IDs; do not create a replacement.'))
+        return value
+
+    def _activate_created(self, original):
+        identifier = original['operation_id']
+        actor = self._actor(identifier)
+        with self._interaction_lock(identifier):
+            original = self.runtime._owned(actor, self.runtime._load(identifier), lambda: actor)
+            if original.get('local_readiness', {}).get('ready'):
+                return self._activation_view(original)
+            if original['execution'] != 'completed':
+                return self.runtime.envelope('grok.create', original)
+            target = original['result']['target']
+            request = self._request(target, identifier, 'local-grok-load-')
+            readiness = dict(ready=False, state='activation_pending', creation_operation_id=identifier,
+                load_operation_id=request['operation_id'], reason=None)
+            # Bind both original IDs durably before any activation I/O.
+            original['local_readiness'] = readiness
+            self.runtime._save(original)
+            try:
+                try:
+                    load = self.runtime._load(request['operation_id'])
+                except InventoryError as error:
+                    if error.code != 'operation_not_found':
+                        raise
+                    profile = original['payload']['profile']
+                    session_actor = local_operator(target)
+                    response = self.owner.execute(session_actor, 'grok.load', dict(profile=profile,
+                        expected_target=target, _request=request), authorize=lambda: session_actor)
+                    load = self.runtime._load(response['result']['operation']['operation_id'])
+                else:
+                    self._actor(load['operation_id'])
+                    if load['operation'] != 'grok.load' or load['target'] != target:
+                        raise InventoryError('idempotency_conflict', 'activation ID already belongs to another target')
+                    if load['phase'] == 'uncertain':
+                        # Only native loaded-session listing may reconcile an uncertain
+                        # activation. It never resends session/load or session/new.
+                        row = self.resolve('grok:' + target['conversation_id'], target, original['payload']['profile'])
+                        proof = dict(session_id=row['thread_id'], reconciliation='native_loaded_session_observed_without_replay')
+                        session_actor = local_operator(target)
+                        self.runtime.reconcile_result(session_actor, load['operation_id'], expected_operation='grok.load',
+                            authorize=lambda: session_actor, observe=lambda record: proof)
+                        load = self.runtime._load(load['operation_id'])
+                if load['execution'] == 'completed':
+                    readiness.update(ready=True, state='ready', reason=None)
+                else:
+                    readiness.update(state='activation_uncertain' if load['phase'] == 'uncertain' else 'activation_failed',
+                                     reason=load.get('reason') or 'native_activation_not_confirmed')
+            except (ValueError, OSError, KeyError, TypeError) as error:
+                readiness.update(state='activation_uncertain', reason=getattr(error, 'code', 'native_activation_unavailable'))
+            original = self.runtime._load(identifier)
+            original['local_readiness'] = readiness
+            self.runtime._save(original)
+            return self._activation_view(original)
 
     def prompt(self, selector, prompt, key=None, profile=None, expected_target=None):
         request = self._request({}, key)
@@ -157,6 +219,8 @@ class LocalGrokControl:
     def result(self, operation_id, timeout=0):
         actor = self._actor(operation_id)
         record = self.runtime._load(operation_id)
+        if record['operation'] == 'grok.create' and record.get('local_readiness'):
+            return self._activation_view(record)
         if record['operation'] == 'grok.prompt' and (record.get('result') or {}).get('kind') == 'grok_acp_collecting':
             import time
             if type(timeout) not in (int, float) or not 0 <= timeout <= 30:
