@@ -8,6 +8,7 @@ def engagement(receipt, controller):
     if receipt.get('governor_enabled',True) is False:
         return dict(status='inactive',engaged=False,enforcement='inactive',presentation='pending',
             operator_read='unverified',next_action='Governor disabled by operator. Drop stale governor instructions; independent platform controls remain. No resources renewed or work resumed.')
+    from .goal_time import controller_compatible
     status = 'waiting_for_first_poll'
     action = 'Wait for the independent watcher to poll this enrollment; inspect goal-limits show.'
     accounting = receipt.get('accounting') or {}
@@ -16,6 +17,9 @@ def engagement(receipt, controller):
         status = 'watcher_stale' if controller.get('active') and controller.get('process_alive',True) else 'watcher_not_running'
         action = ('Run goal-limits watcher-status for the configured service. An authorized operator '
                   'can use goal-limits start-watcher; masked services require an explicit operator decision.')
+    elif not controller_compatible(receipt,controller):
+        status='watcher_capability_unavailable'
+        action='Qualify an updated controller for this exact root; preserve the existing owner and resource history. No automatic restart is authorized.'
     elif receipt.get('reason') == 'controller_maintenance':
         status='maintenance'
         action='Wait for the authorized controller handover and verify its replacement first poll; no resources are renewed.'
@@ -39,15 +43,24 @@ def engagement(receipt, controller):
                   presentation='pending', operator_read='unverified')
     if status == 'engaged':
         used, limit = receipt['used_tokens'], receipt['token_limit']
-        elapsed = max(0, time.clock_gettime(time.CLOCK_BOOTTIME)-receipt['started_boottime'])
-        upper = receipt['started_upper']+elapsed
+        from .goal_time import relative
+        counter_time=relative(receipt)
+        if counter_time:
+            upper=receipt.get('clock_elapsed_upper',0)
+            deadline_utc=None
+        else:
+            elapsed = max(0, time.clock_gettime(time.CLOCK_BOOTTIME)-receipt['started_boottime'])
+            upper = receipt['started_upper']+elapsed
+            deadline_utc=datetime.fromtimestamp(receipt['deadline'], timezone.utc).isoformat().replace('+00:00', 'Z')
         result['card'] = dict(thread_id=receipt['thread_id'], allocation_id=receipt['allocation_id'],
             generation=receipt['generation'], enrollment_revision=receipt['enrollment_revision'],
             token_limit=limit, used_tokens=used, remaining_tokens=max(0, limit-used),
             lifetime_used_tokens=receipt.get('lifetime_tokens_before_window',0)+used,
             token_accounting=receipt.get('token_accounting', 'cache_inclusive'),
-            deadline_utc=datetime.fromtimestamp(receipt['deadline'], timezone.utc).isoformat().replace('+00:00', 'Z'),
-            timezone='UTC', remaining_seconds=max(0, receipt['deadline']-upper),
+            deadline_utc=deadline_utc,
+            timezone=None if counter_time else 'UTC',
+            time_basis='authenticated_host_counter' if counter_time else 'qualified_utc',
+            time_observation='last_authenticated_sample' if counter_time else 'same_boot_elapsed', remaining_seconds=max(0, receipt['deadline']-upper),
             checkpoint_tokens=limit*receipt['checkpoint_token_percent']/100,
             checkpoint_seconds=receipt['checkpoint_seconds'], watcher_health='healthy',
             scope='shared_allocation' if receipt.get('allocation_path') else 'session',
