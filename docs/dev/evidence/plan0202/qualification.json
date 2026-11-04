@@ -1,0 +1,37 @@
+{
+  "source": "56ef9356a7f0e17251b5c5f203ab341df598d2c6",
+  "issue": 478,
+  "seam": "rendered client actual Windows PowerShell5.1 + real wsl.exe + disposable Linux fixture CLI",
+  "red": "structured stderr lost exit7 and leaked PRIVATE_ERROR_SENTINEL via ErrorRecord under Stop; malformed successful JSON separately leaked private stdout",
+  "intermediate": "native stderr redirected to file under Continue preserved exit but PowerShell error formatting prevented structured JSON parsing; replaced with private in-memory ErrorRecord capture",
+  "checks": [
+    {
+      "command": "PYTHONPATH=src:tests /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv311/bin/python -m unittest test_powershell_bootstrap test_local_controller_server test_local_harness_routing test_command_contract",
+      "passed": 12,
+      "seconds": 70.149
+    },
+    {
+      "command": "PYTHONPATH=src:tests /home/ecochran76/.local/state/codex-wake/testing/command-contract/venv312/bin/python -m unittest test_powershell_bootstrap test_local_controller_server test_local_harness_routing test_command_contract",
+      "passed": 12,
+      "seconds": 68.911
+    }
+  ],
+  "other_checks": [
+    "RuffF821/F822/F823",
+    "generator--check",
+    "policywiring",
+    "gitdiffcheck"
+  ],
+  "log_sha256": {
+    "bootstrap478-red.log": "2bc1ad5420ea0cce6d6d3ac0f8a8ee5e8eb903693e37f23cdfb28a0b3f238f36",
+    "bootstrap478-green.log": "7532a7ff0b5ff1491023fd4d4072cf0220ab1b33c95edbb2a6bb8a7408af7e9e",
+    "bootstrap478-green2.log": "a716ace25a654837fdc8f818f71203fc8ff6f6772b62c15e5533d7626f679997",
+    "bootstrap478-parse-red.log": "725d60574867d39361b7dd6e3935ab5eaf111e819ad5ab1a3155b060c923006b",
+    "bootstrap478-check311.log": "a913bcf01b7713c54e0618f4f90b3f10b8bebd490d32e61f775425fdd5fcfbb1",
+    "bootstrap478-check312.log": "b34f3f65aea3094528f7a4fe3a0281745eb966afe60022d38afc7e8072e71d3b"
+  },
+  "hosted_ci": "skipped per cost policy",
+  "limitations": "Failure-reporting regression only; original intermittent bootstrap cause remains unresolved. Actual Windows tests opt-in by environment availability; executed here.",
+  "provider_calls": 0,
+  "working_installation": "unchanged"
+}

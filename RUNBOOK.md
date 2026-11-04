@@ -8475,3 +8475,15 @@ Source integration is tracked by PR477 and companion Bots PR74. No working
 installation or deployment was changed. Qualification/review artifacts retain
 exact commands, source/prefix/wheel/log/census hashes and environment differences.
 Memory disposition: forbidden by Plan0200; recorded no-write receipt, zero writes.
+
+## Turn 407 | 2026-11-04
+
+Issue478 bootstrap observability implemented test-first at `56ef935`. The actual
+PowerShell/WSL fixture exposed raw ErrorRecord leakage under Stop and malformed
+connection JSON leakage. Private stream capture plus allowlisted diagnostics
+preserves native exit/category without printing raw messages or connection data.
+Twelve affected tests pass on each Python3.11/3.12, including actual PowerShell
+success behavior; lint/generator/policy/diff checks pass. Retained red/intermediate
+logs and source/command identities are in Plan0202 evidence. No provider effects
+or working installation change. Original intermittent bootstrap cause unresolved.
+Memory disposition: forbidden; no explicit memory-write request.
