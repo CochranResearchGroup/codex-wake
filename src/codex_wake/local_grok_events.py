@@ -67,8 +67,9 @@ def collect(root, identifier):
             current = runtime._load(identifier)
             current['result'] = result
             owner.observe_native_owned(current)
-            runtime._save(current)
+            # Publish complete retention before a caller can observe terminal work.
             store.update(identifier, status='completed')
+            runtime._save(current)
         except ACPRefusal as error:
             current = runtime._load(identifier)
             current['result'] = dict(kind='grok_acp_refusal', reason=error.code,
