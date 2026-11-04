@@ -1443,8 +1443,8 @@ State: OPEN
 Current State: Codex Milestone A and children #467–#475 are validated and closed.
 The actual codex-bots adapter is qualified on draft PR74, pending shared review
 and source integration. Grok #476 is in progress: source is integrated, and the
-installed creation/activation repair is under qualification. No Grok provider
-prompt has run. Final review/remediation follow ticket validation. Working
+installed creation/activation repair is under qualification. The first Grok prompt completed with live output; metadata
+classification requires repair before the remaining one of two allowed intents. Final review/remediation follow ticket validation. Working
 installations and native daemon packages remain unchanged.
 
 Plan: [WSL session control](docs/dev/plans/0200-2026-11-03-wsl-session-control.md)

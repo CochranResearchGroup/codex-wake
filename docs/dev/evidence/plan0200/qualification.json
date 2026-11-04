@@ -401,7 +401,7 @@
       "repair": "Preserve successful creation, activate through retained stable-key load, report created_not_ready if activation fails; never create again on retry",
       "cumulative_native_fixture_creations": 2
     },
-    "current_gate": "Exact910531f prefix validation and maximum2 genuine marker-only provider intents; same fixture, no new creation",
+    "current_gate": "Known metadata classification repair, explicit same-session resume without creation, then remaining one genuine provider intent",
     "installed_bootstrap_repaired": {
       "status": "passed",
       "source": "49350db4cda29c39e5d56f346b61c781062e281c",
@@ -421,6 +421,27 @@
       "external_provider_prompts": 0,
       "native_fixture_creations_cumulative": 3,
       "owned_processes": "Retained inactive with exact custody for provider packet; not a cleanup claim"
+    },
+    "native_intent1": {
+      "source": "910531f1f23a48b7d07f7a64c5835231d08f8c0c",
+      "status": "completed native work, partial transcript acceptance",
+      "wheel_sha256": "9c9d2e275957b12897a97a5805a4e07cfb56c69ed62edd5a29b3edf53c12b0e4",
+      "entrypoint": "actual Windows PowerShell fresh submission",
+      "operation_id": "local-grok-7af468b6f64525d9df021956c0893924",
+      "idempotency_key": "qualification476-1-e64877c0c080",
+      "native_result": "end_turn with marker in actual saved answer",
+      "live_before_terminal": [
+        "API",
+        "local MCP"
+      ],
+      "failed": "known available_commands_update marked unsupported; history_complete=false and PSexit3",
+      "private_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/grok476/installed-0df50f01/provider/receipt.json",
+      "receipt_sha256": "80cf4bb4c8165b8ca7ccc54912f7ebcef0982d7ac619390fef718fdc9b33eb9c",
+      "census_sha256": "cb9d3d7d3e411717d294ed446b35c59d7e0e6a45a896a8a2d3f2637ac5fe2a6b",
+      "owned_processes": "host/native/controller/collector gone after confirmed completion",
+      "provider_intents_consumed": 1,
+      "remaining_of_max2": 1,
+      "repair": "retain known ordered native metadata; exclude it only from assistant-text projection; unknown kinds stay partial"
     }
   },
   "review": {

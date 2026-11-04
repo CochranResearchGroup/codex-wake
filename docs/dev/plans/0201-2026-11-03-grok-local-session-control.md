@@ -14,8 +14,11 @@ readiness proved the sole ACP owner, cached authentication, session loading and
 model selection/readback. The first installed creation check exposed missing
 activation; the repair preserves creation and stable load IDs. Replacement
 installed qualification is running with one additional fixture allowed, three
-cumulative. No provider prompt has run. The provider packet and final broad
-review/remediation remain unopened. Plan0200 and its ledger own parent sequencing.
+cumulative. The first actual PowerShell provider prompt completed, with API/MCP live
+output before terminal. Retention remained partial because known native command
+metadata was misclassified. All owned processes were cleaned; one provider slot
+remains for a repaired exact-prefix run after explicit same-session resume. The
+final broad review/remediation remain unopened. Plan0200 and its ledger own parent sequencing.
 
 ## Scope and acceptance
 
