@@ -117,3 +117,10 @@ persisted conversation without creating another session. See [Grok workflow](loc
 for the exact bootstrap, loaded-session discovery, command interactions and native
 capability limits. Retained operation handles select their original owner; result
 retrieval does not change harness or require a fresh profile.
+
+PowerShell bootstrap failures report `wsl_exit` and a sanitized `category`
+(`controller_unavailable`, `invalid_argument`, `configuration_unavailable`,
+`unknown`, `launch_failed` or `invalid_connection`). Raw native errors and the
+private connection response are not printed. Preserve these fields when reporting
+a failure; no automatic submission retry is performed. These diagnostics improve
+failure evidence and do not establish a fix for the earlier intermittent WSL error.

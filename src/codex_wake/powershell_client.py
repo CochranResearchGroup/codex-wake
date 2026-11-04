@@ -20,10 +20,25 @@ $retryKey=$null
 try {
  # Bootstrap is captured privately; the bearer never appears in command arguments.
  $bootstrap=@('-d',$Distro,'--exec',$WakeCli,'--wake-root',$WakeRoot,'control','connection')
- $privateText=(& wsl.exe @bootstrap 2>$null | Out-String)
- if ($LASTEXITCODE -ne 0) { throw 'Start the WSL local controller before using this client.' }
- $connection=$privateText | ConvertFrom-Json
- $address=[Uri]$connection.url
+ # Capture both streams as private objects. PowerShell5.1 wraps native stderr
+ # in ErrorRecord; letting Stop handle it would expose arbitrary native text.
+ $ErrorActionPreference='Continue'
+ try { $bootstrapOutput=@(& wsl.exe @bootstrap 2>&1); $bootstrapExit=$LASTEXITCODE }
+ catch { throw 'WSL bootstrap failed: wsl_exit=unavailable category=launch_failed' }
+ finally { $ErrorActionPreference='Stop' }
+ $privateText=($bootstrapOutput | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] } | Out-String)
+ if ($bootstrapExit -ne 0) {
+  $category='unknown'
+  try {
+   $privateError=($bootstrapOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | ForEach-Object { $_.Exception.Message }) -join "`n"
+   $nativeError=$privateError | ConvertFrom-Json
+   if ($nativeError.error.code -in @('controller_unavailable','invalid_argument','configuration_unavailable')) { $category=[string]$nativeError.error.code }
+  } catch { $category='unknown' }
+  throw ('WSL bootstrap failed: wsl_exit='+$bootstrapExit+' category='+$category)
+ }
+
+ try { $connection=$privateText | ConvertFrom-Json; $address=[Uri]$connection.url }
+ catch { throw 'WSL bootstrap failed: wsl_exit=0 category=invalid_connection' }
  if ($address.Scheme -ne 'http' -or $address.Host -notin @('127.0.0.1','localhost','::1')) { throw 'Local controller endpoint must be loopback.' }
  Add-Type -AssemblyName System.Net.Http
  $handler=New-Object System.Net.Http.HttpClientHandler
