@@ -138,4 +138,14 @@ class OutputModesTests(unittest.TestCase):
                         '--idempotency-key','failure-key','--endpoint',endpoint,'--mode','silent','--timeout','3'],capture_output=True,text=True,timeout=15)
                     self.assertEqual(caller.returncode,2,caller.stderr)
                     self.assertEqual(caller.stdout,'');self.assertIn('operation_id',caller.stderr)
+                    from codex_wake.local_control_service import LocalOperations
+                    from codex_wake.local_control_client import cli_frames
+                    diagnostic=json.loads(caller.stderr.strip().splitlines()[-1])
+                    self.assertEqual(diagnostic['reason'],'native_turn_failed')
+                    frames=list(cli_frames(LocalOperations(root),['output',diagnostic['operation_id'],'--mode','silent','--timeout','0']))
+                    self.assertEqual([frame['exit_code'] for frame in frames if 'exit_code' in frame],[2])
+                    self.assertFalse(any(frame.get('stdout') for frame in frames))
+                    framed=json.loads(''.join(frame.get('stderr','') for frame in frames))
+                    self.assertEqual(framed['reason'],'native_turn_failed')
+                    self.assertEqual(framed['operation_id'],diagnostic['operation_id'])
                 finally:server.shutdown();worker.join(2)

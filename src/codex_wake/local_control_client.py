@@ -2,11 +2,10 @@
 import json
 import math
 import sys
-import time
 from uuid import uuid4
 from urllib.request import Request,build_opener,ProxyHandler
 
-from .local_control_commands import output_exit_code,operation_exit_code,receipt_output,operation_schemas
+from .local_control_commands import operation_exit_code,receipt_output,operation_schemas
 from .local_control_routing import LocalSessionRouter
 
 
@@ -108,20 +107,9 @@ def remote(root,arguments):
 
 
 def output_frames(owner,identifier,mode,timeout,cursor=0,limit=100):
-    yield {'operation_id':identifier}
-    session=LocalSessionRouter(owner.root);deadline=time.monotonic()+timeout
-    while True:
-        output=session.output(identifier,mode=mode,cursor=cursor,limit=limit,timeout=max(0,min(30,deadline-time.monotonic())))
-        yield {'output':output}
-        if mode=='stream' and output.get('text'):yield {'stdout':output['text']}
-        elif mode=='transcript':yield {'stdout':json.dumps(output,sort_keys=True)+'\n'}
-        elif mode=='final' and output['terminal']:yield {'stdout':output.get('text','')}
-        cursor=output['next_cursor']
-        if mode in ('stream','transcript') and cursor<output['latest_cursor']:continue
-        if output['terminal'] or output['phase']=='uncertain' or time.monotonic()>=deadline:
-            code=output_exit_code(output)
-            if code:yield {'stderr':json.dumps(dict(operation_id=identifier,reason=output['reason'] or ('output_incomplete' if output['terminal'] else 'wait_timeout'),next_cursor=cursor,retention=output['retention']))+'\n'}
-            yield {'exit_code':code};return
+    """Bind the operation registry's root to the shared retained-output writer."""
+    from .local_control_commands import output_frames as frames
+    yield from frames(LocalSessionRouter(owner.root),identifier,mode,timeout,cursor,limit)
 
 
 def operation_frames(owner,operation,arguments):

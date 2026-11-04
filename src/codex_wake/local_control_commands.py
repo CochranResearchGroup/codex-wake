@@ -93,22 +93,33 @@ def _exit(output):
     return 0
 
 
-def present(owner,identifier,*,mode,timeout,cursor=0,limit=100):
-    """CLI presentation only. Timeout/disconnect never cancels the retained turn."""
+def output_frames(owner,identifier,mode,timeout,cursor=0,limit=100):
+    """One polling and diagnostic contract for direct and framed presentation."""
+    yield {'operation_id':identifier}
     deadline=time.monotonic()+timeout
     while True:
-        value=owner.output(identifier,mode=mode,cursor=cursor,limit=limit,timeout=max(0,min(30,deadline-time.monotonic())))
-        if mode=='stream':print(value.get('text',''),end='',flush=True)
-        elif mode=='transcript':print(json.dumps(value,sort_keys=True),flush=True)
-        elif mode=='final' and value['terminal']:print(value['text'],end='',flush=True)
-        cursor=value['next_cursor']
-        # Drain already-retained pages even after terminal completion.
-        if mode in ('stream','transcript') and cursor<value['latest_cursor']:
-            continue
-        if value['terminal'] or value['phase']=='uncertain' or time.monotonic()>=deadline:
-            code=_exit(value)
-            if code:print(json.dumps(dict(operation_id=identifier,reason=value['reason'] or ('native_turn_'+value['execution'] if value['execution'] in ('failed','cancelled') else 'output_incomplete' if value['terminal'] else 'wait_timeout'),next_cursor=cursor,retention=value['retention'])),file=sys.stderr)
-            return code
+        output=owner.output(identifier,mode=mode,cursor=cursor,limit=limit,timeout=max(0,min(30,deadline-time.monotonic())))
+        yield {'output':output}
+        if mode=='stream' and output.get('text'):yield {'stdout':output['text']}
+        elif mode=='transcript':yield {'stdout':json.dumps(output,sort_keys=True)+'\n'}
+        elif mode=='final' and output['terminal']:yield {'stdout':output.get('text','')}
+        cursor=output['next_cursor']
+        # Terminal status does not discard already-retained pages.
+        if mode in ('stream','transcript') and cursor<output['latest_cursor']:continue
+        if output['terminal'] or output['phase']=='uncertain' or time.monotonic()>=deadline:
+            code=_exit(output)
+            if code:
+                reason=output['reason'] or ('native_turn_'+output['execution'] if output['execution'] in ('failed','cancelled') else 'output_incomplete' if output['terminal'] else 'wait_timeout')
+                yield {'stderr':json.dumps(dict(operation_id=identifier,reason=reason,next_cursor=cursor,retention=output['retention']))+'\n'}
+            yield {'exit_code':code};return
+
+
+def present(owner,identifier,*,mode,timeout,cursor=0,limit=100):
+    """Write shared frames; caller timeout/disconnect never cancels native work."""
+    for frame in output_frames(owner,identifier,mode,timeout,cursor,limit):
+        if 'stdout' in frame:print(frame['stdout'],end='',flush=True)
+        if 'stderr' in frame:print(frame['stderr'],end='',file=sys.stderr,flush=True)
+        if 'exit_code' in frame:return frame['exit_code']
 
 
 def command(args,root):

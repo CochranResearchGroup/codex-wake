@@ -579,11 +579,25 @@
   },
   "review": {
     "broad_reviews": 1,
-    "remediation_passes": 0,
-    "status": "running one frozen Standards/Spec review",
+    "remediation_passes": 1,
+    "status": "single broad review and bounded TDD remediation complete; final local CI pending",
     "wake_base": "171befbaf1be833f55eb0627c802e279cf0fbf35",
     "bots_base": "9ec0e7a5d8542d936f64b5409322c62393ebb694",
-    "bots_tip": "763056b168db54a7a68b8d34b7595896e71cf384"
+    "bots_tip": "763056b168db54a7a68b8d34b7595896e71cf384",
+    "accepted_findings": [
+      {
+        "id": "S1",
+        "axis": "Standards",
+        "classification": "blocking",
+        "priority": "P2",
+        "type": "judgement, not hard violation",
+        "scope": "Shared output loop and reasonless native-failure diagnostic parity",
+        "resolution": "resolved by shared output generator; public red/green and33focused tests/version passed"
+      }
+    ],
+    "spec_findings": [],
+    "report": "docs/dev/evidence/plan0200/review.md",
+    "remediation_receipt": "/home/ecochran76/.local/state/codex-wake/testing/plan0200/final-review/S1-remediation.json"
   },
   "deployment": "working installation unchanged",
   "environment_differences": [
