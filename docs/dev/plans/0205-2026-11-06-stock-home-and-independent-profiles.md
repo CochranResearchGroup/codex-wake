@@ -137,7 +137,7 @@ Tracker closure follows validated integration outcomes, separately from release/
 | Unit | Blockers | Owner | State | Write scope |
 |---|---|---|---|---|
 | #489 stores/seeding | none | primary | validated domain seam | controller_accounts, codex_profiles config and independent store owner; tests |
-| #490 adoption | none | /root/adopt205 | running | controller_migration and adoption helper; migration tests |
+| #490 adoption | none | /root/adopt205 | integrated; 25 focused PASS | controller_migration and adoption helper; migration tests |
 | #491 readiness | none | /root/ready205 | integrated (runtime join pending) | selected readiness owner; readiness tests |
 | #492 config sync | #489 | /root/sync205 | running | configuration sync owner and tests |
 | #493 history | #489 | history worker | pending | history discovery/import and tests |
@@ -152,3 +152,8 @@ Worker branches start from the recorded integration checkpoint; no nested worker
 #489 integrated 9ee1d157045c8bfd6bdebca76f4043e89b3bb72d. Public account seam red: unsupported stores.register; green: test_independent_stores.py 1 passed, test_controller_accounts.py 8 passed. Commands: PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p <file>. Raw red/green logs /tmp/cw205-stores-{red,green}.log and /tmp/cw205-accounts.log. No installed/native claim. Sync baseline and detailed categories belong #492.
 #491 worker e092695 +36a2d96 integrated as ddc1ba6 +10cee78; primary reran test_account_*py: 7 passed1.589s. Actual backend and watcher read-only owners used; native limits/refresh and transport guards remain join gates. Explicit caller paths must not become remote file inspection authority.
 #490 worker /root/adopt205, branch feat/profile-adoption-490, base258b823; first turn runtime failure network permission revoked, resumed same owned state. #492 /root/sync205 branch feat/profile-sync-492 base9ee1d15 owns configuration engine and profile_stores helpers. Workers use shared existing Python venv, not nonexistent worktree .venv. No ticket closed yet; all seven creation receipts in user-scoped spec0205/tickets.json.
+
+### Adoption integration checkpoint
+
+Worker69531b9 and afec766 integrated as6b9e426 and a42458c. Primary focused public migration/adoption regression: 25 PASS5.614s, command PYTHONPATH=src:tests /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest test_controller_adoption test_controller_migration -q. Actual copied hook execution, private MCP values/redacted receipts and rollback verified. Explicit native/credential state and unsupported nested links stay under existing owner. Pinned ruff0.14.2 undefined-name check on changed files PASS via /home/linuxbrew/.linuxbrew/bin/uv tool run. Initial venv ruff absent; no source failure hidden.
+Review comparison point requested asynchronously per skill; no answer yet, no broad review started. All issue states remain open until integration/runtime joins. Three-worker implementation fan-out ended adoption; primary may resume implementation alongside sync/history.
