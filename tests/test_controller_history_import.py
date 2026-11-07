@@ -78,6 +78,110 @@ readable_accounts=["alice","bob"]
         self.assertEqual(second['result']['operation']['result'],result)
         self.assertEqual(self.forks,1)
 
+    def test_unchanged_revision_reuses_copy_across_distinct_requests_and_preserves_destination_work(self):
+        first = self.owner().execute(self.actor, 'history.import', self.arguments, authorize=lambda: self.actor)
+        original = first['result']['operation']['result']
+        self.child_path.write_text(self.child_path.read_text() + 'destination-only work\n')
+        args = copy.deepcopy(self.arguments)
+        args['_request'].update(operation_id='copy-again', idempotency_key='copy-again')
+        second = self.owner().execute(self.actor, 'history.import', args, authorize=lambda: self.actor)
+        self.assertEqual(second['result']['operation']['result'], original)
+        self.assertEqual(self.forks, 1)
+        self.assertIn('destination-only work', self.child_path.read_text())
+
+    def test_advanced_source_creates_linked_snapshot_without_overwriting_prior_destination(self):
+        from dataclasses import replace
+        from uuid import UUID
+        owner = self.owner()
+        first = owner.execute(self.actor, 'history.import', self.arguments, authorize=lambda: self.actor)['result']['operation']['result']
+        previous_path = self.child_path
+        previous_path.write_text(previous_path.read_text() + 'destination-only work\n')
+        previous_content = previous_path.read_bytes()
+        self.source.write_text(self.source.read_text() + json.dumps(dict(type='response_item', payload=dict(type='message', role='user', content=[]))) + '\n')
+        self.turns.append(dict(id='turn-two', status='completed', items=[], itemsView='full'))
+        pin = self.reader.execute('history.read', dict(owner='alice', thread_id=SOURCE))['session']['target']
+        actor = replace(self.actor, targets=[pin, self.destination])
+        args = copy.deepcopy(self.arguments)
+        args['expected_source'] = pin
+        args['_request'].update(operation_id='advanced', idempotency_key='advanced')
+        request = self.request
+        new_id = str(UUID(int=UUID(CHILD).int + 1))
+        def advanced(endpoint, executable, method, params, timeout, **kwargs):
+            if method == 'thread/fork':
+                self.forks += 1
+                self.child_path = previous_path.with_name('advanced.jsonl')
+                self.child_path.write_bytes(Path(params['path']).read_bytes())
+                return {'thread': {'id': new_id}}
+            return request(endpoint, executable, method, params, timeout, **kwargs)
+        owner.request = advanced
+        second = owner.execute(actor, 'history.import', args, authorize=lambda: actor)['result']['operation']['result']
+        self.assertEqual(second['thread_id'], new_id)
+        self.assertEqual(second['provenance']['previous_snapshot_thread_id'], first['thread_id'])
+        self.assertEqual(previous_path.read_bytes(), previous_content)
+        self.assertEqual(self.forks, 2)
+
+    def test_ongoing_source_copies_only_saved_completed_prefix(self):
+        self.source.write_text(self.source.read_text() + json.dumps(dict(type='event_msg', payload=dict(type='task_complete', turn_id='turn-one'))) + '\n')
+        completed = self.source.read_bytes()
+        self.source.write_text(self.source.read_text() + json.dumps(dict(type='event_msg', payload=dict(type='task_started', turn_id='turn-two'))) + '\n')
+        self.pin = self.reader.execute('history.read', dict(owner='alice', thread_id=SOURCE))['session']['target']
+        self.arguments['expected_source'] = self.pin
+        from dataclasses import replace
+        self.actor = replace(self.actor, targets=[self.pin, self.destination])
+        captured = self.source.read_bytes()
+        continued = (json.dumps(dict(type='event_msg', payload=dict(type='token_count'))) + '\n').encode()
+        original = self.request
+        def ongoing(endpoint, executable, method, params, timeout, **kwargs):
+            value = copy.deepcopy(original(endpoint, executable, method, params, timeout, **kwargs))
+            if method == 'thread/fork':
+                with self.source.open('ab') as stream:
+                    stream.write(continued)
+            if method == 'thread/read' and params['threadId'] == SOURCE:
+                value['thread']['status'] = {'type': 'active'}
+                value['thread']['turns'].append(dict(id='turn-two', status='inProgress', items=[], itemsView='full'))
+            return value
+        owner = self.owner()
+        owner.request = ongoing
+        value = owner.execute(self.actor, 'history.import', self.arguments, authorize=lambda: self.actor)['result']['operation']
+        self.assertEqual(value['execution'], 'completed')
+        self.assertEqual(self.child_path.read_bytes(), completed)
+        result = value['result']['provenance']
+        self.assertEqual(result['saved_boundary']['last_completed_turn_id'], 'turn-one')
+        self.assertEqual(result['exclusions'], [dict(turn_id='turn-two', reason='incomplete_turn')])
+        self.assertEqual(self.source.read_bytes(), captured + continued)
+
+    def test_registered_stock_source_imports_through_same_native_owner(self):
+        from dataclasses import replace
+        self.accounts.execute('stores.register', dict(selector='stock', home=str(self.source.parent.parent)))
+        self.config.write_text(self.config.read_text().replace('readable_accounts=["alice","bob"]', 'readable_accounts=["stock","bob"]'))
+        reader = ControllerHistory(self.config, root=self.root, host='local', environment='test', authorized_accounts=['stock','bob'])
+        pin = reader.execute('history.read', dict(owner='stock', thread_id=SOURCE))['session']['target']
+        self.destination = self.daemons.execute('daemons.status', dict(account='bob', channel='modded'))['daemon']['target']
+        self.arguments['expected_target'] = self.destination
+        self.arguments['_request']['target'] = self.destination
+        actor = replace(self.actor, targets=[pin, self.destination])
+        self.arguments.update(owner='stock', expected_source=pin)
+        value = self.owner().execute(actor, 'history.import', self.arguments, authorize=lambda: actor)['result']['operation']['result']
+        self.assertEqual(value['provenance']['source_owner'], 'stock')
+        self.assertEqual(value['thread_id'], CHILD)
+        self.assertEqual(self.forks, 1)
+
+    def test_registered_stock_destination_imports_without_replacing_shared_home(self):
+        from dataclasses import replace
+        stock_home = self.root / 'homes/codex-bob'
+        self.accounts.execute('stores.register', dict(selector='stock', home=str(stock_home)))
+        destination = self.daemons.execute('daemons.status', dict(account='stock', channel='modded'))['daemon']['target']
+        self.pin = self.reader.execute('history.read', dict(owner='alice', thread_id=SOURCE))['session']['target']
+        self.arguments['expected_source'] = self.pin
+        actor = replace(self.actor, targets=[self.pin, destination])
+        self.arguments.update(destination='stock', expected_target=destination)
+        self.arguments['_request']['target'] = destination
+        before = stock_home.stat().st_ino
+        value = self.owner().execute(actor, 'history.import', self.arguments, authorize=lambda: actor)['result']['operation']['result']
+        self.assertEqual(value['destination'], 'stock')
+        self.assertEqual(stock_home.stat().st_ino, before)
+        self.assertEqual(value['target']['home'], str(stock_home))
+
     def test_completed_unloaded_saved_source_can_be_copied_and_replayed(self):
         original = self.request
         def unloaded(endpoint, executable, method, params, timeout, **kwargs):
@@ -165,6 +269,22 @@ readable_accounts=["alice","bob"]
         second=owner.execute(self.actor,'history.import',self.arguments,authorize=lambda:self.actor)['result']['operation']
         self.assertEqual(second,first)
         self.assertEqual(self.forks,1)
+
+    def test_new_request_after_unknown_revision_does_not_fork_again(self):
+        owner = self.owner()
+        request = self.request
+        def lost(*args, **kwargs):
+            value = request(*args, **kwargs)
+            if args[2] == 'thread/fork':
+                raise TimeoutError('lost native result')
+            return value
+        owner.request = lost
+        owner.execute(self.actor, 'history.import', self.arguments, authorize=lambda: self.actor)
+        args = copy.deepcopy(self.arguments)
+        args['_request'].update(operation_id='unknown-again', idempotency_key='unknown-again')
+        value = self.owner().execute(self.actor, 'history.import', args, authorize=lambda: self.actor)
+        self.assertEqual(value['result']['operation']['reason'], 'uncertain_effect')
+        self.assertEqual(self.forks, 1)
 
     def test_import_is_exposed_as_explicit_source_destination_cli_operation(self):
         import argparse

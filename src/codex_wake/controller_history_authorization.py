@@ -6,7 +6,7 @@ import socket
 from codex_profiles.config import load_settings
 from .controller_accounts import ControllerAccounts
 from .controller_auth import AuthError
-from .controller_history import ControllerHistory, ManagedHistoryResume
+from .controller_history import ControllerHistory, ManagedHistoryResume, HistoryStores
 from .managed_inventory import InventoryError
 from .session_permissions import PermissionStore, Principal
 
@@ -31,7 +31,8 @@ class HistoryAuthorization:
         path = self.root / 'controller-accounts.toml'
         def admission():
             from .controller_registry import resolve_registry
-            settings = load_settings(resolve_registry(path, root=self.root, host=self.host, environment=self.environment))
+            settings = HistoryStores(load_settings(resolve_registry(path, root=self.root, host=self.host, environment=self.environment)),
+                ControllerAccounts(path, host=self.host, environment=self.environment))
             actor = self.authority.authenticate(token)
             if actor.grant_id != initial.grant_id or actor.subject != initial.subject or capability not in actor.scopes:
                 raise AuthError('insufficient_scope')

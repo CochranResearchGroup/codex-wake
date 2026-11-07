@@ -14,6 +14,20 @@ from .managed_inventory import InventoryError
 from .records import WakeError
 
 
+class HistoryStores:
+    """Adapt registered stores to the existing native history discovery owner."""
+    def __init__(self, settings, accounts):
+        self.settings, self.accounts = settings, accounts
+        self.known_profiles = settings.known_profiles
+
+    def resolve_profile_name(self, name):
+        # Stock is a registered store, never a synthetic codex-stock profile.
+        return 'stock' if name == 'stock' else self.settings.resolve_profile_name(name)
+
+    def account_root(self, name):
+        return Path(self.accounts.execute('stores.resolve', {'selector': name})['store']['home'])
+
+
 class ControllerHistory:
     def __init__(self, config_path, *, root, host, environment, authorized_accounts,
                  resume_owner=None, authorization_guard=None):
@@ -39,7 +53,8 @@ class ControllerHistory:
             if not path.is_file():
                 raise InventoryError('configuration_unavailable', 'host history policy is unavailable')
             data = tomllib.loads(path.read_text())
-            settings = load_settings(path)
+            account_owner = ControllerAccounts(path, host=self.host, environment=self.environment)
+            settings = HistoryStores(load_settings(path), account_owner)
             if not data.get('profiles', {}).get('state_root'):
                 raise InventoryError('configuration_unavailable', 'explicit account state root required')
             history = data.get('history', {})
@@ -61,7 +76,6 @@ class ControllerHistory:
                 raise InventoryError('unauthorized_target', 'history owner is outside the permitted account scope')
             if not owners:
                 return dict(sessions=[], holds=[], status='complete')
-            account_owner = ControllerAccounts(path, host=self.host, environment=self.environment)
             accounts = {name: account_owner.execute('accounts.resolve', {'selector': name})['account'] for name in owners}
             if operation == 'history.search':
                 query = arguments.get('query', '')
@@ -135,7 +149,7 @@ class ControllerHistory:
                       rollout_revision=hashlib.sha256(content).hexdigest())
         return dict(owner=row['profile'], thread_id=row['thread_id'], cwd=row['cwd'], title=row['title'],
                     rollout_path=str(path), target=target, updated_at=row.get('updated_at'), recency_source=row.get('recency_source'),
-                    provenance=dict(native_schema=5, namespace=row['namespace'],
+                    provenance=dict(native_schema=5, namespace=row['namespace'], store_id=account.get('store_id'),
                                     source='codex_profiles.history', rollout_sha256=target['rollout_revision'], byte_length=len(content)))
 
 

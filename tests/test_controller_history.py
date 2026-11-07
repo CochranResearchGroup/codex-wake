@@ -34,6 +34,22 @@ readable_accounts=["alice","bob"]
         return ControllerHistory(self.path, root=self.root / 'wake', host='local', environment='test',
                                  authorized_accounts=accounts, **kwargs)
 
+    def test_registered_stock_history_uses_original_home_and_stable_store_identity(self):
+        from codex_wake.controller_accounts import ControllerAccounts
+        home = self.root / 'homes' / 'codex-alice'
+        accounts = ControllerAccounts(self.path, host='local', environment='test')
+        store = accounts.execute('stores.register', {'selector': 'stock', 'home': str(home)})['store']
+        self.path.write_text(self.path.read_text().replace('readable_accounts=["alice","bob"]', 'readable_accounts=["stock"]'))
+        owner = self.owner(('stock',))
+        found = owner.execute('history.search', {'owners': ['stock']})
+        self.assertEqual(len(found['sessions']), 1)
+        session = found['sessions'][0]
+        self.assertEqual(session['owner'], 'stock')
+        self.assertEqual(session['provenance']['store_id'], store['store_id'])
+        self.assertEqual(session['provenance']['namespace'], str(home))
+        read = owner.execute('history.read', {'owner': 'stock', 'thread_id': THREAD})
+        self.assertEqual(read['records'][1]['payload']['content'], 'alice evidence')
+
     def test_search_and_read_keep_duplicate_ids_bound_to_their_permitted_owner(self):
         owner = self.owner()
         found = owner.execute('history.search', {'query': 'report'})
