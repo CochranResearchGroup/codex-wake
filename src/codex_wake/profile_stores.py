@@ -123,7 +123,9 @@ def inventory(home):
     for name in ('mcp', 'hooks'):
         if any(category == name and json.loads(key)[0] == 'toml' for key, (category, _value) in entries.items()):
             categories[name].append('config.toml:' + ('mcp_servers' if name == 'mcp' else 'hooks'))
-    return dict(categories=categories,
+    config = home / "config.toml"
+    data = tomllib.loads(config.read_text()) if config.exists() else {}
+    return dict(dependencies=list(_dependencies(data, home)), categories=categories,
                 entries={name: [json.loads(key) for key, (category, _value) in entries.items() if category == name] for name in CATEGORIES},
                 external_dependencies='references outside the selected home are preserved; assets and credentials there are not copied',
                 unknown=sorted(item.name for item in home.iterdir() if item.name not in recognized | EXCLUDED
