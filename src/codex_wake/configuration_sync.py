@@ -18,6 +18,8 @@ from .profile_stores import CATEGORIES, EXCLUDED, _save
 PROTECTED = {'cli_auth_credentials_store', 'forced_login_method', 'forced_chatgpt_workspace_id'}
 
 
+ASSET_RUNTIME = {'.venv', 'node_modules', '__pycache__', '.git', '.hg', '.svn', '.pytest_cache', '.ruff_cache', '.env'}
+
 def _digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
@@ -62,9 +64,25 @@ def _category(path):
 
 def _safe_asset(home, path, allow_links=False):
     relative = path.relative_to(home)
-    resolved = path.resolve()
-    if not resolved.is_relative_to(home) or any(part in EXCLUDED or 'credential' in part.lower() for part in (*relative.parts, *resolved.relative_to(home).parts)):
-        _fail('unsupported_target', 'configuration asset crosses its selected home or authentication boundary')
+    try:
+        resolved = path.resolve()
+    except RuntimeError:
+        _fail('unsupported_target', 'configuration asset link cycle')
+    if resolved == home:
+        _fail('unsupported_target', 'configuration asset cannot select the entire store')
+    within_home = resolved.is_relative_to(home)
+    protected_names = {'auth.json', '.credentials.json', 'credentials.json', 'tokens.json',
+                       '.env', '.ssh', '.gnupg', 'id_rsa', 'id_ed25519', 'keyring'}
+    parts = (*relative.parts, *resolved.parts)
+    if (relative.parts[0] in EXCLUDED
+            or within_home and resolved.relative_to(home).parts[0] in EXCLUDED
+            or any(part in protected_names or 'credential' in part.lower() for part in parts)):
+        _fail('unsupported_target', 'configuration asset crosses its authentication or runtime boundary')
+    # Explicitly configured skills/rules/hooks may live outside CODEX_HOME.
+    # Only the source can follow these links; destinations are private copies.
+    linked_configuration = allow_links and relative.parts[0] in {'skills', 'rules', 'hooks'} and resolved != path
+    if not within_home and not linked_configuration:
+        _fail('unsupported_target', 'external configuration reference requires explicit asset selection')
     if not allow_links and resolved != path:
         _fail('unsupported_target', 'configuration destination requires private direct local assets')
     return resolved
@@ -77,13 +95,17 @@ def _read_file(home, path, allow_links=False):
     return resolved.read_bytes()
 
 
-def _walk_files(home, path, allow_links=False, seen=frozenset()):
+def _walk_files(home, path, allow_links=False, seen=frozenset(), omissions=None):
+    if path.name in ASSET_RUNTIME:
+        if omissions is not None:
+            omissions.append(dict(entry=str(path.relative_to(home)), reason='runtime_dependency_not_copied'))
+        return
     resolved = _safe_asset(home, path, allow_links)
     if resolved.is_dir():
         if resolved in seen:
             _fail('unsupported_target', 'configuration asset link cycle')
         for child in resolved.iterdir():
-            yield from _walk_files(home, path / child.name, allow_links, seen | {resolved})
+            yield from _walk_files(home, path / child.name, allow_links, seen | {resolved}, omissions)
     elif path.exists() or path.is_symlink():
         yield path
 
@@ -108,7 +130,7 @@ def seed_assets(home):
     return sorted({json.loads(key)[1] for key in entries if json.loads(key)[0] == 'asset'})
 
 
-def _inventory(store, categories, *, allow_links=False):
+def _inventory(store, categories, *, allow_links=False, omissions=None):
     home = Path(store['home'])
     entries = {}
     config = home / 'config.toml'
@@ -135,12 +157,12 @@ def _inventory(store, categories, *, allow_links=False):
             if relative in ('config.toml', 'hooks.json'):
                 continue
             path = home / relative
-            for item in _walk_files(home, path, allow_links):
+            for item in _walk_files(home, path, allow_links, omissions=omissions):
                 key = json.dumps(['file', str(item.relative_to(home))])
                 entries[key] = (category, _read_file(home, item, allow_links))
     for category, relative in references:
         path = home / relative
-        for item in _walk_files(home, path, allow_links):
+        for item in _walk_files(home, path, allow_links, omissions=omissions):
             entries[json.dumps(['asset', str(item.relative_to(home)), category])] = (category, _read_file(home, item, allow_links))
     return entries
 

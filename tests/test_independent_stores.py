@@ -48,3 +48,48 @@ class IndependentStoreTests(unittest.TestCase):
             self.assertIn({'entry':['notify', '0'], 'scope':'external', 'value':'[redacted]'}, result['inventory']['dependencies'])
             self.assertNotIn('private-hook', json.dumps(result))
             self.assertNotIn('secret-value', json.dumps(result))
+
+    def test_seed_materializes_external_skill_links_and_syncs_their_updates(self):
+        from codex_wake.configuration_sync import execute
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            stock = root / 'stock'
+            stock.mkdir(mode=0o700)
+            (stock / 'config.toml').write_text('model="stock"\n')
+            assets = root / 'configured-skills'
+            assets.mkdir()
+            (assets / 'SKILL.md').write_text('first skill revision')
+            (stock / 'skills').mkdir()
+            (stock / 'skills' / 'demo').symlink_to(assets)
+            owner = ControllerAccounts(root / 'controller-accounts.toml', host='test', environment='wsl')
+            owner.execute('accounts.init', {})
+            owner.execute('stores.register', {'selector':'stock','home':str(stock)})
+            created = owner.execute('accounts.create', {'selector':'alice','mode':'independent','source':'stock'})
+            copied = Path(created['account']['home']) / 'skills' / 'demo'
+            self.assertFalse(copied.is_symlink())
+            self.assertEqual((copied / 'SKILL.md').read_text(), 'first skill revision')
+            (assets / 'SKILL.md').write_text('second skill revision')
+            self.assertEqual((copied / 'SKILL.md').read_text(), 'first skill revision')
+            args = dict(source='stock',destinations=['alice'],categories=['skills'],operation_id='skill-update')
+            preview = execute(owner,'configuration.sync.preview',args)
+            execute(owner,'configuration.sync.apply',dict(args,expected_snapshot=preview['snapshot']))
+            self.assertEqual((copied / 'SKILL.md').read_text(), 'second skill revision')
+
+    def test_skill_seed_reports_runtime_environment_instead_of_copying_it(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            stock = root / 'stock'
+            skill = stock / 'skills' / 'demo'
+            skill.mkdir(parents=True)
+            stock.chmod(0o700)
+            (skill / 'SKILL.md').write_text('Use the skill; install its runtime dependencies separately.')
+            (skill / '.venv').mkdir()
+            (skill / '.venv' / 'large-runtime.so').write_bytes(b'x' * (4 * 1024 * 1024 + 1))
+            owner = ControllerAccounts(root / 'controller-accounts.toml', host='test', environment='wsl')
+            owner.execute('accounts.init', {})
+            owner.execute('stores.register', {'selector':'stock','home':str(stock)})
+            result = owner.execute('accounts.create', {'selector':'alice','mode':'independent','source':'stock'})
+            home = Path(result['account']['home'])
+            self.assertTrue((home / 'skills/demo/SKILL.md').is_file())
+            self.assertFalse((home / 'skills/demo/.venv').exists())
+            self.assertIn({'entry':'skills/demo/.venv','reason':'runtime_dependency_not_copied'}, result['inventory']['unsupported_entries'])

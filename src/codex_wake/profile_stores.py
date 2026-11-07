@@ -118,14 +118,15 @@ def _dependencies(value, home, entry=()):
 def inventory(home):
     from .configuration_sync import _inventory
     recognized = {item for values in CATEGORIES.values() for item in values}
-    entries = _inventory(dict(home=str(home)), list(CATEGORIES), allow_links=True)
+    omissions = []
+    entries = _inventory(dict(home=str(home)), list(CATEGORIES), allow_links=True, omissions=omissions)
     categories = {name: [item for item in values if (home / item).exists()] for name, values in CATEGORIES.items()}
     for name in ('mcp', 'hooks'):
         if any(category == name and json.loads(key)[0] == 'toml' for key, (category, _value) in entries.items()):
             categories[name].append('config.toml:' + ('mcp_servers' if name == 'mcp' else 'hooks'))
     config = home / "config.toml"
     data = tomllib.loads(config.read_text()) if config.exists() else {}
-    return dict(dependencies=list(_dependencies(data, home)), categories=categories,
+    return dict(unsupported_entries=omissions, dependencies=list(_dependencies(data, home)), categories=categories,
                 entries={name: [json.loads(key) for key, (category, _value) in entries.items() if category == name] for name in CATEGORIES},
                 external_dependencies='references outside the selected home are preserved; assets and credentials there are not copied',
                 unknown=sorted(item.name for item in home.iterdir() if item.name not in recognized | EXCLUDED
@@ -133,17 +134,19 @@ def inventory(home):
                 mcp_auth='operator keyring when supported; file credentials remain local and are not copied')
 
 
-def _copy_asset(source, destination, source_home, destination_home):
-    from .configuration_sync import _safe_asset
+def _copy_asset(source, destination, source_home, destination_home, seen=frozenset()):
+    from .configuration_sync import _safe_asset, _read_file, ASSET_RUNTIME
+    if source.name in ASSET_RUNTIME:
+        return
     resolved = _safe_asset(source_home, source, allow_links=True)
-    if source.is_symlink():
-        source = resolved
+    if resolved in seen:
+        raise InventoryError('unsupported_target', 'configuration asset link cycle')
     if source.is_dir():
         destination.mkdir(mode=0o700)
         for child in source.iterdir():
-            _copy_asset(child, destination / child.name, source_home, destination_home)
+            _copy_asset(child, destination / child.name, source_home, destination_home, seen | {resolved})
     elif source.is_file():
-        raw = source.read_bytes()
+        raw = _read_file(source_home, source, allow_links=True)
         try:
             raw = raw.decode().replace(str(source_home), str(destination_home)).encode()
         except UnicodeDecodeError:
