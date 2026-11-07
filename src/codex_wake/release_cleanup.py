@@ -103,17 +103,21 @@ def live_references(target):
         if pid == os.getpid():
             continue
         relevant = False
+        build_context = False
         incomplete = False
         try:
             command = (process / 'comm').read_text().strip()
         except (OSError, UnicodeError):
             command = ''
         def inspect_link(link):
-            nonlocal relevant, incomplete
+            nonlocal relevant, build_context, incomplete
             try:
                 value = os.readlink(link).removesuffix(' (deleted)')
-                if value.startswith('/') and beneath(Path(value), target):
-                    relevant = True
+                if value.startswith('/'):
+                    if beneath(Path(value), target):
+                        relevant = True
+                    elif link.name == 'cwd' and Path(value) == target.parent:
+                        build_context = True
             except FileNotFoundError:
                 pass
             except OSError:
@@ -149,7 +153,7 @@ def live_references(target):
             incomplete = True
         if relevant:
             found.append(pid)
-        elif incomplete and command in ('cargo', 'rustc', 'sccache'):
+        elif incomplete and build_context and command in ('cargo', 'rustc', 'sccache'):
             visibility['relevant_unknown_processes'].append(pid)
         elif incomplete:
             visibility['unrelated_protected_processes'] += 1
