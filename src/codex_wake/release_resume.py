@@ -63,6 +63,20 @@ def invalid_stages(driver, run, steps, graph):
 def execute(driver, operation, run, arguments):
     if operation != 'resume':
         raise ValueError('unsupported release resume operation')
+    qualification = run.get('qualification')
+    if qualification:
+        from .release_qualification import reconcile as reconcile_qualification
+        try:
+            reconcile_qualification(driver, run)
+        except (OSError, ValueError) as error:
+            qualification['status'] = run['status'] = 'unknown'
+            qualification['failure'] = 'qualification reconciliation unavailable: ' + str(error)
+        pending = [name for name, stage in qualification['steps'].items() if stage.get('status') in ACTIVE]
+        if pending:
+            run['resume_summary'] = dict(reused=[], invalidated=[], executed=[],
+                unresolved=['qualification:' + name for name in pending])
+            driver.save(run)
+            return run
     resolved_source(driver, run)
     steps = stage_definitions(run)
     graph = dependencies(steps)
@@ -101,6 +115,14 @@ def execute(driver, operation, run, arguments):
         if changed:
             run['retained_invalidated'] = True
             invalid.update(step['name'] for step in steps)
+    if qualification and qualification.get('status') == 'failed' and not invalid:
+        package = run.get('package')
+        if not package or package_inventory(run, package['path'])['files'] != package['files']:
+            raise ValueError('complete unchanged package required before retrying qualification')
+        run.setdefault('qualification_attempts', []).append(run.pop('qualification'))
+        run['status'] = 'built'
+        run.pop('failure', None)
+        driver.event(run, 'qualification_retry_admitted')
     names = [step['name'] for step in steps]
     continuing = run.get('resume_plan_active', False)
     if not continuing or invalid:
@@ -129,7 +151,8 @@ def execute(driver, operation, run, arguments):
         # the current acceptance is withdrawn until the affected stages pass.
         if run.get('package'):
             run.setdefault('prior_packages', []).append(run.pop('package'))
-        run.pop('qualification', None)
+        if run.get('qualification'):
+            run.setdefault('qualification_attempts', []).append(run.pop('qualification'))
         run['status'] = 'prepared'
         run.pop('failure', None)
         release_cache_claim(run)

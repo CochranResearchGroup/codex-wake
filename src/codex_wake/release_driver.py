@@ -95,23 +95,30 @@ class ReleaseDriver:
         directory = self.root / run_id
         directory.mkdir(mode=0o700)
         tree = directory / 'source'
-        subprocess.run(['git', '-C', str(source), 'worktree', 'add', '--detach', str(tree), pins['mod_revision']],
-                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
-        with (directory / 'integration.log').open('wb') as log:
-            merged = subprocess.run(['git', '-C', str(tree), '-c', 'user.name=Release Driver',
-                '-c', 'user.email=release-driver@example.invalid', 'merge', '--no-edit', pins['upstream']],
-                stdout=log, stderr=subprocess.STDOUT)
-        toolchain = toolchain_version(tree)
         run = dict(schema_version=1, run_id=run_id, recipe_name=name, recipe=recipe,
                    recipe_sha256=digest(recipe_path), source=dict(repository=str(source), **pins),
                    worktree=str(tree), manifest=str(directory / 'manifest.json'),
-                   status='prepared' if merged.returncode == 0 else 'conflicted',
-                   created_at=time.time(), toolchain=toolchain, build_environment={key: os.environ.get(key) for key in
-                       ('RUSTFLAGS','RUSTDOCFLAGS','CARGO_ENCODED_RUSTFLAGS','CC','CXX','AR','V8_FROM_PREBUILT','V8_BASE_URL')}, stages={}, events=[])
-        self.save(run)
-        if merged.returncode == 0:
-            run['source_snapshot'] = self.snapshot(run)
-        self.event(run, 'prepared', status=run['status'])
+                   status='preparing', created_at=time.time(), toolchain=None,
+                   build_environment={key: os.environ.get(key) for key in
+                       ('RUSTFLAGS','RUSTDOCFLAGS','CARGO_ENCODED_RUSTFLAGS','CC','CXX','AR','V8_FROM_PREBUILT','V8_BASE_URL')},
+                   stages={}, events=[])
+        self.event(run, 'preparation_started')
+        try:
+            subprocess.run(['git', '-C', str(source), 'worktree', 'add', '--detach', str(tree), pins['mod_revision']],
+                           check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+            with (directory / 'integration.log').open('wb') as log:
+                merged = subprocess.run(['git', '-C', str(tree), '-c', 'user.name=Release Driver',
+                    '-c', 'user.email=release-driver@example.invalid', 'merge', '--no-edit', pins['upstream']],
+                    stdout=log, stderr=subprocess.STDOUT)
+            run['toolchain'] = toolchain_version(tree)
+            run['status'] = 'prepared' if merged.returncode == 0 else 'conflicted'
+            if merged.returncode == 0:
+                run['source_snapshot'] = self.snapshot(run)
+            self.event(run, 'prepared', status=run['status'])
+        except (OSError, ValueError, subprocess.SubprocessError) as error:
+            run['status'] = 'failed'
+            run['failure'] = 'preparation failed: ' + str(error)
+            self.event(run, 'preparation_failed', reason=run['failure'])
         return run
 
     def execute(self, operation, arguments):

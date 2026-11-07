@@ -4,8 +4,8 @@
   "branch": "feat/native-release-driver-0204",
   "base": "c40dc79ec3b0abe25a4efbbcc138cd1c7ac6f908",
   "review_fixed_point": "c40dc79ec3b0abe25a4efbbcc138cd1c7ac6f908",
-  "review_passes": 0,
-  "remediation_passes": 0,
+  "review_passes": 1,
+  "remediation_passes": 1,
   "tickets": [
     {
       "ticket": 1,
@@ -33,7 +33,11 @@
         "test_command_contract: 3 passed",
         "ruff F821,F822,F823 passed"
       ],
-      "remaining_program_gate": "actual PowerShell and real disposable qualification in #485"
+      "remaining_program_gate": "actual PowerShell and real disposable qualification in #485",
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:11Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
     },
     {
       "ticket": 2,
@@ -64,7 +68,11 @@
       "integrated_sha": "f56b8c84706e5de20e126bdad14c9830d1e9821a",
       "validation": [
         "5 public release tests passed on integration tip including four real Cargo Signal MCP build cases"
-      ]
+      ],
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:14Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
     },
     {
       "ticket": 3,
@@ -93,7 +101,11 @@
       "integrated_sha": "85fb00c",
       "validation": [
         "six real Cargo Signal resume seam tests passed on integration tip"
-      ]
+      ],
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:17Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
     },
     {
       "ticket": 4,
@@ -122,7 +134,11 @@
       "integrated_sha": "e2e3b4a",
       "validation": [
         "four actual Cargo Signal qualification seam tests passed; real UID1017 acceptance in #485"
-      ]
+      ],
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:20Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
     },
     {
       "ticket": 5,
@@ -151,7 +167,11 @@
       "integrated_sha": "9def610",
       "validation": [
         "five public cleanup tests passed on integration; tighter process-classification follow-up integrated"
-      ]
+      ],
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:23Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
     },
     {
       "ticket": 6,
@@ -188,7 +208,11 @@
         "24 release-driver regressions passed together",
         "actual PowerShell5.1, WSL CLI, REST, OAuth MCP and native MCP acceptance passed",
         "real UID1017 upgrade/failure/history-private-lock qualification: seven checks true; no external model calls"
-      ]
+      ],
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:26Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
     }
   ],
   "retained_native_preflight": {
@@ -201,5 +225,45 @@
     "historical_compiler": "unknown; disclosed"
   },
   "acceptance": "docs/dev/evidence/plan0204/acceptance.json",
-  "broad_regression": "pending (OpenClaw excluded per parked-work boundary)"
+  "broad_regression": "600.067s timeout with external runner import-path errors; exact31 failures also occur on baseline; corrected discovery0 errors and first109 tests pass28.409s; no comprehensive pass claimed",
+  "review_tip": "c34ac066135af8227dc1f995cb4595dd17907b00",
+  "review_findings": [
+    {
+      "id": "R1",
+      "axes": [
+        "Standards",
+        "Spec"
+      ],
+      "severity": "P1",
+      "state": "resolved",
+      "finding": "Active qualification custody lost on source invalidation"
+    },
+    {
+      "id": "R2",
+      "axes": [
+        "Spec"
+      ],
+      "severity": "P1",
+      "state": "resolved",
+      "finding": "Explicit failed qualification retry did not recover"
+    },
+    {
+      "id": "R3",
+      "axes": [
+        "Standards"
+      ],
+      "severity": "P2",
+      "state": "resolved",
+      "finding": "Preparation failure before durable manifest"
+    },
+    {
+      "id": "R4",
+      "axes": [
+        "Spec"
+      ],
+      "severity": "P2",
+      "state": "resolved",
+      "finding": "Native discovery lost complete run input schema"
+    }
+  ]
 }

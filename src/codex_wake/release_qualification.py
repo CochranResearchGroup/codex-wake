@@ -118,19 +118,7 @@ def reconcile(driver, run):
     qualification = run.get('qualification')
     if not qualification:
         return run
-    try:
-        current_binding = _binding(driver, run)
-    except (OSError, ValueError, KeyError) as error:
-        return _fail(driver, run, qualification, str(error))
-    if current_binding != qualification['input_fingerprint']:
-        return _fail(driver, run, qualification, 'source or package inputs changed during qualification')
     for name, stage in qualification['steps'].items():
-        if stage['status'] == 'passed':
-            try:
-                if digest(stage['report']) != stage['report_sha256']:
-                    raise ValueError('retained qualification report changed')
-            except (OSError, ValueError, KeyError) as error:
-                return _fail(driver, run, qualification, str(error))
         if stage['status'] not in ('running', 'submitting', 'unknown'):
             continue
         if not stage.get('job_dir'):
@@ -161,6 +149,16 @@ def reconcile(driver, run):
             return _fail(driver, run, qualification, str(error))
         stage['status'] = attempt['status'] = 'passed'
         driver.event(run, 'qualification_step_finished', stage=name, status='passed')
+    # Resolve submitted effects before withdrawing their input acceptance.
+    # A changed source must never make a live helper disappear from custody.
+    try:
+        if _binding(driver, run) != qualification['input_fingerprint']:
+            raise ValueError('source or package inputs changed during qualification')
+        for stage in qualification['steps'].values():
+            if stage['status'] == 'passed' and digest(stage['report']) != stage['report_sha256']:
+                raise ValueError('retained qualification report changed')
+    except (OSError, ValueError, KeyError) as error:
+        return _fail(driver, run, qualification, str(error))
     return run
 
 
