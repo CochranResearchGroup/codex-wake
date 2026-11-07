@@ -179,7 +179,7 @@ def _guard(owner, authorize, expected):
     return current
 
 
-def _copy(source, destination):
+def _copy(source, destination, home, aliases):
     if source.is_dir():
         shutil.copytree(source, destination)
         for path in [destination, *destination.rglob('*')]:
@@ -188,6 +188,13 @@ def _copy(source, destination):
     else:
         shutil.copyfile(source, destination)
         destination.chmod(0o700 if source.stat().st_mode & 0o111 else 0o600)
+    from .configuration_sync import _remap
+    for path in destination.rglob('*') if destination.is_dir() else (destination,):
+        if path.is_file():
+            original = path.read_bytes()
+            remapped = _remap(original, home, home, aliases)
+            if remapped != original:
+                path.write_bytes(remapped)
 
 
 def apply(owner, directory, before, authorize):
@@ -207,7 +214,17 @@ def apply(owner, directory, before, authorize):
         custody.mkdir(mode=0o700)
         for number, action in enumerate(before['plan']):
             staged = custody / ('private-' + str(number))
-            _copy(Path(action['source']), staged)
+            home = next(Path(value) for value in before['homes'] if Path(action['path']).is_relative_to(Path(value)))
+            aliases = {}
+            for selected in before['plan']:
+                destination = Path(selected['path'])
+                if not destination.is_relative_to(home):
+                    continue
+                source = Path(selected['source'])
+                for value, metadata in before['sources'][str(destination)].items():
+                    if metadata['kind'] in ('file', 'directory'):
+                        aliases[value] = str(destination / Path(value).relative_to(source))
+            _copy(Path(action['source']), staged, home, aliases)
             if action.get('mappings'):
                 text = staged.read_text()
                 for mapping in action['mappings']:

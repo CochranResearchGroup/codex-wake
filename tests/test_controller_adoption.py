@@ -34,6 +34,30 @@ class IndependentAdoptionTests(unittest.TestCase):
         self.assertTrue((self.home / 'config.toml').is_symlink())
         self.assertEqual((self.home / 'auth.json').stat().st_ino, auth_inode)
 
+    def test_adopted_skill_references_use_the_private_copied_helper(self):
+        import subprocess
+        skill = self.source / 'skills/demo'
+        skill.mkdir()
+        helper = skill / 'helper.py'
+        helper.write_text('print("private-skill-helper")\n')
+        (skill / 'SKILL.md').write_text(str(helper))
+        (self.home / 'skills').symlink_to(self.source / 'skills')
+        owner = self.owner()
+        preview = owner.execute('migration.preview', {})
+        self.assertEqual(preview['status'], 'ready', preview['holds'])
+        applied = owner.execute('migration.apply', {'expected_target': preview['target']})
+        copied_reference = (self.home / 'skills/demo/SKILL.md').read_text()
+        self.assertEqual(copied_reference, str(self.home / 'skills/demo/helper.py'))
+        helper.write_text('print("changed-shared-helper")\n')
+        import sys
+        self.assertEqual(subprocess.check_output([sys.executable, copied_reference], text=True), 'private-skill-helper\n')
+        self.assertEqual((skill / 'SKILL.md').read_text(), str(helper))
+        from codex_wake.managed_inventory import InventoryError
+        with self.assertRaises(InventoryError) as failure:
+            owner.execute('migration.rollback', {'expected_target': owner.execute('migration.preview', {})['target'], 'receipt_id': applied['receipt_id']})
+        self.assertEqual(failure.exception.code, 'target_changed')
+        self.assertFalse((self.home / 'skills').is_symlink())
+
     def test_mcp_sensitive_settings_and_hooks_are_private_remapped_and_redacted(self):
         hooks = self.source / 'hooks'
         hooks.mkdir()
