@@ -25,7 +25,7 @@ def register(parser):
     for verb in ('open', 'resume'):
         item = commands.add_parser(verb, help='open a named private account') if verb == 'open' else commands.choices['resume']
         item.add_argument('account', **({'nargs':'?'} if verb == 'resume' else {}), help='registered account name or alias; bare resume retains emergency-pause behavior')
-        item.add_argument('--channel', choices=('stock', 'modded'), default='modded' if verb == 'open' else None, help='registered native channel (default: modded)')
+        item.add_argument('--channel', choices=('stock', 'modded'), default='modded' if verb == 'open' else None, help='profile build channel (default: modded); stock stores always use stock')
         if verb == 'resume':
             item.add_argument('thread_id', nargs='?', help='exact saved UUID; omit for the native account chooser')
             item.add_argument('--last', action='store_true', help='reopen the most recently active conversation in this account')
@@ -42,7 +42,7 @@ def register(parser):
         item.add_argument('--json', action='store_true', dest='as_json', help='emit structured results rather than a compact listing')
         if verb == 'import-recent':
             item.add_argument('--destination', help='destination account for source-preserving copies')
-            item.add_argument('--channel', choices=('stock','modded'), default=None, help='registered native channel (default: modded)')
+            item.add_argument('--channel', choices=('stock','modded'), default=None, help='profile build channel (default: modded); stock stores always use stock')
             item.add_argument('--batch', help='reuse this frozen batch ID; never select newer history on retry')
             item.add_argument('--yes', action='store_true', help='explicitly confirm the frozen selection for copying')
             item.add_argument('--preview', action='store_true', help='save/show the selection without native effects or confirmation')
@@ -83,7 +83,8 @@ def launch(args, root):
     if args.command == 'resume' and any(getattr(args, key, None) for key in ('all_roots','registry_dir','authorized_root','caller_wake_subject','as_json')):
         raise ValueError('account resume cannot be mixed with emergency-pause scope flags')
     owner = owner_from_root(root)
-    account_pin = owner.accounts.execute('accounts.resolve', {'selector':args.account})['account']['target']
+    account = owner.accounts.execute('accounts.resolve', {'selector':args.account})['account']
+    account_pin = account['target']
     def same_account(target):
         if any(target.get(key) != value for key,value in account_pin.items()):
             raise InventoryError('stale_target', 'account binding changed while selecting its conversation or build')
@@ -110,7 +111,7 @@ def launch(args, root):
                 raise InventoryError(value['error']['code'], value['error']['message'])
             same_account(value['result']['session']['target'])
         native = ['resume'] + ([identifier] if identifier else [])
-    channel = args.channel or 'modded'
+    channel = 'stock' if account.get('kind') == 'stock' else args.channel or 'modded'
     builds = owner.execute('builds.list', {'account':args.account})['builds']
     selected = next(row for row in builds if row['name'] == channel)
     same_account(selected['target'])
@@ -148,7 +149,10 @@ def import_recent(args, root):
             channel=args.channel or 'modded'
             limit=args.limit or 10
             found = recent(root,args.owner,limit)
-            destination = daemon_execute(root,'daemons.status',dict(account=args.destination,channel=channel))['result']['daemon']
+            from .build_commands import owner_from_root
+            account = owner_from_root(root).accounts.execute('accounts.resolve', {'selector':args.destination})['account']
+            destination_channel = 'stock' if account.get('kind') == 'stock' else channel
+            destination = daemon_execute(root,'daemons.status',dict(account=args.destination,channel=destination_channel))['result']['daemon']
             identifier=uuid4().hex
             batch=dict(version=1,id=identifier,owner=args.owner,destination=args.destination,channel=channel,limit=limit,
                        entries=[],holds=found['holds'],status='preview')
