@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "status": "DEPLOYED",
+  "source_commit": "5fd4aeba084b973284485cf4054299c226269ca0",
+  "merged_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/486",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb",
+  "matching_python_files": 263,
+  "wheel_sha256": "57be00dd12253315882695bce6b72ea11c977b7be348147ef0f6078b945e66df",
+  "launchers": {
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb/bin/codex-wake-github-webhook",
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb/bin/codex-wake",
+    "codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb/bin/codex-wake-mcp",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb/bin/codex-wake-hook",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb/bin/codex-waked"
+  },
+  "rollback_targets": {
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c40dc79/bin/codex-wake-github-webhook",
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c40dc79/bin/codex-wake",
+    "codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c40dc79/bin/codex-wake-mcp",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c40dc79/bin/codex-wake-hook",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c40dc79/bin/codex-waked"
+  },
+  "completion": {
+    "bash": "installed",
+    "zsh": "installed",
+    "new_build_verbs_discovered": true
+  },
+  "installed_mcp_tools": [
+    "wake_builds_build",
+    "wake_builds_cleanup",
+    "wake_builds_prepare",
+    "wake_builds_qualify",
+    "wake_builds_resume",
+    "wake_builds_run",
+    "wake_builds_status"
+  ],
+  "installed_workflow_smoke": {
+    "status": "passed",
+    "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb",
+    "cli_run_survived_caller_exit": true,
+    "build_executions": 1,
+    "qualification": "owned_fixture",
+    "native_recompilation": false,
+    "external_model_calls": 0
+  },
+  "preserved": {
+    "services_unchanged": true,
+    "native_generations_unchanged": true,
+    "native_count": 2,
+    "stock_unchanged": true,
+    "stock_sha256": "cdcb45aaa01d0f14e298985e09465aebccd47f64ecd298aea44814af7b62bbda"
+  },
+  "existing_mcp_connections": "Reload individually to load new tool definitions; no unrelated connections interrupted.",
+  "native_binary_rebuilt": false,
+  "working_account_daemon_restarts": 0,
+  "hosted_ci_used": false,
+  "local_validation": "docs/dev/evidence/plan0204/validation.json; source tree equal reviewed a36cb3c",
+  "deployed_at": 1794024077.8592665,
+  "memory_disposition": "forbidden"
+}

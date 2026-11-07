@@ -270,7 +270,13 @@
   "validation": "docs/dev/evidence/plan0204/validation.json",
   "review": "docs/dev/evidence/plan0204/review.md",
   "remaining_gates": [
-    "Merge/deployment outside this task",
-    "No comprehensive-suite or Python3.11 claim"
-  ]
+    "Existing MCP connections reload individually for new definitions",
+    "No comprehensive-suite/Python3.11 claim"
+  ],
+  "main_integration": {
+    "pr": 486,
+    "commit": "5fd4aeba084b973284485cf4054299c226269ca0",
+    "tree_equal_reviewed_tip": true
+  },
+  "deployment": "docs/dev/evidence/plan0204/deployment.json"
 }

@@ -11,12 +11,15 @@ Integration branch: feat/native-release-driver-0204; last code commit7f87ac4.
 One Standards/Spec review and one bounded TDD pass resolved four distinct blockers.
 28 release,19 MCP and191 controller tests passed. Actual PowerShell/WSL/REST/MCP
 and real UID1017 native acceptance passed using the verified retained0.167 package.
-No native recompilation or working installation occurred. Broad-suite/Python3.11
+Source was subsequently merged through PR486 as5fd4aeb and deployed to the
+versioned Wake prefix recorded in deployment.json. No native recompilation or
+working-account daemon restart occurred. Broad-suite/Python3.11
 coverage is not claimed; the validation receipt retains the harness timeout and
 baseline diagnosis. Worker branches/worktrees retain recoverable custody.
 
 Acceptance: [native/public receipt](../evidence/plan0204/acceptance.json).
 Final checks: [validation](../evidence/plan0204/validation.json).
+Deployment/rollback: [receipt](../evidence/plan0204/deployment.json).
 Review: [one-pass adjudication](../evidence/plan0204/review.md).
 Execution custody: [ledger](0204-execution-ledger.json).
 
@@ -60,8 +63,9 @@ Execution custody: [ledger](0204-execution-ledger.json).
 
 Implement a resumable release workflow over existing staging and native packaging
 tools. The operator explicitly authorized tickets, implementation, delegated
-workers, review and bounded remediation. Working-account installation, main-branch
-merge, deployment and paid hosted CI are outside this completed slice.
+workers, review and bounded remediation. The later operator instruction explicitly authorized main-branch merge and Wake
+package deployment. Native package replacement, account-daemon restarts and paid
+hosted CI remain outside this deployment.
 
 ## Confirmation gate
 

@@ -1454,3 +1454,5 @@ Execution custody: [dependency ledger](docs/dev/plans/0200-execution-ledger.json
 Grok execution slice: [owned ACP session control](docs/dev/plans/0201-2026-11-03-grok-local-session-control.md).
 
 Native release driver (closed local integration): [Plan0204](docs/dev/plans/0204-2026-11-06-native-release-driver.md) records six closed tickets, Cargo Signal execution, real-client/native acceptance and one reviewed remediation pass. Merge/deployment and comprehensive-suite qualification remain separate.
+
+Plan0204 deployment: PR486 merged at5fd4aeb; Wake release-driver commands installed with automatic completion. [Deployment and rollback receipt](docs/dev/evidence/plan0204/deployment.json). Native Codex processes preserved.
