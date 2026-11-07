@@ -160,6 +160,12 @@ class ControllerAccounts:
         self.host, self.environment = host, environment
 
     def execute(self, operation, arguments):
+        if operation.startswith('stores.'):
+            from .profile_stores import execute
+            return execute(self, operation, arguments)
+        if operation == 'accounts.create' and isinstance(arguments, dict) and arguments.get('mode') == 'independent':
+            from .profile_stores import create
+            return create(self, arguments)
         if operation in ('accounts.init', 'accounts.create'):
             try:
                 return self._manage(operation, arguments)
