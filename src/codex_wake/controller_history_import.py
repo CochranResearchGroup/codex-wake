@@ -109,8 +109,26 @@ class ControllerHistoryImport:
                 return None
             for row in rows:
                 identifier = row.get('id')
-                if row.get('forkedFromId') != thread_id or identifier in known_children:
+                if identifier in known_children:
                     continue
+                if row.get('forkedFromId') != thread_id:
+                    # Native0.167 list metadata omits fork lineage. Its first
+                    # owning rollout header supplies a bounded candidate hint;
+                    # thread/read below must still prove the actual lineage.
+                    listed_path = Path(row.get('path') or '')
+                    home = Path(destination['target']['home'])
+                    if (not listed_path.is_file()
+                            or not listed_path.resolve().is_relative_to(home / 'sessions')):
+                        continue
+                    with listed_path.open('rb') as stream:
+                        header = stream.readline(256 * 1024 + 1)
+                    if len(header) > 256 * 1024:
+                        continue
+                    metadata = json.loads(header)
+                    if (metadata.get('type') != 'session_meta'
+                            or metadata.get('payload', {}).get('id') != identifier
+                            or metadata.get('payload', {}).get('forked_from_id') != thread_id):
+                        continue
                 value = self._request(destination, 'thread/read', dict(threadId=identifier, includeTurns=True))
                 child = value.get('thread', {})
                 path = Path(child.get('path', ''))

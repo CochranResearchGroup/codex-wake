@@ -342,7 +342,9 @@ readable_accounts=["alice","bob"]
         def lost(*args, **kwargs):
             value = request(*args, **kwargs)
             if args[2] == 'thread/fork':
-                self.child_path.write_text(''.join(json.dumps(dict(row, timestamp='2026-11-07T11:00:00Z'))+'\n' for row in rows))
+                child_rows = copy.deepcopy(rows)
+                child_rows[0]['payload'].update(id=CHILD, forked_from_id=SOURCE)
+                self.child_path.write_text(''.join(json.dumps(dict(row, timestamp='2026-11-07T11:00:00Z'))+'\n' for row in child_rows))
                 raise TimeoutError('lost native result')
             return value
         owner.request = lost
@@ -352,7 +354,7 @@ readable_accounts=["alice","bob"]
         owner = self.owner()
         def recovery(endpoint, executable, method, params, timeout, **kwargs):
             if method == 'thread/list':
-                return {'data': [dict(id=CHILD, forkedFromId=SOURCE)], 'nextCursor': None}
+                return {'data': [dict(id=CHILD, path=str(self.child_path), forkedFromId=None)], 'nextCursor': None}
             return request(endpoint, executable, method, params, timeout, **kwargs)
         owner.request = recovery
         value = owner.execute(self.actor, 'history.import', args, authorize=lambda: self.actor)['result']['operation']
