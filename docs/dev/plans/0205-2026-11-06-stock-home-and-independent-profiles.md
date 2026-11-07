@@ -136,13 +136,19 @@ Tracker closure follows validated integration outcomes, separately from release/
 
 | Unit | Blockers | Owner | State | Write scope |
 |---|---|---|---|---|
-| #489 stores/seeding | none | primary | running | controller_accounts, codex_profiles config and independent store owner; tests |
-| #490 adoption | none | adoption worker | pending | controller_migration and adoption helper; migration tests |
-| #491 readiness | none | readiness worker | pending | selected readiness owner; readiness tests |
-| #492 config sync | #489 | sync worker | pending | configuration sync owner and tests |
-| history | #489 | history worker | pending | history discovery/import and tests |
-| parity | all preceding | parity worker | pending | command contracts/adapters/generated docs |
-| qualification | parity | primary | pending | installed/runtime acceptance and receipts |
+| #489 stores/seeding | none | primary | validated domain seam | controller_accounts, codex_profiles config and independent store owner; tests |
+| #490 adoption | none | /root/adopt205 | running | controller_migration and adoption helper; migration tests |
+| #491 readiness | none | /root/ready205 | integrated (runtime join pending) | selected readiness owner; readiness tests |
+| #492 config sync | #489 | /root/sync205 | running | configuration sync owner and tests |
+| #493 history | #489 | history worker | pending | history discovery/import and tests |
+| #494 parity | all preceding | parity worker | pending | command contracts/adapters/generated docs |
+| #495 qualification | #494 | primary | pending | installed/runtime acceptance and receipts |
 
 Shared contract owner: primary. Extend ControllerAccounts; store records carry stable store_id, kind (stock/profile), home, independent boolean and observed account separately. Stock identity is stored in Wake metadata, never auth-derived. Configuration engine consumes resolved store records. Preserve legacy default mode. Public operations are wired by parity owner after domain owners stabilize; domain public execute methods are the initial test seam.
 Worker branches start from the recorded integration checkpoint; no nested workers or working-account live effects. Worker red/green command receipts and commits are integrated serially. Source changes must not clone auth or control state. Native package effects first qualify UID1017; no paid CI.
+
+### Checkpoint 2026-11-07
+
+#489 integrated 9ee1d157045c8bfd6bdebca76f4043e89b3bb72d. Public account seam red: unsupported stores.register; green: test_independent_stores.py 1 passed, test_controller_accounts.py 8 passed. Commands: PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p <file>. Raw red/green logs /tmp/cw205-stores-{red,green}.log and /tmp/cw205-accounts.log. No installed/native claim. Sync baseline and detailed categories belong #492.
+#491 worker e092695 +36a2d96 integrated as ddc1ba6 +10cee78; primary reran test_account_*py: 7 passed1.589s. Actual backend and watcher read-only owners used; native limits/refresh and transport guards remain join gates. Explicit caller paths must not become remote file inspection authority.
+#490 worker /root/adopt205, branch feat/profile-adoption-490, base258b823; first turn runtime failure network permission revoked, resumed same owned state. #492 /root/sync205 branch feat/profile-sync-492 base9ee1d15 owns configuration engine and profile_stores helpers. Workers use shared existing Python venv, not nonexistent worktree .venv. No ticket closed yet; all seven creation receipts in user-scoped spec0205/tickets.json.
