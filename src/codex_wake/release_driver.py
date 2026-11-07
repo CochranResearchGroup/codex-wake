@@ -127,6 +127,9 @@ class ReleaseDriver:
                     if run.get('stages'):
                         from .release_build import reconcile
                         reconcile(self, run)
+                    if run.get('qualification'):
+                        from .release_qualification import reconcile as reconcile_qualification
+                        reconcile_qualification(self, run)
                     result = run
                 elif operation in ('resume', 'qualify', 'cleanup', 'run'):
                     from importlib import import_module
