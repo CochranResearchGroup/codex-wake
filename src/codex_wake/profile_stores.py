@@ -96,6 +96,25 @@ def execute(owner, operation, arguments):
     return dict(owner='codex-wake', store=_resolve(owner, selector), stock_modified=False)
 
 
+def _dependencies(value, home, entry=()):
+    if isinstance(value, dict):
+        for key, child in value.items():
+            yield from _dependencies(child, home, entry + (key,))
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            yield from _dependencies(child, home, entry + (str(index),))
+    elif isinstance(value, str):
+        paths = re.findall(r"(?<![A-Za-z0-9:])/(?:[^\s\"'`;|&<>]+)", value)
+        for reference in paths:
+            path = Path(reference)
+            if not path.is_relative_to(home):
+                yield dict(entry=list(entry), scope='external', value='[redacted]')
+                break
+            if not path.exists():
+                yield dict(entry=list(entry), scope='unavailable_home_local', value='[redacted]')
+                break
+
+
 def inventory(home):
     from .configuration_sync import _inventory
     recognized = {item for values in CATEGORIES.values() for item in values}

@@ -34,3 +34,17 @@ class IndependentStoreTests(unittest.TestCase):
             (alice / 'skills' / 'guide.md').write_text('alice edit')
             self.assertEqual((stock / 'skills' / 'guide.md').read_text(), 'stock guide')
             self.assertNotIn('"account": "B"', json.dumps(owner.execute('stores.list', {})))
+
+    def test_seed_reports_external_config_dependencies_without_exposing_values(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            stock = root / 'stock'
+            stock.mkdir(mode=0o700)
+            (stock / 'config.toml').write_text('notify=["/outside/private-hook"]\n[mcp_servers.demo.env]\nTOKEN="secret-value"\n')
+            owner = ControllerAccounts(root / 'controller-accounts.toml', host='test', environment='wsl')
+            owner.execute('accounts.init', {})
+            owner.execute('stores.register', {'selector':'stock', 'home':str(stock)})
+            result = owner.execute('accounts.create', {'selector':'alice','mode':'independent','source':'stock'})
+            self.assertIn({'entry':['notify', '0'], 'scope':'external', 'value':'[redacted]'}, result['inventory']['dependencies'])
+            self.assertNotIn('private-hook', json.dumps(result))
+            self.assertNotIn('secret-value', json.dumps(result))
