@@ -54,7 +54,7 @@ class ControllerOperations:
             from .profile_reload import selected_reload
             return dict(schema_version=1, operation=operation, status='completed',
                         result=execute(self.accounts, operation, arguments,
-                            reload_executor=lambda destination: selected_reload(self.accounts, destination)))
+                            reload_executor=lambda destination: selected_reload(self.accounts, destination, categories=arguments.get('categories', []))))
         if operation.startswith('stores.') or operation in ('accounts.init', 'accounts.create', 'accounts.list', 'accounts.resolve', 'configuration.explain'):
             if self.accounts is None:
                 raise InventoryError('configuration_unavailable', 'host account owner is unavailable')

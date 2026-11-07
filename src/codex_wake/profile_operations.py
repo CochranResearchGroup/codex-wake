@@ -68,7 +68,7 @@ def execute(root, operation, arguments, *, accounts, actor, authorize):
         from .profile_reload import selected_reload
         guard()
         result = sync(accounts, operation, arguments,
-                      reload_executor=lambda destination: selected_reload(accounts, destination, guard=guard))
+                      reload_executor=lambda destination: selected_reload(accounts, destination, categories=arguments.get('categories', []), guard=guard))
     else:
         raise InventoryError('unsupported_operation', 'unsupported profile operation')
     guard()

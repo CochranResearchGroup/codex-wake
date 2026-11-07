@@ -37,7 +37,7 @@ class ProfileSyncReloadTests(unittest.TestCase):
     def test_public_sync_reloads_selected_profile_once_and_preserves_peer(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);stock=root/'stock';stock.mkdir(mode=0o700)
-            (stock/'config.toml').write_text('model="first"\n')
+            (stock/'config.toml').write_text('model="first"\n[mcp_servers.demo]\nurl="https://first.invalid"\n')
             execute('accounts.init',{},root)
             execute('stores.register',dict(selector='stock',home=str(stock)),root)
             homes={}
@@ -57,8 +57,8 @@ class ProfileSyncReloadTests(unittest.TestCase):
                     if child.poll() is not None:raise RuntimeError(child.stderr.read().decode())
                     if time.monotonic()>deadline:raise RuntimeError('native fixture readiness timeout')
                     time.sleep(.01)
-                (stock/'config.toml').write_text('model="second"\n')
-                args=dict(source='stock',destinations=['alice'],categories=['settings'],operation_id='selected-reload',reload=True)
+                (stock/'config.toml').write_text('model="second"\n[mcp_servers.demo]\nurl="https://second.invalid"\n')
+                args=dict(source='stock',destinations=['alice'],categories=['mcp'],operation_id='selected-reload',reload=True)
                 preview=execute('configuration.sync.preview',args,root)
                 args['expected_snapshot']=preview['result']['snapshot']
                 result=execute('configuration.sync.apply',args,root)
@@ -88,8 +88,8 @@ class ProfileSyncReloadTests(unittest.TestCase):
                 config=dict(version=1,local_caller=dict(subject=actor.subject,client_id=actor.client_id,grant_id=actor.grant_id,issuer=actor.issuer,resource=actor.resource,scopes=sorted(actor.scopes),targets=targets,expires_at=actor.expires_at))
                 (root/'controller-messaging.json').write_text(json.dumps(config))
                 for index,transport in enumerate(('api','mcp'),start=2):
-                    (stock/'config.toml').write_text('model="revision-'+transport+'"\n')
-                    request=dict(source='stock',destinations=['alice'],categories=['settings'],operation_id=transport+'-reload',reload=True)
+                    (stock/'config.toml').write_text('model="first"\n[mcp_servers.demo]\nurl="https://'+transport+'.invalid"\n')
+                    request=dict(source='stock',destinations=['alice'],categories=['mcp'],operation_id=transport+'-reload',reload=True)
                     if transport=='api':
                         def dispatch(verb,arguments):return protected.execute('token','configuration.sync.'+verb,arguments)
                     else:
