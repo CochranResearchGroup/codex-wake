@@ -165,3 +165,63 @@ and link validation recorded at commit closeout. Raw transient issue readbacks
 remain outside Git; no private account identifiers/credentials copied here.
 
 Memory disposition: forbidden; no explicit request to write memory.
+
+## Confirmed product decisions following review
+
+Operator accepted all three recommendations on 2026-11-07:
+
+- Grouping includes repository ordering, named groups and separate terminal
+  sessions. Manual placement/pins precede automatic organization.
+- Standard tab operations include create, list/show, rename, focus, reorder,
+  move between sessions, park, restore and close, with CLI/API/MCP equivalents
+  where supported. Close preserves conversation history; active work receives
+  an explicit warning or refusal.
+- Cross-backend movement means reconnecting the same saved conversation in the
+  destination, not transferring a live OS process. Preserve account/conversation/
+  history; verify destination before retiring source attachment. On uncertain or
+  unsupported continuity, retain source and explain the limitation.
+
+Additional operator requirement: rich tab observations drive action, sorting and
+ grouping by traits, explicitly including stock Codex, modded Codex, other coding
+ harness sessions and SSH connections to another machine. The dictated harness
+ name “drop code” requires clarification; do not silently map it to a provider.
+“Active” also needs distinct running-session and current-turn-working semantics.
+This is captured product input for the continuing interview, not an implementation
+or automatic live-tab reorganization instruction. Review remains complete;
+new specification synthesis has not begun.
+
+### Confirmed trait and health decisions
+
+Operator clarified Grok Code is in current scope; Claude Code is future scope.
+Accepted separate coding-session presence and current-turn activity observations,
+including idle, waiting-for-input, disconnected and unknown states. Accepted
+bottom-of-screen current visible error detection, retaining message/location/
+observation time; structured status and terminal evidence complement each other,
+old scrollback is distinguished, and red coloring alone is insufficient.
+
+Accepted layered grouping/filtering such as remote host → harness/build →
+activity/error state, saved named views and manual pins. Error detection flags
+and groups; retry/dismiss/interrupt/restart remain explicit separate actions.
+Automatic responses may be opted into through future explicit rules.
+
+Operator explicitly connects these traits to existing modded Codex tab health:
+retain exact controlling-TUI responsiveness as a separate observation from session
+presence, turn activity and visible errors. No single healthy/unhealthy bit may
+collapse those dimensions or turn missing evidence into a success claim.
+
+### Confirmed monitoring and arrangement decisions
+
+Operator accepted bounded background observation with manual refresh and visible
+stale/unknown indicators. Reuse existing observers and exact controlling-TUI
+health checks; monitoring preserves drafts and sends no model prompts. Observation
+of session presence, turn activity, responsiveness, current visible errors and
+context remains independent and attributable to the exact attachment/runtime.
+
+Saved views may update automatically. Physically rearranging tabs requires
+explicit opt-in; pins/manual placement take precedence and automatic movement
+must be easy to pause. Detection alone does not authorize recovery actions.
+
+The interview frontier for this bounded hardening scope is settled. Synthesize
+the existing specifications plus these confirmed decisions into a successor
+specification and dependency-aware tickets; do not reinterpret this interview as
+claiming implementation, live qualification, or automatic rearrangement authority.

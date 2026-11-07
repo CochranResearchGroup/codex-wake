@@ -286,6 +286,20 @@ A terminal pane, TUI connection or structured client connection through which a
 runtime can be presented or accessed. Replacing an attachment does not by itself
 replace the conversation or logical agent.
 
+**Tab trait**:
+An observed property of a terminal attachment or its associated session, such as
+harness, build, account, remote host, turn activity, responsiveness or visible
+error. Each observation retains its freshness and uncertainty; one trait does
+not establish another.
+
+**Tab group**:
+A named or criteria-based collection of terminal attachments. Group membership
+alone does not move attachments or change their conversations.
+
+**Tab view**:
+A filtered and ordered presentation of terminal attachments and their traits.
+Updating a view is separate from physically rearranging the attachments.
+
 **Resource binding**:
 The explicit relationship between a stable controller resource identity and its
 scoped native representations. A binding identifies context; it grants no action
