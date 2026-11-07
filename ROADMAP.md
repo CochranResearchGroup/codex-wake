@@ -1459,4 +1459,4 @@ Plan0204 deployment: PR486 merged at5fd4aeb; Wake release-driver commands instal
 
 ## P205 | Stock shared home and independent profiles
 
-OPEN: [spec #488](https://github.com/CochranResearchGroup/codex-wake/issues/488), dependent tickets #489–#495. [Plan0205](docs/dev/plans/0205-2026-11-06-stock-home-and-independent-profiles.md) owns execution and three-lane custody. Stock stays unchanged; private seeding, adoption, sync, snapshots, parity and runtime qualification precede completion. No merge/deployment authorized by this packet.
+CLOSED implementation/qualification: [spec #488](https://github.com/CochranResearchGroup/codex-wake/issues/488), tickets #489–#495. [Plan0205](docs/dev/plans/0205-2026-11-06-stock-home-and-independent-profiles.md): private seeding/adoption, explicit sync/snapshots, installed transport parity and two real accounts qualified. One review/one TDD pass resolved four blockers. Stock/global launchers unchanged; branch awaits separate merge/deployment. No comprehensive-suite claim.

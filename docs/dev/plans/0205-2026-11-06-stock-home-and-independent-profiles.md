@@ -1,17 +1,21 @@
 # Stock shared home and independent Wake profiles
 
-State: OPEN
+State: CLOSED
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/488
 Owner: ecochran76 / primary
 Authority: ten accepted interview decisions and explicit to-spec invocation.
 
 ## Current State
 
-Specification published as GitHub #488 with ready-for-agent state;
-implementation is integrated on feat/independent-profiles-0205. The
-operator-approved testing boundary is the existing public controller operation
-surface shared by CLI/API/MCP, followed by actual stock/two-profile and WSL/PowerShell
-acceptance. Selected real profiles have now been explicitly adopted and qualified from an isolated installed prefix; global deployment remains separate.
+Implementation and selected qualification complete on feat/independent-profiles-0205.
+Tickets #489–#495 are closed. One broad Standards/Spec review and one bounded TDD
+pass resolved four blocking findings; one low maintainability follow-up remains.
+Final implementation source d78585937272782cbc76e557351cc6f7d0e750a0; exact wheel
+420970c1c4c2092488ec166f3f893fbbdd7f76f55b7869475100242f5fcba23f.
+See ../evidence/plan0205/final-remediation.json and review-and-remediation.md.
+Selected existing profiles were adopted and qualified using an isolated installed
+prefix; plain stock/global launcher deployment stays unchanged. No merge/deploy
+or comprehensive-suite claim.
 
 ## Problem Statement
 
@@ -122,7 +126,7 @@ The ten interview recommendations were accepted, and the operator explicitly sel
 
 Historical readiness observations are evidence of gaps to recheck during implementation, not permanent claims about the current runtime. Source implementation, disposable qualification, working-profile activation, merge and deployment remain distinct evidence boundaries. The retained native0.167 package and Plan0204 release-driver evidence may be reused after fresh identity verification; historical compiler provenance remains unknown where it was not recorded.
 
-Owner: ecochran76 / primary coordinator. Classification: enhancement. State: ready-for-agent. Plan0205 is the execution/design locator. The next phase is a dependency-linked implementation ticket breakdown; this specification itself is not an implementation-completion claim.
+Owner: ecochran76 / primary coordinator. Classification: enhancement. State: implementation and selected qualification complete. Plan0205 retains specification, execution and evidence authority. The validated integration branch is ready for a separately authorized merge/deployment.
 
 Memory disposition: forbidden; no explicit memory-write request.
 
@@ -188,3 +192,11 @@ Qualification uses copied controller metadata and isolated installed prefix, not
 Primary owns final real transfer and cleanup, /root/real_peer205 qualified MCP/peer preservation, /root/cross205 owns only the explicit synthetic real conversation transfer, /root/gates205 runs mechanical affected-source local gates. No broad review has started. Use recorded base0f469f3 for the requested single review after ticket closure; user continued after the previously presented comparison question. No merge/deployment authorization is inferred.
 
 Real cross-profile copied synthetic conversation resumed and continued under the second actual account; source unchanged and replay reused the same copy. One further real provider turn, total3. No goal/allowance transferred. Cleanup stopped only exact owned native daemons and retained test histories/configuration; fresh Linux/Windows process census recorded. All owned processes empty. Of26 earlier relevant processes,10 retained same PID/birth/executable and16 exited independently; no stronger unrelated-continuity claim. Windows55 PowerShell/pwsh processes totaled4169.04MiB, largest189.81MiB at readback; no unrelated termination. Source gate Python3.12 selected172PASS; Python3.11 first run171PASS/one environment error because sibling installed CLI was absent, repaired by exact wheel installation and focused rerun (5PASS2.360s, failed case plus transport parity). Whole-tree undefined-name Ruff, compile, policy wiring, generated command reference and active planning audit PASS. This is a selected presubmit, not the comprehensive suite.
+
+### Final review and closeout
+
+All seven ticket states read back CLOSED on github.com/CochranResearchGroup/codex-wake (actor ecochran76 ADMIN). Frozen broad review base0f469f3/head64e9f0c: /root/review205_standards and /root/review205_spec completed independently. Primary adjudicated4 blocking findings and1 nonblocking low internal inventory coupling suggestion. Single bounded TDD pass integrated f07038b,0f62074,f66989e,569ad36,5bf4fb0,d785859; root owned runtime reload/store projection, asset worker owned canonical materialization paths including adoption, parity worker owned installed entrypoints. All accepted blockers resolved; no second broad review.
+
+Final affected installed44PASS eachPython3.11/3.12; preceding changed-surface67PASS each. Whole-tree undefined names/compile/policy/reference/planning PASS at5bf; final adoption changed-file Ruff and installed parity PASS atd785. Native selected MCP reload advanced only selectedtoolv1→v2; peer/goals/process generations preserved, replay same receipt,0provider calls, network isolated, final owned0. Reused eight unchanged reload-related modules by exact byte hashes rather than repeating unaffected native qualification after adoption-only correction. Final260 package Python files match exact wheel in both isolated prefixes. Hosted CI skipped by cost policy; comprehensive lane and parked OpenClaw unexecuted.
+
+Low follow-up owner primary: consider a shared configuration-snapshot interface if seeding/sync private inventory coupling causes concrete change cost. It is a judgment-call maintainability suggestion, not a missing acceptance criterion or permission to broaden this completed packet. No automatic credential migration, global launcher switch, merge or deployment performed. Three real provider turns total; own test histories retained, owned native daemons/watchers stopped, unrelated work preserved. Memory disposition forbidden because no explicit memory-write request.

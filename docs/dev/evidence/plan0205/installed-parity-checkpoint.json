@@ -23,5 +23,11 @@
   "final_owned_server": "closed",
   "elapsed_at": 1794059213.4898999,
   "installed_wheel_sha256": "d5f2d328afa6c56ef507f4133b12cace68de4a3ae543f3afebc8faf1fde5c21c",
-  "source_wheel_installed_python_files_equal": 268
+  "source_wheel_installed_python_files_equal": 268,
+  "scope_correction_from_single_review": {
+    "classification": "source parity in installed dependency environment; installed entrypoint routing not established by this checkpoint",
+    "reason": "original fixture forced source imports/module entrypoints",
+    "replacement": "review remediation explicit installed-prefix acceptance uses actual installed CLI/MCP paths with source import exclusion",
+    "original_observations_preserved": true
+  }
 }
