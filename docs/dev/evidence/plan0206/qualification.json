@@ -1,0 +1,64 @@
+{
+  "source_commit": "4fbd008c58487d2cbc233051ad44771732072d4b",
+  "tier": "affected presubmit and disposable native relocation",
+  "public_default_routing_tests": 5,
+  "python311": {
+    "passed": 118,
+    "failed": 0,
+    "actual_powershell_workflow": "passed"
+  },
+  "python312": {
+    "passed": 117,
+    "errors": 1,
+    "error": "initial PowerShell/WSL bootstrap timeout; focused retry WSL UtilAcceptVsock accept4 error110",
+    "classification": "intermittent OS transport boundary; unchanged boundary source; no default-routing assertion failure",
+    "direct_powershell_to_wsl_echo": "passed"
+  },
+  "static": [
+    "whole-tree undefined-name Ruff PASS",
+    "compile PASS",
+    "policy wiring PASS",
+    "generated reference PASS",
+    "planning PASS after required Current State repair"
+  ],
+  "native_relocation": {
+    "uid": 1017,
+    "package_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+    "status": "passed",
+    "stopped_before_rename": true,
+    "legacy_alias": true,
+    "saved_history_resume_and_goal_counters": "preserved",
+    "inode_and_saved_bytes_at_move": "preserved",
+    "new_canonical_home_verified": true,
+    "provider_calls": 0,
+    "final_owned_processes": [],
+    "private_receipt_sha256": "1f0f31d6e2956b284f08478bd3f2ce5ddb48d1a64bfa76485d5b722e815ce24f"
+  },
+  "retained_red_green_logs": [
+    "defaults-red.log (initial parent creation failure)",
+    "defaults-red-location.log",
+    "defaults-green.log",
+    "launcher-red.log",
+    "launcher-green.log",
+    "mcp-red.log",
+    "mcp-green.log",
+    "profile-override-red.log",
+    "defaults-shortcuts-green.log",
+    "legacy-environment-red.log",
+    "legacy-environment-green312.log",
+    "canonical-precedence-red.log",
+    "canonical-precedence-green.log"
+  ],
+  "retained_initial_join": "unsafe symlink root allowed batch directory creation; restored non-following shortcut roots and existing safety test passed",
+  "hosted_ci": false,
+  "comprehensive_suite_claim": false,
+  "working_relocation": "not yet performed",
+  "final_default_precedence_source": "15740a6348e459995165c198adefb104d2ab683e",
+  "final_focused": {
+    "python311_passed": 31,
+    "python312_passed": 31,
+    "all_static_checks": "passed",
+    "scope": "default routing, compatibility launchers, shortcuts safety, concurrency, completion, transport parity",
+    "receipt_sha256": "ed1d47cead8f30ac2c17c4d756549f3d71985bcc41a427381ebad246d1903a7a"
+  }
+}

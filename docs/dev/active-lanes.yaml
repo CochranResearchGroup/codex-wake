@@ -1149,3 +1149,17 @@ lanes:
     checkpoint: c1c049532f4658c1e64862c41b71c82c8957544c
     validation_status: focused_and_real_runtime_passed
     disposition: PR496 merged and exact Wake prefix deployed; compatibility launchers repaired; 59 completed Wake worktrees retired with recovery refs; stock/native services preserved
+
+  - id: P206
+    owner: ecochran76 / primary
+    objective: Stable default user controller and root-free account commands
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/498]
+    plan: docs/dev/plans/0206-2026-11-07-default-controller-location.md
+    branch: fix/default-controller-location
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P205]
+    updated_at: 2026-11-07
+    disposition: Primary default routing; one bounded native relocation qualification; preserve stock and active sessions

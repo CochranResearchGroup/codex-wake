@@ -110,23 +110,24 @@ def tool_specs():
     }
 
 
-def mcp_call(runner, arguments, native_context, verb, *, runtime=None, now=None):
+def mcp_call(runner, arguments, native_context, verb, *, runtime=None, now=None, root=None):
     from .goal_supervision import verified_native_caller
     from .session_permissions import Principal, PermissionStore
+    root = runner.wake_root if root is None else root
     try:
         caller = arguments.get('caller_thread_id')
         verified_native_caller(native_context, caller)
-        host_policy = policy(runner.wake_root)
+        host_policy = policy(root)
         allowed = host_policy.get('callers', {}).get(caller, [])
         if not allowed:
             raise InventoryError('unauthorized_target', 'history caller has no account read scope')
         principal = None
         if verb == 'resume':
-            store = PermissionStore(runner.wake_root)
+            store = PermissionStore(root)
             delegated = caller in store._read()['policy'].get('delegations', {})
             principal = Principal(caller, 'controller' if delegated else 'session')
         selected = {key: value for key, value in arguments.items() if key != 'caller_thread_id'}
-        result = execute('history.' + verb, selected, runner.wake_root,
+        result = execute('history.' + verb, selected, root,
             authorized_accounts=allowed, principal=principal, runtime=runtime, now=now)
     except (WakeError, ValueError, TypeError, KeyError, OSError) as error:
         result = dict(schema_version=1, operation='history.' + verb, status='failed',

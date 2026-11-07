@@ -335,7 +335,7 @@ class ControllerAccounts:
         if path.is_symlink() or path != path.resolve():
             raise InventoryError('stale_target', 'account management requires the fixed real registry')
         if operation == 'accounts.init' and not path.parent.exists():
-            path.parent.mkdir(mode=0o700)
+            path.parent.mkdir(mode=0o700, parents=True)
         with _registry_lock(path):
             if operation == 'accounts.init':
                 return self._initialize(path)

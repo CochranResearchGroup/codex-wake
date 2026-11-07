@@ -4,6 +4,34 @@ Codex Wake owns the account registry, configuration explanation, immutable build
 selection, daemon lifecycle and history transfer. `profiles` and the older
 `codex-stock`/`codex-modded` launchers remain compatibility entrypoints.
 
+## Use your user controller
+
+Account commands and launchers remember the same user controller. You do not
+need to export a root or repeat `--wake-root`:
+
+```sh
+codex-wake accounts list
+codex-wake accounts status soylei --json
+codex-profile soylei
+codex-wake resume soylei --last
+codex-wake history recent --owner soylei --limit 10
+```
+
+First-use account state lives at `~/.local/state/codex-wake/controller`, or
+`$XDG_STATE_HOME/codex-wake/controller`. An existing saved default takes priority;
+`codex-wake configuration default-root /your/controller` changes it once.
+Explicit `--wake-root` and the optional `CODEX_WAKE_ROOT` override retain their
+scope. Compatibility launchers also honor explicit `--config` and
+`CODEX_WAKE_ACCOUNTS_CONFIG` choices. A saved Wake default takes precedence over
+the legacy `CODEX_PROFILES_CONFIG` fallback.
+An existing project account registry remains a fallback before a user controller
+has been initialized or selected. Ordinary wakes, schedules and emergency controls keep their project
+scope; choosing an account controller does not redirect those records.
+
+To initialize a new user controller, run `codex-wake accounts init`. Existing
+profiles need no reinitialization or new sign-in. Independent seeding and session
+imports remain explicit, preserving stock and existing profile state.
+
 ## Set up isolated accounts
 
 Choose a new private Wake root. This creates empty account homes; it does not
