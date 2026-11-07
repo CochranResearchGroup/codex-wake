@@ -5,6 +5,16 @@ Work item: https://github.com/CochranResearchGroup/codex-wake/issues/498
 Owner: ecochran76 / primary
 Priority: high. Tracker state: IN_PROGRESS. WIP: primary implementation plus one bounded native qualification worker.
 
+## Current State
+
+Default-routing implementation4fbd008 passes the four new public regressions.
+Native stopped-home relocation qualified on UID1017 without provider calls.
+Affected Python3.11 run118PASS; Python3.12 run117PASS plus one retained
+PowerShell/WSL bootstrap timeout. One instrumented retry exposed OS
+UtilAcceptVsock accept4 error110 in unchanged boundary code. Actual PowerShell
+workflow passed on3.11; no clean-all-gates claim. Static/planning checks pass.
+Working controller location is not moved yet.
+
 ## Scope and outcome
 
 User rejects the testing-era installation name and manual WAKE_ROOT exports. Existing shortcut preference ownership must serve all account/store/configuration/history/build/daemon/migration commands, compatibility launchers, completion and corresponding local MCP calls. Explicit roots/configuration retain priority. Use XDG_STATE_HOME/codex-wake/controller (normally ~/.local/state/codex-wake/controller) for first-use user account state; continue project-local scheduler/control semantics. Existing saved default-root remains authoritative; no competing preference registry. Retain legacy project account discovery only when no user default exists. Malformed preference fails explicitly and can be repaired with configuration default-root.
