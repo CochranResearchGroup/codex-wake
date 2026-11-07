@@ -93,3 +93,17 @@ class IndependentStoreTests(unittest.TestCase):
             self.assertTrue((home / 'skills/demo/SKILL.md').is_file())
             self.assertFalse((home / 'skills/demo/.venv').exists())
             self.assertIn({'entry':'skills/demo/.venv','reason':'runtime_dependency_not_copied'}, result['inventory']['unsupported_entries'])
+
+    def test_stock_registration_accepts_normal_readable_home_without_chmod(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            stock = root / 'stock'
+            stock.mkdir(mode=0o755)
+            stock.chmod(0o755)
+            (stock / 'config.toml').write_text('model="stock"\n')
+            owner = ControllerAccounts(root/'controller-accounts.toml',host='test',environment='wsl')
+            owner.execute('accounts.init',{})
+            owner.execute('stores.register',{'selector':'stock','home':str(stock)})
+            row=owner.execute('accounts.create',{'selector':'alice','mode':'independent','source':'stock'})
+            self.assertEqual(stock.stat().st_mode & 0o777,0o755)
+            self.assertEqual(Path(row['account']['home']).stat().st_mode & 0o777,0o700)

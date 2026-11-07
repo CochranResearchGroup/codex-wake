@@ -65,7 +65,7 @@ def _resolve(owner, selector):
 
 
 def execute(owner, operation, arguments):
-    from .controller_accounts import _safe_name, _private_directory, _registry_lock
+    from .controller_accounts import _safe_name, _registry_lock
     if not isinstance(arguments, dict):
         raise InventoryError('invalid_argument', 'store arguments must be an object')
     allowed = {'stores.register': {'selector', 'home'}, 'stores.resolve': {'selector'}, 'stores.list': set()}
@@ -83,7 +83,9 @@ def execute(owner, operation, arguments):
     if not isinstance(value, str):
         raise InventoryError('invalid_argument', 'stock registration requires an absolute home')
     home = Path(value)
-    _private_directory(home)
+    if (not home.is_absolute() or home != home.resolve() or not home.is_dir()
+            or home.stat().st_uid != os.getuid() or home.stat().st_mode & 0o022):
+        raise InventoryError('unauthorized_target', 'stock registration requires a canonical user-owned home without group or world writes; stock permissions are never changed')
     with _registry_lock(owner.path):
         data = tomllib.loads(owner.path.read_text())
         existing = data.get('stores', {}).get(selector)
