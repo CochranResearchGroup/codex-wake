@@ -7,7 +7,7 @@ Priority: high. Tracker state: IN_PROGRESS. WIP: primary implementation plus one
 
 ## Current State
 
-Default-routing implementation4fbd008 passes the four new public regressions.
+Default-routing implementation15740a6 passes five new public regressions and final31 affected tests on each Python3.11/3.12.
 Native stopped-home relocation qualified on UID1017 without provider calls.
 Affected Python3.11 run118PASS; Python3.12 run117PASS plus one retained
 PowerShell/WSL bootstrap timeout. One instrumented retry exposed OS
@@ -39,8 +39,12 @@ Memory disposition pending closeout; no memory-write request.
 
 ### Source and native qualification checkpoint
 
-Four public default-routing tests cover first-use canonical state, arbitrary cwd, shared launcher/MCP defaults, explicit/saved/environment precedence, project wakes and malformed-preference repair. Red failures retained for wrong project location, missing launcher configuration, MCP host-root-required and ignored explicit profile root. First broader join caught a symlink-root batch safety regression; restored non-following shortcut semantics and retained the original failure. Native UID1017 stopped-home rename+legacyalias qualification PASS with exact0.167 package, saved history/goal/counters/inodes preserved, freshnewhome peer verified,0provider calls and ownedprocessesempty. No working move yet.
+Five public default-routing tests cover first-use canonical state, arbitrary cwd, shared launcher/MCP defaults, explicit/saved/environment precedence, project wakes and malformed-preference repair. Red failures retained for wrong project location, missing launcher configuration, MCP host-root-required and ignored explicit profile root. First broader join caught a symlink-root batch safety regression; restored non-following shortcut semantics and retained the original failure. Native UID1017 stopped-home rename+legacyalias qualification PASS with exact0.167 package, saved history/goal/counters/inodes preserved, freshnewhome peer verified,0provider calls and ownedprocessesempty. No working move yet.
 
 A live same-user local HTTP controller remains in the legacyroot (PIDidentity read-only verified), serving shared native discovery from older Pythonprefix. Its15 journal operations are terminal/completed; no profile native processes are active. Physical cutover therefore includes only a supported stop/start of this idle selected HTTP listener, with fresh identity/idle checks, same port/nativeendpoint and regenerated private connection bootstrap. The shared native daemon, unrelated services, budgets and sessions remain running. This is separate from goal-watcher maintenance; no goal allocation or stop latch is changed.
 
 Inherited CODEX_PROFILES_CONFIG still points at the retired Profiles project in the working environment. A saved Wake default is an explicit modern selection and now takes priority over this legacy fallback; --config/new CODEX_WAKE_ACCOUNTS_CONFIG and CODEX_WAKE_ROOT remain explicit overrides. Public regression reproduced selecting the wrong legacy account then verified the intended store, retaining direct --config access. This closes the same default-consistency outcome rather than changing legacy project files or requiring manual environment cleanup.
+
+### Final source validation
+
+Final source15740a6348e459995165c198adefb104d2ab683e:31 focusedPASS eachPython3.11/3.12; whole undefined-name Ruff, compile, policy, generatedreference and activeplanning PASS. Legacyprofilevariable and canonical-vs-project discovery regressions red→green retained. Earlier affected source4fbd008:3.11all118PASS,3.12one concreteintermittentWSLUtilAcceptVsock bootstrap error among117passing; unchanged controltransport files and successful3.11actualPowerShell workflow bound its environmental disposition. No cleancomprehensive/allgates claim, no more retries or scope expansion.

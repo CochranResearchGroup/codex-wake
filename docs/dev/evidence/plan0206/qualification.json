@@ -1,7 +1,7 @@
 {
   "source_commit": "4fbd008c58487d2cbc233051ad44771732072d4b",
   "tier": "affected presubmit and disposable native relocation",
-  "public_default_routing_tests": 4,
+  "public_default_routing_tests": 5,
   "python311": {
     "passed": 118,
     "failed": 0,
@@ -43,10 +43,22 @@
     "mcp-red.log",
     "mcp-green.log",
     "profile-override-red.log",
-    "defaults-shortcuts-green.log"
+    "defaults-shortcuts-green.log",
+    "legacy-environment-red.log",
+    "legacy-environment-green312.log",
+    "canonical-precedence-red.log",
+    "canonical-precedence-green.log"
   ],
   "retained_initial_join": "unsafe symlink root allowed batch directory creation; restored non-following shortcut roots and existing safety test passed",
   "hosted_ci": false,
   "comprehensive_suite_claim": false,
-  "working_relocation": "not yet performed"
+  "working_relocation": "not yet performed",
+  "final_default_precedence_source": "15740a6348e459995165c198adefb104d2ab683e",
+  "final_focused": {
+    "python311_passed": 31,
+    "python312_passed": 31,
+    "all_static_checks": "passed",
+    "scope": "default routing, compatibility launchers, shortcuts safety, concurrency, completion, transport parity",
+    "receipt_sha256": "ed1d47cead8f30ac2c17c4d756549f3d71985bcc41a427381ebad246d1903a7a"
+  }
 }
