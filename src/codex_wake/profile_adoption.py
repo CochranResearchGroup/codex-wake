@@ -7,6 +7,7 @@ its supported native owner and is refused rather than cloned.
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import stat
@@ -22,11 +23,13 @@ ASSETS = {'config.toml', 'skills', 'rules', 'hooks', 'hooks.json', 'AGENTS.md'}
 def preview(owner, data, settings, scope, marker, paths):
     from .controller_migration import _tree, _links, _digest, _secret_name
     names, inactive = account_inventory(settings, data)
-    holds, entries, plan, sources = [], {}, [], {}
+    holds, entries, plan, sources, external = [], {}, [], {}, []
     homes = [settings.account_root(name) for name in names]
     if not homes:
         holds.append('explicit_profile_selection_required')
     candidate = paths['candidate_root']
+    if candidate.is_relative_to(settings.source_root) or settings.source_root.is_relative_to(candidate):
+        holds.append('adoption_custody_overlaps_stock')
     for home in homes:
         if home.is_symlink() or home != home.resolve() or not home.is_dir():
             holds.append('profile_home_requires_canonical_private_directory')
@@ -52,26 +55,65 @@ def preview(owner, data, settings, scope, marker, paths):
                 source = Path(link['resolved'])
                 if not link['exists'] or not source.is_relative_to(scope) or source.is_relative_to(home):
                     raise ValueError()
+                mappings = []
                 if path.name == 'config.toml':
                     text = source.read_text()
-                    # Until reference-aware seeding qualifies a mapping, an
-                    # absolute stock dependency cannot claim independence.
-                    if str(settings.source_root) in text:
-                        holds.append('configuration_home_references_require_asset_mapping')
-                    def embedded(value):
+                    config = tomllib.loads(text)
+                    def strings(value, trail=()):
                         if isinstance(value, dict):
-                            return any(k.lower() in {'env', 'password', 'token', 'api_key', 'secret', 'credentials', 'authorization'} or embedded(v) for k, v in value.items())
-                        if isinstance(value, list):
-                            return any(embedded(v) for v in value)
-                        return False
-                    if embedded(tomllib.loads(text)):
-                        holds.append('embedded_credentials_require_native_owner')
+                            for key, child in value.items():
+                                yield from strings(child, (*trail, key))
+                        elif isinstance(value, list):
+                            for child in value:
+                                yield from strings(child, trail)
+                        elif isinstance(value, str):
+                            # Sensitive connector values are private settings,
+                            # never inventory output or asset paths.
+                            if not any(key.lower() in {'env', 'headers', 'password', 'token', 'api_key', 'secret', 'credentials', 'authorization'} for key in trail):
+                                yield value
+                    for value in strings(config):
+                        for reference in re.findall(r"(?<![^\s\"'])/[^\s\"'<>|;]+", value):
+                            referenced = Path(reference)
+                            if not referenced.is_relative_to(settings.source_root):
+                                external.append(dict(profile=str(home), dependency=reference))
+                                continue
+                            relative_asset = referenced.relative_to(settings.source_root)
+                            if (not relative_asset.parts or '..' in relative_asset.parts
+                                    or relative_asset.parts[0] not in ASSETS | {'scripts', 'assets'}
+                                    or any(_secret_name(Path(part)) for part in relative_asset.parts)):
+                                holds.append('configuration_asset_reference_requires_native_owner')
+                                continue
+                            asset = settings.source_root / relative_asset.parts[0]
+                            destination = home / relative_asset.parts[0]
+                            if not referenced.exists() or asset.is_symlink():
+                                holds.append('configuration_asset_reference_unavailable')
+                                continue
+                            asset_snapshot, asset_links = _tree(asset, scope)
+                            if asset_links or any(_secret_name(Path(p)) for p in asset_snapshot):
+                                holds.append('configuration_asset_links_or_credentials_require_repair')
+                                continue
+                            mappings.append(dict(source=str(settings.source_root), destination=str(home)))
+                            if not destination.exists() and not destination.is_symlink():
+                                if not any(row['path'] == str(destination) for row in plan):
+                                    sources[str(destination)] = asset_snapshot
+                                    plan.append(dict(path=str(destination), source=str(asset), target=None))
+                    # A literal prefix rewrite is accepted only when it has
+                    # exactly the semantics of rewriting parsed string values.
+                    if mappings:
+                        def remap(value):
+                            if isinstance(value, dict):
+                                return {k: remap(v) for k, v in value.items()}
+                            if isinstance(value, list):
+                                return [remap(v) for v in value]
+                            return value.replace(str(settings.source_root), str(home)) if isinstance(value, str) else value
+                        if tomllib.loads(text.replace(str(settings.source_root), str(home))) != remap(config):
+                            holds.append('configuration_asset_reference_encoding_requires_repair')
                 snapshot, nested = _tree(source, scope)
                 if nested or any(_secret_name(Path(p)) for p in snapshot):
                     holds.append('linked_asset_credentials_or_nested_links_require_repair')
                     continue
                 sources[str(path)] = snapshot
-                plan.append(dict(path=str(path), source=str(source), target=os.readlink(path)))
+                plan.append(dict(path=str(path), source=str(source), target=os.readlink(path), mappings=mappings))
             except (OSError, ValueError, RuntimeError, InventoryError):
                 holds.append('linked_configuration_source_requires_repair')
     writers = owner.writer_probe(tuple(homes) + tuple(Path(p['source']) for p in plan))
@@ -83,7 +125,7 @@ def preview(owner, data, settings, scope, marker, paths):
     return dict(status='held' if holds else 'ready', strategy='adopt_independent',
                 target=dict(owner.scope_target(), migration_revision=_digest(dict(policy=policy_sha, entries=entries, sources=sources, writers=writers))),
                 holds=sorted(set(holds)), accounts=names, inactive_accounts=inactive,
-                homes=[str(h) for h in homes], plan=plan, sources=sources,
+                homes=[str(h) for h in homes], plan=plan, sources=sources, external_dependencies=external,
                 policy_sha=policy_sha, credential_copy=False,
                 original_shared_store='preserved', production_activation=False)
 
@@ -128,6 +170,11 @@ def apply(owner, directory, before, authorize):
         for number, action in enumerate(before['plan']):
             staged = custody / ('private-' + str(number))
             _copy(Path(action['source']), staged)
+            if action.get('mappings'):
+                text = staged.read_text()
+                for mapping in action['mappings']:
+                    text = text.replace(mapping['source'], mapping['destination'])
+                staged.write_text(text)
         # Copying never opens native state; recheck full selected state and all
         # link sources after staging and immediately before each replacement.
         current = _guard(owner, authorize, before['target'])
@@ -138,7 +185,8 @@ def apply(owner, directory, before, authorize):
             row = dict(action, backup=str(backup), state='intent')
             receipt['moves'].append(row)
             _save(receipt_path, receipt)
-            os.rename(path, backup)
+            if action['target'] is not None:
+                os.rename(path, backup)
             os.rename(custody / ('private-' + str(number)), path)
             row['state'] = 'adopted'
             _save(receipt_path, receipt)
@@ -178,6 +226,10 @@ def rollback(owner, directory, identifier, before, authorize):
                 raise InventoryError('target_changed', 'original linked configuration changed; rollback needs reconciliation')
         for row in receipt['moves']:
             backup = Path(row['backup'])
+            if row['target'] is None:
+                if backup.exists() or backup.is_symlink():
+                    raise InventoryError('target_changed', 'absent-before rollback custody changed')
+                continue
             if not backup.is_symlink() or os.readlink(backup) != row['target']:
                 raise InventoryError('target_changed', 'rollback link custody changed; repair required')
     check()
@@ -191,7 +243,8 @@ def rollback(owner, directory, identifier, before, authorize):
             _guard(owner, authorize, expected)
             original = Path(row['path'])
             os.rename(original, paths['candidate_root'] / ('retained-private-' + str(number)))
-            os.rename(row['backup'], original)
+            if row['target'] is not None:
+                os.rename(row['backup'], original)
             expected = owner._preview()['target']
         receipt['state'] = 'rolled_back'
         _save(path, receipt)
