@@ -65,6 +65,20 @@ def execute(root, arguments, *, accounts=None, actor=None, authorize=None):
         ('limits', 'Exercise voluntary limits through the existing self-limit owner on the selected real profile; retain cumulative usage.'),
         ('refresh', 'Qualify scoped refresh through the existing refresh owner on the selected real profile; preserve stock, peers and budgets.')):
         checks[name] = dict(state='not_qualified', remedy=remedy)
+    # Daemon observation and client event-loop health are distinct evidence.
+    checks['backend'] = dict(state='unknown', remedy='Supply the host-owned selected build manifest, then inspect daemons status.')
+    if arguments.get('manifest'):
+        from .controller_builds import ControllerBuilds
+        from .controller_daemons import ControllerDaemons
+        try:
+            guard()
+            daemon = ControllerDaemons(ControllerBuilds(arguments['manifest'], accounts)).execute(
+                'daemons.status', dict(account=arguments['selector'], channel='modded'))['daemon']
+            checks['backend'] = dict(state=daemon['state'], observation=daemon,
+                remedy='Inspect the selected daemons status; any start or scoped restart requires separate authorization and the exact observed target.')
+        except (InventoryError, BuildError, OSError, ValueError) as error:
+            checks['backend'] = dict(state='unavailable', reason=getattr(error, 'code', 'build_held'),
+                remedy='Repair the selected build registration or private daemon endpoint using existing build/daemon owners; inspect again before any authorized start.')
     from .controller_health import ControllerHealth
     health = ControllerHealth(root)
     try:
@@ -73,18 +87,19 @@ def execute(root, arguments, *, accounts=None, actor=None, authorize=None):
         if len(bindings) == 1:
             guard()
             observed = health.execute('health.observe', {'expected_target': bindings[0]['target']})
-            checks['backend'] = dict(state=observed['observation']['status'], observation=observed,
+            checks['client'] = dict(state=observed['observation']['status'], observation=observed,
                 remedy='Use the existing health.observe and exact selected runtime recovery capabilities; no peer restart is implied.')
         else:
-            checks['backend'] = dict(state='unknown', reason='missing_or_ambiguous_selected_health_binding',
+            checks['client'] = dict(state='unknown', reason='missing_or_ambiguous_selected_health_binding',
                 remedy='Register one exact selected runtime with the existing health binding owner, then inspect again.')
     except (InventoryError, OSError, ValueError):
-        checks['backend'] = dict(state='unavailable', remedy='Repair the existing private controller-health binding for the selected runtime.')
+        checks['client'] = dict(state='unavailable', remedy='Repair the existing private controller-health binding for the selected runtime.')
     from .goal_watcher import watcher_status
     try:
         guard()
         watcher = watcher_status(root)
         checks['watcher'] = dict(state=watcher['reason'], observation=watcher,
+            scope='wake_root_process', selected_goal_enforced=False,
             remedy=watcher['next_action'])
     except (OSError, ValueError, TimeoutError, subprocess.TimeoutExpired):
         checks['watcher'] = dict(state='unavailable', remedy='Inspect goal-limits watcher-status for the selected Wake root; do not start a competing watcher.')
