@@ -1,19 +1,23 @@
 # Stable user controller and account-command defaults
 
-State: OPEN
+State: CLOSED
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/498
 Owner: ecochran76 / primary
 Priority: high. Tracker state: IN_PROGRESS. WIP: primary implementation plus one bounded native qualification worker.
 
 ## Current State
 
-Default-routing implementation15740a6 passes five new public regressions and final31 affected tests on each Python3.11/3.12.
-Native stopped-home relocation qualified on UID1017 without provider calls.
-Affected Python3.11 run118PASS; Python3.12 run117PASS plus one retained
-PowerShell/WSL bootstrap timeout. One instrumented retry exposed OS
-UtilAcceptVsock accept4 error110 in unchanged boundary code. Actual PowerShell
-workflow passed on3.11; no clean-all-gates claim. Static/planning checks pass.
-Working controller location is not moved yet.
+Merged PR499 as aaf619cc890828798d2c694d919b4ed02f4cdb4d and deployed its exact
+Python prefix. The live user controller is now ~/.local/state/codex-wake/controller;
+account commands/launchers work without root flags. Legacy saved history paths
+resolve through the retained compatibility alias. All29 protected native-state
+files and15 journal records are unchanged. Installed no-root status/recent/store,
+launcher and Windows PowerShell checks passed. Existing interactive shell wrappers
+were repaired; open a new terminal once to load the startup change.
+
+Final31 focused tests pass eachPython3.11/3.12; prior broader3.12 WSL-vsock failure
+remains retained separately. No new provider calls, native restarts or credential
+copying. See ../evidence/plan0206/deployment.json. Issue498 acceptance complete.
 
 ## Scope and outcome
 
@@ -48,3 +52,13 @@ Inherited CODEX_PROFILES_CONFIG still points at the retired Profiles project in 
 ### Final source validation
 
 Final source15740a6348e459995165c198adefb104d2ab683e:31 focusedPASS eachPython3.11/3.12; whole undefined-name Ruff, compile, policy, generatedreference and activeplanning PASS. Legacyprofilevariable and canonical-vs-project discovery regressions red→green retained. Earlier affected source4fbd008:3.11all118PASS,3.12one concreteintermittentWSLUtilAcceptVsock bootstrap error among117passing; unchanged controltransport files and successful3.11actualPowerShell workflow bound its environmental disposition. No cleancomprehensive/allgates claim, no more retries or scope expansion.
+
+### Working cutover and installed acceptance
+
+Exact merged wheel01cbec7818e873a66f529fe04c6946f46be5571e68ecc4fe23b98a656688aee0 in ~/.local/share/codex-wake/releases/0.22.0.dev2-aaf619c matches269Pythonfiles. Selected idle HTTPlistener stopped through publiccontrolserverstop, then root renamed in-place with oldnamealias. Updated3liveconfigurationfiles and13metadata/configsymlinks; raw native auth/history/SQLite untouched,29protectedfiles preserveinode/hash/mtime. All15terminal operation/event/revocation records preserve their digest. Sourcehomes/storeIDs/generations remain intact; historical receipts/transcripts are not rewritten.
+
+First listener replacement inherited requested port0 and selected a new port, causing the explicit same-port verification to fail after the completed move. Preserved first intent/script, inspected known currentstate and rebound only that replacement listener to the prior observed37185; no directory retry or scope reset. Final listener currentPID3793423 is ready in canonicalcwd using newprefix.26remaining native generations unchanged,1earlierprocess exited independently, no native interruption.
+
+Inherited CODEX_PROFILES_CONFIG exposed another installed binding: .zshrc legacyfunctions forced --config to the old project, bypassing the published launchers. Surgically replaced only that managed block, preserved unrelated startup bytes/legacy variables, syntaxcheckedZsh and verified the normalcommand launcher. Users open a fresh terminal or reload startup once; no root exports are required. Reinstalled Bash/Zsh completion.
+
+Actual no-root accountsstatus,storesresolve,historyrecent(complete,noholds),controllerstatus and profileversion pass from unrelatedcwd. Actual Windows PowerShell→WSL no-root status completed in1.385s with canonicalhome; savedcredentialspresent, no provider call. Stockbinary hashunchanged. Rollback configuration/preferences/launchers/startup snapshots and oldprefix retained privately. ExistingMCPprocesses load module changes when individually reloaded. Memory disposition forbidden because no explicit memory-write request.

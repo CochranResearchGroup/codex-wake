@@ -1157,9 +1157,11 @@ lanes:
     plan: docs/dev/plans/0206-2026-11-07-default-controller-location.md
     branch: fix/default-controller-location
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: [P205]
     updated_at: 2026-11-07
-    disposition: Primary default routing; one bounded native relocation qualification; preserve stock and active sessions
+    checkpoint: aaf619cc890828798d2c694d919b4ed02f4cdb4d
+    validation_status: focused_installed_native_passed_with_retained_prior_wsl_gap
+    disposition: PR499 deployed; controller renamed with legacy alias; account commands and shell launchers remember defaults; stock/native state preserved
