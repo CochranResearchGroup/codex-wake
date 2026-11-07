@@ -117,7 +117,14 @@ class ReleaseDriver:
             else:
                 run = self.load(arguments.get('run_id'))
                 if operation == 'status':
+                    if run.get('stages'):
+                        from .release_build import reconcile
+                        reconcile(self, run)
                     result = run
+                elif operation in ('resume', 'qualify', 'cleanup', 'run'):
+                    from importlib import import_module
+                    module = import_module('.release_' + {'qualify':'qualification'}.get(operation, operation), __package__)
+                    result = module.execute(self, operation, run, arguments)
                 else:
                     from .release_build import execute
                     result = execute(self, operation, run, arguments)
@@ -137,4 +144,12 @@ class ReleaseDriver:
         if mode != 'json':
             result['stages'] = {name: {k: v for k, v in stage.items() if k != 'attempts'}
                                 for name, stage in run.get('stages', {}).items()}
+        if mode == 'diagnostics':
+            diagnostics = []
+            for name, stage in run.get('stages', {}).items():
+                receipt = stage.get('receipt') or {}
+                if isinstance(receipt, dict):
+                    for item in receipt.get('diagnostics', []):
+                        diagnostics.append(dict(stage=name, diagnostic=item))
+            result['diagnostics'] = diagnostics[:bound]
         return result

@@ -57,6 +57,18 @@ class ReleasePreparationTests(unittest.TestCase):
             native, failed = CommandRunner(wake_root=root).call('wake_builds_status', {'run_id': state['run_id']})
             self.assertFalse(failed, native)
             self.assertEqual(json.loads(cli.stdout)['result'], native['result'])
+            from types import SimpleNamespace
+            from codex_wake.operation_commands import local_actor
+            from codex_wake.build_commands import owner_from_root
+            from codex_wake.controller_http import ProtectedOperations
+            from codex_wake.controller_operations import ControllerOperations
+            from codex_wake.managed_inventory import ManagedInventory
+            registered = owner_from_root(root)
+            operations = ControllerOperations(ManagedInventory(root), host=registered.accounts.host,
+                environment=registered.accounts.environment, builds=registered)
+            api = ProtectedOperations(SimpleNamespace(authenticate=lambda token: local_actor(root)), operations)
+            reply = api.execute('fixture', 'builds.status', {'run_id': state['run_id']})
+            self.assertEqual(reply['result'], native['result'])
 
 
 if __name__ == '__main__':
