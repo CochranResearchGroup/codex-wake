@@ -65,8 +65,10 @@ def execute(root, operation, arguments, *, accounts, actor, authorize):
             if not store_allowed(store):
                 raise AuthError('insufficient_scope')
         from .configuration_sync import execute as sync
+        from .profile_reload import selected_reload
         guard()
-        result = sync(accounts, operation, arguments)
+        result = sync(accounts, operation, arguments,
+                      reload_executor=lambda destination: selected_reload(accounts, destination, guard=guard))
     else:
         raise InventoryError('unsupported_operation', 'unsupported profile operation')
     guard()
