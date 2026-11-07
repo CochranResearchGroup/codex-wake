@@ -1456,3 +1456,7 @@ Grok execution slice: [owned ACP session control](docs/dev/plans/0201-2026-11-03
 Native release driver (closed local integration): [Plan0204](docs/dev/plans/0204-2026-11-06-native-release-driver.md) records six closed tickets, Cargo Signal execution, real-client/native acceptance and one reviewed remediation pass. Merge/deployment and comprehensive-suite qualification remain separate.
 
 Plan0204 deployment: PR486 merged at5fd4aeb; Wake release-driver commands installed with automatic completion. [Deployment and rollback receipt](docs/dev/evidence/plan0204/deployment.json). Native Codex processes preserved.
+
+## P205 | Stock shared home and independent profiles
+
+OPEN: [spec #488](https://github.com/CochranResearchGroup/codex-wake/issues/488), dependent tickets #489–#495. [Plan0205](docs/dev/plans/0205-2026-11-06-stock-home-and-independent-profiles.md) owns execution and three-lane custody. Stock stays unchanged; private seeding, adoption, sync, snapshots, parity and runtime qualification precede completion. No merge/deployment authorized by this packet.
