@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "status": "PASSED",
+  "run_id": "f6733c7252284ee896e1f5f481d69143",
+  "source_commit": "263334b69dbc27c1b295251c7f5593cf5297903f",
+  "source": {
+    "repository": "/home/ecochran76/workspace.local/codex-wake-native-0167",
+    "upstream": "086ccc833bc9cf01024ad2dd6af7dbd421b6bf9a",
+    "mod_revision": "a4cad1365c850a9c6a14efe004adf84b51fbf7ad"
+  },
+  "package": {
+    "path": "/home/ecochran76/.local/state/codex-wake/native-modern-0167/package",
+    "files": {
+      "bin/codex": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+      "bin/codex-code-mode-host": "a558a3c99756e075a9de90fdbb8f6cc09af526e16c3b736ee8a340d67041f2f0",
+      "bin/codex-exec-server": "9abfcd38bde7eb2d4003ee70940bc706cb760dab9d17b85e593fdeeb2baf81e4",
+      "codex-package.json": "64a6c8f7bc146a94e9af84915c6a08d5457d58b5936f825894bbb8e6b1be8133",
+      "codex-path/rg": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+      "codex-resources/bwrap": "251e9e9ad727583d379a252d36ecd1c55c4c1e5375d876a64324b45ca2bcc64f"
+    },
+    "inventory_sha256": "93ca9530fd75d2f160d56a85a138cea0cf1e01f98a7002ed2a16ddb1d2d2c856",
+    "reused": true,
+    "origin": "verified_retained_package",
+    "binding": {
+      "source_revision": "a4cad1365c850a9c6a14efe004adf84b51fbf7ad",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "dev-small",
+      "features": [],
+      "toolchain": "unknown"
+    },
+    "provenance_gaps": [
+      "historical compiler toolchain not recorded"
+    ]
+  },
+  "qualification": {
+    "status": "passed",
+    "checks": {
+      "active_multiclient": true,
+      "reconnect": true,
+      "upgrade": true,
+      "rollback": true,
+      "failed_start": true,
+      "history": true,
+      "private_ownership": true
+    },
+    "environment": {
+      "kind": "separate_uid",
+      "uid": 1017,
+      "shared_kernel": true
+    },
+    "evidence_scope": "disposable_runtime",
+    "working_installation_eligible": false
+  },
+  "surfaces": {
+    "windows_powershell": "5.1.26100.9711",
+    "windows_start": true,
+    "windows_status_progress": true,
+    "windows_resume": true,
+    "wsl_cli": true,
+    "rest": true,
+    "oauth_mcp": true,
+    "native_mcp": true
+  },
+  "duration_seconds": 193.232,
+  "external_model_calls": 0,
+  "native_recompilation": false,
+  "working_installation": false,
+  "private_evidence": "~/.local/state/codex-wake/release-driver-0204/",
+  "limitations": [
+    "Separate UID and network namespace share host kernel/resources.",
+    "Historical compiler provenance of retained package was not recorded; current preparation observes rustc1.95.0.",
+    "Broad Python regression still pending at this acceptance checkpoint; OpenClaw tests excluded under operator parking instruction."
+  ],
+  "failed_attempts_retained": [
+    "Cargo tool PATH missing rustc during initial private preparation",
+    "Acceptance listener initially used forbidden non-loopback binding; corrected to loopback",
+    "Disposable systemd invocation required explicit user-bus environment",
+    "Fixture case path exceeded tmux socket path bound; corrected with bounded unique case names"
+  ]
+}

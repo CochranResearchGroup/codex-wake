@@ -164,7 +164,7 @@
         483,
         484
       ],
-      "state": "running",
+      "state": "validated",
       "actor": "ecochran76",
       "host": "github.com",
       "created_at": "2026-11-07T03:00:40Z",
@@ -180,6 +180,14 @@
         "tests/test_release_workflow.py",
         "docs/agents/native-release-builds.md",
         "shared run dispatch/schema (exclusive handoff)"
+      ],
+      "result_sha": "9c89bd931d107b492d8eea60173acbc2424653c2",
+      "integrated_sha": "263334b",
+      "validation": [
+        "four real MCP orchestration seam tests passed",
+        "24 release-driver regressions passed together",
+        "actual PowerShell5.1, WSL CLI, REST, OAuth MCP and native MCP acceptance passed",
+        "real UID1017 upgrade/failure/history-private-lock qualification: seven checks true; no external model calls"
       ]
     }
   ],
@@ -191,5 +199,7 @@
     "seconds": 5.042,
     "compiler": "rustc1.95.0",
     "historical_compiler": "unknown; disclosed"
-  }
+  },
+  "acceptance": "docs/dev/evidence/plan0204/acceptance.json",
+  "broad_regression": "pending (OpenClaw excluded per parked-work boundary)"
 }

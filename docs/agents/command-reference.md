@@ -1599,7 +1599,7 @@ Native release work in isolated WSL state; no working-account installation.
 Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_run`).
 
 ```sh
-codex-wake --wake-root ROOT builds run --run-id RUN
+codex-wake --wake-root ROOT builds run --recipe RECIPE --upstream SHA --mod-revision SHA
 ```
 
 ### CLI help
@@ -1639,7 +1639,7 @@ options:
                         a changed target.
 
 Examples:
-  codex-wake --wake-root ROOT builds run --run-id RUN
+  codex-wake --wake-root ROOT builds run --recipe RECIPE --upstream SHA --mod-revision SHA
 ```
 
 | Argument | Required remotely | Meaning |
@@ -1647,7 +1647,7 @@ Examples:
 | `recipe` | no | Host-registered build recipe name, never an arbitrary executable or path. |
 | `upstream` | no | Pinned upstream commit SHA. |
 | `mod_revision` | no | Pinned retained mod commit SHA. |
-| `run_id` | yes | Durable native release run identifier. |
+| `run_id` | no | Durable native release run identifier. |
 | `jobs` | no | Explicit maximum compiler jobs. |
 | `output` | no | Release result presentation. |
 | `max_items` | no | Maximum diagnostic or progress entries. |
