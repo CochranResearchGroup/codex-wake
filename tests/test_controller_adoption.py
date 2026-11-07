@@ -162,3 +162,27 @@ class IndependentAdoptionTests(unittest.TestCase):
         (self.home / 'packages/app-server-daemon/current').symlink_to(self.source / 'sessions')
         preview = self.owner().execute('migration.preview', {})
         self.assertIn('linked_native_or_unknown_state_requires_native_owner', preview['holds'])
+
+    def test_local_cli_adoption_uses_operator_authority_and_replays_without_grant_files(self):
+        import contextlib
+        import io
+        import json
+        from types import SimpleNamespace
+        from codex_wake.migration_commands import command
+        def cli(verb, arguments):
+            output=io.StringIO()
+            with contextlib.redirect_stdout(output):
+                code=command(SimpleNamespace(migration_verb=verb,arguments=arguments,as_json=True),self.root,
+                             writer_probe=lambda roots:dict(status='complete',writers=[]))
+            value=json.loads(output.getvalue())
+            self.assertEqual(code,0,value)
+            return value['result']
+        self.assertFalse((self.root/'controller-messaging.json').exists())
+        preview=cli('preview',{})
+        arguments={'expected_target':preview['target']}
+        applied=cli('apply',arguments)['operation']
+        self.assertEqual(applied['execution'],'completed')
+        self.assertEqual(applied['result']['status'],'applied')
+        self.assertEqual(cli('apply',arguments)['operation']['operation_id'],applied['operation_id'])
+        self.assertFalse((self.home/'config.toml').is_symlink())
+        self.assertFalse((self.root/'controller-messaging.json').exists())

@@ -1966,7 +1966,7 @@ Examples:
 
 Apply a pinned qualified migration or independent-profile adoption.
 
-Uses existing migration registry, backup and rollback custody; no parallel adoption registry.
+Local CLI uses operator authority; API/MCP require scoped grants. Mutations retain exact pins, durable intent and rollback custody.
 
 Transport: CLI / API / OAuth MCP / native MCP (`wake_controller_migration_apply`).
 
@@ -1981,7 +1981,7 @@ usage: codex-wake migration apply [-h] [--arguments ARGUMENTS] [--json]
 
 Apply a pinned qualified migration or independent-profile adoption.
 
-Uses existing migration registry, backup and rollback custody; no parallel adoption registry.
+Local CLI uses operator authority; API/MCP require scoped grants. Mutations retain exact pins, durable intent and rollback custody.
 
 options:
   -h, --help            show this help message and exit
