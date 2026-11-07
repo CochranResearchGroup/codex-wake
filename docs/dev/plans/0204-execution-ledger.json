@@ -44,7 +44,7 @@
       "blockers": [
         480
       ],
-      "state": "running",
+      "state": "validated",
       "actor": "ecochran76",
       "host": "github.com",
       "created_at": "2026-11-07T03:00:29Z",
@@ -59,6 +59,11 @@
         "src/codex_wake/release_build.py",
         "src/codex_wake/release_signal.py",
         "tests/test_release_build.py"
+      ],
+      "result_sha": "0c093b561061506ff5e5d9dcea9bfc2943b371a7",
+      "integrated_sha": "f56b8c84706e5de20e126bdad14c9830d1e9821a",
+      "validation": [
+        "5 public release tests passed on integration tip including four real Cargo Signal MCP build cases"
       ]
     },
     {
@@ -70,13 +75,20 @@
       "blockers": [
         481
       ],
-      "state": "pending",
+      "state": "running",
       "actor": "ecochran76",
       "host": "github.com",
       "created_at": "2026-11-07T03:00:31Z",
       "marker": "<!-- native-release-driver-0204-ticket-03 -->",
       "readback": true,
-      "native_dependencies_verified": true
+      "native_dependencies_verified": true,
+      "worker": "/root/resume482",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-release-resume482",
+      "base": "f56b8c84706e5de20e126bdad14c9830d1e9821a",
+      "paths": [
+        "src/codex_wake/release_resume.py",
+        "tests/test_release_resume.py"
+      ]
     },
     {
       "ticket": 4,
@@ -87,13 +99,20 @@
       "blockers": [
         481
       ],
-      "state": "pending",
+      "state": "running",
       "actor": "ecochran76",
       "host": "github.com",
       "created_at": "2026-11-07T03:00:35Z",
       "marker": "<!-- native-release-driver-0204-ticket-04 -->",
       "readback": true,
-      "native_dependencies_verified": true
+      "native_dependencies_verified": true,
+      "worker": "/root/qualify483",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-release-qualify483",
+      "base": "f56b8c84706e5de20e126bdad14c9830d1e9821a",
+      "paths": [
+        "src/codex_wake/release_qualification.py",
+        "tests/test_release_qualification.py"
+      ]
     },
     {
       "ticket": 5,
@@ -104,13 +123,20 @@
       "blockers": [
         481
       ],
-      "state": "pending",
+      "state": "running",
       "actor": "ecochran76",
       "host": "github.com",
       "created_at": "2026-11-07T03:00:38Z",
       "marker": "<!-- native-release-driver-0204-ticket-05 -->",
       "readback": true,
-      "native_dependencies_verified": true
+      "native_dependencies_verified": true,
+      "worker": "/root/cleanup484",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-release-cleanup484",
+      "base": "f56b8c84706e5de20e126bdad14c9830d1e9821a",
+      "paths": [
+        "src/codex_wake/release_cleanup.py",
+        "tests/test_release_cleanup.py"
+      ]
     },
     {
       "ticket": 6,
