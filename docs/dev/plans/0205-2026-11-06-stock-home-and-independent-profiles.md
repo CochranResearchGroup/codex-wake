@@ -139,9 +139,9 @@ Tracker closure follows validated integration outcomes, separately from release/
 | #489 stores/seeding | none | primary | validated domain seam | controller_accounts, codex_profiles config and independent store owner; tests |
 | #490 adoption | none | /root/adopt205 | integrated; 25 focused PASS | controller_migration and adoption helper; migration tests |
 | #491 readiness | none | /root/ready205 | integrated (runtime join pending) | selected readiness owner; readiness tests |
-| #492 config sync | #489 | /root/sync205 | running | configuration sync owner and tests |
-| #493 history | #489 | history worker | pending | history discovery/import and tests |
-| #494 parity | all preceding | parity worker | pending | command contracts/adapters/generated docs |
+| #492 config sync | #489 | /root/sync205 | validated domain seam | configuration sync owner and tests |
+| #493 history | #489 | /root/history205 | validated domain seam | history discovery/import and tests |
+| #494 parity | #489–#493 | /root/parity205 | running | command contracts/adapters/generated docs |
 | #495 qualification | #494 | primary | pending | installed/runtime acceptance and receipts |
 
 Shared contract owner: primary. Extend ControllerAccounts; store records carry stable store_id, kind (stock/profile), home, independent boolean and observed account separately. Stock identity is stored in Wake metadata, never auth-derived. Configuration engine consumes resolved store records. Preserve legacy default mode. Public operations are wired by parity owner after domain owners stabilize; domain public execute methods are the initial test seam.
@@ -159,3 +159,9 @@ Worker69531b9 and afec766 integrated as6b9e426 and a42458c. Primary focused publ
 Review comparison point requested asynchronously per skill; no answer yet, no broad review started. All issue states remain open until integration/runtime joins. Three-worker implementation fan-out ended adoption; primary may resume implementation alongside sync/history.
 
 Focused controller checkpoint: 195 PASS72.859s at6b9e426; evidence ../evidence/plan0205/checkpoint-validation.json. Warning: existing websockets deprecation only. This precedes adoption follow-up/sync/history and does not replace affected final checks. Live read-only readback reconfirmed real460 personal profile cached credentials unverified and stock/modded registrations held; private readback stays outside Git. PowerShell5.1 executable available.
+
+### Domain join 2026-11-07
+
+Integration77be4a5. #492 worker9d2007d+ecc9cd9 integratedc02eed0+843e2e8; sync/seed/stock focused8PASS; pinned ruff PASS. #493 worker8505175+db92fb4 integrated7685a85+176906a; public history/auth/import/shortcuts/runtime37PASS19.020s. Initial primary test selection misspelled test_controller_shortcuts and failed import; corrected test_command_shortcuts run25PASS11.368s, then follow-up37PASS. First failures retained, not source regressions.
+#489 dependency-inventory red KeyError; first integration omission retained as edbe04d, corrected77be4a5 with8PASS1.109s. Config values remain redacted; dependency entries identify keys and external/missing-local scope.
+#494 dispatched /root/parity205, branch feat/profile-parity-494, base77be4a5, owned command/transport/generated-doc surfaces only. Primary owns #495 runtime join after parity. Domain source outcomes validated; native launcher/backend/limits/refresh and real clients remain separate #495 gates. Active implementation count now one worker plus primary coordinator; no overlapping writers. All workers inherit runtime configuration; effective model/effort and allocation attribution unavailable, no optimization claim.
