@@ -729,10 +729,17 @@ def create_server(runner):
     from mcp.types import CallToolResult, ListToolsResult, TextContent, Tool, ToolAnnotations
     gate = asyncio.Lock()
 
+    def native_schema(name, spec):
+        # Preserve complete canonical constraints (including input alternatives),
+        # then retain adapter-specific verified caller fields and requirements.
+        schema = dict(controller_public_tools.get(name, (None, {}))[1])
+        schema.update(type='object', additionalProperties=False,
+                      properties=spec[3], required=spec[4])
+        return schema
+
     async def list_tools(_context, _params):
         return ListToolsResult(tools=[Tool(name=name, description=spec[2],
-            inputSchema={"type": "object", "additionalProperties": False,
-                         "properties": spec[3], "required": spec[4]},
+            inputSchema=native_schema(name, spec),
             annotations=ToolAnnotations(readOnlyHint=spec[5], destructiveHint=not spec[5],
                                         openWorldHint=False)) for name, spec in SPECS.items()])
 

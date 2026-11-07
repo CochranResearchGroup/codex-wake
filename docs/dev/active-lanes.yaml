@@ -1117,3 +1117,19 @@ lanes:
     overlaps: [P200]
     updated_at: 2026-11-03
     disposition: Grok accepted and integrated into P200; native packets closed; owned processes cleaned
+
+  - id: P204
+    owner: ecochran76 / primary
+    objective: Deliver deterministic native release driver
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/480]
+    plan: docs/dev/plans/0204-2026-11-06-native-release-driver.md
+    branch: feat/native-release-driver-0204
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P179]
+    updated_at: 2026-11-06
+    checkpoint: 7f87ac44e999e4ebf7b081caa094c57e6a6f8962
+    validation_status: focused_and_real_runtime_passed
+    disposition: Six tickets closed; review1 TDD1 resolved four blockers; local integration only, no comprehensive-suite or deployment claim

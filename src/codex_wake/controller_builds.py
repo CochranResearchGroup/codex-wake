@@ -5,6 +5,7 @@ Launch retains the existing private-home lock and descriptor pinning boundary.
 """
 from pathlib import Path
 import io
+import subprocess
 
 from codex_profiles.build_channels import BuildError, load_build, run_build
 from codex_profiles import upgrades
@@ -18,6 +19,12 @@ class ControllerBuilds:
         self.recipes = dict(recipes or {})
 
     def execute(self, operation, arguments):
+        from .release_driver import ReleaseDriver, VERBS
+        if operation in {'builds.' + verb for verb in VERBS}:
+            try:
+                return ReleaseDriver(self.manifest.parent / 'release-runs', self.recipes).execute(operation.split('.')[1], arguments)
+            except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
+                raise InventoryError('build_held', str(error)) from error
         allowed = {
             'builds.list': {'account'},
             'builds.launch': {'account', 'channel', 'expected_target', 'args'},

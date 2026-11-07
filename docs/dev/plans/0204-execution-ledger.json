@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "plan": "docs/dev/plans/0204-2026-11-06-native-release-driver.md",
+  "branch": "feat/native-release-driver-0204",
+  "base": "c40dc79ec3b0abe25a4efbbcc138cd1c7ac6f908",
+  "review_fixed_point": "c40dc79ec3b0abe25a4efbbcc138cd1c7ac6f908",
+  "review_passes": 1,
+  "remediation_passes": 1,
+  "tickets": [
+    {
+      "ticket": 1,
+      "number": 480,
+      "id": 6254440294,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/480",
+      "title": "Prepare a pinned native build",
+      "blockers": [],
+      "state": "validated",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:26Z",
+      "marker": "<!-- native-release-driver-0204-ticket-01 -->",
+      "readback": true,
+      "native_dependencies_verified": true,
+      "owner": "primary",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-release-driver",
+      "paths": [
+        "release_driver",
+        "shared build adapters"
+      ],
+      "validation": [
+        "test_release_driver: red unsupported operation; green isolated source + persisted CLI/native MCP parity",
+        "test_controller_builds: 6 passed",
+        "test_command_contract: 3 passed",
+        "ruff F821,F822,F823 passed"
+      ],
+      "remaining_program_gate": "actual PowerShell and real disposable qualification in #485",
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:11Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
+    },
+    {
+      "ticket": 2,
+      "number": 481,
+      "id": 6254440646,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/481",
+      "title": "Build a complete package through Cargo Signal",
+      "blockers": [
+        480
+      ],
+      "state": "validated",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:29Z",
+      "marker": "<!-- native-release-driver-0204-ticket-02 -->",
+      "readback": true,
+      "native_dependencies_verified": true,
+      "worker": "/root/build481",
+      "branch": "feat/release-build-481",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-release-build481",
+      "base": "3617b36ba967d66354087b79614f60676401ed14",
+      "paths": [
+        "src/codex_wake/release_build.py",
+        "src/codex_wake/release_signal.py",
+        "tests/test_release_build.py"
+      ],
+      "result_sha": "0c093b561061506ff5e5d9dcea9bfc2943b371a7",
+      "integrated_sha": "f56b8c84706e5de20e126bdad14c9830d1e9821a",
+      "validation": [
+        "5 public release tests passed on integration tip including four real Cargo Signal MCP build cases"
+      ],
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:14Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
+    },
+    {
+      "ticket": 3,
+      "number": 482,
+      "id": 6254441011,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/482",
+      "title": "Resume builds without duplicating work",
+      "blockers": [
+        481
+      ],
+      "state": "validated",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:31Z",
+      "marker": "<!-- native-release-driver-0204-ticket-03 -->",
+      "readback": true,
+      "native_dependencies_verified": true,
+      "worker": "/root/resume482",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-release-resume482",
+      "base": "f56b8c84706e5de20e126bdad14c9830d1e9821a",
+      "paths": [
+        "src/codex_wake/release_resume.py",
+        "tests/test_release_resume.py"
+      ],
+      "result_sha": "8d2282a8f4222c5d1842363d84a0ec260c5c2a64",
+      "integrated_sha": "85fb00c",
+      "validation": [
+        "six real Cargo Signal resume seam tests passed on integration tip"
+      ],
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:17Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
+    },
+    {
+      "ticket": 4,
+      "number": 483,
+      "id": 6254441452,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/483",
+      "title": "Qualify the exact package in disposable state",
+      "blockers": [
+        481
+      ],
+      "state": "validated",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:35Z",
+      "marker": "<!-- native-release-driver-0204-ticket-04 -->",
+      "readback": true,
+      "native_dependencies_verified": true,
+      "worker": "/root/qualify483",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-release-qualify483",
+      "base": "f56b8c84706e5de20e126bdad14c9830d1e9821a",
+      "paths": [
+        "src/codex_wake/release_qualification.py",
+        "tests/test_release_qualification.py"
+      ],
+      "result_sha": "7e717f1bff133a8ec26a614e02ed00c0d4edc467",
+      "integrated_sha": "e2e3b4a",
+      "validation": [
+        "four actual Cargo Signal qualification seam tests passed; real UID1017 acceptance in #485"
+      ],
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:20Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
+    },
+    {
+      "ticket": 5,
+      "number": 484,
+      "id": 6254441751,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/484",
+      "title": "Clean inactive build caches safely",
+      "blockers": [
+        481
+      ],
+      "state": "validated",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:38Z",
+      "marker": "<!-- native-release-driver-0204-ticket-05 -->",
+      "readback": true,
+      "native_dependencies_verified": true,
+      "worker": "/root/cleanup484",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-release-cleanup484",
+      "base": "f56b8c84706e5de20e126bdad14c9830d1e9821a",
+      "paths": [
+        "src/codex_wake/release_cleanup.py",
+        "tests/test_release_cleanup.py"
+      ],
+      "result_sha": "33d1c64 + 0e10052",
+      "integrated_sha": "9def610",
+      "validation": [
+        "five public cleanup tests passed on integration; tighter process-classification follow-up integrated"
+      ],
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:23Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
+    },
+    {
+      "ticket": 6,
+      "number": 485,
+      "id": 6254442088,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/485",
+      "title": "Run the release workflow and prove 0.167 acceptance",
+      "blockers": [
+        482,
+        483,
+        484
+      ],
+      "state": "validated",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:40Z",
+      "marker": "<!-- native-release-driver-0204-ticket-06 -->",
+      "readback": true,
+      "native_dependencies_verified": true,
+      "worker": "/root/workflow485",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-release-workflow485",
+      "branch": "feat/release-workflow-485",
+      "base": "9def610b796725712a3362aaeb16be31fab06cdc",
+      "paths": [
+        "src/codex_wake/release_run.py",
+        "tests/test_release_workflow.py",
+        "docs/agents/native-release-builds.md",
+        "shared run dispatch/schema (exclusive handoff)"
+      ],
+      "result_sha": "9c89bd931d107b492d8eea60173acbc2424653c2",
+      "integrated_sha": "263334b",
+      "validation": [
+        "four real MCP orchestration seam tests passed",
+        "24 release-driver regressions passed together",
+        "actual PowerShell5.1, WSL CLI, REST, OAuth MCP and native MCP acceptance passed",
+        "real UID1017 upgrade/failure/history-private-lock qualification: seven checks true; no external model calls"
+      ],
+      "tracker_state": "CLOSED",
+      "closed_at": "2026-11-07T03:28:26Z",
+      "closure_sha": "c34ac066135af8227dc1f995cb4595dd17907b00",
+      "closure_readback": true
+    }
+  ],
+  "retained_native_preflight": {
+    "run_id": "0492ed9f1f9d4279afe6115bce76112b",
+    "status": "built",
+    "files": 6,
+    "reused": true,
+    "seconds": 5.042,
+    "compiler": "rustc1.95.0",
+    "historical_compiler": "unknown; disclosed"
+  },
+  "acceptance": "docs/dev/evidence/plan0204/acceptance.json",
+  "broad_regression": "600.067s timeout with external runner import-path errors; exact31 failures also occur on baseline; corrected discovery0 errors and first109 tests pass28.409s; no comprehensive pass claimed",
+  "review_tip": "c34ac066135af8227dc1f995cb4595dd17907b00",
+  "review_findings": [
+    {
+      "id": "R1",
+      "axes": [
+        "Standards",
+        "Spec"
+      ],
+      "severity": "P1",
+      "state": "resolved",
+      "finding": "Active qualification custody lost on source invalidation"
+    },
+    {
+      "id": "R2",
+      "axes": [
+        "Spec"
+      ],
+      "severity": "P1",
+      "state": "resolved",
+      "finding": "Explicit failed qualification retry did not recover"
+    },
+    {
+      "id": "R3",
+      "axes": [
+        "Standards"
+      ],
+      "severity": "P2",
+      "state": "resolved",
+      "finding": "Preparation failure before durable manifest"
+    },
+    {
+      "id": "R4",
+      "axes": [
+        "Spec"
+      ],
+      "severity": "P2",
+      "state": "resolved",
+      "finding": "Native discovery lost complete run input schema"
+    }
+  ],
+  "last_code_commit": "7f87ac44e999e4ebf7b081caa094c57e6a6f8962",
+  "validation": "docs/dev/evidence/plan0204/validation.json",
+  "review": "docs/dev/evidence/plan0204/review.md",
+  "remaining_gates": [
+    "Merge/deployment outside this task",
+    "No comprehensive-suite or Python3.11 claim"
+  ]
+}

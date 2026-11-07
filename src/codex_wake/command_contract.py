@@ -41,6 +41,13 @@ PARAMETERS = {
     'bus_root': ('Existing enrolled mailbox runtime root for caller verification.', {'type': 'string'}),
     'operator_capability': ('Path to the private operator capability; never its secret contents.', {'type': 'string'}),
     'app_server': ('Enrolled native app-server endpoint (default: unix://).', {'type': 'string'}),
+    'upstream': ('Pinned upstream commit SHA.', {'type':'string', 'pattern':'^[a-fA-F0-9]{40}$'}),
+    'mod_revision': ('Pinned retained mod commit SHA.', {'type':'string', 'pattern':'^[a-fA-F0-9]{40}$'}),
+    'run_id': ('Durable native release run identifier.', {'type':'string'}),
+    'jobs': ('Explicit maximum compiler jobs.', {'type':'integer', 'minimum':1}),
+    'output': ('Release result presentation.', {'type':'string','enum':['compact','json','progress','diagnostics']}),
+    'max_items': ('Maximum diagnostic or progress entries.', {'type':'integer','minimum':1,'maximum':40}),
+    'expected_cache': ('Exact cache fingerprint returned by cleanup preview.', {'type':'string'}),
     'recipe': ('Host-registered build recipe name, never an arbitrary executable or path.', {'type': 'string'}),
     'identifier': ('Existing immutable build artifact identifier to select.', {'type': 'string'}),
     'args': ('Native client arguments for the registered build.', {'type': 'array', 'items': {'type': 'string'}}),
@@ -59,7 +66,13 @@ class Operation:
 
     def schema(self):
         properties = {key: dict(deepcopy(PARAMETERS[key][1]), description=PARAMETERS[key][0]) for key in self.parameters}
-        return {'type': 'object', 'properties': properties, 'required': list(self.required), 'additionalProperties': False}
+        schema = {'type': 'object', 'properties': properties, 'required': list(self.required), 'additionalProperties': False}
+        if self.name == 'builds.run':
+            schema['oneOf'] = [
+                {'required':['run_id'], 'not':{'anyOf':[{'required':[key]} for key in ('recipe','upstream','mod_revision')]}},
+                {'required':['recipe','upstream','mod_revision'], 'not':{'required':['run_id']}},
+            ]
+        return schema
 
 
 OPERATIONS = (
@@ -94,6 +107,12 @@ OPERATIONS += (
     Operation('history.recent', 'View the latest saved conversations for one permitted account.', None, effect='Local shortcut to history.search with sort=recent and a bounded limit; API/MCP can use those same search arguments. Partial evidence stays visible.', example='history recent --owner work --limit 10'),
     Operation('history.import-recent', 'Preview and copy a frozen recent-conversation selection.', None, effect='Local batch orchestration over protected history.import. Retains exact intents and per-entry outcomes; same source revision/destination reuses the original copy. Requires both account daemons running; preview starts none.', example='history import-recent --owner work --destination personal --limit 10'),
 )
+OPERATIONS += tuple(Operation('builds.' + verb, summary, 'wake_builds_' + verb,
+    ('recipe','upstream','mod_revision','run_id','jobs','output','max_items','confirm','expected_cache'),
+    ('recipe','upstream','mod_revision') if verb == 'prepare' else (() if verb == 'run' else ('run_id',)),
+    'Native release work in isolated WSL state; no working-account installation.',
+    'builds ' + verb + (' --recipe RECIPE --upstream SHA --mod-revision SHA' if verb in ('prepare','run') else ' --run-id RUN'))
+    for verb, summary in [('prepare','Prepare pinned source in an isolated worktree.'),('status','Inspect a durable native release run.'),('build','Build a complete immutable package through Cargo Signal.'),('resume','Reconcile and resume a native release run.'),('qualify','Qualify the exact package in disposable state.'),('cleanup','Preview or explicitly clean an inactive build cache.'),('run','Prepare, build and qualify one native release.')])
 BY_NAME = {op.name: op for op in OPERATIONS}
 
 

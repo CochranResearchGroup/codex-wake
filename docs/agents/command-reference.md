@@ -1196,6 +1196,464 @@ Examples:
   codex-wake --wake-root ROOT history import-recent --owner work --destination personal --limit 10
 ```
 
+## builds prepare
+
+Prepare pinned source in an isolated worktree.
+
+Native release work in isolated WSL state; no working-account installation.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_prepare`).
+
+```sh
+codex-wake --wake-root ROOT builds prepare --recipe RECIPE --upstream SHA --mod-revision SHA
+```
+
+### CLI help
+
+```text
+usage: codex-wake builds prepare [-h] [--arguments ARGUMENTS]
+                                 [--recipe RECIPE] [--upstream UPSTREAM]
+                                 [--mod-revision MOD_REVISION]
+                                 [--run-id RUN_ID]
+                                 [--expected-cache EXPECTED_CACHE]
+                                 [--jobs JOBS]
+                                 [--output {compact,json,progress,diagnostics}]
+                                 [--json] [--max-items MAX_ITEMS] [--confirm]
+
+Prepare pinned source in an isolated worktree.
+
+Native release work in isolated WSL state; no working-account installation.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --recipe RECIPE       Host-registered build recipe name, never an arbitrary
+                        executable or path.
+  --upstream UPSTREAM   Pinned upstream commit SHA.
+  --mod-revision MOD_REVISION
+                        Pinned retained mod commit SHA.
+  --run-id RUN_ID       Durable native release run identifier.
+  --expected-cache EXPECTED_CACHE
+                        Exact cache fingerprint returned by cleanup preview.
+  --jobs JOBS           Explicit maximum compiler jobs.
+  --output {compact,json,progress,diagnostics}
+                        Release result presentation.
+  --json                Release result presentation.
+  --max-items MAX_ITEMS
+                        Maximum diagnostic or progress entries.
+  --confirm             Confirm the displayed scoped effect; does not override
+                        a changed target.
+
+Examples:
+  codex-wake --wake-root ROOT builds prepare --recipe RECIPE --upstream SHA --mod-revision SHA
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `recipe` | yes | Host-registered build recipe name, never an arbitrary executable or path. |
+| `upstream` | yes | Pinned upstream commit SHA. |
+| `mod_revision` | yes | Pinned retained mod commit SHA. |
+| `run_id` | no | Durable native release run identifier. |
+| `jobs` | no | Explicit maximum compiler jobs. |
+| `output` | no | Release result presentation. |
+| `max_items` | no | Maximum diagnostic or progress entries. |
+| `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
+| `expected_cache` | no | Exact cache fingerprint returned by cleanup preview. |
+
+## builds status
+
+Inspect a durable native release run.
+
+Native release work in isolated WSL state; no working-account installation.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_status`).
+
+```sh
+codex-wake --wake-root ROOT builds status --run-id RUN
+```
+
+### CLI help
+
+```text
+usage: codex-wake builds status [-h] [--arguments ARGUMENTS] [--recipe RECIPE]
+                                [--upstream UPSTREAM]
+                                [--mod-revision MOD_REVISION]
+                                [--run-id RUN_ID]
+                                [--expected-cache EXPECTED_CACHE]
+                                [--jobs JOBS]
+                                [--output {compact,json,progress,diagnostics}]
+                                [--json] [--max-items MAX_ITEMS] [--confirm]
+
+Inspect a durable native release run.
+
+Native release work in isolated WSL state; no working-account installation.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --recipe RECIPE       Host-registered build recipe name, never an arbitrary
+                        executable or path.
+  --upstream UPSTREAM   Pinned upstream commit SHA.
+  --mod-revision MOD_REVISION
+                        Pinned retained mod commit SHA.
+  --run-id RUN_ID       Durable native release run identifier.
+  --expected-cache EXPECTED_CACHE
+                        Exact cache fingerprint returned by cleanup preview.
+  --jobs JOBS           Explicit maximum compiler jobs.
+  --output {compact,json,progress,diagnostics}
+                        Release result presentation.
+  --json                Release result presentation.
+  --max-items MAX_ITEMS
+                        Maximum diagnostic or progress entries.
+  --confirm             Confirm the displayed scoped effect; does not override
+                        a changed target.
+
+Examples:
+  codex-wake --wake-root ROOT builds status --run-id RUN
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `recipe` | no | Host-registered build recipe name, never an arbitrary executable or path. |
+| `upstream` | no | Pinned upstream commit SHA. |
+| `mod_revision` | no | Pinned retained mod commit SHA. |
+| `run_id` | yes | Durable native release run identifier. |
+| `jobs` | no | Explicit maximum compiler jobs. |
+| `output` | no | Release result presentation. |
+| `max_items` | no | Maximum diagnostic or progress entries. |
+| `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
+| `expected_cache` | no | Exact cache fingerprint returned by cleanup preview. |
+
+## builds build
+
+Build a complete immutable package through Cargo Signal.
+
+Native release work in isolated WSL state; no working-account installation.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_build`).
+
+```sh
+codex-wake --wake-root ROOT builds build --run-id RUN
+```
+
+### CLI help
+
+```text
+usage: codex-wake builds build [-h] [--arguments ARGUMENTS] [--recipe RECIPE]
+                               [--upstream UPSTREAM]
+                               [--mod-revision MOD_REVISION] [--run-id RUN_ID]
+                               [--expected-cache EXPECTED_CACHE] [--jobs JOBS]
+                               [--output {compact,json,progress,diagnostics}]
+                               [--json] [--max-items MAX_ITEMS] [--confirm]
+
+Build a complete immutable package through Cargo Signal.
+
+Native release work in isolated WSL state; no working-account installation.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --recipe RECIPE       Host-registered build recipe name, never an arbitrary
+                        executable or path.
+  --upstream UPSTREAM   Pinned upstream commit SHA.
+  --mod-revision MOD_REVISION
+                        Pinned retained mod commit SHA.
+  --run-id RUN_ID       Durable native release run identifier.
+  --expected-cache EXPECTED_CACHE
+                        Exact cache fingerprint returned by cleanup preview.
+  --jobs JOBS           Explicit maximum compiler jobs.
+  --output {compact,json,progress,diagnostics}
+                        Release result presentation.
+  --json                Release result presentation.
+  --max-items MAX_ITEMS
+                        Maximum diagnostic or progress entries.
+  --confirm             Confirm the displayed scoped effect; does not override
+                        a changed target.
+
+Examples:
+  codex-wake --wake-root ROOT builds build --run-id RUN
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `recipe` | no | Host-registered build recipe name, never an arbitrary executable or path. |
+| `upstream` | no | Pinned upstream commit SHA. |
+| `mod_revision` | no | Pinned retained mod commit SHA. |
+| `run_id` | yes | Durable native release run identifier. |
+| `jobs` | no | Explicit maximum compiler jobs. |
+| `output` | no | Release result presentation. |
+| `max_items` | no | Maximum diagnostic or progress entries. |
+| `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
+| `expected_cache` | no | Exact cache fingerprint returned by cleanup preview. |
+
+## builds resume
+
+Reconcile and resume a native release run.
+
+Native release work in isolated WSL state; no working-account installation.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_resume`).
+
+```sh
+codex-wake --wake-root ROOT builds resume --run-id RUN
+```
+
+### CLI help
+
+```text
+usage: codex-wake builds resume [-h] [--arguments ARGUMENTS] [--recipe RECIPE]
+                                [--upstream UPSTREAM]
+                                [--mod-revision MOD_REVISION]
+                                [--run-id RUN_ID]
+                                [--expected-cache EXPECTED_CACHE]
+                                [--jobs JOBS]
+                                [--output {compact,json,progress,diagnostics}]
+                                [--json] [--max-items MAX_ITEMS] [--confirm]
+
+Reconcile and resume a native release run.
+
+Native release work in isolated WSL state; no working-account installation.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --recipe RECIPE       Host-registered build recipe name, never an arbitrary
+                        executable or path.
+  --upstream UPSTREAM   Pinned upstream commit SHA.
+  --mod-revision MOD_REVISION
+                        Pinned retained mod commit SHA.
+  --run-id RUN_ID       Durable native release run identifier.
+  --expected-cache EXPECTED_CACHE
+                        Exact cache fingerprint returned by cleanup preview.
+  --jobs JOBS           Explicit maximum compiler jobs.
+  --output {compact,json,progress,diagnostics}
+                        Release result presentation.
+  --json                Release result presentation.
+  --max-items MAX_ITEMS
+                        Maximum diagnostic or progress entries.
+  --confirm             Confirm the displayed scoped effect; does not override
+                        a changed target.
+
+Examples:
+  codex-wake --wake-root ROOT builds resume --run-id RUN
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `recipe` | no | Host-registered build recipe name, never an arbitrary executable or path. |
+| `upstream` | no | Pinned upstream commit SHA. |
+| `mod_revision` | no | Pinned retained mod commit SHA. |
+| `run_id` | yes | Durable native release run identifier. |
+| `jobs` | no | Explicit maximum compiler jobs. |
+| `output` | no | Release result presentation. |
+| `max_items` | no | Maximum diagnostic or progress entries. |
+| `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
+| `expected_cache` | no | Exact cache fingerprint returned by cleanup preview. |
+
+## builds qualify
+
+Qualify the exact package in disposable state.
+
+Native release work in isolated WSL state; no working-account installation.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_qualify`).
+
+```sh
+codex-wake --wake-root ROOT builds qualify --run-id RUN
+```
+
+### CLI help
+
+```text
+usage: codex-wake builds qualify [-h] [--arguments ARGUMENTS]
+                                 [--recipe RECIPE] [--upstream UPSTREAM]
+                                 [--mod-revision MOD_REVISION]
+                                 [--run-id RUN_ID]
+                                 [--expected-cache EXPECTED_CACHE]
+                                 [--jobs JOBS]
+                                 [--output {compact,json,progress,diagnostics}]
+                                 [--json] [--max-items MAX_ITEMS] [--confirm]
+
+Qualify the exact package in disposable state.
+
+Native release work in isolated WSL state; no working-account installation.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --recipe RECIPE       Host-registered build recipe name, never an arbitrary
+                        executable or path.
+  --upstream UPSTREAM   Pinned upstream commit SHA.
+  --mod-revision MOD_REVISION
+                        Pinned retained mod commit SHA.
+  --run-id RUN_ID       Durable native release run identifier.
+  --expected-cache EXPECTED_CACHE
+                        Exact cache fingerprint returned by cleanup preview.
+  --jobs JOBS           Explicit maximum compiler jobs.
+  --output {compact,json,progress,diagnostics}
+                        Release result presentation.
+  --json                Release result presentation.
+  --max-items MAX_ITEMS
+                        Maximum diagnostic or progress entries.
+  --confirm             Confirm the displayed scoped effect; does not override
+                        a changed target.
+
+Examples:
+  codex-wake --wake-root ROOT builds qualify --run-id RUN
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `recipe` | no | Host-registered build recipe name, never an arbitrary executable or path. |
+| `upstream` | no | Pinned upstream commit SHA. |
+| `mod_revision` | no | Pinned retained mod commit SHA. |
+| `run_id` | yes | Durable native release run identifier. |
+| `jobs` | no | Explicit maximum compiler jobs. |
+| `output` | no | Release result presentation. |
+| `max_items` | no | Maximum diagnostic or progress entries. |
+| `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
+| `expected_cache` | no | Exact cache fingerprint returned by cleanup preview. |
+
+## builds cleanup
+
+Preview or explicitly clean an inactive build cache.
+
+Native release work in isolated WSL state; no working-account installation.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_cleanup`).
+
+```sh
+codex-wake --wake-root ROOT builds cleanup --run-id RUN
+```
+
+### CLI help
+
+```text
+usage: codex-wake builds cleanup [-h] [--arguments ARGUMENTS]
+                                 [--recipe RECIPE] [--upstream UPSTREAM]
+                                 [--mod-revision MOD_REVISION]
+                                 [--run-id RUN_ID]
+                                 [--expected-cache EXPECTED_CACHE]
+                                 [--jobs JOBS]
+                                 [--output {compact,json,progress,diagnostics}]
+                                 [--json] [--max-items MAX_ITEMS] [--confirm]
+
+Preview or explicitly clean an inactive build cache.
+
+Native release work in isolated WSL state; no working-account installation.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --recipe RECIPE       Host-registered build recipe name, never an arbitrary
+                        executable or path.
+  --upstream UPSTREAM   Pinned upstream commit SHA.
+  --mod-revision MOD_REVISION
+                        Pinned retained mod commit SHA.
+  --run-id RUN_ID       Durable native release run identifier.
+  --expected-cache EXPECTED_CACHE
+                        Exact cache fingerprint returned by cleanup preview.
+  --jobs JOBS           Explicit maximum compiler jobs.
+  --output {compact,json,progress,diagnostics}
+                        Release result presentation.
+  --json                Release result presentation.
+  --max-items MAX_ITEMS
+                        Maximum diagnostic or progress entries.
+  --confirm             Confirm the displayed scoped effect; does not override
+                        a changed target.
+
+Examples:
+  codex-wake --wake-root ROOT builds cleanup --run-id RUN
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `recipe` | no | Host-registered build recipe name, never an arbitrary executable or path. |
+| `upstream` | no | Pinned upstream commit SHA. |
+| `mod_revision` | no | Pinned retained mod commit SHA. |
+| `run_id` | yes | Durable native release run identifier. |
+| `jobs` | no | Explicit maximum compiler jobs. |
+| `output` | no | Release result presentation. |
+| `max_items` | no | Maximum diagnostic or progress entries. |
+| `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
+| `expected_cache` | no | Exact cache fingerprint returned by cleanup preview. |
+
+## builds run
+
+Prepare, build and qualify one native release.
+
+Native release work in isolated WSL state; no working-account installation.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_builds_run`).
+
+```sh
+codex-wake --wake-root ROOT builds run --recipe RECIPE --upstream SHA --mod-revision SHA
+```
+
+### CLI help
+
+```text
+usage: codex-wake builds run [-h] [--arguments ARGUMENTS] [--recipe RECIPE]
+                             [--upstream UPSTREAM]
+                             [--mod-revision MOD_REVISION] [--run-id RUN_ID]
+                             [--expected-cache EXPECTED_CACHE] [--jobs JOBS]
+                             [--output {compact,json,progress,diagnostics}]
+                             [--json] [--max-items MAX_ITEMS] [--confirm]
+
+Prepare, build and qualify one native release.
+
+Native release work in isolated WSL state; no working-account installation.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --recipe RECIPE       Host-registered build recipe name, never an arbitrary
+                        executable or path.
+  --upstream UPSTREAM   Pinned upstream commit SHA.
+  --mod-revision MOD_REVISION
+                        Pinned retained mod commit SHA.
+  --run-id RUN_ID       Durable native release run identifier.
+  --expected-cache EXPECTED_CACHE
+                        Exact cache fingerprint returned by cleanup preview.
+  --jobs JOBS           Explicit maximum compiler jobs.
+  --output {compact,json,progress,diagnostics}
+                        Release result presentation.
+  --json                Release result presentation.
+  --max-items MAX_ITEMS
+                        Maximum diagnostic or progress entries.
+  --confirm             Confirm the displayed scoped effect; does not override
+                        a changed target.
+
+Examples:
+  codex-wake --wake-root ROOT builds run --recipe RECIPE --upstream SHA --mod-revision SHA
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `recipe` | no | Host-registered build recipe name, never an arbitrary executable or path. |
+| `upstream` | no | Pinned upstream commit SHA. |
+| `mod_revision` | no | Pinned retained mod commit SHA. |
+| `run_id` | no | Durable native release run identifier. |
+| `jobs` | no | Explicit maximum compiler jobs. |
+| `output` | no | Release result presentation. |
+| `max_items` | no | Maximum diagnostic or progress entries. |
+| `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
+| `expected_cache` | no | Exact cache fingerprint returned by cleanup preview. |
+
 
 ## Local session controller
 
