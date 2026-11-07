@@ -55,6 +55,9 @@ def _resolve(owner, selector):
         account = owner.execute('accounts.resolve', {'selector': selector})['account']
         record = stores.get(account['id'])
         if record is None:
+            from .profile_adoption import adopted_store
+            record = adopted_store(owner, account)
+        if record is None:
             record = dict(store_id='legacy:' + account['target']['home_generation'], kind='profile',
                           home=account['home'], independent=False,
                           home_generation=account['target']['home_generation'])
@@ -75,7 +78,10 @@ def execute(owner, operation, arguments):
         return dict(owner='codex-wake', store=_resolve(owner, arguments.get('selector')))
     if operation == 'stores.list':
         data = tomllib.loads(owner.path.read_text())
-        return dict(owner='codex-wake', stores=[_resolve(owner, name) for name in data.get('stores', {})])
+        names = list(data.get('stores', {}))
+        names.extend(account['id'] for account in owner.execute('accounts.list', {})['accounts']
+                     if account['id'] not in names)
+        return dict(owner='codex-wake', stores=[_resolve(owner, name) for name in names])
     selector = _safe_name(arguments.get('selector'))
     if selector != 'stock':
         raise InventoryError('invalid_argument', 'register the stock store as stock; create profiles through accounts.create')

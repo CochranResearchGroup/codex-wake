@@ -291,3 +291,35 @@ def rollback(owner, directory, identifier, before, authorize):
         receipt['state'] = 'uncertain'
         _save(path, receipt)
         raise
+
+
+def adopted_store(accounts, account):
+    """Project mode from the existing custody receipt, not mutable history bytes."""
+    from .controller_migration import ControllerMigration
+    from .goal_supervision import _private
+    data = tomllib.loads(accounts.path.read_text())
+    if data.get('migration', {}).get('strategy') != 'adopt_independent':
+        return None
+    migration = ControllerMigration(accounts.path, root=accounts.path.parent,
+                                   host=accounts.host, environment=accounts.environment)
+    scope = migration.scope_target()
+    home = Path(account['home'])
+    for path in (accounts.path.parent / 'controller-migration').glob('*.json'):
+        _private(path)
+        try:
+            receipt = json.loads(path.read_text())
+            row = receipt.get('after', {}).get(str(home), {}).get(str(home), {})
+            if (receipt.get('strategy') != 'adopt_independent' or receipt.get('state') != 'applied'
+                    or receipt.get('scope') != scope or row.get('kind') != 'directory'
+                    or f"{row.get('device')}:{row.get('inode')}" != account['target']['home_generation']):
+                continue
+            # Relinking configuration after adoption invalidates independence;
+            # subsequent ordinary history/config writes do not revoke the mode.
+            if any((home / name).is_symlink() for name in ASSETS):
+                return None
+            return dict(store_id='legacy:' + account['target']['home_generation'], kind='profile',
+                        home=str(home), independent=True, home_generation=account['target']['home_generation'],
+                        adoption_receipt=receipt['receipt_id'])
+        except (ValueError, TypeError, KeyError, AttributeError):
+            continue
+    return None

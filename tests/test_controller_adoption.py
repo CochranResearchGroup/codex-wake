@@ -61,6 +61,9 @@ class IndependentAdoptionTests(unittest.TestCase):
         self.assertNotIn('synthetic-sensitive', receipt.read_text())
         self.assertNotIn('synthetic-sensitive', str(applied))
         owner.execute('migration.rollback', {'expected_target': applied['target'], 'receipt_id': applied['receipt_id']})
+        from codex_wake.controller_accounts import ControllerAccounts
+        accounts = ControllerAccounts(self.path, host='fixture-host', environment='fixture-env')
+        self.assertFalse(accounts.execute('stores.resolve', {'selector':'alice'})['store']['independent'])
         self.assertTrue((self.home / 'config.toml').is_symlink())
         self.assertFalse((self.home / 'hooks').exists())
         self.assertEqual((hooks / 'run.sh').stat().st_mode & 0o777, 0o755)
@@ -78,6 +81,21 @@ class IndependentAdoptionTests(unittest.TestCase):
         (self.home / 'history.jsonl').symlink_to(self.source / 'sessions/unassigned.jsonl')
         self.assertIn('linked_native_or_unknown_state_requires_native_owner', owner.execute('migration.preview', {})['holds'])
         self.assertTrue((self.home / 'config.toml').is_symlink())
+
+    def test_store_discovery_tracks_adoption_through_normal_activity(self):
+        from codex_wake.controller_accounts import ControllerAccounts
+        owner = self.owner()
+        accounts = ControllerAccounts(self.path, host='fixture-host', environment='fixture-env')
+        original = accounts.execute('stores.resolve', {'selector':'alice'})['store']
+        self.assertFalse(original['independent'])
+        result = owner.execute('migration.apply', {'expected_target':owner.execute('migration.preview', {})['target']})
+        adopted = accounts.execute('stores.resolve', {'selector':'alice'})['store']
+        self.assertTrue(adopted['independent'])
+        self.assertEqual(adopted['store_id'], original['store_id'])
+        self.assertEqual(accounts.execute('stores.list', {})['stores'][0]['store_id'], adopted['store_id'])
+        history = self.home / 'history.jsonl'
+        history.write_text('normal subsequent session activity')
+        self.assertTrue(accounts.execute('stores.resolve', {'selector':'alice'})['store']['independent'])
 
     def test_rollback_preserves_new_private_work(self):
         from codex_wake.managed_inventory import InventoryError
