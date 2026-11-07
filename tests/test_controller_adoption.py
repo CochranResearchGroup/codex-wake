@@ -110,3 +110,55 @@ class IndependentAdoptionTests(unittest.TestCase):
             owner.execute('migration.apply', {'expected_target': preview['target']}, authorize=authorize)
         self.assertEqual(error.exception.code, 'migration_held')
         self.assertTrue((self.home / 'config.toml').is_symlink())
+
+    def test_native_package_and_control_aliases_survive_opaque_configuration_census(self):
+        package = self.home / 'packages/app-server-daemon/releases/synthetic-v1'
+        package.mkdir(parents=True)
+        (package / 'bin').mkdir()
+        (package / 'bin/codex').write_text('immutable synthetic executable')
+        release_link = package / 'codex'
+        release_link.symlink_to(package / 'bin/codex')
+        helper = self.home / 'tmp/arg0-linux/codex-arg0fixture/apply_patch'
+        helper.parent.mkdir(parents=True)
+        helper.symlink_to(package / 'bin/codex')
+        package_link = self.home / 'packages/app-server-daemon/current'
+        package_link.symlink_to(package)
+        control_dir = self.home / 'app-server-control'
+        control_dir.mkdir()
+        socket_path = '/tmp/codex-daemon-' + str(os.getuid()) + '/' + 'a' * 64
+        control_link = control_dir / '.pre-native167-app-server-control.sock'
+        control_link.symlink_to(socket_path)
+        identities = {p: (p.lstat().st_ino, p.readlink()) for p in (package_link, release_link, helper, control_link)}
+        probed = []
+        def probe(roots):
+            probed.append(roots)
+            return dict(status='unknown', writers=[], reason='unrelated protected process')
+        owner = self.owner(writer_probe=probe)
+        preview = owner.execute('migration.preview', {})
+        self.assertEqual(preview['status'], 'ready', preview['holds'])
+        self.assertEqual(preview['writers']['status'], 'unknown')
+        self.assertEqual(set(probed[-1]), {self.home / 'config.toml', self.source / 'config.toml'})
+        applied = owner.execute('migration.apply', {'expected_target': preview['target']})
+        for path, identity in identities.items():
+            self.assertEqual((path.lstat().st_ino, path.readlink()), identity)
+        owner.execute('migration.rollback', {'expected_target': applied['target'], 'receipt_id': applied['receipt_id']})
+        for path, identity in identities.items():
+            self.assertEqual((path.lstat().st_ino, path.readlink()), identity)
+
+    def test_changed_source_after_staging_refuses_configuration_replacement(self):
+        from codex_wake.managed_inventory import InventoryError
+        owner = self.owner(writer_probe=lambda roots: dict(status='unknown', writers=[]))
+        preview = owner.execute('migration.preview', {})
+        def authorize():
+            if (self.lab / 'candidate').exists():
+                (self.source / 'config.toml').write_text('model="advanced"\n')
+        with self.assertRaises(InventoryError) as error:
+            owner.execute('migration.apply', {'expected_target': preview['target']}, authorize=authorize)
+        self.assertEqual(error.exception.code, 'stale_target')
+        self.assertTrue((self.home / 'config.toml').is_symlink())
+
+    def test_native_shaped_alias_cannot_disguise_history_or_external_package(self):
+        (self.home / 'packages/app-server-daemon').mkdir(parents=True)
+        (self.home / 'packages/app-server-daemon/current').symlink_to(self.source / 'sessions')
+        preview = self.owner().execute('migration.preview', {})
+        self.assertIn('linked_native_or_unknown_state_requires_native_owner', preview['holds'])

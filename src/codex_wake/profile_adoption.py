@@ -1,8 +1,8 @@
 """Private configuration adoption under the existing migration custody owner.
 
 Native authentication, histories and runtime control state stay at their original
-inodes. Only explicit configuration assets are copied; linked native state needs
-its supported native owner and is refused rather than cloned.
+inodes. Only explicit configuration assets are copied. Recognized native package and
+control aliases remain with their owner; linked auth/history state is refused.
 """
 import hashlib
 import json
@@ -20,10 +20,45 @@ from .managed_inventory import InventoryError
 ASSETS = {'config.toml', 'skills', 'rules', 'hooks', 'hooks.json', 'AGENTS.md'}
 
 
+def _native_owned_alias(path, home):
+    """Recognize native-owned package selection/helpers and socket locators only."""
+    if path.lstat().st_uid != os.getuid():
+        return False
+    relative = path.relative_to(home)
+    parts = relative.parts
+    destination = path.resolve()
+    releases = home / 'packages/app-server-daemon/releases'
+    if relative == Path('packages/app-server-daemon/current'):
+        return destination.parent == releases and destination.is_dir()
+    if (len(parts) == 5 and parts[:3] == ('packages', 'app-server-daemon', 'releases')
+            and parts[4] == 'codex'):
+        return destination == releases / parts[3] / 'bin/codex'
+    if (len(parts) == 4 and parts[:2] == ('tmp', 'arg0-linux')
+            and re.fullmatch(r'codex-arg0[A-Za-z0-9_-]+', parts[2])
+            and parts[3] in {'apply_patch', 'applypatch', 'codex-linux-sandbox'}):
+        return (destination.is_relative_to(releases) and len(destination.relative_to(releases).parts) == 3
+                and destination.name == 'codex' and destination.parent.name == 'bin')
+    if (parts[0] == 'app-server-control' and len(parts) == 2
+            and parts[1] in {'app-server-control.sock', '.pre-native167-app-server-control.sock'}):
+        return (destination.parent == Path('/tmp') / ('codex-daemon-' + str(os.getuid()))
+                and re.fullmatch(r'[0-9a-f]{64}', destination.name) is not None)
+    return False
+
+
+def _asset_snapshot(path, scope):
+    from .controller_migration import _tree
+    snapshot, links = _tree(path, scope)
+    for value, metadata in snapshot.items():
+        if metadata['kind'] == 'file':
+            with Path(value).open('rb') as stream:
+                metadata['sha256'] = hashlib.file_digest(stream, 'sha256').hexdigest()
+    return snapshot, links
+
+
 def preview(owner, data, settings, scope, marker, paths):
     from .controller_migration import _tree, _links, _digest, _secret_name
     names, inactive = account_inventory(settings, data)
-    holds, entries, plan, sources, external = [], {}, [], {}, []
+    holds, entries, plan, sources, external, native = [], {}, [], {}, [], []
     homes = [settings.account_root(name) for name in names]
     if not homes:
         holds.append('explicit_profile_selection_required')
@@ -47,6 +82,9 @@ def preview(owner, data, settings, scope, marker, paths):
             if metadata['kind'] != 'link':
                 continue
             relative = path.relative_to(home)
+            if _native_owned_alias(path, home):
+                native.append(str(path))
+                continue
             if relative.parts[0] not in ASSETS:
                 holds.append('linked_native_or_unknown_state_requires_native_owner')
                 continue
@@ -88,7 +126,7 @@ def preview(owner, data, settings, scope, marker, paths):
                             if not referenced.exists() or asset.is_symlink():
                                 holds.append('configuration_asset_reference_unavailable')
                                 continue
-                            asset_snapshot, asset_links = _tree(asset, scope)
+                            asset_snapshot, asset_links = _asset_snapshot(asset, scope)
                             if asset_links or any(_secret_name(Path(p)) for p in asset_snapshot):
                                 holds.append('configuration_asset_links_or_credentials_require_repair')
                                 continue
@@ -108,7 +146,7 @@ def preview(owner, data, settings, scope, marker, paths):
                             return value.replace(str(settings.source_root), str(home)) if isinstance(value, str) else value
                         if tomllib.loads(text.replace(str(settings.source_root), str(home))) != remap(config):
                             holds.append('configuration_asset_reference_encoding_requires_repair')
-                snapshot, nested = _tree(source, scope)
+                snapshot, nested = _asset_snapshot(source, scope)
                 if nested or any(_secret_name(Path(p)) for p in snapshot):
                     holds.append('linked_asset_credentials_or_nested_links_require_repair')
                     continue
@@ -116,9 +154,8 @@ def preview(owner, data, settings, scope, marker, paths):
                 plan.append(dict(path=str(path), source=str(source), target=os.readlink(path), mappings=mappings))
             except (OSError, ValueError, RuntimeError, InventoryError):
                 holds.append('linked_configuration_source_requires_repair')
-    writers = owner.writer_probe(tuple(homes) + tuple(Path(p['source']) for p in plan))
-    if writers.get('status') != 'complete':
-        holds.append('writer_census_unknown')
+    probe_paths = tuple(sorted({Path(row[key]) for row in plan for key in ('path', 'source')}))
+    writers = owner.writer_probe(probe_paths)
     if writers.get('writers'):
         holds.append('competing_writer')
     policy_sha = hashlib.sha256(owner.path.read_bytes()).hexdigest()
@@ -126,7 +163,8 @@ def preview(owner, data, settings, scope, marker, paths):
                 target=dict(owner.scope_target(), migration_revision=_digest(dict(policy=policy_sha, entries=entries, sources=sources, writers=writers))),
                 holds=sorted(set(holds)), accounts=names, inactive_accounts=inactive,
                 homes=[str(h) for h in homes], plan=plan, sources=sources, external_dependencies=external,
-                policy_sha=policy_sha, credential_copy=False,
+                native_owned_aliases=native, writer_census_policy='positive_configuration_writers_block_opaque_census_visible',
+                policy_sha=policy_sha, writers=writers, credential_copy=False,
                 original_shared_store='preserved', production_activation=False)
 
 
@@ -135,7 +173,7 @@ def _guard(owner, authorize, expected):
         authorize()
     current = owner._preview()
     if current['holds']:
-        raise InventoryError('migration_held', 'adoption requires idle selected profiles and linked configuration sources: ' + ','.join(current['holds']))
+        raise InventoryError('migration_held', 'adoption configuration inputs have an observed writer or unsafe layout: ' + ','.join(current['holds']))
     if current['target'] != expected:
         raise InventoryError('stale_target', 'adoption inputs changed; preview again before applying')
     return current
@@ -222,7 +260,7 @@ def rollback(owner, directory, identifier, before, authorize):
             raise InventoryError('target_changed', 'profile changed since adoption; private work and custody retained')
         for source_path, snapshot in receipt['sources'].items():
             source = next(row['source'] for row in receipt['moves'] if row['path'] == source_path)
-            if _tree(Path(source), scope)[0] != snapshot:
+            if _asset_snapshot(Path(source), scope)[0] != snapshot:
                 raise InventoryError('target_changed', 'original linked configuration changed; rollback needs reconciliation')
         for row in receipt['moves']:
             backup = Path(row['backup'])
