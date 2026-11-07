@@ -53,6 +53,7 @@ readable_accounts=["alice","bob"]
 
     def request(self,endpoint,executable,method,params,timeout,**kwargs):
         if method=='thread/goal/get':return {'goal':None}
+        if method=='thread/list':return {'data': [], 'nextCursor': None}
         if method=='thread/read':
             return {'thread':dict(id=params['threadId'],cwd=str(self.root),ephemeral=False,status={'type':'idle'},turns=self.turns,path=str(self.source) if params['threadId']==SOURCE else str(self.child_path),forkedFromId=None if params['threadId']==SOURCE else SOURCE)}
         if method=='thread/fork':
@@ -119,6 +120,25 @@ readable_accounts=["alice","bob"]
         self.assertEqual(second['provenance']['previous_snapshot_thread_id'], first['thread_id'])
         self.assertEqual(previous_path.read_bytes(), previous_content)
         self.assertEqual(self.forks, 2)
+
+    def test_destination_restart_reuses_known_copy_under_current_store_authority(self):
+        from dataclasses import replace
+        first = self.owner().execute(self.actor, 'history.import', self.arguments, authorize=lambda: self.actor)['result']['operation']['result']
+        previous = self.daemons
+        class Restarted:
+            def execute(unused, operation, args):
+                value = copy.deepcopy(previous.execute(operation, args))
+                value['daemon']['target']['socket_generation'] = 'restarted'
+                return value
+        self.daemons = Restarted()
+        target = self.daemons.execute('daemons.status', dict(account='bob', channel='modded'))['daemon']['target']
+        args = copy.deepcopy(self.arguments)
+        args.update(expected_target=target)
+        args['_request'].update(operation_id='after-restart', idempotency_key='after-restart', target=target)
+        actor = replace(self.actor, targets=[self.pin, target])
+        result = self.owner().execute(actor, 'history.import', args, authorize=lambda: actor)['result']['operation']['result']
+        self.assertEqual(result['thread_id'], first['thread_id'])
+        self.assertEqual(self.forks, 1)
 
     def test_ongoing_source_copies_only_saved_completed_prefix(self):
         self.source.write_text(self.source.read_text() + json.dumps(dict(type='event_msg', payload=dict(type='task_complete', turn_id='turn-one'))) + '\n')
@@ -284,6 +304,29 @@ readable_accounts=["alice","bob"]
         args['_request'].update(operation_id='unknown-again', idempotency_key='unknown-again')
         value = self.owner().execute(self.actor, 'history.import', args, authorize=lambda: self.actor)
         self.assertEqual(value['result']['operation']['reason'], 'uncertain_effect')
+        self.assertEqual(self.forks, 1)
+
+    def test_lost_result_is_reconciled_from_unique_native_lineage_and_saved_content(self):
+        owner = self.owner()
+        request = self.request
+        def lost(*args, **kwargs):
+            value = request(*args, **kwargs)
+            if args[2] == 'thread/fork':
+                raise TimeoutError('lost native result')
+            return value
+        owner.request = lost
+        owner.execute(self.actor, 'history.import', self.arguments, authorize=lambda: self.actor)
+        args = copy.deepcopy(self.arguments)
+        # Reconciliation reuses the original immutable operation, not a retry.
+        owner = self.owner()
+        def recovery(endpoint, executable, method, params, timeout, **kwargs):
+            if method == 'thread/list':
+                return {'data': [dict(id=CHILD, forkedFromId=SOURCE)], 'nextCursor': None}
+            return request(endpoint, executable, method, params, timeout, **kwargs)
+        owner.request = recovery
+        value = owner.execute(self.actor, 'history.import', args, authorize=lambda: self.actor)['result']['operation']
+        self.assertEqual(value['execution'], 'completed')
+        self.assertEqual(value['result']['thread_id'], CHILD)
         self.assertEqual(self.forks, 1)
 
     def test_import_is_exposed_as_explicit_source_destination_cli_operation(self):
