@@ -66,7 +66,13 @@ class Operation:
 
     def schema(self):
         properties = {key: dict(deepcopy(PARAMETERS[key][1]), description=PARAMETERS[key][0]) for key in self.parameters}
-        return {'type': 'object', 'properties': properties, 'required': list(self.required), 'additionalProperties': False}
+        schema = {'type': 'object', 'properties': properties, 'required': list(self.required), 'additionalProperties': False}
+        if self.name == 'builds.run':
+            schema['oneOf'] = [
+                {'required':['run_id'], 'not':{'anyOf':[{'required':[key]} for key in ('recipe','upstream','mod_revision')]}},
+                {'required':['recipe','upstream','mod_revision'], 'not':{'required':['run_id']}},
+            ]
+        return schema
 
 
 OPERATIONS = (
@@ -103,9 +109,9 @@ OPERATIONS += (
 )
 OPERATIONS += tuple(Operation('builds.' + verb, summary, 'wake_builds_' + verb,
     ('recipe','upstream','mod_revision','run_id','jobs','output','max_items','confirm','expected_cache'),
-    ('recipe','upstream','mod_revision') if verb == 'prepare' else ('run_id',),
+    ('recipe','upstream','mod_revision') if verb == 'prepare' else (() if verb == 'run' else ('run_id',)),
     'Native release work in isolated WSL state; no working-account installation.',
-    'builds ' + verb + (' --recipe RECIPE --upstream SHA --mod-revision SHA' if verb == 'prepare' else ' --run-id RUN'))
+    'builds ' + verb + (' --recipe RECIPE --upstream SHA --mod-revision SHA' if verb in ('prepare','run') else ' --run-id RUN'))
     for verb, summary in [('prepare','Prepare pinned source in an isolated worktree.'),('status','Inspect a durable native release run.'),('build','Build a complete immutable package through Cargo Signal.'),('resume','Reconcile and resume a native release run.'),('qualify','Qualify the exact package in disposable state.'),('cleanup','Preview or explicitly clean an inactive build cache.'),('run','Prepare, build and qualify one native release.')])
 BY_NAME = {op.name: op for op in OPERATIONS}
 

@@ -121,9 +121,21 @@ class ReleaseDriver:
         with self.locked():
             if operation == 'prepare':
                 result = self.prepare(arguments)
+            elif operation == 'run':
+                from .release_run import execute
+                if arguments.get('run_id'):
+                    if any(key in arguments for key in ('recipe', 'upstream', 'mod_revision')):
+                        raise ValueError('run accepts either run_id or source pins, not both')
+                    run = self.load(arguments['run_id'])
+                else:
+                    run = self.prepare(arguments)
+                result = execute(self, operation, run, arguments)
             else:
                 run = self.load(arguments.get('run_id'))
                 if operation == 'status':
+                    if run.get('orchestration'):
+                        from .release_run import reconcile as reconcile_workflow
+                        reconcile_workflow(self, run)
                     if run.get('stages'):
                         from .release_build import reconcile
                         reconcile(self, run)
@@ -132,9 +144,19 @@ class ReleaseDriver:
                         reconcile_qualification(self, run)
                     result = run
                 elif operation in ('resume', 'qualify', 'cleanup', 'run'):
+                    if operation == 'resume' and run.get('orchestration'):
+                        from .release_run import reconcile as reconcile_workflow, worker_alive
+                        worker = run['orchestration']
+                        if worker.get('status') in ('running','submitting','unknown') and worker_alive(worker):
+                            return self.present(run, arguments)
+                        reconcile_workflow(self, run)
                     from importlib import import_module
                     module = import_module('.release_' + {'qualify':'qualification'}.get(operation, operation), __package__)
                     result = module.execute(self, operation, run, arguments)
+                    if operation == 'resume' and result.get('orchestration', {}).get('status') == 'unknown':
+                        if not result.get('resume_summary', {}).get('unresolved'):
+                            result['orchestration'].update(status='held', reason='explicit resume reconciled stage outcomes')
+                            self.event(result, 'orchestration_reconciled')
                 else:
                     from .release_build import execute
                     result = execute(self, operation, run, arguments)
