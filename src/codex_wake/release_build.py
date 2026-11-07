@@ -58,7 +58,7 @@ def stage_fingerprint(driver, run, step):
               if inputs else driver.snapshot(run))
     return fingerprint(dict(source=source, definition=step, toolchain=run['toolchain'],
                             target=run['recipe'].get('target'), profile=run['recipe'].get('profile'),
-                            features=run['recipe'].get('features', []), resources=run.get('resources')))
+                            features=run['recipe'].get('features', []), environment=run.get('build_environment'), resources=run.get('resources')))
 
 
 def output_inventory(run, step):
@@ -216,6 +216,8 @@ def reconcile(driver, run):
 
 
 def adopt(driver, run):
+    if run.get('retained_invalidated'):
+        return False
     retained = run['recipe'].get('retained_package')
     if not retained:
         return False
@@ -268,7 +270,10 @@ def advance(driver, run, arguments):
         run['status'] = 'building'
         driver.event(run, 'stage_submitting', stage=name)
         cwd = safe_path(run['worktree'], step.get('cwd', '.'))
-        argv = ['/usr/bin/env', 'CARGO_BUILD_JOBS=' + str(run['resources']['jobs']),
+        frozen_environment = run.get('build_environment', {})
+        clear = [arg for key, value in frozen_environment.items() if value is None for arg in ('-u', key)]
+        values = [key + '=' + value for key, value in frozen_environment.items() if value is not None]
+        argv = ['/usr/bin/env', *clear, *values, 'CARGO_BUILD_JOBS=' + str(run['resources']['jobs']),
                 'CARGO_TARGET_DIR=' + run['target_directory'], *step['argv']]
         stage['argv'] = argv
         try:
