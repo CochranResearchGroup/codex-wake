@@ -1126,10 +1126,10 @@ lanes:
     branch: feat/native-release-driver-0204
     target: origin/main
     plan_state: CLOSED
-    custody_state: ACTIVE_WORKTREE
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: [P179]
     updated_at: 2026-11-06
-    checkpoint: 7f87ac44e999e4ebf7b081caa094c57e6a6f8962
+    checkpoint: 5fd4aeba084b973284485cf4054299c226269ca0
     validation_status: focused_and_real_runtime_passed
-    disposition: Six tickets closed; review1 TDD1 resolved four blockers; local integration only, no comprehensive-suite or deployment claim
+    disposition: Six tickets closed; review1 TDD1 resolved four blockers; PR486 merged and Wake prefix deployed, native daemons preserved; no comprehensive-suite claim
