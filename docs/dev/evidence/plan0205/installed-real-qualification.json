@@ -1,0 +1,61 @@
+{
+  "source_commit": "bc822f36da4b60905594fb6a8249fbc0c6b619a2",
+  "tier": "live_or_soak (bounded installed/native acceptance)",
+  "installed_wheel_sha256": "6cae696fb11b0a2fb62727b0f11736930e843d70a9d52b554e4f413d792f51b8",
+  "source_installed_codex_wake_python_files": 259,
+  "source_installed_differences": 0,
+  "installed_stock_seed": {
+    "source": "bc822f36da4b60905594fb6a8249fbc0c6b619a2",
+    "installed": true,
+    "status": "passed",
+    "private_skill_files": 1343,
+    "skill_symlinks": 0,
+    "auth_copied": false,
+    "history_copied": false,
+    "stock_permissions": "0o755"
+  },
+  "managed_uid1017": {
+    "script_sha256": "3d99af8a15542bafe0ac608d06d29451583d2a8baae56a728619f7e3842ca439",
+    "receipt_sha256": "d266a0bc0e9166a7d6f7a37e01016c407e9cdf2523a226d70cfce2eda08a1aee",
+    "source": "de07fbb",
+    "checks": [
+      "genuine stock/modded supported daemon starts",
+      "all three recent2 directions and replays",
+      "stock/profile native TUI resume",
+      "copied notify hook executed"
+    ],
+    "external_provider_turns": 0,
+    "local_sse_turns": 1,
+    "final_owned_processes": []
+  },
+  "real_cross_account": {
+    "checks": {
+      "resume_qualified": true,
+      "source_unchanged": true,
+      "unchanged_revision_reused": true,
+      "no_goal_transferred": true,
+      "no_allowance_renewed": true,
+      "cross_account_continuation": true
+    },
+    "receipt_sha256": "bafd5ccc2b3c4b5c310c5fbff47e21ffff4619a23ebf88f705d78b68e1889bc7",
+    "owned_clients_closed": true
+  },
+  "real_provider_turns_total": 3,
+  "global_deployment": false,
+  "comprehensive_suite_claim": false,
+  "cleanup": {
+    "private_receipt_sha256": "5f8755c927b107e62e2d90cb6f38cd1f83b65acdfd9dd7f066d1b77c71c05a7e",
+    "owned_remaining": [],
+    "only_owned_daemons_stopped": true,
+    "stock_configuration_and_executable_unchanged_during_cleanup": true,
+    "linux_relevant_processes": 28,
+    "linux_relevant_rss_mib": 4623.99,
+    "baseline_same_pid_birth_executable": 10,
+    "baseline_independently_exited": 16,
+    "baseline_pid_reuse": 0,
+    "windows_powershell_processes": 55,
+    "windows_powershell_total_mib": 4169.04,
+    "windows_largest_powershell_mib": 189.81,
+    "limitations": "Fresh census is observation, not attribution of unrelated processes. Shared-kernel UID1017 isolation is not a VM."
+  }
+}

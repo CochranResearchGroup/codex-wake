@@ -8,10 +8,10 @@ Authority: ten accepted interview decisions and explicit to-spec invocation.
 ## Current State
 
 Specification published as GitHub #488 with ready-for-agent state;
-implementation ticket execution is starting on feat/independent-profiles-0205. The
+implementation is integrated on feat/independent-profiles-0205. The
 operator-approved testing boundary is the existing public controller operation
 surface shared by CLI/API/MCP, followed by actual stock/two-profile and WSL/PowerShell
-acceptance. No runtime configuration or authentication changed in this phase.
+acceptance. Selected real profiles have now been explicitly adopted and qualified from an isolated installed prefix; global deployment remains separate.
 
 ## Problem Statement
 
@@ -136,13 +136,13 @@ Tracker closure follows validated integration outcomes, separately from release/
 
 | Unit | Blockers | Owner | State | Write scope |
 |---|---|---|---|---|
-| #489 stores/seeding | none | primary | validated domain seam | controller_accounts, codex_profiles config and independent store owner; tests |
-| #490 adoption | none | /root/adopt205 | integrated; 25 focused PASS | controller_migration and adoption helper; migration tests |
-| #491 readiness | none | /root/ready205 | integrated (runtime join pending) | selected readiness owner; readiness tests |
-| #492 config sync | #489 | /root/sync205 | validated domain seam | configuration sync owner and tests |
-| #493 history | #489 | /root/history205 | validated domain seam | history discovery/import and tests |
-| #494 parity | #489–#493 | /root/parity205 | running | command contracts/adapters/generated docs |
-| #495 qualification | #494 | primary | pending | installed/runtime acceptance and receipts |
+| #489 stores/seeding | none | primary | CLOSED; validated domain seam | controller_accounts, codex_profiles config and independent store owner; tests |
+| #490 adoption | none | /root/adopt205 | CLOSED; installed adoption also qualified | controller_migration and adoption helper; migration tests |
+| #491 readiness | none | /root/ready205 | CLOSED; selected real backend/limit/refresh verified | selected readiness owner; readiness tests |
+| #492 config sync | #489 | /root/sync205 | CLOSED; validated domain seam | configuration sync owner and tests |
+| #493 history | #489 | /root/history205 | CLOSED; validated domain seam | history discovery/import and tests |
+| #494 parity | #489–#493 | /root/parity205 | CLOSED; native stdio/OAuth/PowerShell parity | command contracts/adapters/generated docs |
+| #495 qualification | #494 | primary | CLOSED; installed/real matrix and cleanup verified | installed/runtime acceptance and receipts |
 
 Shared contract owner: primary. Extend ControllerAccounts; store records carry stable store_id, kind (stock/profile), home, independent boolean and observed account separately. Stock identity is stored in Wake metadata, never auth-derived. Configuration engine consumes resolved store records. Preserve legacy default mode. Public operations are wired by parity owner after domain owners stabilize; domain public execute methods are the initial test seam.
 Worker branches start from the recorded integration checkpoint; no nested workers or working-account live effects. Worker red/green command receipts and commits are integrated serially. Source changes must not clone auth or control state. Native package effects first qualify UID1017; no paid CI.
@@ -172,3 +172,19 @@ Tracker #489/#490/#492 CLOSED after comment+state readback; private mutation rec
 Domain regression at1583961:206PASS70.468s, pinned ruff undefined names across src/scripts/tests/hooks PASS, policy wiring PASS. Local Python3.12.13; prepared isolated qualification-prefix3.12.13 and qualification-prefix3113.11.15 with matching frozen dependencies. No working installation.
 /root/history205 supplemental native verification at source1583961 uses UID1017 isolated network, exact candidate0.167 hash56a10d48... Native active-source completed-prefix run4 PASS; run5 all directions/restart/advanced/recent2 PASS, lost-reply native reconciliation held instead of recovered (no duplicate effect). Failed fixture setup attempts retained; final owned processes empty. Candidate was used for all stores in initial matrix, so genuine stock-build coexistence is NOT yet claimed. Worker now verifying genuine stock package and narrow reconciliation mismatch. Root exec remains available despite worker intermittent EMFILE; no unrelated process cleanup authorized/performed.
 /root/parity205 has shared schemas/adapters and local/native/OAuth parity tests; actual PowerShell fixture revealed missing stable store_id grant field, now in targeted validation. No broad review or remediation pass started. Review fixed-point answer pending.
+
+### Installed and selected real qualification 2026-11-07
+
+Native history #493 closed after genuine stock/modded all-direction completed/ongoing-prefix/restart/recovery acceptance; public native-history.json retains scope and source correction. #494 closed after actual installed CLI/REST/OAuth/native stdio MCP and Windows PowerShell5.1 parity. No native recompilation occurred.
+
+Follow-up fixes: private external skill materialization with explicit runtime omissions9b4dbcf; ordinary0755 stock home registration without chmodb3aae46; actual ControllerDaemons readiness034ed16; native-owned aliases preserved during adoption7cda244; stock shortcut channelde07fbb; local UID migration through common authorization/journal without messaging-grant prerequisite5db8cf3. Each arose from a concrete source/installed failure; retained private logs preserve initial failures.
+
+Exact installed bc822f36da4b wheel SHA2566cae696fb11b0a2fb62727b0f11736930e843d70a9d52b554e4f413d792f51b8. Separate UID1017 supporting installed managed acceptance used de07fbb wheel5ff43bbb8d73e8a778a047a24243a214bcb4a112f4fd61ecfc60551f6f402b71 and integrated scriptbc822f3: all three recent2 batches, actual stock/profile TUI resume, copied notify hook execution, one local SSE turn, zero external model calls, final owned processes empty.
+
+Personal selected profile adopted first, normal real chat/resume passed, voluntary limit stop_proof=true with native goal paused and owned watcher stopped; actual persistent resumed client exact-thread refresh passed. Second selected profile then adopted and normal real chat/resume passed. Both retained existing distinct Codex sign-ins; operator service-owned stable-time read-only MCP calls succeeded before/after personal refresh while peer turns/goal/process remained unchanged. Two real provider turns at this checkpoint. Authentication/history/native state preserved at adoption; stock/shared configuration and global launchers unchanged. Public selected-readiness.json records sanitized proof; #491 closed from that evidence.
+
+Qualification uses copied controller metadata and isolated installed prefix, not a global launcher/build-manifest deployment. UID1017 legacy clock configuration pointed at a dead service; diagnosed without modifying it. Fresh private working-UID native idle self-limit and refresh fixtures passed with the existing healthy operator clock. Initial unloaded-thread refresh probes were corrected to actual persistent resumed clients; no missing native dependency or rebuild was inferred.
+
+Primary owns final real transfer and cleanup, /root/real_peer205 qualified MCP/peer preservation, /root/cross205 owns only the explicit synthetic real conversation transfer, /root/gates205 runs mechanical affected-source local gates. No broad review has started. Use recorded base0f469f3 for the requested single review after ticket closure; user continued after the previously presented comparison question. No merge/deployment authorization is inferred.
+
+Real cross-profile copied synthetic conversation resumed and continued under the second actual account; source unchanged and replay reused the same copy. One further real provider turn, total3. No goal/allowance transferred. Cleanup stopped only exact owned native daemons and retained test histories/configuration; fresh Linux/Windows process census recorded. All owned processes empty. Of26 earlier relevant processes,10 retained same PID/birth/executable and16 exited independently; no stronger unrelated-continuity claim. Windows55 PowerShell/pwsh processes totaled4169.04MiB, largest189.81MiB at readback; no unrelated termination. Source gate Python3.12 selected172PASS; Python3.11 first run171PASS/one environment error because sibling installed CLI was absent, repaired by exact wheel installation and focused rerun (5PASS2.360s, failed case plus transport parity). Whole-tree undefined-name Ruff, compile, policy wiring, generated command reference and active planning audit PASS. This is a selected presubmit, not the comprehensive suite.

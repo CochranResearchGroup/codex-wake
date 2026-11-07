@@ -8499,3 +8499,7 @@ Operator authorized merge/deployment. PR486 squash-merged as5fd4aeba084b97328448
 ## Turn | 2026-11-07 | Plan0205 implementation
 
 Created seven dependency-linked GitHub tickets #489–#495 under spec #488. Isolated integration feat/independent-profiles-0205 from0f469f3 preserves primary checkout dirty config. Primary store/seeding public tests red→green; readiness helper integrated with seven account regressions. Adoption, sync and history workers own disjoint worktrees; primary now coordinator-only during three-worker fan-out. One broad review and one bounded TDD remediation reserved; no paid CI or working runtime effects.
+
+## Turn | 2026-11-07 | Plan0205 installed and real account qualification
+
+Integrated #489–#494 with private seeding/adoption, selective three-way sync, genuine stock/profile saved-prefix history, native lost-reply reconciliation and actual WSL/PowerShell/REST/OAuth/stdio MCP parity. Selected real profiles then qualified sequentially using existing sign-ins from isolated installed prefix: normal chat/resume, personal self-limit and exact-thread refresh, peer preservation, authenticated service-owned clock MCP, and cross-account copied-session continuation. Three real provider turns total; stock launcher/shared home and original controller deployment remain intact. Public receipts under docs/dev/evidence/plan0205 bind exact source/packages; raw account/private evidence stays user-scoped. Final cleanup and source gates precede #495 closure; one broad review and one bounded remediation follow ticket closure.
