@@ -184,10 +184,11 @@ def _normalized(value, home):
 
 def _hashes(entries, home):
     result = {}
+    aliases = _asset_aliases(entries, home)
     for key, (_, value) in entries.items():
         path = json.loads(key)
         executable = bool((Path(home) / path[1]).stat().st_mode & 0o111) if path[0] in ('file', 'asset') else None
-        result[key] = _digest([_normalized(value, home), executable])
+        result[key] = _digest([_normalized(_remap(value, home, home, aliases), home), executable])
     return result
 
 
@@ -215,18 +216,41 @@ def capture_seed(owner, source, destination):
     _save(_metadata(owner) / (_pair(destination, source) + '.json'), json.dumps(reverse))
 
 
-def _remap(value, source, destination):
+def _asset_aliases(entries, home):
+    """Map only materialized asset paths from canonical to logical locations."""
+    home = Path(home)
+    aliases = {}
+    for key in sorted(entries):
+        entry = json.loads(key)
+        if entry[0] not in ('file', 'asset'):
+            continue
+        path = home / entry[1]
+        while path != home:
+            resolved = path.resolve()
+            if resolved != path:
+                aliases.setdefault(str(resolved), str(path))
+            path = path.parent
+    return aliases
+
+
+def _remap(value, source, destination, aliases=None):
     if isinstance(value, bytes):
         try:
-            return value.decode().replace(str(source), str(destination)).encode()
+            return _remap(value.decode(), source, destination, aliases).encode()
         except UnicodeDecodeError:
             return value
     if isinstance(value, str):
+        if aliases:
+            # One simultaneous substitution keeps a logical destination from
+            # becoming another canonical source alias during the same rewrite.
+            pattern = '|'.join(re.escape(path) for path in sorted(aliases, key=len, reverse=True))
+            value = re.sub('(?:' + pattern + r')(?![A-Za-z0-9_./-])',
+                           lambda match: aliases[match.group()], value)
         return value.replace(str(source), str(destination))
     if isinstance(value, list):
-        return [_remap(item, source, destination) for item in value]
+        return [_remap(item, source, destination, aliases) for item in value]
     if isinstance(value, dict):
-        return {key: _remap(item, source, destination) for key, item in value.items()}
+        return {key: _remap(item, source, destination, aliases) for key, item in value.items()}
     return value
 
 
@@ -292,6 +316,7 @@ def execute(owner, operation, arguments, *, reload_executor=None):
         source = owner.execute('stores.resolve', {'selector': arguments['source']})['store']
         src = _inventory(source, categories, allow_links=True)
         source_hashes = _hashes(src, source['home'])
+        source_aliases = _asset_aliases(src, source['home'])
         plans, snapshot_data = [], []
         fingerprints = [(source, _input_fingerprint(source, src, allow_links=True))]
         for selector in destinations:
@@ -356,7 +381,7 @@ def execute(owner, operation, arguments, *, reload_executor=None):
                 status = decision['status']
                 if status in ('update', 'delete'):
                     path = decision['entry']
-                    value = _remap(src[key][1], source['home'], destination['home']) if key in src else None
+                    value = _remap(src[key][1], source['home'], destination['home'], source_aliases) if key in src else None
                     if path[0] == 'toml':
                         text = _edit_toml(text, path[1:], value, status == 'delete')
                         changed_config = True
@@ -420,7 +445,6 @@ def execute(owner, operation, arguments, *, reload_executor=None):
                 if destination['kind'] != 'profile' or reload_executor is None:
                     item['reload'] = 'unsupported; use next launch or supported selected-profile reload'
                 else:
-                    reload_executor(destination)
-                    item['reload'] = 'requested_selected_profile'
+                    item['reload'] = reload_executor(destination) or 'requested_selected_profile'
         _save(receipt_path, json.dumps(dict(request=_digest(request), snapshot=snapshot, result=result, state='complete')))
         return result

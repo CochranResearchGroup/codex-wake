@@ -136,8 +136,8 @@ def inventory(home):
                 mcp_auth='operator keyring when supported; file credentials remain local and are not copied')
 
 
-def _copy_asset(source, destination, source_home, destination_home, seen=frozenset()):
-    from .configuration_sync import _safe_asset, _read_file, ASSET_RUNTIME
+def _copy_asset(source, destination, source_home, destination_home, seen=frozenset(), aliases=None):
+    from .configuration_sync import _safe_asset, _read_file, _remap, ASSET_RUNTIME
     if source.name in ASSET_RUNTIME:
         return
     resolved = _safe_asset(source_home, source, allow_links=True)
@@ -146,13 +146,10 @@ def _copy_asset(source, destination, source_home, destination_home, seen=frozens
     if source.is_dir():
         destination.mkdir(mode=0o700)
         for child in source.iterdir():
-            _copy_asset(child, destination / child.name, source_home, destination_home, seen | {resolved})
+            _copy_asset(child, destination / child.name, source_home, destination_home, seen | {resolved}, aliases)
     elif source.is_file():
         raw = _read_file(source_home, source, allow_links=True)
-        try:
-            raw = raw.decode().replace(str(source_home), str(destination_home)).encode()
-        except UnicodeDecodeError:
-            pass
+        raw = _remap(raw, source_home, destination_home, aliases)
         destination.write_bytes(raw)
         destination.chmod(0o700 if source.stat().st_mode & 0o111 else 0o600)
     else:
@@ -181,8 +178,10 @@ def create(owner, arguments):
             raise InventoryError('conflict', 'existing profile is preserved; use explicit adoption')
         if 'enabled' in data.get('accounts', {}):
             raise InventoryError('unsupported_target', 'selected account admission requires the existing host workflow')
-        from .configuration_sync import _input_fingerprint, _inventory
-        seed_fingerprint = _input_fingerprint(source, _inventory(source, list(CATEGORIES), allow_links=True), allow_links=True)
+        from .configuration_sync import _input_fingerprint, _inventory, _asset_aliases
+        seed_entries = _inventory(source, list(CATEGORIES), allow_links=True)
+        seed_fingerprint = _input_fingerprint(source, seed_entries, allow_links=True)
+        aliases = _asset_aliases(seed_entries, source_home)
         assets = inventory(source_home)
         stage = Path(tempfile.mkdtemp(prefix='.profile-seed-', dir=settings.state_root))
         try:
@@ -190,12 +189,12 @@ def create(owner, arguments):
                 for relative in values:
                     item = source_home / relative
                     if item.exists() or item.is_symlink():
-                        _copy_asset(item, stage / relative, source_home, home)
+                        _copy_asset(item, stage / relative, source_home, home, aliases=aliases)
             from .configuration_sync import seed_assets
             for relative in seed_assets(source_home):
                 if not (stage / relative).exists():
                     (stage / relative).parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-                    _copy_asset(source_home / relative, stage / relative, source_home, home)
+                    _copy_asset(source_home / relative, stage / relative, source_home, home, aliases=aliases)
             config = stage / 'config.toml'
             if config.exists():
                 text = config.read_text()

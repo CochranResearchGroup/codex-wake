@@ -75,6 +75,55 @@ class IndependentStoreTests(unittest.TestCase):
             execute(owner,'configuration.sync.apply',dict(args,expected_snapshot=preview['snapshot']))
             self.assertEqual((copied / 'SKILL.md').read_text(), 'second skill revision')
 
+    def test_materialized_linked_skill_references_follow_private_assets(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            stock = root / 'stock'
+            shared = stock / 'shared/skills'
+            shared.mkdir(parents=True)
+            stock.chmod(0o700)
+            (stock / 'config.toml').write_text('model="stock"\n')
+            (stock / 'skills').symlink_to(shared)
+            (shared / 'demo').mkdir()
+            helper = shared / 'demo/helper.py'
+            helper.write_text('print("shared helper")\n')
+            external = root / 'external-skill'
+            external.mkdir()
+            (external / 'helper.py').write_text('print("external helper")\n')
+            (external / '.venv').mkdir()
+            runtime = external / '.venv/bin/python'
+            (shared / 'external').symlink_to(external)
+            (shared / 'demo/SKILL.md').write_text('Run ' + str(helper))
+            (external / 'SKILL.md').write_text('Run ' + str(external / 'helper.py') + '; runtime ' + str(runtime))
+            owner = ControllerAccounts(root / 'controller-accounts.toml', host='test', environment='wsl')
+            owner.execute('accounts.init', {})
+            owner.execute('stores.register', {'selector': 'stock', 'home': str(stock)})
+            seeded = owner.execute('accounts.create', {'selector': 'alice', 'mode': 'independent', 'source': 'stock'})
+            home = Path(seeded['account']['home'])
+            self.assertEqual((home / 'skills/demo/SKILL.md').read_text(), 'Run ' + str(home / 'skills/demo/helper.py'))
+            self.assertEqual((home / 'skills/external/SKILL.md').read_text(), 'Run ' + str(home / 'skills/external/helper.py') + '; runtime ' + str(runtime))
+            self.assertTrue((home / 'skills/demo/helper.py').is_file())
+            self.assertTrue((home / 'skills/external/helper.py').is_file())
+            self.assertFalse((home / 'skills').is_symlink())
+            self.assertFalse((home / 'skills/external').is_symlink())
+            from codex_wake.configuration_sync import execute
+            arguments = dict(source='stock', destinations=['alice'], categories=['skills'], operation_id='linked-initial')
+            initial = execute(owner, 'configuration.sync.preview', arguments)
+            self.assertTrue(all(entry['status'] == 'unchanged' for entry in initial['destinations'][0]['entries']))
+            (home / 'skills/demo/helper.py').write_text('print("private helper")\n')
+            (shared / 'demo/SKILL.md').write_text('Updated: run ' + str(helper))
+            (external / 'SKILL.md').write_text('Updated: run ' + str(external / 'helper.py') + '; runtime ' + str(runtime))
+            arguments['operation_id'] = 'linked-update'
+            preview = execute(owner, 'configuration.sync.preview', arguments)
+            applied = execute(owner, 'configuration.sync.apply', dict(arguments, expected_snapshot=preview['snapshot']))
+            self.assertEqual((home / 'skills/demo/SKILL.md').read_text(), 'Updated: run ' + str(home / 'skills/demo/helper.py'))
+            self.assertEqual((home / 'skills/external/SKILL.md').read_text(), 'Updated: run ' + str(home / 'skills/external/helper.py') + '; runtime ' + str(runtime))
+            self.assertEqual((home / 'skills/demo/helper.py').read_text(), 'print("private helper")\n')
+            self.assertEqual(execute(owner, 'configuration.sync.apply', dict(arguments, expected_snapshot=preview['snapshot'])), applied)
+            arguments['operation_id'] = 'linked-after-update'
+            after = execute(owner, 'configuration.sync.preview', arguments)
+            self.assertFalse(any(entry['status'] in ('update', 'delete', 'conflict') for entry in after['destinations'][0]['entries']))
+
     def test_skill_seed_reports_runtime_environment_instead_of_copying_it(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
