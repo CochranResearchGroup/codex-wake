@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "status": "DEPLOYED",
+  "source_commit": "c1c049532f4658c1e64862c41b71c82c8957544c",
+  "merged_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/496",
+  "reviewed_tree_equal_to_merged_tree": true,
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c1c0495",
+  "wheel_sha256": "ac8f65c68f31b82edcaea738a59cd0b819a00105558007f38526fc1d703fff12",
+  "matching_python_files": 269,
+  "dependency_constraints_sha256": "aa51383700e79c078e79e7145c24bd00f72705b353d00dd84ffdd4a62dbd3a1b",
+  "launchers": {
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c1c0495/bin/codex-wake",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c1c0495/bin/codex-waked",
+    "codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c1c0495/bin/codex-wake-mcp",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c1c0495/bin/codex-wake-hook",
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c1c0495/bin/codex-wake-github-webhook"
+  },
+  "rollback_targets": {
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb/bin/codex-wake",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb/bin/codex-waked",
+    "codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb/bin/codex-wake-mcp",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb/bin/codex-wake-hook",
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-5fd4aeb/bin/codex-wake-github-webhook"
+  },
+  "compatibility_launchers": {
+    "count": 4,
+    "commands": [
+      "codex-profiles",
+      "codex-profile",
+      "codex-stock",
+      "codex-modded"
+    ],
+    "staged_refusal_replaced": true,
+    "canonical_existing_registry_used": true,
+    "default_profile": "existing personal profile",
+    "selected_profiles_registered_independent": 2,
+    "stock_build": "0.167.0",
+    "modded_build": "0.167.0",
+    "new_provider_calls": 0,
+    "auth_history_native_state_preserved": true,
+    "metadata_and_launcher_backups": "user-scoped deploy-cleanup/rollback; no credential files copied"
+  },
+  "completion": {
+    "bash": "installed",
+    "zsh": "installed",
+    "new_profile_verbs_discovered": true
+  },
+  "installed_transport_smoke": {
+    "state": "passed",
+    "execution_mode": "installed",
+    "cli": true,
+    "rest": true,
+    "oauth_mcp": true,
+    "native_mcp": true,
+    "powershell": {
+      "state": "passed",
+      "version": "5.1.26100.9711",
+      "operations": [
+        "stores.resolve REST",
+        "configuration.sync.apply REST",
+        "stores.resolve OAuth MCP"
+      ]
+    },
+    "final_owned_server": "closed",
+    "provider_calls": 0
+  },
+  "preserved": {
+    "stock_launcher_binary_unchanged": true,
+    "stock_sha256": "cdcb45aaa01d0f14e298985e09465aebccd47f64ecd298aea44814af7b62bbda",
+    "remaining_native_generations_unchanged": 27,
+    "native_before": 29,
+    "native_after": 27,
+    "native_exited_independently": 2,
+    "native_pid_reuse": 0,
+    "no_unrelated_service_or_native_restarts": true,
+    "preexisting_main_config_change_preserved": true
+  },
+  "cleanup": {
+    "wake_worktrees_retired": 59,
+    "native_source_worktrees_retired": 2,
+    "missing_registrations_pruned": 6,
+    "remaining_wake_worktrees": 100,
+    "retained_unique_worktrees": 85,
+    "retained_dirty_worktrees": 7,
+    "retained_open_pr_worktrees": 7,
+    "primary_checkout_retained": true,
+    "all_branch_refs_retained": true,
+    "additional_recovery_refs": "refs/archive/cleanup-20261107/*",
+    "build_source_archive_paths_removed": 18,
+    "build_source_archive_allocated_bytes": 447508480,
+    "net_free_bytes_vs_initial_audit": 1370890240,
+    "filesystem_used_percent_at_readback": 83.86395801195094,
+    "all_json_logs_wheels_native_runtime_and_rollback_prefixes_retained": true,
+    "native_cargo_cache": "previous 18.1GB cache already absent; remaining target metadata only24KB, no rebuild requested",
+    "native_run_recovery": "two retired source snapshots restore via recorded Git-owner worktree add before resuming old runs; manifests/logs/package remain"
+  },
+  "fresh_resources": {
+    "linux_relevant_native_rss_mib": 4923.66,
+    "windows_powershell_count": 49,
+    "windows_powershell_total_mib": 3106.61,
+    "windows_largest_powershell_mib": 108.05,
+    "note": "read-only census; no unrelated process terminated"
+  },
+  "existing_connections": "Long-lived MCP/services retain loaded modules until individually reloaded; new invocations use the deployed prefix. No unrelated connections interrupted.",
+  "native_recompilation": false,
+  "hosted_ci_used": false,
+  "new_external_model_calls": 0,
+  "comprehensive_suite_claim": false,
+  "memory_disposition": "forbidden"
+}

@@ -7,15 +7,17 @@ Authority: ten accepted interview decisions and explicit to-spec invocation.
 
 ## Current State
 
-Implementation and selected qualification complete on feat/independent-profiles-0205.
-Tickets #489–#495 are closed. One broad Standards/Spec review and one bounded TDD
-pass resolved four blocking findings; one low maintainability follow-up remains.
-Final implementation source d78585937272782cbc76e557351cc6f7d0e750a0; exact wheel
-420970c1c4c2092488ec166f3f893fbbdd7f76f55b7869475100242f5fcba23f.
-See ../evidence/plan0205/final-remediation.json and review-and-remediation.md.
-Selected existing profiles were adopted and qualified using an isolated installed
-prefix; plain stock/global launcher deployment stays unchanged. No merge/deploy
-or comprehensive-suite claim.
+Merged through PR496 as c1c049532f4658c1e64862c41b71c82c8957544c and deployed
+to ~/.local/share/codex-wake/releases/0.22.0.dev2-c1c0495. Deployment wheel
+ac8f65c68f31b82edcaea738a59cd0b819a00105558007f38526fc1d703fff12;269 Python
+files match source/wheel/install. See ../evidence/plan0205/deployment.json.
+
+Spec #488 and tickets #489–#495 are closed. One broad Standards/Spec review and
+one bounded TDD pass resolved four blockers; one low maintainability follow-up
+remains. Qualification source d785859 and its exact wheel remain retained as
+historical evidence. Compatibility launchers now use Wake's existing registry;
+plain stock stays unchanged. Completed worktrees/build copies were reconciled
+with recovery refs. No comprehensive-suite claim.
 
 ## Problem Statement
 
@@ -126,7 +128,7 @@ The ten interview recommendations were accepted, and the operator explicitly sel
 
 Historical readiness observations are evidence of gaps to recheck during implementation, not permanent claims about the current runtime. Source implementation, disposable qualification, working-profile activation, merge and deployment remain distinct evidence boundaries. The retained native0.167 package and Plan0204 release-driver evidence may be reused after fresh identity verification; historical compiler provenance remains unknown where it was not recorded.
 
-Owner: ecochran76 / primary coordinator. Classification: enhancement. State: implementation and selected qualification complete. Plan0205 retains specification, execution and evidence authority. The validated integration branch is ready for a separately authorized merge/deployment.
+Owner: ecochran76 / primary coordinator. Classification: enhancement. State: implementation and selected qualification complete. Plan0205 retains specification, execution and evidence authority. The operator subsequently authorized merge/deployment; the final section records those effects.
 
 Memory disposition: forbidden; no explicit memory-write request.
 
@@ -200,3 +202,13 @@ All seven ticket states read back CLOSED on github.com/CochranResearchGroup/code
 Final affected installed44PASS eachPython3.11/3.12; preceding changed-surface67PASS each. Whole-tree undefined names/compile/policy/reference/planning PASS at5bf; final adoption changed-file Ruff and installed parity PASS atd785. Native selected MCP reload advanced only selectedtoolv1→v2; peer/goals/process generations preserved, replay same receipt,0provider calls, network isolated, final owned0. Reused eight unchanged reload-related modules by exact byte hashes rather than repeating unaffected native qualification after adoption-only correction. Final260 package Python files match exact wheel in both isolated prefixes. Hosted CI skipped by cost policy; comprehensive lane and parked OpenClaw unexecuted.
 
 Low follow-up owner primary: consider a shared configuration-snapshot interface if seeding/sync private inventory coupling causes concrete change cost. It is a judgment-call maintainability suggestion, not a missing acceptance criterion or permission to broaden this completed packet. No automatic credential migration, global launcher switch, merge or deployment performed. Three real provider turns total; own test histories retained, owned native daemons/watchers stopped, unrelated work preserved. Memory disposition forbidden because no explicit memory-write request.
+
+### Authorized merge, deployment and custody reconciliation
+
+Operator explicitly authorized merge, deployment, build-artifact cleanup and worktree reconciliation. PR496 squash-merged as c1c049532f4658c1e64862c41b71c82c8957544c, tree byte-identical to reviewed integration6c01010. Exact merged wheel ac8f65c68f31b82edcaea738a59cd0b819a00105558007f38526fc1d703fff12 installed with qualified pinned dependencies in ~/.local/share/codex-wake/releases/0.22.0.dev2-c1c0495;269 Python files source/wheel/install equal. Actual installed CLI/REST/OAuth/native stdio/PowerShell smoke passed; completion installed Bash/Zsh.
+
+Five Wake launcher symlinks switched atomically; four compatibility launchers now use supported Wake entrypoints and canonical existing account registry instead of staged refusal/pipx ownership. Registered qualified stock/modded0.167 complete packages and stable stock store, promoted two existing applied-adoption store records with original custody provenance, selected existing personal default and qualified current stock model as host override. No disabled test-connector overrides were promoted. Existing file-store sign-ins/history/native inodes preserved, no credentials copied, no daemon restart or provider turn. Backups of metadata/launchers and prior Python prefix retained outsideGit. Plain codex still points at stock shared home. Existing long-lived MCP connections load new modules when individually reloaded; unrelated services/connections were preserved.
+
+Read-only audit reconciled165 Wake registrations against currentGit and266mergedPRheads, plus per-tree ignored files and process references. Removed59 clean completed Wake worktrees,2 disposable native source worktrees and6 missing registrations; all branch refs retained, additional archive refs bind removed tips.100 Wake checkouts remain: primary,85 unmerged/unique,7 dirty and7 open-PR worktrees. Removed18 reproducible source/build/archive paths (447,508,480allocatedbytes), retaining all JSON/logs, wheels, installed/rollback prefixes, qualified native packages and actual account homes. Previously large18.1GB Cargo cache was already absent; no native recompilation or risky cache eviction occurred. Two retired native run source checkouts can be restored from retained a4cad136 Git revision before resuming those old runs; original manifests/logs remain unchanged.
+
+Filesystem free-space gain versus initial audit1,370,890,240bytes (~1.28GiB), measured under concurrent host activity; selected allocated totals are not presented as actual reclaimed blocks. Fresh27 remaining relevant native processes preserve exact baseline generations;2 earlier processes exited independently, noPIDreuse. Windows49PowerShell processes total3106.61MiB, largest108.05MiB; observation only, no unrelated termination. Public deployment.json and user-scoped spec0205/deploy-cleanup receipts preserve source, prefix, rollback, cleanup, activity and resource proof. Main preexisting dirty .codex/config.toml preserved; memory disposition forbidden because no explicit memory-write request.
