@@ -1,16 +1,24 @@
 # Native release driver design
 
-State: OPEN
+State: CLOSED
 Work items: GitHub #480, #481, #482, #483, #484, #485
 Authority: operator-approved interview decisions in the current conversation.
 
 ## Current State
 
-Operator selected ticket publication and implementation after accepting all
-design decisions. Implementation is now authorized; deployment remains separate. Existing account-build
-workflow Plan0179 and its staging module remain authoritative for current behavior.
-Plan0203 and the private native-modern-0167 receipts supply the initial acceptance
-inputs. The efficient-cargo-builds skill supplies the build execution guidance.
+Six tickets (#480–#485) are implemented, integrated, validated and tracker-closed.
+Integration branch: feat/native-release-driver-0204; last code commit7f87ac4.
+One Standards/Spec review and one bounded TDD pass resolved four distinct blockers.
+28 release,19 MCP and191 controller tests passed. Actual PowerShell/WSL/REST/MCP
+and real UID1017 native acceptance passed using the verified retained0.167 package.
+No native recompilation or working installation occurred. Broad-suite/Python3.11
+coverage is not claimed; the validation receipt retains the harness timeout and
+baseline diagnosis. Worker branches/worktrees retain recoverable custody.
+
+Acceptance: [native/public receipt](../evidence/plan0204/acceptance.json).
+Final checks: [validation](../evidence/plan0204/validation.json).
+Review: [one-pass adjudication](../evidence/plan0204/review.md).
+Execution custody: [ledger](0204-execution-ledger.json).
 
 ## Settled decisions
 
@@ -50,10 +58,10 @@ inputs. The efficient-cargo-builds skill supplies the build execution guidance.
 
 ## Scope and non-goals
 
-Design a resumable release workflow over existing staging and native packaging
-tools. No implementation, installation, service interruption, source integration,
-paid hosted CI or publication is authorized by this interview artifact alone.
-Existing session authorization and repository policies still govern those actions.
+Implement a resumable release workflow over existing staging and native packaging
+tools. The operator explicitly authorized tickets, implementation, delegated
+workers, review and bounded remediation. Working-account installation, main-branch
+merge, deployment and paid hosted CI are outside this completed slice.
 
 ## Confirmation gate
 
@@ -65,12 +73,12 @@ Exact command spelling is provisional until checked against the existing tree.
 
 ## Acceptance criteria and definition of done
 
-Design is complete when the operator confirms a shared understanding covering
-the full decision frontier. Record a buildable specification and implementation
-work items in the subsequent explicitly selected flow. Implementation acceptance
-must demonstrate complete package identity, no duplicate ambiguous jobs, selective
-stage reuse and exact-artifact disposable qualification without working-host
-installation. Claims of binary reproducibility require separate measured evidence.
+The six approved tickets meet their named acceptance conditions on the integration
+branch and are closed with provider readback. Review and remediation ran once each;
+all four accepted blockers have red/green regression evidence. Retained package
+reuse, job reconciliation, selective rebuild, complete inventory, output controls,
+cleanup refusal and exact-artifact disposable qualification are verified. This is
+repeatable orchestration; bit-reproducible native binaries are not claimed.
 
 ## Evidence
 

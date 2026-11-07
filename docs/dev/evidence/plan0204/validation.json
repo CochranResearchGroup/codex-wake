@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "status": "FOCUSED_PASS",
+  "source_commit": "7f87ac44e999e4ebf7b081caa094c57e6a6f8962",
+  "python": "3.12.13",
+  "tier": "focused plus real disposable runtime acceptance",
+  "checks": [
+    {
+      "command": "PYTHONPATH=.:src python -m unittest discover -s tests -p 'test_release*.py'",
+      "tests": 28,
+      "result": "passed",
+      "seconds": 54.569
+    },
+    {
+      "command": "PYTHONPATH=.:src python -m unittest discover -s tests -p 'test_*mcp.py'",
+      "tests": 19,
+      "result": "passed",
+      "seconds": 13.132
+    },
+    {
+      "command": "PYTHONPATH=.:src python -m unittest discover -s tests -p 'test_controller*.py'",
+      "tests": 191,
+      "result": "passed",
+      "seconds": 49.357
+    },
+    {
+      "command": "python -m ruff check --select F821,F822,F823 src scripts tests .codex/hooks",
+      "result": "passed",
+      "version": "0.14.2"
+    },
+    {
+      "command": "python -m compileall -q src .codex/hooks",
+      "result": "passed"
+    },
+    {
+      "command": "python scripts/generate_command_reference.py --check",
+      "result": "passed"
+    },
+    {
+      "command": "python scripts/check_policy_wiring.py",
+      "result": "passed"
+    },
+    {
+      "command": "python -m build --no-isolation --outdir PRIVATE/dist-final",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "review": {
+    "passes": 1,
+    "remediation_passes": 1,
+    "distinct_blockers": 4,
+    "resolved": 4
+  },
+  "post_remediation_public": {
+    "state": "passed",
+    "source_commit": "7f87ac44e999e4ebf7b081caa094c57e6a6f8962",
+    "run_id": "f6733c7252284ee896e1f5f481d69143",
+    "actual_windows_resume": true,
+    "package_inventory_sha256": "93ca9530fd75d2f160d56a85a138cea0cf1e01f98a7002ed2a16ddb1d2d2c856",
+    "qualification_checks": {
+      "active_multiclient": true,
+      "reconnect": true,
+      "upgrade": true,
+      "rollback": true,
+      "failed_start": true,
+      "history": true,
+      "private_ownership": true
+    },
+    "native_recompilation": false
+  },
+  "fresh_owned_native_processes": [],
+  "broad": {
+    "status": "TIMED_OUT_HARNESS_FAILURE",
+    "seconds": 600.067,
+    "cause": "External runner missing repository root on sys.path",
+    "baseline_same_discovery_failures": 31,
+    "corrected_discovery_errors": 0,
+    "corrected_first_tests": 109,
+    "corrected_first_tests_seconds": 28.409,
+    "comprehensive_pass": false
+  },
+  "hosted_differences": [
+    "WSL shared kernel rather than GitHub Ubuntu runner",
+    "Python3.12 selected; Python3.11 matrix not executed",
+    "Focused selection rather than complete hosted test suite",
+    "Parked OpenClaw execution tests excluded",
+    "Provider-free native fixture, not real-account model smoke"
+  ],
+  "hosted_ci_used": false,
+  "installed_test_prefix": "/home/ecochran76/.local/state/codex-wake/release-driver-0204/venv",
+  "working_installation": false,
+  "memory_disposition": "forbidden",
+  "fresh_release_coordinator_processes": []
+}

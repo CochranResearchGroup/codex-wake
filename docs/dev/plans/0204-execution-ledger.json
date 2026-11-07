@@ -265,5 +265,12 @@
       "state": "resolved",
       "finding": "Native discovery lost complete run input schema"
     }
+  ],
+  "last_code_commit": "7f87ac44e999e4ebf7b081caa094c57e6a6f8962",
+  "validation": "docs/dev/evidence/plan0204/validation.json",
+  "review": "docs/dev/evidence/plan0204/review.md",
+  "remaining_gates": [
+    "Merge/deployment outside this task",
+    "No comprehensive-suite or Python3.11 claim"
   ]
 }
