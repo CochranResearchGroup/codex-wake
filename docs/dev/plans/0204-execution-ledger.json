@@ -75,7 +75,7 @@
       "blockers": [
         481
       ],
-      "state": "running",
+      "state": "validated",
       "actor": "ecochran76",
       "host": "github.com",
       "created_at": "2026-11-07T03:00:31Z",
@@ -88,6 +88,11 @@
       "paths": [
         "src/codex_wake/release_resume.py",
         "tests/test_release_resume.py"
+      ],
+      "result_sha": "8d2282a8f4222c5d1842363d84a0ec260c5c2a64",
+      "integrated_sha": "85fb00c",
+      "validation": [
+        "six real Cargo Signal resume seam tests passed on integration tip"
       ]
     },
     {
@@ -99,7 +104,7 @@
       "blockers": [
         481
       ],
-      "state": "running",
+      "state": "validated",
       "actor": "ecochran76",
       "host": "github.com",
       "created_at": "2026-11-07T03:00:35Z",
@@ -112,6 +117,11 @@
       "paths": [
         "src/codex_wake/release_qualification.py",
         "tests/test_release_qualification.py"
+      ],
+      "result_sha": "7e717f1bff133a8ec26a614e02ed00c0d4edc467",
+      "integrated_sha": "e2e3b4a",
+      "validation": [
+        "four actual Cargo Signal qualification seam tests passed; real UID1017 acceptance in #485"
       ]
     },
     {
@@ -123,7 +133,7 @@
       "blockers": [
         481
       ],
-      "state": "running",
+      "state": "validated",
       "actor": "ecochran76",
       "host": "github.com",
       "created_at": "2026-11-07T03:00:38Z",
@@ -136,6 +146,11 @@
       "paths": [
         "src/codex_wake/release_cleanup.py",
         "tests/test_release_cleanup.py"
+      ],
+      "result_sha": "33d1c64 + 0e10052",
+      "integrated_sha": "9def610",
+      "validation": [
+        "five public cleanup tests passed on integration; tighter process-classification follow-up integrated"
       ]
     },
     {
@@ -149,13 +164,32 @@
         483,
         484
       ],
-      "state": "pending",
+      "state": "running",
       "actor": "ecochran76",
       "host": "github.com",
       "created_at": "2026-11-07T03:00:40Z",
       "marker": "<!-- native-release-driver-0204-ticket-06 -->",
       "readback": true,
-      "native_dependencies_verified": true
+      "native_dependencies_verified": true,
+      "worker": "/root/workflow485",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-release-workflow485",
+      "branch": "feat/release-workflow-485",
+      "base": "9def610b796725712a3362aaeb16be31fab06cdc",
+      "paths": [
+        "src/codex_wake/release_run.py",
+        "tests/test_release_workflow.py",
+        "docs/agents/native-release-builds.md",
+        "shared run dispatch/schema (exclusive handoff)"
+      ]
     }
-  ]
+  ],
+  "retained_native_preflight": {
+    "run_id": "0492ed9f1f9d4279afe6115bce76112b",
+    "status": "built",
+    "files": 6,
+    "reused": true,
+    "seconds": 5.042,
+    "compiler": "rustc1.95.0",
+    "historical_compiler": "unknown; disclosed"
+  }
 }
