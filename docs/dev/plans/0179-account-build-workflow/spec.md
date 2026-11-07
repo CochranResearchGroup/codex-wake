@@ -4,6 +4,8 @@ State: APPROVED_FOR_IMPLEMENTATION. Owner: ecochran76 / primary coordinator. Coo
 
 ## Problem Statement
 
+Operating-mode correction: [Plan0205](../0205-2026-11-06-stock-home-and-independent-profiles.md) records the later requirement to retain stock's shared home across logout/login switches and seed independent Wake profiles with explicit transfer. For this mode it supersedes the assumptions below about replacing plain codex or sharing managed-profile configuration. The corrected mode is not yet implemented or activated.
+
 Switching previously authenticated Codex profiles now repeatedly requests login. The cause and first affected release remain unknown. The current launcher can use an official client against a modified shared backend while both show the same upstream version. The operator wants concurrent accounts, common skills/settings/MCP connections, unified history discovery, genuine stock side-by-side operation, and straightforward upgrades without disrupting work or silently dropping modifications.
 
 ## Solution

@@ -317,7 +317,7 @@ held for reconciliation rather than authorizing another attempt.
 Host-owned evidence binding a recovery to the original goal, tenant/account, policy, cumulative accounting and limits. The trusted TUI user action establishes original native policy when creating a native goal, and may carry already verified native policy through later controls without changing its grant. A later status action cannot convert an existing unknown or externally controlled goal into native-only authority. Model handoffs cannot establish this declaration; absent or unverifiable authority keeps recovery held.
 
 **Conversation import**:
-A source-preserving copy into a distinct destination account conversation, with
+A source-preserving copy into a distinct destination conversation in a selected home, with
 source identity and revision provenance. It transfers no credentials, goals,
 grants or resource allowance and does not change exact-owner resume.
 
@@ -325,3 +325,12 @@ grants or resource allowance and does not change exact-owner resume.
 A native daemon bound to one private account home, identified by its socket,
 process birth/boot and executable build. It is separate from both the Wake
 scheduler daemon and an attached native client.
+
+**Stock shared home**:
+The operator's stock Codex home whose history and configuration remain available
+when the operator switches authenticated Codex accounts.
+
+**Wake profile**:
+An independently managed Codex environment with its own home, history and
+configuration. It can be seeded or explicitly updated from another home without
+sharing that home's writable state.

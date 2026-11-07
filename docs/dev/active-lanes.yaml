@@ -1133,3 +1133,19 @@ lanes:
     checkpoint: 5fd4aeba084b973284485cf4054299c226269ca0
     validation_status: focused_and_real_runtime_passed
     disposition: Six tickets closed; review1 TDD1 resolved four blockers; PR486 merged and Wake prefix deployed, native daemons preserved; no comprehensive-suite claim
+
+  - id: P205
+    owner: ecochran76 / primary
+    objective: Stock shared home with independent Wake profiles
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/488]
+    plan: docs/dev/plans/0205-2026-11-06-stock-home-and-independent-profiles.md
+    branch: feat/independent-profiles-0205
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P179]
+    updated_at: 2026-11-07
+    checkpoint: d78585937272782cbc76e557351cc6f7d0e750a0
+    validation_status: focused_and_real_runtime_passed
+    disposition: Seven tickets closed; review1 TDD1 resolved four blockers; stock/two real accounts qualified; separate merge/deployment pending

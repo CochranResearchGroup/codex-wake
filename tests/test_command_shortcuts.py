@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import sqlite3
+import shutil
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -70,6 +71,47 @@ class ShortcutTests(unittest.TestCase):
         self.assertEqual(self.cli('resume','--channel','stock')[0],2)
         self.assertFalse((self.root/'emergency-control').exists())
 
+    def register_stock(self, backend='private'):
+        from codex_wake.controller_accounts import ControllerAccounts
+        self.build_fixture(backend)
+        stock = self.root / 'stock-home'
+        shutil.copytree(self.home, stock)
+        stock.chmod(0o700)
+        with sqlite3.connect(stock / 'state_5.sqlite') as db:
+            for identifier in self.ids:
+                db.execute('update threads set rollout_path=? where id=?', (str(stock/'sessions'/(identifier+'.jsonl')), identifier))
+        binary = self.root / 'stock-native'
+        binary.write_text((self.root / 'native').read_text().replace('{"home":os.environ', '{"build":"stock","home":os.environ'))
+        binary.chmod(0o700)
+        manifest = self.root / 'builds.json'
+        data = json.loads(manifest.read_text())
+        data['builds']['stock'] = dict(data['builds']['modded'], executable=str(binary),
+            source='https://github.com/openai/codex/releases/download/fixture/synthetic',
+            sha256=hashlib.sha256(binary.read_bytes()).hexdigest())
+        manifest.write_text(json.dumps(data))
+        ControllerAccounts(self.config, host='fixture', environment='test').execute(
+            'stores.register', {'selector': 'stock', 'home': str(stock)})
+        self.config.write_text(self.config.read_text().replace('readable_accounts=["alice"]', 'readable_accounts=["alice","stock"]'))
+        return stock
+
+    def test_open_and_resume_registered_stock_select_stock_build_and_original_home(self):
+        stock = self.register_stock()
+        for command in [('open', 'stock'), ('open', 'stock', '--channel', 'modded'),
+                        ('resume', 'stock', '--last'), ('resume', 'stock', '--last', '--channel', 'modded')]:
+            with self.subTest(command=command):
+                code, out, err = self.cli(*command)
+                self.assertEqual(code, 7, (out, err))
+                result = json.loads((stock / 'native-result').read_text())
+                self.assertEqual(result['build'], 'stock')
+                self.assertEqual(result['home'], str(stock))
+        self.assertEqual(result['args'][-2:], ['resume', self.ids[1]])
+        self.assertFalse((self.home / 'native-result').exists())
+        code, out, err = self.cli('open', 'alice', '--channel', 'stock')
+        self.assertEqual(code, 7, (out, err))
+        profile = json.loads((self.home / 'native-result').read_text())
+        self.assertEqual(profile['build'], 'stock')
+        self.assertEqual(profile['home'], str(self.home))
+
     def test_recent_preview_freezes_selection_and_never_starts_a_daemon(self):
         self.build_fixture('managed')
         bob=self.root/'accounts/codex-bob';bob.mkdir(mode=0o700)
@@ -86,6 +128,26 @@ class ShortcutTests(unittest.TestCase):
         self.assertFalse((bob/'packages').exists())
         code,out,err=self.cli('history','import-recent','--batch','../escape','--preview','--json')
         self.assertEqual(code,2)
+
+    def test_recent_stock_destination_freezes_stock_target_and_preserves_profile_channel(self):
+        stock = self.register_stock('managed')
+        code, out, err = self.cli('history', 'import-recent', '--owner', 'alice',
+            '--destination', 'stock', '--limit', '1', '--preview', '--json')
+        self.assertEqual(code, 0, (out, err))
+        batch = json.loads(out)
+        self.assertEqual(batch['channel'], 'modded')
+        entry = batch['entries'][0]['arguments']
+        self.assertEqual(entry['channel'], 'modded')
+        self.assertEqual(entry['expected_source']['home'], str(self.home))
+        self.assertEqual(entry['expected_target']['home'], str(stock))
+        self.assertEqual(entry['expected_target']['build_channel'], 'stock')
+        self.assertEqual(entry['expected_target']['executable'], str(self.root / 'stock-native'))
+        self.assertEqual(entry['_request']['target'], entry['expected_target'])
+        code, replay, err = self.cli('history', 'import-recent', '--batch', batch['id'], '--preview', '--json')
+        self.assertEqual(code, 0, (replay, err))
+        self.assertEqual(json.loads(replay), batch)
+        self.assertFalse((stock / 'native-result').exists())
+        self.assertFalse((self.home / 'native-result').exists())
 
     def test_unsafe_root_symlink_is_refused_before_creating_batch_storage(self):
         outside=self.root/'outside';outside.mkdir(mode=0o700)

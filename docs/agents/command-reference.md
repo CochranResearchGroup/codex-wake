@@ -2,7 +2,7 @@
 
 Generated from `codex_wake.command_contract`; do not edit by hand.
 
-Scope: accounts, configuration, builds, daemons and history. Other Wake
+Scope: stores, accounts, configuration, builds, daemons, migration and history. Other Wake
 commands are deferred from this contract migration; their existing interfaces remain.
 
 Local human login and status use native stdio. Structured status is cache evidence,
@@ -60,19 +60,24 @@ codex-wake --wake-root ROOT accounts create work --alias office
 ### CLI help
 
 ```text
-usage: codex-wake accounts create [-h] [--alias ALIAS] [--json] selector
+usage: codex-wake accounts create [-h] [--alias ALIAS] [--mode {independent}]
+                                  [--source SOURCE] [--json]
+                                  selector
 
 Create a private account home without credentials.
 
 Creates account configuration and a private home; does not sign in.
 
 positional arguments:
-  selector       Account name or configured alias.
+  selector              Account name or configured alias.
 
 options:
-  -h, --help     show this help message and exit
-  --alias ALIAS  Optional alternate name for the newly created account.
-  --json         Emit structured results for this command.
+  -h, --help            show this help message and exit
+  --alias ALIAS         Optional alternate name for the newly created account.
+  --mode {independent}  Create an independent private configuration snapshot;
+                        legacy creation remains the default.
+  --source SOURCE       Registered source store selector, including stock.
+  --json                Emit structured results for this command.
 
 Examples:
   codex-wake --wake-root ROOT accounts create work --alias office
@@ -82,7 +87,278 @@ Examples:
 |---|---|---|
 | `selector` | yes | Account name or configured alias. |
 | `alias` | no | Optional alternate name for the newly created account. |
+| `mode` | no | Create an independent private configuration snapshot; legacy creation remains the default. |
+| `source` | no | Registered source store selector, including stock. |
 | `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## accounts readiness
+
+Inspect the selected profile readiness and specific remedies.
+
+Read-only; native limits, refresh and backend acceptance remain separately qualified. Remote callers cannot supply launcher or manifest paths.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_controller_account_readiness`).
+
+```sh
+codex-wake --wake-root ROOT accounts readiness work --json
+```
+
+### CLI help
+
+```text
+usage: codex-wake accounts readiness [-h] [--expected-target EXPECTED_TARGET]
+                                     [--manifest MANIFEST]
+                                     [--launcher LAUNCHER] [--json]
+                                     selector
+
+Inspect the selected profile readiness and specific remedies.
+
+Read-only; native limits, refresh and backend acceptance remain separately qualified. Remote callers cannot supply launcher or manifest paths.
+
+positional arguments:
+  selector              Account name or configured alias.
+
+options:
+  -h, --help            show this help message and exit
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --manifest MANIFEST
+  --launcher LAUNCHER
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT accounts readiness work --json
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `selector` | yes | Account name or configured alias. |
+| `expected_target` | no | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+
+## stores register
+
+Register the stable shared stock store in Wake metadata.
+
+Preserves stock configuration and login. Remote admin grant must pin the registry revision and selected home.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_controller_store_register`).
+
+```sh
+codex-wake --wake-root ROOT stores register stock --home /absolute/stock/home
+```
+
+### CLI help
+
+```text
+usage: codex-wake stores register [-h] --home HOME [--json] selector
+
+Register the stable shared stock store in Wake metadata.
+
+Preserves stock configuration and login. Remote admin grant must pin the registry revision and selected home.
+
+positional arguments:
+  selector     Account name or configured alias.
+
+options:
+  -h, --help   show this help message and exit
+  --home HOME  Absolute existing stock home; registration changes only Wake
+               metadata.
+  --json       Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT stores register stock --home /absolute/stock/home
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `selector` | yes | Account name or configured alias. |
+| `home` | yes | Absolute existing stock home; registration changes only Wake metadata. |
+
+## stores resolve
+
+Resolve a registered stock or profile store.
+
+Read-only observation; no model turn.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_controller_store_resolve`).
+
+```sh
+codex-wake --wake-root ROOT stores resolve stock
+```
+
+### CLI help
+
+```text
+usage: codex-wake stores resolve [-h] [--json] selector
+
+Resolve a registered stock or profile store.
+
+Read-only observation; no model turn.
+
+positional arguments:
+  selector    Account name or configured alias.
+
+options:
+  -h, --help  show this help message and exit
+  --json      Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT stores resolve stock
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `selector` | yes | Account name or configured alias. |
+
+## stores list
+
+List permitted registered stores with stable identities.
+
+Read-only observation; no model turn.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_controller_stores`).
+
+```sh
+codex-wake --wake-root ROOT stores list
+```
+
+### CLI help
+
+```text
+usage: codex-wake stores list [-h] [--json]
+
+List permitted registered stores with stable identities.
+
+Read-only observation; no model turn.
+
+options:
+  -h, --help  show this help message and exit
+  --json      Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT stores list
+```
+
+## configuration sync preview
+
+Preview selected directional configuration changes and conflicts.
+
+Saves a frozen preview outside stock; sensitive values are redacted. Grant must cover every selected store.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_controller_configuration_sync_preview`).
+
+```sh
+codex-wake --wake-root ROOT configuration sync preview --source stock --destination work --category mcp --operation-id sync-1
+```
+
+### CLI help
+
+```text
+usage: codex-wake configuration sync preview [-h] --source SOURCE
+                                             --destination DESTINATIONS
+                                             --category
+                                             {settings,mcp,hooks,skills,rules}
+                                             --operation-id OPERATION_ID
+                                             [--propagate-deletions]
+                                             [--reload] [--json]
+
+Preview selected directional configuration changes and conflicts.
+
+Saves a frozen preview outside stock; sensitive values are redacted. Grant must cover every selected store.
+
+options:
+  -h, --help            show this help message and exit
+  --source SOURCE       Registered source store selector, including stock.
+  --destination DESTINATIONS
+                        Explicit destination store selectors.
+  --category {settings,mcp,hooks,skills,rules}
+                        Selected configuration categories; authentication is
+                        excluded.
+  --operation-id OPERATION_ID
+                        Stable sync intent identifier; reconcile unknown
+                        outcomes before resubmitting.
+  --propagate-deletions
+                        Explicitly propagate matching source deletions;
+                        default preserves destination copies.
+  --reload              Request selected-profile reload if supported;
+                        otherwise each destination reports next-launch remedy.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT configuration sync preview --source stock --destination work --category mcp --operation-id sync-1
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `source` | yes | Registered source store selector, including stock. |
+| `destinations` | yes | Explicit destination store selectors. |
+| `categories` | yes | Selected configuration categories; authentication is excluded. |
+| `operation_id` | yes | Stable sync intent identifier; reconcile unknown outcomes before resubmitting. |
+| `propagate_deletions` | no | Explicitly propagate matching source deletions; default preserves destination copies. |
+| `reload` | no | Request selected-profile reload if supported; otherwise each destination reports next-launch remedy. |
+
+## configuration sync apply
+
+Apply safe selected changes and preserve divergent destination entries.
+
+Repeat-safe per-destination results. Default takes effect at next launch; reload reports an explicit unsupported remedy when no selected-profile owner is available.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_controller_configuration_sync_apply`).
+
+```sh
+codex-wake --wake-root ROOT configuration sync apply --source stock --destination work --category mcp --operation-id sync-1 --expected-snapshot SNAPSHOT
+```
+
+### CLI help
+
+```text
+usage: codex-wake configuration sync apply [-h] --source SOURCE --destination
+                                           DESTINATIONS --category
+                                           {settings,mcp,hooks,skills,rules}
+                                           --operation-id OPERATION_ID
+                                           --expected-snapshot
+                                           EXPECTED_SNAPSHOT
+                                           [--propagate-deletions] [--reload]
+                                           [--json]
+
+Apply safe selected changes and preserve divergent destination entries.
+
+Repeat-safe per-destination results. Default takes effect at next launch; reload reports an explicit unsupported remedy when no selected-profile owner is available.
+
+options:
+  -h, --help            show this help message and exit
+  --source SOURCE       Registered source store selector, including stock.
+  --destination DESTINATIONS
+                        Explicit destination store selectors.
+  --category {settings,mcp,hooks,skills,rules}
+                        Selected configuration categories; authentication is
+                        excluded.
+  --operation-id OPERATION_ID
+                        Stable sync intent identifier; reconcile unknown
+                        outcomes before resubmitting.
+  --expected-snapshot EXPECTED_SNAPSHOT
+                        Exact snapshot digest returned by sync preview.
+  --propagate-deletions
+                        Explicitly propagate matching source deletions;
+                        default preserves destination copies.
+  --reload              Request selected-profile reload if supported;
+                        otherwise each destination reports next-launch remedy.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT configuration sync apply --source stock --destination work --category mcp --operation-id sync-1 --expected-snapshot SNAPSHOT
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `source` | yes | Registered source store selector, including stock. |
+| `destinations` | yes | Explicit destination store selectors. |
+| `categories` | yes | Selected configuration categories; authentication is excluded. |
+| `operation_id` | yes | Stable sync intent identifier; reconcile unknown outcomes before resubmitting. |
+| `expected_snapshot` | yes | Exact snapshot digest returned by sync preview. |
+| `propagate_deletions` | no | Explicitly propagate matching source deletions; default preserves destination copies. |
+| `reload` | no | Request selected-profile reload if supported; otherwise each destination reports next-launch remedy. |
 
 ## accounts list
 
@@ -659,9 +935,9 @@ Examples:
 
 ## history import
 
-Copy a completed saved conversation into another account.
+Copy a supported saved snapshot between stock and profile stores.
 
-Creates a new destination UUID; source remains unchanged. Idle, goal-free legacy JSONL only; transfers no credentials, grants or allowance.
+Creates a new destination UUID; source remains unchanged. Reports saved snapshot boundaries and excluded unsupported entries; transfers no credentials, grants or allowance.
 
 Transport: CLI / API / OAuth MCP / native MCP (`wake_controller_history_import`).
 
@@ -680,9 +956,9 @@ usage: codex-wake history import [-h] --owner OWNER --destination DESTINATION
                                  [--json]
                                  thread_id
 
-Copy a completed saved conversation into another account.
+Copy a supported saved snapshot between stock and profile stores.
 
-Creates a new destination UUID; source remains unchanged. Idle, goal-free legacy JSONL only; transfers no credentials, grants or allowance.
+Creates a new destination UUID; source remains unchanged. Reports saved snapshot boundaries and excluded unsupported entries; transfers no credentials, grants or allowance.
 
 positional arguments:
   thread_id             Native saved conversation identifier in its owning
@@ -1653,6 +1929,113 @@ Examples:
 | `max_items` | no | Maximum diagnostic or progress entries. |
 | `confirm` | no | Confirm the displayed scoped effect; does not override a changed target. |
 | `expected_cache` | no | Exact cache fingerprint returned by cleanup preview. |
+
+## migration preview
+
+Preview the existing host-selected migration or independent-profile adoption.
+
+Host migration strategy adopt_independent preserves history, sign-ins and local settings; no effect in preview.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_controller_migration_preview`).
+
+```sh
+codex-wake --wake-root ROOT migration preview
+```
+
+### CLI help
+
+```text
+usage: codex-wake migration preview [-h] [--arguments ARGUMENTS] [--json]
+
+Preview the existing host-selected migration or independent-profile adoption.
+
+Host migration strategy adopt_independent preserves history, sign-ins and local settings; no effect in preview.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT migration preview
+```
+
+## migration apply
+
+Apply a pinned qualified migration or independent-profile adoption.
+
+Local CLI uses operator authority; API/MCP require scoped grants. Mutations retain exact pins, durable intent and rollback custody.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_controller_migration_apply`).
+
+```sh
+codex-wake --wake-root ROOT migration apply --arguments "$ARGUMENTS"
+```
+
+### CLI help
+
+```text
+usage: codex-wake migration apply [-h] [--arguments ARGUMENTS] [--json]
+
+Apply a pinned qualified migration or independent-profile adoption.
+
+Local CLI uses operator authority; API/MCP require scoped grants. Mutations retain exact pins, durable intent and rollback custody.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT migration apply --arguments "$ARGUMENTS"
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## migration rollback
+
+Roll back one attributable unchanged migration or adoption.
+
+Preserves changed targets and uncertain outcomes for reconciliation.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_controller_migration_rollback`).
+
+```sh
+codex-wake --wake-root ROOT migration rollback --arguments "$ARGUMENTS"
+```
+
+### CLI help
+
+```text
+usage: codex-wake migration rollback [-h] [--arguments ARGUMENTS] [--json]
+
+Roll back one attributable unchanged migration or adoption.
+
+Preserves changed targets and uncertain outcomes for reconciliation.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT migration rollback --arguments "$ARGUMENTS"
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `receipt_id` | yes | Exact prior migration receipt for a qualified rollback. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
 
 
 ## Local session controller

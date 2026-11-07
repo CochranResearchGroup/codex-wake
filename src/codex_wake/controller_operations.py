@@ -40,7 +40,22 @@ class ControllerOperations:
                 raise InventoryError('configuration_unavailable', 'host build owner is unavailable')
             return dict(schema_version=1, operation=operation, status='completed',
                         result=self.builds.execute(operation, arguments))
-        if operation in ('accounts.init', 'accounts.create', 'accounts.list', 'accounts.resolve', 'configuration.explain'):
+        if operation == 'accounts.readiness':
+            if self.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host account root is unavailable')
+            if self.accounts is None:
+                raise InventoryError('configuration_unavailable', 'host account owner is unavailable')
+            from .profile_operations import readiness
+            return readiness(self.inventory.root, arguments, accounts=self.accounts, actor=actor, authorize=authorize)
+        if operation.startswith('configuration.sync.'):
+            if self.accounts is None:
+                raise InventoryError('configuration_unavailable', 'host account owner is unavailable')
+            from .configuration_sync import execute
+            from .profile_reload import selected_reload
+            return dict(schema_version=1, operation=operation, status='completed',
+                        result=execute(self.accounts, operation, arguments,
+                            reload_executor=lambda destination: selected_reload(self.accounts, destination, categories=arguments.get('categories', []))))
+        if operation.startswith('stores.') or operation in ('accounts.init', 'accounts.create', 'accounts.list', 'accounts.resolve', 'configuration.explain'):
             if self.accounts is None:
                 raise InventoryError('configuration_unavailable', 'host account owner is unavailable')
             return dict(schema_version=1, operation=operation, status='completed',

@@ -29,6 +29,36 @@ def protected_execute(operation, arguments, root, *, writer_probe=None):
     return ProtectedOperations(authority, service).execute('host-local-grant', operation, arguments)
 
 
+
+def operator_execute(operation, arguments, root, *, writer_probe=None):
+    """Local CLI uses UID authority over the explicitly selected host policy.
+
+    API/MCP continue through protected_execute and their persisted grants.
+    Mutation intent, exact pins and the common operation journal are retained.
+    """
+    from types import SimpleNamespace
+    import hashlib
+    from .daemon_commands import local_operator
+    from .controller_runtime import ControllerRuntime
+    from .controller_migration_authorization import MigrationAuthorization
+    owner = owner_from_root(root, writer_probe=writer_probe)
+    if not isinstance(arguments, dict):
+        raise InventoryError('invalid_argument', 'migration arguments must be an object')
+    payload = dict(arguments)
+    target = owner.scope_target() if operation == 'migration.preview' else payload.get('expected_target')
+    if not isinstance(target, dict):
+        raise InventoryError('invalid_argument', 'preview and pin the exact migration target before applying')
+    if operation != 'migration.preview' and '_request' not in payload:
+        key = hashlib.sha256(json.dumps([operation, payload], sort_keys=True).encode()).hexdigest()
+        payload['_request'] = dict(operation_id='migration-cli-' + key[:32],
+            idempotency_key='migration-cli-' + key, correlation_id=key,
+            binding='local-cli', target=target)
+    actor = local_operator(target, ('admin', 'migration.observe', 'control'))
+    authority = SimpleNamespace(authenticate=lambda unused: actor)
+    return MigrationAuthorization(authority, owner, runtime=ControllerRuntime(root)).execute(
+        'local-cli', operation, payload)
+
+
 def register_parser(subparsers):
     parser = subparsers.add_parser('migration', help='preview legacy dependencies; qualify reversible cutover only in disposable scope')
     verbs = parser.add_subparsers(dest='migration_verb', required=True)
@@ -40,7 +70,7 @@ def register_parser(subparsers):
 
 def command(args, root, *, writer_probe=None):
     try:
-        value = protected_execute('migration.' + args.migration_verb, args.arguments, root, writer_probe=writer_probe)
+        value = operator_execute('migration.' + args.migration_verb, args.arguments, root, writer_probe=writer_probe)
     except (ValueError, OSError, InventoryError) as error:
         value = dict(schema_version=1, operation='migration.' + args.migration_verb, status='failed',
                      error=dict(code=getattr(error, 'code', 'migration_unavailable'), message=str(error)))

@@ -27,6 +27,24 @@ class OAuthTests(unittest.TestCase):
             auth.revoke_grant(actor.grant_id)
             with self.assertRaises(AuthError): auth.authenticate(rotated['access_token'])
 
+    def test_store_identity_grant_round_trips_without_broadening_targets(self):
+        from codex_wake.controller_auth import OAuthAuthority, AuthError
+        with tempfile.TemporaryDirectory() as directory:
+            auth = OAuthAuthority(Path(directory) / 'auth.sqlite', issuer='https://wake.test', resource='https://wake.test/controller')
+            client = auth.register({'redirect_uris': ['http://localhost/callback']})
+            verifier = 'x' * 43
+            challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+            target = dict(host='fixture', environment='test', store_id='stable-stock', home='/fixture/stock', home_generation='1:2')
+            values = dict(subject='owner', principal_kind='owner', client_id=client['client_id'],
+                redirect_uri=client['redirect_uris'][0], resource=auth.resource,
+                scopes=['configuration.observe'], targets=[target], code_challenge=challenge)
+            code = auth.authorize(**values)
+            token = auth.token(dict(grant_type='authorization_code', code=code, code_verifier=verifier,
+                redirect_uri=client['redirect_uris'][0], resource=auth.resource, client_id=client['client_id']))['access_token']
+            self.assertEqual(auth.authenticate(token).targets, [target])
+            with self.assertRaises(AuthError):
+                auth.authorize(**dict(values, targets=[dict(target, arbitrary_path='/unapproved')]))
+
     def test_http_api_and_oauth_mcp_share_target_scopes_and_reauthenticate(self):
         import json
         import threading

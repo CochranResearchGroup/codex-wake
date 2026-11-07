@@ -160,6 +160,12 @@ class ControllerAccounts:
         self.host, self.environment = host, environment
 
     def execute(self, operation, arguments):
+        if operation.startswith('stores.'):
+            from .profile_stores import execute
+            return execute(self, operation, arguments)
+        if operation == 'accounts.create' and isinstance(arguments, dict) and arguments.get('mode') == 'independent':
+            from .profile_stores import create
+            return create(self, arguments)
         if operation in ('accounts.init', 'accounts.create'):
             try:
                 return self._manage(operation, arguments)
@@ -214,13 +220,30 @@ class ControllerAccounts:
                 accounts.append(dict(id=name, home=str(home), target=target,
                                      aliases=sorted(k for k, v in settings.aliases.items()
                                                     if settings.resolve_profile_name(v) == name)))
+            if 'stock' in data.get('stores', {}):
+                from .profile_stores import execute as store_execute
+                store = store_execute(self, 'stores.resolve', {'selector': 'stock'})['store']
+                home = Path(store['home'])
+                native_path = home / 'config.toml'
+                native_bytes = native_path.read_bytes() if native_path.exists() else b''
+                target = dict(host=self.host, environment=self.environment, provider='codex', account='stock',
+                              home=str(home), home_generation=store['home_generation'],
+                              configuration_revision=hashlib.sha256(raw + b'\0' + native_bytes).hexdigest())
+                accounts.append(dict(id='stock', home=str(home), target=target, aliases=[],
+                                     store_id=store['store_id'], kind='stock', independent=False,
+                                     account_provenance='unknown'))
+            for account in accounts:
+                stored = data.get('stores', {}).get(account['id'])
+                if stored:
+                    account.update(store_id=stored['store_id'], kind=stored['kind'],
+                                   independent=stored['independent'])
             if operation == 'accounts.list':
                 result = dict(owner='codex-wake', accounts=accounts)
                 if 'enabled' in data.get('accounts', {}):
                     result['inactive_accounts'] = inactive
                 return result
             selector = _safe_name(arguments.get('selector'))
-            name = _safe_name(settings.resolve_profile_name(selector))
+            name = 'stock' if selector == 'stock' and 'stock' in data.get('stores', {}) else _safe_name(settings.resolve_profile_name(selector))
             matches = [account for account in accounts if account['id'] == name]
             if not matches:
                 raise InventoryError('target_not_found', 'account is not enabled for private operation')
@@ -229,7 +252,12 @@ class ControllerAccounts:
                 raise InventoryError('stale_target', 'account or configuration generation changed')
             if operation == 'accounts.resolve':
                 return dict(owner='codex-wake', account=account, grants_operations=False)
-            view = settings.configuration_view(name)
+            if name == 'stock':
+                from .profile_stores import inventory
+                view = dict(profile='stock', inventory=inventory(Path(account['home'])),
+                            mcp=dict(codex_account_auth='stock shared-home login; independent of Wake profiles'))
+            else:
+                view = settings.configuration_view(name)
             native_path = Path(account['home']) / 'config.toml'
             native = tomllib.loads(native_path.read_text()) if native_path.exists() else {}
             effective, provenance = {}, {}

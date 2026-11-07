@@ -72,7 +72,7 @@ class ControllerRuntime:
         """Authorize composed host workflows without admitting a new effect."""
         return self._authorize(actor, target, capability, authorize)
 
-    def owned_operations(self, actor, target, operation, *, authorize, cursor=0):
+    def owned_operations(self, actor, target, operation, *, authorize, cursor=0, stable_history_store=False):
         """Bounded caller-owned journal projection; never broadens target grants."""
         self._authorize(actor, target, 'observe', authorize)
         if type(cursor) is not int or not 0 <= cursor <= 10000:
@@ -82,11 +82,19 @@ class ControllerRuntime:
         result = []
         for row in rows:
             record = json.loads(row[0])
-            if record['target'] != target or record['operation'] != operation:
+            if stable_history_store:
+                if operation != 'history.import':
+                    raise InventoryError('invalid_argument', 'stable store projection is history-only')
+                same_target = all(record['target'].get(key) == target.get(key) for key in
+                    ('host', 'environment', 'provider', 'account', 'home', 'home_generation'))
+            else:
+                same_target = record['target'] == target
+            if not same_target or record['operation'] != operation:
                 continue
             if identity(actor) not in [record['principal'], *record.get('successors', [])]:
                 continue
-            self._owned(actor, record, authorize)
+            if not stable_history_store:
+                self._owned(actor, record, authorize)
             result.append(self.projection(record))
         self._authorize(actor, target, 'observe', authorize)
         return result, cursor + len(rows) if len(rows) == 100 else None

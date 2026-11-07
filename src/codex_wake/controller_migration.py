@@ -180,9 +180,9 @@ class ControllerMigration:
     def _configuration(self):
         data = tomllib.loads(self.path.read_text())
         policy = data['migration']
-        if policy.get('strategy', 'relocate') not in ('relocate', 'isolate_in_place'):
+        if policy.get('strategy', 'relocate') not in ('relocate', 'isolate_in_place', 'adopt_independent'):
             raise InventoryError('unsupported_target', 'unknown migration strategy')
-        if policy.get('strategy', 'relocate') != 'isolate_in_place' and 'enabled' in data.get('accounts', {}):
+        if policy.get('strategy', 'relocate') not in ('isolate_in_place', 'adopt_independent') and 'enabled' in data.get('accounts', {}):
             raise InventoryError('unsupported_target', 'selective admission requires in-place isolation')
         fixture = Path(policy.get('scope_root', policy.get('fixture_root', '')))
         if not fixture.is_absolute() or fixture != fixture.resolve() or not fixture.is_dir():
@@ -230,7 +230,8 @@ class ControllerMigration:
             if operation == 'migration.preview':
                 return self._preview()
             data, settings, fixture, marker, paths = self._configuration()
-            isolation = data['migration'].get('strategy') == 'isolate_in_place'
+            adoption = data['migration'].get('strategy') == 'adopt_independent'
+            isolation = adoption or data['migration'].get('strategy') == 'isolate_in_place'
             if marker is None and not (isolation and data['migration'].get('live_activation') is True):
                 raise InventoryError('production_not_authorized', 'explicit host live activation or disposable designation required')
             if marker is None:
@@ -247,6 +248,10 @@ class ControllerMigration:
                     raise InventoryError('stale_target', 'migration plan or target changed')
                 if preview['holds']:
                     raise InventoryError('migration_held', 'migration evidence has explicit holds: ' + ','.join(preview['holds']))
+                if adoption:
+                    from .profile_adoption import apply, rollback
+                    return (apply(self, directory, preview, authorize) if operation == 'migration.apply'
+                            else rollback(self, directory, arguments.get('receipt_id'), preview, authorize))
                 if isolation:
                     if operation == 'migration.apply':
                         return self._isolate_apply(directory, preview, settings, paths, fixture, authorize)
@@ -432,6 +437,9 @@ class ControllerMigration:
 
     def _preview(self):
         data, settings, fixture, marker, paths = self._configuration()
+        if data['migration'].get('strategy') == 'adopt_independent':
+            from .profile_adoption import preview
+            return preview(self, data, settings, fixture, marker, paths)
         if data['migration'].get('strategy') == 'isolate_in_place':
             return self._isolate_preview(data, settings, fixture, marker, paths)
         entries, links = {}, []

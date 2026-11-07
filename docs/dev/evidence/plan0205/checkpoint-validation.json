@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "status": "checkpoint_passed",
+  "source_commit": "6b9e42665f8183fd7cfd53001a8ebb29ff71bddc",
+  "tier": "focused",
+  "checks": [
+    {
+      "selection": "test_controller_*.py",
+      "command": "PYTHONPATH=src:tests timeout 180 /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p test_controller_*.py",
+      "passed": 195,
+      "seconds": 72.859,
+      "log": "/tmp/cw205-controller-checkpoint.log"
+    },
+    {
+      "selection": "test_controller_adoption test_controller_migration",
+      "source_commit": "a42458c",
+      "passed": 25,
+      "seconds": 5.614,
+      "log": "/tmp/cw205-adoption-final.log"
+    },
+    {
+      "selection": "changed Python undefined names",
+      "tool": "ruff0.14.2",
+      "result": "passed"
+    }
+  ],
+  "environment_differences": [
+    "Local Linux Python3.12.13; hosted Actions skipped under no-paid-CI policy",
+    "Not a comprehensive suite or Python3.11 result",
+    "No native rebuild, working installation, model/provider calls or live profile changes"
+  ],
+  "review_count": 0,
+  "remediation_count": 0
+}

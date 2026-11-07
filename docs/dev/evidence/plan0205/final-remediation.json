@@ -1,0 +1,114 @@
+{
+  "source_commit": "d78585937272782cbc76e557351cc6f7d0e750a0",
+  "wheel_sha256": "420970c1c4c2092488ec166f3f893fbbdd7f76f55b7869475100242f5fcba23f",
+  "tier": "focused post-remediation plus bounded installed/native acceptance",
+  "broad_reviews": 1,
+  "bounded_tdd_passes": 1,
+  "accepted_blocking_findings": 4,
+  "resolved_blocking_findings": 4,
+  "nonblocking_maintainability_backlog": 1,
+  "source_focus": {
+    "python311_tests": 67,
+    "python312_tests": 67,
+    "source": "5bf4fb00e5a44a6e0782f9b38c0a8e3f42e67948",
+    "whole_tree_ruff_compile_policy_reference_planning": "passed"
+  },
+  "final_installed_focus": {
+    "python311_tests": 44,
+    "python312_tests": 44,
+    "pythonpath": ".:tests; no src",
+    "all_260_python_files_match_wheel_both_prefixes": true,
+    "receipt_sha256": "20cd563e86307c8bf7ac3a3597d62e4e6d823809089cc873d721effb6249bc16"
+  },
+  "final_installed_transports": {
+    "state": "passed",
+    "mode": "installed",
+    "cli": true,
+    "rest": true,
+    "oauth_mcp": true,
+    "native_mcp": true,
+    "powershell": {
+      "state": "passed",
+      "version": "5.1.26100.9711",
+      "operations": [
+        "stores.resolve REST",
+        "configuration.sync.apply REST",
+        "stores.resolve OAuth MCP"
+      ]
+    },
+    "model_calls": 0,
+    "final_owned_server": "closed",
+    "receipt_sha256": "ce9f70caf65a0adc54fc351295733f95c769f4ae17967a82b7282dfcf4741b92"
+  },
+  "native_selected_reload": {
+    "qualification_source": "5bf4fb00e5a44a6e0782f9b38c0a8e3f42e67948",
+    "qualification_wheel_sha256": "a46e35c294d5650bb91014f4eacb4fd4c87b54ac0bc0f182673c42e1ff45909a",
+    "native_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+    "checks": {
+      "selected_actual_native_reload_ack": true,
+      "same_operation_replay_same_receipt": true,
+      "no_daemon_restart": true,
+      "selected_and_peer_goals_preserved": true,
+      "bob_config_and_runtime_v1_preserved": true,
+      "stock_config_unchanged_by_sync": true
+    },
+    "selected_tool_v1_to_v2": true,
+    "peer_tool_stayed_v1": true,
+    "provider_calls": 0,
+    "network_isolated": true,
+    "final_owned_processes": [],
+    "fixture_failures_retained": [
+      "obsolete FastMCP fixture import; cleaned before sync",
+      "incorrect fixture command-envelope extraction; cleaned before apply"
+    ],
+    "unchanged_code_reuse": {
+      "native_qualification_source": "5bf4fb00e5a44a6e0782f9b38c0a8e3f42e67948",
+      "final_source": "d78585937272782cbc76e557351cc6f7d0e750a0",
+      "unchanged_native_reload_modules": [
+        {
+          "file": "profile_reload.py",
+          "sha256": "3383775a5d4574a7704de6459ec08e193b4e8a530338658b12f3e5740da3216a"
+        },
+        {
+          "file": "controller_operations.py",
+          "sha256": "fd286b65ac68300f6e9998d248c25396255193a679941d27f6e5ff2402869e56"
+        },
+        {
+          "file": "profile_operations.py",
+          "sha256": "dfb555f658347b0328cfa6d83ba2c584b3abed411b72916407e89e1825069dc0"
+        },
+        {
+          "file": "configuration_sync.py",
+          "sha256": "fa95cebe04209b2c38e5f798655b662cacd44077726f32aa38ecac1cb140e952"
+        },
+        {
+          "file": "controller_daemons.py",
+          "sha256": "55de331ea0e2539018f8548eabea715cea6e10c4b403a76e5916f617b19bc6c5"
+        },
+        {
+          "file": "controller_builds.py",
+          "sha256": "d25b187d20e1081623856ff45e7721897964c3bca038768fe4f8bbd01e3dac6c"
+        },
+        {
+          "file": "native_protocol.py",
+          "sha256": "69ec9ff48986b3f67385ed28968a165240146a9c846f2cfe339917a128ef2712"
+        },
+        {
+          "file": "profile_stores.py",
+          "sha256": "541cfdd11091ed2651f1844b4e61e208337dff62893c585a6435117162d3810a"
+        }
+      ],
+      "change": "profile_adoption copied asset text remapping only; separate installed regression qualifies that change"
+    }
+  },
+  "final_real_adoption_mode_readback": {
+    "profiles": 2,
+    "independent": true,
+    "new_provider_calls": 0
+  },
+  "real_provider_turns_total": 3,
+  "hosted_ci": false,
+  "comprehensive_suite_claim": false,
+  "merged": false,
+  "global_deployment": false
+}

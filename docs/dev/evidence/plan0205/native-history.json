@@ -1,0 +1,109 @@
+{
+  "active": {
+    "checks": {
+      "prior_destination_unchanged": true,
+      "real_ongoing_prefix": {
+        "active": true,
+        "exclusions": [
+          {
+            "reason": "incomplete_turn",
+            "turn_id": "01a1b643-6f91-74d1-b34e-0ddd4bab67e4"
+          }
+        ],
+        "native_completed_turns_equal": true,
+        "saved_boundary": {
+          "last_completed_turn_id": "340a38b0-6f6a-48e9-bf82-9ff97db812b9"
+        },
+        "source_unchanged": true
+      },
+      "sibling_unchanged": true,
+      "source_completed_after_copy": true,
+      "source_completed_snapshot_linked": true
+    },
+    "local_provider_requests": 1,
+    "receipt": "/home/codex-daemon-test/history493-active8/receipt.json",
+    "source_commit": "56a879b04cd86a88fc356216685e72f847cef6ae"
+  },
+  "external_network": false,
+  "final_owned_processes": [],
+  "host_uid": 1017,
+  "limitations": [
+    "recent-N native proof uses public history owner selection and importer; installed frozen-batch transport acceptance belongs #495",
+    "native package installation and working-account activation are not claimed"
+  ],
+  "matrix": {
+    "checks": {
+      "alice-to-bob": {
+        "advanced_linked": true,
+        "native_copy": true,
+        "prior_copy_preserved": true,
+        "recent_n_owner_selection": {
+          "copied": 2,
+          "destination_threads": [
+            "01a1b63f-a843-76e3-b818-32930a13cf0e",
+            "01a1b63f-a4cb-79f1-99c8-0734903e9f2b"
+          ],
+          "selected": 2
+        },
+        "restart_reused": true,
+        "revision_reused": true,
+        "source_unchanged": true
+      },
+      "alice-to-stock": {
+        "advanced_linked": true,
+        "native_copy": true,
+        "prior_copy_preserved": true,
+        "recent_n_owner_selection": {
+          "copied": 2,
+          "destination_threads": [
+            "01a1b63f-9c8f-70f0-aea7-862cbebfeba3",
+            "01a1b63f-9a60-7891-9238-087aca41a33c"
+          ],
+          "selected": 2
+        },
+        "restart_reused": true,
+        "revision_reused": true,
+        "source_unchanged": true
+      },
+      "stock-to-alice": {
+        "advanced_linked": true,
+        "native_copy": true,
+        "prior_copy_preserved": true,
+        "recent_n_owner_selection": {
+          "copied": 2,
+          "destination_threads": [
+            "01a1b63f-90be-7d22-808c-72e84c94f9d1",
+            "01a1b63f-8eb8-70d2-b2ca-e6f194f3b94f"
+          ],
+          "selected": 2
+        },
+        "restart_reused": true,
+        "revision_reused": true,
+        "source_unchanged": true
+      }
+    },
+    "receipt": "/home/codex-daemon-test/history493-run7/receipt.json",
+    "source_commit": "5103a5facbd2088f11454ff27d09eb76308b30bd",
+    "source_custody_correction": "/home/codex-daemon-test/history493-run7/source-custody-correction.json"
+  },
+  "native_modded_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "native_stock_sha256": "cdcb45aaa01d0f14e298985e09465aebccd47f64ecd298aea44814af7b62bbda",
+  "recovery": {
+    "fork_requests": 0,
+    "receipt": "/home/codex-daemon-test/history493-run7/recovery-receipt.json",
+    "recovered_thread_id": "01a1b63f-ab99-7890-99e1-549d331ac8ad",
+    "source_commit": "56a879b04cd86a88fc356216685e72f847cef6ae"
+  },
+  "retained_failed_runs": [
+    "/home/codex-daemon-test/history493-run2/receipt.json",
+    "/home/codex-daemon-test/history493-run3/receipt.json",
+    "/home/codex-daemon-test/history493-run5/receipt.json",
+    "/home/codex-daemon-test/history493-run6/receipt.json",
+    "/home/codex-daemon-test/history493-run7/receipt.json"
+  ],
+  "scope": "history domain owner through real native protocol; installed transport join is separate",
+  "status": "passed",
+  "delegated_worker": "/root/history205",
+  "primary_disposition": "accepted after native hashes, terminal receipts and unchanged history source verification",
+  "original_receipt_sha256": "9bc61a012342df237022323379716f3edd2f1951850ef472b4937d85d7bbfa89"
+}

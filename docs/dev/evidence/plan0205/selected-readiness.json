@@ -1,0 +1,33 @@
+{
+  "source_commit": "bc822f36da4b60905594fb6a8249fbc0c6b619a2",
+  "scope": "isolated installed prefix; selected real profiles; no global deployment",
+  "native_modded_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "selected_backend_running": true,
+  "cached_codex_logins_distinct": true,
+  "normal_chat_profiles": 2,
+  "normal_resume_profiles": 2,
+  "real_provider_turns_at_checkpoint": 2,
+  "personal_voluntary_limit": {
+    "stop_proof": true,
+    "goal_paused": true,
+    "owned_watcher_stopped": true
+  },
+  "exact_thread_refresh": true,
+  "peer_mcp": {
+    "status": "passed",
+    "operator_connector": "stable-time",
+    "method": "get_time",
+    "read_only": true,
+    "peer_unchanged": true,
+    "private_receipt_sha256": "324cb7a8115d09b05e5c31cc221c96f971d74b4cfcad762942929efea257866f"
+  },
+  "protected_native_state_preserved_at_adoption": true,
+  "stock_and_shared_configuration_preserved": true,
+  "global_launchers_changed": false,
+  "limitations": [
+    "MCP sign-in reuse qualified for service-owned stable-time only; arbitrary native OAuth/keyring connectors not claimed.",
+    "Existing global launcher/build manifest untouched; future deployment is separate.",
+    "Earlier refresh probes used unloaded threads; actual resumed persistent client exact-thread refresh passed.",
+    "UID1017 stale clock fixture was diagnosed without changing its config; working-UID private/native and selected-profile limit proof passed."
+  ]
+}

@@ -140,7 +140,7 @@ def import_tool_specs():
         channel={'type': 'string', 'enum': ['stock', 'modded']}, expected_source={'type': 'object'},
         expected_target={'type': 'object'}, _request={'type': 'object'})
     return {'wake_controller_history_import': ('controller-history-import', 'history.import',
-        'Copy a pinned goal-free saved conversation into another account; source remains unchanged. No model turn or allowance renewal.',
+        'Copy a supported pinned saved snapshot between registered stock/profile stores; report its boundary and excluded entries. Source remains unchanged; no model turn or allowance renewal.',
         properties, list(properties), False)}
 
 

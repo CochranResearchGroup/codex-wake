@@ -5,6 +5,7 @@
     "accounts.init",
     "accounts.list",
     "accounts.login",
+    "accounts.readiness",
     "accounts.resolve",
     "accounts.status",
     "builds.build",
@@ -21,6 +22,8 @@
     "builds.status",
     "configuration.default-root",
     "configuration.explain",
+    "configuration.sync.apply",
+    "configuration.sync.preview",
     "daemons.list",
     "daemons.restart",
     "daemons.start",
@@ -33,8 +36,14 @@
     "history.recent",
     "history.resume",
     "history.search",
+    "migration.apply",
+    "migration.preview",
+    "migration.rollback",
     "open",
-    "resume"
+    "resume",
+    "stores.list",
+    "stores.register",
+    "stores.resolve"
   ],
   "local_only": [
     "accounts.login",
@@ -235,9 +244,6 @@
     "messages.show",
     "messages.wait",
     "messages.watch",
-    "migration.apply",
-    "migration.preview",
-    "migration.rollback",
     "monitor.check",
     "native.after",
     "native.at",
@@ -349,6 +355,12 @@
   "mcp_tools": {
     "accounts.init": "wake_controller_account_init",
     "accounts.create": "wake_controller_account_create",
+    "accounts.readiness": "wake_controller_account_readiness",
+    "stores.register": "wake_controller_store_register",
+    "stores.resolve": "wake_controller_store_resolve",
+    "stores.list": "wake_controller_stores",
+    "configuration.sync.preview": "wake_controller_configuration_sync_preview",
+    "configuration.sync.apply": "wake_controller_configuration_sync_apply",
     "accounts.list": "wake_controller_accounts",
     "accounts.resolve": "wake_controller_account_resolve",
     "accounts.status": "wake_controller_account_status",
@@ -374,7 +386,10 @@
     "builds.resume": "wake_builds_resume",
     "builds.qualify": "wake_builds_qualify",
     "builds.cleanup": "wake_builds_cleanup",
-    "builds.run": "wake_builds_run"
+    "builds.run": "wake_builds_run",
+    "migration.preview": "wake_controller_migration_preview",
+    "migration.apply": "wake_controller_migration_apply",
+    "migration.rollback": "wake_controller_migration_rollback"
   },
   "local_controller": {
     "schema_version": 1,
