@@ -28,6 +28,12 @@ def fingerprint(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
 
+def toolchain_version(worktree):
+    tree = Path(worktree)
+    cwd = tree / 'codex-rs' if (tree / 'codex-rs/rust-toolchain.toml').exists() else tree
+    return subprocess.run(['rustc', '--version'], cwd=cwd, capture_output=True, text=True, check=True).stdout.strip()
+
+
 class ReleaseDriver:
     def __init__(self, root, recipes):
         self.root = Path(root).absolute()
@@ -95,8 +101,7 @@ class ReleaseDriver:
             merged = subprocess.run(['git', '-C', str(tree), '-c', 'user.name=Release Driver',
                 '-c', 'user.email=release-driver@example.invalid', 'merge', '--no-edit', pins['upstream']],
                 stdout=log, stderr=subprocess.STDOUT)
-        toolchain_root = tree / 'codex-rs' if (tree / 'codex-rs/rust-toolchain.toml').exists() else tree
-        toolchain = subprocess.run(['rustc', '--version'], cwd=toolchain_root, capture_output=True, text=True, check=True).stdout.strip()
+        toolchain = toolchain_version(tree)
         run = dict(schema_version=1, run_id=run_id, recipe_name=name, recipe=recipe,
                    recipe_sha256=digest(recipe_path), source=dict(repository=str(source), **pins),
                    worktree=str(tree), manifest=str(directory / 'manifest.json'),
