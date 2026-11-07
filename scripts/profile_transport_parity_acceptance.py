@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Disposable WSL/PowerShell CLI, REST and OAuth MCP profile parity. No model calls."""
 import argparse
+import asyncio
 import base64
 import hashlib
 import json
@@ -87,14 +88,26 @@ def main():
                 applied = post('/operations', dict(operation='configuration.sync.apply', arguments=args))
                 assert applied['result'] == mcp('wake_controller_configuration_sync_apply', args)['result']
                 # Native MCP uses the same scopes through the existing host caller binding.
-                from codex_wake.mcp_server import CommandRunner
                 actor = authority.authenticate(token)
                 (root / 'controller-messaging.json').write_text(json.dumps(dict(version=1,
                     local_caller=dict(subject=actor.subject, client_id=actor.client_id, grant_id=actor.grant_id,
                         issuer=actor.issuer, resource=actor.resource, scopes=sorted(actor.scopes),
                         targets=actor.targets, expires_at=actor.expires_at))))
-                native, failed = CommandRunner(wake_root=root).call('wake_controller_store_resolve', {'selector':'stock'})
-                assert not failed and native['result'] == rest['result'], native
+                async def native_stdio():
+                    from mcp import Client, StdioServerParameters
+                    parameters = StdioServerParameters(command=sys.executable,
+                        args=['-m', 'codex_wake.mcp_server', '--wake-root', str(root)], cwd=source,
+                        env=dict(os.environ, PYTHONPATH=str(source / 'src')))
+                    async with Client(parameters, mode='legacy') as native:
+                        tools = {tool.name for tool in (await native.list_tools()).tools}
+                        assert 'wake_controller_store_resolve' in tools
+                        observed = await native.call_tool('wake_controller_store_resolve', {'selector':'stock'})
+                        assert not observed.is_error, observed
+                        assert json.loads(observed.content[0].text)['result'] == rest['result']
+                        copied = await native.call_tool('wake_controller_configuration_sync_apply', args)
+                        assert not copied.is_error, copied
+                        assert json.loads(copied.content[0].text)['result'] == applied['result']
+                asyncio.run(native_stdio())
                 if options.powershell:
                     script = "$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n"
                     script += "$headers=@{Authorization='Bearer " + token + "'}\n"
@@ -113,7 +126,7 @@ def main():
                     report['powershell'] = dict(state='passed', version=windows['version'],
                         operations=['stores.resolve REST','configuration.sync.apply REST','stores.resolve OAuth MCP'])
                 report.update(state='passed', cli=True, rest=True, oauth_mcp=True, native_mcp=True,
-                    sync_preview_apply_replay=True, final_owned_server='closed', elapsed_at=time.time())
+                    sync_preview_apply_replay=True, native_mcp_transport='stdio subprocess', final_owned_server='closed', elapsed_at=time.time())
             finally:
                 server.shutdown()
                 server.server_close()
