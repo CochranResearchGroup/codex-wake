@@ -2986,7 +2986,7 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         if args.profile_config is not None:
             arguments = ["--config", str(args.profile_config), *arguments]
         return main(arguments)
-    if args.command in ("accounts", "configuration"):
+    if args.command in ("accounts", "configuration", "stores"):
         from .account_commands import command
         return command(args, root)
     if args.command == "health":

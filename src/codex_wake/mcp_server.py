@@ -163,6 +163,8 @@ for _name, _spec in tuple(SPECS.items()):
         SPECS[_name] = (*_spec[:3], {**_spec[3], **WAKE_POLICY_PROPERTIES}, *_spec[4:])
 
 
+from .profile_operations import tool_specs as profile_tool_specs
+SPECS.update(profile_tool_specs())
 from .history_commands import tool_specs as history_tool_specs
 SPECS.update(history_tool_specs())
 from .migration_commands import tool_specs as migration_tool_specs
@@ -395,6 +397,14 @@ class CommandRunner:
                 return value, False
             except (ValueError, OSError) as error:
                 return {'error': {'code': getattr(error, 'code', 'account_observation_unavailable'), 'message': str(error)}}, True
+        if group == 'controller-profiles':
+            from .profile_operations import protected_execute
+            try:
+                value = protected_execute(verb, arguments, self.wake_root)
+                return value, value['status'] != 'completed'
+            except (ValueError, OSError) as error:
+                return dict(schema_version=1, operation=verb, status='failed',
+                    error=dict(code=getattr(error, 'code', 'operation_held'), message=str(error))), True
         if group == 'controller-accounts':
             from .account_commands import execute
             from .managed_inventory import InventoryError

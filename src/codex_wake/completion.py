@@ -42,6 +42,9 @@ def _accounts(root):
         for name, target in aliases.items():
             if isinstance(name, str) and _NAME.fullmatch(name) and isinstance(target, str) and (allowed is None or normalize(target) in allowed):
                 result.add(name)
+        stores = data.get('stores', {})
+        if isinstance(stores, dict):
+            result.update(name for name in stores if isinstance(name, str) and _NAME.fullmatch(name))
         return sorted(result)
     except (OSError, ValueError, TypeError, AttributeError, UnicodeError):
         return []
@@ -102,12 +105,12 @@ def candidates(words, cursor, *, parser=None):
         flag, unused, value_prefix = prefix.partition('=')
         action = next((a for a in parser._actions if flag in a.option_strings), None)
         values = [str(v) for v in action.choices] if action is not None and action.choices else []
-        if action is not None and action.dest in ('account', 'owner', 'destination', 'owners', 'selector'):
+        if action is not None and action.dest in ('account', 'owner', 'destination', 'owners', 'selector', 'source', 'destinations'):
             values += _accounts(root)
         return sorted({flag + '=' + v for v in values if v.startswith(value_prefix) and '\n' not in v and '\r' not in v})
     if pending is not None:
         values = [str(v) for v in pending.choices] if pending.choices else []
-        if pending.dest in ('account', 'owner', 'destination', 'owners', 'selector'):
+        if pending.dest in ('account', 'owner', 'destination', 'owners', 'selector', 'source', 'destinations'):
             values += _accounts(root)
     elif prefix.startswith('-'):
         values = [flag for a in parser._actions for flag in a.option_strings]
@@ -119,7 +122,7 @@ def candidates(words, cursor, *, parser=None):
             action = positional[position]
             if action.choices:
                 values += [str(v) for v in action.choices]
-            if action.dest in ('account', 'owner', 'destination', 'owners', 'selector'):
+            if action.dest in ('account', 'owner', 'destination', 'owners', 'selector', 'source', 'destinations'):
                 values += _accounts(root)
     return sorted({v for v in values if v.startswith(prefix) and '\n' not in v and '\r' not in v})
 

@@ -11,6 +11,16 @@ from dataclasses import dataclass
 
 
 PARAMETERS = {
+    'mode': ('Create an independent private configuration snapshot; legacy creation remains the default.', {'type':'string','enum':['independent']}),
+    'source': ('Registered source store selector, including stock.', {'type':'string'}),
+    'home': ('Absolute existing stock home; registration changes only Wake metadata.', {'type':'string'}),
+    'destinations': ('Explicit destination store selectors.', {'type':'array','items':{'type':'string'},'minItems':1,'maxItems':64}),
+    'categories': ('Selected configuration categories; authentication is excluded.', {'type':'array','items':{'type':'string','enum':['settings','mcp','hooks','skills','rules']},'minItems':1}),
+    'operation_id': ('Stable sync intent identifier; reconcile unknown outcomes before resubmitting.', {'type':'string'}),
+    'expected_snapshot': ('Exact snapshot digest returned by sync preview.', {'type':'string'}),
+    'propagate_deletions': ('Explicitly propagate matching source deletions; default preserves destination copies.', {'type':'boolean'}),
+    'reload': ('Request selected-profile reload if supported; otherwise each destination reports next-launch remedy.', {'type':'boolean'}),
+    'receipt_id': ('Exact prior migration receipt for a qualified rollback.', {'type':'string'}),
     'limit': ('Maximum recent conversations, from1 to100 (default:10 for shortcuts).', {'type': 'integer', 'minimum': 1, 'maximum': 100}),
     'sort': ('Order by recent activity when set to recent; default preserves existing discovery order.', {'type': 'string', 'enum': ['recent']}),
     'root': ('Existing private Wake account root saved only for local shortcuts.', {'type':'string'}),
@@ -77,7 +87,13 @@ class Operation:
 
 OPERATIONS = (
     Operation('accounts.init', 'Initialize a new private account registry.', 'wake_controller_account_init', ('_request',), ('_request',), 'Creates only an empty isolated registry; preserves existing state.', 'accounts init'),
-    Operation('accounts.create', 'Create a private account home without credentials.', 'wake_controller_account_create', ('selector', 'alias', '_request'), ('selector', '_request'), 'Creates account configuration and a private home; does not sign in.', 'accounts create work --alias office'),
+    Operation('accounts.create', 'Create a private account home without credentials.', 'wake_controller_account_create', ('selector', 'alias', 'mode', 'source', '_request'), ('selector', '_request'), 'Creates account configuration and a private home; does not sign in.', 'accounts create work --alias office'),
+    Operation('accounts.readiness', 'Inspect the selected profile readiness and specific remedies.', 'wake_controller_account_readiness', ('selector','expected_target'), ('selector',), 'Read-only; native limits, refresh and backend acceptance remain separately qualified. Remote callers cannot supply launcher or manifest paths.', 'accounts readiness work --json'),
+    Operation('stores.register', 'Register the stable shared stock store in Wake metadata.', 'wake_controller_store_register', ('selector','home'), ('selector','home'), 'Preserves stock configuration and login. Remote admin grant must pin the registry revision and selected home.', 'stores register stock --home /absolute/stock/home'),
+    Operation('stores.resolve', 'Resolve a registered stock or profile store.', 'wake_controller_store_resolve', ('selector',), ('selector',), example='stores resolve stock'),
+    Operation('stores.list', 'List permitted registered stores with stable identities.', 'wake_controller_stores', example='stores list'),
+    Operation('configuration.sync.preview', 'Preview selected directional configuration changes and conflicts.', 'wake_controller_configuration_sync_preview', ('source','destinations','categories','operation_id','propagate_deletions','reload'), ('source','destinations','categories','operation_id'), 'Saves a frozen preview outside stock; sensitive values are redacted. Grant must cover every selected store.', 'configuration sync preview --source stock --destination work --category mcp --operation-id sync-1'),
+    Operation('configuration.sync.apply', 'Apply safe selected changes and preserve divergent destination entries.', 'wake_controller_configuration_sync_apply', ('source','destinations','categories','operation_id','expected_snapshot','propagate_deletions','reload'), ('source','destinations','categories','operation_id','expected_snapshot'), 'Repeat-safe per-destination results. Default takes effect at next launch; reload reports an explicit unsupported remedy when no selected-profile owner is available.', 'configuration sync apply --source stock --destination work --category mcp --operation-id sync-1 --expected-snapshot SNAPSHOT'),
     Operation('accounts.list', 'List registered account names and targets.', 'wake_controller_accounts', example='accounts list'),
     Operation('accounts.resolve', 'Resolve one account name to its exact current target.', 'wake_controller_account_resolve', ('selector', 'expected_target'), ('selector',), example='accounts resolve work'),
     Operation('accounts.login', 'Sign into a named private account through native login.', None, effect='Local human CLI only. Writes native credentials; active account clients or daemons hold login.', example='accounts login work --device-auth'),
@@ -91,7 +107,7 @@ OPERATIONS = (
     Operation('history.search', 'Search explicitly permitted saved conversation metadata.', 'wake_controller_history_search', ('owners','query','limit','sort'), example='history search --owner work --query test'),
     Operation('history.read', 'Read a saved conversation from its exact permitted owner.', 'wake_controller_history_read', ('owner','thread_id','expected_target'), ('owner','thread_id'), example='history read THREAD --owner work'),
     Operation('history.resume', 'Resume a saved conversation under existing exact-owner authority.', 'wake_controller_history_resume', ('owner','thread_id','expected_target','intent','expires_at'), ('owner','thread_id','expected_target','intent','expires_at'), 'Requires existing enrolled caller permission; does not renew work or allowance.', 'history resume THREAD --owner work --expected-target "$TARGET" --intent INTENT --expires-at TIME --bus-root ROOT --operator-capability FILE'),
-    Operation('history.import', 'Copy a completed saved conversation into another account.', 'wake_controller_history_import', ('owner','thread_id','destination','channel','expected_source','expected_target','_request'), ('owner','thread_id','destination','channel','expected_source','expected_target','_request'), 'Creates a new destination UUID; source remains unchanged. Idle, goal-free legacy JSONL only; transfers no credentials, grants or allowance.', 'history import THREAD --owner work --destination personal --expected-source "$SOURCE" --expected-target "$TARGET" --idempotency-key copy-1'),
+    Operation('history.import', 'Copy a supported saved snapshot between stock and profile stores.', 'wake_controller_history_import', ('owner','thread_id','destination','channel','expected_source','expected_target','_request'), ('owner','thread_id','destination','channel','expected_source','expected_target','_request'), 'Creates a new destination UUID; source remains unchanged. Reports saved snapshot boundaries and excluded unsupported entries; transfers no credentials, grants or allowance.', 'history import THREAD --owner work --destination personal --expected-source "$SOURCE" --expected-target "$TARGET" --idempotency-key copy-1'),
 ) + tuple(
     Operation('daemons.'+verb, summary, 'wake_daemons_'+verb,
               tuple(([] if verb=='list' else ['account'])+['channel']+([] if verb in ('list','status') else ['expected_target','confirm','_request'])),
@@ -113,6 +129,11 @@ OPERATIONS += tuple(Operation('builds.' + verb, summary, 'wake_builds_' + verb,
     'Native release work in isolated WSL state; no working-account installation.',
     'builds ' + verb + (' --recipe RECIPE --upstream SHA --mod-revision SHA' if verb in ('prepare','run') else ' --run-id RUN'))
     for verb, summary in [('prepare','Prepare pinned source in an isolated worktree.'),('status','Inspect a durable native release run.'),('build','Build a complete immutable package through Cargo Signal.'),('resume','Reconcile and resume a native release run.'),('qualify','Qualify the exact package in disposable state.'),('cleanup','Preview or explicitly clean an inactive build cache.'),('run','Prepare, build and qualify one native release.')])
+OPERATIONS += (
+    Operation('migration.preview', 'Preview the existing host-selected migration or independent-profile adoption.', 'wake_controller_migration_preview', effect='Host migration strategy adopt_independent preserves history, sign-ins and local settings; no effect in preview.', example='migration preview'),
+    Operation('migration.apply', 'Apply a pinned qualified migration or independent-profile adoption.', 'wake_controller_migration_apply', ('expected_target','_request'), ('expected_target','_request'), 'Uses existing migration registry, backup and rollback custody; no parallel adoption registry.', 'migration apply --arguments "$ARGUMENTS"'),
+    Operation('migration.rollback', 'Roll back one attributable unchanged migration or adoption.', 'wake_controller_migration_rollback', ('expected_target','receipt_id','_request'), ('expected_target','receipt_id','_request'), 'Preserves changed targets and uncertain outcomes for reconciliation.', 'migration rollback --arguments "$ARGUMENTS"'),
+)
 BY_NAME = {op.name: op for op in OPERATIONS}
 
 
@@ -146,7 +167,7 @@ def apply_help(parser):
 
 def render_reference():
     lines = ['# Generated command reference', '', 'Generated from `codex_wake.command_contract`; do not edit by hand.', '',
-             'Scope: accounts, configuration, builds, daemons and history. Other Wake',
+             'Scope: stores, accounts, configuration, builds, daemons, migration and history. Other Wake',
              'commands are deferred from this contract migration; their existing interfaces remain.', '',
              'Local human login and status use native stdio. Structured status is cache evidence,',
              'not proof of current provider access. Native history MCP additionally requires',

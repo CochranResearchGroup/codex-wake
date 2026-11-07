@@ -175,6 +175,12 @@ class ProtectedOperations:
         'accounts.init': ('admin', None, None),
         'accounts.create': ('admin', None, None),
         'history.import': ('control', None, None),
+        'stores.register': ('admin', None, None),
+        'stores.resolve': ('account.observe', None, None),
+        'stores.list': ('account.observe', None, None),
+        'configuration.sync.preview': ('configuration.observe', None, None),
+        'configuration.sync.apply': ('control', None, None),
+        'accounts.readiness': ('account.observe', None, None),
         'accounts.status': ('account.observe', None, None),
         'accounts.list': ('account.observe', 'accounts', None),
         'accounts.resolve': ('account.observe', None, 'account'),
@@ -195,7 +201,15 @@ class ProtectedOperations:
             raise InventoryError('unsupported_operation', 'operation is unsupported')
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
-        if operation.startswith('grok.'):
+        from .profile_operations import OPERATIONS as profile_operations
+        if operation in profile_operations:
+            from .profile_operations import execute
+            if self.operations.accounts is None or self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'host account owner unavailable')
+            result = execute(self.operations.inventory.root, operation, arguments,
+                accounts=self.operations.accounts, actor=actor,
+                authorize=lambda: self.authority.authenticate(token))
+        elif operation.startswith('grok.'):
             from .controller_grok import ControllerGrok
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host Grok owner unavailable')
