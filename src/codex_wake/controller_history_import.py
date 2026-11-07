@@ -37,6 +37,11 @@ class ControllerHistoryImport:
         self.runtime = ControllerRuntime(root)
 
     def _daemon(self, account, channel):
+        from .controller_accounts import ControllerAccounts
+        store = ControllerAccounts(self.root / 'controller-accounts.toml', host=self.host,
+            environment=self.environment).execute('stores.resolve', dict(selector=account))['store']
+        if store['kind'] == 'stock':
+            channel = 'stock'
         if self.daemons is None:
             from .daemon_commands import owner_from_root
             self.daemons = owner_from_root(self.root)
@@ -87,7 +92,10 @@ class ControllerHistoryImport:
     def _recover_snapshot(self, destination, thread_id, content, known_children):
         """Observe native lineage and exact saved records; never redispatch."""
         expected = [json.loads(line) for line in content.splitlines() if line]
-        expected = [row for row in expected if row.get('type') != 'session_meta']
+        # Native fork regenerates each outer write timestamp. Retain all
+        # payload fields (including embedded timestamps) for content proof.
+        expected = [{key: value for key, value in row.items() if key != 'timestamp'}
+                    for row in expected if row.get('type') != 'session_meta']
         if not expected:
             return None
         cursor, matches = None, []
@@ -112,7 +120,8 @@ class ControllerHistoryImport:
                         or path.stat().st_size > 8 * 1024 * 1024):
                     continue
                 records = [json.loads(line) for line in path.read_bytes().splitlines() if line]
-                records = [record for record in records if record.get('type') != 'session_meta']
+                records = [{key: value for key, value in record.items() if key != 'timestamp'}
+                           for record in records if record.get('type') != 'session_meta']
                 if records[:len(expected)] == expected:
                     matches.append(value)
             cursor = page.get('nextCursor')

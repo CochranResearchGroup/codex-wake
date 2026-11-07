@@ -172,6 +172,16 @@ readable_accounts=["alice","bob"]
 
     def test_registered_stock_source_imports_through_same_native_owner(self):
         from dataclasses import replace
+        calls = []
+        previous = self.daemons
+        class SeparateChannels:
+            def execute(unused, operation, arguments):
+                calls.append((arguments['account'], arguments['channel']))
+                value = previous.execute(operation, arguments)
+                if arguments['account'] == 'stock':
+                    value['daemon']['target']['build_channel'] = 'stock'
+                return value
+        self.daemons = SeparateChannels()
         self.accounts.execute('stores.register', dict(selector='stock', home=str(self.source.parent.parent)))
         self.config.write_text(self.config.read_text().replace('readable_accounts=["alice","bob"]', 'readable_accounts=["stock","bob"]'))
         reader = ControllerHistory(self.config, root=self.root, host='local', environment='test', authorized_accounts=['stock','bob'])
@@ -185,12 +195,24 @@ readable_accounts=["alice","bob"]
         self.assertEqual(value['provenance']['source_owner'], 'stock')
         self.assertEqual(value['thread_id'], CHILD)
         self.assertEqual(self.forks, 1)
+        self.assertEqual({channel for account, channel in calls if account == 'stock'}, {'stock'})
+        self.assertEqual({channel for account, channel in calls if account == 'bob'}, {'modded'})
 
     def test_registered_stock_destination_imports_without_replacing_shared_home(self):
         from dataclasses import replace
+        calls = []
+        previous = self.daemons
+        class SeparateChannels:
+            def execute(unused, operation, arguments):
+                calls.append((arguments['account'], arguments['channel']))
+                value = previous.execute(operation, arguments)
+                if arguments['account'] == 'stock':
+                    value['daemon']['target']['build_channel'] = 'stock'
+                return value
+        self.daemons = SeparateChannels()
         stock_home = self.root / 'homes/codex-bob'
         self.accounts.execute('stores.register', dict(selector='stock', home=str(stock_home)))
-        destination = self.daemons.execute('daemons.status', dict(account='stock', channel='modded'))['daemon']['target']
+        destination = self.daemons.execute('daemons.status', dict(account='stock', channel='stock'))['daemon']['target']
         self.pin = self.reader.execute('history.read', dict(owner='alice', thread_id=SOURCE))['session']['target']
         self.arguments['expected_source'] = self.pin
         actor = replace(self.actor, targets=[self.pin, destination])
@@ -201,6 +223,8 @@ readable_accounts=["alice","bob"]
         self.assertEqual(value['destination'], 'stock')
         self.assertEqual(stock_home.stat().st_ino, before)
         self.assertEqual(value['target']['home'], str(stock_home))
+        self.assertEqual({channel for account, channel in calls if account == 'stock'}, {'stock'})
+        self.assertEqual({channel for account, channel in calls if account == 'alice'}, {'modded'})
 
     def test_completed_unloaded_saved_source_can_be_copied_and_replayed(self):
         original = self.request
@@ -307,11 +331,18 @@ readable_accounts=["alice","bob"]
         self.assertEqual(self.forks, 1)
 
     def test_lost_result_is_reconciled_from_unique_native_lineage_and_saved_content(self):
+        from dataclasses import replace
+        rows = [dict(json.loads(line), timestamp='2026-11-07T10:00:00Z') for line in self.source.read_text().splitlines()]
+        self.source.write_text(''.join(json.dumps(row)+'\n' for row in rows))
+        self.pin = self.reader.execute('history.read', dict(owner='alice', thread_id=SOURCE))['session']['target']
+        self.arguments['expected_source'] = self.pin
+        self.actor = replace(self.actor, targets=[self.pin, self.destination])
         owner = self.owner()
         request = self.request
         def lost(*args, **kwargs):
             value = request(*args, **kwargs)
             if args[2] == 'thread/fork':
+                self.child_path.write_text(''.join(json.dumps(dict(row, timestamp='2026-11-07T11:00:00Z'))+'\n' for row in rows))
                 raise TimeoutError('lost native result')
             return value
         owner.request = lost
