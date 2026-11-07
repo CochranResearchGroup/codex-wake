@@ -97,16 +97,26 @@ def execute(owner, operation, arguments):
 
 
 def inventory(home):
+    from .configuration_sync import _inventory
     recognized = {item for values in CATEGORIES.values() for item in values}
-    return dict(categories={name: [item for item in values if (home / item).exists()] for name, values in CATEGORIES.items()},
+    entries = _inventory(dict(home=str(home)), list(CATEGORIES), allow_links=True)
+    categories = {name: [item for item in values if (home / item).exists()] for name, values in CATEGORIES.items()}
+    for name in ('mcp', 'hooks'):
+        if any(category == name and json.loads(key)[0] == 'toml' for key, (category, _value) in entries.items()):
+            categories[name].append('config.toml:' + ('mcp_servers' if name == 'mcp' else 'hooks'))
+    return dict(categories=categories,
+                entries={name: [json.loads(key) for key, (category, _value) in entries.items() if category == name] for name in CATEGORIES},
+                external_dependencies='references outside the selected home are preserved; assets and credentials there are not copied',
                 unknown=sorted(item.name for item in home.iterdir() if item.name not in recognized | EXCLUDED
                                and not item.name.endswith(('.sqlite', '.sqlite-wal', '.sqlite-shm'))),
                 mcp_auth='operator keyring when supported; file credentials remain local and are not copied')
 
 
 def _copy_asset(source, destination, source_home, destination_home):
+    from .configuration_sync import _safe_asset
+    resolved = _safe_asset(source_home, source, allow_links=True)
     if source.is_symlink():
-        raise InventoryError('unsupported_target', 'seed asset is indirect; adopt or select explicit local assets first')
+        source = resolved
     if source.is_dir():
         destination.mkdir(mode=0o700)
         for child in source.iterdir():
@@ -118,7 +128,7 @@ def _copy_asset(source, destination, source_home, destination_home):
         except UnicodeDecodeError:
             pass
         destination.write_bytes(raw)
-        destination.chmod(0o600)
+        destination.chmod(0o700 if source.stat().st_mode & 0o111 else 0o600)
     else:
         raise InventoryError('unsupported_target', 'seed contains a non-file asset')
 
@@ -145,6 +155,8 @@ def create(owner, arguments):
             raise InventoryError('conflict', 'existing profile is preserved; use explicit adoption')
         if 'enabled' in data.get('accounts', {}):
             raise InventoryError('unsupported_target', 'selected account admission requires the existing host workflow')
+        from .configuration_sync import _input_fingerprint, _inventory
+        seed_fingerprint = _input_fingerprint(source, _inventory(source, list(CATEGORIES), allow_links=True), allow_links=True)
         assets = inventory(source_home)
         stage = Path(tempfile.mkdtemp(prefix='.profile-seed-', dir=settings.state_root))
         try:
@@ -153,6 +165,11 @@ def create(owner, arguments):
                     item = source_home / relative
                     if item.exists() or item.is_symlink():
                         _copy_asset(item, stage / relative, source_home, home)
+            from .configuration_sync import seed_assets
+            for relative in seed_assets(source_home):
+                if not (stage / relative).exists():
+                    (stage / relative).parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+                    _copy_asset(source_home / relative, stage / relative, source_home, home)
             config = stage / 'config.toml'
             if config.exists():
                 text = config.read_text()
@@ -168,14 +185,28 @@ def create(owner, arguments):
                 if alias in settings.aliases:
                     raise InventoryError('conflict', 'alias already exists')
                 updated = _set_registry_value(updated, 'profiles.aliases', alias, name)
-            # Publish home only after source configuration copied successfully.
-            stage.rename(home)
+            # Revalidate the selected source before publishing the snapshot.
+            current_source = _resolve(owner, arguments.get('source', 'stock'))
+            if _input_fingerprint(current_source, _inventory(current_source, list(CATEGORIES), allow_links=True), allow_links=True) != seed_fingerprint:
+                raise InventoryError('stale_target', 'seed configuration changed; retry from a fresh source snapshot')
+            tomllib.loads(updated)
             record = dict(store_id=str(uuid.uuid4()), kind='profile', home=str(home), independent=True,
-                          home_generation=_generation(home), seed_store_id=source['store_id'])
+                          home_generation=_generation(stage), seed_store_id=source['store_id'])
             for key, value in record.items():
                 updated = _set_registry_value(updated, 'stores.' + json.dumps(name), key, value)
             tomllib.loads(updated)
-            _save(owner.path, updated)
+            from .configuration_sync import capture_seed
+            stage.rename(home)
+            try:
+                capture_seed(owner, source, record)
+                _save(owner.path, updated)
+            except Exception:
+                # Registry publication is the authority boundary. Preserve an
+                # uncertain published home; remove only a definitely unclaimed one.
+                published = tomllib.loads(owner.path.read_text()).get('stores', {}).get(name)
+                if published != record and home.exists():
+                    shutil.rmtree(home)
+                raise
         finally:
             if stage.exists():
                 shutil.rmtree(stage)
