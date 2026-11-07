@@ -1463,4 +1463,4 @@ CLOSED implementation/qualification: [spec #488](https://github.com/CochranResea
 
 ## P206 | Stable user controller defaults
 
-OPEN: [#498](https://github.com/CochranResearchGroup/codex-wake/issues/498), [Plan0206](docs/dev/plans/0206-2026-11-07-default-controller-location.md). Unify account-command defaults and replace the legacy installation name; preserve project-local wakes and qualify stopped-home relocation before working effects.
+CLOSED: [#498](https://github.com/CochranResearchGroup/codex-wake/issues/498), [Plan0206](docs/dev/plans/0206-2026-11-07-default-controller-location.md). PR499 merged/deployed; canonical user controller, remembered account defaults and repaired shell launchers require no root exports. Native history/auth/journals and stock preserved; no-root CLI and Windows checks passed.

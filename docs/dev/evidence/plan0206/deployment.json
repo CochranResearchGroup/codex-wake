@@ -1,0 +1,89 @@
+{
+  "status": "DEPLOYED",
+  "merged_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/499",
+  "source_commit": "aaf619cc890828798d2c694d919b4ed02f4cdb4d",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-aaf619c",
+  "wheel_sha256": "01cbec7818e873a66f529fe04c6946f46be5571e68ecc4fe23b98a656688aee0",
+  "matching_python_files": 269,
+  "controller_location": "~/.local/state/codex-wake/controller",
+  "legacy_path": "compatibility alias retained for saved absolute history paths",
+  "no_root_cli_operations": [
+    [
+      "accounts",
+      "status",
+      "soylei",
+      "--json"
+    ],
+    [
+      "stores",
+      "resolve",
+      "soylei",
+      "--json"
+    ],
+    [
+      "history",
+      "recent",
+      "--owner",
+      "soylei",
+      "--limit",
+      "3",
+      "--json"
+    ],
+    [
+      "control",
+      "server",
+      "status"
+    ]
+  ],
+  "profile_launcher": "passed with inherited legacy environment still present",
+  "powershell_no_root": {
+    "exit": 0,
+    "elapsed_seconds": 1.385,
+    "new_provider_calls": 0,
+    "result": {
+      "canonical_home": true,
+      "status": "completed",
+      "credential_state": "credentials_present"
+    }
+  },
+  "completion_bash_zsh": "refreshed",
+  "shell_bindings": {
+    "old_legacy_functions_removed": true,
+    "unrelated_startup_bytes_preserved": true,
+    "syntax_and_launcher": "passed",
+    "legacy_variables_retained_for_explicit_config": true,
+    "existing_shells": "Open a new terminal or reload startup configuration once."
+  },
+  "preserved": {
+    "native_state_files": 29,
+    "native_state_inodes_contents_mtimes": "unchanged",
+    "credentials_copied": false,
+    "controller_journal_operations": 15,
+    "controller_journal_unchanged": true,
+    "stock_launcher_binary": "unchanged",
+    "remaining_native_generations_unchanged": 26,
+    "native_exited_independently": 1,
+    "native_restarts": 0,
+    "provider_calls": 0
+  },
+  "selected_http_listener": {
+    "old_pid": 122405,
+    "new_pid": 3793423,
+    "loopback_port": 37185,
+    "same_observed_port_restored": true,
+    "first_attempt": "Directory move succeeded; requested port0 was initially carried over instead of observed bound port. Original intent/script preserved, actual state reconciled, only replacement HTTP listener rebound to37185. No directory-move retry.",
+    "bootstrap": "private connection token renewed by supported listener startup; standard clients read current bootstrap"
+  },
+  "live_path_updates": {
+    "configuration_files": 3,
+    "symlinks": 13,
+    "historical_receipts_and_transcript_bytes": "preserved; no database/history rewrite"
+  },
+  "validation": "qualification.json; final31 affected tests eachPython3.11/3.12 plus installed no-root CLI, launcher and actual Windows PowerShell checks",
+  "retained_gap": "Earlier broader Python3.12 WSL-vsock fixture failure retained; broader3.11 workflow and final live Windows no-root command passed. No comprehensive/all-gates-clean claim.",
+  "rollback": "Private configuration/launcher/preferences/startup backups, exact native/package refs and checkpointed relocation receipts retained under default-controller-fix/live-cutover. Old release prefix retained.",
+  "hosted_ci_used": false,
+  "native_compilation": false,
+  "existing_mcp_processes": "Reload existing MCP clients to load new Python module defaults; unrelated connections were not restarted.",
+  "memory_disposition": "forbidden"
+}
