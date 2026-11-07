@@ -85,6 +85,7 @@ class ReleaseDriver:
             if not isinstance(ref, str) or not re.fullmatch(r'[a-fA-F0-9]{40}', ref):
                 raise ValueError(key + ' must be a full commit SHA')
             pins[key] = subprocess.check_output(['git', '-C', str(source), 'rev-parse', '--verify', ref + '^{commit}'], text=True).strip()
+        toolchain = subprocess.run(['rustc', '--version'], capture_output=True, text=True, check=True).stdout.strip()
         run_id = uuid.uuid4().hex
         directory = self.root / run_id
         directory.mkdir(mode=0o700)
@@ -95,7 +96,6 @@ class ReleaseDriver:
             merged = subprocess.run(['git', '-C', str(tree), '-c', 'user.name=Release Driver',
                 '-c', 'user.email=release-driver@example.invalid', 'merge', '--no-edit', pins['upstream']],
                 stdout=log, stderr=subprocess.STDOUT)
-        toolchain = subprocess.run(['rustc', '--version'], capture_output=True, text=True, check=True).stdout.strip()
         run = dict(schema_version=1, run_id=run_id, recipe_name=name, recipe=recipe,
                    recipe_sha256=digest(recipe_path), source=dict(repository=str(source), **pins),
                    worktree=str(tree), manifest=str(directory / 'manifest.json'),
