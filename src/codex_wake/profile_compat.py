@@ -10,9 +10,13 @@ import sys
 
 
 def default_config():
-    return Path(os.environ.get('CODEX_WAKE_ACCOUNTS_CONFIG') or
-                os.environ.get('CODEX_PROFILES_CONFIG') or
-                str(Path(os.environ.get('CODEX_WAKE_ROOT', '.codex/wake')) / 'controller-accounts.toml'))
+    explicit = os.environ.get('CODEX_WAKE_ACCOUNTS_CONFIG') or os.environ.get('CODEX_PROFILES_CONFIG')
+    if explicit:
+        return Path(explicit)
+    if os.environ.get('CODEX_WAKE_ROOT'):
+        return Path(os.environ['CODEX_WAKE_ROOT']) / 'controller-accounts.toml'
+    from .shortcut_store import default_root
+    return default_root() / 'controller-accounts.toml'
 
 
 def main(argv=None):
@@ -22,7 +26,12 @@ def main(argv=None):
     from .managed_inventory import InventoryError
     arguments = list(sys.argv[1:] if argv is None else argv)
     if not any(arg == '--config' or arg.startswith('--config=') for arg in arguments):
-        arguments = ['--config', str(default_config()), *arguments]
+        try:
+            selected = default_config()
+        except (ValueError, OSError) as error:
+            print('account operation held: ' + str(error), file=sys.stderr)
+            return 2
+        arguments = ['--config', str(selected), *arguments]
     # Preserve all supported legacy commands. Only run needs configuration
     # materialization, and command-line overrides avoid changing shared files.
     parsed, _ = build_parser().parse_known_args(arguments)

@@ -26,3 +26,9 @@ No new account manager, credential copying, global scheduler-root rewrite, impli
 Base main ba8092c73eae7066e5674661ad2766e45468a4d2; branch fix/default-controller-location; isolated worktree codex-wake-controller-defaults, primary dirtyconfig preserved. Primary owns default routing/installed cutover; bounded worker qualifies native relocation only. Standalone canonical naming choices and fallback order are frozen above. Implementation, native acceptance, physical move and deployment remain distinct receipts.
 
 Memory disposition pending closeout; no memory-write request.
+
+### Source and native qualification checkpoint
+
+Four public default-routing tests cover first-use canonical state, arbitrary cwd, shared launcher/MCP defaults, explicit/saved/environment precedence, project wakes and malformed-preference repair. Red failures retained for wrong project location, missing launcher configuration, MCP host-root-required and ignored explicit profile root. First broader join caught a symlink-root batch safety regression; restored non-following shortcut semantics and retained the original failure. Native UID1017 stopped-home rename+legacyalias qualification PASS with exact0.167 package, saved history/goal/counters/inodes preserved, freshnewhome peer verified,0provider calls and ownedprocessesempty. No working move yet.
+
+A live same-user local HTTP controller remains in the legacyroot (PIDidentity read-only verified), serving shared native discovery from older Pythonprefix. Its15 journal operations are terminal/completed; no profile native processes are active. Physical cutover therefore includes only a supported stop/start of this idle selected HTTP listener, with fresh identity/idle checks, same port/nativeendpoint and regenerated private connection bootstrap. The shared native daemon, unrelated services, budgets and sessions remain running. This is separate from goal-watcher maintenance; no goal allocation or stop latch is changed.

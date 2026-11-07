@@ -93,7 +93,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--wake-root",
         type=Path,
         default=None,
-        help="wake runtime root; defaults to .codex/wake under the current directory",
+        help="explicit runtime root; account commands use the saved user controller, project wakes use .codex/wake",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     from .completion import register_parser as register_completion
@@ -2805,6 +2805,13 @@ def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
 def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if (args.command in ('accounts', 'stores', 'configuration', 'history', 'builds', 'daemons', 'migration')
+            and not (args.command == 'configuration' and args.account_verb == 'default-root')):
+        from .shortcut_store import default_root
+        try:
+            args.wake_root = default_root(args.wake_root)
+        except (ValueError, OSError) as error:
+            raise WakeError(str(error)) from None
     from .account_shortcuts import handles as shortcut_handles, command as shortcut_command
     if shortcut_handles(args):
         return shortcut_command(args)
@@ -2985,6 +2992,8 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
             arguments = arguments[1:]
         if args.profile_config is not None:
             arguments = ["--config", str(args.profile_config), *arguments]
+        elif args.wake_root is not None:
+            arguments = ["--config", str(args.wake_root / "controller-accounts.toml"), *arguments]
         return main(arguments)
     if args.command in ("accounts", "configuration", "stores"):
         from .account_commands import command

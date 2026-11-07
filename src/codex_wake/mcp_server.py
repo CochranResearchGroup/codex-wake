@@ -336,6 +336,15 @@ class CommandRunner:
                   "properties": properties, "required": required}
         if not Draft202012Validator(schema).is_valid(arguments):
             return {"error": {"code": "invalid_argument", "message": "Arguments do not match the tool schema."}}, True
+        account_root = self.wake_root
+        if group in ('controller-account-management', 'controller-account-status', 'controller-accounts',
+                     'controller-profiles', 'controller-daemons', 'controller-history',
+                     'controller-history-import', 'controller-migration', 'controller-builds', 'builds'):
+            from .shortcut_store import default_root
+            try:
+                account_root = default_root(self.wake_root)
+            except (ValueError, OSError) as error:
+                return {'error': {'code': 'configuration_unavailable', 'message': str(error)}}, True
         local_root = self.wake_root
         if group in ('local', 'local-slash', 'self-limits') and local_root is None:
             from .local_control_lifecycle import root_for
@@ -376,31 +385,31 @@ class CommandRunner:
             try:
                 if group == 'controller-account-management':
                     from .account_management import protected_execute
-                    value = protected_execute(verb, arguments, self.wake_root)
+                    value = protected_execute(verb, arguments, account_root)
                 else:
                     from .history_commands import protected_import
-                    value = protected_import(arguments, self.wake_root)
+                    value = protected_import(arguments, account_root)
                 return value, value['status'] != 'completed' or value.get('result', {}).get('operation', {}).get('execution') != 'completed'
             except (ValueError, OSError) as error:
                 return {'error': {'code': getattr(error, 'code', 'operation_held'), 'message': str(error)}}, True
         if group == 'controller-daemons':
             from .daemon_commands import protected_execute
             try:
-                value = protected_execute(verb, arguments, self.wake_root)
+                value = protected_execute(verb, arguments, account_root)
                 return value, value['status'] != 'completed' or value.get('result', {}).get('operation', {}).get('phase', 'terminal') != 'terminal'
             except (ValueError, OSError) as error:
                 return {'error': {'code': getattr(error, 'code', 'daemon_held'), 'message': str(error)}}, True
         if group == 'controller-account-status':
             from .account_observation import protected_execute
             try:
-                value = protected_execute(arguments, self.wake_root)
+                value = protected_execute(arguments, account_root)
                 return value, False
             except (ValueError, OSError) as error:
                 return {'error': {'code': getattr(error, 'code', 'account_observation_unavailable'), 'message': str(error)}}, True
         if group == 'controller-profiles':
             from .profile_operations import protected_execute
             try:
-                value = protected_execute(verb, arguments, self.wake_root)
+                value = protected_execute(verb, arguments, account_root)
                 return value, value['status'] != 'completed'
             except (ValueError, OSError) as error:
                 return dict(schema_version=1, operation=verb, status='failed',
@@ -409,7 +418,7 @@ class CommandRunner:
             from .account_commands import execute
             from .managed_inventory import InventoryError
             try:
-                result = execute(verb, arguments, self.wake_root)
+                result = execute(verb, arguments, account_root)
                 return result, result['status'] != 'completed'
             except InventoryError as error:
                 return {'error': {'code': error.code, 'message': str(error)}}, True
@@ -473,14 +482,14 @@ class CommandRunner:
             from .migration_commands import protected_execute
             from .managed_inventory import InventoryError
             try:
-                value = protected_execute(verb, arguments, self.wake_root, writer_probe=self.migration_writer_probe)
+                value = protected_execute(verb, arguments, account_root, writer_probe=self.migration_writer_probe)
                 return value, value['status'] != 'completed'
             except (InventoryError, ValueError, OSError, KeyError) as error:
                 return {'error': {'code': getattr(error, 'code', 'migration_held'), 'message': str(error)}}, True
         if group == 'controller-builds':
             from .build_commands import protected_execute
             try:
-                value = protected_execute('builds.' + verb, arguments, self.wake_root)
+                value = protected_execute('builds.' + verb, arguments, account_root)
                 return value, value['status'] != 'completed'
             except (ValueError, OSError, KeyError) as error:
                 return {'error': {'code': getattr(error, 'code', 'build_held'), 'message': str(error)}}, True
@@ -493,11 +502,11 @@ class CommandRunner:
                 return {'error': {'code': getattr(error, 'code', 'host_unavailable'), 'message': str(error)}}, True
         if group == 'controller-history':
             from .history_commands import mcp_call
-            return mcp_call(self, arguments, native_context, verb)
+            return mcp_call(self, arguments, native_context, verb, root=account_root)
         if group == 'builds':
             from .build_commands import owner_from_root
             try:
-                result = owner_from_root(self.wake_root).execute('builds.' + verb, arguments)
+                result = owner_from_root(account_root).execute('builds.' + verb, arguments)
                 return {'schema_version': 1, 'operation': 'builds.' + verb, 'status': 'completed', 'result': result}, False
             except ValueError as error:
                 return {'error': {'code': getattr(error, 'code', 'build_held'), 'message': str(error)}}, True

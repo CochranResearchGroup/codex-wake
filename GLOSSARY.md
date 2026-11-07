@@ -334,3 +334,9 @@ when the operator switches authenticated Codex accounts.
 An independently managed Codex environment with its own home, history and
 configuration. It can be seeded or explicitly updated from another home without
 sharing that home's writable state.
+
+**User controller root**:
+The persistent named-account registry and host control state selected by an
+explicit root, optional host override or saved default. First use defaults to
+`XDG_STATE_HOME/codex-wake/controller`; project-local wake records keep their
+separate project root.

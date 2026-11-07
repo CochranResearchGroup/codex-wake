@@ -31,7 +31,7 @@ def register(parser):
             item.add_argument('--last', action='store_true', help='reopen the most recently active conversation in this account')
     config = commands.choices['configuration']
     sub = next(a for a in config._actions if isinstance(a, argparse._SubParsersAction))
-    item = sub.add_parser('default-root', help='explicitly save the user-local root used by account shortcuts')
+    item = sub.add_parser('default-root', help='save the user controller used by account commands and launchers')
     item.add_argument('root', type=Path, help='existing private Wake root containing controller-accounts.toml')
     history = commands.choices['history']
     sub = next(a for a in history._actions if isinstance(a, argparse._SubParsersAction))
@@ -236,7 +236,7 @@ def command(args):
             if value['status']!='completed':raise ValueError('configured account registry required')
             path=store.preference_path()
             with store.locked(path.parent):store.write(path,{'version':1,'wake_root':str(root)})
-            print('Shortcut default root: '+str(root))
+            print('Account controller default: '+str(root))
             return 0
         root=store.default_root(args.wake_root)
         if args.command in ('open','resume'):return launch(args,root)

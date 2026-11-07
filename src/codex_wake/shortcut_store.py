@@ -78,12 +78,19 @@ def preference_path():
 
 
 def default_root(explicit=None):
-    if explicit is not None:
-        return Path(explicit).expanduser().absolute()
+    selected = explicit if explicit is not None else os.environ.get('CODEX_WAKE_ROOT') or None
+    if selected is not None:
+        return Path(selected).expanduser().absolute()
     try:
         value = read(preference_path())
     except FileNotFoundError:
-        raise ValueError('Select a root with configuration default-root ROOT, or pass --wake-root ROOT') from None
+        # Preserve an existing project controller when no user default has
+        # been selected; ordinary project wake state alone is not an account registry.
+        project = Path.cwd() / '.codex' / 'wake'
+        if (project / 'controller-accounts.toml').is_file():
+            return project.resolve()
+        state = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local' / 'state')))
+        return (state / 'codex-wake' / 'controller').expanduser().absolute()
     if not isinstance(value, dict) or value.get('version') != 1 or not isinstance(value.get('wake_root'), str) or not Path(value['wake_root']).is_absolute():
         raise ValueError('invalid shortcut root preference')
     return Path(value['wake_root'])
