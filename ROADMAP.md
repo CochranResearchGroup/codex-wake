@@ -1464,3 +1464,11 @@ CLOSED implementation/qualification: [spec #488](https://github.com/CochranResea
 ## P206 | Stable user controller defaults
 
 CLOSED: [#498](https://github.com/CochranResearchGroup/codex-wake/issues/498), [Plan0206](docs/dev/plans/0206-2026-11-07-default-controller-location.md). PR499 merged/deployed; canonical user controller, remembered account defaults and repaired shell launchers require no root exports. Native history/auth/journals and stock preserved; no-root CLI and Windows checks passed.
+
+## P208 | Controller specification and hardening review
+
+Review complete: [LOCAL-P208](docs/dev/plans/0208-2026-11-07-controller-hardening-review.md).
+Reconciles existing harness/controller/session/profile tickets, two installed tab
+failures and missing observer wiring. Proposed HARD-01–10 remain local TRIAGE;
+first outcome is useful no-root workspace listing and installed grouping/undo.
+No new runtime changes or provider acceptance were performed.

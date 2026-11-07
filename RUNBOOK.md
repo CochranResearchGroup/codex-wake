@@ -8521,3 +8521,14 @@ Issue498/Plan0206 fixes inconsistent accountroot defaults and testing-era instal
 ## Turn | 2026-11-07 | Permanent controller location deployed
 
 PR499 aaf619c exactprefix deployed,269Pythonfilesmatch. User controller moved in-place to ~/.local/state/codex-wake/controller; legacyalias retains savedabsolutehistory paths.29nativeauth/history/SQLite files preserve inode/content/mtime;15controller journal rows plus events/revocations unchanged,26nativegenerationssame/1independentexit. Only idleHTTPlistener handedover; firstport0replacementassertion preservedandreconciled topriorobserved37185 without repeatingmove. Three liveconfigfiles/13symlinks updated,9launcherentrypoints selectednewprefix. Source remembereddefault outrankslegacyenvironment/project discovery; explicitselectors retained. OldZshfunctions forcinglegacy --config removed from theirmanagedblock, unrelatedstartupbytespreserved; completionsrefreshed. No-root CLIstatus/store/recents/profileversion and actualWindowsPowerShellstatuspass;0provider/nativecompile/restart. Final31tests eachPython3.11/3.12 pass; earlierbroader3.12vsockfixtureerrorretained. EvidencePlan0206 deployment.json, privaterollback/rawdefault-controller-fix. Memoryforbidden(noexplicitrequest).
+
+## Turn | 2026-11-07 | Existing specification and ticket hardening review
+
+P208 reconciles Plan0173/HF drafts, #337/#368, Plan0190/#393/#402/#405,
+Plan0200/#466, command-contract and account follow-ons with current issue/PR,
+source and installed readbacks. Confirms no-root tabs TypeError, missing canonical
+workspace-config traceback and source observer-wiring gap; distinguishes these
+from missing CRUD/movement/holding/automatic policy features. Proposed local
+HARD-01–10 reuse existing owners; no GitHub mutations, live tab moves, provider
+calls, services or credentials changed. Historic qualification is explicitly
+separate from fresh verification. Memory forbidden (no explicit request).
