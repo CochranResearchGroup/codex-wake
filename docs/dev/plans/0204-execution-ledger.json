@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "plan": "docs/dev/plans/0204-2026-11-06-native-release-driver.md",
+  "branch": "feat/native-release-driver-0204",
+  "base": "c40dc79ec3b0abe25a4efbbcc138cd1c7ac6f908",
+  "review_fixed_point": "c40dc79ec3b0abe25a4efbbcc138cd1c7ac6f908",
+  "review_passes": 0,
+  "remediation_passes": 0,
+  "tickets": [
+    {
+      "ticket": 1,
+      "number": 480,
+      "id": 6254440294,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/480",
+      "title": "Prepare a pinned native build",
+      "blockers": [],
+      "state": "validated",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:26Z",
+      "marker": "<!-- native-release-driver-0204-ticket-01 -->",
+      "readback": true,
+      "native_dependencies_verified": true,
+      "owner": "primary",
+      "worktree": "/home/ecochran76/workspace.local/codex-wake-release-driver",
+      "paths": [
+        "release_driver",
+        "shared build adapters"
+      ],
+      "validation": [
+        "test_release_driver: red unsupported operation; green isolated source + persisted CLI/native MCP parity",
+        "test_controller_builds: 6 passed",
+        "test_command_contract: 3 passed",
+        "ruff F821,F822,F823 passed"
+      ],
+      "remaining_program_gate": "actual PowerShell and real disposable qualification in #485"
+    },
+    {
+      "ticket": 2,
+      "number": 481,
+      "id": 6254440646,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/481",
+      "title": "Build a complete package through Cargo Signal",
+      "blockers": [
+        480
+      ],
+      "state": "pending",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:29Z",
+      "marker": "<!-- native-release-driver-0204-ticket-02 -->",
+      "readback": true,
+      "native_dependencies_verified": true
+    },
+    {
+      "ticket": 3,
+      "number": 482,
+      "id": 6254441011,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/482",
+      "title": "Resume builds without duplicating work",
+      "blockers": [
+        481
+      ],
+      "state": "pending",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:31Z",
+      "marker": "<!-- native-release-driver-0204-ticket-03 -->",
+      "readback": true,
+      "native_dependencies_verified": true
+    },
+    {
+      "ticket": 4,
+      "number": 483,
+      "id": 6254441452,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/483",
+      "title": "Qualify the exact package in disposable state",
+      "blockers": [
+        481
+      ],
+      "state": "pending",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:35Z",
+      "marker": "<!-- native-release-driver-0204-ticket-04 -->",
+      "readback": true,
+      "native_dependencies_verified": true
+    },
+    {
+      "ticket": 5,
+      "number": 484,
+      "id": 6254441751,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/484",
+      "title": "Clean inactive build caches safely",
+      "blockers": [
+        481
+      ],
+      "state": "pending",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:38Z",
+      "marker": "<!-- native-release-driver-0204-ticket-05 -->",
+      "readback": true,
+      "native_dependencies_verified": true
+    },
+    {
+      "ticket": 6,
+      "number": 485,
+      "id": 6254442088,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/485",
+      "title": "Run the release workflow and prove 0.167 acceptance",
+      "blockers": [
+        482,
+        483,
+        484
+      ],
+      "state": "pending",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "created_at": "2026-11-07T03:00:40Z",
+      "marker": "<!-- native-release-driver-0204-ticket-06 -->",
+      "readback": true,
+      "native_dependencies_verified": true
+    }
+  ]
+}

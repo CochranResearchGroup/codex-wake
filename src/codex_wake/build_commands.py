@@ -9,9 +9,18 @@ def execute(owner, operation, arguments):
 def register_parser(subparsers):
     parser = subparsers.add_parser('builds')
     commands = parser.add_subparsers(dest='build_command', required=True)
-    for verb in ('list', 'launch', 'stage', 'select', 'rollback'):
+    for verb in ('list', 'launch', 'stage', 'select', 'rollback', 'prepare', 'status', 'build', 'resume', 'qualify', 'cleanup', 'run'):
         item = commands.add_parser(verb)
         item.add_argument('--arguments', type=json.loads, default=None)
+        if verb in ('prepare', 'status', 'build', 'resume', 'qualify', 'cleanup', 'run'):
+            for flag in ('recipe', 'upstream', 'mod-revision', 'run-id', 'expected-cache'):
+                item.add_argument('--' + flag)
+            item.add_argument('--jobs', type=int)
+            item.add_argument('--output', choices=('compact','json','progress','diagnostics'), default=None)
+            item.add_argument('--json', dest='output', action='store_const', const='json')
+            item.add_argument('--max-items', type=int)
+            item.add_argument('--confirm', action='store_true', default=None)
+            continue
         if verb == 'stage':
             item.add_argument('--recipe')
         else:
@@ -35,13 +44,13 @@ def command(args, owner):
         if not isinstance(arguments, dict):
             raise InventoryError('invalid_argument', '--arguments must be a JSON object')
         arguments = dict(arguments)
-        typed = {key: getattr(args, key) for key in ('account', 'channel', 'expected_target', 'recipe', 'identifier')
+        typed = {key: getattr(args, key) for key in ('account', 'channel', 'expected_target', 'recipe', 'identifier', 'upstream', 'mod_revision', 'run_id', 'jobs', 'output', 'max_items', 'confirm', 'expected_cache')
                  if getattr(args, key, None) is not None}
         native = getattr(args, 'native_args', None)
         native_json = getattr(args, 'native_args_json', None)
         if native is not None or native_json is not None:
             typed['args'] = native if native is not None else native_json
-        if typed and args.arguments is None and args.build_command not in ('list', 'stage'):
+        if typed and args.arguments is None and args.build_command in ('launch', 'select', 'rollback'):
             typed.setdefault('channel', 'modded')
         for key, value in typed.items():
             if key in arguments and arguments[key] != value:

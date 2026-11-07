@@ -181,6 +181,8 @@ class ProtectedOperations:
         'configuration.explain': ('configuration.observe', None, 'account'),
     }
 
+    READ_POLICIES.update({'builds.' + verb: ('admin', None, None) for verb in ('prepare','status','build','resume','qualify','cleanup','run')})
+
     def __init__(self, authority, operations):
         self.authority, self.operations = authority, operations
 
@@ -260,6 +262,15 @@ class ProtectedOperations:
                 raise InventoryError('configuration_unavailable', 'host migration owner is unavailable')
             result = MigrationAuthorization(self.authority, self.operations.migration,
                 runtime=ControllerRuntime(self.operations.inventory.root)).execute(token, operation, arguments)
+        elif operation in {'builds.' + verb for verb in ('prepare','status','build','resume','qualify','cleanup','run')}:
+            # Build recipe registration is host-owned; release operations never
+            # activate packages or mutate account state. Existing admin scope applies.
+            if self.operations.builds is None:
+                raise InventoryError('configuration_unavailable', 'host build owner unavailable')
+            target = dict(host=self.operations.host, environment=self.operations.environment)
+            if not permitted(actor, target):
+                raise AuthError('insufficient_scope')
+            result = self.operations.execute(operation, arguments)
         elif operation.startswith('builds.') and operation != 'builds.list':
             from .controller_build_authorization import BuildAuthorization
             from .controller_runtime import ControllerRuntime

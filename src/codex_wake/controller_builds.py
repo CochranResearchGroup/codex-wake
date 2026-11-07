@@ -18,6 +18,12 @@ class ControllerBuilds:
         self.recipes = dict(recipes or {})
 
     def execute(self, operation, arguments):
+        from .release_driver import ReleaseDriver, VERBS
+        if operation in {'builds.' + verb for verb in VERBS}:
+            try:
+                return ReleaseDriver(self.manifest.parent / 'release-runs', self.recipes).execute(operation.split('.')[1], arguments)
+            except (OSError, ValueError, KeyError) as error:
+                raise InventoryError('build_held', str(error)) from error
         allowed = {
             'builds.list': {'account'},
             'builds.launch': {'account', 'channel', 'expected_target', 'args'},
