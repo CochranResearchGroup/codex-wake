@@ -26,6 +26,7 @@ class ControllerDefaultTests(unittest.TestCase):
                 self.assertTrue((canonical/'controller-accounts.toml').is_file())
                 invoke('accounts','create','soylei','--json')
                 elsewhere=base/'another-project';elsewhere.mkdir()
+                invoke('--wake-root',str(elsewhere/'.codex/wake'),'accounts','init','--json')
                 with contextlib.chdir(elsewhere):
                     account=invoke('accounts','resolve','soylei','--json')['result']['account']
                     self.assertEqual(account['home'],str(canonical/'accounts/codex-soylei'))
@@ -88,3 +89,24 @@ class ControllerDefaultTests(unittest.TestCase):
                 invoke('profiles','--','list',expected=2)
                 invoke('configuration','default-root',str(chosen))
                 self.assertEqual(json.loads(invoke('accounts','list','--json'))['result']['accounts'][0]['id'],'codex-soylei')
+
+    def test_saved_wake_default_precedes_legacy_environment_but_not_explicit_config(self):
+        from codex_wake.profile_compat import main as profiles
+        with tempfile.TemporaryDirectory() as directory:
+            base=Path(directory)
+            env={'HOME':str(base),'XDG_CONFIG_HOME':str(base/'config'),'XDG_STATE_HOME':str(base/'state'),'CODEX_WAKE_ROOT':'','CODEX_WAKE_ACCOUNTS_CONFIG':'','CODEX_PROFILES_CONFIG':''}
+            with patch.dict(os.environ,env),contextlib.chdir(base):
+                user=base/'state/codex-wake/controller';legacy=base/'legacy'
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(main(['accounts','init','--json']),0)
+                    self.assertEqual(main(['accounts','create','soylei','--json']),0)
+                    self.assertEqual(main(['configuration','default-root',str(user)]),0)
+                    self.assertEqual(main(['--wake-root',str(legacy),'accounts','init','--json']),0)
+                    self.assertEqual(main(['--wake-root',str(legacy),'accounts','create','legacy','--json']),0)
+                with patch.dict(os.environ,{'CODEX_PROFILES_CONFIG':str(legacy/'controller-accounts.toml')}):
+                    out=io.StringIO()
+                    with contextlib.redirect_stdout(out):code=profiles(['list'])
+                    self.assertEqual(code,0,out.getvalue());self.assertIn('soylei',out.getvalue());self.assertNotIn('codex-legacy',out.getvalue())
+                    explicit=io.StringIO()
+                    with contextlib.redirect_stdout(explicit):code=profiles(['--config',str(legacy/'controller-accounts.toml'),'list'])
+                    self.assertEqual(code,0,explicit.getvalue());self.assertIn('codex-legacy',explicit.getvalue())

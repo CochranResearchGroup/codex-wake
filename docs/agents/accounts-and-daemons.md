@@ -21,9 +21,11 @@ First-use account state lives at `~/.local/state/codex-wake/controller`, or
 `$XDG_STATE_HOME/codex-wake/controller`. An existing saved default takes priority;
 `codex-wake configuration default-root /your/controller` changes it once.
 Explicit `--wake-root` and the optional `CODEX_WAKE_ROOT` override retain their
-scope. Compatibility launchers also honor explicit account configuration paths.
-An existing project account registry remains a fallback when no user default is
-configured. Ordinary wakes, schedules and emergency controls keep their project
+scope. Compatibility launchers also honor explicit `--config` and
+`CODEX_WAKE_ACCOUNTS_CONFIG` choices. A saved Wake default takes precedence over
+the legacy `CODEX_PROFILES_CONFIG` fallback.
+An existing project account registry remains a fallback before a user controller
+has been initialized or selected. Ordinary wakes, schedules and emergency controls keep their project
 scope; choosing an account controller does not redirect those records.
 
 To initialize a new user controller, run `codex-wake accounts init`. Existing

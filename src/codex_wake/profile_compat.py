@@ -1,7 +1,7 @@
 """Compatibility entrypoints for the Profiles implementation absorbed by Wake.
 
-Explicit legacy --config and CODEX_PROFILES_CONFIG are migration inputs. They
-select the same owner; no state or credential migration occurs automatically.
+Explicit --config remains authoritative. CODEX_PROFILES_CONFIG is a legacy
+fallback when no Wake default is selected; no credentials migrate automatically.
 """
 import os
 from pathlib import Path
@@ -10,12 +10,15 @@ import sys
 
 
 def default_config():
-    explicit = os.environ.get('CODEX_WAKE_ACCOUNTS_CONFIG') or os.environ.get('CODEX_PROFILES_CONFIG')
+    explicit = os.environ.get('CODEX_WAKE_ACCOUNTS_CONFIG')
     if explicit:
         return Path(explicit)
     if os.environ.get('CODEX_WAKE_ROOT'):
         return Path(os.environ['CODEX_WAKE_ROOT']) / 'controller-accounts.toml'
-    from .shortcut_store import default_root
+    from .shortcut_store import default_root, preference_path, user_root
+    legacy = os.environ.get('CODEX_PROFILES_CONFIG')
+    if legacy and not preference_path().exists() and not (user_root() / 'controller-accounts.toml').is_file():
+        return Path(legacy)
     return default_root() / 'controller-accounts.toml'
 
 
