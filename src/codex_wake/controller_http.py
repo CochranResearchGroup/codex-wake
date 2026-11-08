@@ -14,6 +14,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 
 from .controller_auth import AuthError, SCOPES
 from .managed_inventory import InventoryError
+from .tab_views import TabViews
 
 TOOLS = {
     'wake_builds_list': ('builds.list', {'type': 'object', 'properties': {'account': {'type': 'string'}}, 'required': ['account'], 'additionalProperties': False}),
@@ -187,6 +188,10 @@ class ProtectedOperations:
         'configuration.explain': ('configuration.observe', None, 'account'),
     }
 
+    READ_POLICIES.update({'tabs.monitor.'+v:('observe' if v in ('status','refresh') else 'control',None,None) for v in ('start','status','refresh','stop')})
+    READ_POLICIES.update(dict.fromkeys(TabViews.READS,('observe',None,None)))
+    READ_POLICIES.update(dict.fromkeys(TabViews.MUTATIONS,('control',None,None)))
+
     READ_POLICIES.update({'builds.' + verb: ('admin', None, None) for verb in ('prepare','status','build','resume','qualify','cleanup','run')})
 
     def __init__(self, authority, operations):
@@ -256,7 +261,29 @@ class ProtectedOperations:
             flows = owner(self.operations.inventory.root, actor=actor,
                 authorize=lambda: self.authority.authenticate(token), dispatch=dispatch)
             result = execute(flows, actor, operation, arguments)
-        elif operation.startswith('tabs.') and operation not in ('tabs.list','tabs.show'):
+        elif operation in ('tabs.monitor.status','tabs.monitor.refresh'):
+            tabs=self.operations.tabs
+            if tabs is None or not permitted(actor,tabs.monitor_target()):
+                raise AuthError('insufficient_scope')
+            result=self.operations.execute(operation,arguments)
+            rows=result['result'].get('snapshot')
+            if rows and 'resources' in rows:
+                rows['resources']=[r for r in rows['resources'] if permitted(actor,r['target'])]
+        elif operation in TabViews.READS:
+            tabs=self.operations.tabs
+            if tabs is None:
+                raise InventoryError('configuration_unavailable','host presentation owner unavailable')
+            if not permitted(actor,tabs.logical_target()):
+                raise AuthError('insufficient_scope')
+            result=self.operations.execute(operation,arguments)
+            if operation=='tabs.view-evaluate':
+                rows=[r for r in result['result']['resources'] if permitted(actor,r['target'])]
+                result['result']['resources']=rows
+                allowed_ids={TabViews.identity(r)['id'] for r in rows}
+                groups=result['result'].get('groups',[])
+                for group in groups:group['attachments']=[i for i in group['attachments'] if i in allowed_ids]
+                result['result']['groups']=[g for g in groups if g['attachments']]
+        elif operation.startswith('tabs.') and operation not in ('tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show'):
             from .controller_tabs import AuthorizedTabs
             from .controller_runtime import ControllerRuntime
             if self.operations.tabs is None or self.operations.inventory is None:

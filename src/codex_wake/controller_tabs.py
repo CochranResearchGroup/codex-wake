@@ -10,7 +10,7 @@ from .tab_organization import TabOrganization, TabError, digest
 
 
 class ControllerTabs:
-    READS = frozenset(('tabs.list', 'tabs.show'))
+    READS = frozenset(('tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh'))
     MUTATIONS = frozenset(('tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input'))
 
     def __init__(self, root, *, workspaces, host, environment):
@@ -18,12 +18,27 @@ class ControllerTabs:
         self.host, self.environment = host, environment
 
     def execute(self, operation, arguments):
+        if operation.startswith('tabs.monitor.'):
+            from .tab_monitor import TabMonitor
+            payload=dict(arguments)
+            expected=payload.pop('expected_target',None)
+            if expected is not None and expected!=self.monitor_target():
+                raise InventoryError('stale_target','Monitor generation changed; refresh status before controlling.')
+            return TabMonitor(self.root).execute(operation,payload)
+        from .tab_views import TabViews
+        if operation in TabViews.READS|TabViews.MUTATIONS:
+            payload=dict(arguments)
+            expected=payload.pop('expected_target',None)
+            if expected is not None and expected != self.logical_target():
+                raise InventoryError('stale_target','Saved view definitions changed; refresh before applying.')
+            resources=self.execute('tabs.list',{})['resources'] if operation in ('tabs.view-evaluate','tabs.group-save') else []
+            return TabViews(self.root).execute(operation,payload,resources=resources)
         from .tab_lifecycle import TabLifecycle
         if operation in TabLifecycle.ARGUMENTS:
             return TabLifecycle(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment).execute(operation,arguments)
         allowed = {
             'tabs.list': set(), 'tabs.show': {'workspace', 'selector'},
-            'tabs.preview': {'workspace','expected_target','mode','pins'},
+            'tabs.preview': {'workspace','expected_target','mode','pins','criteria'},
             'tabs.apply': {'workspace','expected_target','plan_id'},
             'tabs.undo': {'workspace','expected_target','receipt_id'},
             'tabs.capture': {'workspace','expected_target','pane','lines'},
@@ -122,7 +137,7 @@ class ControllerTabs:
                                     authorize=lambda action: None)
             try:
                 if operation == 'tabs.preview':
-                    return dict(target=target, **owner.preview(mode=arguments.get('mode','activity'), pins=arguments.get('pins',[]), deadline=deadline))
+                    return dict(target=target, **owner.preview(mode=arguments.get('mode','activity'), pins=arguments.get('pins',[]), criteria=arguments.get('criteria',[]), deadline=deadline))
                 if operation == 'tabs.apply':
                     return dict(target=target, **owner.apply(arguments['plan_id'], deadline=deadline))
                 return dict(target=target, **owner.undo(arguments['receipt_id'], deadline=deadline))
@@ -137,6 +152,17 @@ class ControllerTabs:
                                      message='Existing owned workspaces discovered.' if resources else
                                      'No live owned workspace found; start Byobu/tmux or register a supported psmux bridge, then refresh.')
         return value
+
+    def monitor_target(self):
+        from .tab_monitor import TabMonitor
+        monitor=TabMonitor(self.root).execute('tabs.monitor.status',{})['monitor']
+        return dict(host=self.host,environment=self.environment,workspace='@monitor',presentation='logical',
+                    generation=monitor.get('generation') or 'inactive')
+
+    def logical_target(self):
+        from .tab_views import TabViews
+        return dict(host=self.host,environment=self.environment,workspace='@views',
+                    presentation='logical',generation=digest(TabViews(self.root)._read()))
 
     @staticmethod
     def _pane(snapshot, pane):
@@ -190,6 +216,9 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
         workspaces, diagnostics = discover()
         owner = ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
                                environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name)
+        from .tab_traits import WorkspaceTraitsObserver
+        for workspace in workspaces.values():
+            workspace['observer']=WorkspaceTraitsObserver(root,workspace['transport'],workspace.get('privacy'))
         owner.discovery_diagnostics = diagnostics
         return owner
     try:
@@ -223,6 +252,8 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
             workspace['broker'] = UnixInputBroker(row['input_broker_socket'])
         if row.get('evidence_scope') == 'disposable_fixture' and row.get('privacy') == 'safe':
             workspace['privacy'] = lambda pane:'safe'
+        from .tab_traits import WorkspaceTraitsObserver
+        workspace['observer']=WorkspaceTraitsObserver(root,transport,workspace.get('privacy'))
         workspaces[name] = workspace
     return ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
                           environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name)

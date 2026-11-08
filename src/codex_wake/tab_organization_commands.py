@@ -96,8 +96,17 @@ def execute(action, arguments, root, *, principal, observer=None, transport=None
 def register_parser(subparsers):
     parser = subparsers.add_parser('tabs', help='preview and conditionally apply managed workspace tab ordering')
     verbs = parser.add_subparsers(dest='tabs_command', required=True)
-    for action in ('list','capture','input','preview','show','apply','undo','create','rename','focus','move','park','restore','close'):
+    for action in ('list','capture','input','preview','show','apply','undo','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop'):
         command = verbs.add_parser(action)
+        if action.startswith(('view-','group-')) and not action.endswith('-list'):
+            command.add_argument('view_name',nargs='?')
+        for field in ('interval','probe-timeout','stale-after','cycle-timeout'):
+            command.add_argument('--'+field,type=float)
+        command.add_argument('--filter',action='append',dest='filters',default=[])
+        command.add_argument('--group-by',action='append',default=[])
+        command.add_argument('--sort-by',action='append',default=[])
+        command.add_argument('--group')
+        command.add_argument('--member',action='append',dest='members',default=[])
         command.add_argument('--arguments',type=json.loads)
         for field in ('workspace','window','name','cwd','destination'):
             command.add_argument('--'+field)
@@ -113,7 +122,7 @@ def register_parser(subparsers):
         command.add_argument('--timeout', type=float, default=30)
         command.add_argument('--json', dest='as_json', action='store_true')
         if action == 'preview':
-            command.add_argument('--mode', choices=('activity', 'repository'), default='activity')
+            command.add_argument('--mode', choices=('activity','repository','traits'), default='activity')
             command.add_argument('--pin', action='append', dest='pins', default=[])
         if action in ('show', 'apply'): command.add_argument('--plan-id')
         if action in ('undo','restore'): command.add_argument('--receipt-id')
@@ -121,10 +130,29 @@ def register_parser(subparsers):
 
 
 def run(args, root, *, observer=None):
-    if args.arguments is not None or getattr(args,'workspace',None) is not None or args.tabs_command in ('list','capture','input','create','rename','focus','move','park','restore','close'):
+    if args.arguments is not None or getattr(args,'workspace',None) is not None or args.tabs_command in ('list','capture','input','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop'):
         from .tab_commands import command
         args.tab_command = args.tabs_command
         args.arguments = args.arguments or {}
+        if getattr(args,'view_name',None):args.arguments.setdefault('name',args.view_name)
+        if args.tabs_command=='monitor-start':
+            for field in ('interval','probe_timeout','stale_after','cycle_timeout'):
+                value=getattr(args,field,None)
+                if value is not None:args.arguments.setdefault(field,value)
+        if args.tabs_command=='preview':
+            args.arguments.setdefault('mode',args.mode)
+            args.arguments.setdefault('pins',args.pins)
+            if args.group_by or args.sort_by:args.arguments.setdefault('criteria',args.group_by+args.sort_by)
+        if args.tabs_command=='view-save':
+            filters={}
+            for value in args.filters:
+                if '=' not in value:
+                    print(json.dumps(dict(status='held',error=dict(code='invalid_argument',message='Use --filter trait=value.'))));return 2
+                key,value=value.split('=',1);filters[key]=value
+            definition=dict(filters=filters,group_by=args.group_by,sort_by=args.sort_by)
+            if args.group:definition['group']=args.group
+            args.arguments.setdefault('definition',definition)
+        if args.tabs_command=='group-save':args.arguments.setdefault('members',args.members)
         for field in ('workspace','window','name','cwd','destination','index','force','preview','receipt_id','plan_id'):
             value=getattr(args,field,None)
             if value is not None:args.arguments.setdefault(field,value)
