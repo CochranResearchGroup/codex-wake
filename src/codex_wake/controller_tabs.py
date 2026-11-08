@@ -18,6 +18,9 @@ class ControllerTabs:
         self.host, self.environment = host, environment
 
     def execute(self, operation, arguments):
+        from .tab_lifecycle import TabLifecycle
+        if operation in TabLifecycle.ARGUMENTS:
+            return TabLifecycle(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment).execute(operation,arguments)
         allowed = {
             'tabs.list': set(), 'tabs.show': {'workspace', 'selector'},
             'tabs.preview': {'workspace','expected_target','mode','pins'},
@@ -46,12 +49,29 @@ class ControllerTabs:
                         for pane in window['panes']:
                             pane['process_generation'] = process_identity(pane['pid'])
             except Exception as error:
+                if getattr(error,'code',None) == 'stale_target':
+                    raise
                 if operation == 'tabs.list':
                     unavailable.append(dict(workspace=name,status='unavailable',code='attachment_unavailable'))
                     continue
                 raise InventoryError('attachment_unavailable', 'host presentation observation failed') from error
             target = dict(host=self.host, environment=self.environment, workspace=name,
                           presentation=config['kind'], generation=digest(snapshot))
+            observation = None
+            if operation in self.READS:
+                from .tab_traits import TabTraits, session_rows
+                traits = TabTraits(self.root)
+                initial = {w['window_id']:traits.observe_window(w,transport=transport,
+                           privacy=config.get('privacy'),deadline=deadline) for w in snapshot['windows']}
+                needs_native = any(p['traits']['harness']['value']=='codex'
+                                   for result in initial.values() for p in result['panes'])
+                rows = session_rows(self.root,socket_path=config.get('socket_path'),
+                                    deadline=min(deadline,time.monotonic()+2)) if needs_native else dict(sessions=[],holds=[])
+                if rows['sessions']:
+                    traits = TabTraits(self.root,sessions=rows['sessions'])
+                    initial = {w['window_id']:traits.observe_window(w,transport=transport,
+                               privacy=config.get('privacy'),deadline=deadline) for w in snapshot['windows']}
+                observation = (initial, rows)
             broker = config.get('broker')
             custody = broker.inspect() if broker else dict(available=False, transport='unowned', generation=None)
             if operation not in self.READS and arguments.get('expected_target') != target:
@@ -63,8 +83,12 @@ class ControllerTabs:
                     windows = [w for w in windows if selector in (w['window_id'], w['name'])]
                     if len(windows) != 1:
                         raise InventoryError('ambiguous_target' if windows else 'target_not_found', 'friendly selector must identify one attachment')
-                resources.extend(dict(target=target, window=w, input_custody=custody,
-                                      runtime_identity='unverified', fallback='explicit_only') for w in windows)
+                for w in windows:
+                    observed, rows = observation
+                    evidence = observed[w['window_id']]
+                    resources.append(dict(target=target,window=w,input_custody=custody,
+                                          traits=evidence,runtime_identity='unverified',fallback='explicit_only',
+                                          observation_holds=rows['holds'],workspace_label=config.get('label',name)))
                 continue
             if operation in ('tabs.input', 'tabs.capture'):
                 privacy = config.get('privacy')

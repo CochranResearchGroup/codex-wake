@@ -145,7 +145,7 @@ class ProtectedOperations:
             for verb in ('list','show','configure','enable','disable','check','tick','apply','reconcile')},
         **{'notices.'+verb: ('observe',None,None)
             for verb in ('list','publish','reconcile')},
-        **{'tabs.'+verb: ('observe' if verb in ('list','show') else 'control', 'resources' if verb in ('list','show') else None, None) for verb in ('list','show','preview','apply','undo','capture','input')},
+        **{'tabs.'+verb: ('observe' if verb in ('list','show') else 'control', 'resources' if verb in ('list','show') else None, None) for verb in ('list','show','preview','apply','undo','capture','input','create','rename','focus','move','park','restore','close')},
         **{'flows.' + verb: ('observe' if verb in ('propose', 'definition', 'inspect') else 'control', None, None)
             for verb in ('propose', 'publish', 'definition', 'start', 'inspect', 'advance', 'reconcile', 'cancel')},
         'migration.preview': ('migration.observe', None, None),

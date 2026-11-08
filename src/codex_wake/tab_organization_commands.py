@@ -96,9 +96,14 @@ def execute(action, arguments, root, *, principal, observer=None, transport=None
 def register_parser(subparsers):
     parser = subparsers.add_parser('tabs', help='preview and conditionally apply managed workspace tab ordering')
     verbs = parser.add_subparsers(dest='tabs_command', required=True)
-    for action in ('list','capture','input','preview', 'show', 'apply', 'undo'):
+    for action in ('list','capture','input','preview','show','apply','undo','create','rename','focus','move','park','restore','close'):
         command = verbs.add_parser(action)
         command.add_argument('--arguments',type=json.loads)
+        for field in ('workspace','window','name','cwd','destination'):
+            command.add_argument('--'+field)
+        command.add_argument('--index',type=int)
+        command.add_argument('--force',action='store_true',default=None)
+        command.add_argument('--dry-run',dest='preview',action='store_true',default=None)
         command.add_argument('--socket-path')
         command.add_argument('--session-id')
         command.add_argument('--bus-root', type=Path)
@@ -111,15 +116,18 @@ def register_parser(subparsers):
             command.add_argument('--mode', choices=('activity', 'repository'), default='activity')
             command.add_argument('--pin', action='append', dest='pins', default=[])
         if action in ('show', 'apply'): command.add_argument('--plan-id')
-        if action == 'undo': command.add_argument('--receipt-id')
+        if action in ('undo','restore'): command.add_argument('--receipt-id')
     return parser
 
 
 def run(args, root, *, observer=None):
-    if args.arguments is not None or args.tabs_command in ('list','capture','input'):
+    if args.arguments is not None or getattr(args,'workspace',None) is not None or args.tabs_command in ('list','capture','input','create','rename','focus','move','park','restore','close'):
         from .tab_commands import command
         args.tab_command = args.tabs_command
         args.arguments = args.arguments or {}
+        for field in ('workspace','window','name','cwd','destination','index','force','preview','receipt_id','plan_id'):
+            value=getattr(args,field,None)
+            if value is not None:args.arguments.setdefault(field,value)
         return command(args)
     from .permission_commands import verified_cli_principal
     try:

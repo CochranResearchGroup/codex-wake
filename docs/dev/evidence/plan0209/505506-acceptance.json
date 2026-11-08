@@ -1,0 +1,35 @@
+{
+  "tickets": [
+    505,
+    506
+  ],
+  "status": "passed",
+  "tier": "focused + installed",
+  "focused": "28 PASS Python3.12; worker6traits and8lifecycle PASS both3.11/3.12",
+  "installed_trait_error_cli": "1 PASS actual disposable screen and draft preservation",
+  "installed_lifecycle_cli": "1 PASS create/rename without grant file",
+  "transport": {
+    "local_cli": true,
+    "local_mutation_cli": true,
+    "mcp": true,
+    "module": "/tmp/codex-wake-503-installed/lib/python3.12/site-packages/codex_wake/controller_tabs.py",
+    "native_mcp": true,
+    "oauth_api": true,
+    "observe_cannot_capture": true,
+    "real_isolated_tmux": true,
+    "remote_cli": true,
+    "retained_intent": true,
+    "status": "passed",
+    "windows_matrix": false
+  },
+  "source_matches_installed": true,
+  "prefix": "/tmp/codex-wake-503-installed",
+  "first_integration_failure": "Explicit retained CLI request actor mismatch with native MCP; corrected compatible local mapping for supplied request while grant-free local UID remains default",
+  "provider_calls": 0,
+  "production_effects": false,
+  "scope_limits": [
+    "psmux lifecycle pending509",
+    "profile-selected creation wiring remains512",
+    "native provider boundaries inherited not freshly model-qualified"
+  ]
+}
