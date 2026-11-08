@@ -86,12 +86,16 @@
         504,
         505
       ],
-      "state": "pending",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/507",
-      "worker": null,
+      "worker": "/root",
       "owned_paths": [],
-      "validation": []
+      "validation": [
+        "docs/dev/evidence/plan0209/507508-acceptance.json",
+        "44PASS Python3.11(19.921s)/3.12(18.987s)"
+      ],
+      "result_sha": "a9a4fc2"
     },
     {
       "key": "monitor",
@@ -100,12 +104,16 @@
       "blockers": [
         505
       ],
-      "state": "pending",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/508",
-      "worker": null,
+      "worker": "/root/traits505",
       "owned_paths": [],
-      "validation": []
+      "validation": [
+        "docs/dev/evidence/plan0209/507508-acceptance.json",
+        "44PASS Python3.11(19.921s)/3.12(18.987s)"
+      ],
+      "result_sha": "a9a4fc2"
     },
     {
       "key": "psmux",
@@ -219,5 +227,5 @@
     }
   ],
   "dependency_validation": "acyclic, all blocker IDs resolved",
-  "integration_tip": "8b585db"
+  "integration_tip": "a9a4fc2"
 }
