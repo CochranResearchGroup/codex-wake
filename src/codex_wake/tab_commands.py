@@ -103,6 +103,13 @@ def tool_specs():
         if op.endswith(('capture','apply')):
             props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
         specs['wake_'+op.replace('.','_')]=('controller-tabs',op,'Capture or restore exact workspace conversations; unknown historical mappings remain held.',props,required,op.endswith(('preview','status')))
+    from .tab_reattach import TabReattach
+    for op,fields in TabReattach.ARGUMENTS.items():
+        props={key:({'type':'object'} if key.startswith('expected_') else {'type':'boolean'} if key in ('force','retire_source') else text) for key in fields}
+        required=['plan_id'] if op!='tabs.reattach-preview' else ['workspace','window','destination','expected_destination']
+        if op!='tabs.reattach-status':
+            props['_request']={'type':'object'};required+=['_request','expected_target']
+        specs['wake_'+op.replace('.','_').replace('-','_')]=('controller-tabs',op,'Reattach the exact saved conversation; retain source by default and reconcile uncertain effects.',props,required,op=='tabs.reattach-status')
     return specs
 
 
@@ -121,6 +128,9 @@ def protected_execute(operation,arguments,root):
     configured=(Path(root)/'controller-messaging.json').is_file()
     from .daemon_commands import local_operator
     uid_actor=None if configured else local_operator(arguments.get('expected_target',{}),('control','observe'))
+    if uid_actor is not None and operation in ('tabs.reattach-apply','tabs.reattach-status'):
+        from dataclasses import replace
+        uid_actor=replace(uid_actor,targets=[*uid_actor.targets,*tabs.reattach_owner().authorization_targets(arguments.get('plan_id'))])
     if uid_actor is not None and isinstance(arguments.get('expected_destination'),dict):
         from dataclasses import replace
         uid_actor=replace(uid_actor,targets=[*uid_actor.targets,arguments['expected_destination']])
@@ -147,6 +157,15 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
         payload.setdefault('_request',dict(operation_id='tab-cli-'+key,idempotency_key='tab-cli-'+key,
             correlation_id=key,binding='local-cli',target=payload['expected_target']))
         actor=local_operator(payload['expected_target'],('control','observe'))
+        return AuthorizedTabs(SimpleNamespace(authenticate=lambda unused:actor),owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
+    if operation in ('tabs.reattach-apply','tabs.reattach-status'):
+        plan=owner.reattach_owner().execute('tabs.reattach-status',{'plan_id':payload.get('plan_id')})
+        payload.setdefault('expected_target',plan['target'])
+        key=_intent_key(operation,payload,request_id)
+        payload.setdefault('_request',dict(operation_id='tab-cli-'+key,idempotency_key='tab-cli-'+key,correlation_id=key,binding='local-cli',target=payload['expected_target']))
+        actor=local_operator(payload['expected_target'],('control','observe'))
+        from dataclasses import replace
+        actor=replace(actor,targets=[*actor.targets,*owner.reattach_owner().authorization_targets(payload['plan_id'])])
         return AuthorizedTabs(SimpleNamespace(authenticate=lambda unused:actor),owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
     workspace = payload.get('workspace')
     if workspace is None and len(owner.workspaces) == 1:
@@ -193,6 +212,6 @@ def _intent_key(operation,payload,request_id=None):
     import hashlib
     from uuid import uuid4
     if request_id is not None:return request_id
-    if operation in ('tabs.preview','tabs.policy.tick','tabs.recovery.capture'):
+    if operation in ('tabs.preview','tabs.policy.tick','tabs.recovery.capture','tabs.reattach-preview'):
         return uuid4().hex
     return hashlib.sha256(json.dumps([operation,payload],sort_keys=True).encode()).hexdigest()

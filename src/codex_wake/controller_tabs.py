@@ -10,14 +10,20 @@ from .tab_organization import TabOrganization, TabError, digest
 
 
 class ControllerTabs:
-    READS = frozenset(('tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status'))
+    READS = frozenset(('tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
     MUTATIONS = frozenset(('tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input'))
 
     def __init__(self, root, *, workspaces, host, environment):
         self.root, self.workspaces = root, dict(workspaces)
         self.host, self.environment = host, environment
 
+    def reattach_owner(self):
+        from .tab_reattach import TabReattach
+        return TabReattach(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment)
+
     def execute(self, operation, arguments):
+        if operation.startswith('tabs.reattach-'):
+            return self.reattach_owner().execute(operation,arguments)
         if operation.startswith('tabs.recovery.'):
             from .tab_recovery import TabRecovery
             from .tab_lifecycle import TabLifecycle
@@ -216,8 +222,10 @@ class AuthorizedTabs:
         target = arguments.get('expected_target') if isinstance(arguments, dict) else None
         required = {'host','environment','workspace','presentation'}
         targets=[target]
-        if operation in ('tabs.move','tabs.park','tabs.restore'):
+        if operation in ('tabs.move','tabs.park','tabs.restore','tabs.reattach-preview'):
             targets.append(arguments.get('expected_destination'))
+        if operation in ('tabs.reattach-apply','tabs.reattach-status'):
+            targets += self.tabs.reattach_owner().authorization_targets(arguments.get('plan_id'))
         for selected in targets:
             if not isinstance(selected,dict) or not (required|{'generation'})<=selected.keys() or not any(
                     required<=scope.keys() and all(selected.get(k)==v for k,v in scope.items()) for scope in actor.targets):

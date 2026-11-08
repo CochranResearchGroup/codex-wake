@@ -96,7 +96,7 @@ def execute(action, arguments, root, *, principal, observer=None, transport=None
 def register_parser(subparsers):
     parser = subparsers.add_parser('tabs', help='preview and conditionally apply managed workspace tab ordering')
     verbs = parser.add_subparsers(dest='tabs_command', required=True)
-    for action in ('list','capture','input','preview','show','apply','undo','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop','policy-configure','policy-status','policy-enable','policy-pause','policy-disable','policy-tick','recovery-capture','recovery-preview','recovery-apply','recovery-status'):
+    for action in ('list','capture','input','preview','show','apply','undo','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop','policy-configure','policy-status','policy-enable','policy-pause','policy-disable','policy-tick','recovery-capture','recovery-preview','recovery-apply','recovery-status','reattach-preview','reattach-apply','reattach-status'):
         command = verbs.add_parser(action)
         if action.startswith(('view-','group-')) and not action.endswith('-list'):
             command.add_argument('view_name',nargs='?')
@@ -120,6 +120,7 @@ def register_parser(subparsers):
         for field in ('workspace','window','name','cwd','destination'):
             command.add_argument('--'+field)
         command.add_argument('--index',type=int)
+        command.add_argument('--retire-source',action='store_true',default=None)
         command.add_argument('--force',action='store_true',default=None)
         command.add_argument('--dry-run',dest='preview',action='store_true',default=None)
         command.add_argument('--socket-path')
@@ -136,13 +137,13 @@ def register_parser(subparsers):
         if action == 'preview':
             command.add_argument('--mode', choices=('activity','repository','traits'), default='activity')
             command.add_argument('--pin', action='append', dest='pins', default=[])
-        if action in ('show', 'apply'): command.add_argument('--plan-id')
+        if action in ('show', 'apply','reattach-apply','reattach-status'): command.add_argument('--plan-id')
         if action in ('undo','restore'): command.add_argument('--receipt-id')
     return parser
 
 
 def run(args, root, *, observer=None):
-    if args.arguments is not None or getattr(args,'workspace',None) is not None or args.tabs_command in ('list','capture','input','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop','policy-configure','policy-status','policy-enable','policy-pause','policy-disable','policy-tick','recovery-capture','recovery-preview','recovery-apply','recovery-status'):
+    if args.arguments is not None or getattr(args,'workspace',None) is not None or args.tabs_command in ('list','capture','input','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop','policy-configure','policy-status','policy-enable','policy-pause','policy-disable','policy-tick','recovery-capture','recovery-preview','recovery-apply','recovery-status','reattach-preview','reattach-apply','reattach-status'):
         from .tab_commands import command
         args.tab_command = args.tabs_command
         args.arguments = args.arguments or {}
@@ -180,7 +181,7 @@ def run(args, root, *, observer=None):
             if args.group:definition['group']=args.group
             args.arguments.setdefault('definition',definition)
         if args.tabs_command=='group-save':args.arguments.setdefault('members',args.members)
-        for field in ('workspace','window','name','cwd','destination','index','force','preview','receipt_id','plan_id'):
+        for field in ('workspace','window','name','cwd','destination','index','force','preview','receipt_id','plan_id','retire_source'):
             value=getattr(args,field,None)
             if value is not None:args.arguments.setdefault(field,value)
         return command(args)

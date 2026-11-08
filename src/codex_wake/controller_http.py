@@ -190,6 +190,7 @@ class ProtectedOperations:
 
     READ_POLICIES.update({'tabs.monitor.'+v:('observe' if v in ('status','refresh') else 'control',None,None) for v in ('start','status','refresh','stop')})
     READ_POLICIES.update({'tabs.policy.'+v:('observe' if v=='status' else 'control',None,None) for v in ('configure','status','enable','pause','disable','tick')})
+    READ_POLICIES.update({'tabs.reattach-'+v:('observe' if v=='status' else 'control',None,None) for v in ('preview','apply','status')})
     READ_POLICIES.update({'tabs.recovery.'+v:('observe' if v in ('preview','status') else 'control',None,None) for v in ('capture','preview','apply','status')})
     READ_POLICIES.update(dict.fromkeys(TabViews.READS,('observe',None,None)))
     READ_POLICIES.update(dict.fromkeys(TabViews.MUTATIONS,('control',None,None)))
@@ -263,6 +264,12 @@ class ProtectedOperations:
             flows = owner(self.operations.inventory.root, actor=actor,
                 authorize=lambda: self.authority.authenticate(token), dispatch=dispatch)
             result = execute(flows, actor, operation, arguments)
+        elif operation=='tabs.reattach-status':
+            tabs=self.operations.tabs
+            if tabs is None:raise InventoryError('configuration_unavailable','host presentation owner unavailable')
+            if not all(permitted(actor,t) for t in tabs.reattach_owner().authorization_targets(arguments.get('plan_id'))):
+                raise AuthError('insufficient_scope')
+            result=self.operations.execute(operation,arguments)
         elif operation in ('tabs.recovery.preview','tabs.recovery.status'):
             tabs=self.operations.tabs
             if tabs is None:
