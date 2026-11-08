@@ -30,3 +30,13 @@ class TabViewTests(unittest.TestCase):
             self.assertFalse(result['physical_effects'])
             rows[1]['window']['panes'][0]['process_generation']=3
             self.assertEqual(owner.execute('tabs.view-evaluate',dict(name='errors'),resources=rows)['resources'],[])
+
+    def test_windows_named_group_cannot_adopt_a_reused_native_pid(self):
+        from codex_wake.tab_views import TabViews
+        with tempfile.TemporaryDirectory() as directory:
+            owner=TabViews(directory)
+            row=dict(target={'workspace':'native'},window={'window_id':'@1','panes':[dict(pane_id='%1',platform='windows',windows_creation_filetime=10)]})
+            owner.execute('tabs.group-save',dict(name='work',members=['native/@1']),resources=[row])
+            owner.execute('tabs.view-save',dict(name='work',definition=dict(group='work')))
+            row['window']['panes'][0]['windows_creation_filetime']=11
+            self.assertEqual(owner.execute('tabs.view-evaluate',dict(name='work'),resources=[row])['resources'],[])

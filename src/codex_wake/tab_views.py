@@ -37,7 +37,7 @@ class TabViews:
     def identity(resource):
         window=resource['window'];target=resource['target']
         key=target['workspace']+'/'+window['window_id']
-        identity=hashlib.sha256(json.dumps([(v['pane_id'],v.get('process_generation')) for v in window['panes']],sort_keys=True).encode()).hexdigest()
+        identity=hashlib.sha256(json.dumps([(v['pane_id'],dict(platform='windows',creation_filetime=v.get('windows_creation_filetime')) if v.get('platform')=='windows' else v.get('process_generation')) for v in window['panes']],sort_keys=True).encode()).hexdigest()
         return dict(id=key,identity=identity)
 
     def execute(self,operation,arguments,*,resources=()):
