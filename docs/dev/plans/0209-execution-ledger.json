@@ -38,8 +38,8 @@
       "number": 505,
       "title": "Observe rich tab traits independently of activity health and visible errors",
       "blockers": [],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/505",
       "worker": "/root/traits505",
       "owned_paths": [
@@ -47,26 +47,36 @@
         "tab_traits_commands.py",
         "tests/test_tab_traits.py"
       ],
-      "validation": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/505506-acceptance.json",
+        "28 affected PASS Python3.11 and3.12"
+      ],
       "worktree": "/tmp/codex-wake-505",
-      "branch": "feat/tab-traits-505"
+      "branch": "feat/tab-traits-505",
+      "result_sha": "8b585db",
+      "worker_result_sha": "309decb"
     },
     {
       "key": "lifecycle",
       "number": 506,
       "title": "Create rename focus move park restore and close exact tabs",
       "blockers": [],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/506",
       "worker": "/root/lifecycle506",
       "owned_paths": [
         "tab_lifecycle.py",
         "tests/test_tab_lifecycle.py"
       ],
-      "validation": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/505506-acceptance.json",
+        "28 affected PASS Python3.11 and3.12"
+      ],
       "worktree": "/tmp/codex-wake-506",
-      "branch": "feat/tab-lifecycle-506"
+      "branch": "feat/tab-lifecycle-506",
+      "result_sha": "8b585db",
+      "worker_result_sha": "c32d248"
     },
     {
       "key": "views",
@@ -209,5 +219,5 @@
     }
   ],
   "dependency_validation": "acyclic, all blocker IDs resolved",
-  "integration_tip": "1b8e6f7"
+  "integration_tip": "8b585db"
 }
