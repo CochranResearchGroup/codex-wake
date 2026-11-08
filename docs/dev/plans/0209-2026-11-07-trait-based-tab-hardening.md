@@ -1,7 +1,7 @@
 # Trait-based tab and session hardening specification
 
-State: PLANNED
-Workflow: READY; specification published, implementation not started
+State: OPEN
+Workflow: IN_PROGRESS; dependency-aware implementation
 Owner: ecochran76 / primary coordinator
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/503
 Priority: P1
@@ -188,3 +188,16 @@ Reuse and reconcile these existing owners:
 - [Interruption continuity #500](https://github.com/CochranResearchGroup/codex-wake/issues/500), [handoff #370](https://github.com/CochranResearchGroup/codex-wake/issues/370), [governor UX #343](https://github.com/CochranResearchGroup/codex-wake/issues/343), [bounded execution #350](https://github.com/CochranResearchGroup/codex-wake/issues/350), [upgrade recovery #413](https://github.com/CochranResearchGroup/codex-wake/issues/413) and [activation #380](https://github.com/CochranResearchGroup/codex-wake/issues/380): retain separate unresolved acceptance and avoid unrelated feature duplication.
 
 This issue is the canonical successor product acceptance contract for trait-based tab/session hardening. Existing specs remain authoritative for their unchanged domain behavior. Source-qualified, integrated, installed and operationally qualified are separate milestones; ready-for-agent marks specification readiness, not permission to modify existing production tabs. The next step is approved dependency-aware ticket decomposition; no implementation children or blocking relationships are created by this spec-publication step.
+
+## Implementation packet
+
+User explicitly authorized ticket creation, primary ownership of one ready ticket,
+one-ticket-per-worker delegation, closure from acceptance, then exactly one broad
+Standards/Spec review and one bounded TDD remediation pass. Frozen review base:
+20e396b5aa469ed814c123218cc356a68b229936 (packet integration base). Runtime effects
+remain limited to authorized disposable qualification; production deployment,
+provider prompts and shared daemon changes are not implied.
+
+Tickets504–514 plus reused368 form an acyclic graph. Three initial lanes: primary504,
+traits worker505, lifecycle worker506. Primary owns shared CLI/API/MCP/observer
+registration. Review and remediation counts live in0209-execution-ledger.json.

@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/503",
+  "branch": "feat/tab-hardening-503",
+  "base": "20e396b5aa469ed814c123218cc356a68b229936",
+  "review": {
+    "broad_limit": 1,
+    "broad_used": 0,
+    "remediation_limit": 1,
+    "remediation_used": 0
+  },
+  "tickets": [
+    {
+      "key": "discover",
+      "number": 504,
+      "title": "Discover existing workspaces with reliable controller defaults",
+      "blockers": [],
+      "state": "running",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/504",
+      "worker": "/root",
+      "owned_paths": [
+        "controller_tabs.py",
+        "tab_commands.py",
+        "tab_workspace_discovery.py",
+        "tests/test_tab_discovery.py",
+        "shared registration"
+      ],
+      "validation": [],
+      "worktree": "/tmp/codex-wake-503",
+      "branch": "feat/tab-hardening-503"
+    },
+    {
+      "key": "traits",
+      "number": 505,
+      "title": "Observe rich tab traits independently of activity health and visible errors",
+      "blockers": [],
+      "state": "running",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/505",
+      "worker": "/root/traits505",
+      "owned_paths": [
+        "tab_traits.py",
+        "tab_traits_commands.py",
+        "tests/test_tab_traits.py"
+      ],
+      "validation": [],
+      "worktree": "/tmp/codex-wake-505",
+      "branch": "feat/tab-traits-505"
+    },
+    {
+      "key": "lifecycle",
+      "number": 506,
+      "title": "Create rename focus move park restore and close exact tabs",
+      "blockers": [],
+      "state": "running",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/506",
+      "worker": "/root/lifecycle506",
+      "owned_paths": [
+        "tab_lifecycle.py",
+        "tests/test_tab_lifecycle.py"
+      ],
+      "validation": [],
+      "worktree": "/tmp/codex-wake-506",
+      "branch": "feat/tab-lifecycle-506"
+    },
+    {
+      "key": "views",
+      "number": 507,
+      "title": "Apply useful trait-based grouping and saved views with conditional undo",
+      "blockers": [
+        504,
+        505
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/507",
+      "worker": null,
+      "owned_paths": [],
+      "validation": []
+    },
+    {
+      "key": "monitor",
+      "number": 508,
+      "title": "Maintain bounded tab observations and expose refresh freshness and status",
+      "blockers": [
+        505
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/508",
+      "worker": null,
+      "owned_paths": [],
+      "validation": []
+    },
+    {
+      "key": "psmux",
+      "number": 509,
+      "title": "Qualify Windows psmux discovery traits and manual lifecycle from WSL and PowerShell",
+      "blockers": [
+        504,
+        505,
+        506
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/509",
+      "worker": null,
+      "owned_paths": [],
+      "validation": []
+    },
+    {
+      "key": "reattach",
+      "number": 510,
+      "title": "Reattach the same saved conversation across terminal backends safely",
+      "blockers": [
+        506,
+        509
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/510",
+      "worker": null,
+      "owned_paths": [],
+      "validation": []
+    },
+    {
+      "key": "recovery",
+      "number": 368,
+      "title": "Connect Byobu reboot restore to durable exact-conversation recovery",
+      "blockers": [
+        504,
+        506
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/368",
+      "worker": null,
+      "owned_paths": [],
+      "validation": []
+    },
+    {
+      "key": "auto",
+      "number": 511,
+      "title": "Offer opt-in physical organization with manual precedence and visible pause",
+      "blockers": [
+        507,
+        508,
+        506
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/511",
+      "worker": null,
+      "owned_paths": [],
+      "validation": []
+    },
+    {
+      "key": "contract",
+      "number": 512,
+      "title": "Expose tab workflows through typed CLI API MCP help and completion",
+      "blockers": [
+        507,
+        508,
+        509,
+        510,
+        511,
+        368
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/512",
+      "worker": null,
+      "owned_paths": [],
+      "validation": []
+    },
+    {
+      "key": "continuity",
+      "number": 513,
+      "title": "Preserve session control and reconcile existing acceptance ownership",
+      "blockers": [
+        512
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/513",
+      "worker": null,
+      "owned_paths": [],
+      "validation": []
+    },
+    {
+      "key": "acceptance",
+      "number": 514,
+      "title": "Qualify the exact installed tab hardening workflow across callers and backends",
+      "blockers": [
+        512,
+        513
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/514",
+      "worker": null,
+      "owned_paths": [],
+      "validation": []
+    }
+  ],
+  "dependency_validation": "acyclic, all blocker IDs resolved",
+  "integration_tip": "339124d"
+}
