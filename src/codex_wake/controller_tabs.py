@@ -17,6 +17,10 @@ class ControllerTabs:
         self.root, self.workspaces = root, dict(workspaces)
         self.host, self.environment = host, environment
 
+    def profile_owner(self):
+        from .tab_profile_create import TabProfileCreate
+        return TabProfileCreate(self.root,host=self.host,environment=self.environment)
+
     def reattach_owner(self):
         from .tab_reattach import TabReattach
         return TabReattach(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment)
@@ -235,6 +239,10 @@ class AuthorizedTabs:
         for selected in targets:
             if not isinstance(selected,dict) or not (required|{'generation'})<=selected.keys() or not any(
                     required<=scope.keys() and all(selected.get(k)==v for k,v in scope.items()) for scope in actor.targets):
+                raise AuthError('insufficient_scope')
+        if operation=='tabs.create' and arguments.get('profile') and not actor.issuer.startswith('local://uid/'):
+            from .controller_http import permitted
+            if not permitted(actor,self.tabs.profile_owner().authorization_target(arguments['profile'])):
                 raise AuthError('insufficient_scope')
         def authorize():
             current = self.authority.authenticate(token)

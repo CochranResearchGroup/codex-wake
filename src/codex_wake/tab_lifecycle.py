@@ -18,7 +18,7 @@ from .tab_organization import TabOrganization, digest
 class TabLifecycle:
     READS = frozenset()
     ARGUMENTS = {
-        'tabs.create': {'workspace', 'expected_target', 'name', 'cwd', 'preview'},
+        'tabs.create': {'workspace', 'expected_target', 'name', 'cwd', 'profile', 'preview'},
         'tabs.rename': {'workspace', 'expected_target', 'window', 'name', 'preview'},
         'tabs.focus': {'workspace', 'expected_target', 'window', 'preview'},
         'tabs.move': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'index', 'force', 'preview'},
@@ -131,6 +131,8 @@ class TabLifecycle:
             raise InventoryError('stale_target', 'exact current workspace generation required')
         config = self.workspaces[workspace]
         transport = config['transport']
+        if operation=='tabs.create' and args.get('profile') and config['kind'] not in ('tmux','byobu'):
+            raise InventoryError('unsupported_target','Selected profile creation is qualified only for Byobu/tmux; no fallback was launched.')
         if config['kind']=='psmux' and hasattr(transport,'lifecycle'):
             return self._psmux(operation,args,before,config,deadline)
         if config['kind'] not in ('tmux', 'byobu'):
@@ -180,6 +182,12 @@ class TabLifecycle:
                     raise InventoryError('stale_target', 'parked native pane/process generation changed')
                 index = original['window']['index']
             self._collision(after_destination['snapshot'], name, index=index)
+        profile_owner=None
+        if operation=='tabs.create' and args.get('profile'):
+            from .tab_profile_create import TabProfileCreate
+            profile_owner=TabProfileCreate(self.root,host=self.host,environment=self.environment)
+            if args.get('preview'):
+                return dict(profile_owner.create(args['profile'],transport=transport,name=name,cwd=str(cwd),deadline=deadline,guard=lambda:None,preview=True),target=before['target'])
         if args.get('preview'):
             return dict(status='preview', action=operation, target=before['target'],
                         destination=after_destination['target'] if after_destination else None,
@@ -202,6 +210,14 @@ class TabLifecycle:
                        before=before['target'], affected_work=affected, forced=bool(args.get('force')))
         self.records.save(receipt_id, receipt)
         try:
+            if profile_owner is not None:
+                def guard():
+                    if self.inspect(workspace,deadline=deadline)['target']!=before['target']:
+                        raise InventoryError('stale_target','Destination changed before profile launch.')
+                selected=profile_owner.create(args['profile'],transport=transport,name=name,cwd=str(cwd),deadline=deadline,guard=guard)
+                receipt.update(status=selected['status'],profile_target=selected.get('profile_target'),observed_window=selected.get('window'),profile_intent=selected.get('intent'))
+                self.records.save(receipt_id,receipt)
+                return dict(selected,target=before['target'],receipt_id=receipt_id,action=operation)
             if operation == 'tabs.create':
                 wid = transport.command(deadline, 'new-window', '-d', '-P', '-F', '#{window_id}',
                     '-t', transport.session + ':', '-n', name, '-c', str(cwd)).strip()

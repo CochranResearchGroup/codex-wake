@@ -121,7 +121,7 @@ class TabProfileCreate:
                     if not generation or _hash(Path('/proc',str(pid),'exe'))!=selected['target']['build_sha256']:continue
                     if generation!=process_identity(pid):continue
                     return dict(result,status='applied',process=dict(pid=pid,**generation),
-                                account_identity='selected_home_verified_remote_identity_unverified',application_effects=False)
+                                account_identity='selected_home_verified_remote_identity_unverified')
             except FileNotFoundError:pass
             except (OSError,ValueError,KeyError,StopIteration,subprocess.SubprocessError):
                 pass

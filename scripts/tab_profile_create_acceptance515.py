@@ -10,17 +10,14 @@ import json
 import os
 from pathlib import Path
 import socket
+import sys
 import subprocess
 import tempfile
 import threading
 import time
 import traceback
 
-from codex_wake.controller_auth import Actor
-from codex_wake.controller_runtime import ControllerRuntime
-from codex_wake.controller_tab_adapters import TmuxAttachmentTransport
 from codex_wake.process import process_identity
-from codex_wake.tab_profile_create import TabProfileCreate
 
 assert os.getuid()==1017
 root=Path(tempfile.mkdtemp(prefix='wake-profile515-native-'));root.chmod(0o700)
@@ -55,15 +52,16 @@ try:
  tm('set-option','-g','automatic-rename','off')
  # An unrelated local process is deliberately outside the disposable socket.
  unrelated=subprocess.Popen(['sleep','120'])
- owner=TabProfileCreate(wake,host=socket.gethostname(),environment='fixture')
- transport=TmuxAttachmentTransport(sock,'$0')
- target=dict(host=socket.gethostname(),environment='fixture',workspace='fixture')
- actor=Actor('fixture','service','fixture','fixture','https://fixture','https://fixture/controller',frozenset({'observe','control'}),[target],time.time()+60)
- runtime=ControllerRuntime(wake)
- request=dict(profile='fixture',_request=dict(operation_id='native-profile515',idempotency_key='native-profile515',correlation_id='native-profile515',binding='fixture',target=target))
- def dispatch(operation,args):
-  return owner.create(args['profile'],transport=transport,name='selected',cwd=str(workspace),deadline=time.monotonic()+10,guard=lambda:None)
- result=runtime.execute(actor,'tabs.create',request,authorize=lambda:actor,dispatch=dispatch)
+ config=wake/'controller-tabs.json'
+ config.write_text(json.dumps(dict(schema_version=1,workspaces={'fixture':dict(kind='tmux',socket_path=sock,session_id='$0')})));config.chmod(0o600)
+ argv=[str(Path(sys.executable).parent/'codex-wake'),'--wake-root',str(wake),'tabs','create',
+       '--workspace','fixture','--profile','fixture','--name','selected','--cwd',str(workspace),'--request-id','native-profile515']
+ def create():
+  completed=subprocess.run(argv,env=env,cwd=workspace,text=True,capture_output=True,timeout=20)
+  assert completed.returncode==0,(completed.stdout,completed.stderr)
+  return json.loads(completed.stdout)
+ result=create()
+ report['public_cli']=True
  report['operation']=result
  # The public journal retains the exact effect owner's response.
  record=result['result']['operation'];effect=record['result']
@@ -73,7 +71,7 @@ try:
  assert effect['profile_target']['build_sha256']==sha
  assert effect['profile_target']['build_channel']=='modded'
  before=tm('list-windows','-F','#{window_id}')
- repeated=runtime.execute(actor,'tabs.create',request,authorize=lambda:actor,dispatch=lambda *_:(_ for _ in ()).throw(AssertionError('duplicate launch')))
+ repeated=create()
  assert repeated==result and before==tm('list-windows','-F','#{window_id}')
  report['same_key_replay_without_duplicate']=True
  assert process_identity(child['pid'])=={k:v for k,v in child.items() if k!='pid'}
