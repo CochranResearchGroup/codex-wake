@@ -207,8 +207,8 @@
         511,
         368
       ],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/512",
       "worker": "/root/traits505",
       "owned_paths": [
@@ -219,10 +219,14 @@
         "generated reference/help/completion",
         "contract tests"
       ],
-      "validation": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/512-acceptance.json"
+      ],
       "branch": "feat/tab-contract-512",
       "worktree": "/tmp/codex-wake-512",
-      "base": "501e053"
+      "base": "501e053",
+      "worker_result_sha": "43b12b3",
+      "result_sha": "9254f67"
     },
     {
       "key": "continuity",

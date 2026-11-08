@@ -1,0 +1,46 @@
+{
+  "ticket": 512,
+  "status": "passed",
+  "source": "9254f67",
+  "worker": "43b12b3",
+  "prefix": "/tmp/codex-wake-503-installed",
+  "wheel": "/tmp/codex-wake-503-wheels/512-frozen/codex_wake-0.22.0.dev2-py3-none-any.whl",
+  "wheel_sha256": "46b024dcb22d0da66fd3746c0d0fcf6b3dd0523fdbc981cea596fa2833404856",
+  "source_checks": [
+    "51 affected Python3.12 checks PASS25.5s",
+    "25 affected Python3.11 checks PASS19.721s",
+    "generator --check PASS; portable schema/help/completion parity"
+  ],
+  "installed": {
+    "bounded_monitor": true,
+    "local_cli": true,
+    "local_mutation_cli": true,
+    "mcp": true,
+    "module": "/tmp/codex-wake-503-installed/lib/python3.12/site-packages/codex_wake/controller_tabs.py",
+    "native_mcp": true,
+    "oauth_api": true,
+    "observe_cannot_capture": true,
+    "opt_in_policy": true,
+    "real_isolated_tmux": true,
+    "remote_cli": true,
+    "retained_intent": true,
+    "saved_views": true,
+    "status": "passed",
+    "windows_matrix": false,
+    "workspace_recovery_routing": true
+  },
+  "installed_contract": {
+    "command": "PYTHONPATH=/tmp/codex-wake-503/tests /tmp/codex-wake-503-installed/bin/python -m unittest test_tab_contract -q (cwd=/tmp)",
+    "result": "5PASS4.443s",
+    "test_path_only": true,
+    "source_forcing": false,
+    "log": "/tmp/codex-wake-503-512-contract-installed.log"
+  },
+  "bounds": [
+    "Actual PowerShell/native final package matrix remains514.",
+    "Selected profile field is conditional until515 validated; shell create fully supported.",
+    "Raw capture/input retain explicit privacy/custody; no grant preparation needed for ordinary sameUID metadata/lifecycle."
+  ],
+  "provider_calls": 0,
+  "production_effects": false
+}
