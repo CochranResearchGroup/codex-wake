@@ -15,8 +15,8 @@
       "number": 504,
       "title": "Discover existing workspaces with reliable controller defaults",
       "blockers": [],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/504",
       "worker": "/root",
       "owned_paths": [
@@ -26,9 +26,12 @@
         "tests/test_tab_discovery.py",
         "shared registration"
       ],
-      "validation": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/504-acceptance.json"
+      ],
       "worktree": "/tmp/codex-wake-503",
-      "branch": "feat/tab-hardening-503"
+      "branch": "feat/tab-hardening-503",
+      "result_sha": "1b8e6f7"
     },
     {
       "key": "traits",
@@ -206,5 +209,5 @@
     }
   ],
   "dependency_validation": "acyclic, all blocker IDs resolved",
-  "integration_tip": "339124d"
+  "integration_tip": "1b8e6f7"
 }
