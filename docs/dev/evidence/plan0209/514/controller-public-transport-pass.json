@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "bounded_monitor": true,
+  "local_cli": true,
+  "local_mutation_cli": true,
+  "mcp": true,
+  "module": "/tmp/codex-wake-503-native-prefix/lib/python3.12/site-packages/codex_wake/controller_tabs.py",
+  "native_mcp": true,
+  "oauth_api": true,
+  "observe_cannot_capture": true,
+  "opt_in_policy": true,
+  "real_isolated_tmux": true,
+  "remote_cli": true,
+  "retained_intent": true,
+  "saved_views": true,
+  "windows_matrix": false,
+  "workspace_recovery_routing": true,
+  "provenance": "Exact JSON stdout from installed-only controller_tabs_acceptance.py completed exit0 in this qualification; transcribed from tool result."
+}

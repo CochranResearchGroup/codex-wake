@@ -96,6 +96,7 @@ class TabOrganization:
             raise TabError('workspace_store_unavailable', 'private store required')
         self.transport, self.observer, self.authorize = transport, observer, authorize
         self.policy_revision = policy_revision or (lambda: 0)
+        self.criteria = []
 
     @contextmanager
     def locked(self, deadline):
@@ -148,7 +149,7 @@ class TabOrganization:
         evidence = self.observer(max(.001, deadline-time.monotonic())) if self.observer else {}
         from .process import process_identity
         for window in result['windows']:
-            reasons, repos, states = [], [], []
+            reasons, repos, states, observed_traits = [], [], [], []
             if window['focused']: reasons.append('focused')
             if window['linked']: reasons.append('linked')
             if window['window_id'] in pins: reasons.append('explicit')
@@ -181,9 +182,20 @@ class TabOrganization:
                     repo = dict(path=str(common), device=info.st_dev, inode=info.st_ino)
                     repos.append(repo)
                 except (OSError, ValueError, subprocess.SubprocessError, TimeoutError):
-                    reasons.append('unqualified')
+                    if not self.criteria or 'repository' in self.criteria:
+                        reasons.append('unqualified')
                 states.append(sample['state'])
+                observed_traits.append(sample.get('traits',{}))
             if len({digest(r) for r in repos}) > 1: reasons.append('mixed')
+            if self.criteria:
+                window['traits']={}
+                for field in self.criteria:
+                    values=[t.get(field,{}) for t in observed_traits]
+                    qualified=bool(values) and all(v.get('status')=='observed' for v in values)
+                    distinct={str(v.get('value','unknown')) for v in values}
+                    window['traits'][field]=next(iter(distinct)) if qualified and len(distinct)==1 else 'unknown'
+                    if window['traits'][field] in ('unknown','mixed'):
+                        reasons.append('unqualified_traits')
             window['pins'] = sorted(set(reasons))
             window['repository'] = repos[0] if repos and len({digest(r) for r in repos}) == 1 else None
             window['activity'] = min(({'working': 0, 'awaiting-human': 1, 'auth-required': 2,
@@ -192,16 +204,21 @@ class TabOrganization:
             raise TabError('workspace_timeout', 'observation exceeded deadline')
         return result
 
-    def preview(self, *, mode='activity', pins=(), deadline):
-        if mode not in ('activity', 'repository') or not isinstance(pins, (list, tuple)) or any(
+    def preview(self, *, mode='activity', pins=(), criteria=(), deadline):
+        if mode not in ('activity','repository','traits') or not isinstance(pins, (list, tuple)) or any(
                 not isinstance(p, str) or not re.fullmatch(r'@[0-9]+', p) for p in pins):
             raise TabError('workspace_invalid_argument', 'invalid ordering mode or pins')
+        from .tab_views import FIELDS
+        if not isinstance(criteria,(list,tuple)) or any(v not in FIELDS for v in criteria) or (mode=='traits' and not criteria):
+            raise TabError('workspace_invalid_argument','Trait ordering requires supported criteria.')
+        self.criteria=list(criteria) if mode=='traits' else []
         with self.locked(deadline):
             before = self.snapshot(pins, deadline)
             if set(pins) - {w['window_id'] for w in before['windows']}:
                 raise TabError('workspace_invalid_argument', 'pin is outside exact workspace')
             movable = [w for w in before['windows'] if not w['pins']]
             def key(w):
+                if mode=='traits':return tuple(w['traits'][v] for v in self.criteria)+(w['index'],)
                 repo = w['repository']['path']
                 return (w['activity'], repo, w['index']) if mode == 'activity' else (repo, w['activity'], w['index'])
             ordered = iter(sorted(movable, key=key))
@@ -210,13 +227,14 @@ class TabOrganization:
                 selected = window if window['pins'] else next(ordered)
                 target.append(dict(window_id=selected['window_id'], index=window['index'], name=selected['name']))
             plan = dict(version=1, plan_id='plan_' + uuid.uuid4().hex, before=before,
-                        fingerprint=digest(before), pins=list(pins), mode=mode, target=target)
+                        fingerprint=digest(before), pins=list(pins), mode=mode, criteria=self.criteria, target=target)
             self.save(plan['plan_id'], plan)
             return dict(status='preview', plan=plan)
 
     def apply(self, plan_id, *, deadline):
         with self.locked(deadline):
             plan = self.read(plan_id)
+            self.criteria=plan.get('criteria',[])
             if plan.get('receipt_id'):
                 return dict(status='replayed', receipt=self.read(plan['receipt_id']))
             return self.permute(plan, plan['target'], deadline, undo=False)
@@ -229,6 +247,7 @@ class TabOrganization:
             if original['status'] != 'applied':
                 raise TabError('workspace_undo_held', 'only fully observed applied layout may be undone')
             plan = self.read(original['plan_id'])
+            self.criteria=plan.get('criteria',[])
             inverse = dict(plan, before=original['after'], fingerprint=digest(original['after']), undo_parent=receipt_id)
             target = [{k: w[k] for k in ('window_id', 'index', 'name')} for w in plan['before']['windows']]
             result = self.permute(inverse, target, deadline, undo=True)

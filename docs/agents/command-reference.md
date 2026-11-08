@@ -12,6 +12,14 @@ verified caller identity; local CLI and scoped remote caller admission differ.
 Examples use placeholders ROOT, THREAD, TIME, FILE and exact target JSON.
 Resolve fresh targets before execution; empty target objects are never valid pins.
 
+## Tab capability boundaries
+
+- `selected_profile_create`: **conditional**. Use --profile with an existing account selector/alias; requires the qualified selected-profile launch owner. Windows profile creation remains unsupported; no shell fallback or account substitution.
+- `workspace_recovery`: **conditional**. Exact saved conversation identity is required. With --restore-layout, qualified single local interactive shell slots are preserved in separate tabs before coding views resume in their saved positions; busy, pinned or unknown slots hold.
+- `exact_grok_tui_health`: **unsupported**. Grok ACP activity does not prove arbitrary foreground TUI responsiveness.
+- `cross_backend`: **conditional**. Exact saved Codex conversation reattachment requires a qualified destination bridge/profile; unsupported continuity preserves the source.
+- `result`: **supported**. tabs result --request-id reads local UID-owned common journal; remote callers use operations.result.
+
 ## accounts init
 
 Initialize a new private account registry.
@@ -2036,6 +2044,2188 @@ Examples:
 | `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
 | `receipt_id` | yes | Exact prior migration receipt for a qualified rollback. |
 | `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs apply
+
+Apply owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_apply`).
+
+```sh
+codex-wake --wake-root ROOT tabs apply --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs apply [-h] [--arguments ARGUMENTS] [--json]
+                             [--request-id REQUEST_ID]
+                             [--expected-target EXPECTED_TARGET]
+                             [--plan-id PLAN_ID] [--workspace WORKSPACE]
+                             [--socket-path SOCKET_PATH]
+                             [--session-id SESSION_ID]
+                             [--app-server APP_SERVER] [--timeout TIMEOUT]
+                             [--bus-root BUS_ROOT]
+                             [--operator-capability OPERATOR_CAPABILITY]
+                             [--actor-capability ACTOR_CAPABILITY]
+
+Apply owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --plan-id PLAN_ID     Exact retained plan ID from preview.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+  --socket-path SOCKET_PATH
+                        Legacy explicit tmux adapter option.
+  --session-id SESSION_ID
+                        Legacy explicit tmux adapter option.
+  --app-server APP_SERVER
+                        Enrolled native app-server endpoint (default:
+                        unix://).
+  --timeout TIMEOUT
+  --bus-root BUS_ROOT   Existing enrolled mailbox runtime root for caller
+                        verification.
+  --operator-capability OPERATOR_CAPABILITY
+                        Path to the private operator capability; never its
+                        secret contents.
+  --actor-capability ACTOR_CAPABILITY
+
+Examples:
+  codex-wake --wake-root ROOT tabs apply --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `plan_id` | yes | plan id. |
+| `workspace` | yes | workspace. |
+
+## tabs capture
+
+Capture owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_capture`).
+
+```sh
+codex-wake --wake-root ROOT tabs capture --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs capture [-h] [--arguments ARGUMENTS] [--json]
+                               [--request-id REQUEST_ID]
+                               [--expected-target EXPECTED_TARGET]
+                               [--lines LINES] [--pane PANE]
+                               [--workspace WORKSPACE]
+
+Capture owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --lines LINES         Lines.
+  --pane PANE           Exact native pane ID from tabs show (for example %4).
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs capture --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `lines` | no | lines. |
+| `pane` | yes | pane. |
+| `workspace` | yes | workspace. |
+
+## tabs close
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_close`).
+
+```sh
+codex-wake --wake-root ROOT tabs close --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs close [-h] [--arguments ARGUMENTS] [--json]
+                             [--request-id REQUEST_ID]
+                             [--expected-target EXPECTED_TARGET] [--force]
+                             [--dry-run] [--window WINDOW]
+                             [--workspace WORKSPACE]
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --force               Explicitly override supported active/focused guards;
+                        never overrides stale identity.
+  --dry-run             Show/save the frozen selection without native copying
+                        or daemon starts.
+  --window WINDOW       Exact native window ID from tabs list/show (for
+                        example @3); names are not identity pins.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs close --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `force` | no | force. |
+| `preview` | no | Show/save the frozen selection without native copying or daemon starts. |
+| `window` | yes | window. |
+| `workspace` | yes | workspace. |
+
+## tabs create
+
+Create an owned shell tab, or select --profile for a qualified host-owned native profile attachment; no fallback.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_create`).
+
+```sh
+codex-wake --wake-root ROOT tabs create --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs create [-h] [--arguments ARGUMENTS] [--json]
+                              [--request-id REQUEST_ID] [--cwd CWD]
+                              [--expected-target EXPECTED_TARGET]
+                              [--name NAME] [--dry-run] [--profile PROFILE]
+                              [--workspace WORKSPACE]
+
+Create an owned shell tab, or select --profile for a qualified host-owned native profile attachment; no fallback.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --cwd CWD             Cwd.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --name NAME           Name.
+  --dry-run             Show/save the frozen selection without native copying
+                        or daemon starts.
+  --profile PROFILE     Existing account/profile selector or alias; host
+                        registry selects build and home. Unsupported backends
+                        remain held; no shell fallback.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs create --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `cwd` | no | cwd. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `name` | yes | name. |
+| `preview` | no | Show/save the frozen selection without native copying or daemon starts. |
+| `workspace` | yes | workspace. |
+| `profile` | no | profile. |
+
+## tabs focus
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_focus`).
+
+```sh
+codex-wake --wake-root ROOT tabs focus --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs focus [-h] [--arguments ARGUMENTS] [--json]
+                             [--request-id REQUEST_ID]
+                             [--expected-target EXPECTED_TARGET] [--dry-run]
+                             [--window WINDOW] [--workspace WORKSPACE]
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --dry-run             Show/save the frozen selection without native copying
+                        or daemon starts.
+  --window WINDOW       Exact native window ID from tabs list/show (for
+                        example @3); names are not identity pins.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs focus --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `preview` | no | Show/save the frozen selection without native copying or daemon starts. |
+| `window` | yes | window. |
+| `workspace` | yes | workspace. |
+
+## tabs group-delete
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_group_delete`).
+
+```sh
+codex-wake --wake-root ROOT tabs group-delete
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs group-delete [-h] [--arguments ARGUMENTS] [--json]
+                                    [--request-id REQUEST_ID]
+                                    [--expected-target EXPECTED_TARGET]
+                                    [--name NAME]
+                                    [view_name]
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+positional arguments:
+  view_name             Saved logical view or group name.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --name NAME           Name.
+
+Examples:
+  codex-wake --wake-root ROOT tabs group-delete
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `name` | yes | name. |
+
+## tabs group-list
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_group_list`).
+
+```sh
+codex-wake --wake-root ROOT tabs group-list
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs group-list [-h] [--arguments ARGUMENTS] [--json]
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT tabs group-list
+```
+
+## tabs group-save
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_group_save`).
+
+```sh
+codex-wake --wake-root ROOT tabs group-save
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs group-save [-h] [--arguments ARGUMENTS] [--json]
+                                  [--request-id REQUEST_ID]
+                                  [--expected-target EXPECTED_TARGET]
+                                  [--member MEMBERS] [--name NAME]
+                                  [view_name]
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+positional arguments:
+  view_name             Saved logical view or group name.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --member MEMBERS      Stable attachment references from tabs list; repeat
+                        --member.
+  --name NAME           Name.
+
+Examples:
+  codex-wake --wake-root ROOT tabs group-save
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `members` | yes | members. |
+| `name` | yes | name. |
+
+## tabs group-show
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_group_show`).
+
+```sh
+codex-wake --wake-root ROOT tabs group-show
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs group-show [-h] [--arguments ARGUMENTS] [--json]
+                                  [--name NAME]
+                                  [view_name]
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+positional arguments:
+  view_name             Saved logical view or group name.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --name NAME           Name.
+
+Examples:
+  codex-wake --wake-root ROOT tabs group-show
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `name` | yes | name. |
+
+## tabs input
+
+Input owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_input`).
+
+```sh
+codex-wake --wake-root ROOT tabs input --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs input [-h] [--arguments ARGUMENTS] [--json]
+                             [--request-id REQUEST_ID] [--custody CUSTODY]
+                             [--expected-target EXPECTED_TARGET]
+                             [--input INPUT] [--pane PANE]
+                             [--transport {structured,terminal}]
+                             [--workspace WORKSPACE]
+
+Input owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --custody CUSTODY     Exact host input custody object from tabs show; never
+                        grants ownership of another stdin.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --input INPUT         Literal prompt text; only sent through separately
+                        qualified host input custody.
+  --pane PANE           Exact native pane ID from tabs show (for example %4).
+  --transport {structured,terminal}
+                        Explicit qualified input transport; terminal is never
+                        fallback after uncertain structured input.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs input --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `custody` | yes | custody. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `input` | yes | input. |
+| `pane` | yes | pane. |
+| `transport` | yes | transport. |
+| `workspace` | yes | workspace. |
+
+## tabs list
+
+List owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_list`).
+
+```sh
+codex-wake --wake-root ROOT tabs list
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs list [-h] [--arguments ARGUMENTS] [--json]
+
+List owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT tabs list
+```
+
+## tabs monitor refresh
+
+Observe or control the bounded read-only tab monitor.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_monitor_refresh`).
+
+```sh
+codex-wake --wake-root ROOT tabs monitor-refresh
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs monitor-refresh [-h] [--arguments ARGUMENTS] [--json]
+
+Observe or control the bounded read-only tab monitor.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT tabs monitor-refresh
+```
+
+## tabs monitor start
+
+Observe or control the bounded read-only tab monitor.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_monitor_start`).
+
+```sh
+codex-wake --wake-root ROOT tabs monitor-start
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs monitor-start [-h] [--arguments ARGUMENTS] [--json]
+                                     [--request-id REQUEST_ID]
+                                     [--cycle-timeout CYCLE_TIMEOUT]
+                                     [--expected-target EXPECTED_TARGET]
+                                     [--interval INTERVAL]
+                                     [--probe-timeout PROBE_TIMEOUT]
+                                     [--stale-after STALE_AFTER]
+
+Observe or control the bounded read-only tab monitor.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --cycle-timeout CYCLE_TIMEOUT
+                        Cycle timeout.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --interval INTERVAL   Interval.
+  --probe-timeout PROBE_TIMEOUT
+                        Probe timeout.
+  --stale-after STALE_AFTER
+                        Stale after.
+
+Examples:
+  codex-wake --wake-root ROOT tabs monitor-start
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `cycle_timeout` | no | cycle timeout. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `interval` | no | interval. |
+| `probe_timeout` | no | probe timeout. |
+| `stale_after` | no | stale after. |
+
+## tabs monitor status
+
+Observe or control the bounded read-only tab monitor.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_monitor_status`).
+
+```sh
+codex-wake --wake-root ROOT tabs monitor-status
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs monitor-status [-h] [--arguments ARGUMENTS] [--json]
+
+Observe or control the bounded read-only tab monitor.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT tabs monitor-status
+```
+
+## tabs monitor stop
+
+Observe or control the bounded read-only tab monitor.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_monitor_stop`).
+
+```sh
+codex-wake --wake-root ROOT tabs monitor-stop
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs monitor-stop [-h] [--arguments ARGUMENTS] [--json]
+                                    [--request-id REQUEST_ID]
+                                    [--expected-target EXPECTED_TARGET]
+                                    [--timeout TIMEOUT]
+
+Observe or control the bounded read-only tab monitor.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --timeout TIMEOUT     Timeout.
+
+Examples:
+  codex-wake --wake-root ROOT tabs monitor-stop
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `timeout` | no | timeout. |
+
+## tabs move
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_move`).
+
+```sh
+codex-wake --wake-root ROOT tabs move --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs move [-h] [--arguments ARGUMENTS] [--json]
+                            [--request-id REQUEST_ID]
+                            [--destination DESTINATION]
+                            [--expected-destination EXPECTED_DESTINATION]
+                            [--expected-target EXPECTED_TARGET] [--force]
+                            [--index INDEX] [--dry-run] [--window WINDOW]
+                            [--workspace WORKSPACE]
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --destination DESTINATION
+                        Destination account for a distinct source-preserving
+                        conversation copy.
+  --expected-destination EXPECTED_DESTINATION
+                        Exact destination target; ordinary local CLI resolves
+                        it.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --force               Explicitly override supported active/focused guards;
+                        never overrides stale identity.
+  --index INDEX         Index.
+  --dry-run             Show/save the frozen selection without native copying
+                        or daemon starts.
+  --window WINDOW       Exact native window ID from tabs list/show (for
+                        example @3); names are not identity pins.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs move --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `destination` | yes | Destination account for a distinct source-preserving conversation copy. |
+| `expected_destination` | yes | expected destination. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `force` | no | force. |
+| `index` | no | index. |
+| `preview` | no | Show/save the frozen selection without native copying or daemon starts. |
+| `window` | yes | window. |
+| `workspace` | yes | workspace. |
+
+## tabs park
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_park`).
+
+```sh
+codex-wake --wake-root ROOT tabs park --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs park [-h] [--arguments ARGUMENTS] [--json]
+                            [--request-id REQUEST_ID]
+                            [--destination DESTINATION]
+                            [--expected-destination EXPECTED_DESTINATION]
+                            [--expected-target EXPECTED_TARGET] [--force]
+                            [--dry-run] [--window WINDOW]
+                            [--workspace WORKSPACE]
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --destination DESTINATION
+                        Destination account for a distinct source-preserving
+                        conversation copy.
+  --expected-destination EXPECTED_DESTINATION
+                        Exact destination target; ordinary local CLI resolves
+                        it.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --force               Explicitly override supported active/focused guards;
+                        never overrides stale identity.
+  --dry-run             Show/save the frozen selection without native copying
+                        or daemon starts.
+  --window WINDOW       Exact native window ID from tabs list/show (for
+                        example @3); names are not identity pins.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs park --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `destination` | yes | Destination account for a distinct source-preserving conversation copy. |
+| `expected_destination` | yes | expected destination. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `force` | no | force. |
+| `preview` | no | Show/save the frozen selection without native copying or daemon starts. |
+| `window` | yes | window. |
+| `workspace` | yes | workspace. |
+
+## tabs policy configure
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_policy_configure`).
+
+```sh
+codex-wake --wake-root ROOT tabs policy-configure --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs policy-configure [-h] [--arguments ARGUMENTS] [--json]
+                                        [--request-id REQUEST_ID]
+                                        [--criterion CRITERIA]
+                                        [--debounce-seconds DEBOUNCE_SECONDS]
+                                        [--expected-target EXPECTED_TARGET]
+                                        [--max-swaps-per-tick MAX_SWAPS_PER_TICK]
+                                        [--min-interval-seconds MIN_INTERVAL_SECONDS]
+                                        [--mode MODE] [--pin PINS]
+                                        [--stale-after-seconds STALE_AFTER_SECONDS]
+                                        [--view VIEW] [--workspace WORKSPACE]
+                                        [--group-by GROUP_BY]
+                                        [--sort-by SORT_BY]
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --criterion CRITERIA  Layered trait ordering criterion; repeat --criterion.
+  --debounce-seconds DEBOUNCE_SECONDS
+                        Debounce seconds.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --max-swaps-per-tick MAX_SWAPS_PER_TICK
+                        Max swaps per tick.
+  --min-interval-seconds MIN_INTERVAL_SECONDS
+                        Min interval seconds.
+  --mode MODE           Create an independent private configuration snapshot;
+                        legacy creation remains the default.
+  --pin PINS            Pins.
+  --stale-after-seconds STALE_AFTER_SECONDS
+                        Stale after seconds.
+  --view VIEW           View.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+  --group-by GROUP_BY   Layered grouping trait; repeat in order.
+  --sort-by SORT_BY     Layered sorting trait; repeat in order.
+
+Examples:
+  codex-wake --wake-root ROOT tabs policy-configure --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `criteria` | no | criteria. |
+| `debounce_seconds` | no | debounce seconds. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `max_swaps_per_tick` | no | max swaps per tick. |
+| `min_interval_seconds` | no | min interval seconds. |
+| `mode` | no | Create an independent private configuration snapshot; legacy creation remains the default. |
+| `pins` | no | pins. |
+| `stale_after_seconds` | no | stale after seconds. |
+| `view` | no | view. |
+| `workspace` | yes | workspace. |
+
+## tabs policy disable
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_policy_disable`).
+
+```sh
+codex-wake --wake-root ROOT tabs policy-disable
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs policy-disable [-h] [--arguments ARGUMENTS] [--json]
+                                      [--request-id REQUEST_ID]
+                                      [--expected-target EXPECTED_TARGET]
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+
+Examples:
+  codex-wake --wake-root ROOT tabs policy-disable
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+
+## tabs policy enable
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_policy_enable`).
+
+```sh
+codex-wake --wake-root ROOT tabs policy-enable
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs policy-enable [-h] [--arguments ARGUMENTS] [--json]
+                                     [--request-id REQUEST_ID]
+                                     [--acknowledge-pending]
+                                     [--expected-target EXPECTED_TARGET]
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --acknowledge-pending
+                        Acknowledge pending.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+
+Examples:
+  codex-wake --wake-root ROOT tabs policy-enable
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `acknowledge_pending` | no | acknowledge pending. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+
+## tabs policy pause
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_policy_pause`).
+
+```sh
+codex-wake --wake-root ROOT tabs policy-pause
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs policy-pause [-h] [--arguments ARGUMENTS] [--json]
+                                    [--request-id REQUEST_ID]
+                                    [--expected-target EXPECTED_TARGET]
+                                    [--reason REASON]
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --reason REASON       Reason.
+
+Examples:
+  codex-wake --wake-root ROOT tabs policy-pause
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `reason` | no | reason. |
+
+## tabs policy status
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_policy_status`).
+
+```sh
+codex-wake --wake-root ROOT tabs policy-status
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs policy-status [-h] [--arguments ARGUMENTS] [--json]
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT tabs policy-status
+```
+
+## tabs policy tick
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_policy_tick`).
+
+```sh
+codex-wake --wake-root ROOT tabs policy-tick
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs policy-tick [-h] [--arguments ARGUMENTS] [--json]
+                                   [--request-id REQUEST_ID]
+                                   [--expected-target EXPECTED_TARGET]
+
+Opt-in bounded physical organization; preserve manual changes.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+
+Examples:
+  codex-wake --wake-root ROOT tabs policy-tick
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+
+## tabs preview
+
+Preview owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_preview`).
+
+```sh
+codex-wake --wake-root ROOT tabs preview --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs preview [-h] [--arguments ARGUMENTS] [--json]
+                               [--request-id REQUEST_ID]
+                               [--criterion CRITERIA]
+                               [--expected-target EXPECTED_TARGET]
+                               [--mode {activity,repository,traits}]
+                               [--pin PINS] [--workspace WORKSPACE]
+                               [--group-by GROUP_BY] [--sort-by SORT_BY]
+                               [--socket-path SOCKET_PATH]
+                               [--session-id SESSION_ID]
+                               [--app-server APP_SERVER] [--timeout TIMEOUT]
+                               [--bus-root BUS_ROOT]
+                               [--operator-capability OPERATOR_CAPABILITY]
+                               [--actor-capability ACTOR_CAPABILITY]
+
+Preview owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --criterion CRITERIA  Layered trait ordering criterion; repeat --criterion.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --mode {activity,repository,traits}
+                        Create an independent private configuration snapshot;
+                        legacy creation remains the default.
+  --pin PINS            Pins.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+  --group-by GROUP_BY   Layered grouping trait; repeat in order.
+  --sort-by SORT_BY     Layered sorting trait; repeat in order.
+  --socket-path SOCKET_PATH
+                        Legacy explicit tmux adapter option.
+  --session-id SESSION_ID
+                        Legacy explicit tmux adapter option.
+  --app-server APP_SERVER
+                        Enrolled native app-server endpoint (default:
+                        unix://).
+  --timeout TIMEOUT
+  --bus-root BUS_ROOT   Existing enrolled mailbox runtime root for caller
+                        verification.
+  --operator-capability OPERATOR_CAPABILITY
+                        Path to the private operator capability; never its
+                        secret contents.
+  --actor-capability ACTOR_CAPABILITY
+
+Examples:
+  codex-wake --wake-root ROOT tabs preview --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `criteria` | no | criteria. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `mode` | no | Create an independent private configuration snapshot; legacy creation remains the default. |
+| `pins` | no | pins. |
+| `workspace` | yes | workspace. |
+
+## tabs reattach-apply
+
+Reattach the exact saved conversation; retain source by default and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_reattach_apply`).
+
+```sh
+codex-wake --wake-root ROOT tabs reattach-apply
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs reattach-apply [-h] [--arguments ARGUMENTS] [--json]
+                                      [--request-id REQUEST_ID]
+                                      [--expected-target EXPECTED_TARGET]
+                                      [--plan-id PLAN_ID]
+
+Reattach the exact saved conversation; retain source by default and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --plan-id PLAN_ID     Exact retained plan ID from preview.
+
+Examples:
+  codex-wake --wake-root ROOT tabs reattach-apply
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `plan_id` | yes | plan id. |
+
+## tabs reattach-preview
+
+Reattach the exact saved conversation; retain source by default and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_reattach_preview`).
+
+```sh
+codex-wake --wake-root ROOT tabs reattach-preview --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs reattach-preview [-h] [--arguments ARGUMENTS] [--json]
+                                        [--request-id REQUEST_ID]
+                                        [--destination DESTINATION]
+                                        [--expected-destination EXPECTED_DESTINATION]
+                                        [--expected-target EXPECTED_TARGET]
+                                        [--force] [--retire-source]
+                                        [--window WINDOW]
+                                        [--workspace WORKSPACE]
+
+Reattach the exact saved conversation; retain source by default and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --destination DESTINATION
+                        Destination account for a distinct source-preserving
+                        conversation copy.
+  --expected-destination EXPECTED_DESTINATION
+                        Exact destination target; ordinary local CLI resolves
+                        it.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --force               Explicitly override supported active/focused guards;
+                        never overrides stale identity.
+  --retire-source       Retire source only after exact destination
+                        verification; default retains source.
+  --window WINDOW       Exact native window ID from tabs list/show (for
+                        example @3); names are not identity pins.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs reattach-preview --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `destination` | yes | Destination account for a distinct source-preserving conversation copy. |
+| `expected_destination` | yes | expected destination. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `force` | no | force. |
+| `retire_source` | no | retire source. |
+| `window` | yes | window. |
+| `workspace` | yes | workspace. |
+
+## tabs reattach-status
+
+Reattach the exact saved conversation; retain source by default and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_reattach_status`).
+
+```sh
+codex-wake --wake-root ROOT tabs reattach-status
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs reattach-status [-h] [--arguments ARGUMENTS] [--json]
+                                       [--expected-target EXPECTED_TARGET]
+                                       [--plan-id PLAN_ID]
+
+Reattach the exact saved conversation; retain source by default and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --plan-id PLAN_ID     Exact retained plan ID from preview.
+
+Examples:
+  codex-wake --wake-root ROOT tabs reattach-status
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `expected_target` | no | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `plan_id` | yes | plan id. |
+
+## tabs recovery apply
+
+Capture or restore exact workspace conversations; unknown historical mappings remain held.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_recovery_apply`).
+
+```sh
+codex-wake --wake-root ROOT tabs recovery-apply --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs recovery-apply [-h] [--arguments ARGUMENTS] [--json]
+                                      [--request-id REQUEST_ID]
+                                      [--capture-id CAPTURE_ID]
+                                      [--expected-target EXPECTED_TARGET]
+                                      [--intent INTENT] [--restore-layout]
+                                      [--workspace WORKSPACE]
+
+Capture or restore exact workspace conversations; unknown historical mappings remain held.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --capture-id CAPTURE_ID
+                        Durable whole-workspace capture identifier.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --intent INTENT       Existing exact-owner resume intent; does not grant new
+                        work authority.
+  --restore-layout      Restore missing exact captured conversations into the
+                        selected recreated workspace.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs recovery-apply --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `capture_id` | yes | capture id. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `intent` | yes | Existing exact-owner resume intent; does not grant new work authority. |
+| `restore_layout` | no | restore layout. |
+| `workspace` | yes | workspace. |
+
+## tabs recovery capture
+
+Capture or restore exact workspace conversations; unknown historical mappings remain held.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_recovery_capture`).
+
+```sh
+codex-wake --wake-root ROOT tabs recovery-capture --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs recovery-capture [-h] [--arguments ARGUMENTS] [--json]
+                                        [--request-id REQUEST_ID]
+                                        [--capture-id CAPTURE_ID]
+                                        [--expected-target EXPECTED_TARGET]
+                                        [--workspace WORKSPACE]
+
+Capture or restore exact workspace conversations; unknown historical mappings remain held.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --capture-id CAPTURE_ID
+                        Durable whole-workspace capture identifier.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs recovery-capture --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `capture_id` | no | capture id. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `workspace` | yes | workspace. |
+
+## tabs recovery preview
+
+Capture or restore exact workspace conversations; unknown historical mappings remain held.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_recovery_preview`).
+
+```sh
+codex-wake --wake-root ROOT tabs recovery-preview --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs recovery-preview [-h] [--arguments ARGUMENTS] [--json]
+                                        [--capture-id CAPTURE_ID]
+                                        [--restore-layout]
+                                        [--workspace WORKSPACE]
+
+Capture or restore exact workspace conversations; unknown historical mappings remain held.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --capture-id CAPTURE_ID
+                        Durable whole-workspace capture identifier.
+  --restore-layout      Restore missing exact captured conversations into the
+                        selected recreated workspace.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs recovery-preview --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `capture_id` | yes | capture id. |
+| `restore_layout` | no | restore layout. |
+| `workspace` | yes | workspace. |
+
+## tabs recovery status
+
+Capture or restore exact workspace conversations; unknown historical mappings remain held.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_recovery_status`).
+
+```sh
+codex-wake --wake-root ROOT tabs recovery-status
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs recovery-status [-h] [--arguments ARGUMENTS] [--json]
+                                       [--capture-id CAPTURE_ID]
+                                       [--intent INTENT]
+
+Capture or restore exact workspace conversations; unknown historical mappings remain held.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --capture-id CAPTURE_ID
+                        Durable whole-workspace capture identifier.
+  --intent INTENT       Existing exact-owner resume intent; does not grant new
+                        work authority.
+
+Examples:
+  codex-wake --wake-root ROOT tabs recovery-status
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `capture_id` | no | capture id. |
+| `intent` | no | Existing exact-owner resume intent; does not grant new work authority. |
+
+## tabs rename
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_rename`).
+
+```sh
+codex-wake --wake-root ROOT tabs rename --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs rename [-h] [--arguments ARGUMENTS] [--json]
+                              [--request-id REQUEST_ID]
+                              [--expected-target EXPECTED_TARGET]
+                              [--name NAME] [--dry-run] [--window WINDOW]
+                              [--workspace WORKSPACE]
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --name NAME           Name.
+  --dry-run             Show/save the frozen selection without native copying
+                        or daemon starts.
+  --window WINDOW       Exact native window ID from tabs list/show (for
+                        example @3); names are not identity pins.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs rename --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `name` | yes | name. |
+| `preview` | no | Show/save the frozen selection without native copying or daemon starts. |
+| `window` | yes | window. |
+| `workspace` | yes | workspace. |
+
+## tabs restore
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_restore`).
+
+```sh
+codex-wake --wake-root ROOT tabs restore --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs restore [-h] [--arguments ARGUMENTS] [--json]
+                               [--request-id REQUEST_ID]
+                               [--destination DESTINATION]
+                               [--expected-destination EXPECTED_DESTINATION]
+                               [--expected-target EXPECTED_TARGET] [--force]
+                               [--dry-run] [--receipt-id RECEIPT_ID]
+                               [--window WINDOW] [--workspace WORKSPACE]
+
+Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --destination DESTINATION
+                        Destination account for a distinct source-preserving
+                        conversation copy.
+  --expected-destination EXPECTED_DESTINATION
+                        Exact destination target; ordinary local CLI resolves
+                        it.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --force               Explicitly override supported active/focused guards;
+                        never overrides stale identity.
+  --dry-run             Show/save the frozen selection without native copying
+                        or daemon starts.
+  --receipt-id RECEIPT_ID
+                        Exact prior migration receipt for a qualified
+                        rollback.
+  --window WINDOW       Exact native window ID from tabs list/show (for
+                        example @3); names are not identity pins.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs restore --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `destination` | yes | Destination account for a distinct source-preserving conversation copy. |
+| `expected_destination` | yes | expected destination. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `force` | no | force. |
+| `preview` | no | Show/save the frozen selection without native copying or daemon starts. |
+| `receipt_id` | yes | Exact prior migration receipt for a qualified rollback. |
+| `window` | yes | window. |
+| `workspace` | yes | workspace. |
+
+## tabs show
+
+Show owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_show`).
+
+```sh
+codex-wake --wake-root ROOT tabs show --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs show [-h] [--arguments ARGUMENTS] [--json]
+                            [--selector SELECTOR] [--workspace WORKSPACE]
+                            [--socket-path SOCKET_PATH]
+                            [--session-id SESSION_ID]
+                            [--app-server APP_SERVER] [--timeout TIMEOUT]
+                            [--bus-root BUS_ROOT]
+                            [--operator-capability OPERATOR_CAPABILITY]
+                            [--actor-capability ACTOR_CAPABILITY]
+                            [--plan-id PLAN_ID] [--receipt-id RECEIPT_ID]
+
+Show owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --selector SELECTOR   Account name or configured alias.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+  --socket-path SOCKET_PATH
+                        Legacy explicit tmux adapter option.
+  --session-id SESSION_ID
+                        Legacy explicit tmux adapter option.
+  --app-server APP_SERVER
+                        Enrolled native app-server endpoint (default:
+                        unix://).
+  --timeout TIMEOUT
+  --bus-root BUS_ROOT   Existing enrolled mailbox runtime root for caller
+                        verification.
+  --operator-capability OPERATOR_CAPABILITY
+                        Path to the private operator capability; never its
+                        secret contents.
+  --actor-capability ACTOR_CAPABILITY
+  --plan-id PLAN_ID
+  --receipt-id RECEIPT_ID
+                        Exact prior migration receipt for a qualified
+                        rollback.
+
+Examples:
+  codex-wake --wake-root ROOT tabs show --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `selector` | no | Account name or configured alias. |
+| `workspace` | yes | workspace. |
+
+## tabs undo
+
+Undo owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_undo`).
+
+```sh
+codex-wake --wake-root ROOT tabs undo --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs undo [-h] [--arguments ARGUMENTS] [--json]
+                            [--request-id REQUEST_ID]
+                            [--expected-target EXPECTED_TARGET]
+                            [--receipt-id RECEIPT_ID] [--workspace WORKSPACE]
+                            [--socket-path SOCKET_PATH]
+                            [--session-id SESSION_ID]
+                            [--app-server APP_SERVER] [--timeout TIMEOUT]
+                            [--bus-root BUS_ROOT]
+                            [--operator-capability OPERATOR_CAPABILITY]
+                            [--actor-capability ACTOR_CAPABILITY]
+
+Undo owned attachments; automatic same-user discovery, exact identities, no input ownership implied.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --receipt-id RECEIPT_ID
+                        Exact prior migration receipt for a qualified
+                        rollback.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+  --socket-path SOCKET_PATH
+                        Legacy explicit tmux adapter option.
+  --session-id SESSION_ID
+                        Legacy explicit tmux adapter option.
+  --app-server APP_SERVER
+                        Enrolled native app-server endpoint (default:
+                        unix://).
+  --timeout TIMEOUT
+  --bus-root BUS_ROOT   Existing enrolled mailbox runtime root for caller
+                        verification.
+  --operator-capability OPERATOR_CAPABILITY
+                        Path to the private operator capability; never its
+                        secret contents.
+  --actor-capability ACTOR_CAPABILITY
+
+Examples:
+  codex-wake --wake-root ROOT tabs undo --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `receipt_id` | yes | Exact prior migration receipt for a qualified rollback. |
+| `workspace` | yes | workspace. |
+
+## tabs view-delete
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_view_delete`).
+
+```sh
+codex-wake --wake-root ROOT tabs view-delete
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs view-delete [-h] [--arguments ARGUMENTS] [--json]
+                                   [--request-id REQUEST_ID]
+                                   [--expected-target EXPECTED_TARGET]
+                                   [--name NAME]
+                                   [view_name]
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+positional arguments:
+  view_name             Saved logical view or group name.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --name NAME           Name.
+
+Examples:
+  codex-wake --wake-root ROOT tabs view-delete
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `name` | yes | name. |
+
+## tabs view-evaluate
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_view_evaluate`).
+
+```sh
+codex-wake --wake-root ROOT tabs view-evaluate
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs view-evaluate [-h] [--arguments ARGUMENTS] [--json]
+                                     [--name NAME]
+                                     [view_name]
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+positional arguments:
+  view_name             Saved logical view or group name.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --name NAME           Name.
+
+Examples:
+  codex-wake --wake-root ROOT tabs view-evaluate
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `name` | yes | name. |
+
+## tabs view-list
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_view_list`).
+
+```sh
+codex-wake --wake-root ROOT tabs view-list
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs view-list [-h] [--arguments ARGUMENTS] [--json]
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT tabs view-list
+```
+
+## tabs view-save
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_view_save`).
+
+```sh
+codex-wake --wake-root ROOT tabs view-save
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs view-save [-h] [--arguments ARGUMENTS] [--json]
+                                 [--request-id REQUEST_ID]
+                                 [--definition DEFINITION]
+                                 [--expected-target EXPECTED_TARGET]
+                                 [--name NAME] [--group-by GROUP_BY]
+                                 [--sort-by SORT_BY] [--filter FILTERS]
+                                 [--group GROUP]
+                                 [view_name]
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+positional arguments:
+  view_name             Saved logical view or group name.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --definition DEFINITION
+                        Advanced saved view JSON; ordinary CLI offers
+                        --filter/--group-by/--sort-by.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --name NAME           Name.
+  --group-by GROUP_BY   Layered grouping trait; repeat in order.
+  --sort-by SORT_BY     Layered sorting trait; repeat in order.
+  --filter FILTERS      Read-only trait=value filter.
+  --group GROUP         Saved named group restriction.
+
+Examples:
+  codex-wake --wake-root ROOT tabs view-save
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `definition` | yes | definition. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `name` | yes | name. |
+
+## tabs view-show
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_view_show`).
+
+```sh
+codex-wake --wake-root ROOT tabs view-show
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs view-show [-h] [--arguments ARGUMENTS] [--json]
+                                 [--name NAME]
+                                 [view_name]
+
+Inspect or update logical tab group/view definitions without moving attachments.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+positional arguments:
+  view_name             Saved logical view or group name.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --name NAME           Name.
+
+Examples:
+  codex-wake --wake-root ROOT tabs view-show
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `name` | yes | name. |
+
+## tabs result
+
+Read a retained local UID-owned tab request after disconnect or workspace closure.
+
+Local CLI shortcut for authenticated common operations.result; no live workspace or new effect.
+
+Transport: Local human CLI only.
+
+```sh
+codex-wake --wake-root ROOT tabs result --request-id REQUEST
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs result [-h] --request-id REQUEST_ID [--json]
+
+Read a retained local UID-owned tab request after disconnect or workspace closure.
+
+Local CLI shortcut for authenticated common operations.result; no live workspace or new effect.
+
+options:
+  -h, --help            show this help message and exit
+  --request-id REQUEST_ID
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT tabs result --request-id REQUEST
+```
 
 
 ## Local session controller

@@ -1,0 +1,367 @@
+{
+  "schema_version": 1,
+  "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/503",
+  "branch": "feat/tab-hardening-503",
+  "base": "20e396b5aa469ed814c123218cc356a68b229936",
+  "review": {
+    "broad_limit": 1,
+    "broad_used": 1,
+    "remediation_limit": 1,
+    "remediation_used": 1,
+    "status": "complete; zero remaining blocking findings",
+    "fixed_point": "20e396b5aa469ed814c123218cc356a68b229936",
+    "product_source": "4d22a56",
+    "frozen_head": "c63c5075ac4e3f78f29917256e718030fbba819a",
+    "findings": [
+      {
+        "id": "S1",
+        "axis": "Standards",
+        "classification": "nonblocking_backlog",
+        "priority": "P3",
+        "subject": "Projection helper externally mutates owner probe budget"
+      },
+      {
+        "id": "S2",
+        "axis": "Standards",
+        "classification": "nonblocking_backlog",
+        "priority": "P3",
+        "subject": "Recovery imports private generic storage/monitor lock helpers"
+      },
+      {
+        "id": "F1",
+        "axis": "Spec",
+        "classification": "blocking",
+        "priority": "P1",
+        "subject": "Safely reconcile restored layout shell slots",
+        "resolution": "resolved in single bounded TDD pass"
+      },
+      {
+        "id": "F2",
+        "axis": "Spec",
+        "classification": "blocking",
+        "priority": "P2",
+        "subject": "Resolved visible errors must not remain current",
+        "resolution": "resolved in single bounded TDD pass"
+      },
+      {
+        "id": "F3",
+        "axis": "Spec",
+        "classification": "blocking",
+        "priority": "P2",
+        "subject": "Selected-profile completion must verify foreground client rather than backend",
+        "resolution": "resolved in single bounded TDD pass"
+      }
+    ],
+    "report": "docs/dev/evidence/plan0209/review.md",
+    "final_product_source": "94012f3",
+    "validation": "docs/dev/evidence/plan0209/remediation/validation.json"
+  },
+  "tickets": [
+    {
+      "key": "discover",
+      "number": 504,
+      "title": "Discover existing workspaces with reliable controller defaults",
+      "blockers": [],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/504",
+      "worker": "/root",
+      "owned_paths": [
+        "controller_tabs.py",
+        "tab_commands.py",
+        "tab_workspace_discovery.py",
+        "tests/test_tab_discovery.py",
+        "shared registration"
+      ],
+      "validation": [
+        "docs/dev/evidence/plan0209/504-acceptance.json"
+      ],
+      "worktree": "/tmp/codex-wake-503",
+      "branch": "feat/tab-hardening-503",
+      "result_sha": "1b8e6f7"
+    },
+    {
+      "key": "traits",
+      "number": 505,
+      "title": "Observe rich tab traits independently of activity health and visible errors",
+      "blockers": [],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/505",
+      "worker": "/root/traits505",
+      "owned_paths": [
+        "tab_traits.py",
+        "tab_traits_commands.py",
+        "tests/test_tab_traits.py"
+      ],
+      "validation": [
+        "docs/dev/evidence/plan0209/505506-acceptance.json",
+        "28 affected PASS Python3.11 and3.12",
+        "docs/dev/evidence/plan0209/review.md; accepted behavior finding resolved; final package validation separately attributed"
+      ],
+      "worktree": "/tmp/codex-wake-505",
+      "branch": "feat/tab-traits-505",
+      "result_sha": "8b585db",
+      "worker_result_sha": "309decb"
+    },
+    {
+      "key": "lifecycle",
+      "number": 506,
+      "title": "Create rename focus move park restore and close exact tabs",
+      "blockers": [],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/506",
+      "worker": "/root/lifecycle506",
+      "owned_paths": [
+        "tab_lifecycle.py",
+        "tests/test_tab_lifecycle.py"
+      ],
+      "validation": [
+        "docs/dev/evidence/plan0209/505506-acceptance.json",
+        "28 affected PASS Python3.11 and3.12"
+      ],
+      "worktree": "/tmp/codex-wake-506",
+      "branch": "feat/tab-lifecycle-506",
+      "result_sha": "8b585db",
+      "worker_result_sha": "c32d248"
+    },
+    {
+      "key": "views",
+      "number": 507,
+      "title": "Apply useful trait-based grouping and saved views with conditional undo",
+      "blockers": [
+        504,
+        505
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/507",
+      "worker": "/root",
+      "owned_paths": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/507508-acceptance.json",
+        "44PASS Python3.11(19.921s)/3.12(18.987s)"
+      ],
+      "result_sha": "a9a4fc2"
+    },
+    {
+      "key": "monitor",
+      "number": 508,
+      "title": "Maintain bounded tab observations and expose refresh freshness and status",
+      "blockers": [
+        505
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/508",
+      "worker": "/root/traits505",
+      "owned_paths": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/507508-acceptance.json",
+        "44PASS Python3.11(19.921s)/3.12(18.987s)"
+      ],
+      "result_sha": "a9a4fc2"
+    },
+    {
+      "key": "psmux",
+      "number": 509,
+      "title": "Qualify Windows psmux discovery traits and manual lifecycle from WSL and PowerShell",
+      "blockers": [
+        504,
+        505,
+        506
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/509",
+      "worker": "/root/lifecycle506",
+      "owned_paths": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/509-acceptance.json"
+      ],
+      "worker_result_sha": "dbc9176",
+      "result_sha": "6f1344b"
+    },
+    {
+      "key": "reattach",
+      "number": 510,
+      "title": "Reattach the same saved conversation across terminal backends safely",
+      "blockers": [
+        506,
+        509
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/510",
+      "worker": "/root/lifecycle506",
+      "owned_paths": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/510-acceptance.json"
+      ],
+      "branch": "feat/tab-reattach-510",
+      "worktree": "/tmp/codex-wake-510",
+      "worker_result_sha": "89d57f4",
+      "result_sha": "75edf4f"
+    },
+    {
+      "key": "recovery",
+      "number": 368,
+      "title": "Connect Byobu reboot restore to durable exact-conversation recovery",
+      "blockers": [
+        504,
+        506
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/368",
+      "worker": "/root/traits505",
+      "owned_paths": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/368-acceptance.json",
+        "docs/dev/evidence/plan0209/review.md; accepted behavior finding resolved; final package validation separately attributed"
+      ],
+      "worker_result_sha": "f50fb6f",
+      "result_sha": "7aba5a8"
+    },
+    {
+      "key": "auto",
+      "number": 511,
+      "title": "Offer opt-in physical organization with manual precedence and visible pause",
+      "blockers": [
+        507,
+        508,
+        506
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/511",
+      "worker": "/root/lifecycle506",
+      "owned_paths": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/511-acceptance.json"
+      ],
+      "result_sha": "7aba5a8",
+      "worker_result_sha": "a378033"
+    },
+    {
+      "key": "contract",
+      "number": 512,
+      "title": "Expose tab workflows through typed CLI API MCP help and completion",
+      "blockers": [
+        507,
+        508,
+        509,
+        510,
+        511,
+        368
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/512",
+      "worker": "/root/traits505",
+      "owned_paths": [
+        "tab_commands.py",
+        "tab_organization_commands.py",
+        "tab_contract.py",
+        "command_contract.py",
+        "generated reference/help/completion",
+        "contract tests"
+      ],
+      "validation": [
+        "docs/dev/evidence/plan0209/512-acceptance.json"
+      ],
+      "branch": "feat/tab-contract-512",
+      "worktree": "/tmp/codex-wake-512",
+      "base": "501e053",
+      "worker_result_sha": "43b12b3",
+      "result_sha": "9254f67"
+    },
+    {
+      "key": "continuity",
+      "number": 513,
+      "title": "Preserve session control and reconcile existing acceptance ownership",
+      "blockers": [
+        512
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/513",
+      "worker": "/root",
+      "owned_paths": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/513-continuity.md",
+        "56 normally installed affected controls PASS; existing provider evidence explicitly inherited"
+      ],
+      "result_sha": "4d22a56"
+    },
+    {
+      "key": "acceptance",
+      "number": 514,
+      "title": "Qualify the exact installed tab hardening workflow across callers and backends",
+      "blockers": [
+        512,
+        513,
+        515
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/514",
+      "worker": "/root/traits505",
+      "owned_paths": [
+        "qualification scripts",
+        "docs/dev/evidence/plan0209/514-*"
+      ],
+      "validation": [
+        "docs/dev/evidence/plan0209/514/installed-matrix.json",
+        "retained receipt hashes verified; all281 installed Pythonmembers identical",
+        "F821/F822/F823 +4 harnesssyntax +diffcheck PASS",
+        "frozen full311/312 still running independently; no failuremarkers at checkpoint",
+        "docs/dev/evidence/plan0209/review.md; accepted behavior finding resolved; final package validation separately attributed"
+      ],
+      "base": "bfded49",
+      "branch": "feat/tab-qualification-514",
+      "worktree": "/tmp/codex-wake-514",
+      "worker_result_sha": "2a7caa4",
+      "result_sha": "a8d6682"
+    },
+    {
+      "key": "profile-create",
+      "number": 515,
+      "title": "Create a tab with an exact selected coding profile",
+      "blockers": [
+        504,
+        506
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/515",
+      "worker": "/root/lifecycle506",
+      "branch": "feat/tab-profile-create-515",
+      "worktree": "/tmp/codex-wake-515",
+      "base": "103ce77",
+      "owned_paths": [
+        "tab_profile_create.py",
+        "profilecreate tests"
+      ],
+      "validation": [
+        "docs/dev/evidence/plan0209/515-acceptance.json",
+        "docs/dev/evidence/plan0209/review.md; accepted behavior finding resolved; final package validation separately attributed"
+      ],
+      "result_sha": "4d22a56",
+      "worker_result_sha": "4a374a8"
+    }
+  ],
+  "dependency_validation": "acyclic, all blocker IDs resolved",
+  "integration_tip": "94012f3",
+  "status": "validated integration; tickets closed; review and bounded remediation complete; merge/deployment separate",
+  "pull_request": "https://github.com/CochranResearchGroup/codex-wake/pull/516",
+  "parent_tracker_state": "CLOSED",
+  "memory_disposition": {
+    "status": "forbidden",
+    "reason": "Memory writes were not authorized.",
+    "receipt": "/tmp/codex-wake-503-memory-disposition.json"
+  },
+  "validated_product_source": "94012f3",
+  "publication_checkpoint": "f3e915578a0b11ccd94ec6f661b417128447834e; subsequent changes only closeout documentation"
+}

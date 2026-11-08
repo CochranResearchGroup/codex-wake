@@ -1464,3 +1464,31 @@ CLOSED implementation/qualification: [spec #488](https://github.com/CochranResea
 ## P206 | Stable user controller defaults
 
 CLOSED: [#498](https://github.com/CochranResearchGroup/codex-wake/issues/498), [Plan0206](docs/dev/plans/0206-2026-11-07-default-controller-location.md). PR499 merged/deployed; canonical user controller, remembered account defaults and repaired shell launchers require no root exports. Native history/auth/journals and stock preserved; no-root CLI and Windows checks passed.
+
+## P208 | Controller specification and hardening review
+
+Review complete: [LOCAL-P208](docs/dev/plans/0208-2026-11-07-controller-hardening-review.md).
+Reconciles existing harness/controller/session/profile tickets, two installed tab
+failures and missing observer wiring. Proposed HARD-01–10 remain local TRIAGE;
+first outcome is useful no-root workspace listing and installed grouping/undo.
+No new runtime changes or provider acceptance were performed.
+
+## P209 | Trait-based tab and session hardening
+
+State: CLOSED implementation/qualification — all13 scoped tickets validated,
+one broad review and one bounded TDD remediation pass complete. [Spec503](https://github.com/CochranResearchGroup/codex-wake/issues/503),
+[plan](docs/dev/plans/0209-2026-11-07-trait-based-tab-hardening.md),
+[execution ledger](docs/dev/plans/0209-execution-ledger.json).
+
+Tickets504–515 and reused368 are validated and closed on
+`feat/tab-hardening-503`;514 records exact installed WSL/actualPowerShell/public
+CLI/API/MCP and real Byobu/nativepsmux acceptance. Three accepted behavior
+findings are resolved; two P3 design notes remain nonblocking backlog. Traits, saved views/groups,
+bounded monitoring, manual lifecycle, opt-in sorting, exact reattachment and
+workspace recovery reuse the existing operation/native ownership. Stock and
+production Wake remain unchanged. Existing broad governor/activation/handoff
+parents retain their own unresolved acceptance.
+
+Exact source/package/installed/native evidence and retained failed fixtures live
+under [Plan0209 evidence](docs/dev/evidence/plan0209/). No new provider prompts,
+working native restart, merge or deployment is included in this packet.

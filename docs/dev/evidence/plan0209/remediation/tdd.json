@@ -1,0 +1,45 @@
+{
+  "pass_count": 1,
+  "status": "complete",
+  "findings": {
+    "F1": {
+      "red_command": "PYTHONPATH=src:tests /tmp/codex-wake-503-py311/bin/python -m unittest test_tab_recovery_restored_slots -v",
+      "red_log": "/tmp/codex-wake-503-F1-red.log",
+      "red_outcome": "FAILED: marked and unmarked restored shell preview held, expectedready",
+      "green_log": "/tmp/codex-wake-503-F1-green.log",
+      "commit": "6d7701a",
+      "native": "docs/dev/evidence/plan0209/remediation/recovery-restored-shells-native.json",
+      "log_sha256": {
+        "/tmp/codex-wake-503-F1-red.log": "b1659b3bd4b4433abe2be9f6fb1be09240c7886f5c13b212123cbce3bc9b090b",
+        "/tmp/codex-wake-503-F1-green.log": "97e50012b48a88c022fbab1e21ed81ba15e72e8f366b7f8fd5ef00e2cc4a0e5b"
+      }
+    },
+    "F2": {
+      "red_command": "PYTHONPATH=src:tests python -m unittest test_tab_traits_default_error.DefaultErrorObservationTests.test_later_explicit_resolution_clears_only_prior_visible_errors -v",
+      "red_logs": [
+        "/tmp/codex-wake-503-f2-red311.log",
+        "/tmp/codex-wake-503-f2-red312.log"
+      ],
+      "red_outcome": "present != absent for later explicit resolution",
+      "green_logs": [
+        "/tmp/codex-wake-503-f2-green311.log",
+        "/tmp/codex-wake-503-f2-green312.log"
+      ],
+      "green": "10PASS each3.11/3.12",
+      "commit": "0e9d9f2",
+      "log_sha256": {
+        "/tmp/codex-wake-503-f2-red311.log": "fc8f1fdba4648963c4707bdd9766126dfe2850a410eab5d4415d7b291dc6d5b9",
+        "/tmp/codex-wake-503-f2-red312.log": "8710d91ed36c4e346f1bf5c3eb37702d494738a62889e11ab819e89f7b8c2c73",
+        "/tmp/codex-wake-503-f2-green311.log": "475e8c77aae574c8c083f8f3966d0aa0720d7815ac25f037c216c73336e0a1a1",
+        "/tmp/codex-wake-503-f2-green312.log": "e9e2a318fd0b4690bacb6b3fb3b7ca7888684c8d2a67d5283625acf7d574bb64"
+      }
+    },
+    "F3": {
+      "commit": "da00a8f",
+      "worker_commit": "64fdd2e",
+      "receipt": "docs/dev/evidence/plan0209/review-f3-foreground-role.json",
+      "native": "docs/dev/evidence/plan0209/remediation/profile-foreground-native.json",
+      "log_sha256": {}
+    }
+  }
+}

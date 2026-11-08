@@ -8521,3 +8521,68 @@ Issue498/Plan0206 fixes inconsistent accountroot defaults and testing-era instal
 ## Turn | 2026-11-07 | Permanent controller location deployed
 
 PR499 aaf619c exactprefix deployed,269Pythonfilesmatch. User controller moved in-place to ~/.local/state/codex-wake/controller; legacyalias retains savedabsolutehistory paths.29nativeauth/history/SQLite files preserve inode/content/mtime;15controller journal rows plus events/revocations unchanged,26nativegenerationssame/1independentexit. Only idleHTTPlistener handedover; firstport0replacementassertion preservedandreconciled topriorobserved37185 without repeatingmove. Three liveconfigfiles/13symlinks updated,9launcherentrypoints selectednewprefix. Source remembereddefault outrankslegacyenvironment/project discovery; explicitselectors retained. OldZshfunctions forcinglegacy --config removed from theirmanagedblock, unrelatedstartupbytespreserved; completionsrefreshed. No-root CLIstatus/store/recents/profileversion and actualWindowsPowerShellstatuspass;0provider/nativecompile/restart. Final31tests eachPython3.11/3.12 pass; earlierbroader3.12vsockfixtureerrorretained. EvidencePlan0206 deployment.json, privaterollback/rawdefault-controller-fix. Memoryforbidden(noexplicitrequest).
+
+## Turn | 2026-11-07 | Existing specification and ticket hardening review
+
+P208 reconciles Plan0173/HF drafts, #337/#368, Plan0190/#393/#402/#405,
+Plan0200/#466, command-contract and account follow-ons with current issue/PR,
+source and installed readbacks. Confirms no-root tabs TypeError, missing canonical
+workspace-config traceback and source observer-wiring gap; distinguishes these
+from missing CRUD/movement/holding/automatic policy features. Proposed local
+HARD-01–10 reuse existing owners; no GitHub mutations, live tab moves, provider
+calls, services or credentials changed. Historic qualification is explicitly
+separate from fresh verification. Memory forbidden (no explicit request).
+
+## Turn | 2026-11-07 | Trait-based tab hardening specification draft
+
+P209 drafted the confirmed tab traits/grouping/lifecycle/recovery requirements
+as40user stories with implementation/testing decisions and explicit exclusions.
+Existing ticket ownership is preserved. GitHub target/actor/labels/duplicates
+preflight passed. Operator acceptance-seam question remains pending; publication
+and ready-for-agent labeling wait for that answer as required by to-spec. No
+implementation/live effects. Draft sections and whitespace checks pass.
+
+## Turn | 2026-11-08 | Trait-based tab hardening specification published
+
+Operator confirmed the installed WSL/actual PowerShell CLI/API/MCP acceptance
+seam against disposable real Byobu/psmux tabs. Published canonical spec503 with
+existing enhancement/ready-for-agent labels; body and label readback match. Local
+Plan0209 retains matching snapshot. No implementation tickets, runtime effects,
+provider calls or memory writes.
+
+## Turn | 2026-11-08 | Trait hardening implementation and frozen qualification
+
+Published native child/dependency graph for503; primary owned defaults/grouping,
+traits worker owned observations/monitor/contracts, lifecycle worker owned
+lifecycle/nativepsmux/reattachment/policies/profilecreate. Serial integration and
+acceptance closed504–513, reused368 and added515 for the observed selected-profile
+creation gap. Ledger records custody, source SHAs and per-ticket proof.
+
+Product4d22a56 is frozen in a normally installed disposable package; UID1017
+native profilecreate, exact recovery/reattachment and current-loop health have
+zero provider/model turns. Working `codex` remains stock167; installed Wake stays
+aaf619c. No production tab, credential or daemon replacement occurred.
+
+Initial comprehensive311 run retained24 failures/twoerrors from missing sibling
+launcher, nonisolated test context and then-stale generatedcoverage; the corrected
+38-test affected run passed. Frozenbfded49 comprehensive311/312 runs use installed
+launchers and isolated XDG/tmux roots.514 owns finalnative/publicmatrix; one broad
+review and one TDD pass remain unused. Retain all native partial/failed fixture
+receipts and their individual axes; a later pass never erases them.
+
+## Turn | 2026-11-08 | Single review and TDD hardening complete
+
+All13 scoped tickets are closed. Frozenbfded49 comprehensive checks passed2205
+tests/version (one existing opt-in skip). One independent Standards/Spec review
+accepted three behavior findings; one bounded TDD pass fixed restored-shell
+recovery, resolved visible-error state and foreground profile-client role.
+Two P3 ownership design notes remain explicitly nonblocking backlog.
+
+Final product94012f3 has91 affected checks/version plus final contract and
+normally installed public transport checks. Native6d7701a proof restores two
+real repository conversations while retaining restored-shell drafts/processes,
+and verifies the profile's foreground client; final package differs only in
+one data-only capability/help statement. All281 installed Python members match
+its immutable wheel. Earlier partial/failed fixtures remain source-attributed.
+No second broad review, provider/model prompt, production change, merge or
+deployment occurred. Review/evidence/ledger own exact source and package bounds.

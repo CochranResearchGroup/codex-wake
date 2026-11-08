@@ -2805,7 +2805,7 @@ def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
 def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    if (args.command in ('accounts', 'stores', 'configuration', 'history', 'builds', 'daemons', 'migration')
+    if (args.command in ('accounts', 'stores', 'configuration', 'history', 'builds', 'daemons', 'migration', 'tabs')
             and not (args.command == 'configuration' and args.account_verb == 'default-root')):
         from .shortcut_store import default_root
         try:

@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "uid": 1017,
+  "scope": [
+    "/tmp/wake-recovery368-native-8_xngu8n",
+    "/tmp/wake-recovery368-native-l97t967k",
+    "/tmp/wake-recovery368-native-xaoyc5j0",
+    "/tmp/wake-reattach510-native-byb254c5",
+    "/tmp/wake-reattach510-native-16h85_kr",
+    "/tmp/wake-profile515-native-6mzcdmrq"
+  ],
+  "final_owned_processes": []
+}

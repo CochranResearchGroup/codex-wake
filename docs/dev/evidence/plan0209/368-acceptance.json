@@ -1,0 +1,77 @@
+{
+  "status": "passed",
+  "scope": "installed provider-free native recovery axes combined with exact-loop stopped negative; failed preliminary fixtures retained",
+  "observed_at": 1794150468.1454191,
+  "wheel": {
+    "path": "/tmp/codex-wake-503-wheels/368-511-frozen/codex_wake-0.22.0.dev2-py3-none-any.whl",
+    "sha256": "5e28942803ac39cfa63b18fc44769b2a6f9c482e820754774282b83c2bce7cee",
+    "source_commit": "7aba5a8"
+  },
+  "native_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "module_provenance": {
+    "codex_wake.local_health": {
+      "wheel_member_identical": true,
+      "installed_sha256": "bc547723fd1789d1dfd3235381c731067c0582333340d957396b0592071b6a3b",
+      "path": "/tmp/codex-wake-503-native-prefix/lib/python3.12/site-packages/codex_wake/local_health.py"
+    },
+    "codex_wake.tab_recovery": {
+      "wheel_member_identical": true,
+      "installed_sha256": "dc12dd0edb059185826894dcd30a8bd11589aaae7290c7a799aa0e9d80770e11",
+      "path": "/tmp/codex-wake-503-native-prefix/lib/python3.12/site-packages/codex_wake/tab_recovery.py"
+    },
+    "codex_wake.tab_traits": {
+      "wheel_member_identical": true,
+      "installed_sha256": "d88801c72a606c3fbcafcb1a22719b291a4239776e1bd2801a9a12c99e8e126d",
+      "path": "/tmp/codex-wake-503-native-prefix/lib/python3.12/site-packages/codex_wake/tab_traits.py"
+    }
+  },
+  "positive_source_receipt": "/tmp/wake-recovery368-native-49wco7w9/receipt.json",
+  "negative_source_receipt": "/tmp/wake-recovery368-native-49wco7w9/health-ptrace-diagnosis.json",
+  "original_positive_receipt_overall_status": "failed",
+  "original_failure": "fixture group SIGSTOP not acknowledged by all threads; superseded only for foreground-negative axis by ptrace proof",
+  "axes": {
+    "two_exact_conversations_restored": 2,
+    "whole_workspace_capture_kinds": [
+      "noncoding",
+      "codex",
+      "codex"
+    ],
+    "cli_status": true,
+    "cli_preview": true,
+    "noncoding_preserved": true,
+    "replay_without_new_windows": true,
+    "simultaneous_same_conversation_two_views": true,
+    "exact_stopped_loop_rejected": true,
+    "healthy_peer_remains_responsive": true,
+    "stopped_source_capture_unsupported": true
+  },
+  "model_turns": 0,
+  "trap_requests": [],
+  "final_owned_native_processes": [],
+  "limitations": [
+    "Historical unbound tabs remain unknown; no retrospective mapping guessed.",
+    "Synthetic fixture account/profile only; no production history or credentials used.",
+    "Installed CLI status/preview exercised; public apply routing covered by parent integration tests, native exact owner apply here."
+  ],
+  "public_routing": {
+    "bounded_monitor": true,
+    "local_cli": true,
+    "local_mutation_cli": true,
+    "mcp": true,
+    "module": "/tmp/codex-wake-503-native-prefix/lib/python3.12/site-packages/codex_wake/controller_tabs.py",
+    "native_mcp": true,
+    "oauth_api": true,
+    "observe_cannot_capture": true,
+    "opt_in_policy": true,
+    "real_isolated_tmux": true,
+    "remote_cli": true,
+    "retained_intent": true,
+    "saved_views": true,
+    "status": "passed",
+    "windows_matrix": false,
+    "workspace_recovery_routing": true
+  },
+  "ticket": 368,
+  "execution_source": "7aba5a8",
+  "current_delta": "Later Windows-relay-only TabTraits branch does not change POSIX capture/health core; final package acceptance remains514."
+}

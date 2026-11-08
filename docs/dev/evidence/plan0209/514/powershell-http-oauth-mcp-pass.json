@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "checks": [
+    "pinned-native-process-and-session-discovery",
+    "create-rename-focus-current-visible-screen",
+    "cross-session-movement-explicitly-unsupported-source-preserved",
+    "actual-powershell-native-bridge-client",
+    "unsupported-action-and-replaced-process-generation-refused",
+    "installed-wake-cli-http-native-mcp-and-actual-powershell",
+    "owned-namespace-cleanup-and-unavailable-result"
+  ],
+  "namespace": "wake509-2efe61affb07",
+  "identity": {
+    "platform": "windows",
+    "namespace": "wake509-2efe61affb07",
+    "pid": 84512,
+    "session": "source",
+    "creation_filetime": 134386261204819597,
+    "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+  },
+  "bridge_sha256": "25c461d652ed90f52e979c494e31e62f77a8d609d6def7ecb35ebf64c0207eb6",
+  "bridge_module": "/tmp/codex-wake-503-native-prefix/lib/python3.12/site-packages/codex_wake/tab_psmux_bridge.py",
+  "python": "3.12.3",
+  "windows_python": "/mnt/c/Users/ecoch/AppData/Local/codex-wake-test/controller405-20261030/venv/Scripts/python.exe",
+  "elapsed_seconds": 37.778,
+  "provider_calls": 0,
+  "native_windows_owner": false,
+  "actual_powershell": true,
+  "final_owned_namespace": {
+    "returncode": 1,
+    "sessions": []
+  },
+  "boundary": "Actual native presentation/finite transport; installed public CLI/API/nativeMCP lifecycle and actual PowerShell qualified; native Windows execution owner unsupported."
+}

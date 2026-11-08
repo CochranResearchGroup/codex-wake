@@ -10,17 +10,68 @@ from .tab_organization import TabOrganization, TabError, digest
 
 
 class ControllerTabs:
-    READS = frozenset(('tabs.list', 'tabs.show'))
+    READS = frozenset(('tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
     MUTATIONS = frozenset(('tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input'))
 
     def __init__(self, root, *, workspaces, host, environment):
         self.root, self.workspaces = root, dict(workspaces)
         self.host, self.environment = host, environment
 
+    def profile_owner(self):
+        from .tab_profile_create import TabProfileCreate
+        return TabProfileCreate(self.root,host=self.host,environment=self.environment)
+
+    def reattach_owner(self):
+        from .tab_reattach import TabReattach
+        return TabReattach(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment)
+
     def execute(self, operation, arguments):
+        if operation.startswith('tabs.reattach-'):
+            return self.reattach_owner().execute(operation,arguments)
+        if operation.startswith('tabs.recovery.'):
+            from .tab_recovery import TabRecovery
+            from .tab_lifecycle import TabLifecycle
+            payload=dict(arguments);expected=payload.pop('expected_target',None)
+            lifecycle=TabLifecycle(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment)
+            if operation=='tabs.recovery.capture' and expected is not None:
+                if expected!=lifecycle.inspect(payload.get('workspace'))['target']:
+                    raise InventoryError('stale_target','Workspace changed before capture.')
+            if operation=='tabs.recovery.apply':
+                keys=('capture_id','capture_sha256','workspace','workspace_identity','presentation_generation')
+                payload['expected_target']={k:expected[k] for k in keys if expected and k in expected}
+            result=TabRecovery(self.root,tabs=self).execute(operation,payload)
+            if operation=='tabs.recovery.preview':
+                physical=lifecycle.inspect(payload['workspace'])['target']
+                result['target'].update(physical)
+            return result
+        if operation.startswith('tabs.policy.'):
+            from .tab_organization_policy import TabOrganizationPolicy
+            payload=dict(arguments)
+            expected=payload.pop('expected_target',None)
+            if expected is not None and expected!=self.policy_target():
+                raise InventoryError('stale_target','Physical policy changed; refresh before acting.')
+            return TabOrganizationPolicy(self.root,workspaces=self.workspaces).execute(operation,payload)
+        if operation.startswith('tabs.monitor.'):
+            from .tab_monitor import TabMonitor
+            payload=dict(arguments)
+            expected=payload.pop('expected_target',None)
+            if expected is not None and expected!=self.monitor_target():
+                raise InventoryError('stale_target','Monitor generation changed; refresh status before controlling.')
+            return TabMonitor(self.root).execute(operation,payload)
+        from .tab_views import TabViews
+        if operation in TabViews.READS|TabViews.MUTATIONS:
+            payload=dict(arguments)
+            expected=payload.pop('expected_target',None)
+            if expected is not None and expected != self.logical_target():
+                raise InventoryError('stale_target','Saved view definitions changed; refresh before applying.')
+            resources=self.execute('tabs.list',{})['resources'] if operation in ('tabs.view-evaluate','tabs.group-save') else []
+            return TabViews(self.root).execute(operation,payload,resources=resources)
+        from .tab_lifecycle import TabLifecycle
+        if operation in TabLifecycle.ARGUMENTS:
+            return TabLifecycle(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment).execute(operation,arguments)
         allowed = {
             'tabs.list': set(), 'tabs.show': {'workspace', 'selector'},
-            'tabs.preview': {'workspace','expected_target','mode','pins'},
+            'tabs.preview': {'workspace','expected_target','mode','pins','criteria'},
             'tabs.apply': {'workspace','expected_target','plan_id'},
             'tabs.undo': {'workspace','expected_target','receipt_id'},
             'tabs.capture': {'workspace','expected_target','pane','lines'},
@@ -31,7 +82,7 @@ class ControllerTabs:
         if not isinstance(arguments, dict) or set(arguments) - allowed[operation]:
             raise InventoryError('invalid_argument', 'unsupported attachment arguments')
         names = list(self.workspaces) if operation == 'tabs.list' else [arguments.get('workspace')]
-        resources = []
+        resources, unavailable = [], []
         deadline = time.monotonic() + 10
         for name in names:
             if name not in self.workspaces:
@@ -46,9 +97,35 @@ class ControllerTabs:
                         for pane in window['panes']:
                             pane['process_generation'] = process_identity(pane['pid'])
             except Exception as error:
+                if getattr(error,'code',None) == 'stale_target':
+                    raise
+                if operation == 'tabs.list':
+                    unavailable.append(dict(workspace=name,status='unavailable',code='attachment_unavailable'))
+                    continue
                 raise InventoryError('attachment_unavailable', 'host presentation observation failed') from error
             target = dict(host=self.host, environment=self.environment, workspace=name,
                           presentation=config['kind'], generation=digest(snapshot))
+            observation = None
+            if operation in self.READS:
+                from .tab_traits import TabTraits, session_rows
+                traits = TabTraits(self.root)
+                initial = {w['window_id']:traits.observe_window(w,transport=transport,
+                           privacy=config.get('privacy'),deadline=deadline) for w in snapshot['windows']}
+                needs_native = any(p.get('platform')!='windows' and p['traits']['harness']['value']=='codex'
+                                   for result in initial.values() for p in result['panes'])
+                rows = session_rows(self.root,socket_path=config.get('socket_path'),
+                                    deadline=min(deadline,time.monotonic()+2)) if needs_native else dict(sessions=[],holds=[])
+                if rows['sessions']:
+                    traits = TabTraits(self.root,sessions=rows['sessions'])
+                    initial = {w['window_id']:traits.observe_window(w,transport=transport,
+                               privacy=config.get('privacy'),deadline=deadline) for w in snapshot['windows']}
+                if any(w.get('attach_intent') for w in snapshot['windows']):
+                    from .tab_reattach_traits import observe_managed
+                    managed=self.reattach_owner()
+                    for window in snapshot['windows']:
+                        key=window['window_id']
+                        initial[key]=observe_managed(managed,name,window,initial[key],deadline)
+                observation = (initial, rows)
             broker = config.get('broker')
             custody = broker.inspect() if broker else dict(available=False, transport='unowned', generation=None)
             if operation not in self.READS and arguments.get('expected_target') != target:
@@ -60,8 +137,12 @@ class ControllerTabs:
                     windows = [w for w in windows if selector in (w['window_id'], w['name'])]
                     if len(windows) != 1:
                         raise InventoryError('ambiguous_target' if windows else 'target_not_found', 'friendly selector must identify one attachment')
-                resources.extend(dict(target=target, window=w, input_custody=custody,
-                                      runtime_identity='unverified', fallback='explicit_only') for w in windows)
+                for w in windows:
+                    observed, rows = observation
+                    evidence = observed[w['window_id']]
+                    resources.append(dict(target=target,window=w,input_custody=custody,
+                                          traits=evidence,runtime_identity='unverified',fallback='explicit_only',
+                                          observation_holds=rows['holds'],workspace_label=config.get('label',name)))
                 continue
             if operation in ('tabs.input', 'tabs.capture'):
                 privacy = config.get('privacy')
@@ -95,13 +176,42 @@ class ControllerTabs:
                                     authorize=lambda action: None)
             try:
                 if operation == 'tabs.preview':
-                    return dict(target=target, **owner.preview(mode=arguments.get('mode','activity'), pins=arguments.get('pins',[]), deadline=deadline))
+                    return dict(target=target, **owner.preview(mode=arguments.get('mode','activity'), pins=arguments.get('pins',[]), criteria=arguments.get('criteria',[]), deadline=deadline))
                 if operation == 'tabs.apply':
                     return dict(target=target, **owner.apply(arguments['plan_id'], deadline=deadline))
                 return dict(target=target, **owner.undo(arguments['receipt_id'], deadline=deadline))
             except TabError as error:
                 raise InventoryError(error.code, str(error)) from error
-        return dict(resources=resources)
+        value = dict(resources=resources)
+        if unavailable:
+            value['unavailable'] = unavailable
+        if hasattr(self, 'discovery_diagnostics'):
+            value['discovery'] = dict(source='automatic', status='ready' if resources else 'not_found',
+                                     diagnostics=self.discovery_diagnostics,
+                                     message='Existing owned workspaces discovered.' if resources else
+                                     'No live owned workspace found; start Byobu/tmux or register a supported psmux bridge, then refresh.')
+        return value
+
+    def recovery_target(self):
+        from pathlib import Path
+        return dict(host=self.host,environment=self.environment,workspace='@recovery',presentation='logical',
+                    generation=digest(str(Path(self.root).resolve())))
+
+    def policy_target(self):
+        from .tab_organization_policy import TabOrganizationPolicy
+        state=TabOrganizationPolicy(self.root,workspaces=self.workspaces).execute('tabs.policy.status',{})['policy']
+        return dict(host=self.host,environment=self.environment,workspace='@policy',presentation='logical',generation=str(state.get('control_revision',0)))
+
+    def monitor_target(self):
+        from .tab_monitor import TabMonitor
+        monitor=TabMonitor(self.root).execute('tabs.monitor.status',{})['monitor']
+        return dict(host=self.host,environment=self.environment,workspace='@monitor',presentation='logical',
+                    generation=digest(dict(generation=monitor.get('generation'),status=monitor['status'],process=monitor.get('process'))))
+
+    def logical_target(self):
+        from .tab_views import TabViews
+        return dict(host=self.host,environment=self.environment,workspace='@views',
+                    presentation='logical',generation=digest(TabViews(self.root)._read()))
 
     @staticmethod
     def _pane(snapshot, pane):
@@ -121,9 +231,19 @@ class AuthorizedTabs:
             raise AuthError('insufficient_scope')
         target = arguments.get('expected_target') if isinstance(arguments, dict) else None
         required = {'host','environment','workspace','presentation'}
-        if not isinstance(target, dict) or not (required | {'generation'}) <= target.keys() or not any(
-                required <= scope.keys() and all(target.get(k) == v for k,v in scope.items()) for scope in actor.targets):
-            raise AuthError('insufficient_scope')
+        targets=[target]
+        if operation in ('tabs.move','tabs.park','tabs.restore','tabs.reattach-preview'):
+            targets.append(arguments.get('expected_destination'))
+        if operation in ('tabs.reattach-apply','tabs.reattach-status'):
+            targets += self.tabs.reattach_owner().authorization_targets(arguments.get('plan_id'))
+        for selected in targets:
+            if not isinstance(selected,dict) or not (required|{'generation'})<=selected.keys() or not any(
+                    required<=scope.keys() and all(selected.get(k)==v for k,v in scope.items()) for scope in actor.targets):
+                raise AuthError('insufficient_scope')
+        if operation=='tabs.create' and arguments.get('profile') and not actor.issuer.startswith('local://uid/'):
+            from .controller_http import permitted
+            if not permitted(actor,self.tabs.profile_owner().authorization_target(arguments['profile'])):
+                raise AuthError('insufficient_scope')
         def authorize():
             current = self.authority.authenticate(token)
             if current != actor: raise AuthError()
@@ -145,8 +265,21 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
     from pathlib import Path
     from .controller_tab_adapters import (TmuxAttachmentTransport,
         PsmuxAttachmentTransport, ConfiguredBridge, UnixInputBroker)
-    path = Path(root) / 'controller-tabs.json'
-    fd = os.open(path,os.O_RDONLY | os.O_NOFOLLOW)
+    from .shortcut_store import default_root
+    root = default_root(root)
+    path = root / 'controller-tabs.json'
+    try:
+        fd = os.open(path,os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    except FileNotFoundError:
+        from .tab_workspace_discovery import discover
+        workspaces, diagnostics = discover()
+        owner = ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
+                               environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name)
+        from .tab_traits import WorkspaceTraitsObserver
+        for workspace in workspaces.values():
+            workspace['observer']=WorkspaceTraitsObserver(root,workspace['transport'],workspace.get('privacy'))
+        owner.discovery_diagnostics = diagnostics
+        return owner
     try:
         info = os.fstat(fd)
         if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
@@ -154,7 +287,10 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
         with os.fdopen(os.dup(fd)) as stream:
             raw = stream.read(262145)
         if len(raw)>262144: raise ValueError('configuration exceeds bound')
-        config = json.loads(raw)
+        try:
+            config = json.loads(raw)
+        except ValueError:
+            raise InventoryError('configuration_unavailable', 'Tab configuration is invalid; repair the selected controller configuration.') from None
     finally:
         os.close(fd)
     if config.get('schema_version') != 1 or not isinstance(config.get('workspaces'),dict):
@@ -169,10 +305,14 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
         else:
             raise ValueError('unsupported host presentation')
         workspace = dict(kind=kind,transport=transport)
+        if kind in ('tmux','byobu'):
+            workspace.update(socket_path=row['socket_path'], session_id=row['session_id'])
         if row.get('input_broker_socket'):
             workspace['broker'] = UnixInputBroker(row['input_broker_socket'])
         if row.get('evidence_scope') == 'disposable_fixture' and row.get('privacy') == 'safe':
             workspace['privacy'] = lambda pane:'safe'
+        from .tab_traits import WorkspaceTraitsObserver
+        workspace['observer']=WorkspaceTraitsObserver(root,transport,workspace.get('privacy'))
         workspaces[name] = workspace
     return ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
                           environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name)

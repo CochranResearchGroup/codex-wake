@@ -153,6 +153,29 @@ class ControllerRuntime:
         if not row: raise InventoryError('operation_not_found', 'operation handle is not retained')
         return json.loads(row[0])
 
+    def local_tab_result(self, operation_id, *, expected_operation=None, arguments=None):
+        """Read one retained same-UID tab intent without live workspace access.
+
+        Local CLI only: remote APIs retain authenticated operations.result. The
+        stored target restores scope, never effect dispatch or fresh authority.
+        Optional supplied inputs must still match the immutable original intent.
+        """
+        from .daemon_commands import local_operator
+        for path in (self.path.parent, self.path):
+            info=path.lstat()
+            if info.st_uid != os.geteuid() or info.st_mode & 0o077 or path.is_symlink():
+                raise AuthError('insufficient_scope')
+        record=self._load(operation_id)
+        if not record['operation'].startswith('tabs.'):
+            raise InventoryError('unsupported_operation','Retained operation belongs to another owner.')
+        actor=local_operator(record['target'])
+        self._owned(actor,record,lambda:actor)
+        if expected_operation is not None and record['operation'] != expected_operation:
+            raise InventoryError('idempotency_conflict','Request ID already names another operation.')
+        if arguments is not None and any(record['payload'].get(k) != v for k,v in arguments.items() if k != '_request'):
+            raise InventoryError('idempotency_conflict','Request ID already binds different immutable inputs.')
+        return self.envelope(record['operation'],record)
+
     def _owned(self, actor, record, authorize=None, *, capability='observe'):
         self._authorize(actor, record['target'], capability, authorize)
         if identity(actor) not in [record['principal'], *record.get('successors', [])]: raise AuthError('insufficient_scope')

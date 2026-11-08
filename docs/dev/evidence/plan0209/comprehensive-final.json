@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "runs": [
+    {
+      "python": "311",
+      "source": "bfded49",
+      "product_source": "4d22a56",
+      "worktree": "/tmp/codex-wake-503-validate",
+      "tier": "comprehensive",
+      "command": "env -u TMUX WSL_INTEROP=/run/WSL/1_interop XDG_CONFIG_HOME=/tmp/codex-wake-503-final311/config XDG_STATE_HOME=/tmp/codex-wake-503-final311/state TMUX_TMPDIR=/tmp/codex-wake-503-final311/tmux CODEX_WAKE_STABLE_TIME_CONFIG= PYTHONPATH=src /tmp/codex-wake-503-py311/bin/python -m unittest discover -s tests -p test_*.py",
+      "exit_code": 0,
+      "tests": 2205,
+      "skipped": 1,
+      "seconds": 673.875,
+      "log": "/tmp/codex-wake-503-final311/result.log",
+      "log_sha256": "5ec33e123e9cad839a49398352f58c92f4ed414dc876d9fc2283e52c599e5bfc"
+    },
+    {
+      "python": "312",
+      "source": "bfded49",
+      "product_source": "4d22a56",
+      "worktree": "/tmp/codex-wake-503-validate",
+      "tier": "comprehensive",
+      "command": "env -u TMUX WSL_INTEROP=/run/WSL/1_interop XDG_CONFIG_HOME=/tmp/codex-wake-503-final312/config XDG_STATE_HOME=/tmp/codex-wake-503-final312/state TMUX_TMPDIR=/tmp/codex-wake-503-final312/tmux CODEX_WAKE_STABLE_TIME_CONFIG= PYTHONPATH=src /tmp/codex-wake-503-native-prefix/bin/python -m unittest discover -s tests -p test_*.py",
+      "exit_code": 0,
+      "tests": 2205,
+      "skipped": 1,
+      "seconds": 679.988,
+      "log": "/tmp/codex-wake-503-final312/result.log",
+      "log_sha256": "c44fba0107c0268cb3a9725d4720e7097761e1e5ce86bca6f7fb608e2cf7fc18"
+    }
+  ],
+  "skip": "Existing opt-in disposable systemd deadline test; matches default CI.",
+  "hosted_ci": "skipped repository cost policy",
+  "environment_differences": [
+    "Local WSL shared kernel, not hostedUbuntu runner",
+    "Normally installed launchers present; isolated XDG config/state and TMUX_TMPDIR per version",
+    "Actual Windows relay verified locally; no production restart",
+    "Source frozen before final qualification harness-only edits; product Python modules match immutable4d22a56 package"
+  ],
+  "initial_failed_run": "docs/dev/evidence/plan0209/comprehensive-initial-failure.json",
+  "new_provider_calls": 0
+}

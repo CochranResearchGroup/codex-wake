@@ -94,32 +94,87 @@ def execute(action, arguments, root, *, principal, observer=None, transport=None
 
 
 def register_parser(subparsers):
-    parser = subparsers.add_parser('tabs', help='preview and conditionally apply managed workspace tab ordering')
+    from .tab_contract import tool_specs, cli_verb
+    parser = subparsers.add_parser('tabs', help='observe, group and control exact owned terminal attachments')
     verbs = parser.add_subparsers(dest='tabs_command', required=True)
-    for action in ('list','capture','input','preview', 'show', 'apply', 'undo'):
-        command = verbs.add_parser(action)
-        command.add_argument('--arguments',type=json.loads)
-        command.add_argument('--socket-path')
-        command.add_argument('--session-id')
-        command.add_argument('--bus-root', type=Path)
-        command.add_argument('--operator-capability', type=Path)
-        command.add_argument('--actor-capability', type=Path)
-        command.add_argument('--app-server', default='unix://')
-        command.add_argument('--timeout', type=float, default=30)
-        command.add_argument('--json', dest='as_json', action='store_true')
-        if action == 'preview':
-            command.add_argument('--mode', choices=('activity', 'repository'), default='activity')
-            command.add_argument('--pin', action='append', dest='pins', default=[])
-        if action in ('show', 'apply'): command.add_argument('--plan-id')
-        if action == 'undo': command.add_argument('--receipt-id')
+    aliases = {'pins':'pin', 'members':'member', 'criteria':'criterion'}
+    for _, operation, summary, properties, required, readonly in tool_specs().values():
+        action=cli_verb(operation)
+        command=verbs.add_parser(action, help=summary, description=summary)
+        command.set_defaults(group_by=[],sort_by=[],filters=[],pins=[],members=[],mode='activity')
+        if action.startswith(('view-','group-')) and not action.endswith('-list'):
+            command.add_argument('view_name',nargs='?',help='Saved logical view or group name.')
+        command.add_argument('--arguments',type=json.loads,help='Advanced operation JSON; typed flags fill only omitted fields.')
+        command.add_argument('--json',dest='as_json',action='store_true',help='Emit structured results.')
+        if not readonly:
+            command.add_argument('--request-id',help='Stable intent ID; reuse only for identical inputs. Retrieve with tabs result.')
+        for field, schema in sorted(properties.items()):
+            if field=='_request':continue
+            option='--'+aliases.get(field,field.replace('_','-'))
+            settings={'dest':field,'default':None,'help':schema.get('description',field.replace('_',' ')+'.').replace('%','%%')}
+            kind=schema.get('type')
+            if kind=='boolean':settings['action']='store_true'
+            elif kind=='array':settings.update(action='append')
+            elif kind=='object':settings['type']=json.loads
+            elif kind=='integer':settings['type']=int
+            elif kind=='number':settings['type']=float
+            if 'enum' in schema:settings['choices']=schema['enum']
+            if field=='preview':option='--dry-run'
+            command.add_argument(option,**settings)
+        if action in ('preview','view-save','policy-configure'):
+            command.add_argument('--group-by',action='append',default=[],help='Layered grouping trait; repeat in order.')
+            command.add_argument('--sort-by',action='append',default=[],help='Layered sorting trait; repeat in order.')
+        if action=='view-save':
+            command.add_argument('--filter',action='append',dest='filters',default=[],help='Read-only trait=value filter.')
+            command.add_argument('--group',help='Saved named group restriction.')
+        if action in ('preview','show','apply','undo'):
+            for field in ('socket-path','session-id','app-server'):
+                command.add_argument('--'+field,help='Legacy explicit tmux adapter option.')
+            command.add_argument('--timeout',type=float,default=30)
+            for field in ('bus-root','operator-capability','actor-capability'):
+                command.add_argument('--'+field,type=Path)
+            if action=='show':
+                command.add_argument('--plan-id');command.add_argument('--receipt-id')
+    result=verbs.add_parser('result',help='Read the retained same-user request result, including after a workspace closes.')
+    result.add_argument('--request-id',required=True)
+    result.add_argument('--json',dest='as_json',action='store_true')
+    result.set_defaults(arguments=None)
     return parser
 
 
 def run(args, root, *, observer=None):
-    if args.arguments is not None or args.tabs_command in ('list','capture','input'):
+    legacy = args.tabs_command in ('preview','show','apply','undo') and (
+        getattr(args,'socket_path',None) is not None or getattr(args,'session_id',None) is not None or
+        (args.tabs_command=='show' and (getattr(args,'plan_id',None) or getattr(args,'receipt_id',None))))
+    if args.arguments is not None or not legacy:
         from .tab_commands import command
-        args.tab_command = args.tabs_command
-        args.arguments = args.arguments or {}
+        from .tab_contract import BY_OPERATION
+        args.tab_command=args.tabs_command
+        args.arguments=dict(args.arguments or {})
+        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1)
+        if operation in BY_OPERATION:
+            properties=BY_OPERATION[operation][1][3]
+            for field in properties:
+                value=getattr(args,field,None)
+                if value is not None:args.arguments.setdefault(field,value)
+        if getattr(args,'view_name',None):args.arguments.setdefault('name',args.view_name)
+        if args.tabs_command=='recovery-apply' and 'intent' not in args.arguments:
+            from uuid import uuid4
+            args.arguments['intent']='restore-'+(getattr(args,'request_id',None) or uuid4().hex)
+        if args.tabs_command in ('preview','policy-configure'):
+            criteria=(args.group_by or [])+(args.sort_by or [])
+            args.arguments.setdefault('mode','traits' if criteria else 'activity')
+            if criteria:args.arguments.setdefault('criteria',criteria)
+        if args.tabs_command=='view-save' and 'definition' not in args.arguments:
+            filters={}
+            for value in args.filters:
+                if '=' not in value:
+                    print(json.dumps(dict(status='held',error=dict(code='invalid_argument',message='Use --filter trait=value.'))));return 2
+                key,value=value.split('=',1);filters[key]=value
+            definition=dict(filters=filters,group_by=args.group_by,sort_by=args.sort_by)
+            if args.group:definition['group']=args.group
+            args.arguments['definition']=definition
+        if args.tabs_command=='group-save':args.arguments.setdefault('members',[])
         return command(args)
     from .permission_commands import verified_cli_principal
     try:

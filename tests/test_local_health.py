@@ -111,3 +111,29 @@ class LocalHealthTests(unittest.TestCase):
                     finally:
                         server.shutdown()
                         worker.join(timeout=2)
+
+    def test_attachment_scoped_health_never_borrows_a_responsive_peer(self):
+        import subprocess
+        import sys
+        from codex_wake.local_health import observe_row
+        from codex_wake.native_protocol import NativeHealthDeadline
+        with tempfile.TemporaryDirectory() as directory:
+            child=subprocess.Popen([sys.executable,'-c','import time;time.sleep(20)'])
+            self.addCleanup(lambda:(child.terminate(),child.wait(timeout=3)))
+            birth=process_identity(child.pid)
+            scoped=dict(pid=child.pid,start_ticks=str(birth['start_time_ticks']),boot_id=birth['boot_id'])
+            binding=self.binding(directory)
+            row=dict(model_provider='test',target=dict(binding['target'],executable=str(Path('/proc/self/exe').resolve()),provider='codex'),
+                     endpoint=binding['endpoint'],codex_cmd=binding['codex_cmd'],attachments=[dict(client_pid=child.pid),dict(client_pid=os.getpid())])
+            described=[]
+            def request(endpoint,command,method,arguments,timeout):
+                if method=='tui/health/describe':
+                    pid=arguments['pid'];described.append(pid);identity=process_identity(pid)
+                    return dict(bindings=[dict(home=directory,provider='test',backendId='test',channel='native_tui',pid=pid,
+                        startTicks=str(identity['start_time_ticks']),bootId=identity['boot_id'],connectionGeneration='one')])
+                if arguments['binding']['process']['pid']==child.pid:
+                    raise NativeHealthDeadline('fixture exact TUI stalled')
+                return dict(state='responsive',evidence='tui_main_loop_ack',challenge=arguments['challenge'],binding=arguments['binding'],threadId=arguments['threadId'],loopTid=os.getpid())
+            result=observe_row(directory,row,timeout=1,request=request,client_process=scoped)
+            self.assertFalse(result['observation']['responsive'],result)
+            self.assertEqual(described,[child.pid])

@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P209
+    owner: primary / ecochran76
+    objective: Close spec503 trait-based tab and session hardening tickets
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/503]
+    plan: docs/dev/plans/0209-2026-11-07-trait-based-tab-hardening.md
+    branch: feat/tab-hardening-503
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: PUBLISHED_REVIEW
+    dependencies: []
+    overlaps: [P208]
+    updated_at: 2026-11-08
+    disposition: All13 scoped tickets and503 closed; review1/TDD1 complete; draft PR516 published; merge and deployment separate
   - id: P179
     owner: primary / ecochran76
     objective: Deliver concurrent accounts and identifiable stock or modified Codex with qualified upgrades

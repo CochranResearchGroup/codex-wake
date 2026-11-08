@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "ticket": 514,
+  "status": "scoped_axes_qualified_with_retained_limits",
+  "observed_at": 1794152810.2741117,
+  "integration_source": "bfded49",
+  "product_source": "4d22a56",
+  "wheel": {
+    "path": "/tmp/codex-wake-503-wheels/candidate-4d22a56/codex_wake-0.22.0.dev2-py3-none-any.whl",
+    "sha256": "6e772f6571caba1d59589336d4546fd5f762aee0a7267d2c931311e5ef88c29d"
+  },
+  "installed_prefix": "/tmp/codex-wake-503-native-prefix",
+  "normal_install": true,
+  "source_forcing": false,
+  "installed_python_members_checked": 281,
+  "installed_python_mismatches": [],
+  "python": "3.12",
+  "native_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "wsl_interop": "/run/WSL/1_interop",
+  "axes": {
+    "wsl_cli_api_native_mcp_oauth_mcp": "PASS installed controller_tabs_acceptance.py: realtmux, viewdefinition, grantnegative, retainedintent, monitor, policy enable/pause/disable, recoveryrouting.",
+    "windows_psmux_powershell_cli": "PASS real Windows processbirth-pinned bridge, lifecycle/screen, unsupportedmoves preservesource, actual PowerShell invokes installed WSL CLI.",
+    "powershell_http_oauth_mcp": "PASS actual native Invoke-RestMethod /operations and /mcp against WSL authority; synthetic OAuth credential only over private stdin.",
+    "native_recovery": "PASS public installed CLI capture/preview/apply/replay, two exact conversations, noncoding preserved, zero duplicate windows.",
+    "native_repository_layout_undo": "PASS two actual native bindings with distinct real gitrepositories; observed physicalswap then conditionalundo restored originalorder.",
+    "exact_attachment_health_negative": "PASS acknowledged codex-main exactloop ptrace-stopped t before/after; sourceunknown/peerresponsive; publicCLIcapture holds stoppedsourceunsupported.",
+    "cross_backend_reattach": "PASS public operator_execute/ControllerTabs/commonjournal; WSLnative conversation to actualWindowspsmux destination, exactdestinationloopack, source/draft/ledger preserved, retry no duplicate.",
+    "selected_profile_create": "PASS publicCLI selectednativebuild/home process +repeat-safe creation; exact returnedPID TUIrole unqualified.",
+    "default_error_privacy": "PASS exactinstalled package 3 actualtmux tests in0.663s, redacted currenterror, private/unknown no reads, secret/draft suppression, unchanged screen.",
+    "cleanup": "PASS freshscoped UID1017 /proc census empty; Windows owned namespaces final no sessions."
+  },
+  "limits": [
+    "Distinct-repository recovery partial: each saved profile timeout2 and apply readiness min(5,timeout); both launches recordedonce then rowsstarting. Captured exact cwd/profile correct, daemonlogempty; cleanup removed live TUIs before failure diagnosis. Eventualready vs trust/binding failure not proven. Baseline native two-conversation recovery independent PASS. Do not claim distinctrepo recoverypositive.",
+    "Profile515 returned exactbuild/homeprocess, but retainedreceipt lacks argv/controllingloop proof distinguishing TUI from inherited backend app-server. Processes cleaned; exact TUIrole unqualified.",
+    "Older harnesses did not retain whole-run monotonic duration. Explicit elapsed_seconds retained where available; no reconstructed durations.",
+    "Native Windows execution ownership, arbitrary Grok foreground health and unsupported Windows cross-session process movement remain unsupported.",
+    "Parent owns independent comprehensive source checks and issueacceptance; no broadreview run by this worker."
+  ],
+  "failures_retained": [
+    "UID1017 private700 fixture helper unreadable over Windows UNC before namespace start; rerun from owning Windows/WSLuser passed.",
+    "Reattach enhancement missing owner.host attribute failed preoperation; fixed to lifecycle host, freshfixture passed.",
+    "Candidate publicwheel unreadable during recovery provenance check after daemonstart; exactowned PID2205901 terminated, failure retained. Read/traverseonly publicwheel permissions adjusted, bytes unchanged; guarded startup reordered.",
+    "Distinctrepo recoverypartial retained; actualrepositoryordering/undo separate positive axis."
+  ],
+  "commands": [
+    "sudo -n -u codex-daemon-test env -u PYTHONPATH WSL_INTEROP=/run/WSL/1_interop /tmp/codex-wake-503-native-prefix/bin/python /tmp/controller-tabs-acceptance514.py",
+    "sudo -n -u codex-daemon-test env -u PYTHONPATH WSL_INTEROP=/run/WSL/1_interop /tmp/codex-wake-503-native-prefix/bin/python /tmp/tab-profile-create-acceptance514.py",
+    "env -u PYTHONPATH WSL_INTEROP=/run/WSL/1_interop /tmp/codex-wake-503-native-prefix/bin/python /tmp/tab-psmux-acceptance514.py --state /tmp/wake-psmux514-powershell-http --windows-python /mnt/c/Users/ecoch/AppData/Local/codex-wake-test/controller405-20261030/venv/Scripts/python.exe --output /tmp/wake-psmux514-powershell-http-receipt.json",
+    "sudo -n -u codex-daemon-test env -u PYTHONPATH WSL_INTEROP=/run/WSL/1_interop WSL_DISTRO_NAME=Ubuntu /tmp/codex-wake-503-native-prefix/bin/python /tmp/tab-reattach-acceptance514.py",
+    "sudo -n -u codex-daemon-test env -u PYTHONPATH WSL_INTEROP=/run/WSL/1_interop /tmp/codex-wake-503-native-prefix/bin/python /tmp/tab-recovery-acceptance514.py",
+    "sudo -n -u codex-daemon-test env -u PYTHONPATH /tmp/codex-wake-503-native-prefix/bin/python /tmp/tab-health-exact-loop-acceptance514.py --state /tmp/wake-recovery368-native-8_xngu8n",
+    "env -u PYTHONPATH /tmp/codex-wake-503-native-prefix/bin/python -m unittest discover -s /tmp -p test_tab_traits_default_error514.py -q #3PASS0.663s"
+  ],
+  "retained_receipts": {
+    "windows-permission-failure": {
+      "receipt": "docs/dev/evidence/plan0209/514/windows-permission-failure.json",
+      "original": "/tmp/wake-psmux514-final-receipt.json",
+      "sha256": "3480a464714f49e400566cd5ac2a7563de57f4acf501e1d06adb35ac4dbe03a7",
+      "status": "failed",
+      "elapsed_seconds": null
+    },
+    "windows-psmux-pass": {
+      "receipt": "docs/dev/evidence/plan0209/514/windows-psmux-pass.json",
+      "original": "/tmp/wake-psmux514-owner-final-receipt.json",
+      "sha256": "45782c272b08260c92049fc147eca7b6e28d2c8c465fc6efc00569a136ef2b64",
+      "status": "passed",
+      "elapsed_seconds": 30.102
+    },
+    "powershell-http-oauth-mcp-pass": {
+      "receipt": "docs/dev/evidence/plan0209/514/powershell-http-oauth-mcp-pass.json",
+      "original": "/tmp/wake-psmux514-powershell-http-receipt.json",
+      "sha256": "b53c0d010e8ce4a4632a17e2fa5f091afa54b3f24c289db057be33a73d315367",
+      "status": "passed",
+      "elapsed_seconds": 37.778
+    },
+    "profile-selected-home-build-pass": {
+      "receipt": "docs/dev/evidence/plan0209/514/profile-selected-home-build-pass.json",
+      "original": "/tmp/wake-profile515-native-6mzcdmrq/receipt.json",
+      "sha256": "473823ffb37c62c0f5e9875f0f6fce7e77b7afcbca34d8027fb6682d9ab818d6",
+      "status": "passed",
+      "elapsed_seconds": null
+    },
+    "reattach-harness-attribute-failure": {
+      "receipt": "docs/dev/evidence/plan0209/514/reattach-harness-attribute-failure.json",
+      "original": "/tmp/wake-reattach510-native-byb254c5/receipt.json",
+      "sha256": "ff7c6bae7a42a0411f1b06438fbbb792a9fb83061111963337a7fe698c3925af",
+      "status": "failed",
+      "elapsed_seconds": null
+    },
+    "reattach-public-native-pass": {
+      "receipt": "docs/dev/evidence/plan0209/514/reattach-public-native-pass.json",
+      "original": "/tmp/wake-reattach510-native-16h85_kr/receipt.json",
+      "sha256": "19a92ebcd380b3c86c337671f1b2209d43a8806c28bfc404203b12a24cadf9fd",
+      "status": "passed",
+      "elapsed_seconds": null
+    },
+    "recovery-provenance-permission-failure": {
+      "receipt": "docs/dev/evidence/plan0209/514/recovery-provenance-permission-failure.json",
+      "original": "/tmp/wake-recovery368-native-xaoyc5j0/setup-failure.json",
+      "sha256": "29f14409ac7aedf817dbf9f4d4471a38718bfa7865497cd8be31cef90153def5",
+      "status": "failed",
+      "elapsed_seconds": null
+    },
+    "recovery-public-two-conversations-pass": {
+      "receipt": "docs/dev/evidence/plan0209/514/recovery-public-two-conversations-pass.json",
+      "original": "/tmp/wake-recovery368-native-8_xngu8n/receipt.json",
+      "sha256": "26589de043d64f5db14ec5f4675ab16134a165cdfb18c11cd8ef3d2a6a5d2024",
+      "status": "passed",
+      "elapsed_seconds": null
+    },
+    "health-exact-loop-stop-pass": {
+      "receipt": "docs/dev/evidence/plan0209/514/health-exact-loop-stop-pass.json",
+      "original": "/tmp/wake-recovery368-native-8_xngu8n/health-ptrace-diagnosis.json",
+      "sha256": "04089f6d4da8c4adece7582eec5809e46d7beadb7e4a708906948da2e14c6037",
+      "status": "observed",
+      "elapsed_seconds": null
+    },
+    "repository-layout-undo-pass-recovery-partial": {
+      "receipt": "docs/dev/evidence/plan0209/514/repository-layout-undo-pass-recovery-partial.json",
+      "original": "/tmp/wake-recovery368-native-l97t967k/receipt.json",
+      "sha256": "7a6c415539bc5726634c9ee6c365ed47c43aedc4a96ea6824162b507383f0608",
+      "status": "failed",
+      "elapsed_seconds": null
+    },
+    "final-process-census": {
+      "receipt": "docs/dev/evidence/plan0209/514/final-process-census.json",
+      "original": "/tmp/wake-514-final-census.json",
+      "sha256": "fc9f9ed8d770937d9bc5ffdbcb7bc85d81cb8fdeee9f131e87ec0999cf77bca0",
+      "status": "passed",
+      "elapsed_seconds": null
+    },
+    "controller-public-transport-pass": {
+      "receipt": "docs/dev/evidence/plan0209/514/controller-public-transport-pass.json",
+      "sha256": "eeba3e4f24aa10805176d7b8d50c1e1048596b79f311982bc0b7b8256689407d",
+      "status": "passed"
+    }
+  },
+  "harness_sha256": {
+    "/tmp/controller-tabs-acceptance514.py": "306eeb0606d8ab6acf71f39e4e2411cf7383f71caf523f22935dbf496fa09d3c",
+    "/tmp/tab-profile-create-acceptance514.py": "bce60ce63e94ac6a625bcc13e4947a8119ff77eed07c7a8de96ea2bb4ee185b9",
+    "/tmp/tab-psmux-acceptance514.py": "aae69dbbfd7a0cdd14b203bd22fa7ddb58cf29ad8ea7a128da4581a991ef4dff",
+    "/tmp/tab-reattach-acceptance514.py": "cdb2c90be3477cc61dd30c2faf651cd9f433ea790b7a1d756eac3c6c847d6273",
+    "/tmp/tab-recovery-acceptance514.py": "ef2d56cffbec405790b39bcf26b670a68ab013b5fcde477a3c26bad642f30b74",
+    "/tmp/tab-health-exact-loop-acceptance514.py": "1ae918582d06537501701eff6571282a180feccad970f46caa7e9e4fc4e0924e"
+  },
+  "provider_calls": 0,
+  "model_turns": 0,
+  "scope": "Disposable synthetic UID1017 native state and unique Windows namespaces only; no production changes.",
+  "memory_disposition": {
+    "status": "forbidden",
+    "reason": "Delegated scope prohibits memory writes."
+  }
+}

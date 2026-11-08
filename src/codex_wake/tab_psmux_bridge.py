@@ -1,0 +1,507 @@
+"""Finite Windows psmux bridge for a WSL-owned Wake controller.
+
+The host fixes the executable, namespace, session and server birth in its bridge
+command. Requests contain typed presentation actions, never shell or argv. This
+module is stdlib-only so the same installed artifact runs under native Windows
+Python without creating a second Wake execution owner.
+"""
+from __future__ import annotations
+
+import argparse
+import ctypes
+from ctypes import wintypes
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import time
+
+
+class BridgeError(ValueError):
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
+
+
+def process_birth(pid):
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel.OpenProcess.restype = wintypes.HANDLE
+    kernel.GetProcessTimes.argtypes = [wintypes.HANDLE, *([ctypes.POINTER(wintypes.FILETIME)] * 4)]
+    kernel.GetProcessTimes.restype = wintypes.BOOL
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    handle = kernel.OpenProcess(0x1000, False, pid)
+    if not handle:
+        raise BridgeError('attachment_unavailable', 'native presentation process is unavailable')
+    try:
+        times = [wintypes.FILETIME() for _ in range(4)]
+        if not kernel.GetProcessTimes(handle, *[ctypes.byref(value) for value in times]):
+            raise BridgeError('attachment_unavailable', 'native process generation is unavailable')
+        return (times[0].dwHighDateTime << 32) | times[0].dwLowDateTime
+    finally:
+        kernel.CloseHandle(handle)
+
+
+def process_image(pid):
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel.OpenProcess.restype = wintypes.HANDLE
+    kernel.QueryFullProcessImageNameW.argtypes = [wintypes.HANDLE, wintypes.DWORD, wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)]
+    kernel.QueryFullProcessImageNameW.restype = wintypes.BOOL
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    handle = kernel.OpenProcess(0x1000, False, pid)
+    if not handle:
+        return None
+    try:
+        size = wintypes.DWORD(32768)
+        value = ctypes.create_unicode_buffer(size.value)
+        return value.value if kernel.QueryFullProcessImageNameW(handle, 0, value, ctypes.byref(size)) else None
+    finally:
+        kernel.CloseHandle(handle)
+
+
+def pane_processes(roots):
+    """One bounded native snapshot, returning only selected pane descendants.
+
+    No command-line/private environment reads and no PowerShell/WMI process loop.
+    Image identity can classify a harness; it cannot attest its conversation,
+    turn activity, stock/modded registration or exact TUI-loop health.
+    """
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    class Entry(ctypes.Structure):
+        _fields_ = [('dwSize', wintypes.DWORD), ('cntUsage', wintypes.DWORD),
+                    ('th32ProcessID', wintypes.DWORD), ('th32DefaultHeapID', ctypes.c_size_t),
+                    ('th32ModuleID', wintypes.DWORD), ('cntThreads', wintypes.DWORD),
+                    ('th32ParentProcessID', wintypes.DWORD), ('pcPriClassBase', wintypes.LONG),
+                    ('dwFlags', wintypes.DWORD), ('szExeFile', wintypes.WCHAR * 260)]
+    kernel.CreateToolhelp32Snapshot.argtypes = [wintypes.DWORD, wintypes.DWORD]
+    kernel.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+    for name in ('Process32FirstW', 'Process32NextW'):
+        getattr(kernel, name).argtypes = [wintypes.HANDLE, ctypes.POINTER(Entry)]
+        getattr(kernel, name).restype = wintypes.BOOL
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    handle = kernel.CreateToolhelp32Snapshot(2, 0)
+    if handle == ctypes.c_void_p(-1).value:
+        return {}, False
+    deadline = time.monotonic() + .5
+    children, parents, count, complete = {}, {}, 0, True
+    try:
+        entry = Entry()
+        entry.dwSize = ctypes.sizeof(entry)
+        found = kernel.Process32FirstW(handle, ctypes.byref(entry))
+        while found:
+            count += 1
+            if count > 4096 or time.monotonic() >= deadline:
+                complete = False
+                break
+            pid, parent = int(entry.th32ProcessID), int(entry.th32ParentProcessID)
+            children.setdefault(parent, []).append(pid)
+            parents[pid] = parent
+            found = kernel.Process32NextW(handle, ctypes.byref(entry))
+    finally:
+        kernel.CloseHandle(handle)
+    result = {}
+    for root in roots:
+        pending, seen, rows = [root], set(), []
+        while pending:
+            pid = pending.pop(0)
+            if pid in seen:
+                continue
+            if len(seen) >= 256 or time.monotonic() >= deadline:
+                complete = False
+                break
+            seen.add(pid)
+            try:
+                birth = process_birth(pid)
+                image = process_image(pid)
+                if process_birth(pid) != birth:
+                    complete = False
+                    continue
+                rows.append(dict(pid=pid, parent_pid=parents.get(pid), creation_filetime=birth,
+                                 executable=image, platform='windows'))
+            except BridgeError:
+                complete = False
+            pending.extend(children.get(pid, []))
+        result[root] = rows
+    return result, complete
+
+
+def current_sid():
+    """Current native Windows owner, without a child process or token output."""
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    advapi = ctypes.WinDLL('advapi32', use_last_error=True)
+    kernel.GetCurrentProcess.restype = wintypes.HANDLE
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel.LocalFree.argtypes = [ctypes.c_void_p]
+    advapi.OpenProcessToken.argtypes = [wintypes.HANDLE, wintypes.DWORD, ctypes.POINTER(wintypes.HANDLE)]
+    advapi.GetTokenInformation.argtypes = [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD, ctypes.POINTER(wintypes.DWORD)]
+    token = wintypes.HANDLE()
+    if not advapi.OpenProcessToken(kernel.GetCurrentProcess(), 8, ctypes.byref(token)):
+        raise BridgeError('unauthorized_target', 'native manifest owner cannot be verified')
+    try:
+        size = wintypes.DWORD()
+        advapi.GetTokenInformation(token, 1, None, 0, ctypes.byref(size))
+        if not 0 < size.value <= 65536:
+            raise BridgeError('unauthorized_target', 'native owner token exceeds bound')
+        value = ctypes.create_string_buffer(size.value)
+        if not advapi.GetTokenInformation(token, 1, value, size, ctypes.byref(size)):
+            raise BridgeError('unauthorized_target', 'native owner token is unavailable')
+        return _sid_string(ctypes.cast(value, ctypes.POINTER(ctypes.c_void_p))[0])
+    finally:
+        kernel.CloseHandle(token)
+
+
+def _sid_string(sid):
+    advapi = ctypes.WinDLL('advapi32', use_last_error=True)
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    advapi.ConvertSidToStringSidW.argtypes = [ctypes.c_void_p, ctypes.POINTER(wintypes.LPWSTR)]
+    kernel.LocalFree.argtypes = [ctypes.c_void_p]
+    output = wintypes.LPWSTR()
+    if not advapi.ConvertSidToStringSidW(sid, ctypes.byref(output)):
+        raise BridgeError('unauthorized_target', 'native manifest SID is invalid')
+    try:
+        return output.value
+    finally:
+        kernel.LocalFree(ctypes.cast(output, ctypes.c_void_p))
+
+
+def check_private_manifest(path):
+    """Current-owner private DACL, with bounded direct Win32 ACL inspection.
+
+    Same owner/SYSTEM/Administrators exception as the portable caller contract;
+    no PowerShell startup/census can outlive a bridge timeout.
+    """
+    class ACL(ctypes.Structure):
+        _fields_ = [('revision', ctypes.c_ubyte), ('unused', ctypes.c_ubyte),
+                    ('size', wintypes.WORD), ('count', wintypes.WORD), ('unused2', wintypes.WORD)]
+    advapi = ctypes.WinDLL('advapi32', use_last_error=True)
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    advapi.GetNamedSecurityInfoW.argtypes = [wintypes.LPWSTR, ctypes.c_int, wintypes.DWORD,
+        ctypes.POINTER(ctypes.c_void_p), ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p), ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)]
+    advapi.GetNamedSecurityInfoW.restype = wintypes.DWORD
+    advapi.GetAce.argtypes = [ctypes.c_void_p, wintypes.DWORD, ctypes.POINTER(ctypes.c_void_p)]
+    kernel.LocalFree.argtypes = [ctypes.c_void_p]
+    owner, dacl, descriptor = ctypes.c_void_p(), ctypes.c_void_p(), ctypes.c_void_p()
+    if advapi.GetNamedSecurityInfoW(str(path), 1, 5, ctypes.byref(owner), None,
+            ctypes.byref(dacl), None, ctypes.byref(descriptor)):
+        raise BridgeError('unauthorized_target', 'native manifest security descriptor is unavailable')
+    try:
+        current = current_sid()
+        if not dacl.value or _sid_string(owner.value) != current:
+            raise BridgeError('unauthorized_target', 'native manifest must have current owner and a private DACL')
+        count = ctypes.cast(dacl, ctypes.POINTER(ACL)).contents.count
+        if count > 256:
+            raise BridgeError('unauthorized_target', 'native manifest ACL exceeds bound')
+        allowed = {current, 'S-1-5-18', 'S-1-5-32-544'}
+        sensitive = 0xD00F0007
+        for index in range(count):
+            ace = ctypes.c_void_p()
+            if not advapi.GetAce(dacl, index, ctypes.byref(ace)):
+                raise BridgeError('unauthorized_target', 'native manifest ACE is unavailable')
+            kind = ctypes.c_ubyte.from_address(ace.value).value
+            if kind in (1, 6, 10, 12):
+                continue  # deny ACEs cannot grant another principal access
+            if kind != 0:
+                raise BridgeError('unauthorized_target', 'native manifest ACL contains unsupported grant semantics')
+            mask = wintypes.DWORD.from_address(ace.value + 4).value
+            if mask & sensitive and _sid_string(ace.value + 8) not in allowed:
+                raise BridgeError('unauthorized_target', 'native manifest grants another principal sensitive access')
+    finally:
+        kernel.LocalFree(descriptor)
+
+
+class PsmuxHost:
+    ACTIONS = {'snapshot', 'discover', 'capture', 'visible_screen', 'swap', 'lifecycle', 'attach_saved'}
+
+    def __init__(self, *, namespace, session, server_pid=None, server_birth=None, attach_directory=None):
+        if os.name != 'nt':
+            raise BridgeError('unsupported_target', 'this presentation bridge requires native Windows Python')
+        if not isinstance(namespace, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,95}', namespace):
+            raise BridgeError('invalid_argument', 'host must configure a bounded exact namespace')
+        self.namespace = namespace
+        self.session = self._text(session, 'session')
+        self.binary = Path(os.environ['LOCALAPPDATA']) / 'Microsoft/WinGet/Links/psmux.exe'
+        self.server_pid, self.server_birth = server_pid, server_birth
+        self.attach_directory = Path(attach_directory).resolve() if attach_directory else None
+        self.identity = self.describe()
+        if self.attach_directory is not None:
+            self.identity['attach_directory'] = str(self.attach_directory)
+        if server_pid is not None and (self.identity['pid'] != server_pid or self.identity['creation_filetime'] != server_birth):
+            raise BridgeError('stale_target', 'psmux server generation changed')
+        self.generation = hashlib.sha256(json.dumps(self.identity, sort_keys=True).encode()).hexdigest()
+
+    @staticmethod
+    def _text(value, field):
+        if not isinstance(value, str) or not value or len(value.encode()) > 256 or any(ord(c) < 32 for c in value):
+            raise BridgeError('invalid_argument', field + ' must be bounded single-line text')
+        return value
+
+    def command(self, *argv, timeout=4):
+        try:
+            reply = subprocess.run([str(self.binary), '-L', self.namespace, *argv],
+                text=True, capture_output=True, timeout=timeout, check=True)
+        except (OSError, subprocess.SubprocessError):
+            raise BridgeError('attachment_unavailable', 'native psmux command failed; reconcile effects before retry') from None
+        if len(reply.stdout.encode()) > 1048576:
+            raise BridgeError('capacity', 'native presentation exceeds bounded output')
+        return reply.stdout
+
+    def describe(self):
+        pid = int(self.command('display-message', '-p', '-t', self.session + ':', '#{pid}').strip())
+        return dict(platform='windows', namespace=self.namespace, pid=pid,
+                    session=self.session, creation_filetime=process_birth(pid),
+                    executable_sha256=hashlib.sha256(self.binary.read_bytes()).hexdigest())
+
+    def _current(self):
+        if process_birth(self.identity['pid']) != self.identity['creation_filetime']:
+            raise BridgeError('stale_target', 'native psmux process generation changed')
+        pid = int(self.command('display-message', '-p', '-t', self.session + ':', '#{pid}').strip())
+        if pid != self.identity['pid']:
+            raise BridgeError('stale_target', 'native psmux server was replaced')
+
+    def _rows(self):
+        fields = ('session_id', 'session_name', 'window_id', 'window_index', 'window_name',
+                  'window_active', 'pane_id', 'pane_index', 'pane_pid', 'pane_current_path')
+        output = self.command('list-panes', '-a', '-F', '\t'.join('#{' + field + '}' for field in fields))
+        lines = output.splitlines()
+        if len(lines) > 4096:
+            raise BridgeError('capacity', 'native pane inventory exceeds bound')
+        rows = []
+        for line in lines:
+            values = line.split('\t')
+            if len(values) != len(fields):
+                raise BridgeError('attachment_unavailable', 'ambiguous native presentation metadata')
+            row = dict(zip(fields, values))
+            if not re.fullmatch(r'@[0-9]+', row['window_id']) or not re.fullmatch(r'%[0-9]+', row['pane_id']):
+                raise BridgeError('attachment_unavailable', 'invalid native presentation identities')
+            rows.append(row)
+        return rows
+
+    def _snapshot(self, rows, session=None):
+        session = session or self.session
+        selected = [row for row in rows if session in (row['session_id'], row['session_name'])]
+        identities = {row['session_id'] for row in selected}
+        if len(identities) != 1:
+            raise BridgeError('attachment_unavailable', 'exact psmux session is unavailable or ambiguous')
+        native_processes, complete = pane_processes({int(row['pane_pid']) for row in selected})
+        windows = {}
+        for row in selected:
+            window = windows.setdefault(row['window_id'], dict(window_id=row['window_id'], index=int(row['window_index']),
+                name=row['window_name'], focused=row['window_active'] == '1',
+                linked=False, panes=[]))
+            pid = int(row['pane_pid'])
+            window['panes'].append(dict(pane_id=row['pane_id'], pane_index=int(row['pane_index']), pid=pid, platform='windows',
+                windows_creation_filetime=process_birth(pid), windows_executable=process_image(pid), cwd=row['pane_current_path'],
+                windows_processes=native_processes.get(pid, []), windows_processes_complete=complete))
+        if self.attach_directory is not None:
+            for window in windows.values():
+                receipt_path = self._window_receipt(window['window_id'])
+                if not receipt_path.exists():
+                    continue
+                try:
+                    check_private_manifest(receipt_path)
+                    if receipt_path.is_symlink() or receipt_path.stat().st_size > 4096:
+                        continue
+                    receipt = json.loads(receipt_path.read_text())
+                    pane = window['panes'][0] if len(window['panes']) == 1 else None
+                    if (pane and receipt.get('bridge_generation') == self.generation
+                            and receipt.get('window_id') == window['window_id']
+                            and receipt.get('pane_id') == pane['pane_id']
+                            and receipt.get('windows_pid') == pane['pid']
+                            and receipt.get('windows_creation_filetime') == pane['windows_creation_filetime']):
+                        window['attach_intent'] = receipt['intent']
+                except (BridgeError, OSError, ValueError, KeyError):
+                    pass  # Unknown relay evidence must not become a false binding.
+        return dict(server=str(self.identity['pid']), session_id=next(iter(identities)),
+                    socket_identity=[self.identity['pid'], self.identity['creation_filetime']],
+                    windows=sorted(windows.values(), key=lambda w: w['index']),
+                    server_identity=self.identity, windows_server=self.identity)
+
+    def _window_receipt(self, window):
+        scope = hashlib.sha256(json.dumps([self.identity['pid'], self.identity['creation_filetime'], self.session]).encode()).hexdigest()[:16]
+        return self.attach_directory / ('window_' + scope + '_' + window[1:] + '.json')
+
+    def execute(self, request):
+        if not isinstance(request, dict) or set(request) != {'action', 'arguments'}:
+            raise BridgeError('invalid_argument', 'finite action and arguments required')
+        action, args = request['action'], request['arguments']
+        if action not in self.ACTIONS or not isinstance(args, dict):
+            raise BridgeError('unsupported_operation', 'unsupported finite presentation operation')
+        self._current()
+        rows = self._rows()
+        if action == 'discover':
+            if args:
+                raise BridgeError('invalid_argument', 'discovery accepts no arguments')
+            sessions = {row['session_id']: row['session_name'] for row in rows}
+            result = dict(sessions=[dict(session_id=k, name=v) for k, v in sorted(sessions.items())],
+                          server_identity=self.identity, capabilities=sorted(self.ACTIONS))
+        else:
+            snapshot = self._snapshot(rows)
+            windows = {w['window_id']: w for w in snapshot['windows']}
+            panes = {p['pane_id'] for w in windows.values() for p in w['panes']}
+            if action == 'snapshot':
+                if args:
+                    raise BridgeError('invalid_argument', 'snapshot accepts no arguments')
+                result = snapshot
+            elif action in ('capture', 'visible_screen'):
+                allowed = {'pane', 'lines'} if action == 'capture' else {'pane'}
+                if set(args) != allowed or args.get('pane') not in panes:
+                    raise BridgeError('stale_target', 'exact current pane is required')
+                row = next(r for r in rows if r['session_id'] == snapshot['session_id'] and r['pane_id'] == args['pane'])
+                exact_pane = self.session + ':' + row['window_index'] + '.' + row['pane_index']
+                command = ['capture-pane', '-p', '-t', exact_pane]
+                if action == 'capture':
+                    lines = args['lines']
+                    if type(lines) is not int or not 1 <= lines <= 200:
+                        raise BridgeError('invalid_argument', 'capture supports 1 through 200 lines')
+                    command += ['-S', '-' + str(lines)]
+                result = self.command(*command)[-32768:]
+            elif action == 'swap':
+                if set(args) != {'first', 'second'} or args.get('first') not in windows or args.get('second') not in windows:
+                    raise BridgeError('stale_target', 'exact current windows required')
+                focused = next(w['window_id'] for w in windows.values() if w['focused'])
+                self.command('swap-window', '-d', '-s', self.session + ':' + args['first'], '-t', self.session + ':' + args['second'])
+                self.command('select-window', '-t', self.session + ':' + focused)
+                result = {}
+            elif action == 'attach_saved':
+                result = self._attach_saved(args, snapshot)
+            else:
+                result = self._lifecycle(args, snapshot, rows)
+        if not (action == 'lifecycle' and args.get('action') == 'close'
+                and result.get('workspace_state') == 'removed'):
+            self._current()
+        return dict(generation=self.generation, result=result)
+
+    def _attach_saved(self, args, snapshot):
+        if self.attach_directory is None:
+            raise BridgeError('unsupported_target', 'host has not configured exact saved-conversation attachment')
+        if (set(args) != {'intent', 'manifest_sha256'} or not isinstance(args['intent'], str)
+                or not re.fullmatch(r'[0-9a-f]{32}', args['intent'])
+                or not isinstance(args['manifest_sha256'], str) or not re.fullmatch(r'[0-9a-f]{64}', args['manifest_sha256'])):
+            raise BridgeError('invalid_argument', 'opaque host launch intent and exact manifest digest required')
+        path = self.attach_directory / (args['intent'] + '.json')
+        if path.is_symlink() or not path.is_file() or path.stat().st_size > 65536:
+            raise BridgeError('unauthorized_target', 'bounded regular host launch manifest required')
+        check_private_manifest(path)
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != args['manifest_sha256']:
+            raise BridgeError('stale_target', 'host launch manifest changed')
+        manifest = json.loads(raw)
+        fields = {'version','intent','identity','profile','marker','wsl_manifest','window_name','execution_user','windows_destination'}
+        if (set(manifest) != fields or manifest['version'] != 1 or manifest['intent'] != args['intent']
+                or manifest['windows_destination'] != self.generation):
+            raise BridgeError('stale_target', 'host launch intent/destination mismatch')
+        profile = manifest['profile']
+        if any(k in profile for k in ('argv','shell','command','environment')):
+            raise BridgeError('unauthorized_target', 'launch profiles cannot supply arbitrary commands')
+        for value in ('wake_python','wsl_distribution','codex_home','codex_path','app_server'):
+            self._text(profile.get(value), value)
+        if (not re.fullmatch(r'[A-Za-z0-9_.-]+', profile['wsl_distribution'])
+                or not re.fullmatch(r'[a-z_][a-z0-9_-]{0,63}', manifest['execution_user'])
+                or not profile['wake_python'].startswith('/') or not manifest['wsl_manifest'].startswith('/')):
+            raise BridgeError('unauthorized_target', 'host must select an exact WSL owner/profile')
+        name = self._text(manifest['window_name'], 'window name')
+        if any(w['name'] == name for w in snapshot['windows']):
+            raise BridgeError('uncertain_effect', 'intent attachment already exists; reconcile without creating another')
+        wsl = Path(os.environ.get('SystemRoot', r'C:\Windows')) / 'System32/wsl.exe'
+        window = self.command('new-window','-d','-P','-F','#{window_id}',
+            '-t',self.session+':','-n',name,'--',str(wsl),'--distribution',profile['wsl_distribution'],
+            '--user',manifest['execution_user'],'--exec',profile['wake_python'],'-m','codex_wake.tab_reattach',
+            '--launch-child',manifest['wsl_manifest'],'--manifest-sha',args['manifest_sha256'],timeout=10).strip()
+        after = self._snapshot(self._rows())
+        created = next((w for w in after['windows'] if w['window_id'] == window), None)
+        if created is None or len(created['panes']) != 1:
+            raise BridgeError('effect_uncertain', 'saved-conversation window creation is not verified')
+        pane = created['panes'][0]
+        result = dict(window_id=window,pane_id=pane['pane_id'],windows_pid=pane['pid'],
+                      windows_creation_filetime=pane['windows_creation_filetime'],bridge_generation=self.generation)
+        self._window_receipt(window).write_text(json.dumps(dict(intent=args['intent'], **result)))
+        return result
+
+    def _lifecycle(self, args, snapshot, rows):
+        allowed = {
+            'create': {'name', 'cwd'}, 'rename': {'window', 'name'}, 'focus': {'window'}, 'close': {'window'},
+            'move': {'window', 'destination_session', 'index'}, 'park': {'window', 'destination_session', 'index'},
+            'restore': {'window', 'destination_session', 'index'},
+        }
+        action = args.get('action')
+        if action not in allowed or set(args) - allowed[action] - {'action'}:
+            raise BridgeError('unsupported_operation', 'unsupported finite lifecycle operation')
+        windows = {w['window_id']: w for w in snapshot['windows']}
+        wid = args.get('window')
+        if action != 'create' and wid not in windows:
+            raise BridgeError('stale_target', 'exact current source window is required')
+        destination = snapshot['session_id']
+        if action in ('create', 'rename'):
+            name = self._text(args.get('name'), 'name')
+            if any(w['name'] == name and w['window_id'] != wid for w in windows.values()):
+                raise BridgeError('name_conflict', 'destination already has that tab name')
+        if action == 'create':
+            command = ['new-window', '-d', '-P', '-F', '#{window_id}', '-t', destination + ':', '-n', name]
+            cwd_value = args.get('cwd', os.environ['USERPROFILE'])
+            if cwd_value is not None:
+                cwd = self._text(cwd_value, 'cwd')
+                if not Path(cwd).is_absolute() or not Path(cwd).is_dir():
+                    raise BridgeError('invalid_argument', 'native working directory must exist and be absolute')
+                command += ['-c', cwd]
+            # Shell selection belongs to this host adapter, never to requests.
+            wid = self.command(*command, '--', 'cmd.exe', '/d', '/k').strip()
+        elif action == 'rename':
+            self.command('rename-window', '-t', self.session + ':' + wid, name)
+        elif action == 'focus':
+            self.command('select-window', '-t', self.session + ':' + wid)
+        elif action == 'close':
+            self.command('kill-window', '-t', self.session + ':' + wid)
+        else:
+            destination = args.get('destination_session')
+            target = self._snapshot(rows, destination)
+            if target['session_id'] == snapshot['session_id']:
+                raise BridgeError('invalid_argument', 'destination must differ from source')
+            # Native psmux sessions have separate servers and repeat @/% IDs.
+            # join-pane would be a different operation and must not be substituted.
+            raise BridgeError('unsupported_target', 'psmux whole-window cross-session movement is unsupported; source preserved')
+        after_rows = self._rows()
+        present = any(row['session_id'] == destination for row in after_rows)
+        after = self._snapshot(after_rows, destination) if present else None
+        if action == 'close':
+            if any(row['session_id'] == snapshot['session_id'] and row['window_id'] == wid for row in after_rows):
+                raise BridgeError('effect_uncertain', 'closed tab remains visible')
+        elif after is None or not any(w['window_id'] == wid for w in after['windows']):
+            raise BridgeError('effect_uncertain', 'destination attachment was not observed')
+        return dict(window_id=wid, workspace_state='present' if present else 'removed', snapshot=after)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--namespace', required=True)
+    parser.add_argument('--session', required=True)
+    parser.add_argument('--server-pid', type=int)
+    parser.add_argument('--server-birth', type=int)
+    parser.add_argument('--describe', action='store_true')
+    parser.add_argument('--attach-directory')
+    args = parser.parse_args(argv)
+    host = None
+    try:
+        host = PsmuxHost(namespace=args.namespace, session=args.session,
+                         server_pid=args.server_pid, server_birth=args.server_birth, attach_directory=args.attach_directory)
+        if args.describe:
+            value = dict(generation=host.generation, identity=host.identity,
+                         capabilities=sorted(host.ACTIONS))
+        else:
+            raw = sys.stdin.buffer.read(65537)
+            if len(raw) > 65536:
+                raise BridgeError('capacity', 'finite bridge input exceeds bound')
+            value = host.execute(json.loads(raw))
+        print(json.dumps(value))
+        return 0
+    except (BridgeError, ValueError, KeyError, TypeError, OSError) as error:
+        print(json.dumps(dict(generation=host.generation if host else None,
+            error=dict(code=getattr(error, 'code', 'attachment_unavailable'), message=str(error)))))
+        return 0 if host else 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

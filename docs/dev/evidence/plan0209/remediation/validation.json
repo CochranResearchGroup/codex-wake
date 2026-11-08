@@ -1,0 +1,76 @@
+{
+  "status": "passed",
+  "product_source": "94012f3",
+  "prefix": "/tmp/codex-wake-503-reviewed-94012f3-prefix",
+  "wheel": "/tmp/codex-wake-503-wheels/reviewed-94012f3/codex_wake-0.22.0.dev2-py3-none-any.whl",
+  "wheel_sha256": "1494ef4e6ea84839e043db9d2ce63528504fec60d5c7c2d918fbde75980fe294",
+  "matching_python_members": 281,
+  "native_qualification_source": "6d7701a",
+  "native_wheel_sha256": "ca5e5785679292a446d53945a9369ab06d04a4c1fda4ed860febdd71e2b4c3c1",
+  "native_to_final_delta": [
+    "codex_wake/tab_contract.py"
+  ],
+  "delta_effect": "Data-only capability/help statement describes qualified restored shell preservation; all other280 Pythonmembers bitidentical, including all three remediated behavior owners.",
+  "checks": [
+    {
+      "python": "3.11",
+      "tier": "focused",
+      "tests": 91,
+      "seconds": 32.952,
+      "log": "/tmp/codex-wake-503-pass1-311.log"
+    },
+    {
+      "python": "3.12 normally installed",
+      "tier": "focused",
+      "tests": 91,
+      "seconds": 33.046,
+      "log": "/tmp/codex-wake-503-pass1-312.log"
+    },
+    {
+      "python": "3.11",
+      "tests": 21,
+      "seconds": 16.295,
+      "log": "/tmp/codex-wake-503-reviewed-contract311.log"
+    },
+    {
+      "python": "3.12 final normally installed",
+      "tests": 22,
+      "seconds": 16.817,
+      "log": "/tmp/codex-wake-503-reviewed-contract.log"
+    }
+  ],
+  "final_transport": {
+    "bounded_monitor": true,
+    "local_cli": true,
+    "local_mutation_cli": true,
+    "mcp": true,
+    "module": "/tmp/codex-wake-503-reviewed-94012f3-prefix/lib/python3.12/site-packages/codex_wake/controller_tabs.py",
+    "native_mcp": true,
+    "oauth_api": true,
+    "observe_cannot_capture": true,
+    "opt_in_policy": true,
+    "real_isolated_tmux": true,
+    "remote_cli": true,
+    "retained_intent": true,
+    "saved_views": true,
+    "status": "passed",
+    "windows_matrix": false,
+    "workspace_recovery_routing": true
+  },
+  "native_receipts": [
+    "docs/dev/evidence/plan0209/remediation/recovery-restored-shells-native.json",
+    "docs/dev/evidence/plan0209/remediation/profile-foreground-native.json"
+  ],
+  "full_suite_boundary": "comprehensive-final.json records2205tests/version on frozenbfded49 before review. Post-remediation focused+installed checks are separately source-attributed; no second comprehensive/broadreview claimed.",
+  "windows_transfer": "Initial actualWindowspsmux/PowerShell CLI/HTTP/OAuthMCP evidence retained at product4d22a56. Windowsbridge/adapters/remoteclient/schema/transport owners are unchanged; resolution is narrow sharedscreen postprocessing covered by realtmux and Windows unit tests. No new Windowsnativeexecution claim.",
+  "provider_calls": 0,
+  "model_turns": 0,
+  "production_effects": false,
+  "red_green": "docs/dev/evidence/plan0209/remediation/tdd.json",
+  "memory_disposition": {
+    "status": "forbidden",
+    "reason": "Memory writes were not authorized.",
+    "receipt": "/tmp/codex-wake-503-memory-disposition.json",
+    "graphiti_writes_attempted": 0
+  }
+}

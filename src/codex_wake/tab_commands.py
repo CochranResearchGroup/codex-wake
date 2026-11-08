@@ -1,5 +1,6 @@
 """Controller attachment CLI adapter over the host-owned operation service."""
 import json
+import subprocess
 
 
 def register_parser(subparsers):
@@ -12,39 +13,41 @@ def register_parser(subparsers):
 
 
 def command(args, owner=None):
-    if owner is None:
-        from .controller_tabs import controller_tabs_from_root
-        owner = controller_tabs_from_root(args.wake_root)
-    operation = 'tabs.' + args.tab_command
-    value = owner.execute(operation,args.arguments) if args.tab_command in ('list','show') else protected_execute(operation,args.arguments,args.wake_root)
-    print(json.dumps(value, sort_keys=True))
-    return 0
+    from .managed_inventory import InventoryError
+    from .records import WakeError
+    from .shortcut_store import default_root
+    try:
+        args.wake_root = default_root(args.wake_root)
+        if args.tab_command=='result':
+            from .controller_runtime import ControllerRuntime
+            value=ControllerRuntime(args.wake_root).local_tab_result('tab-cli-'+args.request_id)
+            print(json.dumps(value,sort_keys=True));return 0
+        if owner is None:
+            from .controller_tabs import controller_tabs_from_root
+            owner = controller_tabs_from_root(args.wake_root)
+        operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1)
+        value = owner.execute(operation,args.arguments) if operation in owner.READS else operator_execute(operation,args.arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
+        print(json.dumps(value, sort_keys=True))
+        phase=value.get('result',{}).get('operation',{}).get('phase') if isinstance(value.get('result'),dict) else None
+        return 3 if phase=='uncertain' or value.get('status') in ('uncertain','partial') else 0
+    except (WakeError, OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as error:
+        print(json.dumps(dict(status='held', error=dict(
+            code=getattr(error,'code','configuration_unavailable'),
+            message=str(error) if isinstance(error,WakeError) else
+                    'Tab configuration is unavailable or invalid; inspect the selected controller and refresh workspaces.'))))
+        return 2
 
 
 def tool_specs():
-    text = {'type':'string'}
-    specs = {}
-    for verb in ('list','show','preview','apply','undo','capture','input'):
-        properties = {} if verb=='list' else {'workspace':text}
-        required = [] if verb=='list' else ['workspace']
-        if verb=='show': properties['selector']=text
-        if verb not in ('list','show'):
-            properties.update(expected_target={'type':'object'},_request={'type':'object'})
-            required += ['expected_target','_request']
-        if verb=='preview': properties.update(mode={'enum':['activity','repository']},pins={'type':'array','items':text})
-        if verb=='apply': properties['plan_id']=text; required += ['plan_id']
-        if verb=='undo': properties['receipt_id']=text; required += ['receipt_id']
-        if verb in ('capture','input'): properties['pane']=text; required += ['pane']
-        if verb=='capture': properties['lines']={'type':'integer','minimum':1,'maximum':200}
-        if verb=='input':
-            properties.update(input={'type':'string','maxLength':16384},custody={'type':'object'},transport={'enum':['structured','terminal']})
-            required += ['input','custody','transport']
-        specs['wake_tabs_'+verb]=('controller-tabs','tabs.'+verb,'Use host-enrolled presentation with exact generation and explicit input custody; no automatic replacement.',properties,required,verb in ('list','show'))
-    return specs
+    from .tab_contract import tool_specs as portable_specs
+    return portable_specs()
 
 
 def protected_execute(operation,arguments,root):
+    from .shortcut_store import default_root
+    root=default_root(root)
     from types import SimpleNamespace
+    from pathlib import Path
     from .controller_tabs import controller_tabs_from_root
     from .controller_operations import ControllerOperations
     from .controller_http import ProtectedOperations
@@ -52,5 +55,101 @@ def protected_execute(operation,arguments,root):
     from .operation_commands import local_actor
     tabs=controller_tabs_from_root(root)
     operations=ControllerOperations(ManagedInventory(root),host=tabs.host,environment=tabs.environment,tabs=tabs)
-    authority=SimpleNamespace(authenticate=lambda unused:local_actor(root))
+    configured=(Path(root)/'controller-messaging.json').is_file()
+    from .daemon_commands import local_operator
+    uid_actor=None if configured else local_operator(arguments.get('expected_target',{}),('control','observe'))
+    if uid_actor is not None and operation in ('tabs.reattach-apply','tabs.reattach-status'):
+        from dataclasses import replace
+        uid_actor=replace(uid_actor,targets=[*uid_actor.targets,*tabs.reattach_owner().authorization_targets(arguments.get('plan_id'))])
+    if uid_actor is not None and isinstance(arguments.get('expected_destination'),dict):
+        from dataclasses import replace
+        uid_actor=replace(uid_actor,targets=[*uid_actor.targets,arguments['expected_destination']])
+    authority=SimpleNamespace(authenticate=lambda unused:local_actor(root) if configured else uid_actor)
     return ProtectedOperations(authority,operations).execute('host-local-grant',operation,arguments)
+
+
+def operator_execute(operation, arguments, root, *, owner=None, request_id=None):
+    """UID-authorized local tab control, with retained common journal identity."""
+    import hashlib
+    from pathlib import Path
+    from types import SimpleNamespace
+    from .daemon_commands import local_operator
+    from .controller_tabs import controller_tabs_from_root, AuthorizedTabs
+    from .controller_runtime import ControllerRuntime
+    from .tab_lifecycle import TabLifecycle
+    from .managed_inventory import InventoryError
+    if request_id is not None:
+        from .controller_runtime import bounded_id
+        bounded_id('tab-cli-'+request_id)
+        try:
+            return ControllerRuntime(root).local_tab_result('tab-cli-'+request_id,
+                expected_operation=operation,arguments=arguments)
+        except InventoryError as error:
+            if error.code!='operation_not_found':raise
+    owner = owner or controller_tabs_from_root(root)
+    payload = dict(arguments)
+    from .tab_views import TabViews
+    if operation in TabViews.READS|TabViews.MUTATIONS or operation.startswith(('tabs.monitor.','tabs.policy.')):
+        payload.setdefault('expected_target',owner.monitor_target() if operation.startswith('tabs.monitor.') else owner.policy_target() if operation.startswith('tabs.policy.') else owner.logical_target())
+        key=_intent_key(operation,payload,request_id)
+        payload.setdefault('_request',dict(operation_id='tab-cli-'+key,idempotency_key='tab-cli-'+key,
+            correlation_id=key,binding='local-cli',target=payload['expected_target']))
+        actor=local_operator(payload['expected_target'],('control','observe'))
+        return AuthorizedTabs(SimpleNamespace(authenticate=lambda unused:actor),owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
+    if operation in ('tabs.reattach-apply','tabs.reattach-status'):
+        plan=owner.reattach_owner().execute('tabs.reattach-status',{'plan_id':payload.get('plan_id')})
+        payload.setdefault('expected_target',plan['target'])
+        key=_intent_key(operation,payload,request_id)
+        payload.setdefault('_request',dict(operation_id='tab-cli-'+key,idempotency_key='tab-cli-'+key,correlation_id=key,binding='local-cli',target=payload['expected_target']))
+        actor=local_operator(payload['expected_target'],('control','observe'))
+        from dataclasses import replace
+        actor=replace(actor,targets=[*actor.targets,*owner.reattach_owner().authorization_targets(payload['plan_id'])])
+        return AuthorizedTabs(SimpleNamespace(authenticate=lambda unused:actor),owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
+    workspace = payload.get('workspace')
+    if workspace is None and len(owner.workspaces) == 1:
+        workspace = next(iter(owner.workspaces))
+    elif workspace not in owner.workspaces:
+        matches = [k for k,v in owner.workspaces.items() if v.get('label') == workspace]
+        if len(matches) == 1:
+            workspace = matches[0]
+    if workspace not in owner.workspaces:
+        raise InventoryError('ambiguous_target','Select one workspace from tabs list using --workspace.')
+    payload['workspace'] = workspace
+    lifecycle = TabLifecycle(root,workspaces=owner.workspaces,host=owner.host,environment=owner.environment)
+    if operation=='tabs.recovery.apply' and 'expected_target' not in payload:
+        fields={k:payload[k] for k in ('capture_id','workspace','restore_layout') if k in payload}
+        preview=owner.execute('tabs.recovery.preview',fields)
+        if preview['status']!='ready':
+            raise InventoryError('recovery_held','Recovery preview contains unresolved bindings; inspect before applying.')
+        payload['expected_target']=preview['target']
+    elif 'expected_target' not in payload:
+        payload['expected_target']=lifecycle.inspect(workspace)['target']
+    if 'destination' in payload:
+        dest = payload['destination']
+        if dest not in owner.workspaces:
+            matches=[k for k,v in owner.workspaces.items() if v.get('label') == dest]
+            if len(matches)==1:dest=matches[0]
+        payload['destination']=dest
+        payload.setdefault('expected_destination',lifecycle.inspect(dest)['target'])
+    if '_request' not in payload:
+        key = _intent_key(operation,payload,request_id)
+        payload['_request']=dict(operation_id='tab-cli-'+key,idempotency_key='tab-cli-'+key,
+                                 correlation_id=key,binding='local-cli',target=payload['expected_target'])
+    actor=local_operator(payload['expected_target'],('control','observe'))
+    if '_request' in arguments and (Path(root)/'controller-messaging.json').is_file():
+        from .operation_commands import local_actor
+        actor=local_actor(root)
+    if actor.issuer.startswith('local://uid/') and isinstance(payload.get('expected_destination'),dict):
+        from dataclasses import replace
+        actor=replace(actor,targets=[*actor.targets,payload['expected_destination']])
+    authority=SimpleNamespace(authenticate=lambda unused:actor)
+    return AuthorizedTabs(authority,owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
+
+
+def _intent_key(operation,payload,request_id=None):
+    import hashlib
+    from uuid import uuid4
+    if request_id is not None:return request_id
+    if operation in ('tabs.preview','tabs.policy.tick','tabs.recovery.capture','tabs.reattach-preview'):
+        return uuid4().hex
+    return hashlib.sha256(json.dumps([operation,payload],sort_keys=True).encode()).hexdigest()

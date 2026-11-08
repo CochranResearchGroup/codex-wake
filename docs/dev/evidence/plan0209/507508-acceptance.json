@@ -1,0 +1,35 @@
+{
+  "tickets": [
+    507,
+    508
+  ],
+  "tier": "focused + installed",
+  "status": "passed",
+  "installed_public": {
+    "bounded_monitor": true,
+    "local_cli": true,
+    "local_mutation_cli": true,
+    "mcp": true,
+    "module": "/tmp/codex-wake-503-installed/lib/python3.12/site-packages/codex_wake/controller_tabs.py",
+    "native_mcp": true,
+    "oauth_api": true,
+    "observe_cannot_capture": true,
+    "real_isolated_tmux": true,
+    "remote_cli": true,
+    "retained_intent": true,
+    "saved_views": true,
+    "status": "passed",
+    "windows_matrix": false
+  },
+  "primary_red": "tabs.view-save unsupported; pristine committed TabOrganization.preview rejects criteria",
+  "primary_green": "saved views/group identity projection; real tmux trait reorder and conditional undo; exact installed CLI API OAuth/nativeMCP monitor and views",
+  "focused": "44checks both3.11/3.12; exact final3.12 duration pending receipt",
+  "monitoring": "read-only independent daemon/process generation, timeout/loss and stale-trait tests; no production changes",
+  "retained_failures": [
+    "initial logical grant test used overly broad scope; fixed acceptance packet to include exact physical/views/monitor scopes"
+  ],
+  "prefix": "/tmp/codex-wake-503-installed",
+  "source_and_install": "new owners byte qualified; installer wheel built with pinned setuptools80.9.0/wheel0.45.1",
+  "hosted_ci": false,
+  "provider_calls": 0
+}

@@ -1,0 +1,8 @@
+{
+  "status": "failed",
+  "namespace": "wake509-6d2a422647a2",
+  "checks": [],
+  "error_type": "CalledProcessError",
+  "message": "Command '['/mnt/c/Users/ecoch/AppData/Local/codex-wake-test/controller405-20261030/venv/Scripts/python.exe', '\\\\\\\\wsl.localhost\\\\Ubuntu\\\\tmp\\\\wake-psmux514-final\\\\native_fixture.py', 'start', 'wake509-6d2a422647a2']' returned non-zero exit status 2.",
+  "provider_calls": 0
+}

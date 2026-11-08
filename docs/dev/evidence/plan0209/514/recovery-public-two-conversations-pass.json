@@ -1,0 +1,116 @@
+{
+  "uid": 1017,
+  "native_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "external_provider_calls": 0,
+  "model_turns": 0,
+  "status": "passed",
+  "installed_modules": {
+    "codex_wake.local_health": {
+      "path": "/tmp/codex-wake-503-native-prefix/lib/python3.12/site-packages/codex_wake/local_health.py",
+      "sha256": "bc547723fd1789d1dfd3235381c731067c0582333340d957396b0592071b6a3b"
+    },
+    "codex_wake.tab_recovery": {
+      "path": "/tmp/codex-wake-503-native-prefix/lib/python3.12/site-packages/codex_wake/tab_recovery.py",
+      "sha256": "dc12dd0edb059185826894dcd30a8bd11589aaae7290c7a799aa0e9d80770e11"
+    },
+    "codex_wake.tab_traits": {
+      "path": "/tmp/codex-wake-503-native-prefix/lib/python3.12/site-packages/codex_wake/tab_traits.py",
+      "sha256": "e2de0ae447f77a1c0f805afaba481ed168b993ff93d3dfbb301e9870ff621777"
+    }
+  },
+  "wheel": {
+    "path": "/tmp/codex-wake-503-wheels/candidate-4d22a56/codex_wake-0.22.0.dev2-py3-none-any.whl",
+    "sha256": "6e772f6571caba1d59589336d4546fd5f762aee0a7267d2c931311e5ef88c29d",
+    "source_commit": "4d22a56"
+  },
+  "public_cli_capture": true,
+  "captured_kinds": [
+    "noncoding",
+    "codex",
+    "codex"
+  ],
+  "captured_conversations": [
+    "d35b8501-8671-4faa-a11a-85a5cf9eb3c3",
+    "3676adaa-29e8-41e3-bac5-cf9d068b1d07"
+  ],
+  "installed_cli_status": {
+    "status": null,
+    "passed": true
+  },
+  "installed_cli_preview": {
+    "status": "ready",
+    "passed": true
+  },
+  "preview_statuses": [
+    "preserved",
+    "restoreable",
+    "restoreable"
+  ],
+  "public_cli_apply": true,
+  "apply": {
+    "intent": "once",
+    "replayed": false,
+    "rows": [
+      {
+        "kind": "noncoding",
+        "logical_id": "0367a78249334af0861fff1356328a61",
+        "name": "notes",
+        "reason": "noncoding_commands_not_replayed",
+        "status": "preserved"
+      },
+      {
+        "conversation_id": "d35b8501-8671-4faa-a11a-85a5cf9eb3c3",
+        "effects_attempted": 1,
+        "kind": "codex",
+        "launch": {
+          "pane_id": "%1",
+          "window_id": "@1"
+        },
+        "logical_id": "d2ca9bf8170a4b4ea8c76fc73913faf2",
+        "name": "native-1",
+        "namespace": "codex:c984f80835a446f0dd56c569dcd4f23e59251bf2c18f36b51645cd8725f981ac",
+        "reason": null,
+        "status": "resumed",
+        "window_id": "@1"
+      },
+      {
+        "conversation_id": "3676adaa-29e8-41e3-bac5-cf9d068b1d07",
+        "effects_attempted": 1,
+        "kind": "codex",
+        "launch": {
+          "pane_id": "%2",
+          "window_id": "@2"
+        },
+        "logical_id": "5659be16af4b48aea7e874075296478e",
+        "name": "native-2",
+        "namespace": "codex:c984f80835a446f0dd56c569dcd4f23e59251bf2c18f36b51645cd8725f981ac",
+        "reason": null,
+        "status": "resumed",
+        "window_id": "@2"
+      }
+    ],
+    "schema_version": 1,
+    "selection": {
+      "capture_id": "before-outage",
+      "intent": "once",
+      "restore_layout": true,
+      "workspace": "fixture"
+    },
+    "status": "completed",
+    "target": {
+      "capture_id": "before-outage",
+      "capture_sha256": "7c50b92b606431912c79c5ba9f7f6720bf7dde62a3a447e1cbeb1d5a1bbdfe38",
+      "presentation_generation": "ce7eb127c73bd53f0873075eec19556d91a90ee3b981cb1b314625d734d3e0c9",
+      "workspace": "fixture",
+      "workspace_identity": "09f91f418db9c34304df5b77c14ad3860883221d0e9848196820b8a7b06c13ef"
+    }
+  },
+  "final_conversations": [
+    "3676adaa-29e8-41e3-bac5-cf9d068b1d07",
+    "d35b8501-8671-4faa-a11a-85a5cf9eb3c3"
+  ],
+  "replayed_without_new_windows": true,
+  "noncoding_preserved": true,
+  "trap_requests": [],
+  "final_owned_native_processes": []
+}

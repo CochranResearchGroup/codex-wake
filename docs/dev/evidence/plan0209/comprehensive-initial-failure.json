@@ -1,0 +1,21 @@
+{
+  "status": "failed_corrected_environment",
+  "command": "PYTHONPATH=src /tmp/codex-wake-503-py311/bin/python -m unittest discover -s tests -p test_*.py",
+  "tests": 2187,
+  "seconds": 1150.206,
+  "failures": 24,
+  "errors": 2,
+  "skipped": 1,
+  "log": "/tmp/codex-wake-503-full311.log",
+  "causes": [
+    "Python3.11 venv lacked installed sibling codex-wake launcher (2errors and refresh prerequisites)",
+    "Generated commandcoverage stale before512 integrated during run",
+    "Initial run did not isolate defaulttmux/XDG state; corrected runs use separate roots and frozen source"
+  ],
+  "corrective_run": {
+    "command": "env -u TMUX XDG_CONFIG_HOME=/tmp/codex-wake-503-regression-failures/config XDG_STATE_HOME=/tmp/codex-wake-503-regression-failures/state TMUX_TMPDIR=/tmp/codex-wake-503-regression-failures/tmux CODEX_WAKE_STABLE_TIME_CONFIG= PYTHONPATH=src:tests /tmp/codex-wake-503-py311/bin/python -m unittest test_agent_refresh test_controller_builds test_command_contract -q",
+    "result": "38PASS26.160s",
+    "log": "/tmp/codex-wake-503-regression-failures/result.log"
+  },
+  "classification": "retained test-environment failure, not clean comprehensive proof; isolated final311/312 pending"
+}

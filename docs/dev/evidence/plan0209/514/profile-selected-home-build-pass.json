@@ -1,0 +1,95 @@
+{
+  "status": "passed",
+  "native_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "provider_calls": [],
+  "model_turns": 0,
+  "uid": 1017,
+  "public_cli": true,
+  "operation": {
+    "operation": "tabs.create",
+    "result": {
+      "operation": {
+        "acceptance": "owner_reported",
+        "binding": "local-cli",
+        "cancellation": "not_requested",
+        "correlation_id": "native-profile515",
+        "created_at": 1794152288.9170787,
+        "delivery": "retained",
+        "execution": "completed",
+        "operation": "tabs.create",
+        "operation_id": "tab-cli-native-profile515",
+        "original_binding": "local-cli",
+        "payload_sha256": "3ce6ece297dcc412424a2e3a0035350026bc352218b81a22f1841768ae7bfd3e",
+        "phase": "terminal",
+        "reason": null,
+        "result": {
+          "account_identity": "selected_home_verified_remote_identity_unverified",
+          "action": "tabs.create",
+          "intent": "764bb833e08e418297220e2c8df09bfb",
+          "process": {
+            "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+            "pid": 2179504,
+            "start_time_ticks": 23938651
+          },
+          "profile": "codex-fixture",
+          "profile_target": {
+            "account": "codex-fixture",
+            "backend": "private",
+            "build_channel": "modded",
+            "build_revision": "qualified368",
+            "build_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+            "configuration_revision": "230e317113a3c73b5a4842a81ec9e357480d1894da6cebe7ea532a753478c174",
+            "environment": "posix",
+            "executable": "/tmp/recovery368-native-package/bin/codex",
+            "home": "/tmp/wake-profile515-native-6mzcdmrq/accounts/codex-fixture",
+            "home_generation": "2096:10920022",
+            "host": "cooper",
+            "provider": "codex"
+          },
+          "receipt_id": "receipt_cddac79a873f4191a3aea54c66ddf30f",
+          "status": "applied",
+          "target": {
+            "environment": "posix",
+            "generation": "bee08e2f9293db37389e6aa29d1ee7341f38a8e0bcd2fb0e4d983202286ab9de",
+            "host": "cooper",
+            "presentation": "tmux",
+            "workspace": "fixture"
+          },
+          "window": {
+            "focused": false,
+            "index": 1,
+            "linked": false,
+            "name": "selected",
+            "panes": [
+              {
+                "pane_id": "%1",
+                "pid": 2179399
+              }
+            ],
+            "window_id": "@1"
+          }
+        },
+        "schema_version": 1,
+        "submission": "admitted",
+        "target": {
+          "environment": "posix",
+          "generation": "bee08e2f9293db37389e6aa29d1ee7341f38a8e0bcd2fb0e4d983202286ab9de",
+          "host": "cooper",
+          "presentation": "tmux",
+          "workspace": "fixture"
+        }
+      }
+    },
+    "schema_version": 1,
+    "status": "completed"
+  },
+  "owned_child": {
+    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+    "pid": 2179504,
+    "start_time_ticks": 23938651
+  },
+  "same_key_replay_without_duplicate": true,
+  "exact_selected_build_home_process": true,
+  "final_owned_native_processes": [],
+  "unrelated_process_preserved": true
+}
