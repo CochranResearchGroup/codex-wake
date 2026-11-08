@@ -215,9 +215,13 @@ class AuthorizedTabs:
             raise AuthError('insufficient_scope')
         target = arguments.get('expected_target') if isinstance(arguments, dict) else None
         required = {'host','environment','workspace','presentation'}
-        if not isinstance(target, dict) or not (required | {'generation'}) <= target.keys() or not any(
-                required <= scope.keys() and all(target.get(k) == v for k,v in scope.items()) for scope in actor.targets):
-            raise AuthError('insufficient_scope')
+        targets=[target]
+        if operation in ('tabs.move','tabs.park','tabs.restore'):
+            targets.append(arguments.get('expected_destination'))
+        for selected in targets:
+            if not isinstance(selected,dict) or not (required|{'generation'})<=selected.keys() or not any(
+                    required<=scope.keys() and all(selected.get(k)==v for k,v in scope.items()) for scope in actor.targets):
+                raise AuthError('insufficient_scope')
         def authorize():
             current = self.authority.authenticate(token)
             if current != actor: raise AuthError()

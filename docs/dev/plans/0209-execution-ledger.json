@@ -160,16 +160,16 @@
         504,
         506
       ],
-      "state": "integrated",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/368",
       "worker": "/root/traits505",
       "owned_paths": [],
       "validation": [
-        "source2tests PASS3.11; actualnativeinitialwitness2conversations source; installedexacthealth witness pending"
+        "docs/dev/evidence/plan0209/368-acceptance.json"
       ],
       "worker_result_sha": "f50fb6f",
-      "result_sha": "3779af2"
+      "result_sha": "7aba5a8"
     },
     {
       "key": "auto",

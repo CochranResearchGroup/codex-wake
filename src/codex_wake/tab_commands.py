@@ -121,6 +121,9 @@ def protected_execute(operation,arguments,root):
     configured=(Path(root)/'controller-messaging.json').is_file()
     from .daemon_commands import local_operator
     uid_actor=None if configured else local_operator(arguments.get('expected_target',{}),('control','observe'))
+    if uid_actor is not None and isinstance(arguments.get('expected_destination'),dict):
+        from dataclasses import replace
+        uid_actor=replace(uid_actor,targets=[*uid_actor.targets,arguments['expected_destination']])
     authority=SimpleNamespace(authenticate=lambda unused:local_actor(root) if configured else uid_actor)
     return ProtectedOperations(authority,operations).execute('host-local-grant',operation,arguments)
 
@@ -179,6 +182,9 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
     if '_request' in arguments and (Path(root)/'controller-messaging.json').is_file():
         from .operation_commands import local_actor
         actor=local_actor(root)
+    if actor.issuer.startswith('local://uid/') and isinstance(payload.get('expected_destination'),dict):
+        from dataclasses import replace
+        actor=replace(actor,targets=[*actor.targets,payload['expected_destination']])
     authority=SimpleNamespace(authenticate=lambda unused:actor)
     return AuthorizedTabs(authority,owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
 
