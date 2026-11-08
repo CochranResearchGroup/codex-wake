@@ -32,3 +32,11 @@ class LifecycleCLITests(unittest.TestCase):
             rows=cli('list')['resources']
             self.assertTrue(any(r['window']['name']=='renamed' for r in rows))
             self.assertFalse((root/'wake/controller-messaging.json').exists())
+            from codex_wake.mcp_server import CommandRunner
+            target=next(r['target'] for r in rows if r['target']['workspace']==workspace)
+            payload=dict(workspace=workspace,window=window,name='native-mcp-renamed',expected_target=target)
+            payload['_request']=dict(operation_id='native-rename',idempotency_key='native-rename',correlation_id='native-rename',binding='fixture',target=target)
+            with patch.dict(os.environ,env):
+                native,failed=CommandRunner(wake_root=root/'wake').call('wake_tabs_rename',payload)
+            self.assertFalse(failed,native)
+            self.assertEqual(native['result']['operation']['execution'],'completed',native)

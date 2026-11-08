@@ -130,6 +130,8 @@ class TabLifecycle:
             raise InventoryError('stale_target', 'exact current workspace generation required')
         config = self.workspaces[workspace]
         transport = config['transport']
+        if config['kind']=='psmux' and hasattr(transport,'lifecycle'):
+            return self._psmux(operation,args,before,config,deadline)
         if config['kind'] not in ('tmux', 'byobu'):
             raise InventoryError('unsupported_target', 'manual lifecycle is not qualified for this backend')
         snapshot = before['snapshot']
@@ -242,4 +244,53 @@ class TabLifecycle:
         except Exception:
             receipt.update(status='uncertain')
             self.records.save(receipt_id, receipt)
+            raise
+
+    def _psmux(self,operation,args,before,config,deadline):
+        transport=config['transport'];snapshot=before['snapshot'];workspace=args['workspace']
+        window=None if operation=='tabs.create' else self._window(snapshot,args.get('window'))
+        action=operation.split('.')[1]
+        if action in ('move','park','restore'):
+            destination=self.inspect(args.get('destination'),deadline=deadline)
+            if args.get('expected_destination')!=destination['target']:
+                raise InventoryError('stale_target','Destination changed; refresh before moving.')
+            raise InventoryError('unsupported_target','psmux whole-window cross-session movement is unsupported; source preserved.')
+        if window and window.get('linked'):
+            raise InventoryError('tab_protected','Linked native windows require explicit unlink ownership.')
+        payload={} if window is None else dict(window=window['window_id'])
+        if action in ('create','rename'):
+            payload['name']=self._name(args.get('name'))
+            self._collision(snapshot,payload['name'],except_window=window['window_id'] if window else None)
+        if action=='create' and 'cwd' in args:payload['cwd']=args['cwd']
+        reasons=['native_work_unknown'] if action=='close' else []
+        if action=='close' and not args.get('force') and not args.get('preview'):
+            raise InventoryError('tab_protected','Native Windows work state is unknown; explicit --force is required to close this tab.')
+        if args.get('preview'):
+            return dict(status='preview',target=before['target'],action=operation,window=window,protection=reasons,requires_force=bool(reasons))
+        if self.inspect(workspace,deadline=deadline)['target']!=before['target']:
+            raise InventoryError('stale_target','Native Windows presentation changed before effect.')
+        receipt_id='receipt_'+uuid.uuid4().hex
+        receipt=dict(version=1,receipt_id=receipt_id,status='pending',action=operation,before=before['target'])
+        self.records.save(receipt_id,receipt)
+        try:
+            result=transport.lifecycle(action,payload,deadline)
+            after=result.get('snapshot')
+            observed=None
+            if after is not None:
+                after=dict(after,bridge_generation=transport.generation)
+                wid=result['window_id']
+                observed=next((w for w in after['windows'] if w['window_id']==wid),None)
+                if action=='close' and observed is not None:
+                    raise InventoryError('effect_uncertain','Closed native window is still visible.')
+                if action!='close' and observed is None:
+                    raise InventoryError('effect_uncertain','Native lifecycle outcome was not observed.')
+                target=dict(before['target'],generation=digest(after))
+            else:target=before['target']
+            receipt.update(status='applied',after=target,observed_window=observed)
+            self.records.save(receipt_id,receipt)
+            return dict(status='applied',action=operation,target=target,window=observed,receipt_id=receipt_id,
+                        protection=reasons,affected_work=reasons,forced=bool(args.get('force')),
+                        workspace_state=result.get('workspace_state','present'),conversation='preserved')
+        except Exception:
+            receipt['status']='uncertain';self.records.save(receipt_id,receipt)
             raise

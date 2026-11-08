@@ -273,6 +273,8 @@ class TabTraits:
         return None
 
     def _pane(self, pane, sample, transport, privacy, deadline):
+        if pane.get('platform')=='windows':
+            return self._windows_pane(pane,transport,privacy,deadline)
         stamp = self.clock()
         names = ('harness', 'build', 'account', 'repository', 'remote_host', 'session_presence', 'activity', 'health', 'error')
         traits = {name: _trait(reason='evidence_unavailable') for name in names}
@@ -356,6 +358,26 @@ class TabTraits:
         return dict(pane_id=pane.get('pane_id'), processes=identities, process_complete=complete, traits=traits,
                     binding=dict(sample) if qualified and traits['activity']['status'] == 'observed' else None)
 
+    def _windows_pane(self,pane,transport,privacy,deadline):
+        import ntpath
+        stamp=self.clock()
+        names=('harness','build','account','repository','remote_host','session_presence','activity','health','error')
+        traits={name:_trait(source='windows_presentation',reason='native_runtime_observation_unavailable') for name in names}
+        processes=pane.get('windows_processes',[])[:256]
+        kinds=set()
+        for row in processes:
+            executable=ntpath.basename(row.get('executable','')).lower()
+            if executable in ('codex.exe','codex'):kinds.add('codex')
+            elif executable in ('grok.exe','grok'):kinds.add('grok')
+        if kinds:
+            traits['harness']=_trait(next(iter(kinds)) if len(kinds)==1 else 'mixed',source='windows_process_image',observed_at=stamp,status='observed')
+            traits['session_presence']=_trait('present',source='windows_process_image',observed_at=stamp,status='observed')
+        elif pane.get('windows_processes_complete'):
+            traits['session_presence']=_trait('absent',source='windows_process_tree',observed_at=stamp,status='observed')
+        traits['error']=self._error(pane,transport,privacy,deadline)
+        return dict(pane_id=pane.get('pane_id'),platform='windows',processes=[dict(pid=r.get('pid'),creation_filetime=r.get('creation_filetime'),platform='windows') for r in processes],
+                    process_complete=bool(pane.get('windows_processes_complete')),traits=traits,binding=None)
+
     def _session(self, pane, identities):
         matches = []
         for row in self.sessions:
@@ -375,11 +397,12 @@ class TabTraits:
             return _trait(reason='observation_deadline')
         if privacy is None or privacy(pane.get('pane_id')) != 'safe':
             return _trait(reason='presentation_privacy_unknown')
-        if transport is None or not hasattr(transport, 'command'):
+        if transport is None or not (hasattr(transport, 'command') or hasattr(transport,'visible_screen')):
             return _trait(status='unsupported', reason='visible_screen_capture_unavailable')
         try:
             # Default tmux capture range is the current visible screen, not history.
-            text = transport.command(deadline, 'capture-pane', '-p', '-e', '-t', pane['pane_id'])
+            text = (transport.visible_screen(pane['pane_id'],deadline) if hasattr(transport,'visible_screen') else
+                    transport.command(deadline, 'capture-pane', '-p', '-e', '-t', pane['pane_id']))
             if not isinstance(text, str) or len(text) > 1048576:
                 return _trait(reason='visible_screen_exceeds_bound')
             lines = text.splitlines()
@@ -409,7 +432,7 @@ class WorkspaceTraitsObserver:
         traits=TabTraits(self.root)
         first=[traits.observe_window(w,transport=self.transport,privacy=self.privacy,deadline=deadline)
                for w in snapshot['windows']]
-        native=any(p['traits']['harness']['value']=='codex' for w in first for p in w['panes'])
+        native=any(p.get('platform')!='windows' and p['traits']['harness']['value']=='codex' for w in first for p in w['panes'])
         if native:
             rows=session_rows(self.root,socket_path=getattr(self.transport,'socket',None),deadline=deadline)
             traits=TabTraits(self.root,sessions=rows['sessions'])

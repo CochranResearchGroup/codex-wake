@@ -78,7 +78,7 @@ class ControllerTabs:
                 traits = TabTraits(self.root)
                 initial = {w['window_id']:traits.observe_window(w,transport=transport,
                            privacy=config.get('privacy'),deadline=deadline) for w in snapshot['windows']}
-                needs_native = any(p['traits']['harness']['value']=='codex'
+                needs_native = any(p.get('platform')!='windows' and p['traits']['harness']['value']=='codex'
                                    for result in initial.values() for p in result['panes'])
                 rows = session_rows(self.root,socket_path=config.get('socket_path'),
                                     deadline=min(deadline,time.monotonic()+2)) if needs_native else dict(sessions=[],holds=[])

@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "checks": [
+    "pinned-native-process-and-session-discovery",
+    "create-rename-focus-current-visible-screen",
+    "cross-session-movement-explicitly-unsupported-source-preserved",
+    "actual-powershell-native-bridge-client",
+    "unsupported-action-and-replaced-process-generation-refused",
+    "installed-wake-cli-http-native-mcp-and-actual-powershell",
+    "owned-namespace-cleanup-and-unavailable-result"
+  ],
+  "bridge_sha256": "e5a915053024dee2deed1f50a1e7293fd4fac917caaa3ce87f316ab392bd3391",
+  "elapsed_seconds": 36.031,
+  "provider_calls": 0,
+  "native_windows_owner": false,
+  "actual_powershell": true,
+  "boundary": "Actual native presentation/finite transport; installed public CLI/API/nativeMCP lifecycle and actual PowerShell qualified; native Windows execution owner unsupported.",
+  "final_owned_namespace": {
+    "returncode": 1,
+    "sessions": []
+  },
+  "ticket": 509,
+  "prefix": "/tmp/codex-wake-503-installed",
+  "native_psmux_version": "3.4.0",
+  "supported": "list/traits/current visible errors/create/rename/focus/guarded close; WSL CLI, HTTP API, native MCP, actual PowerShell",
+  "unsupported": "whole-window movement between psmux sessions; source preserved",
+  "retained_failures": [
+    "native MCP UID actor changed expiry each authenticate; fixed stable request actor",
+    "fixture resource wake:fixture invalid canonical audience; corrected fixture",
+    "WSL_DISTRO_NAME absent in tool environment; acceptance resolves owning distro from native UNC path"
+  ],
+  "red": "Windows pane PID attempted Linux process probe; regression now proves no /proc crossing",
+  "source_checks": "21focused3.12 PASS; 22focused3.11 initial environment failure rpds from wrong ABI, correct3.11 dependency venv provisioned for rerun"
+}

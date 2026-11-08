@@ -96,12 +96,10 @@ def protected_execute(operation,arguments,root):
     from .operation_commands import local_actor
     tabs=controller_tabs_from_root(root)
     operations=ControllerOperations(ManagedInventory(root),host=tabs.host,environment=tabs.environment,tabs=tabs)
-    def authenticate(unused):
-        if (Path(root)/'controller-messaging.json').is_file():
-            return local_actor(root)
-        from .daemon_commands import local_operator
-        return local_operator(arguments.get('expected_target',{}),('control','observe'))
-    authority=SimpleNamespace(authenticate=authenticate)
+    configured=(Path(root)/'controller-messaging.json').is_file()
+    from .daemon_commands import local_operator
+    uid_actor=None if configured else local_operator(arguments.get('expected_target',{}),('control','observe'))
+    authority=SimpleNamespace(authenticate=lambda unused:local_actor(root) if configured else uid_actor)
     return ProtectedOperations(authority,operations).execute('host-local-grant',operation,arguments)
 
 
