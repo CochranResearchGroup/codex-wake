@@ -1473,9 +1473,21 @@ failures and missing observer wiring. Proposed HARD-01–10 remain local TRIAGE;
 first outcome is useful no-root workspace listing and installed grouping/undo.
 No new runtime changes or provider acceptance were performed.
 
-## P209 | Trait-based tab and session hardening specification
+## P209 | Trait-based tab and session hardening
 
-[Draft specification](docs/dev/plans/0209-2026-11-07-trait-based-tab-hardening.md)
-consolidates the confirmed Plan0208 interview and existing ticket owners. Published as [spec #503](https://github.com/CochranResearchGroup/codex-wake/issues/503)
-with confirmed installed acceptance seams and ready-for-agent label. Ticket
-decomposition and implementation remain next.
+State: IN_PROGRESS — final installed matrix514, then one broad review and one
+bounded TDD remediation pass. [Spec503](https://github.com/CochranResearchGroup/codex-wake/issues/503),
+[plan](docs/dev/plans/0209-2026-11-07-trait-based-tab-hardening.md),
+[execution ledger](docs/dev/plans/0209-execution-ledger.json).
+
+Tickets504–513, reused368 and story26 followup515 are validated and closed on
+`feat/tab-hardening-503`;514 owns exact installed WSL/actualPowerShell/public
+CLI/API/MCP and real Byobu/nativepsmux acceptance. Traits, saved views/groups,
+bounded monitoring, manual lifecycle, opt-in sorting, exact reattachment and
+workspace recovery reuse the existing operation/native ownership. Stock and
+production Wake remain unchanged. Existing broad governor/activation/handoff
+parents retain their own unresolved acceptance.
+
+Exact source/package/installed/native evidence and retained failed fixtures live
+under [Plan0209 evidence](docs/dev/evidence/plan0209/). No new provider prompts,
+working native restart, merge or deployment is included in this packet.

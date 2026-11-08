@@ -8549,3 +8549,23 @@ seam against disposable real Byobu/psmux tabs. Published canonical spec503 with
 existing enhancement/ready-for-agent labels; body and label readback match. Local
 Plan0209 retains matching snapshot. No implementation tickets, runtime effects,
 provider calls or memory writes.
+
+## Turn | 2026-11-08 | Trait hardening implementation and frozen qualification
+
+Published native child/dependency graph for503; primary owned defaults/grouping,
+traits worker owned observations/monitor/contracts, lifecycle worker owned
+lifecycle/nativepsmux/reattachment/policies/profilecreate. Serial integration and
+acceptance closed504–513, reused368 and added515 for the observed selected-profile
+creation gap. Ledger records custody, source SHAs and per-ticket proof.
+
+Product4d22a56 is frozen in a normally installed disposable package; UID1017
+native profilecreate, exact recovery/reattachment and current-loop health have
+zero provider/model turns. Working `codex` remains stock167; installed Wake stays
+aaf619c. No production tab, credential or daemon replacement occurred.
+
+Initial comprehensive311 run retained24 failures/twoerrors from missing sibling
+launcher, nonisolated test context and then-stale generatedcoverage; the corrected
+38-test affected run passed. Frozenbfded49 comprehensive311/312 runs use installed
+launchers and isolated XDG/tmux roots.514 owns finalnative/publicmatrix; one broad
+review and one TDD pass remain unused. Retain all native partial/failed fixture
+receipts and their individual axes; a later pass never erases them.
