@@ -96,10 +96,19 @@ def execute(action, arguments, root, *, principal, observer=None, transport=None
 def register_parser(subparsers):
     parser = subparsers.add_parser('tabs', help='preview and conditionally apply managed workspace tab ordering')
     verbs = parser.add_subparsers(dest='tabs_command', required=True)
-    for action in ('list','capture','input','preview','show','apply','undo','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop'):
+    for action in ('list','capture','input','preview','show','apply','undo','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop','policy-configure','policy-status','policy-enable','policy-pause','policy-disable','policy-tick','recovery-capture','recovery-preview','recovery-apply','recovery-status'):
         command = verbs.add_parser(action)
         if action.startswith(('view-','group-')) and not action.endswith('-list'):
             command.add_argument('view_name',nargs='?')
+        for field in ('debounce-seconds','min-interval-seconds','stale-after-seconds'):
+            command.add_argument('--'+field,type=float)
+        command.add_argument('--max-swaps-per-tick',type=int)
+        command.add_argument('--capture-id')
+        command.add_argument('--intent')
+        command.add_argument('--restore-layout',action='store_true',default=None)
+        command.add_argument('--view')
+        command.add_argument('--reason')
+        command.add_argument('--acknowledge-pending',action='store_true',default=None)
         for field in ('interval','probe-timeout','stale-after','cycle-timeout'):
             command.add_argument('--'+field,type=float)
         command.add_argument('--filter',action='append',dest='filters',default=[])
@@ -121,6 +130,9 @@ def register_parser(subparsers):
         command.add_argument('--app-server', default='unix://')
         command.add_argument('--timeout', type=float, default=30)
         command.add_argument('--json', dest='as_json', action='store_true')
+        if action == 'policy-configure':
+            command.add_argument('--mode',choices=('activity','repository','traits'),default='activity')
+            command.add_argument('--pin',action='append',dest='pins',default=[])
         if action == 'preview':
             command.add_argument('--mode', choices=('activity','repository','traits'), default='activity')
             command.add_argument('--pin', action='append', dest='pins', default=[])
@@ -130,17 +142,32 @@ def register_parser(subparsers):
 
 
 def run(args, root, *, observer=None):
-    if args.arguments is not None or getattr(args,'workspace',None) is not None or args.tabs_command in ('list','capture','input','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop'):
+    if args.arguments is not None or getattr(args,'workspace',None) is not None or args.tabs_command in ('list','capture','input','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop','policy-configure','policy-status','policy-enable','policy-pause','policy-disable','policy-tick','recovery-capture','recovery-preview','recovery-apply','recovery-status'):
         from .tab_commands import command
         args.tab_command = args.tabs_command
         args.arguments = args.arguments or {}
         if getattr(args,'view_name',None):args.arguments.setdefault('name',args.view_name)
+        if args.tabs_command.startswith('recovery-'):
+            for field in ('capture_id','intent','restore_layout'):
+                value=getattr(args,field,None)
+                if value is not None:args.arguments.setdefault(field,value)
+            if args.tabs_command=='recovery-apply' and 'intent' not in args.arguments:
+                from uuid import uuid4
+                args.arguments['intent']='restore-'+uuid4().hex
+        if args.tabs_command.startswith('policy-'):
+            for field in ('workspace','reason','view','debounce_seconds','min_interval_seconds','max_swaps_per_tick','stale_after_seconds','acknowledge_pending'):
+                value=getattr(args,field,None)
+                if value is not None:args.arguments.setdefault(field,value)
+            if args.tabs_command=='policy-configure':
+                args.arguments.setdefault('mode','traits' if args.group_by or args.sort_by else args.mode)
+                args.arguments.setdefault('pins',args.pins)
+                if args.group_by or args.sort_by:args.arguments.setdefault('criteria',args.group_by+args.sort_by)
         if args.tabs_command=='monitor-start':
             for field in ('interval','probe_timeout','stale_after','cycle_timeout'):
                 value=getattr(args,field,None)
                 if value is not None:args.arguments.setdefault(field,value)
         if args.tabs_command=='preview':
-            args.arguments.setdefault('mode',args.mode)
+            args.arguments.setdefault('mode','traits' if args.group_by or args.sort_by else args.mode)
             args.arguments.setdefault('pins',args.pins)
             if args.group_by or args.sort_by:args.arguments.setdefault('criteria',args.group_by+args.sort_by)
         if args.tabs_command=='view-save':

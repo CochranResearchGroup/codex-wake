@@ -92,7 +92,14 @@ class WorkspaceRecoveryRuntime:
                 records[window['window_id']]=dict(kind='unsupported',reason='exact_live_binding_unavailable')
                 continue
             row=matches[0];target=row['target']
-            health=observe_row(self.root,row,timeout=1)
+            from .process import process_identity
+            attachment=next((a for a in row.get('attachments',[]) if a['pane_id']==window['panes'][0]['pane_id']),None)
+            current=process_identity(attachment.get('client_pid')) if attachment else None
+            if current is None or str(current['start_time_ticks'])!=str(attachment.get('client_start_time_ticks')):
+                records[window['window_id']]=dict(kind='unsupported',reason='exact_client_process_changed')
+                continue
+            client=dict(pid=attachment['client_pid'],start_ticks=current['start_time_ticks'],boot_id=current['boot_id'])
+            health=observe_row(self.root,row,timeout=1,client_process=client)
             if not health['observation'].get('responsive') or health['observation'].get('evidence')!='tui_main_loop_ack':
                 records[window['window_id']]=dict(kind='unsupported',reason='exact_tui_binding_unqualified')
                 continue

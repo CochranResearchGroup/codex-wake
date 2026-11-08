@@ -50,7 +50,7 @@ def main():
                 verifier='v'*43
                 challenge=base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
                 grant={k:v for k,v in target.items() if k!='generation'}
-                grants=[grant]+[dict(host=target['host'],environment=target['environment'],workspace=w,presentation='logical') for w in ('@views','@monitor')]
+                grants=[grant]+[dict(host=target['host'],environment=target['environment'],workspace=w,presentation='logical') for w in ('@views','@monitor','@policy')]
                 code=auth.authorize(subject='fixture',principal_kind='owner',client_id=client['client_id'],redirect_uri=client['redirect_uris'][0],resource=auth.resource,scopes=scopes,targets=grants,code_challenge=challenge)
                 return auth.token(dict(grant_type='authorization_code',client_id=client['client_id'],code=code,code_verifier=verifier,redirect_uri=client['redirect_uris'][0],resource=auth.resource))['access_token']
             access=token(['observe','control'])
@@ -82,7 +82,7 @@ def main():
             record=captured['result']['operation']
             assert record['phase']=='terminal' and record['result']['fallback'] is True,record
             local_grant = dict(subject='fixture-local',client_id='fixture-client',grant_id='fixture-local-grant',issuer=base,resource=auth.resource,
-                scopes=['observe','control'],targets=[{k:v for k,v in target.items() if k!='generation'}]+[dict(host=target['host'],environment=target['environment'],workspace=w,presentation='logical') for w in ('@views','@monitor')],expires_at=time.time()+600)
+                scopes=['observe','control'],targets=[{k:v for k,v in target.items() if k!='generation'}]+[dict(host=target['host'],environment=target['environment'],workspace=w,presentation='logical') for w in ('@views','@monitor','@policy')],expires_at=time.time()+600)
             messaging = root/'controller-messaging.json'
             messaging.write_text(json.dumps(dict(version=1,local_caller=local_grant)))
             messaging.chmod(0o600)
@@ -110,10 +110,21 @@ def main():
                 assert status==200 and value['result']['monitor']['status']=='running',value
                 observed=mcp('wake_tabs_monitor_status',{})
                 assert observed['result']['monitor']['status']=='running',observed
+                configured=cli('tabs','policy-configure','--workspace','fixture','--debounce-seconds','0')
+                assert configured['result']['operation']['execution']=='completed',configured
+                assert cli('tabs','policy-status')['policy']['state']=='disabled'
+                enabled=cli('tabs','policy-enable')
+                assert enabled['result']['operation']['execution']=='completed',enabled
+                assert mcp('wake_tabs_policy_status',{})['result']['policy']['state']=='enabled'
+                status,value=http('/operations',dict(operation='tabs.policy.status',arguments={}))
+                assert status==200 and value['result']['policy']['state']=='enabled',value
+                assert cli('tabs','policy-pause')['result']['operation']['result']['policy']['state']=='paused'
+                assert cli('tabs','policy-disable')['result']['operation']['result']['policy']['state']=='disabled'
+
             finally:
                 stopped=cli('tabs','monitor-stop')
                 assert stopped['result']['operation']['execution']=='completed',stopped
-            print(json.dumps(dict(status='passed',module=source.__file__,local_cli=True,remote_cli=True,oauth_api=True,mcp=True,observe_cannot_capture=True,retained_intent=True,native_mcp=True,local_mutation_cli=True,real_isolated_tmux=True,windows_matrix=False,saved_views=True,bounded_monitor=True),sort_keys=True))
+            print(json.dumps(dict(status='passed',module=source.__file__,local_cli=True,remote_cli=True,oauth_api=True,mcp=True,observe_cannot_capture=True,retained_intent=True,native_mcp=True,local_mutation_cli=True,real_isolated_tmux=True,windows_matrix=False,saved_views=True,bounded_monitor=True,opt_in_policy=True),sort_keys=True))
         finally:
             if listener:
                 listener.terminate()

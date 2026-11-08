@@ -3,8 +3,8 @@
 Defaults: interval5s, per-workspace probe1.5s, stale20s, whole-cycle10s;
 concurrency1,64workspaces,1MiB snapshot and32KiB diagnostics. A single owned
 monitor starts at most one isolated read-only probe at a time. Both probe and
-parent enforce deadlines, including after monitor loss. No input/model notices
-or physical layout operations are performed.
+parent enforce deadlines, including after monitor loss. Observation generates no input/model notices or layout effects. A separately
+enabled same-root organization policy may receive journaled ticks from the daemon.
 """
 from __future__ import annotations
 
@@ -174,7 +174,8 @@ class TabMonitor:
                                   else 'lost' if record else 'inactive',
                                   process=record.get('process') if record else None,
                                   generation=record.get('generation') if record else None,settings=settings,
-                                  last_error=record.get('last_error') if record else None),
+                                  last_error=record.get('last_error') if record else None,
+                                  last_policy_operation=record.get('last_policy_operation') if record else None),
                     snapshot=snapshot,application_effects=False)
 
     def start(self,arguments):
@@ -292,6 +293,19 @@ class TabMonitor:
             _save(self.directory/'snapshot.json',snapshot)
         return self.status()
 
+    def _policy_tick(self,record):
+        from .tab_organization_policy import TabOrganizationPolicy
+        state=TabOrganizationPolicy(self.root,workspaces={}).execute('tabs.policy.status',{})['policy']
+        if state['state']!='enabled':return
+        from .tab_commands import operator_execute
+        from .controller_tabs import controller_tabs_from_root
+        owner=controller_tabs_from_root(self.root)
+        key='monitor-'+record['generation']+'-'+str(state['revision'])
+        value=operator_execute('tabs.policy.tick',{},self.root,owner=owner,request_id=key)
+        operation=value['result']['operation']
+        record['last_policy_operation']=dict(operation_id=operation['operation_id'],execution=operation['execution'],
+                                              policy_revision=state['revision'])
+
     def serve(self):
         stop=threading.Event()
         signal.signal(signal.SIGTERM,lambda signum,frame:stop.set())
@@ -304,6 +318,7 @@ class TabMonitor:
                     started=time.monotonic()
                     try:
                         self.refresh(origin='daemon')
+                        self._policy_tick(record)
                         record.pop('last_error',None)
                     except (InventoryError,OSError,ValueError) as error:
                         record['last_error']=getattr(error,'code','observation_unavailable')

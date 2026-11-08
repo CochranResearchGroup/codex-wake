@@ -39,7 +39,7 @@ class TabOrganizationPolicy:
         try:
             state = read(self.path)
         except FileNotFoundError:
-            return dict(version=1, revision=0, state='disabled', last_reason='opt_in_required',
+            return dict(version=1, revision=0, control_revision=0, state='disabled', last_reason='opt_in_required',
                         settings=None, baseline=None, candidate=None, pending_plan=None,
                         last_apply_at=None, last_tick_at=None, last_receipt=None)
         if (not isinstance(state, dict) or state.get('version') != 1
@@ -48,6 +48,11 @@ class TabOrganizationPolicy:
         return state
 
     def _save(self, state):
+        previous=self._read()
+        control=max(state.get('control_revision',0),previous.get('control_revision',0))
+        if previous['state']!=state['state'] and control==previous.get('control_revision',0):
+            control+=1
+        state['control_revision']=control
         state['revision'] += 1
         write(self.path, state)
 
@@ -98,6 +103,7 @@ class TabOrganizationPolicy:
                              last_reason=reason if operation.endswith('pause') else 'operator_disabled')
             else:
                 return self._tick(state)
+            state['control_revision']=state.get('control_revision',0)+1
             self._save(state)
             return self._result(state)
 
@@ -167,7 +173,7 @@ class TabOrganizationPolicy:
                     binding={k: binding.get(k) for k in ('process', 'conversation_id', 'namespace')} if binding else None))
             windows.append(dict(window=window['window_id'], index=window['index'], name=window['name'],
                                 focused=window['focused'], linked=window['linked'], panes=panes))
-        return dict(server=snapshot['server'], session=snapshot['session_id'], socket=snapshot['socket_identity'], windows=windows)
+        return dict(server=snapshot['server'], session=snapshot['session_id'], socket=snapshot.get('socket_identity',snapshot.get('server_identity')), windows=windows)
 
     @staticmethod
     def _layout_changed(before, after):

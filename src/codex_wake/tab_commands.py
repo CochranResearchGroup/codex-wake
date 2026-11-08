@@ -19,7 +19,7 @@ def command(args, owner=None):
         if owner is None:
             from .controller_tabs import controller_tabs_from_root
             owner = controller_tabs_from_root(args.wake_root)
-        operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1)
+        operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1)
         value = owner.execute(operation,args.arguments) if operation in owner.READS else operator_execute(operation,args.arguments,args.wake_root,owner=owner)
         print(json.dumps(value, sort_keys=True))
         return 0
@@ -83,10 +83,32 @@ def tool_specs():
         if verb in ('start','stop'):
             props.update(expected_target={'type':'object'},_request={'type':'object'});required=['expected_target','_request']
         specs['wake_tabs_monitor_'+verb]=('controller-tabs',op,'Observe or control the bounded read-only tab monitor.',props,required,verb in ('status','refresh'))
+    from .tab_organization_policy import TabOrganizationPolicy
+    for op,fields in TabOrganizationPolicy.ARGUMENTS.items():
+        props={key:({'type':'array','items':text} if key in ('pins','criteria') else
+                    {'type':'boolean'} if key=='acknowledge_pending' else
+                    {'type':'integer'} if key=='max_swaps_per_tick' else
+                    {'type':'number'} if key.endswith('_seconds') else text) for key in fields}
+        required=['workspace'] if op.endswith('configure') else []
+        if op!='tabs.policy.status':
+            props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
+        specs['wake_'+op.replace('.','_')]=('controller-tabs',op,'Opt-in bounded physical organization; preserve manual changes.',props,required,op=='tabs.policy.status')
+    from .tab_recovery import TabRecovery
+    for op,fields in TabRecovery.ARGUMENTS.items():
+        props={key:({'type':'boolean'} if key=='restore_layout' else {'type':'object'} if key=='expected_target' else text) for key in fields}
+        required=[]
+        if not op.endswith('status'):required.append('workspace')
+        if op.endswith(('preview','apply')):required.append('capture_id')
+        if op.endswith('apply'):required.append('intent')
+        if op.endswith(('capture','apply')):
+            props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
+        specs['wake_'+op.replace('.','_')]=('controller-tabs',op,'Capture or restore exact workspace conversations; unknown historical mappings remain held.',props,required,op.endswith(('preview','status')))
     return specs
 
 
 def protected_execute(operation,arguments,root):
+    from .shortcut_store import default_root
+    root=default_root(root)
     from types import SimpleNamespace
     from pathlib import Path
     from .controller_tabs import controller_tabs_from_root
@@ -116,9 +138,9 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
     owner = owner or controller_tabs_from_root(root)
     payload = dict(arguments)
     from .tab_views import TabViews
-    if operation in TabViews.READS|TabViews.MUTATIONS or operation.startswith('tabs.monitor.'):
-        payload.setdefault('expected_target',owner.monitor_target() if operation.startswith('tabs.monitor.') else owner.logical_target())
-        key=request_id or hashlib.sha256(json.dumps([operation,payload],sort_keys=True).encode()).hexdigest()
+    if operation in TabViews.READS|TabViews.MUTATIONS or operation.startswith(('tabs.monitor.','tabs.policy.')):
+        payload.setdefault('expected_target',owner.monitor_target() if operation.startswith('tabs.monitor.') else owner.policy_target() if operation.startswith('tabs.policy.') else owner.logical_target())
+        key=_intent_key(operation,payload,request_id)
         payload.setdefault('_request',dict(operation_id='tab-cli-'+key,idempotency_key='tab-cli-'+key,
             correlation_id=key,binding='local-cli',target=payload['expected_target']))
         actor=local_operator(payload['expected_target'],('control','observe'))
@@ -134,7 +156,14 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
         raise InventoryError('ambiguous_target','Select one workspace from tabs list using --workspace.')
     payload['workspace'] = workspace
     lifecycle = TabLifecycle(root,workspaces=owner.workspaces,host=owner.host,environment=owner.environment)
-    payload.setdefault('expected_target',lifecycle.inspect(workspace)['target'])
+    if operation=='tabs.recovery.apply' and 'expected_target' not in payload:
+        fields={k:payload[k] for k in ('capture_id','workspace','restore_layout') if k in payload}
+        preview=owner.execute('tabs.recovery.preview',fields)
+        if preview['status']!='ready':
+            raise InventoryError('recovery_held','Recovery preview contains unresolved bindings; inspect before applying.')
+        payload['expected_target']=preview['target']
+    elif 'expected_target' not in payload:
+        payload['expected_target']=lifecycle.inspect(workspace)['target']
     if 'destination' in payload:
         dest = payload['destination']
         if dest not in owner.workspaces:
@@ -143,7 +172,7 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
         payload['destination']=dest
         payload.setdefault('expected_destination',lifecycle.inspect(dest)['target'])
     if '_request' not in payload:
-        key = request_id or hashlib.sha256(json.dumps([operation,payload],sort_keys=True).encode()).hexdigest()
+        key = _intent_key(operation,payload,request_id)
         payload['_request']=dict(operation_id='tab-cli-'+key,idempotency_key='tab-cli-'+key,
                                  correlation_id=key,binding='local-cli',target=payload['expected_target'])
     actor=local_operator(payload['expected_target'],('control','observe'))
@@ -152,3 +181,12 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
         actor=local_actor(root)
     authority=SimpleNamespace(authenticate=lambda unused:actor)
     return AuthorizedTabs(authority,owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
+
+
+def _intent_key(operation,payload,request_id=None):
+    import hashlib
+    from uuid import uuid4
+    if request_id is not None:return request_id
+    if operation in ('tabs.preview','tabs.policy.tick','tabs.recovery.capture'):
+        return uuid4().hex
+    return hashlib.sha256(json.dumps([operation,payload],sort_keys=True).encode()).hexdigest()

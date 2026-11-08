@@ -10,7 +10,7 @@ from .tab_organization import TabOrganization, TabError, digest
 
 
 class ControllerTabs:
-    READS = frozenset(('tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh'))
+    READS = frozenset(('tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status'))
     MUTATIONS = frozenset(('tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input'))
 
     def __init__(self, root, *, workspaces, host, environment):
@@ -18,6 +18,29 @@ class ControllerTabs:
         self.host, self.environment = host, environment
 
     def execute(self, operation, arguments):
+        if operation.startswith('tabs.recovery.'):
+            from .tab_recovery import TabRecovery
+            from .tab_lifecycle import TabLifecycle
+            payload=dict(arguments);expected=payload.pop('expected_target',None)
+            lifecycle=TabLifecycle(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment)
+            if operation=='tabs.recovery.capture' and expected is not None:
+                if expected!=lifecycle.inspect(payload.get('workspace'))['target']:
+                    raise InventoryError('stale_target','Workspace changed before capture.')
+            if operation=='tabs.recovery.apply':
+                keys=('capture_id','capture_sha256','workspace','workspace_identity','presentation_generation')
+                payload['expected_target']={k:expected[k] for k in keys if expected and k in expected}
+            result=TabRecovery(self.root,tabs=self).execute(operation,payload)
+            if operation=='tabs.recovery.preview':
+                physical=lifecycle.inspect(payload['workspace'])['target']
+                result['target'].update(physical)
+            return result
+        if operation.startswith('tabs.policy.'):
+            from .tab_organization_policy import TabOrganizationPolicy
+            payload=dict(arguments)
+            expected=payload.pop('expected_target',None)
+            if expected is not None and expected!=self.policy_target():
+                raise InventoryError('stale_target','Physical policy changed; refresh before acting.')
+            return TabOrganizationPolicy(self.root,workspaces=self.workspaces).execute(operation,payload)
         if operation.startswith('tabs.monitor.'):
             from .tab_monitor import TabMonitor
             payload=dict(arguments)
@@ -153,11 +176,21 @@ class ControllerTabs:
                                      'No live owned workspace found; start Byobu/tmux or register a supported psmux bridge, then refresh.')
         return value
 
+    def recovery_target(self):
+        from pathlib import Path
+        return dict(host=self.host,environment=self.environment,workspace='@recovery',presentation='logical',
+                    generation=digest(str(Path(self.root).resolve())))
+
+    def policy_target(self):
+        from .tab_organization_policy import TabOrganizationPolicy
+        state=TabOrganizationPolicy(self.root,workspaces=self.workspaces).execute('tabs.policy.status',{})['policy']
+        return dict(host=self.host,environment=self.environment,workspace='@policy',presentation='logical',generation=str(state.get('control_revision',0)))
+
     def monitor_target(self):
         from .tab_monitor import TabMonitor
         monitor=TabMonitor(self.root).execute('tabs.monitor.status',{})['monitor']
         return dict(host=self.host,environment=self.environment,workspace='@monitor',presentation='logical',
-                    generation=monitor.get('generation') or 'inactive')
+                    generation=digest(dict(generation=monitor.get('generation'),status=monitor['status'],process=monitor.get('process'))))
 
     def logical_target(self):
         from .tab_views import TabViews
