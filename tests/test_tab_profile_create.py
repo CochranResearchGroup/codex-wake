@@ -34,10 +34,10 @@ class ProfileCreateTests(unittest.TestCase):
         with self.assertRaises(InventoryError):self.create('missing')
         self.assertEqual(len(self.transport.snapshot(time.monotonic()+2)['windows']),len(before['windows']))
 
-    def configure(self,exit_immediately=False):
+    def configure(self,exit_immediately=False,backend_only=False):
         if not shutil.which('cc'):self.skipTest('C fixture compiler required')
         home=self.root/'accounts'/'codex-fixture';home.mkdir(parents=True,mode=0o700)
-        source=self.root/'fixture.c';source.write_text('#include <unistd.h>\nint main(void){'+('return 2;' if exit_immediately else 'sleep(60);return 0;')+'}\n')
+        source=self.root/'fixture.c';source.write_text('#include <unistd.h>\n#include <string.h>\nint main(int argc,char **argv){'+('return 2;' if exit_immediately else 'if(argc>1)strcpy(argv[1],"app-server");sleep(60);return 0;' if backend_only else 'sleep(60);return 0;')+'}\n')
         binary=self.root/'codex';subprocess.run(['cc','-o',str(binary),str(source)],check=True,capture_output=True)
         manifest=self.root/'builds.json';manifest.write_text(json.dumps({'schema_version':1,'builds':{'modded':{
             'executable':str(binary),'sha256':hashlib.sha256(binary.read_bytes()).hexdigest(),
@@ -54,6 +54,9 @@ class ProfileCreateTests(unittest.TestCase):
         self.assertEqual(result['profile_target']['executable'],str(binary))
         self.assertEqual(result['profile_target']['build_channel'],'modded')
         self.assertGreater(result['process']['pid'],0)
+        self.assertEqual(result['foreground']['role'],'foreground_tui_client')
+        self.assertEqual(result['foreground']['source'],'exact_run_build_direct_child_invocation')
+        self.assertNotEqual(result['foreground']['wrapper_process']['pid'],result['process']['pid'])
         self.assertEqual(self.owner().authorization_target('fixture')['account'],'codex-fixture')
         from codex_profiles.build_channels import _home_ownership,BuildError
         with self.assertRaises(BuildError):
@@ -69,3 +72,9 @@ class ProfileCreateTests(unittest.TestCase):
         binary.write_bytes(binary.read_bytes()+b'changed')
         with self.assertRaises(InventoryError) as caught:self.create('fixture')
         self.assertEqual(caught.exception.code,'stale_target')
+
+    def test_same_image_home_backend_without_foreground_tui_is_never_applied(self):
+        self.configure(backend_only=True)
+        result=self.create('fixture')
+        self.assertNotEqual(result['status'],'applied',result)
+        self.assertIn(result['status'],('held','uncertain'))

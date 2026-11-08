@@ -29,6 +29,38 @@ def _hash(path):
     with Path(path).open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
 
 
+def _foreground_role(pid,wrapper,selected):
+    """Recognize only run_build's direct, pinned foreground-client invocation.
+
+    Same-image app-server helpers are never client evidence. Command arguments
+    stay inside this bounded local check; the public witness contains no argv.
+    """
+    base=Path('/proc')/str(pid)
+    status=base.joinpath('status').read_text()
+    parent=next(line.split()[1] for line in status.splitlines() if line.startswith('PPid:'))
+    if int(parent)!=wrapper['pid']:return None
+    raw=base.joinpath('cmdline').read_bytes()
+    if not raw or len(raw)>65536:return None
+    argv=raw.rstrip(b'\0').decode().split('\0')
+    import re
+    if not re.fullmatch(r'/proc/self/fd/[0-9]+',argv[0]):return None
+    backend=selected['target']['backend']
+    if backend=='private':
+        if argv[1:2]!=['--no-daemon']:return None
+        tail=argv[2:]
+    elif backend=='managed':
+        if len(argv)<3 or argv[1]!='--remote':return None
+        # The existing launch owner qualifies this exact private account socket.
+        endpoint=Path(selected['target']['home'])/'app-server-control/app-server-control.sock'
+        if argv[2]!='unix://'+str(endpoint.resolve(strict=True)):return None
+        tail=argv[3:]
+    else:return None
+    if tail not in (selected['args'],['-c','tui.terminal_title=[]',*selected['args']]):return None
+    if process_identity(wrapper['pid'])!={k:v for k,v in wrapper.items() if k!='pid'}:return None
+    return dict(role='foreground_tui_client',source='exact_run_build_direct_child_invocation',
+                wrapper_process=wrapper,backend=backend)
+
+
 class TabProfileCreate:
     def __init__(self,root,*,host,environment,channel='modded',python=None):
         self.root=Path(root)
@@ -113,14 +145,16 @@ class TabProfileCreate:
                     pid=row['pid']
                     if pid==wrapper['pid']:continue
                     if row['executable']!=str(Path(selected['target']['executable']).resolve()):continue
+                    role=_foreground_role(pid,wrapper,selected)
+                    if role is None:continue
                     env=Path('/proc',str(pid),'environ').read_bytes().split(b'\0')
                     required=[('CODEX_HOME='+selected['target']['home']).encode(),('CODEX_PROFILE_NAME='+selected['profile']).encode(),
                               ('CODEX_BUILD_CHANNEL='+self.channel).encode()]
                     if not all(value in env for value in required):continue
                     generation=process_identity(pid)
                     if not generation or _hash(Path('/proc',str(pid),'exe'))!=selected['target']['build_sha256']:continue
-                    if generation!=process_identity(pid):continue
-                    return dict(result,status='applied',process=dict(pid=pid,**generation),
+                    if generation!=process_identity(pid) or _foreground_role(pid,wrapper,selected)!=role:continue
+                    return dict(result,status='applied',process=dict(pid=pid,**generation),foreground=role,
                                 account_identity='selected_home_verified_remote_identity_unverified')
             except FileNotFoundError:pass
             except (OSError,ValueError,KeyError,StopIteration,subprocess.SubprocessError):

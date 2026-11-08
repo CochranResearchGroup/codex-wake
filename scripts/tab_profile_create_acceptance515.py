@@ -67,6 +67,16 @@ try:
  record=result['result']['operation'];effect=record['result']
  assert effect['status']=='applied',effect
  child=effect['process'];report['owned_child']=child
+ foreground=effect['foreground']
+ assert foreground['role']=='foreground_tui_client'
+ assert foreground['source']=='exact_run_build_direct_child_invocation'
+ wrapper=foreground['wrapper_process']
+ assert process_identity(wrapper['pid'])=={k:v for k,v in wrapper.items() if k!='pid'}
+ status=Path('/proc',str(child['pid']),'status').read_text()
+ assert int(next(line.split()[1] for line in status.splitlines() if line.startswith('PPid:')))==wrapper['pid']
+ argv_native=Path('/proc',str(child['pid']),'cmdline').read_bytes().rstrip(b'\0').split(b'\0')
+ assert argv_native[1]==b'--no-daemon' and b'app-server' not in argv_native
+ report['exact_foreground_client_role']=foreground
  assert effect['profile_target']['home']==str(home)
  assert effect['profile_target']['build_sha256']==sha
  assert effect['profile_target']['build_channel']=='modded'

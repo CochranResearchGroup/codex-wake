@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "finding": "F3",
+  "parent_issue": 503,
+  "ticket": 515,
+  "review_pass": 1,
+  "tdd_remediation_pass": 1,
+  "source_base": "37a7a335875f3a83325418daf913dd66e9c138d4",
+  "status": "qualified",
+  "source_module_sha256": "c1dcf8e8284e66b88e9fb0e8e751df0101414465462582082a7a0211b5efcf16",
+  "red": {
+    "command": "PYTHONPATH=src python3.11 -m unittest discover -s tests -p test_tab_profile_create.py -q",
+    "result": "FAIL: backend-only same-image/home/channel fixture incorrectly returned applied"
+  },
+  "green": [
+    {
+      "command": "PYTHONPATH=src python3.11 -m unittest discover -s tests -p test_tab_profile_create.py -q",
+      "result": "PASS 4 tests",
+      "scope": "focused"
+    },
+    {
+      "command": "PYTHONPATH=src python3.12 -m unittest discover -s tests -p test_tab_profile_create.py -q",
+      "result": "PASS 4 tests",
+      "scope": "focused"
+    }
+  ],
+  "qualification": {
+    "receipt": "/tmp/wake-profile515-native-djn3u9s7/receipt.json",
+    "log": "/tmp/codex-wake-503-f3-native.log",
+    "uid": 1017,
+    "public_cli": true,
+    "installed_prefix": "/tmp/codex-wake-503-f3-native-prefix-py312",
+    "wheel": "/tmp/codex-wake-503-f3-wheel/dist/codex_wake-0.22.0.dev2-py3-none-any.whl",
+    "wheel_sha256": "1dcd7d07ef142bc18ae0f37fa20387989ef67253b48c2a1a51d1461cd5e3a674",
+    "native_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+    "native_rebuilt": false,
+    "wrapper_pid": 2420519,
+    "foreground_pid": 2420681,
+    "foreground_role": "exact_run_build_direct_child_invocation",
+    "backend": "private",
+    "assertions": [
+      "direct wrapper child and both process births",
+      "exact pinned executable/home/channel",
+      "exact permitted client argv, never backend app-server",
+      "same-key replay without duplicate",
+      "unrelated process preserved",
+      "owned fixture cleanup"
+    ],
+    "provider_calls": [],
+    "model_turns": 0,
+    "final_owned_native_processes": [],
+    "actual_native_attempts": 1
+  },
+  "environment_note": "Initial Python3.11 venv linked private uv interpreter; UID1017 preflight permission refusal before driver execution. Replaced only new staging prefix with public Python3.12.3. Frozen acceptance prefix/candidate unchanged. Shared kernel with host.",
+  "limitations": [
+    "remote account identity remains unverified",
+    "role evidence proves the intended foreground invocation, not a submitted model turn or native health acknowledgement",
+    "final integrated package validation remains parent-owned"
+  ],
+  "memory_disposition": {
+    "status": "forbidden",
+    "reason": "Parent remediation instructions explicitly prohibit memory writes"
+  },
+  "hosted_ci": "not run; local checks per no-paid-CI policy"
+}
