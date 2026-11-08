@@ -129,10 +129,94 @@ def pane_processes(roots):
     return result, complete
 
 
-class PsmuxHost:
-    ACTIONS = {'snapshot', 'discover', 'capture', 'visible_screen', 'swap', 'lifecycle'}
+def current_sid():
+    """Current native Windows owner, without a child process or token output."""
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    advapi = ctypes.WinDLL('advapi32', use_last_error=True)
+    kernel.GetCurrentProcess.restype = wintypes.HANDLE
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel.LocalFree.argtypes = [ctypes.c_void_p]
+    advapi.OpenProcessToken.argtypes = [wintypes.HANDLE, wintypes.DWORD, ctypes.POINTER(wintypes.HANDLE)]
+    advapi.GetTokenInformation.argtypes = [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD, ctypes.POINTER(wintypes.DWORD)]
+    token = wintypes.HANDLE()
+    if not advapi.OpenProcessToken(kernel.GetCurrentProcess(), 8, ctypes.byref(token)):
+        raise BridgeError('unauthorized_target', 'native manifest owner cannot be verified')
+    try:
+        size = wintypes.DWORD()
+        advapi.GetTokenInformation(token, 1, None, 0, ctypes.byref(size))
+        if not 0 < size.value <= 65536:
+            raise BridgeError('unauthorized_target', 'native owner token exceeds bound')
+        value = ctypes.create_string_buffer(size.value)
+        if not advapi.GetTokenInformation(token, 1, value, size, ctypes.byref(size)):
+            raise BridgeError('unauthorized_target', 'native owner token is unavailable')
+        return _sid_string(ctypes.cast(value, ctypes.POINTER(ctypes.c_void_p))[0])
+    finally:
+        kernel.CloseHandle(token)
 
-    def __init__(self, *, namespace, session, server_pid=None, server_birth=None):
+
+def _sid_string(sid):
+    advapi = ctypes.WinDLL('advapi32', use_last_error=True)
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    advapi.ConvertSidToStringSidW.argtypes = [ctypes.c_void_p, ctypes.POINTER(wintypes.LPWSTR)]
+    kernel.LocalFree.argtypes = [ctypes.c_void_p]
+    output = wintypes.LPWSTR()
+    if not advapi.ConvertSidToStringSidW(sid, ctypes.byref(output)):
+        raise BridgeError('unauthorized_target', 'native manifest SID is invalid')
+    try:
+        return output.value
+    finally:
+        kernel.LocalFree(ctypes.cast(output, ctypes.c_void_p))
+
+
+def check_private_manifest(path):
+    """Current-owner private DACL, with bounded direct Win32 ACL inspection.
+
+    Same owner/SYSTEM/Administrators exception as the portable caller contract;
+    no PowerShell startup/census can outlive a bridge timeout.
+    """
+    class ACL(ctypes.Structure):
+        _fields_ = [('revision', ctypes.c_ubyte), ('unused', ctypes.c_ubyte),
+                    ('size', wintypes.WORD), ('count', wintypes.WORD), ('unused2', wintypes.WORD)]
+    advapi = ctypes.WinDLL('advapi32', use_last_error=True)
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    advapi.GetNamedSecurityInfoW.argtypes = [wintypes.LPWSTR, ctypes.c_int, wintypes.DWORD,
+        ctypes.POINTER(ctypes.c_void_p), ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p), ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)]
+    advapi.GetNamedSecurityInfoW.restype = wintypes.DWORD
+    advapi.GetAce.argtypes = [ctypes.c_void_p, wintypes.DWORD, ctypes.POINTER(ctypes.c_void_p)]
+    kernel.LocalFree.argtypes = [ctypes.c_void_p]
+    owner, dacl, descriptor = ctypes.c_void_p(), ctypes.c_void_p(), ctypes.c_void_p()
+    if advapi.GetNamedSecurityInfoW(str(path), 1, 5, ctypes.byref(owner), None,
+            ctypes.byref(dacl), None, ctypes.byref(descriptor)):
+        raise BridgeError('unauthorized_target', 'native manifest security descriptor is unavailable')
+    try:
+        current = current_sid()
+        if not dacl.value or _sid_string(owner.value) != current:
+            raise BridgeError('unauthorized_target', 'native manifest must have current owner and a private DACL')
+        count = ctypes.cast(dacl, ctypes.POINTER(ACL)).contents.count
+        if count > 256:
+            raise BridgeError('unauthorized_target', 'native manifest ACL exceeds bound')
+        allowed = {current, 'S-1-5-18', 'S-1-5-32-544'}
+        sensitive = 0xD00F0007
+        for index in range(count):
+            ace = ctypes.c_void_p()
+            if not advapi.GetAce(dacl, index, ctypes.byref(ace)):
+                raise BridgeError('unauthorized_target', 'native manifest ACE is unavailable')
+            kind = ctypes.c_ubyte.from_address(ace.value).value
+            if kind in (1, 6, 10, 12):
+                continue  # deny ACEs cannot grant another principal access
+            if kind != 0:
+                raise BridgeError('unauthorized_target', 'native manifest ACL contains unsupported grant semantics')
+            mask = wintypes.DWORD.from_address(ace.value + 4).value
+            if mask & sensitive and _sid_string(ace.value + 8) not in allowed:
+                raise BridgeError('unauthorized_target', 'native manifest grants another principal sensitive access')
+    finally:
+        kernel.LocalFree(descriptor)
+
+
+class PsmuxHost:
+    ACTIONS = {'snapshot', 'discover', 'capture', 'visible_screen', 'swap', 'lifecycle', 'attach_saved'}
+
+    def __init__(self, *, namespace, session, server_pid=None, server_birth=None, attach_directory=None):
         if os.name != 'nt':
             raise BridgeError('unsupported_target', 'this presentation bridge requires native Windows Python')
         if not isinstance(namespace, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,95}', namespace):
@@ -141,7 +225,10 @@ class PsmuxHost:
         self.session = self._text(session, 'session')
         self.binary = Path(os.environ['LOCALAPPDATA']) / 'Microsoft/WinGet/Links/psmux.exe'
         self.server_pid, self.server_birth = server_pid, server_birth
+        self.attach_directory = Path(attach_directory).resolve() if attach_directory else None
         self.identity = self.describe()
+        if self.attach_directory is not None:
+            self.identity['attach_directory'] = str(self.attach_directory)
         if server_pid is not None and (self.identity['pid'] != server_pid or self.identity['creation_filetime'] != server_birth):
             raise BridgeError('stale_target', 'psmux server generation changed')
         self.generation = hashlib.sha256(json.dumps(self.identity, sort_keys=True).encode()).hexdigest()
@@ -152,10 +239,10 @@ class PsmuxHost:
             raise BridgeError('invalid_argument', field + ' must be bounded single-line text')
         return value
 
-    def command(self, *argv):
+    def command(self, *argv, timeout=4):
         try:
             reply = subprocess.run([str(self.binary), '-L', self.namespace, *argv],
-                text=True, capture_output=True, timeout=4, check=True)
+                text=True, capture_output=True, timeout=timeout, check=True)
         except (OSError, subprocess.SubprocessError):
             raise BridgeError('attachment_unavailable', 'native psmux command failed; reconcile effects before retry') from None
         if len(reply.stdout.encode()) > 1048576:
@@ -209,10 +296,33 @@ class PsmuxHost:
             window['panes'].append(dict(pane_id=row['pane_id'], pane_index=int(row['pane_index']), pid=pid, platform='windows',
                 windows_creation_filetime=process_birth(pid), windows_executable=process_image(pid), cwd=row['pane_current_path'],
                 windows_processes=native_processes.get(pid, []), windows_processes_complete=complete))
+        if self.attach_directory is not None:
+            for window in windows.values():
+                receipt_path = self._window_receipt(window['window_id'])
+                if not receipt_path.exists():
+                    continue
+                try:
+                    check_private_manifest(receipt_path)
+                    if receipt_path.is_symlink() or receipt_path.stat().st_size > 4096:
+                        continue
+                    receipt = json.loads(receipt_path.read_text())
+                    pane = window['panes'][0] if len(window['panes']) == 1 else None
+                    if (pane and receipt.get('bridge_generation') == self.generation
+                            and receipt.get('window_id') == window['window_id']
+                            and receipt.get('pane_id') == pane['pane_id']
+                            and receipt.get('windows_pid') == pane['pid']
+                            and receipt.get('windows_creation_filetime') == pane['windows_creation_filetime']):
+                        window['attach_intent'] = receipt['intent']
+                except (BridgeError, OSError, ValueError, KeyError):
+                    pass  # Unknown relay evidence must not become a false binding.
         return dict(server=str(self.identity['pid']), session_id=next(iter(identities)),
                     socket_identity=[self.identity['pid'], self.identity['creation_filetime']],
                     windows=sorted(windows.values(), key=lambda w: w['index']),
                     server_identity=self.identity, windows_server=self.identity)
+
+    def _window_receipt(self, window):
+        scope = hashlib.sha256(json.dumps([self.identity['pid'], self.identity['creation_filetime'], self.session]).encode()).hexdigest()[:16]
+        return self.attach_directory / ('window_' + scope + '_' + window[1:] + '.json')
 
     def execute(self, request):
         if not isinstance(request, dict) or set(request) != {'action', 'arguments'}:
@@ -256,12 +366,60 @@ class PsmuxHost:
                 self.command('swap-window', '-d', '-s', self.session + ':' + args['first'], '-t', self.session + ':' + args['second'])
                 self.command('select-window', '-t', self.session + ':' + focused)
                 result = {}
+            elif action == 'attach_saved':
+                result = self._attach_saved(args, snapshot)
             else:
                 result = self._lifecycle(args, snapshot, rows)
         if not (action == 'lifecycle' and args.get('action') == 'close'
                 and result.get('workspace_state') == 'removed'):
             self._current()
         return dict(generation=self.generation, result=result)
+
+    def _attach_saved(self, args, snapshot):
+        if self.attach_directory is None:
+            raise BridgeError('unsupported_target', 'host has not configured exact saved-conversation attachment')
+        if (set(args) != {'intent', 'manifest_sha256'} or not isinstance(args['intent'], str)
+                or not re.fullmatch(r'[0-9a-f]{32}', args['intent'])
+                or not isinstance(args['manifest_sha256'], str) or not re.fullmatch(r'[0-9a-f]{64}', args['manifest_sha256'])):
+            raise BridgeError('invalid_argument', 'opaque host launch intent and exact manifest digest required')
+        path = self.attach_directory / (args['intent'] + '.json')
+        if path.is_symlink() or not path.is_file() or path.stat().st_size > 65536:
+            raise BridgeError('unauthorized_target', 'bounded regular host launch manifest required')
+        check_private_manifest(path)
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != args['manifest_sha256']:
+            raise BridgeError('stale_target', 'host launch manifest changed')
+        manifest = json.loads(raw)
+        fields = {'version','intent','identity','profile','marker','wsl_manifest','window_name','execution_user','windows_destination'}
+        if (set(manifest) != fields or manifest['version'] != 1 or manifest['intent'] != args['intent']
+                or manifest['windows_destination'] != self.generation):
+            raise BridgeError('stale_target', 'host launch intent/destination mismatch')
+        profile = manifest['profile']
+        if any(k in profile for k in ('argv','shell','command','environment')):
+            raise BridgeError('unauthorized_target', 'launch profiles cannot supply arbitrary commands')
+        for value in ('wake_python','wsl_distribution','codex_home','codex_path','app_server'):
+            self._text(profile.get(value), value)
+        if (not re.fullmatch(r'[A-Za-z0-9_.-]+', profile['wsl_distribution'])
+                or not re.fullmatch(r'[a-z_][a-z0-9_-]{0,63}', manifest['execution_user'])
+                or not profile['wake_python'].startswith('/') or not manifest['wsl_manifest'].startswith('/')):
+            raise BridgeError('unauthorized_target', 'host must select an exact WSL owner/profile')
+        name = self._text(manifest['window_name'], 'window name')
+        if any(w['name'] == name for w in snapshot['windows']):
+            raise BridgeError('uncertain_effect', 'intent attachment already exists; reconcile without creating another')
+        wsl = Path(os.environ.get('SystemRoot', r'C:\Windows')) / 'System32/wsl.exe'
+        window = self.command('new-window','-d','-P','-F','#{window_id}',
+            '-t',self.session+':','-n',name,'--',str(wsl),'--distribution',profile['wsl_distribution'],
+            '--user',manifest['execution_user'],'--exec',profile['wake_python'],'-m','codex_wake.tab_reattach',
+            '--launch-child',manifest['wsl_manifest'],'--manifest-sha',args['manifest_sha256'],timeout=10).strip()
+        after = self._snapshot(self._rows())
+        created = next((w for w in after['windows'] if w['window_id'] == window), None)
+        if created is None or len(created['panes']) != 1:
+            raise BridgeError('effect_uncertain', 'saved-conversation window creation is not verified')
+        pane = created['panes'][0]
+        result = dict(window_id=window,pane_id=pane['pane_id'],windows_pid=pane['pid'],
+                      windows_creation_filetime=pane['windows_creation_filetime'],bridge_generation=self.generation)
+        self._window_receipt(window).write_text(json.dumps(dict(intent=args['intent'], **result)))
+        return result
 
     def _lifecycle(self, args, snapshot, rows):
         allowed = {
@@ -323,11 +481,12 @@ def main(argv=None):
     parser.add_argument('--server-pid', type=int)
     parser.add_argument('--server-birth', type=int)
     parser.add_argument('--describe', action='store_true')
+    parser.add_argument('--attach-directory')
     args = parser.parse_args(argv)
     host = None
     try:
         host = PsmuxHost(namespace=args.namespace, session=args.session,
-                         server_pid=args.server_pid, server_birth=args.server_birth)
+                         server_pid=args.server_pid, server_birth=args.server_birth, attach_directory=args.attach_directory)
         if args.describe:
             value = dict(generation=host.generation, identity=host.identity,
                          capabilities=sorted(host.ACTIONS))

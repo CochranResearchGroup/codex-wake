@@ -52,6 +52,9 @@ class PsmuxAttachmentTransport:
     def visible_screen(self, pane, deadline):
         return self.request('visible_screen', dict(pane=pane), deadline)
 
+    def attach_saved(self, intent, manifest_sha256, deadline):
+        return self.request('attach_saved', dict(intent=intent, manifest_sha256=manifest_sha256), deadline)
+
     def lifecycle(self, action, arguments, deadline):
         allowed = {
             'create': {'name', 'cwd'}, 'rename': {'window', 'name'},
@@ -131,7 +134,7 @@ class ConfiguredBridge:
         import subprocess
         import time
         result = subprocess.run(self.command,input=json.dumps(dict(action=action,arguments=arguments)),
-            text=True,capture_output=True,check=True,timeout=max(.001,min(5,deadline-time.monotonic())))
+            text=True,capture_output=True,check=True,timeout=max(.001,min(15 if action=='attach_saved' else 5,deadline-time.monotonic())))
         if len(result.stdout)>1048576: raise ValueError('bridge reply exceeds bounded capacity')
         return json.loads(result.stdout)
 
