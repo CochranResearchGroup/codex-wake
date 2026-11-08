@@ -27,8 +27,10 @@
   "retained_failures": [
     "native MCP UID actor changed expiry each authenticate; fixed stable request actor",
     "fixture resource wake:fixture invalid canonical audience; corrected fixture",
-    "WSL_DISTRO_NAME absent in tool environment; acceptance resolves owning distro from native UNC path"
+    "WSL_DISTRO_NAME absent in tool environment; acceptance resolves owning distro from native UNC path",
+    "Initial3.11 environment reused3.12rpds extension; reprovisioned pinned3.11 dependencies without altering source"
   ],
   "red": "Windows pane PID attempted Linux process probe; regression now proves no /proc crossing",
-  "source_checks": "21focused3.12 PASS; 22focused3.11 initial environment failure rpds from wrong ABI, correct3.11 dependency venv provisioned for rerun"
+  "source_checks": "21focused3.12 PASS;22focused3.11 PASS(9.404s) with correct ABI dependency environment",
+  "source_matches_installed": true
 }
