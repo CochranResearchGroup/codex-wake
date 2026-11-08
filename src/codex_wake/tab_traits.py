@@ -24,6 +24,9 @@ _ANSI = re.compile(r'\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|\x1b\[[0-?]*[ -/]*[@-~]')
 _ERROR = re.compile(r'^(?:[✗×!⚠●■]\s*)?(?:error\s*:|fatal(?:\s+error)?\s*:|panic\s*:|'
                     r'thread\s+.+\s+panicked\b|traceback\s*\(most recent call last\)|'
                     r'error\s+(?:running|connecting|sending|loading|executing)\b)', re.I)
+_SECRET_PROMPT = re.compile(r'^(?:enter\s+(?:your\s+)?)?(?:password|passphrase|api[ _-]?key|'
+                            r'access[ _-]?token|secret|token|authorization)\b.*[:=]', re.I)
+_COMPOSER = re.compile(r'^(?:[›❯>$#]|[^\s]+[$#])(?:\s|$)')
 _HASHES = {}
 
 
@@ -399,8 +402,23 @@ class TabTraits:
     def _error(self, pane, transport, privacy, deadline):
         if time.monotonic() >= deadline:
             return _trait(reason='observation_deadline')
-        if privacy is None or privacy(pane.get('pane_id')) != 'safe':
+        redacted = privacy is None
+        if privacy is not None and privacy(pane.get('pane_id')) != 'safe':
             return _trait(reason='presentation_privacy_unknown')
+        if redacted:
+            # Host-created adapters qualify presentation ownership independently
+            # of capture/input grants. No raw terminal content leaves this owner.
+            from .tab_organization import TmuxTransport
+            from .controller_tab_adapters import PsmuxAttachmentTransport
+            owned = isinstance(transport, PsmuxAttachmentTransport) and pane.get('platform') == 'windows'
+            if isinstance(transport, TmuxTransport):
+                try:
+                    owned = (Path('/proc', str(pane.get('pid'))).stat().st_uid == os.geteuid()
+                             and Path(transport.socket).lstat().st_uid == os.geteuid())
+                except OSError:
+                    owned = False
+            if not owned:
+                return _trait(reason='presentation_ownership_unknown')
         if transport is None or not (hasattr(transport, 'command') or hasattr(transport,'visible_screen')):
             return _trait(status='unsupported', reason='visible_screen_capture_unavailable')
         try:
@@ -413,10 +431,19 @@ class TabTraits:
             visible = [(i, _ANSI.sub('', value).strip()) for i, value in enumerate(lines)]
             nonempty = [(i, value) for i, value in visible if value]
             bottom = nonempty[-8:]
+            # A composer may wrap onto bare error-looking lines. Suppress the
+            # whole uncertain bottom region rather than infer draft/output.
+            for position, (_, value) in enumerate(bottom):
+                prompt = _COMPOSER.match(value)
+                if (_SECRET_PROMPT.match(value) or
+                    (prompt and (value[prompt.end():].strip() or
+                                 any(_ERROR.match(tail) for _, tail in bottom[position+1:])))):
+                    return _trait(reason='visible_input_or_secret_prompt')
             for i, value in reversed(bottom):
                 if _ERROR.match(value):
                     result = _trait('present', source='current_visible_screen', observed_at=self.clock(), status='observed')
-                    result.update(message=value[:512], location=dict(pane_id=pane['pane_id'], row=i, region='bottom'),
+                    result.update(message='Terminal error (content redacted)' if redacted else value[:512],
+                                  location=dict(pane_id=pane['pane_id'], row=i, region='bottom'),
                                   confidence='suspected', reason='current_visible_error_marker')
                     return result
             return _trait('absent', source='current_visible_screen', observed_at=self.clock(), status='observed',

@@ -101,7 +101,8 @@ class TabTraitsTests(unittest.TestCase):
                 self.assertEqual(result['traits']['health']['value'], 'unknown')
                 self.assertEqual(before, tmux('capture-pane','-p','-e','-t','%0'))
                 unknown = owner.observe_window(window,transport=transport,deadline=time.monotonic()+1)
-                self.assertEqual(unknown['traits']['error']['value'], 'unknown')
+                self.assertEqual(unknown['traits']['error']['value'], 'present')
+                self.assertEqual(unknown['traits']['error']['message'], 'Terminal error (content redacted)')
                 for name, command in (
                     ('red', "printf '\\033[31mordinary red text\\033[0m\\nREADY'; exec sleep 60"),
                     ('history', "printf 'Error: old scrollback\\n'; seq 1 30; printf 'Resolved: connection is healthy\\nREADY'; exec sleep 60")):
