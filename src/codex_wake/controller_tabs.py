@@ -115,6 +115,12 @@ class ControllerTabs:
                     traits = TabTraits(self.root,sessions=rows['sessions'])
                     initial = {w['window_id']:traits.observe_window(w,transport=transport,
                                privacy=config.get('privacy'),deadline=deadline) for w in snapshot['windows']}
+                if any(w.get('attach_intent') for w in snapshot['windows']):
+                    from .tab_reattach_traits import observe_managed
+                    managed=self.reattach_owner()
+                    for window in snapshot['windows']:
+                        key=window['window_id']
+                        initial[key]=observe_managed(managed,name,window,initial[key],deadline)
                 observation = (initial, rows)
             broker = config.get('broker')
             custody = broker.inspect() if broker else dict(available=False, transport='unowned', generation=None)

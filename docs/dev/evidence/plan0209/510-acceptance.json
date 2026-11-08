@@ -1,0 +1,35 @@
+{
+  "ticket": 510,
+  "status": "passed",
+  "worker": "89d57f4",
+  "followup": "c7dcc25",
+  "source": "7bbb51b plus shared public projection",
+  "native_receipt": "/tmp/wake-reattach510-native-rrchddqg/receipt.json",
+  "native_wheel_sha256": "ea4c9c197673b72eedfa333df657c573cc301a1f44cf7b9ab2af407de9d715d2",
+  "native_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "native_axes": [
+    "actual UID1017 WSL to Windows psmux same conversation",
+    "destination exact TUI acknowledged before outcome",
+    "unsent draft/source retained by default",
+    "retirement unknown draft held before launch",
+    "replay no duplicates; cumulative ledger inode/bytes preserved",
+    "no model/provider calls; final owned processes empty"
+  ],
+  "public_axes": [
+    "typed CLI preview/apply/status through common journal",
+    "both retained source and destination scopes checked",
+    "managed projection bounded under shared deadline; no Windows PID used as Linux PID"
+  ],
+  "checks": [
+    "18 worker checks both Python3.11 and3.12",
+    "12 followup reattach/projection checks each Python3.11 and3.12",
+    "shared public routes/admission and installed controller_tabs_acceptance passed"
+  ],
+  "limits": [
+    "Retiring normal native source remains held absent verified input custody; default retains source.",
+    "New deadline/projection helper native reruns failed before attachment due Windows WSLInterop startup; failures retained in /tmp/reattach510-package/native-projection{,2}.log; final exact package qualification belongs514.",
+    "Historical unbound native Windows/WSL relay sessions remain unknown."
+  ],
+  "production_effects": false,
+  "provider_calls": 0
+}

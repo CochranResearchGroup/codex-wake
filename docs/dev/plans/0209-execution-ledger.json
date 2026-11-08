@@ -143,14 +143,18 @@
         506,
         509
       ],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/510",
       "worker": "/root/lifecycle506",
       "owned_paths": [],
-      "validation": [],
+      "validation": [
+        "docs/dev/evidence/plan0209/510-acceptance.json"
+      ],
       "branch": "feat/tab-reattach-510",
-      "worktree": "/tmp/codex-wake-510"
+      "worktree": "/tmp/codex-wake-510",
+      "worker_result_sha": "89d57f4",
+      "result_sha": "75edf4f"
     },
     {
       "key": "recovery",
@@ -241,5 +245,5 @@
     }
   ],
   "dependency_validation": "acyclic, all blocker IDs resolved",
-  "integration_tip": "7aba5a8"
+  "integration_tip": "e5f52aa"
 }
