@@ -24,6 +24,12 @@ class PsmuxAttachmentTransport:
         reply = self.bridge(action, arguments, deadline)
         if not isinstance(reply, dict) or reply.get('generation') != self.generation:
             raise InventoryError('stale_target', 'psmux bridge generation changed')
+        if 'error' in reply:
+            error = reply['error']
+            raise InventoryError(error.get('code', 'attachment_unavailable'),
+                                 error.get('message', 'native presentation request failed'))
+        if 'result' not in reply:
+            raise InventoryError('attachment_unavailable', 'bridge returned no typed result')
         return reply['result']
 
     def snapshot(self, deadline):
@@ -34,6 +40,29 @@ class PsmuxAttachmentTransport:
 
     def capture(self, pane, lines, deadline):
         return self.request('capture', dict(pane=pane, lines=lines), deadline)
+
+
+    @property
+    def pinned_server_id(self):
+        return self.generation
+
+    def same_server(self, other):
+        return isinstance(other, PsmuxAttachmentTransport) and self.pinned_server_id == other.pinned_server_id
+
+    def visible_screen(self, pane, deadline):
+        return self.request('visible_screen', dict(pane=pane), deadline)
+
+    def lifecycle(self, action, arguments, deadline):
+        allowed = {
+            'create': {'name', 'cwd'}, 'rename': {'window', 'name'},
+            'focus': {'window'}, 'close': {'window'},
+            'move': {'window', 'destination_session', 'index'},
+            'park': {'window', 'destination_session', 'index'},
+            'restore': {'window', 'destination_session', 'index'},
+        }
+        if action not in allowed or not isinstance(arguments, dict) or set(arguments) - allowed[action]:
+            raise InventoryError('unsupported_operation', 'unsupported finite psmux lifecycle operation')
+        return self.request('lifecycle', dict(action=action, **arguments), deadline)
 
 
 class OwnedStdioBroker:
