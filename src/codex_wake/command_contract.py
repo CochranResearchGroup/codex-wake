@@ -75,6 +75,10 @@ class Operation:
     example: str = ''
 
     def schema(self):
+        if self.name.startswith('tabs.') and self.tool:
+            from .tab_contract import BY_OPERATION
+            spec=BY_OPERATION[self.name][1]
+            return {'type':'object','properties':deepcopy(spec[3]),'required':list(spec[4]),'additionalProperties':False}
         properties = {key: dict(deepcopy(PARAMETERS[key][1]), description=PARAMETERS[key][0]) for key in self.parameters}
         schema = {'type': 'object', 'properties': properties, 'required': list(self.required), 'additionalProperties': False}
         if self.name == 'builds.run':
@@ -134,6 +138,17 @@ OPERATIONS += (
     Operation('migration.apply', 'Apply a pinned qualified migration or independent-profile adoption.', 'wake_controller_migration_apply', ('expected_target','_request'), ('expected_target','_request'), 'Local CLI uses operator authority; API/MCP require scoped grants. Mutations retain exact pins, durable intent and rollback custody.', 'migration apply --arguments "$ARGUMENTS"'),
     Operation('migration.rollback', 'Roll back one attributable unchanged migration or adoption.', 'wake_controller_migration_rollback', ('expected_target','receipt_id','_request'), ('expected_target','receipt_id','_request'), 'Preserves changed targets and uncertain outcomes for reconciliation.', 'migration rollback --arguments "$ARGUMENTS"'),
 )
+from .tab_contract import tool_specs as tab_tool_specs, cli_verb as tab_cli_verb
+_TAB_EFFECT = ('Same-user local CLI resolves exact generations and retains durable request identity; '
+               'API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. '
+               'Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. '
+               'Raw capture and input retain separate privacy/custody checks; observation grants no input access.')
+OPERATIONS += tuple(Operation(spec[1],spec[2],tool,tuple(spec[3]),tuple(spec[4]),_TAB_EFFECT,
+    'tabs '+tab_cli_verb(spec[1])+(' --workspace WORKSPACE' if 'workspace' in spec[3] else ''))
+    for tool,spec in tab_tool_specs().items())
+OPERATIONS += (Operation('tabs.result','Read a retained local UID-owned tab request after disconnect or workspace closure.',
+    None,effect='Local CLI shortcut for authenticated common operations.result; no live workspace or new effect.',
+    example='tabs result --request-id REQUEST'),)
 BY_NAME = {op.name: op for op in OPERATIONS}
 
 
@@ -154,6 +169,8 @@ def apply_help(parser):
     """Enrich the existing compatibility parser from migrated operation metadata."""
     for path, item in parser_paths(parser):
         op = BY_NAME.get('.'.join(path))
+        if not op and len(path)==2 and path[0]=='tabs':
+            op=next((candidate for candidate in OPERATIONS if candidate.name.startswith('tabs.') and tab_cli_verb(candidate.name)==path[1]),None)
         if not op:
             continue
         item.description = op.summary + '\n\n' + op.effect
@@ -176,17 +193,22 @@ def render_reference():
              'Resolve fresh targets before execution; empty target objects are never valid pins.', '']
     from .cli import build_parser
     parsers = dict(parser_paths(build_parser()))
+    from .tab_contract import CAPABILITIES
+    lines += ['## Tab capability boundaries', '']
+    for capability, details in CAPABILITIES.items():
+        lines += ['- `'+capability+'`: **'+details['status']+'**. '+details['reason']]
+    lines += ['']
     for op in OPERATIONS:
         lines += ['## ' + op.name.replace('.', ' '), '', op.summary, '', op.effect, '',
                   'Transport: ' + ('CLI / API / OAuth MCP / native MCP (`'+op.tool+'`).' if op.tool else 'Local human CLI only.'), '',
                   '```sh', 'codex-wake --wake-root ROOT '+op.example, '```', '']
-        item = parsers.get(tuple(op.name.split('.')))
+        item = parsers.get(('tabs',tab_cli_verb(op.name)) if op.name.startswith('tabs.') else tuple(op.name.split('.')))
         if item is not None:
             lines += ['### CLI help', '', '```text', item.format_help().rstrip(), '```', '']
         if op.parameters:
             lines += ['| Argument | Required remotely | Meaning |', '|---|---|---|']
             for key in op.parameters:
-                lines.append('| `'+key+'` | '+('yes' if key in op.required else 'no')+' | '+PARAMETERS[key][0]+' |')
+                lines.append('| `'+key+'` | '+('yes' if key in op.required else 'no')+' | '+PARAMETERS.get(key,(key.replace('_',' ')+'.',{}))[0]+' |')
             lines.append('')
     return '\n'.join(lines)+'\n'
 
@@ -220,6 +242,11 @@ def coverage_report(parser):
                 'local_cli': 'Host operator admission differs from scoped remote authorization; no implicit remote privilege.'},
             'mcp_tools': {op.name: op.tool for op in OPERATIONS if op.tool}}
 
+    tab_paths={'tabs.'+tab_cli_verb(op.name) for op in OPERATIONS if op.name.startswith('tabs.')}
+    result['deferred_commands']=[name for name in result['deferred_commands'] if name not in tab_paths]
+    from .tab_contract import CAPABILITIES
+    result['tab_capabilities']=deepcopy(CAPABILITIES)
+    result['adapter_exceptions']['tabs']='Same-user local CLI resolves pins; API/MCP retain explicit pins and scoped authority. Raw input/capture and unsupported runtime/backends remain held. tabs result aliases common operations.result locally.'
     from .local_control_service import contract
     local=contract()
     result['local_controller']=local

@@ -1,5 +1,6 @@
 """Controller attachment CLI adapter over the host-owned operation service."""
 import json
+import subprocess
 
 
 def register_parser(subparsers):
@@ -13,104 +14,33 @@ def register_parser(subparsers):
 
 def command(args, owner=None):
     from .managed_inventory import InventoryError
+    from .records import WakeError
     from .shortcut_store import default_root
     try:
         args.wake_root = default_root(args.wake_root)
+        if args.tab_command=='result':
+            from .controller_runtime import ControllerRuntime
+            value=ControllerRuntime(args.wake_root).local_tab_result('tab-cli-'+args.request_id)
+            print(json.dumps(value,sort_keys=True));return 0
         if owner is None:
             from .controller_tabs import controller_tabs_from_root
             owner = controller_tabs_from_root(args.wake_root)
         operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1)
-        value = owner.execute(operation,args.arguments) if operation in owner.READS else operator_execute(operation,args.arguments,args.wake_root,owner=owner)
+        value = owner.execute(operation,args.arguments) if operation in owner.READS else operator_execute(operation,args.arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
         print(json.dumps(value, sort_keys=True))
-        return 0
-    except (InventoryError, OSError, ValueError, TypeError) as error:
+        phase=value.get('result',{}).get('operation',{}).get('phase') if isinstance(value.get('result'),dict) else None
+        return 3 if phase=='uncertain' or value.get('status') in ('uncertain','partial') else 0
+    except (WakeError, OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as error:
         print(json.dumps(dict(status='held', error=dict(
             code=getattr(error,'code','configuration_unavailable'),
-            message=str(error) if isinstance(error,InventoryError) else
+            message=str(error) if isinstance(error,WakeError) else
                     'Tab configuration is unavailable or invalid; inspect the selected controller and refresh workspaces.'))))
         return 2
 
 
 def tool_specs():
-    text = {'type':'string'}
-    specs = {}
-    for verb in ('list','show','preview','apply','undo','capture','input'):
-        properties = {} if verb=='list' else {'workspace':text}
-        required = [] if verb=='list' else ['workspace']
-        if verb=='show': properties['selector']=text
-        if verb not in ('list','show'):
-            properties.update(expected_target={'type':'object'},_request={'type':'object'})
-            required += ['expected_target','_request']
-        if verb=='preview': properties.update(mode={'enum':['activity','repository','traits']},pins={'type':'array','items':text},criteria={'type':'array','items':text})
-        if verb=='apply': properties['plan_id']=text; required += ['plan_id']
-        if verb=='undo': properties['receipt_id']=text; required += ['receipt_id']
-        if verb in ('capture','input'): properties['pane']=text; required += ['pane']
-        if verb=='capture': properties['lines']={'type':'integer','minimum':1,'maximum':200}
-        if verb=='input':
-            properties.update(input={'type':'string','maxLength':16384},custody={'type':'object'},transport={'enum':['structured','terminal']})
-            required += ['input','custody','transport']
-        specs['wake_tabs_'+verb]=('controller-tabs','tabs.'+verb,'Use host-enrolled presentation with exact generation and explicit input custody; no automatic replacement.',properties,required,verb in ('list','show'))
-    from .tab_lifecycle import TabLifecycle
-    for operation, fields in TabLifecycle.ARGUMENTS.items():
-        properties={key: ({'type':'object'} if key in ('expected_target','expected_destination') else
-                          {'type':'boolean'} if key in ('preview','force') else
-                          {'type':'integer','minimum':0} if key=='index' else text)
-                    for key in fields}
-        properties['_request']={'type':'object'}
-        required=['workspace','expected_target','_request']
-        if operation!='tabs.create':required.append('window')
-        if operation in ('tabs.create','tabs.rename'):required.append('name')
-        if operation in ('tabs.move','tabs.park','tabs.restore'):required+=['destination','expected_destination']
-        if operation=='tabs.restore':required.append('receipt_id')
-        specs['wake_tabs_'+operation.split('.')[1]]=('controller-tabs',operation,
-            'Manage one exact owned attachment; preserve conversations and reconcile uncertain effects.',properties,required,False)
-    from .tab_views import TabViews
-    for operation in TabViews.READS|TabViews.MUTATIONS:
-        props={} if operation.endswith('-list') else {'name':text}
-        required=[] if operation.endswith('-list') else ['name']
-        if operation=='tabs.view-save':props['definition']={'type':'object'};required.append('definition')
-        if operation=='tabs.group-save':props['members']={'type':'array','items':text};required.append('members')
-        if operation in TabViews.MUTATIONS:
-            props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
-        specs['wake_tabs_'+operation.split('.')[1].replace('-','_')]=('controller-tabs',operation,
-            'Inspect or update logical tab group/view definitions without moving attachments.',props,required,operation in TabViews.READS)
-    for verb in ('start','status','refresh','stop'):
-        op='tabs.monitor.'+verb
-        props={}
-        if verb=='start':props={k:{'type':'number'} for k in ('interval','probe_timeout','stale_after','cycle_timeout')}
-        if verb=='stop':props={'timeout':{'type':'number'}}
-        required=[]
-        if verb in ('start','stop'):
-            props.update(expected_target={'type':'object'},_request={'type':'object'});required=['expected_target','_request']
-        specs['wake_tabs_monitor_'+verb]=('controller-tabs',op,'Observe or control the bounded read-only tab monitor.',props,required,verb in ('status','refresh'))
-    from .tab_organization_policy import TabOrganizationPolicy
-    for op,fields in TabOrganizationPolicy.ARGUMENTS.items():
-        props={key:({'type':'array','items':text} if key in ('pins','criteria') else
-                    {'type':'boolean'} if key=='acknowledge_pending' else
-                    {'type':'integer'} if key=='max_swaps_per_tick' else
-                    {'type':'number'} if key.endswith('_seconds') else text) for key in fields}
-        required=['workspace'] if op.endswith('configure') else []
-        if op!='tabs.policy.status':
-            props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
-        specs['wake_'+op.replace('.','_')]=('controller-tabs',op,'Opt-in bounded physical organization; preserve manual changes.',props,required,op=='tabs.policy.status')
-    from .tab_recovery import TabRecovery
-    for op,fields in TabRecovery.ARGUMENTS.items():
-        props={key:({'type':'boolean'} if key=='restore_layout' else {'type':'object'} if key=='expected_target' else text) for key in fields}
-        required=[]
-        if not op.endswith('status'):required.append('workspace')
-        if op.endswith(('preview','apply')):required.append('capture_id')
-        if op.endswith('apply'):required.append('intent')
-        if op.endswith(('capture','apply')):
-            props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
-        specs['wake_'+op.replace('.','_')]=('controller-tabs',op,'Capture or restore exact workspace conversations; unknown historical mappings remain held.',props,required,op.endswith(('preview','status')))
-    from .tab_reattach import TabReattach
-    for op,fields in TabReattach.ARGUMENTS.items():
-        props={key:({'type':'object'} if key.startswith('expected_') else {'type':'boolean'} if key in ('force','retire_source') else text) for key in fields}
-        required=['plan_id'] if op!='tabs.reattach-preview' else ['workspace','window','destination','expected_destination']
-        if op!='tabs.reattach-status':
-            props['_request']={'type':'object'};required+=['_request','expected_target']
-        specs['wake_'+op.replace('.','_').replace('-','_')]=('controller-tabs',op,'Reattach the exact saved conversation; retain source by default and reconcile uncertain effects.',props,required,op=='tabs.reattach-status')
-    return specs
+    from .tab_contract import tool_specs as portable_specs
+    return portable_specs()
 
 
 def protected_execute(operation,arguments,root):
@@ -148,6 +78,14 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
     from .controller_runtime import ControllerRuntime
     from .tab_lifecycle import TabLifecycle
     from .managed_inventory import InventoryError
+    if request_id is not None:
+        from .controller_runtime import bounded_id
+        bounded_id('tab-cli-'+request_id)
+        try:
+            return ControllerRuntime(root).local_tab_result('tab-cli-'+request_id,
+                expected_operation=operation,arguments=arguments)
+        except InventoryError as error:
+            if error.code!='operation_not_found':raise
     owner = owner or controller_tabs_from_root(root)
     payload = dict(arguments)
     from .tab_views import TabViews

@@ -94,84 +94,78 @@ def execute(action, arguments, root, *, principal, observer=None, transport=None
 
 
 def register_parser(subparsers):
-    parser = subparsers.add_parser('tabs', help='preview and conditionally apply managed workspace tab ordering')
+    from .tab_contract import tool_specs, cli_verb
+    parser = subparsers.add_parser('tabs', help='observe, group and control exact owned terminal attachments')
     verbs = parser.add_subparsers(dest='tabs_command', required=True)
-    for action in ('list','capture','input','preview','show','apply','undo','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop','policy-configure','policy-status','policy-enable','policy-pause','policy-disable','policy-tick','recovery-capture','recovery-preview','recovery-apply','recovery-status','reattach-preview','reattach-apply','reattach-status'):
-        command = verbs.add_parser(action)
+    aliases = {'pins':'pin', 'members':'member', 'criteria':'criterion'}
+    for _, operation, summary, properties, required, readonly in tool_specs().values():
+        action=cli_verb(operation)
+        command=verbs.add_parser(action, help=summary, description=summary)
+        command.set_defaults(group_by=[],sort_by=[],filters=[],pins=[],members=[],mode='activity')
         if action.startswith(('view-','group-')) and not action.endswith('-list'):
-            command.add_argument('view_name',nargs='?')
-        for field in ('debounce-seconds','min-interval-seconds','stale-after-seconds'):
-            command.add_argument('--'+field,type=float)
-        command.add_argument('--max-swaps-per-tick',type=int)
-        command.add_argument('--capture-id')
-        command.add_argument('--intent')
-        command.add_argument('--restore-layout',action='store_true',default=None)
-        command.add_argument('--view')
-        command.add_argument('--reason')
-        command.add_argument('--acknowledge-pending',action='store_true',default=None)
-        for field in ('interval','probe-timeout','stale-after','cycle-timeout'):
-            command.add_argument('--'+field,type=float)
-        command.add_argument('--filter',action='append',dest='filters',default=[])
-        command.add_argument('--group-by',action='append',default=[])
-        command.add_argument('--sort-by',action='append',default=[])
-        command.add_argument('--group')
-        command.add_argument('--member',action='append',dest='members',default=[])
-        command.add_argument('--arguments',type=json.loads)
-        for field in ('workspace','window','name','cwd','destination'):
-            command.add_argument('--'+field)
-        command.add_argument('--index',type=int)
-        command.add_argument('--retire-source',action='store_true',default=None)
-        command.add_argument('--force',action='store_true',default=None)
-        command.add_argument('--dry-run',dest='preview',action='store_true',default=None)
-        command.add_argument('--socket-path')
-        command.add_argument('--session-id')
-        command.add_argument('--bus-root', type=Path)
-        command.add_argument('--operator-capability', type=Path)
-        command.add_argument('--actor-capability', type=Path)
-        command.add_argument('--app-server', default='unix://')
-        command.add_argument('--timeout', type=float, default=30)
-        command.add_argument('--json', dest='as_json', action='store_true')
-        if action == 'policy-configure':
-            command.add_argument('--mode',choices=('activity','repository','traits'),default='activity')
-            command.add_argument('--pin',action='append',dest='pins',default=[])
-        if action == 'preview':
-            command.add_argument('--mode', choices=('activity','repository','traits'), default='activity')
-            command.add_argument('--pin', action='append', dest='pins', default=[])
-        if action in ('show', 'apply','reattach-apply','reattach-status'): command.add_argument('--plan-id')
-        if action in ('undo','restore'): command.add_argument('--receipt-id')
+            command.add_argument('view_name',nargs='?',help='Saved logical view or group name.')
+        command.add_argument('--arguments',type=json.loads,help='Advanced operation JSON; typed flags fill only omitted fields.')
+        command.add_argument('--json',dest='as_json',action='store_true',help='Emit structured results.')
+        if not readonly:
+            command.add_argument('--request-id',help='Stable intent ID; reuse only for identical inputs. Retrieve with tabs result.')
+        for field, schema in sorted(properties.items()):
+            if field=='_request':continue
+            option='--'+aliases.get(field,field.replace('_','-'))
+            settings={'dest':field,'default':None,'help':schema.get('description',field.replace('_',' ')+'.').replace('%','%%')}
+            kind=schema.get('type')
+            if kind=='boolean':settings['action']='store_true'
+            elif kind=='array':settings.update(action='append')
+            elif kind=='object':settings['type']=json.loads
+            elif kind=='integer':settings['type']=int
+            elif kind=='number':settings['type']=float
+            if 'enum' in schema:settings['choices']=schema['enum']
+            if field=='preview':option='--dry-run'
+            command.add_argument(option,**settings)
+        if action in ('preview','view-save','policy-configure'):
+            command.add_argument('--group-by',action='append',default=[],help='Layered grouping trait; repeat in order.')
+            command.add_argument('--sort-by',action='append',default=[],help='Layered sorting trait; repeat in order.')
+        if action=='view-save':
+            command.add_argument('--filter',action='append',dest='filters',default=[],help='Read-only trait=value filter.')
+            command.add_argument('--group',help='Saved named group restriction.')
+        if action in ('preview','show','apply','undo'):
+            for field in ('socket-path','session-id','app-server'):
+                command.add_argument('--'+field,help='Legacy explicit tmux adapter option.')
+            command.add_argument('--timeout',type=float,default=30)
+            for field in ('bus-root','operator-capability','actor-capability'):
+                command.add_argument('--'+field,type=Path)
+            if action=='show':
+                command.add_argument('--plan-id');command.add_argument('--receipt-id')
+    result=verbs.add_parser('result',help='Read the retained same-user request result, including after a workspace closes.')
+    result.add_argument('--request-id',required=True)
+    result.add_argument('--json',dest='as_json',action='store_true')
+    result.set_defaults(arguments=None)
     return parser
 
 
 def run(args, root, *, observer=None):
-    if args.arguments is not None or getattr(args,'workspace',None) is not None or args.tabs_command in ('list','capture','input','create','rename','focus','move','park','restore','close','view-list','view-show','view-save','view-delete','view-evaluate','group-list','group-show','group-save','group-delete','monitor-start','monitor-status','monitor-refresh','monitor-stop','policy-configure','policy-status','policy-enable','policy-pause','policy-disable','policy-tick','recovery-capture','recovery-preview','recovery-apply','recovery-status','reattach-preview','reattach-apply','reattach-status'):
+    legacy = args.tabs_command in ('preview','show','apply','undo') and (
+        getattr(args,'socket_path',None) is not None or getattr(args,'session_id',None) is not None or
+        (args.tabs_command=='show' and (getattr(args,'plan_id',None) or getattr(args,'receipt_id',None))))
+    if args.arguments is not None or not legacy:
         from .tab_commands import command
-        args.tab_command = args.tabs_command
-        args.arguments = args.arguments or {}
+        from .tab_contract import BY_OPERATION
+        args.tab_command=args.tabs_command
+        args.arguments=dict(args.arguments or {})
+        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1)
+        if operation in BY_OPERATION:
+            properties=BY_OPERATION[operation][1][3]
+            for field in properties:
+                value=getattr(args,field,None)
+                if value is not None:args.arguments.setdefault(field,value)
         if getattr(args,'view_name',None):args.arguments.setdefault('name',args.view_name)
-        if args.tabs_command.startswith('recovery-'):
-            for field in ('capture_id','intent','restore_layout'):
-                value=getattr(args,field,None)
-                if value is not None:args.arguments.setdefault(field,value)
-            if args.tabs_command=='recovery-apply' and 'intent' not in args.arguments:
-                from uuid import uuid4
-                args.arguments['intent']='restore-'+uuid4().hex
-        if args.tabs_command.startswith('policy-'):
-            for field in ('workspace','reason','view','debounce_seconds','min_interval_seconds','max_swaps_per_tick','stale_after_seconds','acknowledge_pending'):
-                value=getattr(args,field,None)
-                if value is not None:args.arguments.setdefault(field,value)
-            if args.tabs_command=='policy-configure':
-                args.arguments.setdefault('mode','traits' if args.group_by or args.sort_by else args.mode)
-                args.arguments.setdefault('pins',args.pins)
-                if args.group_by or args.sort_by:args.arguments.setdefault('criteria',args.group_by+args.sort_by)
-        if args.tabs_command=='monitor-start':
-            for field in ('interval','probe_timeout','stale_after','cycle_timeout'):
-                value=getattr(args,field,None)
-                if value is not None:args.arguments.setdefault(field,value)
-        if args.tabs_command=='preview':
-            args.arguments.setdefault('mode','traits' if args.group_by or args.sort_by else args.mode)
-            args.arguments.setdefault('pins',args.pins)
-            if args.group_by or args.sort_by:args.arguments.setdefault('criteria',args.group_by+args.sort_by)
-        if args.tabs_command=='view-save':
+        if args.tabs_command=='recovery-apply' and 'intent' not in args.arguments:
+            from uuid import uuid4
+            args.arguments['intent']='restore-'+(getattr(args,'request_id',None) or uuid4().hex)
+        if args.tabs_command in ('preview','policy-configure'):
+            criteria=(args.group_by or [])+(args.sort_by or [])
+            args.arguments.setdefault('mode','traits' if criteria else 'activity')
+            if criteria:args.arguments.setdefault('criteria',criteria)
+        if args.tabs_command=='view-save' and 'definition' not in args.arguments:
             filters={}
             for value in args.filters:
                 if '=' not in value:
@@ -179,11 +173,8 @@ def run(args, root, *, observer=None):
                 key,value=value.split('=',1);filters[key]=value
             definition=dict(filters=filters,group_by=args.group_by,sort_by=args.sort_by)
             if args.group:definition['group']=args.group
-            args.arguments.setdefault('definition',definition)
-        if args.tabs_command=='group-save':args.arguments.setdefault('members',args.members)
-        for field in ('workspace','window','name','cwd','destination','index','force','preview','receipt_id','plan_id','retire_source'):
-            value=getattr(args,field,None)
-            if value is not None:args.arguments.setdefault(field,value)
+            args.arguments['definition']=definition
+        if args.tabs_command=='group-save':args.arguments.setdefault('members',[])
         return command(args)
     from .permission_commands import verified_cli_principal
     try:
