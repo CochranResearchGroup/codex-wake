@@ -1,0 +1,12 @@
+{
+  "uid": 1017,
+  "native_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "external_provider_calls": 0,
+  "model_turns": 0,
+  "status": "failed",
+  "windows_namespace": "wake510-b020367727e5",
+  "error_type": "AttributeError",
+  "error": "'TabReattach' object has no attribute 'host'",
+  "trap_requests": [],
+  "final_owned_native_processes": []
+}

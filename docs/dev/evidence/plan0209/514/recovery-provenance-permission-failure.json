@@ -1,0 +1,7 @@
+{
+  "status": "failed",
+  "reason": "candidate wheel provenance unreadable before guarded fixture body",
+  "terminated_owned_fixture_pids": [
+    2205901
+  ]
+}

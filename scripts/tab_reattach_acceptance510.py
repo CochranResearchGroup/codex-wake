@@ -8,6 +8,8 @@ from codex_wake.native_protocol import native_request
 from codex_wake.tab_traits import session_rows
 from codex_wake.local_health import observe_row
 from codex_wake.tab_reattach import TabReattach
+from codex_wake.controller_tabs import ControllerTabs
+from codex_wake.tab_commands import operator_execute
 P=pathlib.Path
 assert os.getuid()==1017
 import tempfile
@@ -85,11 +87,18 @@ try:
   # The wrapper only selects the installed fixture package/dependencies; native
   # launch fields remain in the private hashed manifest, never caller argv.
   python_wrapper=root/'wake-python'
-  python_wrapper.write_text('#!/bin/sh\nexport PYTHONPATH='+shlex.quote(os.environ['PYTHONPATH'])+'\nexport HOME='+shlex.quote(str(root/'house'))+'\nexport WSL_DISTRO_NAME='+shlex.quote(os.environ['WSL_DISTRO_NAME'])+'\nexec /usr/bin/python3 "$@"\n')
+  python_wrapper.write_text('#!/bin/sh\nexport HOME='+shlex.quote(str(root/'house'))+'\nexport WSL_DISTRO_NAME='+shlex.quote(os.environ['WSL_DISTRO_NAME'])+'\nunset PYTHONPATH\nexec '+shlex.quote(sys.executable)+' "$@"\n')
   python_wrapper.chmod(0o700)
   workspaces=dict(source=dict(kind='byobu',transport=TmuxAttachmentTransport(sock,'$0'),app_server=endpoint,wake_python=str(python_wrapper)),
                   destination=dict(kind='psmux',transport=PsmuxAttachmentTransport(ConfiguredBridge(command),generation=description['generation'])))
   owner=TabReattach(wake,workspaces=workspaces,host=socket.gethostname(),environment=os.environ['WSL_DISTRO_NAME'])
+  controller=ControllerTabs(wake,workspaces=workspaces,host=owner.lifecycle.host,environment=owner.lifecycle.environment)
+  public_records=[]
+  def public(operation,arguments,request_id):
+   envelope=operator_execute(operation,arguments,wake,owner=controller,request_id=request_id)
+   record=envelope['result']['operation'];public_records.append(dict(operation=operation,operation_id=record['operation_id'],phase=record['phase']))
+   assert record['phase']=='terminal',record
+   return record['result']
   view=session_rows(wake,socket_path=sock,endpoints=[endpoint],deadline=time.monotonic()+3)
   row=next(r for r in view['sessions'] if r['thread_id']==ids[0])
   attachment=row['attachments'][0]
@@ -104,18 +113,18 @@ try:
   draft='synthetic-unsent-510'
   tm('send-keys','-t',attachment['pane_id'],'-l',draft)
   time.sleep(.3)
-  held=owner.execute('tabs.reattach-preview',dict(request,retire_source=True))
+  held=public('tabs.reattach-preview',dict(request,retire_source=True),'draft-negative')
   assert held['status']=='held' and held['reason']=='source_input_custody_unknown_or_nonempty',held
   assert draft in tm('capture-pane','-p','-t',attachment['pane_id'])
   report['draft_retirement_held']=True
-  preview=owner.execute('tabs.reattach-preview',request);report['preview']=preview
+  preview=public('tabs.reattach-preview',request,'preview');report['preview']=preview
   assert preview['status']=='ready',preview
   report['source_alive_before_apply']=process_identity(profile['process']['pid']) is not None
-  result=owner.execute('tabs.reattach-apply',dict(plan_id=preview['plan_id']));report['apply']=result
+  result=public('tabs.reattach-apply',dict(plan_id=preview['plan_id']),'apply');report['apply']=result
   if result['status']!='applied':
    try:
     observed=workspaces['destination']['transport'].snapshot(time.monotonic()+5)
-    report['destination_screens']=[workspaces['destination']['transport'].visible_screen(w['panes'][0]['pane_id'],time.monotonic()+5)
+    report['destination_screen_lengths']=[len(workspaces['destination']['transport'].visible_screen(w['panes'][0]['pane_id'],time.monotonic()+5))
       for w in observed['windows'] if w['name'].startswith('reattach-')]
    except Exception as diagnostic:report['destination_diagnostic_error']=str(diagnostic)
   assert result['status']=='applied',result
@@ -125,8 +134,8 @@ try:
   assert cumulative.read_bytes()==before_cumulative and cumulative.stat().st_ino==before_inode
   current=workspaces['destination']['transport'].snapshot(time.monotonic()+5)
   before_windows=[w['window_id'] for w in current['windows']]
-  repeated=owner.execute('tabs.reattach-apply',dict(plan_id=preview['plan_id']))
-  assert repeated['replayed']
+  repeated=public('tabs.reattach-apply',dict(plan_id=preview['plan_id']),'apply')
+  assert repeated==result
   assert [w['window_id'] for w in workspaces['destination']['transport'].snapshot(time.monotonic()+5)['windows']]==before_windows
   assert result['source_preserved'] is True and result['source_retired'] is False
   assert attachment['window_id'] in tm('list-windows','-F','#{window_id}')
@@ -135,6 +144,7 @@ try:
   projection=owner.binding_for('destination',destination_window)
   assert projection and projection['identity']==result['identity'],projection
   report['managed_destination_projection_verified']=True
+  report['public_operations']=public_records
   report.update(status='passed',same_account_conversation_execution_owner=True,destination_verified_source_draft_retained=True,
                 cumulative_state_preserved=True,replay_without_duplicate_client=True,windows_identity=description['identity'],
                 bridge_sha256=hashlib.sha256(P(tab_psmux_bridge.__file__).read_bytes()).hexdigest(),trap_requests=list(calls))

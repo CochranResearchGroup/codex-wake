@@ -82,6 +82,17 @@ def qualify_public(state,source,holding,windows_python):
         result=subprocess.run([POWERSHELL,'-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',encoded],input=json.dumps(payload),capture_output=True,text=True,timeout=30)
         assert result.returncode==0,(result.stdout,result.stderr)
         assert json.loads(result.stdout.lstrip('\ufeff'))['resources']
+        # Native PowerShell HTTP and OAuth MCP callers reach the same WSL
+        # authority; credential arrives only over the private process stdin.
+        command="$ErrorActionPreference='Stop'; $r=[Console]::In.ReadToEnd() | ConvertFrom-Json; $h=@{Authorization=('Bearer '+$r.token)}; $api=@{operation='tabs.list';arguments=@{}} | ConvertTo-Json -Compress; $a=Invoke-RestMethod -TimeoutSec 15 -Method Post -Uri ($r.base+'/operations') -Headers $h -ContentType 'application/json' -Body $api; $m=@{jsonrpc='2.0';id=1;method='tools/call';params=@{name='wake_tabs_list';arguments=@{}}} | ConvertTo-Json -Depth 10 -Compress; $b=Invoke-RestMethod -TimeoutSec 15 -Method Post -Uri ($r.base+'/mcp') -Headers $h -ContentType 'application/json' -Body $m; @{api=$a;mcp=$b} | ConvertTo-Json -Depth 100 -Compress"
+        encoded=base64.b64encode(command.encode('utf-16-le')).decode()
+        result=subprocess.run([POWERSHELL,'-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',encoded],
+            input=json.dumps(dict(token=access,base='http://127.0.0.1:'+str(server.server_address[1]))),capture_output=True,text=True,timeout=40)
+        assert result.returncode==0,(result.returncode,result.stderr)
+        values=json.loads(result.stdout.lstrip('\ufeff'))
+        assert values['api']['result']['resources']
+        assert values['mcp']['result']['structuredContent']['result']['resources']
+
     finally:
         server.shutdown();server.server_close();thread.join(timeout=5)
         cli('close','--workspace','source','--window',wid,'--force')

@@ -1,0 +1,204 @@
+{
+  "uid": 1017,
+  "native_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "external_provider_calls": 0,
+  "model_turns": 0,
+  "status": "passed",
+  "windows_namespace": "wake510-c4f11e8a9845",
+  "source_process": {
+    "pid": 2209583,
+    "start_time_ticks": 23950477,
+    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a"
+  },
+  "draft_retirement_held": true,
+  "preview": {
+    "status": "ready",
+    "plan_id": "plan_4ca356a548354f599ff9a121d602144c",
+    "target": {
+      "host": "cooper",
+      "environment": "Ubuntu",
+      "workspace": "source",
+      "presentation": "byobu",
+      "generation": "ab8259a5ab55d00dd3500d4731de5c23408dabf4c3cb8744073da8c68a16965d",
+      "reattach_plan": "plan_4ca356a548354f599ff9a121d602144c"
+    },
+    "identity": {
+      "runtime": "codex",
+      "namespace": "codex:3a60b6057607f13a7f5a2a98c19c1fa5df02046ffff90559abfe4ea6bce9f6e4",
+      "conversation_id": "b1da9eec-73e5-4715-beb3-22ec9e0b84ea",
+      "root": "/tmp/wake-reattach510-native-16h85_kr/workspace"
+    },
+    "source_preserved": true,
+    "source_retired": false,
+    "source_retirement": "retained",
+    "destination": null,
+    "reason": null,
+    "replayed": false,
+    "launch_attempts": 0
+  },
+  "source_alive_before_apply": true,
+  "apply": {
+    "status": "applied",
+    "plan_id": "plan_4ca356a548354f599ff9a121d602144c",
+    "target": {
+      "environment": "Ubuntu",
+      "generation": "ab8259a5ab55d00dd3500d4731de5c23408dabf4c3cb8744073da8c68a16965d",
+      "host": "cooper",
+      "presentation": "byobu",
+      "workspace": "source",
+      "reattach_plan": "plan_4ca356a548354f599ff9a121d602144c"
+    },
+    "identity": {
+      "conversation_id": "b1da9eec-73e5-4715-beb3-22ec9e0b84ea",
+      "namespace": "codex:3a60b6057607f13a7f5a2a98c19c1fa5df02046ffff90559abfe4ea6bce9f6e4",
+      "root": "/tmp/wake-reattach510-native-16h85_kr/workspace",
+      "runtime": "codex"
+    },
+    "source_preserved": true,
+    "source_retired": false,
+    "source_retirement": "retained",
+    "destination": {
+      "identity": {
+        "conversation_id": "b1da9eec-73e5-4715-beb3-22ec9e0b84ea",
+        "namespace": "codex:3a60b6057607f13a7f5a2a98c19c1fa5df02046ffff90559abfe4ea6bce9f6e4",
+        "root": "/tmp/wake-reattach510-native-16h85_kr/workspace",
+        "runtime": "codex"
+      },
+      "process": {
+        "pid": 2211285,
+        "start_time_ticks": 23951105,
+        "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a"
+      },
+      "handle": {
+        "window_id": "@2",
+        "pane_id": "%5",
+        "windows_pid": 3776,
+        "windows_creation_filetime": 134386260145268956,
+        "bridge_generation": "3c3db9b27b2eeebde6893cd92069d6d9ccb565bcf0978cace0c94f716ffaf26d",
+        "marker": "/tmp/wake-reattach510-native-16h85_kr/wake/tab-reattach-launches/4ca356a548354f599ff9a121d602144c.process.json",
+        "manifest": "/tmp/wake-reattach510-native-16h85_kr/wake/tab-reattach-launches/4ca356a548354f599ff9a121d602144c.json",
+        "manifest_sha256": "988635034a6d130f2689667ae0dfbad4d4c7bbf5f4108bba0b82a2a0964faf6f"
+      },
+      "window": {
+        "window_id": "@2",
+        "index": 1,
+        "name": "reattach-4ca356a548354f59",
+        "focused": false,
+        "linked": false,
+        "panes": [
+          {
+            "pane_id": "%5",
+            "pane_index": 0,
+            "pid": 3776,
+            "platform": "windows",
+            "windows_creation_filetime": 134386260145268956,
+            "windows_executable": "C:\\Windows\\System32\\wsl.exe",
+            "cwd": "C:\\Users\\ecoch",
+            "windows_processes": [
+              {
+                "pid": 3776,
+                "parent_pid": 2340,
+                "creation_filetime": 134386260145268956,
+                "executable": "C:\\Windows\\System32\\wsl.exe",
+                "platform": "windows"
+              },
+              {
+                "pid": 87512,
+                "parent_pid": 3776,
+                "creation_filetime": 134386260145628194,
+                "executable": "C:\\Program Files\\WSL\\wsl.exe",
+                "platform": "windows"
+              },
+              {
+                "pid": 81264,
+                "parent_pid": 87512,
+                "creation_filetime": 134386260146301113,
+                "executable": "C:\\Program Files\\WSL\\wslhost.exe",
+                "platform": "windows"
+              },
+              {
+                "pid": 12332,
+                "parent_pid": 81264,
+                "creation_filetime": 134386260146524836,
+                "executable": "C:\\Windows\\System32\\conhost.exe",
+                "platform": "windows"
+              }
+            ],
+            "windows_processes_complete": true
+          }
+        ],
+        "attach_intent": "4ca356a548354f599ff9a121d602144c"
+      },
+      "health": {
+        "status": "responsive",
+        "responsive": true,
+        "evidence": "tui_main_loop_ack",
+        "observed_at": 1794152415.8721895,
+        "reason": null,
+        "challenge": "e05997e6f0ac45f8933ba8958a3b61189e798abbed1d44128ddf3b4f7de65f06",
+        "latency_seconds": 0.2738109359925147,
+        "loop_tid": 2211375
+      },
+      "native_health_target": {
+        "host": "cooper",
+        "environment": "Ubuntu",
+        "runtime": "codex",
+        "namespace": "codex:3a60b6057607f13a7f5a2a98c19c1fa5df02046ffff90559abfe4ea6bce9f6e4",
+        "build_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+        "conversation_id": "b1da9eec-73e5-4715-beb3-22ec9e0b84ea",
+        "home": "/tmp/wake-reattach510-native-16h85_kr/accounts/codex-test",
+        "provider": "recovery_fixture",
+        "backend_id": "dcfd23a1-4008-478c-a361-cb89ef749b40",
+        "channel": "native_tui",
+        "connection_generation": "6383bfe4-d3b2-4229-9efb-a46744f215cc",
+        "process": {
+          "pid": 2211285,
+          "start_ticks": "23951105",
+          "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a"
+        }
+      }
+    },
+    "reason": "source_retained_by_request",
+    "replayed": false,
+    "launch_attempts": 1
+  },
+  "managed_destination_projection_verified": true,
+  "public_operations": [
+    {
+      "operation": "tabs.reattach-preview",
+      "operation_id": "tab-cli-draft-negative",
+      "phase": "terminal"
+    },
+    {
+      "operation": "tabs.reattach-preview",
+      "operation_id": "tab-cli-preview",
+      "phase": "terminal"
+    },
+    {
+      "operation": "tabs.reattach-apply",
+      "operation_id": "tab-cli-apply",
+      "phase": "terminal"
+    },
+    {
+      "operation": "tabs.reattach-apply",
+      "operation_id": "tab-cli-apply",
+      "phase": "terminal"
+    }
+  ],
+  "same_account_conversation_execution_owner": true,
+  "destination_verified_source_draft_retained": true,
+  "cumulative_state_preserved": true,
+  "replay_without_duplicate_client": true,
+  "windows_identity": {
+    "platform": "windows",
+    "namespace": "wake510-c4f11e8a9845",
+    "pid": 2340,
+    "session": "destination",
+    "creation_filetime": 134386260097944147,
+    "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca",
+    "attach_directory": "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\wake510-c4f11e8a9845"
+  },
+  "bridge_sha256": "25c461d652ed90f52e979c494e31e62f77a8d609d6def7ecb35ebf64c0207eb6",
+  "trap_requests": [],
+  "final_owned_native_processes": []
+}
