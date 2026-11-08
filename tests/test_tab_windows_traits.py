@@ -18,3 +18,11 @@ class WindowsTraitTests(unittest.TestCase):
             self.assertEqual(traits['harness']['value'],'codex')
             self.assertEqual(traits['health']['value'],'unknown')
             self.assertEqual(traits['activity']['value'],'unknown')
+
+    def test_wsl_relay_is_unknown_not_absent_coding_session(self):
+        with tempfile.TemporaryDirectory() as root:
+            row=dict(panes=[dict(pane_id='%1',pid=1,platform='windows',windows_processes_complete=True,
+                                windows_processes=[dict(pid=1,creation_filetime=10,executable='C:\\Windows\\System32\\wsl.exe')])])
+            traits=TabTraits(root).observe_window(row)['panes'][0]['traits']
+            self.assertEqual(traits['session_presence']['value'],'unknown')
+            self.assertEqual(traits['session_presence']['reason'],'remote_runtime_unverified')

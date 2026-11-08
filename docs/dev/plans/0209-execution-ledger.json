@@ -143,12 +143,14 @@
         506,
         509
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/510",
-      "worker": null,
+      "worker": "/root/lifecycle506",
       "owned_paths": [],
-      "validation": []
+      "validation": [],
+      "branch": "feat/tab-reattach-510",
+      "worktree": "/tmp/codex-wake-510"
     },
     {
       "key": "recovery",
@@ -158,12 +160,16 @@
         504,
         506
       ],
-      "state": "pending",
+      "state": "integrated",
       "tracker_state": "OPEN",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/368",
-      "worker": null,
+      "worker": "/root/traits505",
       "owned_paths": [],
-      "validation": []
+      "validation": [
+        "source2tests PASS3.11; actualnativeinitialwitness2conversations source; installedexacthealth witness pending"
+      ],
+      "worker_result_sha": "f50fb6f",
+      "result_sha": "3779af2"
     },
     {
       "key": "auto",
@@ -174,12 +180,16 @@
         508,
         506
       ],
-      "state": "pending",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/511",
-      "worker": null,
+      "worker": "/root/lifecycle506",
       "owned_paths": [],
-      "validation": []
+      "validation": [
+        "docs/dev/evidence/plan0209/511-acceptance.json"
+      ],
+      "result_sha": "7aba5a8",
+      "worker_result_sha": "a378033"
     },
     {
       "key": "contract",
@@ -231,5 +241,5 @@
     }
   ],
   "dependency_validation": "acyclic, all blocker IDs resolved",
-  "integration_tip": "6f1344b"
+  "integration_tip": "7aba5a8"
 }

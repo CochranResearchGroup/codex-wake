@@ -374,6 +374,8 @@ class TabTraits:
         if kinds:
             traits['harness']=_trait(next(iter(kinds)) if len(kinds)==1 else 'mixed',source='windows_process_image',observed_at=stamp,status='observed')
             traits['session_presence']=_trait('present',source='windows_process_image',observed_at=stamp,status='observed')
+        elif any(ntpath.basename(r.get('executable','')).lower() in ('wsl.exe','ssh.exe') for r in processes):
+            traits['session_presence']=_trait(source='windows_relay',reason='remote_runtime_unverified')
         elif pane.get('windows_processes_complete'):
             traits['session_presence']=_trait('absent',source='windows_process_tree',observed_at=stamp,status='observed')
         traits['error']=self._error(pane,transport,privacy,deadline)

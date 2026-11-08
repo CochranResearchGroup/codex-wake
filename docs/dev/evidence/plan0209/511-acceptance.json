@@ -1,0 +1,44 @@
+{
+  "ticket": 511,
+  "status": "passed",
+  "source": "7aba5a8",
+  "worker": "a378033",
+  "tier": "focused+installed",
+  "focused": "7worker real-tmux tests3.11;27affected3.12;17primaryfocused3.11; backgroundtick/controlgeneration regression green",
+  "installed": {
+    "bounded_monitor": true,
+    "local_cli": true,
+    "local_mutation_cli": true,
+    "mcp": true,
+    "module": "/tmp/codex-wake-503-native-prefix/lib/python3.12/site-packages/codex_wake/controller_tabs.py",
+    "native_mcp": true,
+    "oauth_api": true,
+    "observe_cannot_capture": true,
+    "opt_in_policy": true,
+    "real_isolated_tmux": true,
+    "remote_cli": true,
+    "retained_intent": true,
+    "saved_views": true,
+    "status": "passed",
+    "windows_matrix": false,
+    "workspace_recovery_routing": true
+  },
+  "prefix": "/tmp/codex-wake-503-native-prefix",
+  "wheel_sha256": "5e28942803ac39cfa63b18fc44769b2a6f9c482e820754774282b83c2bce7cee",
+  "core_owner_bytes_match": true,
+  "guards": [
+    "defaultdisabled",
+    "manualoverride/pins/focus",
+    "stalehealthtraits",
+    "uncertainpendingreceiptnoautoreplay",
+    "explicitacknowledgement",
+    "rate/debounce/swapcaps",
+    "backgroundticksdoNotinvalidateoperatorpausepin"
+  ],
+  "scope_limits": [
+    "automatic filtered/named-group physicalplacement explicitlyunsupported; manualviews fullysupported",
+    "Windows panes without qualified runtime observations pinned"
+  ],
+  "provider_calls": 0,
+  "production_effects": false
+}
