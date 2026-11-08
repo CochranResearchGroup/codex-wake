@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "observed_at": "2026-11-08T16:18:50.503576+00:00",
+  "scope": [
+    "/tmp/wake-recovery368-native-9e1dn3_n",
+    "/tmp/wake-profile515-native-qj51kmau"
+  ],
+  "uid": 1017,
+  "owned_native_processes": [],
+  "windows_census": "docs/dev/evidence/plan0209/514/final-process-census.json; no post-remediation Windows namespace effects"
+}

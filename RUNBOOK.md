@@ -8569,3 +8569,20 @@ launcher, nonisolated test context and then-stale generatedcoverage; the correct
 launchers and isolated XDG/tmux roots.514 owns finalnative/publicmatrix; one broad
 review and one TDD pass remain unused. Retain all native partial/failed fixture
 receipts and their individual axes; a later pass never erases them.
+
+## Turn | 2026-11-08 | Single review and TDD hardening complete
+
+All13 scoped tickets are closed. Frozenbfded49 comprehensive checks passed2205
+tests/version (one existing opt-in skip). One independent Standards/Spec review
+accepted three behavior findings; one bounded TDD pass fixed restored-shell
+recovery, resolved visible-error state and foreground profile-client role.
+Two P3 ownership design notes remain explicitly nonblocking backlog.
+
+Final product94012f3 has91 affected checks/version plus final contract and
+normally installed public transport checks. Native6d7701a proof restores two
+real repository conversations while retaining restored-shell drafts/processes,
+and verifies the profile's foreground client; final package differs only in
+one data-only capability/help statement. All281 installed Python members match
+its immutable wheel. Earlier partial/failed fixtures remain source-attributed.
+No second broad review, provider/model prompt, production change, merge or
+deployment occurred. Review/evidence/ledger own exact source and package bounds.

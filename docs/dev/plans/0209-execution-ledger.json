@@ -8,7 +8,7 @@
     "broad_used": 1,
     "remediation_limit": 1,
     "remediation_used": 1,
-    "status": "adjudicated; single bounded TDD remediation running",
+    "status": "complete; zero remaining blocking findings",
     "fixed_point": "20e396b5aa469ed814c123218cc356a68b229936",
     "product_source": "4d22a56",
     "frozen_head": "c63c5075ac4e3f78f29917256e718030fbba819a",
@@ -32,23 +32,29 @@
         "axis": "Spec",
         "classification": "blocking",
         "priority": "P1",
-        "subject": "Safely reconcile restored layout shell slots"
+        "subject": "Safely reconcile restored layout shell slots",
+        "resolution": "resolved in single bounded TDD pass"
       },
       {
         "id": "F2",
         "axis": "Spec",
         "classification": "blocking",
         "priority": "P2",
-        "subject": "Resolved visible errors must not remain current"
+        "subject": "Resolved visible errors must not remain current",
+        "resolution": "resolved in single bounded TDD pass"
       },
       {
         "id": "F3",
         "axis": "Spec",
         "classification": "blocking",
         "priority": "P2",
-        "subject": "Selected-profile completion must verify foreground client rather than backend"
+        "subject": "Selected-profile completion must verify foreground client rather than backend",
+        "resolution": "resolved in single bounded TDD pass"
       }
-    ]
+    ],
+    "report": "docs/dev/evidence/plan0209/review.md",
+    "final_product_source": "94012f3",
+    "validation": "docs/dev/evidence/plan0209/remediation/validation.json"
   },
   "tickets": [
     {
@@ -90,7 +96,8 @@
       ],
       "validation": [
         "docs/dev/evidence/plan0209/505506-acceptance.json",
-        "28 affected PASS Python3.11 and3.12"
+        "28 affected PASS Python3.11 and3.12",
+        "docs/dev/evidence/plan0209/review.md; accepted behavior finding resolved; final package validation separately attributed"
       ],
       "worktree": "/tmp/codex-wake-505",
       "branch": "feat/tab-traits-505",
@@ -211,7 +218,8 @@
       "worker": "/root/traits505",
       "owned_paths": [],
       "validation": [
-        "docs/dev/evidence/plan0209/368-acceptance.json"
+        "docs/dev/evidence/plan0209/368-acceptance.json",
+        "docs/dev/evidence/plan0209/review.md; accepted behavior finding resolved; final package validation separately attributed"
       ],
       "worker_result_sha": "f50fb6f",
       "result_sha": "7aba5a8"
@@ -308,7 +316,8 @@
         "docs/dev/evidence/plan0209/514/installed-matrix.json",
         "retained receipt hashes verified; all281 installed Pythonmembers identical",
         "F821/F822/F823 +4 harnesssyntax +diffcheck PASS",
-        "frozen full311/312 still running independently; no failuremarkers at checkpoint"
+        "frozen full311/312 still running independently; no failuremarkers at checkpoint",
+        "docs/dev/evidence/plan0209/review.md; accepted behavior finding resolved; final package validation separately attributed"
       ],
       "base": "bfded49",
       "branch": "feat/tab-qualification-514",
@@ -336,12 +345,14 @@
         "profilecreate tests"
       ],
       "validation": [
-        "docs/dev/evidence/plan0209/515-acceptance.json"
+        "docs/dev/evidence/plan0209/515-acceptance.json",
+        "docs/dev/evidence/plan0209/review.md; accepted behavior finding resolved; final package validation separately attributed"
       ],
       "result_sha": "4d22a56",
       "worker_result_sha": "4a374a8"
     }
   ],
   "dependency_validation": "acyclic, all blocker IDs resolved",
-  "integration_tip": "bfded49"
+  "integration_tip": "94012f3",
+  "status": "validated integration; tickets closed; review and bounded remediation complete; merge/deployment separate"
 }

@@ -1475,14 +1475,15 @@ No new runtime changes or provider acceptance were performed.
 
 ## P209 | Trait-based tab and session hardening
 
-State: IN_PROGRESS — final installed matrix514, then one broad review and one
-bounded TDD remediation pass. [Spec503](https://github.com/CochranResearchGroup/codex-wake/issues/503),
+State: CLOSED implementation/qualification — all13 scoped tickets validated,
+one broad review and one bounded TDD remediation pass complete. [Spec503](https://github.com/CochranResearchGroup/codex-wake/issues/503),
 [plan](docs/dev/plans/0209-2026-11-07-trait-based-tab-hardening.md),
 [execution ledger](docs/dev/plans/0209-execution-ledger.json).
 
-Tickets504–513, reused368 and story26 followup515 are validated and closed on
-`feat/tab-hardening-503`;514 owns exact installed WSL/actualPowerShell/public
-CLI/API/MCP and real Byobu/nativepsmux acceptance. Traits, saved views/groups,
+Tickets504–515 and reused368 are validated and closed on
+`feat/tab-hardening-503`;514 records exact installed WSL/actualPowerShell/public
+CLI/API/MCP and real Byobu/nativepsmux acceptance. Three accepted behavior
+findings are resolved; two P3 design notes remain nonblocking backlog. Traits, saved views/groups,
 bounded monitoring, manual lifecycle, opt-in sorting, exact reattachment and
 workspace recovery reuse the existing operation/native ownership. Stock and
 production Wake remain unchanged. Existing broad governor/activation/handoff

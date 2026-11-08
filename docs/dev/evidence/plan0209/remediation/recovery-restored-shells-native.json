@@ -1,0 +1,542 @@
+{
+  "uid": 1017,
+  "native_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "external_provider_calls": 0,
+  "model_turns": 0,
+  "status": "passed",
+  "installed_modules": {
+    "codex_wake.local_health": {
+      "path": "/tmp/codex-wake-503-final-6d7701a-prefix/lib/python3.12/site-packages/codex_wake/local_health.py",
+      "sha256": "bc547723fd1789d1dfd3235381c731067c0582333340d957396b0592071b6a3b"
+    },
+    "codex_wake.tab_recovery": {
+      "path": "/tmp/codex-wake-503-final-6d7701a-prefix/lib/python3.12/site-packages/codex_wake/tab_recovery.py",
+      "sha256": "f6491b2e12779ce7943bb098d98b2daa5ef82c1b9b2f8e9b0033564bed1dd985"
+    },
+    "codex_wake.tab_traits": {
+      "path": "/tmp/codex-wake-503-final-6d7701a-prefix/lib/python3.12/site-packages/codex_wake/tab_traits.py",
+      "sha256": "4c724bb4344d638623c2f3eb83f363dd2cd9184b525fc3930c4e3f66f6a2fc31"
+    }
+  },
+  "wheel": {
+    "path": "/tmp/codex-wake-503-wheels/remediation-6d7701a/codex_wake-0.22.0.dev2-py3-none-any.whl",
+    "sha256": "ca5e5785679292a446d53945a9369ab06d04a4c1fda4ed860febdd71e2b4c3c1",
+    "source_commit": "6d7701a"
+  },
+  "layout_plan": {
+    "plan": {
+      "before": {
+        "permission_revision": 0,
+        "server": "2468097",
+        "session_id": "$0",
+        "socket_identity": [
+          2096,
+          11045542
+        ],
+        "windows": [
+          {
+            "activity": 5,
+            "focused": true,
+            "index": 0,
+            "linked": false,
+            "name": "notes",
+            "panes": [
+              {
+                "pane_id": "%0",
+                "pid": 2468100
+              }
+            ],
+            "pins": [
+              "focused",
+              "unqualified",
+              "unqualified_traits"
+            ],
+            "repository": null,
+            "traits": {
+              "repository": "unknown"
+            },
+            "window_id": "@0"
+          },
+          {
+            "activity": 3,
+            "focused": false,
+            "index": 1,
+            "linked": false,
+            "name": "native-1",
+            "panes": [
+              {
+                "binding": {
+                  "conversation_id": "294268f3-95f3-41b3-b2af-efb61c2d3add",
+                  "namespace": "codex-test",
+                  "process": {
+                    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                    "pid": 2468221,
+                    "start_ticks": 24088616
+                  },
+                  "root": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/z-repository",
+                  "state": "ready"
+                },
+                "pane_id": "%1",
+                "pid": 2468221
+              }
+            ],
+            "pins": [],
+            "repository": {
+              "device": 2096,
+              "inode": 10921882,
+              "path": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/z-repository/.git"
+            },
+            "traits": {
+              "repository": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/z-repository"
+            },
+            "window_id": "@1"
+          },
+          {
+            "activity": 3,
+            "focused": false,
+            "index": 2,
+            "linked": false,
+            "name": "native-2",
+            "panes": [
+              {
+                "binding": {
+                  "conversation_id": "7090468d-97ec-4b76-915a-e5f16bfdb33b",
+                  "namespace": "codex-test",
+                  "process": {
+                    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                    "pid": 2468464,
+                    "start_ticks": 24088644
+                  },
+                  "root": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/a-repository",
+                  "state": "ready"
+                },
+                "pane_id": "%2",
+                "pid": 2468464
+              }
+            ],
+            "pins": [],
+            "repository": {
+              "device": 2096,
+              "inode": 11033948,
+              "path": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/a-repository/.git"
+            },
+            "traits": {
+              "repository": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/a-repository"
+            },
+            "window_id": "@2"
+          }
+        ]
+      },
+      "criteria": [
+        "repository"
+      ],
+      "fingerprint": "5cc0102f6c690ffc5082ede07b462ae8f2d7db085c8bd6d35b33d9f5a8477a11",
+      "mode": "traits",
+      "pins": [],
+      "plan_id": "plan_fc5e89559027410eb1d771721f74b944",
+      "target": [
+        {
+          "index": 0,
+          "name": "notes",
+          "window_id": "@0"
+        },
+        {
+          "index": 1,
+          "name": "native-2",
+          "window_id": "@2"
+        },
+        {
+          "index": 2,
+          "name": "native-1",
+          "window_id": "@1"
+        }
+      ],
+      "version": 1
+    },
+    "status": "preview",
+    "target": {
+      "environment": "posix",
+      "generation": "5a5eacd614aefd703030c385795b5147fd83bd9706c6728f39e367d1b558049a",
+      "host": "cooper",
+      "presentation": "tmux",
+      "workspace": "fixture"
+    }
+  },
+  "layout_apply": {
+    "receipt": {
+      "action": "workspace.order",
+      "after": {
+        "permission_revision": 0,
+        "server": "2468097",
+        "session_id": "$0",
+        "socket_identity": [
+          2096,
+          11045542
+        ],
+        "windows": [
+          {
+            "activity": 5,
+            "focused": true,
+            "index": 0,
+            "linked": false,
+            "name": "notes",
+            "panes": [
+              {
+                "pane_id": "%0",
+                "pid": 2468100
+              }
+            ],
+            "pins": [
+              "focused",
+              "unqualified",
+              "unqualified_traits"
+            ],
+            "repository": null,
+            "traits": {
+              "repository": "unknown"
+            },
+            "window_id": "@0"
+          },
+          {
+            "activity": 3,
+            "focused": false,
+            "index": 1,
+            "linked": false,
+            "name": "native-2",
+            "panes": [
+              {
+                "binding": {
+                  "conversation_id": "7090468d-97ec-4b76-915a-e5f16bfdb33b",
+                  "namespace": "codex-test",
+                  "process": {
+                    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                    "pid": 2468464,
+                    "start_ticks": 24088644
+                  },
+                  "root": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/a-repository",
+                  "state": "ready"
+                },
+                "pane_id": "%2",
+                "pid": 2468464
+              }
+            ],
+            "pins": [],
+            "repository": {
+              "device": 2096,
+              "inode": 11033948,
+              "path": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/a-repository/.git"
+            },
+            "traits": {
+              "repository": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/a-repository"
+            },
+            "window_id": "@2"
+          },
+          {
+            "activity": 3,
+            "focused": false,
+            "index": 2,
+            "linked": false,
+            "name": "native-1",
+            "panes": [
+              {
+                "binding": {
+                  "conversation_id": "294268f3-95f3-41b3-b2af-efb61c2d3add",
+                  "namespace": "codex-test",
+                  "process": {
+                    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                    "pid": 2468221,
+                    "start_ticks": 24088616
+                  },
+                  "root": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/z-repository",
+                  "state": "ready"
+                },
+                "pane_id": "%1",
+                "pid": 2468221
+              }
+            ],
+            "pins": [],
+            "repository": {
+              "device": 2096,
+              "inode": 10921882,
+              "path": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/z-repository/.git"
+            },
+            "traits": {
+              "repository": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/z-repository"
+            },
+            "window_id": "@1"
+          }
+        ]
+      },
+      "before": {
+        "permission_revision": 0,
+        "server": "2468097",
+        "session_id": "$0",
+        "socket_identity": [
+          2096,
+          11045542
+        ],
+        "windows": [
+          {
+            "activity": 5,
+            "focused": true,
+            "index": 0,
+            "linked": false,
+            "name": "notes",
+            "panes": [
+              {
+                "pane_id": "%0",
+                "pid": 2468100
+              }
+            ],
+            "pins": [
+              "focused",
+              "unqualified",
+              "unqualified_traits"
+            ],
+            "repository": null,
+            "traits": {
+              "repository": "unknown"
+            },
+            "window_id": "@0"
+          },
+          {
+            "activity": 3,
+            "focused": false,
+            "index": 1,
+            "linked": false,
+            "name": "native-1",
+            "panes": [
+              {
+                "binding": {
+                  "conversation_id": "294268f3-95f3-41b3-b2af-efb61c2d3add",
+                  "namespace": "codex-test",
+                  "process": {
+                    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                    "pid": 2468221,
+                    "start_ticks": 24088616
+                  },
+                  "root": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/z-repository",
+                  "state": "ready"
+                },
+                "pane_id": "%1",
+                "pid": 2468221
+              }
+            ],
+            "pins": [],
+            "repository": {
+              "device": 2096,
+              "inode": 10921882,
+              "path": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/z-repository/.git"
+            },
+            "traits": {
+              "repository": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/z-repository"
+            },
+            "window_id": "@1"
+          },
+          {
+            "activity": 3,
+            "focused": false,
+            "index": 2,
+            "linked": false,
+            "name": "native-2",
+            "panes": [
+              {
+                "binding": {
+                  "conversation_id": "7090468d-97ec-4b76-915a-e5f16bfdb33b",
+                  "namespace": "codex-test",
+                  "process": {
+                    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                    "pid": 2468464,
+                    "start_ticks": 24088644
+                  },
+                  "root": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/a-repository",
+                  "state": "ready"
+                },
+                "pane_id": "%2",
+                "pid": 2468464
+              }
+            ],
+            "pins": [],
+            "repository": {
+              "device": 2096,
+              "inode": 11033948,
+              "path": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/a-repository/.git"
+            },
+            "traits": {
+              "repository": "/tmp/wake-recovery368-native-9e1dn3_n/workspace/a-repository"
+            },
+            "window_id": "@2"
+          }
+        ]
+      },
+      "plan_id": "plan_fc5e89559027410eb1d771721f74b944",
+      "receipt_id": "receipt_6b2683dc45754937b3f1c4164937fddd",
+      "status": "applied",
+      "swaps": [
+        {
+          "first": "@1",
+          "second": "@2",
+          "state": "observed"
+        }
+      ],
+      "version": 1
+    },
+    "status": "applied",
+    "target": {
+      "environment": "posix",
+      "generation": "5a5eacd614aefd703030c385795b5147fd83bd9706c6728f39e367d1b558049a",
+      "host": "cooper",
+      "presentation": "tmux",
+      "workspace": "fixture"
+    }
+  },
+  "public_actual_layout_and_undo": true,
+  "public_cli_capture": true,
+  "captured_kinds": [
+    "noncoding",
+    "codex",
+    "codex"
+  ],
+  "captured_conversations": [
+    "294268f3-95f3-41b3-b2af-efb61c2d3add",
+    "7090468d-97ec-4b76-915a-e5f16bfdb33b"
+  ],
+  "installed_cli_status": {
+    "status": null,
+    "passed": true
+  },
+  "restored_shell_slot_count": 2,
+  "installed_cli_preview": {
+    "status": "ready",
+    "passed": true
+  },
+  "preview_statuses": [
+    "preserved",
+    "restoreable",
+    "restoreable"
+  ],
+  "public_cli_apply": true,
+  "apply": {
+    "intent": "once",
+    "replayed": false,
+    "rows": [
+      {
+        "kind": "noncoding",
+        "logical_id": "36a88a01156b4a39970ac62b5caab2f5",
+        "name": "notes",
+        "reason": "noncoding_commands_not_replayed",
+        "status": "preserved"
+      },
+      {
+        "conversation_id": "294268f3-95f3-41b3-b2af-efb61c2d3add",
+        "effects_attempted": 1,
+        "kind": "codex",
+        "launch": {
+          "pane_id": "%3",
+          "preserved_shell": {
+            "action": "preserve_shell_in_separate_window",
+            "archive_index": 3,
+            "archive_name": "recovery-shell-1-2735949ea357",
+            "index": 1,
+            "logical_id": "2735949ea35741308482e183da77608e",
+            "name": "native-1",
+            "pane_id": "%1",
+            "pid": 2469403,
+            "process": {
+              "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+              "start_time_ticks": 24089528
+            },
+            "window_id": "@1"
+          },
+          "window_id": "@3"
+        },
+        "logical_id": "2735949ea35741308482e183da77608e",
+        "name": "native-1",
+        "namespace": "codex:177096433c20c97011a27547a6419d825c84ff5d40c1061057d37ce09d7ba8c2",
+        "reason": null,
+        "restored_slot": {
+          "action": "preserve_shell_in_separate_window",
+          "index": 1,
+          "logical_id": "2735949ea35741308482e183da77608e",
+          "name": "native-1",
+          "pane_id": "%1",
+          "pid": 2469403,
+          "process": {
+            "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+            "start_time_ticks": 24089528
+          },
+          "window_id": "@1"
+        },
+        "status": "resumed",
+        "window_id": "@3"
+      },
+      {
+        "conversation_id": "7090468d-97ec-4b76-915a-e5f16bfdb33b",
+        "effects_attempted": 1,
+        "kind": "codex",
+        "launch": {
+          "pane_id": "%4",
+          "preserved_shell": {
+            "action": "preserve_shell_in_separate_window",
+            "archive_index": 4,
+            "archive_name": "recovery-shell-2-5a0f90dfac7a",
+            "index": 2,
+            "logical_id": null,
+            "name": "native-2",
+            "pane_id": "%2",
+            "pid": 2469408,
+            "process": {
+              "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+              "start_time_ticks": 24089529
+            },
+            "window_id": "@2"
+          },
+          "window_id": "@4"
+        },
+        "logical_id": "5a0f90dfac7a46ab9722124fb20c87f7",
+        "name": "native-2",
+        "namespace": "codex:177096433c20c97011a27547a6419d825c84ff5d40c1061057d37ce09d7ba8c2",
+        "reason": null,
+        "restored_slot": {
+          "action": "preserve_shell_in_separate_window",
+          "index": 2,
+          "logical_id": null,
+          "name": "native-2",
+          "pane_id": "%2",
+          "pid": 2469408,
+          "process": {
+            "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+            "start_time_ticks": 24089529
+          },
+          "window_id": "@2"
+        },
+        "status": "resumed",
+        "window_id": "@4"
+      }
+    ],
+    "schema_version": 1,
+    "selection": {
+      "capture_id": "before-outage",
+      "intent": "once",
+      "restore_layout": true,
+      "workspace": "fixture"
+    },
+    "status": "completed",
+    "target": {
+      "capture_id": "before-outage",
+      "capture_sha256": "b9e881020bad36a1f7cf6c05ead3fbe4e726c091bc35168a383ea50a8cd19948",
+      "presentation_generation": "f46c8fe2562a0eced93278c324cc766f5f9554a007c7dcac0dd50766e8d583ef",
+      "workspace": "fixture",
+      "workspace_identity": "87e7c013cd5170c9940ac79bb6ac270fb050eedc364af29484bd53a87221c0d8"
+    }
+  },
+  "restored_shell_processes_and_drafts_preserved": true,
+  "final_conversations": [
+    "294268f3-95f3-41b3-b2af-efb61c2d3add",
+    "7090468d-97ec-4b76-915a-e5f16bfdb33b"
+  ],
+  "replayed_without_new_windows": true,
+  "noncoding_preserved": true,
+  "trap_requests": [],
+  "final_owned_native_processes": []
+}
