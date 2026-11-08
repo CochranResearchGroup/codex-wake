@@ -87,9 +87,8 @@ def command(args):
     if account_config.is_file() and 'migration' in tomllib.loads(account_config.read_text()):
         from .migration_commands import owner_from_root as migration_owner
         options['migration'] = migration_owner(args.wake_root)
-    if (Path(args.wake_root)/'controller-tabs.json').is_file():
-        from .controller_tabs import controller_tabs_from_root
-        options['tabs'] = controller_tabs_from_root(args.wake_root)
+    from .controller_tabs import controller_tabs_from_root
+    options['tabs'] = controller_tabs_from_root(args.wake_root)
     service = ControllerOperations(ManagedInventory(Path(args.wake_root)), host=host, environment=environment, **options)
     server = ControllerHTTPServer(('127.0.0.1', args.port), auth, service,
         consent_secret=(root / 'consent.secret').read_text(), owner=config['owner'])

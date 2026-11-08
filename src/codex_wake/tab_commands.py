@@ -12,13 +12,23 @@ def register_parser(subparsers):
 
 
 def command(args, owner=None):
-    if owner is None:
-        from .controller_tabs import controller_tabs_from_root
-        owner = controller_tabs_from_root(args.wake_root)
-    operation = 'tabs.' + args.tab_command
-    value = owner.execute(operation,args.arguments) if args.tab_command in ('list','show') else protected_execute(operation,args.arguments,args.wake_root)
-    print(json.dumps(value, sort_keys=True))
-    return 0
+    from .managed_inventory import InventoryError
+    from .shortcut_store import default_root
+    try:
+        args.wake_root = default_root(args.wake_root)
+        if owner is None:
+            from .controller_tabs import controller_tabs_from_root
+            owner = controller_tabs_from_root(args.wake_root)
+        operation = 'tabs.' + args.tab_command
+        value = owner.execute(operation,args.arguments) if args.tab_command in ('list','show') else protected_execute(operation,args.arguments,args.wake_root)
+        print(json.dumps(value, sort_keys=True))
+        return 0
+    except (InventoryError, OSError, ValueError, TypeError) as error:
+        print(json.dumps(dict(status='held', error=dict(
+            code=getattr(error,'code','configuration_unavailable'),
+            message=str(error) if isinstance(error,InventoryError) else
+                    'Tab configuration is unavailable or invalid; inspect the selected controller and refresh workspaces.'))))
+        return 2
 
 
 def tool_specs():

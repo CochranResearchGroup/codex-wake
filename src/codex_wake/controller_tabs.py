@@ -31,7 +31,7 @@ class ControllerTabs:
         if not isinstance(arguments, dict) or set(arguments) - allowed[operation]:
             raise InventoryError('invalid_argument', 'unsupported attachment arguments')
         names = list(self.workspaces) if operation == 'tabs.list' else [arguments.get('workspace')]
-        resources = []
+        resources, unavailable = [], []
         deadline = time.monotonic() + 10
         for name in names:
             if name not in self.workspaces:
@@ -46,6 +46,9 @@ class ControllerTabs:
                         for pane in window['panes']:
                             pane['process_generation'] = process_identity(pane['pid'])
             except Exception as error:
+                if operation == 'tabs.list':
+                    unavailable.append(dict(workspace=name,status='unavailable',code='attachment_unavailable'))
+                    continue
                 raise InventoryError('attachment_unavailable', 'host presentation observation failed') from error
             target = dict(host=self.host, environment=self.environment, workspace=name,
                           presentation=config['kind'], generation=digest(snapshot))
@@ -101,7 +104,15 @@ class ControllerTabs:
                 return dict(target=target, **owner.undo(arguments['receipt_id'], deadline=deadline))
             except TabError as error:
                 raise InventoryError(error.code, str(error)) from error
-        return dict(resources=resources)
+        value = dict(resources=resources)
+        if unavailable:
+            value['unavailable'] = unavailable
+        if hasattr(self, 'discovery_diagnostics'):
+            value['discovery'] = dict(source='automatic', status='ready' if resources else 'not_found',
+                                     diagnostics=self.discovery_diagnostics,
+                                     message='Existing owned workspaces discovered.' if resources else
+                                     'No live owned workspace found; start Byobu/tmux or register a supported psmux bridge, then refresh.')
+        return value
 
     @staticmethod
     def _pane(snapshot, pane):
@@ -145,8 +156,18 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
     from pathlib import Path
     from .controller_tab_adapters import (TmuxAttachmentTransport,
         PsmuxAttachmentTransport, ConfiguredBridge, UnixInputBroker)
-    path = Path(root) / 'controller-tabs.json'
-    fd = os.open(path,os.O_RDONLY | os.O_NOFOLLOW)
+    from .shortcut_store import default_root
+    root = default_root(root)
+    path = root / 'controller-tabs.json'
+    try:
+        fd = os.open(path,os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    except FileNotFoundError:
+        from .tab_workspace_discovery import discover
+        workspaces, diagnostics = discover()
+        owner = ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
+                               environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name)
+        owner.discovery_diagnostics = diagnostics
+        return owner
     try:
         info = os.fstat(fd)
         if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
@@ -154,7 +175,10 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
         with os.fdopen(os.dup(fd)) as stream:
             raw = stream.read(262145)
         if len(raw)>262144: raise ValueError('configuration exceeds bound')
-        config = json.loads(raw)
+        try:
+            config = json.loads(raw)
+        except ValueError:
+            raise InventoryError('configuration_unavailable', 'Tab configuration is invalid; repair the selected controller configuration.') from None
     finally:
         os.close(fd)
     if config.get('schema_version') != 1 or not isinstance(config.get('workspaces'),dict):
@@ -169,6 +193,8 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
         else:
             raise ValueError('unsupported host presentation')
         workspace = dict(kind=kind,transport=transport)
+        if kind in ('tmux','byobu'):
+            workspace.update(socket_path=row['socket_path'], session_id=row['session_id'])
         if row.get('input_broker_socket'):
             workspace['broker'] = UnixInputBroker(row['input_broker_socket'])
         if row.get('evidence_scope') == 'disposable_fixture' and row.get('privacy') == 'safe':

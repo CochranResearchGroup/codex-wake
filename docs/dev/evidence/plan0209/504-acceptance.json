@@ -1,0 +1,32 @@
+{
+  "ticket": 504,
+  "status": "passed",
+  "source": "working patch before commit",
+  "tier": "focused + installed",
+  "red": "public tabs list TypeError(None); malformed-config JSONDecodeError",
+  "source_checks": {
+    "python3.12": "20 passed before final peer-isolation assertion; final3discovery passed",
+    "python3.11": "20 passed before final peer-isolation assertion"
+  },
+  "installed_discovery": "3 passed",
+  "installed_transport": {
+    "local_cli": true,
+    "local_mutation_cli": true,
+    "mcp": true,
+    "module": "/tmp/codex-wake-503-installed/lib/python3.12/site-packages/codex_wake/controller_tabs.py",
+    "native_mcp": true,
+    "oauth_api": true,
+    "observe_cannot_capture": true,
+    "real_isolated_tmux": true,
+    "remote_cli": true,
+    "retained_intent": true,
+    "status": "passed",
+    "windows_matrix": false
+  },
+  "prefix": "/tmp/codex-wake-503-installed",
+  "source_matches_installed": true,
+  "provider_calls": 0,
+  "hosted_ci": false,
+  "initial_environment_failure": "default interpreter lacked websockets; reran with qualified installed dependency environment",
+  "scope": "owned disposable tmux; no production layout mutations"
+}
