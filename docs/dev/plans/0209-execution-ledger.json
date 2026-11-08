@@ -7,10 +7,48 @@
     "broad_limit": 1,
     "broad_used": 1,
     "remediation_limit": 1,
-    "remediation_used": 0,
-    "status": "running independent Standards and Spec axes",
+    "remediation_used": 1,
+    "status": "adjudicated; single bounded TDD remediation running",
     "fixed_point": "20e396b5aa469ed814c123218cc356a68b229936",
-    "product_source": "4d22a56"
+    "product_source": "4d22a56",
+    "frozen_head": "c63c5075ac4e3f78f29917256e718030fbba819a",
+    "findings": [
+      {
+        "id": "S1",
+        "axis": "Standards",
+        "classification": "nonblocking_backlog",
+        "priority": "P3",
+        "subject": "Projection helper externally mutates owner probe budget"
+      },
+      {
+        "id": "S2",
+        "axis": "Standards",
+        "classification": "nonblocking_backlog",
+        "priority": "P3",
+        "subject": "Recovery imports private generic storage/monitor lock helpers"
+      },
+      {
+        "id": "F1",
+        "axis": "Spec",
+        "classification": "blocking",
+        "priority": "P1",
+        "subject": "Safely reconcile restored layout shell slots"
+      },
+      {
+        "id": "F2",
+        "axis": "Spec",
+        "classification": "blocking",
+        "priority": "P2",
+        "subject": "Resolved visible errors must not remain current"
+      },
+      {
+        "id": "F3",
+        "axis": "Spec",
+        "classification": "blocking",
+        "priority": "P2",
+        "subject": "Selected-profile completion must verify foreground client rather than backend"
+      }
+    ]
   },
   "tickets": [
     {
