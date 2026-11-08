@@ -24,6 +24,9 @@ _ANSI = re.compile(r'\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|\x1b\[[0-?]*[ -/]*[@-~]')
 _ERROR = re.compile(r'^(?:[✗×!⚠●■]\s*)?(?:error\s*:|fatal(?:\s+error)?\s*:|panic\s*:|'
                     r'thread\s+.+\s+panicked\b|traceback\s*\(most recent call last\)|'
                     r'error\s+(?:running|connecting|sending|loading|executing)\b)', re.I)
+# Explicit terminal status markers only; READY/success output is not evidence
+# that an unrelated error was resolved. These markers apply to earlier lines.
+_RESOLVED = re.compile(r'^(?:[✓✔]\s*)?(?:resolved|error\s+(?:resolved|dismissed))\s*:\s*\S', re.I)
 _SECRET_PROMPT = re.compile(r'^(?:enter\s+(?:your\s+)?)?(?:password|passphrase|api[ _-]?key|'
                             r'access[ _-]?token|secret|token|authorization)\b.*[:=]', re.I)
 _COMPOSER = re.compile(r'^(?:[›❯>$#]|[^\s]+[$#])(?:\s|$)')
@@ -440,6 +443,9 @@ class TabTraits:
                                  any(_ERROR.match(tail) for _, tail in bottom[position+1:])))):
                     return _trait(reason='visible_input_or_secret_prompt')
             for i, value in reversed(bottom):
+                if _RESOLVED.match(value):
+                    return _trait('absent', source='current_visible_screen', observed_at=self.clock(), status='observed',
+                                  reason='later_explicit_visible_resolution_marker')
                 if _ERROR.match(value):
                     result = _trait('present', source='current_visible_screen', observed_at=self.clock(), status='observed')
                     result.update(message='Terminal error (content redacted)' if redacted else value[:512],

@@ -79,3 +79,20 @@ class DefaultErrorObservationTests(unittest.TestCase):
             result = self.owner.observe_window(window, transport=transport,
                 privacy=lambda _: privacy, deadline=time.monotonic()+2)
             self.assertEqual(result['traits']['error']['value'], 'unknown')
+
+    def test_later_explicit_resolution_clears_only_prior_visible_errors(self):
+        for text, expected in (
+            ('Error: connection failed\nResolved: connection is healthy', 'absent'),
+            ('Error: connection failed\nResolved: connection is healthy\nError: disk unavailable', 'present'),
+            ('Error: connection failed\nSuccess: unrelated task finished', 'present'),
+            ('\x1b[31mordinary red text\x1b[0m\nResolved: connection is healthy', 'absent'),
+        ):
+            with self.subTest(expected=expected):
+                window = self.screen(text)
+                before = self.tmux('capture-pane', '-p', '-e', '-t', '%0')
+                result = self.owner.observe_window(window, transport=self.transport, deadline=time.monotonic()+2)
+                error = result['traits']['error']
+                self.assertEqual(error['value'], expected)
+                self.assertNotIn('connection failed', json.dumps(result))
+                self.assertNotIn('disk unavailable', json.dumps(result))
+                self.assertEqual(before, self.tmux('capture-pane', '-p', '-e', '-t', '%0'))
