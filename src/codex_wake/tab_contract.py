@@ -437,6 +437,9 @@ CAPABILITIES = {
     'selected_profile_create': {'status':'conditional', 'reason':
         'Use --profile with an existing account selector/alias; requires the qualified selected-profile launch owner. '
         'Windows profile creation remains unsupported; no shell fallback or account substitution.'},
+    'workspace_recovery': {'status':'conditional', 'reason':
+        'Exact saved conversation identity is required. With --restore-layout, qualified single local interactive shell slots '
+        'are preserved in separate tabs before coding views resume in their saved positions; busy, pinned or unknown slots hold.'},
     'exact_grok_tui_health': {'status':'unsupported', 'reason':
         'Grok ACP activity does not prove arbitrary foreground TUI responsiveness.'},
     'cross_backend': {'status':'conditional', 'reason':
