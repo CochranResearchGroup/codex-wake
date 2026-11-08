@@ -1,0 +1,245 @@
+"""Manual whole-tab lifecycle over the existing host-owned terminal adapters.
+
+ControllerRuntime owns admission/replay and uncertain-operation reconciliation.
+This owner stores only reversible placement/effect receipts in TabOrganization's
+existing store; it never creates a second operation journal or conversation.
+"""
+from pathlib import Path
+import re
+import time
+import uuid
+
+from .managed_inventory import InventoryError
+from .process import process_identity
+from .tab_organization import TabOrganization, digest
+
+
+class TabLifecycle:
+    READS = frozenset()
+    ARGUMENTS = {
+        'tabs.create': {'workspace', 'expected_target', 'name', 'cwd', 'preview'},
+        'tabs.rename': {'workspace', 'expected_target', 'window', 'name', 'preview'},
+        'tabs.focus': {'workspace', 'expected_target', 'window', 'preview'},
+        'tabs.move': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'index', 'force', 'preview'},
+        'tabs.park': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'force', 'preview'},
+        'tabs.restore': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'receipt_id', 'force', 'preview'},
+        'tabs.close': {'workspace', 'expected_target', 'window', 'force', 'preview'},
+    }
+
+    def __init__(self, root, *, workspaces, host, environment):
+        self.root = Path(root)
+        self.workspaces = dict(workspaces)
+        self.host, self.environment = host, environment
+        self.records = TabOrganization(root, transport=None)
+
+    def inspect(self, workspace, *, deadline=None):
+        deadline = deadline or time.monotonic() + 10
+        if not isinstance(workspace, str) or workspace not in self.workspaces:
+            raise InventoryError('unsupported_target', 'workspace is not host enrolled')
+        config = self.workspaces[workspace]
+        snapshot = config['transport'].snapshot(deadline)
+        if config['kind'] in ('tmux', 'byobu'):
+            for window in snapshot['windows']:
+                for pane in window['panes']:
+                    pane['process_generation'] = process_identity(pane['pid'])
+        target = dict(host=self.host, environment=self.environment, workspace=workspace,
+                      presentation=config['kind'], generation=digest(snapshot))
+        return dict(target=target, snapshot=snapshot)
+
+    @staticmethod
+    def _window(snapshot, window):
+        if not isinstance(window, str) or not re.fullmatch(r'@[0-9]+', window):
+            raise InventoryError('invalid_argument', 'an exact native window ID is required')
+        matches = [w for w in snapshot['windows'] if w['window_id'] == window]
+        if len(matches) != 1:
+            raise InventoryError('stale_target', 'window is absent from pinned workspace')
+        return matches[0]
+
+    @staticmethod
+    def _name(value):
+        if (not isinstance(value, str) or not value or len(value.encode()) > 256
+                or any(ord(c) < 32 or ord(c) == 127 for c in value)):
+            raise InventoryError('invalid_argument', 'tab name must be bounded single-line text')
+        return value
+
+    @staticmethod
+    def _collision(snapshot, name, *, except_window=None, index=None):
+        if any(w['window_id'] != except_window and w['name'] == name for w in snapshot['windows']):
+            raise InventoryError('name_conflict', 'destination contains a tab with that name')
+        if index is not None and any(w['window_id'] != except_window and w['index'] == index for w in snapshot['windows']):
+            raise InventoryError('placement_conflict', 'destination position is occupied; newer layout is preserved')
+
+    def _protection(self, config, window, deadline):
+        reasons = []
+        if window.get('focused'):
+            reasons.append('focused')
+        if window.get('linked'):
+            reasons.append('linked')
+        if window.get('pins') or window['window_id'] in config.get('pins', []):
+            reasons.append('pinned')
+        observer = config.get('observer')
+        try:
+            evidence = observer(max(.001, deadline - time.monotonic())) if observer else {}
+        except Exception:
+            evidence = {}
+        affected = []
+        for pane in window['panes']:
+            sample = evidence.get(pane['pane_id'], {})
+            expected = sample.get('process') or {}
+            # Like TabOrganization, trust the host observer's pane-to-client
+            # relationship, then recheck that client's exact process generation.
+            # A native client is commonly a descendant of the pane's shell.
+            actual = process_identity(expected['pid']) if type(expected.get('pid')) is int else None
+            identity_matches = bool(actual
+                and expected.get('start_ticks') == actual.get('start_time_ticks')
+                and expected.get('boot_id') == actual.get('boot_id'))
+            if not sample.get('fresh') or not identity_matches:
+                reasons.append('unknown_work')
+                continue
+            if sample.get('state') not in ('ready', 'idle'):
+                reasons.append('active_or_waiting_work')
+            if sample.get('conversation_id') and sample.get('root'):
+                from .session_lifecycle import pending_thread_work
+                row = dict(thread_id=sample['conversation_id'], cwd=sample['root'], attachments=[dict(
+                    socket=config['transport'].socket, pane_id=pane['pane_id'])])
+                work = pending_thread_work(row, self.root)
+                affected.append(dict(pane=pane['pane_id'], **work))
+                if work['pending'] or work['messages']:
+                    reasons.append('pending_work')
+        return sorted(set(reasons)), affected
+
+    def execute(self, operation, arguments):
+        if operation not in self.ARGUMENTS:
+            raise InventoryError('unsupported_operation', 'unsupported manual tab lifecycle operation')
+        if not isinstance(arguments, dict) or set(arguments) - self.ARGUMENTS[operation]:
+            raise InventoryError('invalid_argument', 'unsupported tab lifecycle arguments')
+        args = dict(arguments)
+        for key in ('force', 'preview'):
+            if key in args and type(args[key]) is not bool:
+                raise InventoryError('invalid_argument', key + ' must be a Boolean')
+        if 'index' in args and (type(args['index']) is not int or not 0 <= args['index'] <= 100000):
+            raise InventoryError('invalid_argument', 'destination index must be a nonnegative bounded integer')
+        deadline = time.monotonic() + 10
+        with self.records.locked(deadline):
+            return self._execute(operation, args, deadline)
+
+    def _execute(self, operation, args, deadline):
+        workspace = args.get('workspace')
+        before = self.inspect(workspace, deadline=deadline)
+        if args.get('expected_target') != before['target']:
+            raise InventoryError('stale_target', 'exact current workspace generation required')
+        config = self.workspaces[workspace]
+        transport = config['transport']
+        if config['kind'] not in ('tmux', 'byobu'):
+            raise InventoryError('unsupported_target', 'manual lifecycle is not qualified for this backend')
+        snapshot = before['snapshot']
+        window = None if operation == 'tabs.create' else self._window(snapshot, args.get('window'))
+        name = self._name(args.get('name')) if operation in ('tabs.create', 'tabs.rename') else window['name']
+        destination, after_destination = None, None
+        reasons, affected = [], []
+        if operation in ('tabs.create', 'tabs.rename'):
+            self._collision(snapshot, name, except_window=window['window_id'] if window else None)
+        if operation == 'tabs.create':
+            cwd_value = args.get('cwd', config.get('cwd', str(Path.home())))
+            if not isinstance(cwd_value, str):
+                raise InventoryError('invalid_argument', 'working directory must be an absolute path string')
+            cwd = Path(cwd_value)
+            if not cwd.is_absolute() or not cwd.is_dir():
+                raise InventoryError('invalid_argument', 'create requires an existing absolute working directory')
+        if operation in ('tabs.move', 'tabs.park', 'tabs.restore', 'tabs.close'):
+            reasons, affected = self._protection(config, window, deadline)
+            if window.get('linked'):
+                raise InventoryError('tab_protected', 'linked tabs require explicit unlink ownership; refusing whole-tab operation')
+            if reasons and not args.get('force') and not args.get('preview'):
+                raise InventoryError('tab_protected', 'tab is protected: ' + ', '.join(reasons))
+        if operation in ('tabs.move', 'tabs.park', 'tabs.restore'):
+            destination = args.get('destination')
+            after_destination = self.inspect(destination, deadline=deadline)
+            if args.get('expected_destination') != after_destination['target']:
+                raise InventoryError('stale_target', 'exact current destination generation required')
+            other = self.workspaces[destination]
+            if (other['kind'] not in ('tmux', 'byobu')
+                    or getattr(other['transport'], 'socket', None) != transport.socket):
+                raise InventoryError('unsupported_target', 'whole-process moves require the same terminal server')
+            if destination == workspace:
+                raise InventoryError('invalid_argument', 'source and destination workspace must differ')
+            if len(snapshot['windows']) == 1:
+                raise InventoryError('tab_protected', 'moving the last tab would destroy its source session; retain another tab first')
+            index = args.get('index')
+            if operation == 'tabs.restore':
+                original = self.records.read(args.get('receipt_id'))
+                if (original.get('action') != 'tabs.park' or original.get('status') != 'applied'
+                        or original.get('workspace') != destination or original.get('destination') != workspace
+                        or original.get('window', {}).get('window_id') != window['window_id']):
+                    raise InventoryError('stale_target', 'parking receipt does not identify this exact source and original destination')
+                original_panes = original['window']['panes']
+                if original_panes != window['panes']:
+                    raise InventoryError('stale_target', 'parked native pane/process generation changed')
+                index = original['window']['index']
+            self._collision(after_destination['snapshot'], name, index=index)
+        if args.get('preview'):
+            return dict(status='preview', action=operation, target=before['target'],
+                        destination=after_destination['target'] if after_destination else None,
+                        window=window, name=name, protection=reasons, affected_work=affected,
+                        requires_force=bool(reasons))
+        # Reobserve both pinned workspaces immediately before admitting terminal I/O.
+        if self.inspect(workspace, deadline=deadline)['target'] != before['target']:
+            raise InventoryError('stale_target', 'source changed before lifecycle effect')
+        if destination and self.inspect(destination, deadline=deadline)['target'] != after_destination['target']:
+            raise InventoryError('stale_target', 'destination changed before lifecycle effect')
+        receipt_id = 'receipt_' + uuid.uuid4().hex
+        receipt = dict(version=1, receipt_id=receipt_id, status='pending', action=operation,
+                       workspace=workspace, destination=destination, window=window,
+                       before=before['target'], affected_work=affected, forced=bool(args.get('force')))
+        self.records.save(receipt_id, receipt)
+        try:
+            if operation == 'tabs.create':
+                wid = transport.command(deadline, 'new-window', '-d', '-P', '-F', '#{window_id}',
+                    '-t', transport.session + ':', '-n', name, '-c', str(cwd)).strip()
+            else:
+                wid = window['window_id']
+                if operation == 'tabs.rename':
+                    transport.command(deadline, 'rename-window', '-t', wid, name)
+                elif operation == 'tabs.focus':
+                    transport.command(deadline, 'select-window', '-t', transport.session + ':' + wid)
+                elif operation == 'tabs.close':
+                    transport.command(deadline, 'kill-window', '-t', wid)
+                else:
+                    target_session = self.workspaces[destination]['transport'].session
+                    position = str(index) if index is not None else ''
+                    transport.command(deadline, 'move-window', '-d', '-s', wid, '-t', target_session + ':' + position)
+            workspace_state = 'present'
+            if operation == 'tabs.close' and len(snapshot['windows']) == 1:
+                # tmux removes a session when its last window closes. Verify
+                # window absence across the still-pinned server, or its socket
+                # disappearance after acknowledged last-server-window closure.
+                try:
+                    ids = transport.command(deadline, 'list-windows', '-a', '-F', '#{window_id}').splitlines()
+                except (FileNotFoundError, OSError):
+                    if Path(transport.socket).exists():
+                        raise
+                    ids = []
+                if wid in ids:
+                    raise InventoryError('effect_uncertain', 'closed tab remains on terminal server')
+                after = dict(target=before['target'], snapshot=dict(windows=[]))
+                workspace_state = 'removed'
+            else:
+                after = self.inspect(destination or workspace, deadline=deadline)
+            observed = None if operation == 'tabs.close' else self._window(after['snapshot'], wid)
+            if operation == 'tabs.close' and any(w['window_id'] == wid for w in after['snapshot']['windows']):
+                raise InventoryError('effect_uncertain', 'closed tab remains present')
+            if window and observed and observed['panes'] != window['panes']:
+                raise InventoryError('effect_uncertain', 'native pane/process identity changed')
+            if operation == 'tabs.rename' and observed['name'] != name:
+                raise InventoryError('effect_uncertain', 'renamed tab was not observed')
+            if operation == 'tabs.focus' and not observed['focused']:
+                raise InventoryError('effect_uncertain', 'focused tab was not observed')
+            receipt.update(status='applied', after=after['target'], observed_window=observed, workspace_state=workspace_state)
+            self.records.save(receipt_id, receipt)
+            return dict(status='applied', action=operation, target=after['target'], window=observed,
+                        receipt_id=receipt_id, forced=bool(args.get('force')), affected_work=affected, protection=reasons,
+                        conversation='preserved', workspace_state=workspace_state)
+        except Exception:
+            receipt.update(status='uncertain')
+            self.records.save(receipt_id, receipt)
+            raise
