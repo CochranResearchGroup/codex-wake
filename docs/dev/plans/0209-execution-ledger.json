@@ -354,5 +354,14 @@
   ],
   "dependency_validation": "acyclic, all blocker IDs resolved",
   "integration_tip": "94012f3",
-  "status": "validated integration; tickets closed; review and bounded remediation complete; merge/deployment separate"
+  "status": "validated integration; tickets closed; review and bounded remediation complete; merge/deployment separate",
+  "pull_request": "https://github.com/CochranResearchGroup/codex-wake/pull/516",
+  "parent_tracker_state": "CLOSED",
+  "memory_disposition": {
+    "status": "forbidden",
+    "reason": "Memory writes were not authorized.",
+    "receipt": "/tmp/codex-wake-503-memory-disposition.json"
+  },
+  "validated_product_source": "94012f3",
+  "publication_checkpoint": "f3e915578a0b11ccd94ec6f661b417128447834e; subsequent changes only closeout documentation"
 }

@@ -1,0 +1,77 @@
+{
+  "status": "verified",
+  "repository": "CochranResearchGroup/codex-wake",
+  "pull_request": "https://github.com/CochranResearchGroup/codex-wake/pull/516",
+  "tickets": [
+    {
+      "number": 503,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/503"
+    },
+    {
+      "number": 368,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/368"
+    },
+    {
+      "number": 504,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/504"
+    },
+    {
+      "number": 505,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/505"
+    },
+    {
+      "number": 506,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/506"
+    },
+    {
+      "number": 507,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/507"
+    },
+    {
+      "number": 508,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/508"
+    },
+    {
+      "number": 509,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/509"
+    },
+    {
+      "number": 510,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/510"
+    },
+    {
+      "number": 511,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/511"
+    },
+    {
+      "number": 512,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/512"
+    },
+    {
+      "number": 513,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/513"
+    },
+    {
+      "number": 514,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/514"
+    },
+    {
+      "number": 515,
+      "state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/515"
+    }
+  ]
+}

@@ -48,7 +48,7 @@ All three accepted behavior findings are resolved:
 
 Red/green and final validation are recorded in remediation/validation.json and
 review-f3-foreground-role.json. F1 red: /tmp/codex-wake-503-F1-red.log; F1 green:
-/tmp/codex-wake-503-F1-green.log. F2 red/green paths retained in worker receipt;
+/tmp/codex-wake-503-F1-green.log. F2 red/green paths retained in remediation/tdd.json;
 F3 original failed backend-only and native preflight failure remain recorded.
 The earlier distinct-repository recovery partial remains immutable in514; a
 fresh explicitly trusted repository fixture now passes. The earlier partial's

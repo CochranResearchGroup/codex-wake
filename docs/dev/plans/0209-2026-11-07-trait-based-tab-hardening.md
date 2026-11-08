@@ -206,3 +206,8 @@ Implementation refinement: #515 captures story26 selected-profile tab creation,
 which #512 inspection proved was absent from shell-only #506. It depends on
 validated504/506, runs separately from512 contracts, and blocks final514.
 No new product scope or provider authority is introduced.
+
+Implementation closeout: spec503 and all13 scoped implementation tickets are
+closed from validated integration. One broad Standards/Spec review and one
+bounded TDD pass are complete; see the execution ledger and evidence/review.
+Draft PR516 publishes the result. Working merge/deployment remain separate.
