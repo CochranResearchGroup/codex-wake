@@ -207,12 +207,22 @@
         511,
         368
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/512",
-      "worker": null,
-      "owned_paths": [],
-      "validation": []
+      "worker": "/root/traits505",
+      "owned_paths": [
+        "tab_commands.py",
+        "tab_organization_commands.py",
+        "tab_contract.py",
+        "command_contract.py",
+        "generated reference/help/completion",
+        "contract tests"
+      ],
+      "validation": [],
+      "branch": "feat/tab-contract-512",
+      "worktree": "/tmp/codex-wake-512",
+      "base": "501e053"
     },
     {
       "key": "continuity",
@@ -245,5 +255,5 @@
     }
   ],
   "dependency_validation": "acyclic, all blocker IDs resolved",
-  "integration_tip": "e5f52aa"
+  "integration_tip": "501e053"
 }

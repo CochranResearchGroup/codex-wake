@@ -1,0 +1,19 @@
+{
+  "status": "qualified_readonly",
+  "missing_parent_environment": [
+    "WSL_INTEROP",
+    "WSL_DISTRO_NAME"
+  ],
+  "ancestor": "systemd -> codex -> codex -> command",
+  "unqualified_attempts": [
+    "/tmp/reattach510-package/native-projection.log",
+    "/tmp/reattach510-package/native-projection2.log"
+  ],
+  "independent_workstation_mcp": "windows_volume_probe_unavailable",
+  "verified_relay": "/run/WSL/1_interop",
+  "command": "timeout 8s env WSL_INTEROP=/run/WSL/1_interop /mnt/c/Windows/System32/cmd.exe /d /c ver",
+  "exit_code": 0,
+  "windows_version": "10.0.26300.9711",
+  "mutations": false,
+  "restarts": false
+}
