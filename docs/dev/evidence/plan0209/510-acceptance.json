@@ -27,9 +27,22 @@
   ],
   "limits": [
     "Retiring normal native source remains held absent verified input custody; default retains source.",
-    "New deadline/projection helper native reruns failed before attachment due Windows WSLInterop startup; failures retained in /tmp/reattach510-package/native-projection{,2}.log; final exact package qualification belongs514.",
+    "Initial bounded-helper native attempts failed before attachment due missing WSL_INTEROP; retained failures superseded for helper qualification by explicit verified relay receipt. Final exact integrated public package remains514.",
     "Historical unbound native Windows/WSL relay sessions remain unknown."
   ],
   "production_effects": false,
-  "provider_calls": 0
+  "provider_calls": 0,
+  "managed_projection_native": {
+    "status": "passed",
+    "receipt": "/tmp/wake-reattach510-native-ed5vnz9q/receipt.json",
+    "wheel_sha256": "6ddb62e82ee3c57c9c64334ab27cce9a6a2519a23e9064672e9bdf58ea2b79ec",
+    "source": "c7dcc25",
+    "environment": "UID1017 with verified WSL_INTEROP=/run/WSL/1_interop",
+    "bounded_projection": true,
+    "source_draft_preserved": true,
+    "ledger_preserved": true,
+    "replay_without_duplicates": true,
+    "provider_calls": 0,
+    "final_owned_processes": []
+  }
 }
