@@ -244,7 +244,8 @@
       "title": "Qualify the exact installed tab hardening workflow across callers and backends",
       "blockers": [
         512,
-        513
+        513,
+        515
       ],
       "state": "pending",
       "tracker_state": "OPEN",
@@ -252,8 +253,29 @@
       "worker": null,
       "owned_paths": [],
       "validation": []
+    },
+    {
+      "key": "profile-create",
+      "number": 515,
+      "title": "Create a tab with an exact selected coding profile",
+      "blockers": [
+        504,
+        506
+      ],
+      "state": "running",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/515",
+      "worker": "/root/lifecycle506",
+      "branch": "feat/tab-profile-create-515",
+      "worktree": "/tmp/codex-wake-515",
+      "base": "103ce77",
+      "owned_paths": [
+        "tab_profile_create.py",
+        "profilecreate tests"
+      ],
+      "validation": []
     }
   ],
   "dependency_validation": "acyclic, all blocker IDs resolved",
-  "integration_tip": "501e053"
+  "integration_tip": "103ce77"
 }

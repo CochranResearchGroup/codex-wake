@@ -201,3 +201,8 @@ provider prompts and shared daemon changes are not implied.
 Tickets504–514 plus reused368 form an acyclic graph. Three initial lanes: primary504,
 traits worker505, lifecycle worker506. Primary owns shared CLI/API/MCP/observer
 registration. Review and remediation counts live in0209-execution-ledger.json.
+
+Implementation refinement: #515 captures story26 selected-profile tab creation,
+which #512 inspection proved was absent from shell-only #506. It depends on
+validated504/506, runs separately from512 contracts, and blocks final514.
+No new product scope or provider authority is introduced.
