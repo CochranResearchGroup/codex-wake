@@ -69,9 +69,9 @@ class TabReattach:
             if operation=='tabs.reattach-status':return self._public(plan)
             return self._apply(plan)
 
-    def binding_for(self,workspace,window):
+    def binding_for(self,workspace,window,*,deadline=None):
         if not hasattr(self.runtime,'binding_for'):return None
-        return self.runtime.binding_for(workspace,window)
+        return self.runtime.binding_for(workspace,window,deadline=deadline)
 
     def authorization_targets(self,plan_id):
         plan=self.records.read(plan_id)
@@ -230,12 +230,17 @@ class NativeReattachRuntime:
         return dict(ui_safety=safety,pending_work=bool(work['pending'] or work['messages']),identity=identity,profile=profile,process=process,
                     state=row.get('runtime_state','unknown'),health=health['observation'])
 
-    def health(self,pid,identity,profile):
+    def health(self,pid,identity,profile,*,deadline=None):
+        deadline=deadline or time.monotonic()+4
+        def remaining():
+            value=deadline-time.monotonic()
+            if value<=0:raise TimeoutError("managed_attachment_deadline")
+            return min(2,value)
         from .controller_health import ControllerHealth
         from .native_protocol import native_request
         actual=process_identity(pid)
         if not actual:raise InventoryError('source_unavailable','Pinned native TUI process is gone.')
-        frame=native_request(profile['app_server'],profile['codex_path'],'tui/health/describe',{'pid':pid},2)
+        frame=native_request(profile['app_server'],profile['codex_path'],'tui/health/describe',{'pid':pid},remaining())
         bindings=[b for b in frame.get('bindings',[]) if b.get('pid')==pid and b.get('home')==profile['codex_home']
             and str(b.get('startTicks'))==str(actual['start_time_ticks']) and b.get('bootId')==actual.get('boot_id')]
         if len(bindings)!=1:raise InventoryError('source_unavailable','Exact native controlling TUI binding is unavailable.')
@@ -248,9 +253,9 @@ class NativeReattachRuntime:
             connection_generation=binding['connectionGeneration'],
             process=dict(pid=pid,start_ticks=binding['startTicks'],boot_id=binding['bootId']))
         return ControllerHealth(self.root).observe_binding(target,
-            dict(target=target,endpoint=profile['app_server'],codex_cmd=[profile['codex_path']]),timeout=2)
+            dict(target=target,endpoint=profile['app_server'],codex_cmd=[profile['codex_path']]),timeout=remaining())
 
-    def binding_for(self,workspace,window):
+    def binding_for(self,workspace,window,*,deadline=None):
         """Fresh managed WSL binding for a native Windows relay, no PID guessing.
 
         Only the retained plan, current bridge/pane birth and private child marker
@@ -267,14 +272,15 @@ class NativeReattachRuntime:
             if handle.get('bridge_generation')!=transport.pinned_server_id or handle.get('window_id')!=window['window_id']:return None
             pane=next(p for p in window['panes'] if p['pane_id']==handle['pane_id'])
             if pane['pid']!=handle['windows_pid'] or pane['windows_creation_filetime']!=handle['windows_creation_filetime']:return None
-            verified=self.verify(plan,handle)
-            from .local_sessions import discover
-            rows=discover(self.root,endpoint=plan['source']['profile']['app_server'])['sessions']
+            verified=self.verify(plan,handle,deadline=deadline)
+            if deadline is not None and time.monotonic()>=deadline:return None
+            from .tab_traits import session_rows
+            rows=session_rows(self.root,endpoints=[plan['source']['profile']['app_server']],panes=[],deadline=deadline)['sessions']
             row=next(r for r in rows if r['thread_id']==plan['source']['identity']['conversation_id'])
             return dict(identity=verified['identity'],process=verified['process'],native_row=row,
                         health=dict(target=verified['native_health_target'],observation=verified['health']),
                         provenance='verified_managed_reattachment',application_effects=False)
-        except (ValueError,OSError,KeyError,StopIteration):return None
+        except (ValueError,OSError,KeyError,StopIteration,TimeoutError,subprocess.SubprocessError):return None
 
     def _mirror(self,destination):
         command=getattr(getattr(self.workspaces[destination]['transport'],'bridge',None),'command',[])
@@ -320,8 +326,8 @@ class NativeReattachRuntime:
         window,pane=result.split('\t')
         return dict(window_id=window,pane_id=pane,marker=str(marker),manifest=str(manifest_path),manifest_sha256=sha)
 
-    def verify(self,plan,handle):
-        deadline=time.monotonic()+15
+    def verify(self,plan,handle,*,deadline=None):
+        deadline=min(deadline or time.monotonic()+15,time.monotonic()+15)
         profile=plan['source']['profile'];identity=plan['source']['identity']
         while time.monotonic()<deadline:
             try:
@@ -335,9 +341,10 @@ class NativeReattachRuntime:
                     raise FileNotFoundError('native exec not ready')
                 if SavedRuntime().identity(identity,profile)!=identity:
                     raise InventoryError('stale_target','Destination saved conversation identity changed.')
-                health=self.health(pid,identity,profile)
+                health=self.health(pid,identity,profile,deadline=deadline)
+                if time.monotonic()>=deadline:raise TimeoutError("managed_attachment_deadline")
                 config=self.workspaces[plan['destination']]
-                snapshot=config['transport'].snapshot(time.monotonic()+5)
+                snapshot=config['transport'].snapshot(min(deadline,time.monotonic()+5))
                 window=next(w for w in snapshot['windows'] if w['window_id']==handle['window_id'])
                 if config['kind']=='psmux':
                     pane=next(p for p in window['panes'] if p['pane_id']==handle['pane_id'])
