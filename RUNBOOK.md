@@ -8541,3 +8541,11 @@ Existing ticket ownership is preserved. GitHub target/actor/labels/duplicates
 preflight passed. Operator acceptance-seam question remains pending; publication
 and ready-for-agent labeling wait for that answer as required by to-spec. No
 implementation/live effects. Draft sections and whitespace checks pass.
+
+## Turn | 2026-11-08 | Trait-based tab hardening specification published
+
+Operator confirmed the installed WSL/actual PowerShell CLI/API/MCP acceptance
+seam against disposable real Byobu/psmux tabs. Published canonical spec503 with
+existing enhancement/ready-for-agent labels; body and label readback match. Local
+Plan0209 retains matching snapshot. No implementation tickets, runtime effects,
+provider calls or memory writes.

@@ -1476,6 +1476,6 @@ No new runtime changes or provider acceptance were performed.
 ## P209 | Trait-based tab and session hardening specification
 
 [Draft specification](docs/dev/plans/0209-2026-11-07-trait-based-tab-hardening.md)
-consolidates the confirmed Plan0208 interview and existing ticket owners. Required
-installed acceptance-seam confirmation is pending before GitHub publication;
-implementation has not started.
+consolidates the confirmed Plan0208 interview and existing ticket owners. Published as [spec #503](https://github.com/CochranResearchGroup/codex-wake/issues/503)
+with confirmed installed acceptance seams and ready-for-agent label. Ticket
+decomposition and implementation remain next.
