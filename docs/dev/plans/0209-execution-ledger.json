@@ -255,12 +255,21 @@
         513,
         515
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/514",
-      "worker": null,
-      "owned_paths": [],
-      "validation": []
+      "worker": "/root/traits505",
+      "owned_paths": [
+        "qualification scripts",
+        "docs/dev/evidence/plan0209/514-*"
+      ],
+      "validation": [
+        "immutable package candidate4d22a56 SHA6e772f6571caba1d59589336d4546fd5f762aee0a7267d2c931311e5ef88c29d; 281members match native-prefix",
+        "full unit runs frozenbfded49: sessions50128 Python3.11 and28473 Python3.12, logs /tmp/codex-wake-503-final{311,312}/result.log"
+      ],
+      "base": "bfded49",
+      "branch": "feat/tab-qualification-514",
+      "worktree": "/tmp/codex-wake-514"
     },
     {
       "key": "profile-create",
@@ -289,5 +298,5 @@
     }
   ],
   "dependency_validation": "acyclic, all blocker IDs resolved",
-  "integration_tip": "103ce77"
+  "integration_tip": "bfded49"
 }
