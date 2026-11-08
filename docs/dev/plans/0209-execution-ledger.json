@@ -235,12 +235,16 @@
       "blockers": [
         512
       ],
-      "state": "pending",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/513",
-      "worker": null,
+      "worker": "/root",
       "owned_paths": [],
-      "validation": []
+      "validation": [
+        "docs/dev/evidence/plan0209/513-continuity.md",
+        "56 normally installed affected controls PASS; existing provider evidence explicitly inherited"
+      ],
+      "result_sha": "4d22a56"
     },
     {
       "key": "acceptance",
