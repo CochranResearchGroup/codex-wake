@@ -6,6 +6,7 @@ existing store; it never creates a second operation journal or conversation.
 """
 from pathlib import Path
 import re
+import subprocess
 import time
 import uuid
 
@@ -189,6 +190,12 @@ class TabLifecycle:
             raise InventoryError('stale_target', 'source changed before lifecycle effect')
         if destination and self.inspect(destination, deadline=deadline)['target'] != after_destination['target']:
             raise InventoryError('stale_target', 'destination changed before lifecycle effect')
+        closing_server=None
+        if operation=='tabs.close' and len(snapshot['windows'])==1:
+            server_pid=int(transport.command(deadline,'display-message','-p','#{pid}').strip())
+            closing_server=(server_pid,process_identity(server_pid))
+            if closing_server[1] is None:
+                raise InventoryError('stale_target','Original terminal server process is unavailable.')
         receipt_id = 'receipt_' + uuid.uuid4().hex
         receipt = dict(version=1, receipt_id=receipt_id, status='pending', action=operation,
                        workspace=workspace, destination=destination, window=window,
@@ -214,11 +221,18 @@ class TabLifecycle:
             if operation == 'tabs.close' and len(snapshot['windows']) == 1:
                 # tmux removes a session when its last window closes. Verify
                 # window absence across the still-pinned server, or its socket
-                # disappearance after acknowledged last-server-window closure.
+                # and exact server-process disappearance after acknowledged closure.
                 try:
                     ids = transport.command(deadline, 'list-windows', '-a', '-F', '#{window_id}').splitlines()
-                except (FileNotFoundError, OSError):
-                    if Path(transport.socket).exists():
+                except (OSError,subprocess.CalledProcessError):
+                    # A successful kill-window may end the last server while
+                    # leaving its socket path behind. Require disappearance of
+                    # the exact server process witnessed before that effect.
+                    server_pid,server_birth=closing_server
+                    until=min(deadline,time.monotonic()+1)
+                    while process_identity(server_pid)==server_birth and time.monotonic()<until:
+                        time.sleep(.01)
+                    if process_identity(server_pid)==server_birth:
                         raise
                     ids = []
                 if wid in ids:
