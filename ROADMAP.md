@@ -1472,3 +1472,10 @@ Reconciles existing harness/controller/session/profile tickets, two installed ta
 failures and missing observer wiring. Proposed HARD-01–10 remain local TRIAGE;
 first outcome is useful no-root workspace listing and installed grouping/undo.
 No new runtime changes or provider acceptance were performed.
+
+## P209 | Trait-based tab and session hardening specification
+
+[Draft specification](docs/dev/plans/0209-2026-11-07-trait-based-tab-hardening.md)
+consolidates the confirmed Plan0208 interview and existing ticket owners. Required
+installed acceptance-seam confirmation is pending before GitHub publication;
+implementation has not started.

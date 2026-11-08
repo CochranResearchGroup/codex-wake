@@ -8532,3 +8532,12 @@ from missing CRUD/movement/holding/automatic policy features. Proposed local
 HARD-01–10 reuse existing owners; no GitHub mutations, live tab moves, provider
 calls, services or credentials changed. Historic qualification is explicitly
 separate from fresh verification. Memory forbidden (no explicit request).
+
+## Turn | 2026-11-07 | Trait-based tab hardening specification draft
+
+P209 drafted the confirmed tab traits/grouping/lifecycle/recovery requirements
+as40user stories with implementation/testing decisions and explicit exclusions.
+Existing ticket ownership is preserved. GitHub target/actor/labels/duplicates
+preflight passed. Operator acceptance-seam question remains pending; publication
+and ready-for-agent labeling wait for that answer as required by to-spec. No
+implementation/live effects. Draft sections and whitespace checks pass.
