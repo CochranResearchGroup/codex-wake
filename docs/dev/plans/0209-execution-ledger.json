@@ -5,9 +5,12 @@
   "base": "20e396b5aa469ed814c123218cc356a68b229936",
   "review": {
     "broad_limit": 1,
-    "broad_used": 0,
+    "broad_used": 1,
     "remediation_limit": 1,
-    "remediation_used": 0
+    "remediation_used": 0,
+    "status": "running independent Standards and Spec axes",
+    "fixed_point": "20e396b5aa469ed814c123218cc356a68b229936",
+    "product_source": "4d22a56"
   },
   "tickets": [
     {
