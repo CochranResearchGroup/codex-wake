@@ -266,8 +266,8 @@
         504,
         506
       ],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/515",
       "worker": "/root/lifecycle506",
       "branch": "feat/tab-profile-create-515",
@@ -277,7 +277,11 @@
         "tab_profile_create.py",
         "profilecreate tests"
       ],
-      "validation": []
+      "validation": [
+        "docs/dev/evidence/plan0209/515-acceptance.json"
+      ],
+      "result_sha": "4d22a56",
+      "worker_result_sha": "4a374a8"
     }
   ],
   "dependency_validation": "acyclic, all blocker IDs resolved",

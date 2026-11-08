@@ -1,0 +1,33 @@
+{
+  "ticket": 515,
+  "status": "passed",
+  "source": "4d22a56",
+  "worker": "4a374a8",
+  "prefix": "/tmp/codex-wake-503-native-prefix",
+  "wheel": "/tmp/codex-wake-503-wheels/candidate-4d22a56/codex_wake-0.22.0.dev2-py3-none-any.whl",
+  "wheel_sha256": "6e772f6571caba1d59589336d4546fd5f762aee0a7267d2c931311e5ef88c29d",
+  "matching_python_members": 281,
+  "native_receipt": "/tmp/wake-profile515-native-skceanqk/receipt.json",
+  "native_owner_receipt": "/tmp/wake-profile515-native-g8e0e1hn/receipt.json",
+  "public_cli": true,
+  "exact_build_home_child": true,
+  "same_key_no_duplicate": true,
+  "remote_account_scope_required": true,
+  "native_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "checks": [
+    "3 worker focused each3.11/3.12 PASS",
+    "11 affected public3.11 PASS13.403s; accountscope negative included",
+    "UID1017 actual installed public CLI profilecreate/replay PASS"
+  ],
+  "retained_failure": "/tmp/codex-wake-503-515-native-public.log: script permission denied before execution; corrected by copying only public testscript outside privateworktree",
+  "limits": [
+    "Independent Wake account with host-selected modded build only; stock/shared-home selection unsupported.",
+    "Native Windows psmux new-profile creation unsupported; ordinary shell creation and saved-conversation reattachment separately supported.",
+    "Remote provider account identity unverified; verified local selected home/build/process reported explicitly."
+  ],
+  "provider_calls": 0,
+  "model_turns": 0,
+  "final_owned_processes": [],
+  "unrelated_process_preserved": true,
+  "production_effects": false
+}
