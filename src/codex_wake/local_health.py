@@ -34,7 +34,7 @@ def observe(root, selector, *, expected_target=None, timeout=1, endpoint='unix:/
     return observe_row(root, row, timeout=timeout)
 
 
-def observe_row(root, row, *, timeout=1, request=native_request):
+def observe_row(root, row, *, timeout=1, request=native_request, client_process=None):
     """Observe a resolved same-user row; daemon identity is never TUI identity."""
     target = row['target']
     def unknown(reason, status='unknown'):
@@ -59,8 +59,17 @@ def observe_row(root, row, *, timeout=1, request=native_request):
         return unknown('native_command_unavailable')
     try:
         executable = Path(target['executable']).stat()
+        if client_process is not None:
+            from .process import process_identity
+            if not isinstance(client_process,dict) or type(client_process.get('pid')) is not int:
+                return unknown('exact_client_process_required')
+            current=process_identity(client_process['pid'])
+            if (current is None or str(current['start_time_ticks'])!=str(client_process.get('start_ticks'))
+                    or current.get('boot_id')!=client_process.get('boot_id')):
+                return unknown('exact_client_process_changed')
         preferred = [item.get('client_pid') for item in row.get('attachments', []) if isinstance(item, dict)]
-        pids = list(dict.fromkeys(preferred + [int(item.name) for item in Path('/proc').iterdir() if item.name.isdigit()]))
+        pids = ([client_process['pid']] if client_process is not None else
+                list(dict.fromkeys(preferred + [int(item.name) for item in Path('/proc').iterdir() if item.name.isdigit()])))
         candidates = []
         for pid in pids:
             if type(pid) is not int or pid <= 0: continue
@@ -83,6 +92,7 @@ def observe_row(root, row, *, timeout=1, request=native_request):
             if not isinstance(bindings, list) or len(bindings) > 256: return unknown('invalid_native_description')
             for binding in bindings:
                 if not isinstance(binding, dict) or binding.get('pid') != pid: continue
+                if client_process is not None and (str(binding.get('startTicks'))!=str(client_process['start_ticks']) or binding.get('bootId')!=client_process['boot_id']):continue
                 if binding.get('home') != target['home'] or binding.get('provider') != row.get('model_provider', target['provider']): continue
                 try:
                     native = dict(host=target['host'], environment=target['environment'], runtime='codex',

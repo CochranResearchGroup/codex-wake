@@ -343,7 +343,9 @@ class TabTraits:
                 if probe is None:
                     from .local_health import observe_row
                     probe = observe_row
-                result = probe(self.root, native, timeout=min(1, max(.05, deadline-time.monotonic())))
+                options=dict(timeout=min(1,max(.05,deadline-time.monotonic())))
+                if self.health_probe is None and isinstance(sample,dict):options['client_process']=sample.get('process')
+                result = probe(self.root,native,**options)
                 observed = result['observation']
                 # Only the existing exact-loop owner can positively establish health.
                 value = observed.get('status', 'unknown')
