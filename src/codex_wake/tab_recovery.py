@@ -142,9 +142,65 @@ class WorkspaceRecoveryRuntime:
         # means no qualified attachment, not permission to overwrite any shell.
         return dict(state='absent')
 
+    def restored_slot(self,record,context):
+        """Qualify placement only; an existing shell never proves conversation identity.
+
+        Explicit layout restoration may preserve a plain interactive shell in a
+        separate window, leaving its process/input intact before creating the
+        exact saved coding view. Busy, linked, pinned or ambiguous slots hold.
+        """
+        from .tab_traits import _processes
+        from .process import process_identity
+        marked=[w for w in context['windows'] if w.get('logical_id')==record['logical_id']]
+        candidates=marked or [w for w in context['windows'] if w['name']==record['name'] and w['index']==record['index']]
+        if len(candidates)!=1:return None
+        window=candidates[0]
+        config=self._tabs().workspaces[context['workspace']]
+        if (window['name']!=record['name'] or window['index']!=record['index']
+                or window.get('linked') or window.get('pins') or window['window_id'] in config.get('pins',[])
+                or len(window['panes'])!=1):return None
+        pane=window['panes'][0]
+        rows,complete=_processes(pane['pid'],time.monotonic()+1)
+        if not complete or len(rows)!=1:return None
+        shell=rows[0]
+        if (Path(shell['executable']).name not in ('bash','zsh','fish','dash','sh','ksh')
+                or any(arg not in ('-i','-l','--login','--noprofile','--norc','-il','-li') for arg in shell['argv'][1:] if arg)
+                or Path(shell['cwd']).resolve()!=Path(record['identity']['root']).resolve()):return None
+        birth=process_identity(pane['pid'])
+        if not birth or str(birth['start_time_ticks'])!=str(shell['process']['start_ticks']):return None
+        return dict(window_id=window['window_id'],pane_id=pane['pane_id'],pid=pane['pid'],process=birth,
+                    name=window['name'],index=window['index'],logical_id=window.get('logical_id'),
+                    action='preserve_shell_in_separate_window')
+
     def launch(self,record,context,guard):
         profile=self._profile(record,context)
-        value=self.saved.launch(record['identity'],profile,guard,record['name'])
+        slot=record.get('restored_slot')
+        preserved=None
+        launch_context=context
+        if slot:
+            guard()
+            if self.restored_slot(record,self.context(context['workspace']))!=slot:
+                raise InventoryError('stale_target','Restored shell changed before preservation; no input or process replaced.')
+            transport=self._tabs().workspaces[context['workspace']]['transport']
+            index=record['archive_index']
+            name='recovery-shell-'+slot['window_id'][1:]+'-'+record['logical_id'][:12]
+            if any(w['index']==index or w['name']==name for w in context['windows']):
+                raise InventoryError('placement_conflict','Shell preservation destination is occupied.')
+            deadline=time.monotonic()+3
+            transport.command(deadline,'rename-window','-t',slot['window_id'],name)
+            transport.command(deadline,'move-window','-d','-s',slot['window_id'],'-t',context['session_id']+':'+str(index))
+            if slot.get('logical_id'):
+                transport.command(deadline,'set-option','-wu','-t',slot['window_id'],_MARKER)
+            transport.command(deadline,'set-option','-w','-t',slot['window_id'],'@codex-wake-recovery-preserved-shell-of',record['logical_id'])
+            launch_context=self.context(context['workspace'])
+            expected_windows=[dict(w,name=name,index=index,logical_id=None) if w['window_id']==slot['window_id'] else w for w in context['windows']]
+            expected_windows.sort(key=lambda w:w['index'])
+            if (launch_context['identity']!=context['identity']
+                    or fingerprint(launch_context['windows'])!=fingerprint(expected_windows)):
+                raise InventoryError('stale_target','Restored workspace changed during preservation.')
+            preserved=dict(slot,archive_index=index,archive_name=name)
+        value=self.saved.launch(record['identity'],profile,
+            (lambda:guard(launch_context)) if slot else guard,record['name'])
         window,pane=value.strip().split('\t')
         fresh=self.context(context['workspace'])
         if fresh['identity']!=context['identity']:
@@ -156,7 +212,7 @@ class WorkspaceRecoveryRuntime:
                 raise InventoryError('placement_conflict','Original position was occupied during recovery; preserve the created attachment.')
             self._tabs().workspaces[context['workspace']]['transport'].command(time.monotonic()+3,
                 'move-window','-d','-s',window,'-t',context['session_id']+':'+str(record['index']))
-        return dict(window_id=window,pane_id=pane)
+        return dict(window_id=window,pane_id=pane,preserved_shell=preserved)
 
 
 class TabRecovery:
@@ -236,12 +292,14 @@ class TabRecovery:
                     if target is None or (marked and target['window_id']!=marked[0]['window_id']):
                         rows.append(dict(row,status='held',reason='conversation_attached_elsewhere'));continue
                     rows.append(dict(row,status='already_attached',window_id=target['window_id']));continue
-                if marked:
-                    rows.append(dict(row,status='held',reason='existing_marked_slot_unqualified'));continue
                 if binding['state']!='absent':
                     rows.append(dict(row,status='held',reason=binding.get('reason','attachment_unknown')));continue
-                if any(w['name']==saved['name'] or w['index']==saved['index'] for w in context['windows']):
-                    rows.append(dict(row,status='held',reason='unmarked_placement_conflict'));continue
+                conflicts=[w for w in context['windows'] if w['name']==saved['name'] or w['index']==saved['index']]
+                if marked or conflicts:
+                    slot=(self.runtime.restored_slot(saved,context) if restore_layout and hasattr(self.runtime,'restored_slot') else None)
+                    if slot and len(conflicts)==1 and conflicts[0]['window_id']==slot['window_id']:
+                        rows.append(dict(row,status='restoreable',reason=None,restored_slot=slot));continue
+                    rows.append(dict(row,status='held',reason='existing_marked_slot_unqualified' if marked else 'unmarked_placement_conflict'));continue
                 rows.append(dict(row,status='restoreable' if restore_layout else 'held',reason=None if restore_layout else 'explicit_layout_restore_required'))
             except (OSError,ValueError,KeyError,InventoryError) as error:
                 rows.append(dict(row,status='held',reason=getattr(error,'code','native_history_unavailable')))
@@ -292,15 +350,20 @@ class TabRecovery:
                         result=dict(row,status='starting',effects_attempted=1)
                         receipt['rows']=[r for r in receipt['rows'] if r['logical_id']!=saved['logical_id']]+[result]
                         _save(receipt_path,receipt)
-                        def guard():
+                        def guard(expected_context=None):
                             fresh=self.runtime.context(workspace)
-                            if (fresh['identity']!=context['identity'] or fingerprint(fresh['windows'])!=fingerprint(current_context['windows'])
+                            expected_context=expected_context or current_context
+                            if (fresh['identity']!=context['identity'] or fingerprint(fresh['windows'])!=fingerprint(expected_context['windows'])
                                     or fingerprint(_load(self._path(capture_id)))!=preview['target']['capture_sha256']):
                                 raise InventoryError('stale_target','Recovery source/destination changed before launch.')
                             if self.runtime.identity(saved,fresh)!=saved['identity']:
                                 raise InventoryError('stale_target','Saved native identity changed before launch.')
                         try:
-                            launch=self.runtime.launch(saved,current_context,guard)
+                            launch_record=saved
+                            if row.get('restored_slot'):
+                                launch_record=dict(saved,restored_slot=row['restored_slot'],archive_index=1+max(
+                                    [w['index'] for w in current_context['windows']]+[r['index'] for r in snapshot['rows']]))
+                            launch=self.runtime.launch(launch_record,current_context,guard)
                             result.update(launch=launch)
                             _save(receipt_path,receipt)
                             self.runtime.mark(self.runtime.context(workspace),launch['window_id'],saved['logical_id'])
