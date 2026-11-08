@@ -336,9 +336,11 @@ class TabTraits:
                 if value:
                     traits[name] = _trait(value, source=source, observed_at=at, status=status)
         if native is not None and native.get('target', {}).get('build_sha256') and time.monotonic() < deadline - .05:
-            from .local_health import observe_row
-            probe = self.health_probe or observe_row
             try:
+                probe = self.health_probe
+                if probe is None:
+                    from .local_health import observe_row
+                    probe = observe_row
                 result = probe(self.root, native, timeout=min(1, max(.05, deadline-time.monotonic())))
                 observed = result['observation']
                 # Only the existing exact-loop owner can positively establish health.
@@ -348,7 +350,7 @@ class TabTraits:
                 traits['health'] = _trait(value, source=observed.get('evidence', 'none'),
                                           observed_at=observed.get('observed_at'), status='observed' if value == 'responsive' else value,
                                           reason=observed.get('reason'))
-            except (OSError, ValueError, KeyError, TimeoutError):
+            except (ImportError, OSError, ValueError, KeyError, TimeoutError):
                 pass
         traits['error'] = self._error(pane, transport, privacy, deadline)
         return dict(pane_id=pane.get('pane_id'), processes=identities, process_complete=complete, traits=traits,
