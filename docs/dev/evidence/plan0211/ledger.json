@@ -144,19 +144,24 @@
         532,
         533
       ],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/534",
       "node_id": 6289902096,
       "owner": "/root/acceptance534",
       "branch": "test/terminal-session-534",
-      "worktree": "/tmp/codex-wake-session-534"
+      "worktree": "/tmp/codex-wake-session-534",
+      "integration_sha": "4a4efd8",
+      "validation": "InstalledPASS9/154.659s, nativepsmuxPASS8,303memberssource/wheel/Linux/Windows equal, cleanupPASS;534/validation.md",
+      "runtime_source": "3ed879124f1c6a754aa42827e078431c0a7079bf",
+      "wheel_sha256": "2f72c019f8654d07d0d84638830cf1c30bf8f49cff5cab7a000678cb51408b15"
     }
   ],
   "review": {
-    "broad_runs": 0,
+    "broad_runs": 1,
     "remediation_passes": 0,
-    "fixed_point": "f0798e1ede3104caf591ba0b453fbf553bed569e"
+    "fixed_point": "f0798e1ede3104caf591ba0b453fbf553bed569e",
+    "state": "running"
   },
   "state": "implementing",
   "integration_worktree": "/tmp/codex-wake-session-design-0211",
@@ -169,16 +174,12 @@
   },
   "shared_contract_checkpoint": "3cd8a88",
   "native_qualification": {
-    "529": "Native psmux8checks pass; source-exact bridge, retainedcleanuptransient, finalnamespaceabsenceverified; workercommitpending"
+    "529": "Passed8 sourcechecks and final534installed8checks inclrenamebaselinecarry/explicitdelete/OSexitreadback"
   },
   "runtime_effects": {
     "production": false,
     "providers": false
   },
-  "current_state": "Sevenclosed;534installedacceptanceactive;review0/TDDremediation0",
-  "pending_acceptance_checks": [
-    "534: final installed native psmux rename + formatting baseline/rollback interaction; existing native generation carry remains guarded",
-    "534: final public CLI/API/nativeMCP/OAuth/PowerShell parity and cleanup",
-    "531: factory restoration/alias red-green and budgeted automatic service routing"
-  ]
+  "current_state": "All8validatedandtrackerclosed; review1starting",
+  "pending_acceptance_checks": []
 }
