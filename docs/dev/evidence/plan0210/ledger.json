@@ -191,7 +191,8 @@
       ],
       "composite_gate": "docs/dev/evidence/plan0210/524/serial-full-311-reconciliation.json",
       "completion_repair_worker": "ca88d04",
-      "completion_repair_integrated": "de2eb32"
+      "completion_repair_integrated": "de2eb32",
+      "tracker_state": "CLOSED"
     }
   ],
   "readback": true,
@@ -199,8 +200,10 @@
   "integration_branch": "feat/tab-formatting-517",
   "review": {
     "fixed_point": "3a02f9dc9e59eef8151cc6015f19a6cd4b22e2de",
-    "broad_runs": 0,
-    "remediation_passes": 0
+    "broad_runs": 1,
+    "remediation_passes": 0,
+    "state": "running",
+    "feature_tip": "d16575289d59cb5e32cf34c780c43aa48bf2bb97"
   },
   "discovery": "Current agreed plan/spec and fresh repository sources sufficient; unrelated memory registry hits not used; no additional Graphiti discovery needed.",
   "last_validation_checkpoint": "cdcedfd"

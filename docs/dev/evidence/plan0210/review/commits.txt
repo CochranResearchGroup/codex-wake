@@ -1,0 +1,28 @@
+d165752 docs: reconcile complete local gates and the test-only completion repair (#524)
+de2eb32 test: await actual shell editor readiness before completion key batches (#524)
+59ff603 test: qualify installed formatting clients and retain validation gates (#524)
+fff5d24 fix: preserve tab failure exit parity in portable API and MCP clients (#524)
+d2ad1bd docs: retain cross-version startup and CLI outcome regression evidence
+0dbb3dc docs: add formatting workflow and installed protocol acceptance (#524)
+33218a3 fix: propagate retained partial tab outcomes to CLI exit status (#524)
+d55cd7c fix: enable continuous formatting through the existing monitor (#524)
+382dd32 docs: retain final acceptance gaps and frozen validation custody
+a1e03a6 docs: dispatch installed-package acceptance after six validated tickets
+05f1d88 docs: record actual native rendering qualification
+2a865d9 fix: qualify native rendering and prevent psmux metadata style injection (#523)
+02cd52c docs: checkpoint formatting policy gates before installed-package qualification
+451683f docs: record persistent-policy acceptance and target-pin correction
+3166378 fix: bind display preference mutations to selected workspace (#522)
+44f6d14 docs: retain sustained forty-tab monitor acceptance evidence
+09f2c73 fix: keep global formatting controls available when a terminal disappears (#522)
+8c165ca feat: persist display policy and respect manual theme ownership (#522)
+cdcedfd feat: add accessible rendering fallbacks and expiry styles (#523)
+442ced1 docs: record native formatting acceptance and remaining policy workers
+1b05dad feat: route explicit global formatting policy through scoped controller authority (#522)
+e274810 feat: project bounded tab monitor samples with native expiry (#520)
+c3a7c73 feat: add finite native psmux formatting and exact restoration (#519)
+0601364 docs: checkpoint mixed-pane integration and remaining shared hook
+374d4d1 feat: project mixed tab attention and harness dimensions (#521)
+1f8bbde docs: record formatting ticket graph and worker custody
+324c7a2 feat: expose nested tab format shortcuts and preserve scoped inspection (#518)
+bf1f6b5 feat: add reversible tab formatting controller foundation (#518)
