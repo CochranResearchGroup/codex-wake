@@ -47,9 +47,9 @@ def render(value):
         elif isinstance(current.get('operation'), dict): current = current['operation']
         else: return None
     records = current.get('sessions', [current['session']] if 'session' in current else [])
-    rows = [('NAME','BACKEND','STATE','TABS','HEALTH / ACTIVITY')]
+    rows = [('NAME','BACKEND','SERVER','STATE','TABS','HEALTH / ACTIVITY')]
     for r in records:
-        rows.append((r['name'],r['backend'],r.get('state','unknown'),str(r.get('tab_count','?')),
+        rows.append((r['name'],r['backend'],str(r.get('server','?')),r.get('state','unknown'),str(r.get('tab_count') if r.get('tab_count') is not None else '?'),
                      str(r.get('health_summary') or r.get('activity_summary') or 'unobserved')))
-    widths = [max(len(row[i]) for row in rows) for i in range(5)]
+    widths = [max(len(row[i]) for row in rows) for i in range(6)]
     return '\n'.join('  '.join(cell.ljust(widths[i]) for i,cell in enumerate(row)).rstrip() for row in rows)

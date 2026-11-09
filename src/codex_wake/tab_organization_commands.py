@@ -103,6 +103,8 @@ def register_parser(subparsers):
     session_verbs=sessions.add_subparsers(dest='session_command',required=True)
     relocation=verbs.add_parser('relocate',help='Preview, apply and undo criteria-based tab moves.')
     relocation_verbs=relocation.add_subparsers(dest='relocate_command',required=True)
+    routing=verbs.add_parser('routing',help='Manage saved routing rules and manual holds.')
+    routing_verbs=routing.add_subparsers(dest='routing_command',required=True)
     aliases = {'pins':'pin', 'members':'member', 'criteria':'criterion'}
     for _, operation, summary, properties, required, readonly in tool_specs().values():
         action=cli_verb(operation)
@@ -113,6 +115,8 @@ def register_parser(subparsers):
             commands.append(session_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
         if operation.startswith('tabs.relocate.'):
             commands.append(relocation_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
+        if operation.startswith('tabs.route.'):
+            commands.append(routing_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
         for command in commands:
             command.set_defaults(tabs_command=action,group_by=[],sort_by=[],filters=[],pins=[],members=[],mode='activity')
             if action.startswith(('view-','group-')) and not action.endswith('-list'):
@@ -137,6 +141,15 @@ def register_parser(subparsers):
                 if field=='workspace':
                     command.add_argument('--session',dest='session_selector',help='Terminal session name or stable ID (alias for --workspace).')
                     if 'server' not in properties:command.add_argument('--server',dest='session_server',help='Terminal server qualifier.')
+            if 'selection' in properties:
+                for option,dest,help_text in (
+                    ('--filter','selection_filters','Match TRAIT=VALUE; repeat to combine with AND.'),
+                    ('--pattern','selection_patterns','Match TRAIT=GLOB.'),
+                    ('--exclude','selection_excludes','Exclude known TRAIT=VALUE matches.'),
+                    ('--group','selection_groups','Select a saved named group.'),
+                    ('--label','selection_labels','Select a custom category label.'),
+                    ('--tab','selection_tabs','Select SESSION:@WINDOW; repeat for several tabs.')):
+                    command.add_argument(option,dest=dest,action='append',help=help_text)
             if action in ('preview','view-save','policy-configure'):
                 command.add_argument('--group-by',action='append',default=[],help='Layered grouping trait; repeat in order.')
                 command.add_argument('--sort-by',action='append',default=[],help='Layered sorting trait; repeat in order.')
@@ -167,7 +180,7 @@ def run(args, root, *, observer=None):
         from .tab_contract import BY_OPERATION
         args.tab_command=args.tabs_command
         args.arguments=dict(args.arguments or {})
-        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1).replace('relocate-','relocate.',1)
+        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1).replace('relocate-','relocate.',1).replace('route-','route.',1)
         if operation in BY_OPERATION:
             properties=BY_OPERATION[operation][1][3]
             for field in properties:

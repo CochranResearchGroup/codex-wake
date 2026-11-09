@@ -25,13 +25,17 @@ def command(args, owner=None):
         if owner is None:
             from .controller_tabs import controller_tabs_from_root
             owner = controller_tabs_from_root(args.wake_root)
-        operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1).replace('relocate-','relocate.',1)
+        operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1).replace('relocate-','relocate.',1).replace('route-','route.',1)
         from .terminal_session_cli import select_workspace, render
         arguments=dict(args.arguments)
         selector=arguments.pop('session_selector',None)
         server=arguments.pop('session_server',None)
         from .tab_contract import BY_OPERATION
         properties=BY_OPERATION.get(operation,(None,(None,None,None,{})))[1][3]
+        if 'selection' in properties:
+            from .terminal_selection_cli import expression
+            selected=expression(owner,args,arguments.get('selection'))
+            if selected is not None:arguments['selection']=selected
         if 'workspace' in properties and arguments.get('scope')!='global' and (selector is not None or 'workspace' not in arguments):
             arguments['workspace']=select_workspace(owner,selector,server=server,interactive=not getattr(args,'as_json',False))
         value = owner.execute(operation,arguments) if operation in owner.READS else operator_execute(operation,arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
@@ -122,7 +126,7 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
             correlation_id=key,binding='local-cli',target=payload['expected_target']))
         actor=local_operator(payload['expected_target'],('control','observe'))
         return AuthorizedTabs(SimpleNamespace(authenticate=lambda unused:actor),owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
-    if operation.startswith(('tabs.session.','tabs.relocate.')):
+    if operation.startswith(('tabs.session.','tabs.relocate.','tabs.route.')):
         from .terminal_sessions import TerminalSessions
         payload.setdefault('expected_target',TerminalSessions(root,tabs=owner).target())
         key=_intent_key(operation,payload,request_id)

@@ -17,4 +17,16 @@ def specs():
         required=['destination'] if verb=='preview' else []
         if not readonly:props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
         result['wake_tabs_relocate_'+verb]=('controller-tabs','tabs.relocate.'+verb,'Preview and relocate whole tabs by selection; reconcile partial results and conditionally undo.',props,required,readonly)
+    for verb in ('list','show','save','delete','enable','pause','tick','status','hold','resume','pin','unpin'):
+        readonly=verb in ('list','show','status')
+        props=dict(name={'type':'string'},rule_id={'type':'string'}) if verb in ('show','save','delete','enable','pause') else {}
+        required=[]
+        if verb=='save':
+            props.update(destination={'type':'string'},selection={'type':'object'},priority={'type':'integer'},stability_seconds={'type':'number','minimum':0,'maximum':3600})
+            required=['name','destination','selection']
+        if verb=='enable':props['include_existing']={'type':'boolean'}
+        if verb in ('hold','resume','pin','unpin'):
+            props.update(selection={'type':'object'},reason={'type':'string'});required=['selection']
+        if not readonly:props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
+        result['wake_tabs_route_'+verb]=('controller-tabs','tabs.route.'+verb,'Manage opt-in stable routing rules, explicit pins and manual placement holds.',props,required,readonly)
     return result

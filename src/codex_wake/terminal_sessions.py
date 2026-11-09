@@ -23,9 +23,17 @@ def _digest(value):
 
 class TerminalSessions:
     READS=frozenset(('tabs.session.list','tabs.session.show'))
-    def __init__(self,root,*,tabs):
-        self.root=Path(root);self.tabs=tabs;self.directory=self.root/'terminal-sessions';self.path=self.directory/'registry.json'
+    def __init__(self,root,*,tabs,deadline=None):
+        self.root=Path(root);self.tabs=tabs;self.deadline=deadline;self.directory=self.root/'terminal-sessions';self.path=self.directory/'registry.json'
         self._restore_bindings()
+
+    def _timeout(self,seconds):
+        remaining=seconds if self.deadline is None else min(seconds,self.deadline-time.monotonic())
+        if remaining<=0:raise InventoryError('cycle_deadline','Terminal management cycle deadline elapsed.')
+        return remaining
+
+    def _deadline(self,seconds):
+        return time.monotonic()+self._timeout(seconds)
 
     def _restore_bindings(self):
         from .controller_tab_adapters import TmuxAttachmentTransport
@@ -36,7 +44,7 @@ class TerminalSessions:
             if record.get('deleted') or record.get('backend') not in ('tmux','byobu') or not record.get('native_session_id'):continue
             try:
                 transport=TmuxAttachmentTransport(record['server'],record['native_session_id'])
-                snap=transport.snapshot(time.monotonic()+2)
+                snap=transport.snapshot(self._deadline(2))
                 key=_digest({k:snap.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})
                 if key!=record.get('native_key'):continue
                 self.tabs.workspaces[record['id']]=dict(kind=record['backend'],label=record['name'],socket_path=record['server'],session_id=record['native_session_id'],transport=transport)
@@ -50,12 +58,16 @@ class TerminalSessions:
         write(self.path,state)
 
     def target(self):
-        return dict(host=self.tabs.host,environment=self.tabs.environment,workspace='@terminal-sessions',presentation='terminal',generation=_digest(self.state()))
+        return dict(host=self.tabs.host,environment=self.tabs.environment,workspace='@terminal-sessions',presentation='terminal',generation=_digest(dict(sessions=self.state(),rules=self.routing_rules())))
+
+    def routing_rules(self):
+        try:return read(self.root/'terminal-routing'/'routing.json').get('rules',{})
+        except FileNotFoundError:return {}
 
     def inventory(self,state=None):
         state=state or self.state();live={};by_native={v.get('native_key'):v for v in state['sessions'].values() if not v.get('deleted') and v.get('native_key')}
         for workspace,cfg in list(self.tabs.workspaces.items())[:64]:
-            try:snap=cfg['transport'].snapshot(time.monotonic()+2)
+            try:snap=cfg['transport'].snapshot(self._deadline(2))
             except (OSError,ValueError,subprocess.SubprocessError):continue
             native_key=_digest({k:snap.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})
             saved=by_native.get(native_key);sid=saved['id'] if saved else 'native-'+native_key[:24]
@@ -74,7 +86,7 @@ class TerminalSessions:
                         from .terminal_session_psmux import presence
                         if presence(self,saved)!='absent':fallback.update(state='unavailable',tab_count=None)
                         result.append(live.pop(sid,fallback));continue
-                    check=subprocess.run(['tmux','-S',saved['server'],'has-session','-t',saved['native_session_id']],capture_output=True,timeout=2)
+                    check=subprocess.run(['tmux','-S',saved['server'],'has-session','-t',saved['native_session_id']],capture_output=True,timeout=self._timeout(2))
                     if check.returncode!=1:fallback.update(state='unavailable',tab_count=None)
                 except (OSError,subprocess.SubprocessError):fallback.update(state='unavailable',tab_count=None)
             result.append(live.pop(sid,fallback))
@@ -159,7 +171,7 @@ class TerminalSessions:
         if record['backend']=='psmux':
             from .terminal_session_psmux import native
             return native(self,record,verb,**kwargs)
-        cfg=self.tabs.workspaces[record['workspace']];transport=cfg['transport'];deadline=time.monotonic()+10
+        cfg=self.tabs.workspaces[record['workspace']];transport=cfg['transport'];deadline=self._deadline(10)
         if verb=='rename':
             transport.command(deadline,'rename-session','-t',transport.session,kwargs['name'])
             cfg['label']=kwargs['name']
@@ -188,12 +200,12 @@ class TerminalSessions:
         command=['tmux','-S',str(server),'new-session','-d','-s',record['name'],'-P','-F','#{session_id}']
         if defaults.get('cwd'):command+=['-c',defaults['cwd']]
         command+=['--',*defaults.get('argv',['/bin/sh'])]
-        result=subprocess.run(command,capture_output=True,text=True,timeout=10)
+        result=subprocess.run(command,capture_output=True,text=True,timeout=self._timeout(10))
         if result.returncode:raise InventoryError('session_start_failed',result.stderr[:500])
         session=result.stdout.strip();workspace=record['id']
         cfg=dict(kind=record['backend'],label=record['name'],socket_path=str(server),session_id=session,transport=TmuxAttachmentTransport(str(server),session))
         self.tabs.workspaces[workspace]=cfg
-        snap=cfg['transport'].snapshot(time.monotonic()+5)
+        snap=cfg['transport'].snapshot(self._deadline(5))
         record.pop('opening',None)
         record['native_session_id']=session
         record['native_key']=_digest({k:snap.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})

@@ -14,10 +14,10 @@ from .terminal_tab_holds import TabHolds
 class TerminalRelocation:
     OPERATIONS=frozenset('tabs.relocate.'+v for v in ('preview','apply','status','undo'))
 
-    def __init__(self,root,*,tabs,automatic=False):
-        self.root=Path(root);self.tabs=tabs;self.automatic=automatic
+    def __init__(self,root,*,tabs,automatic=False,deadline=None):
+        self.root=Path(root);self.tabs=tabs;self.automatic=automatic;self.deadline=deadline
         self.directory=self.root/'terminal-relocation'
-        self.sessions=TerminalSessions(root,tabs=tabs)
+        self.sessions=TerminalSessions(root,tabs=tabs,deadline=deadline)
 
     def _save(self,record):
         write(self.directory/(record['plan_id']+'.json'),record)
@@ -49,6 +49,7 @@ class TerminalRelocation:
                     panes=resource['window']['panes'])
 
     def _resources(self):
+        self.sessions._timeout(10)
         return self.tabs.execute('tabs.list',{})['resources']
 
     def _current(self,reference):
@@ -63,6 +64,7 @@ class TerminalRelocation:
         return current
 
     def execute(self,operation,args):
+        self.sessions._timeout(10)
         if operation not in self.OPERATIONS:raise InventoryError('unsupported_operation','Unsupported relocation operation.')
         if not isinstance(args,dict) or set(args)-{'session','destination','selection','plan_id','receipt_id','expected_target','_request'}:
             raise InventoryError('invalid_argument','Unsupported relocation arguments.')
@@ -182,7 +184,7 @@ class TerminalRelocation:
         self._save(record)  # Intent is durable before sending the native effect.
         transport=self.tabs.workspaces[current['workspace']]['transport']
         try:
-            transport.command(time.monotonic()+10,'move-window','-d','-s',resource['window']['window_id'],
+            transport.command(self.sessions._deadline(10),'move-window','-d','-s',resource['window']['window_id'],
                               '-t',dest['snapshot']['session_id']+':')
         except Exception:
             effect['status']='undo_uncertain' if undo else 'uncertain'
@@ -203,7 +205,7 @@ class TerminalRelocation:
             if not transferred:continue
             bootstrap['status']='removing';self._save(record)
             try:
-                self.tabs.workspaces[current['workspace']]['transport'].command(time.monotonic()+5,'kill-window','-t',resource['window']['window_id'])
+                self.tabs.workspaces[current['workspace']]['transport'].command(self.sessions._deadline(5),'kill-window','-t',resource['window']['window_id'])
                 bootstrap['status']='removed'
             except Exception:bootstrap['status']='uncertain'
             self._save(record)

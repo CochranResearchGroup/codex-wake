@@ -10,7 +10,7 @@ from .tab_organization import TabOrganization, TabError, digest
 
 
 class ControllerTabs:
-    READS = frozenset(('tabs.session.list','tabs.session.show','tabs.relocate.status','tabs.format.status','tabs.format.inspect','tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
+    READS = frozenset(('tabs.session.list','tabs.session.show','tabs.relocate.status','tabs.route.list','tabs.route.show','tabs.route.status','tabs.format.status','tabs.format.inspect','tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
     MUTATIONS = frozenset(('tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input'))
 
     def __init__(self, root, *, workspaces, host, environment, host_managed=False):
@@ -31,6 +31,9 @@ class ControllerTabs:
         return TabReattach(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment)
 
     def execute(self, operation, arguments):
+        if operation.startswith('tabs.route.'):
+            from .terminal_routing import TerminalRouting
+            return TerminalRouting(self.root,tabs=self).execute(operation,arguments)
         if operation.startswith('tabs.relocate.'):
             from .terminal_relocation import TerminalRelocation
             return TerminalRelocation(self.root,tabs=self).execute(operation,arguments)

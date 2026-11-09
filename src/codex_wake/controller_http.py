@@ -280,7 +280,7 @@ class ProtectedOperations:
             result=self.operations.execute(operation,arguments)
             target=result['result']['target'] if operation.endswith('preview') else tabs.recovery_target()
             if not permitted(actor,target):raise AuthError('insufficient_scope')
-        elif operation in ('tabs.session.list','tabs.session.show','tabs.relocate.status'):
+        elif operation in ('tabs.session.list','tabs.session.show','tabs.relocate.status','tabs.route.list','tabs.route.show','tabs.route.status'):
             from .terminal_sessions import TerminalSessions
             tabs=self.operations.tabs
             if tabs is None or not permitted(actor,TerminalSessions(tabs.root,tabs=tabs).target()):
