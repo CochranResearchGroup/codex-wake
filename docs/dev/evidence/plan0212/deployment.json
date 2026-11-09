@@ -1,0 +1,63 @@
+{
+  "status": "DEPLOYED",
+  "pr": 536,
+  "source_commit": "74d6ea748767d164251b4ee32d81c062db45e16e",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-74d6ea7",
+  "previous_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-bae92f9",
+  "wheel_sha256": "53f2a3ef358d16bf1fee7dcb05598170e8a0631b4435313d7817340131acc3c0",
+  "package_members_verified": 305,
+  "launchers_updated": 9,
+  "review": {
+    "base": "fbfb41075f12b0567a714eac1d495741b31fb4ef",
+    "tip": "acf263aaaf654b5135d08782a100ad21c0c891f0",
+    "standards_findings": 0,
+    "spec_findings": 0,
+    "report": "review/report.md"
+  },
+  "local_http": {
+    "version": 1,
+    "url": "http://127.0.0.1:37185",
+    "uid": 1000,
+    "pid": 4180684,
+    "process": {
+      "start_time_ticks": 34886429,
+      "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a"
+    }
+  },
+  "host_activation": {
+    "global_mcp_args_updated": true,
+    "operator_file_validated": true,
+    "existing_root_grants_unchanged": true,
+    "native_reload": "Initial request TimeoutError retained; no replay. Reconciled through new host-mode process observation and actual native MCP inbox success."
+  },
+  "live_native_acceptance": {
+    "status": "PASS",
+    "native_thread_identity_verified": true,
+    "issued_actor_generation": 1,
+    "actor_revoked": false,
+    "root_unchanged": true,
+    "live_native_mcp_inbox": "PASS empty inbox 0.483s",
+    "reload_initial": "TimeoutError; no retry",
+    "reload_reconciled": "New host-mode process observed and actual native MCP inbox succeeded",
+    "provider_calls": 0,
+    "figurelabs_question_claim_reply": "NOT_RUN"
+  },
+  "final_census": {
+    "status": "PASS",
+    "native_harnesses_preserved": 30,
+    "native_exited_independently": 0,
+    "stock_unchanged": true,
+    "protected_files_unchanged": 10,
+    "host_mode_mcp_processes": 113,
+    "host_mode_mcp_rss_kib": 8361540
+  },
+  "rollback": {
+    "command": "python /home/ecochran76/.local/state/codex-wake/native-mailbox-0212-deploy/rollback.py",
+    "previous_launchers_and_http": true,
+    "global_mcp_args_restored_selectively": true,
+    "config_roundtrip_fixture": "PASS; unrelated changes preserved; lexical-spacing assertion corrected"
+  },
+  "providers": 0,
+  "figurelabs_question_claim_reply": "NOT_RUN; fixture exchange qualified, real FigureLabs acceptance remains separate",
+  "hosted_ci": false
+}

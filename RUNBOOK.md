@@ -8814,3 +8814,30 @@ memory-write request; non-write receipt remains outside Git.
 
 LOCAL-P212 publication: draft PR536 on fix/native-mailbox-bootstrap; no merge or
 working-host activation. Exact product inputs remain bd79923.
+
+
+## Turn | 2026-11-09 | Review, merge and activate native mailbox host delegation
+
+PR536 reviewed serial Standards/Spec againstfbfb410...acf263a:0accepted findings
+on either axis. Merged74d6ea7 under explicit operator authorization. Exact previously
+qualified wheel53f2a3ef reused, no rebuild/dependency upgrade;305members verified.
+Nine launchers switched, controller HTTP restarted at original37185/nativeendpoint,
+completion installed. Existing bus operator and workspace enrollment validated;
+only global MCP args changed to host delegation; roots/grants not altered.
+
+Generated local native schema confirmed supported config/mcpServer/reload(null).
+One reload request timed out; retained uncertain receipt, no replay. Process
+readback showed new host-mode workers. First native MCP inbox metadata-read timed
+out amid startup; subsequent independent native metadata read PASS0.212s and
+actual native MCP inbox PASS0.483s, self actor generation1 created in existingroot.
+No question/prompt sent to another session; real FigureLabs T06 remains pending.
+Fresh OS census:30native harness births preserved, stock hash unchanged,10protected
+files unchanged;113host-mode MCP processes,8361540KiB aggregateRSS at readback.
+No pre-reload RSS baseline is claimed. No broad process cleanup/restart occurred.
+
+Rollback restores previous nine launchers/listener and selectively restores MCP
+args, preserving unrelated config changes; isolated roundtrip fixture PASS after
+correcting an overstrict lexical-spacing expectation. See plan0212/deployment.json
+and private native-mailbox-0212-deploy receipts/scripts. No hostedCI/providerturns.
+Preexisting repository .codex/config.toml edit preserved. Memory forbidden: no
+explicit memory-write request; non-write receipt kept outsideGit.

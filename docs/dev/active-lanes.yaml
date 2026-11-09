@@ -9,11 +9,11 @@ lanes:
     branch: fix/native-mailbox-bootstrap
     target: origin/main
     plan_state: CLOSED
-    custody_state: PUBLISHED_REVIEW
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: []
     updated_at: 2026-11-09
-    disposition: Draft PR536; source fix and private installed fixture qualified; working-host activation and real FigureLabs acceptance remain separate
+    disposition: PR536 merged74d6ea7; exact wheel deployed; shared MCP host delegation active and actual native inbox PASS; real FigureLabs exchange remains separate
   - id: P211
     owner: primary / ecochran76
     objective: Close named terminal session CRUD and routing tickets

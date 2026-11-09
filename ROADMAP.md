@@ -1529,5 +1529,7 @@ See the plan's final report and deployment receipt.
 Source implementation complete: [LOCAL-P212](docs/dev/plans/0212-2026-11-09-native-mailbox-bootstrap.md).
 Opt-in host delegation provisions separate actors for verified native callers in
 already enrolled roots; shared MCP no longer needs a fixed per-thread capability.
-Public question/claim/reply and installed package fixture qualify. Integration,
-working-host activation and real FigureLabs T06 acceptance remain separate.
+Public question/claim/reply and installed package fixture qualify. PR536 merged
+as74d6ea7 and the exact wheel is deployed. Shared MCP host delegation is configured
+and actual native mailbox self-registration/inbox pass; real FigureLabs T06
+question/claim/reply remains separate.

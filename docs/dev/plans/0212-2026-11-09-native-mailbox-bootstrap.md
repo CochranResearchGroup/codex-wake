@@ -50,3 +50,19 @@ no explicit memory-write request. Supplied current evidence suffices; Graphiti
 historical discovery skipped to avoid revisiting the established setup diagnosis.
 
 Publication: draft PR536, https://github.com/CochranResearchGroup/codex-wake/pull/536.
+
+## Subsequent authorized review, merge and deployment
+
+Operator requested review/merge/deploy. Standards0/Spec0 accepted findings;
+PR536 merged74d6ea7. Exact qualified wheel deployed to release0.22.0.dev2-74d6ea7,
+all305members equal; nine launchers switched, local HTTP controller restarted at
+original endpoint, completion installed. Existing workspace enrollment/operator
+validated; only shared global MCP launch args changed to opt-in host delegation.
+No root grant changes. Supported native config/mcpServer/reload timed out;
+no retry. New host-mode workers observed, metadata-read timeout retained, then
+actual native MCP self-registration/inbox PASS0.483s. Reload effects reconciled
+without requiring another reload. All30 observed native harness births preserved,
+stock hash unchanged, ten protected files unchanged. Rollback includes selective
+MCP args restoration, independently roundtrip-tested without production rollback.
+Real FigureLabs question/claim/reply remains unexecuted; no provider prompts.
+See deployment.json; initial source-only delivery statements are historical.
