@@ -33,17 +33,31 @@ try:
   reopened=ControllerTabs(Path(root),workspaces={},host='test',environment='fixture');running=reopened.execute('tabs.session.show',dict(session='workers'))['session'];assert running['state']=='running';checks.append('restart-restores-exact-generation')
   try:reopened.execute('tabs.session.delete',dict(session='workers'));raise AssertionError('populated deleted')
   except ValueError:checks.append('populated-delete-refused')
+  empty=reopened.execute('tabs.session.create',dict(name='unsupported-move',backend='psmux'))['session']
+  try:
+   reopened.execute('tabs.relocate.preview',dict(session='workers',destination=empty['id']))
+   raise AssertionError('psmux cross-session move accepted')
+  except ValueError:checks.append('psmux-cross-session-move-unsupported-before-effect')
+  reopened.execute('tabs.session.delete',dict(session=empty['id']))
+  deleted=reopened.execute('tabs.session.delete',dict(session='workers',terminate=True))
+  result['first_native_delete_status']=deleted['status']
+  if deleted['status']=='partial':deleted=reopened.execute('tabs.session.delete',dict(plan_id=deleted['plan_id']))
+  assert deleted['status']=='deleted',deleted
+  replacement=reopened.execute('tabs.session.create',dict(name='workers',backend='psmux'))['session']
+  assert replacement['id']!=created['id'] and replacement['state']=='empty'
+  reopened.execute('tabs.session.delete',dict(session=replacement['id']))
+  checks.append('native-terminate-reconcile-tombstone-name-reuse-empty-delete')
   final=transport.snapshot(time.monotonic()+10);assert original['windows']==final['windows'];checks.append('peer-server-unchanged')
- result=dict(status='passed',checks=checks,namespace=ns,identity=ident,bridge_sha256=hashlib.sha256(bridge.read_bytes()).hexdigest(),windows_python=py,provider_calls=0,production_touched=False)
+ result=dict(result,status='passed',checks=checks,namespace=ns,identity=ident,bridge_sha256=hashlib.sha256(bridge.read_bytes()).hexdigest(),windows_python=py,provider_calls=0,production_touched=False)
 except Exception as e:
  result=dict(status='failed',checks=checks,namespace=ns,error=repr(e));raise
 finally:
  # Close only known owned names via exact native bridge lifecycle.
- for name in ['workers','bots','seed']:
+ for name in ['workers','bots','seed','unsupported-move']:
   try:
    if bootstrap(name,'session_probe')['present']:
     d=json.loads(subprocess.check_output(base+['--session',name,'--describe'],text=True,timeout=15));t=PsmuxAttachmentTransport(ConfiguredBridge(base+['--session',name,'--server-pid',str(d['identity']['pid']),'--server-birth',str(d['identity']['creation_filetime'])]),generation=d['generation'])
     for w in t.snapshot(time.monotonic()+10)['windows']:t.lifecycle('close',dict(window=w['window_id']),time.monotonic()+10)
   except Exception as e:result['cleanup_error']=repr(e)
- result['final_presence']={name:bootstrap(name,'session_probe') for name in ['workers','bots','seed']}
+ result['final_presence']={name:bootstrap(name,'session_probe') for name in ['workers','bots','seed','unsupported-move']}
  Path('/tmp/qualification534-green.json').write_text(json.dumps(result,indent=2));print(json.dumps(result));shutil.rmtree(directory)
