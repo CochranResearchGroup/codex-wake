@@ -40,11 +40,19 @@
       "blockers": [
         518
       ],
-      "state": "running",
+      "state": "validated",
       "owner": "/root/format519",
       "worker_base": "bf1f6b5",
       "branch": "feat/tab-format-519",
-      "worktree": "/tmp/codex-wake-format-519"
+      "worktree": "/tmp/codex-wake-format-519",
+      "tracker_state": "CLOSED",
+      "worker_result_sha": "98d1d6d",
+      "integration_sha": "c3a7c73",
+      "validation": [
+        "native-pass.json:9 checks pass; namespace absent",
+        "Python3.11/3.12:6 focused each",
+        "integrated:8 format/projection+3 protocol pass"
+      ]
     },
     {
       "index": 3,
@@ -54,11 +62,15 @@
       "blockers": [
         518
       ],
-      "state": "running",
+      "state": "validated",
       "owner": "/root/format520",
       "worker_base": "bf1f6b5",
       "branch": "feat/tab-format-520",
-      "worktree": "/tmp/codex-wake-format-520"
+      "worktree": "/tmp/codex-wake-format-520",
+      "tracker_state": "CLOSED",
+      "worker_result_sha": "23cbde12c5dc51d5ae142aacec6d9b11c2ed9700",
+      "integration_sha": "e274810",
+      "validation": "11 integrated formatting/projection checks pass; 5 monitor regression checks passed on worker. Installed tmux monitor-death expiry PASS after20-second threshold, process preserved and original session/window settings restored. Forty-window update6.211s under10s deadline, not a5-second cadence claim. Evidence: docs/dev/evidence/plan0210/520-validation.md and native-expiry/forty-window receipts."
     },
     {
       "index": 4,
@@ -68,17 +80,15 @@
       "blockers": [
         518
       ],
-      "state": "integrated",
+      "state": "validated",
       "owner": "/root/format521",
       "worker_base": "bf1f6b5",
       "branch": "feat/tab-format-521",
       "worktree": "/tmp/codex-wake-format-521",
       "worker_result_sha": "87b6686c35afabf615a0c02c0b99a590e3be011b",
       "integration_sha": "374d4d1",
-      "validation": [
-        "8 integrated formatting/projection tests pass"
-      ],
-      "remaining": "Persist projection details via shared520 owner before tracker closure"
+      "validation": "Pure projection5 and controller3 pass, integrated11 formatting checks pass after520. Mixed independently fresh attention, type/activity hues, optional configured/observed model/provider badges and exact-dimension style rules. Projection details/provenance now persisted by520 shared apply and exposed in inspect. Evidence: docs/dev/evidence/plan0210/521/projection.json. Final native rendering/fallback remains523.",
+      "tracker_state": "CLOSED"
     },
     {
       "index": 5,
@@ -88,9 +98,11 @@
       "blockers": [
         518
       ],
-      "state": "pending",
+      "state": "running",
       "owner": "/root/format521",
-      "reason": "Shared tab_formatting.py write ownership serialized after520"
+      "branch": "feat/tab-format-522",
+      "worktree": "/tmp/codex-wake-format-522",
+      "worker_base": "e274810"
     },
     {
       "index": 6,
@@ -101,8 +113,11 @@
         518,
         519
       ],
-      "state": "pending",
-      "owner": null
+      "state": "running",
+      "owner": "/root/format519",
+      "branch": "feat/tab-format-523",
+      "worktree": "/tmp/codex-wake-format-523",
+      "worker_base": "e274810"
     },
     {
       "index": 7,

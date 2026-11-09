@@ -8639,3 +8639,13 @@ logs retained. Exact originals survive rollback/re-enable and partial restoratio
 retry. Workers519/520/521 use isolated worktrees from bf1f6b5; three substantive
 lanes maximum. Native psmux option inheritance and clock-expression differences
 are under bounded qualification; no production backend settings changed.
+
+## Turn | 2026-11-09 | Native formatting and expiry slices validated
+
+Integrated519 Windows finite bridge with exact local/inherited originals and
+read-back native PowerShell/WSL/MCP acceptance; owned namespace cleanup confirmed.
+Integrated520 automatic projection/native clock expiry and521 mixed-pane visual
+projection; persisted details expose provenance through inspect. Tracker518–521
+closed for integration-branch delivery.40-tab tmux measurement6.211s is retained
+as a bounded result, not a5s cadence guarantee. Workers522/523 own persistent
+policy/theme holds and installed rendering/fallback;524 remains blocked on them.
