@@ -1,0 +1,30 @@
+======================================================================
+FAIL: test_reset_holds_currently_linked_window_and_retries_after_unlink (test_tab_format_linked_rollback.LinkedFormattingRollbackTests.test_reset_holds_currently_linked_window_and_retries_after_unlink)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-format-review-fix/tests/test_tab_format_linked_rollback.py", line 71, in test_reset_holds_currently_linked_window_and_retries_after_unlink
+    self.verify_linked_hold_and_retry('reset')
+  File "/tmp/codex-wake-format-review-fix/tests/test_tab_format_linked_rollback.py", line 46, in verify_linked_hold_and_retry
+    self.assertEqual(result['status'],'partial')
+AssertionError: 'reset' != 'partial'
+- reset
++ partial
+
+
+======================================================================
+FAIL: test_rollback_holds_currently_linked_window_and_retries_after_unlink (test_tab_format_linked_rollback.LinkedFormattingRollbackTests.test_rollback_holds_currently_linked_window_and_retries_after_unlink)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-format-review-fix/tests/test_tab_format_linked_rollback.py", line 68, in test_rollback_holds_currently_linked_window_and_retries_after_unlink
+    self.verify_linked_hold_and_retry('rollback')
+  File "/tmp/codex-wake-format-review-fix/tests/test_tab_format_linked_rollback.py", line 46, in verify_linked_hold_and_retry
+    self.assertEqual(result['status'],'partial')
+AssertionError: 'rolled_back' != 'partial'
+- rolled_back
++ partial
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.117s
+
+FAILED (failures=2)

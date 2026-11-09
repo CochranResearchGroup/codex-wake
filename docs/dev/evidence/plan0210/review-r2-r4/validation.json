@@ -1,0 +1,65 @@
+{
+  "base": "58b163177e545ce97436f61adf78d89a00debd2c",
+  "review_packet": "primary review1 / remediation1; counters untouched",
+  "findings": {
+    "R2": "fixed: current linked windows held for rollback/reset; retry after unlink",
+    "R3": "fixed: unused automatic parameter and keyword call removed",
+    "R4": "fixed: immutable standalone vocabulary reused"
+  },
+  "source_hashes": {
+    "src/codex_wake/tab_formatting.py": "daf7eac04919a156dc9e6cf733e28670ed5e7c36c7aad1a3c5b6222e5d5af3cc",
+    "src/codex_wake/tab_psmux_bridge.py": "9273745f40c3925e8dfe57d0a6ae4c119571bfa272d70d59d26a15281c6de065",
+    "tests/test_tab_format_linked_rollback.py": "2f6da5bb0371a097a0efd5e45bccf5cabf52e32a0aead5ff4d7ba23593f00c14"
+  },
+  "red": {
+    "command": "PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p test_tab_format_linked_rollback.py -q",
+    "tests": 2,
+    "result": "failed_before_fix",
+    "evidence": "red-linked.log"
+  },
+  "green": [
+    {
+      "selection": "test_tab_format_linked_rollback.py",
+      "tests": 2,
+      "result": "passed",
+      "evidence": "green-linked.log"
+    },
+    {
+      "interpreter": "/home/ecochran76/workspace.local/codex-wake/.venv/bin/python",
+      "python": "3.12",
+      "selection": "test_tab_format*.py",
+      "tests": 33,
+      "seconds": 22.72,
+      "result": "passed"
+    },
+    {
+      "interpreter": "/home/ecochran76/workspace.local/codex-wake/.venv/bin/python",
+      "python": "3.12",
+      "selection": "test_tab_psmux*.py",
+      "tests": 7,
+      "result": "passed"
+    },
+    {
+      "interpreter": "/home/ecochran76/workspace.local/codex-wake/.venv/bin/python",
+      "python": "3.12",
+      "selection": "test_tab_contract.py",
+      "tests": 5,
+      "result": "passed"
+    },
+    {
+      "interpreter": "/tmp/codex-wake-p210-py311/bin/python",
+      "python": "3.11",
+      "command": "PYTHONPATH=src:tests /tmp/codex-wake-p210-py311/bin/python -m unittest test_tab_format_linked_rollback test_tab_psmux_formatting test_tab_psmux test_tab_format_projection test_tab_format_rendering test_tab_formatting test_tab_contract -q",
+      "tests": 27,
+      "seconds": 12.711,
+      "result": "passed"
+    }
+  ],
+  "finite_vocabulary": "exact equality with canonical WINDOW_OPTIONS/SESSION_OPTIONS passed",
+  "production_touched": false,
+  "native_windows_jobs": 0,
+  "provider_calls": 0,
+  "tier": "focused",
+  "full_suite_run": false,
+  "memory_disposition": "forbidden: explicit delegated task prohibits memory writes"
+}

@@ -167,10 +167,12 @@ class TabFormatting:
                 record.update(enabled=False,paused=verb=='pause');self.save(state)
                 if verb=='pause':return dict(status='paused',target=expected)
                 failures=[]
-                live={w['window_id'] for w in snapshot['windows']}
+                live={w['window_id']:w for w in snapshot['windows']}
                 for window,saved in record['windows'].items():
                     if window not in live:
                         failures.append(dict(window=window,code='window_missing'));continue
+                    if live[window].get('linked'):
+                        failures.append(dict(window=window,code='linked_window'));continue
                     try:
                         wanted={k:v['value'] if v['explicit'] else None for k,v in saved['original'].items()}
                         actual=transport.formatting('write',dict(window=window,values=wanted),deadline)
@@ -207,7 +209,7 @@ class TabFormatting:
             failures=self.apply(state,record,snapshot,resources,transport,deadline,policy=policy,resume_manual=verb=='resume')
             return dict(status='partial' if failures else 'applied',target=expected,failures=failures)
 
-    def apply(self,state,record,snapshot,resources,transport,deadline,*,automatic=False,policy=None,resume_manual=False):
+    def apply(self,state,record,snapshot,resources,transport,deadline,*,policy=None,resume_manual=False):
         """Apply one snapshot under the owner lock, saving originals first."""
         from .tab_format_projection import project
         from .tab_format_expiry import expiring_options
@@ -349,7 +351,7 @@ class TabFormatting:
                     # that was not represented in the trusted bounded sample.
                     physical=dict(physical,windows=[w for w in physical['windows'] if w['window_id'] in rows
                         and w['panes']==rows[w['window_id']]['window']['panes']])
-                    failures=self.apply(state,record,physical,rows,transport,deadline,automatic=True,policy=policy)
+                    failures=self.apply(state,record,physical,rows,transport,deadline,policy=policy)
                     results.append(dict(workspace=name,status='partial' if failures else 'applied',failures=failures))
                 except Exception as error:
                     results.append(dict(workspace=name,status='unavailable',code=getattr(error,'code','formatting_unavailable')))

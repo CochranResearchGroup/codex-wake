@@ -20,6 +20,13 @@ import sys
 import time
 
 
+# Immutable standalone vocabulary: the validator and reader/writer must expose
+# exactly the same finite options without importing Linux controller owners.
+FORMATTING_WINDOW_OPTIONS=('window-status-format','window-status-current-format',
+                           'window-status-style','window-status-current-style')
+FORMATTING_SESSION_OPTIONS=('status-interval','@wake-format-clock')
+
+
 class BridgeError(ValueError):
     def __init__(self, code, message):
         super().__init__(message)
@@ -396,8 +403,7 @@ class PsmuxHost:
         session=action.endswith('-session')
         if action!='refresh' and not session and args.get('window') not in {w['window_id'] for w in snapshot['windows']}:
             raise BridgeError('stale_target','Exact current window required')
-        options=('status-interval','@wake-format-clock') if session else (
-            'window-status-format','window-status-current-format','window-status-style','window-status-current-style')
+        options=FORMATTING_SESSION_OPTIONS if session else FORMATTING_WINDOW_OPTIONS
         if action.startswith('write'):
             values=args['values']
             if (not isinstance(values,dict) or set(values)-set(options)
@@ -422,8 +428,7 @@ class PsmuxHost:
             self.command('refresh-client','-S')
             return dict(status='refreshed')
         session=action.endswith('-session')
-        options=('status-interval','@wake-format-clock') if session else (
-            'window-status-format','window-status-current-format','window-status-style','window-status-current-style')
+        options=FORMATTING_SESSION_OPTIONS if session else FORMATTING_WINDOW_OPTIONS
         if session:
             flags=[];target=self.session
         else:
