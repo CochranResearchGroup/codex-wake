@@ -133,3 +133,19 @@ class RelocationTests(unittest.TestCase):
         receipt=self.execute('apply',plan_id=self.preview()['plan_id'])
         self.assertEqual(receipt['outcomes'][0]['status'],'moved')
         self.assertFalse(marker.exists(),'Relocation launched a saved command instead of an inert owned container.')
+
+    def test_unknown_only_batch_reports_uncertainty_and_never_replays_dispatch(self):
+        import os
+        import shutil
+        from unittest.mock import patch
+        shim=self.root/'bin';shim.mkdir();sent=self.root/'dispatches'
+        (shim/'tmux').write_text('#!/bin/sh\nfor argument in "$@"; do\n if [ "$argument" = move-window ]; then printf x >> '+str(sent)+'; exit 1; fi\ndone\nexec '+shutil.which('tmux')+' "$@"\n')
+        (shim/'tmux').chmod(0o700)
+        plan=self.preview()
+        with patch.dict(os.environ,{'PATH':str(shim)+os.pathsep+os.environ['PATH']}):
+            receipt=self.execute('apply',plan_id=plan['plan_id'])
+            self.assertEqual(receipt['outcomes'][0]['status'],'uncertain')
+            self.assertEqual(receipt['status'],'uncertain')
+            self.execute('status',plan_id=plan['plan_id'])
+            self.execute('apply',plan_id=plan['plan_id'])
+        self.assertEqual(sent.read_text(),'x')

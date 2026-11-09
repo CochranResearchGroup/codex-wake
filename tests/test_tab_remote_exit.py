@@ -25,11 +25,11 @@ class RemoteTabExitTests(unittest.TestCase):
         try:
             with tempfile.TemporaryDirectory() as directory:
                 token=Path(directory)/'token';token.write_text('synthetic-token');token.chmod(0o600)
-                for phase in ('terminal','uncertain'):
+                for phase,status in (('terminal','partial'),('terminal','held'),('terminal','uncertain'),('uncertain',None)):
                     outcome['phase']=phase
-                    outcome['result']={'status':'partial'} if phase=='terminal' else None
+                    outcome['result']={'status':status} if status is not None else None
                     for transport in ('api','mcp'):
-                        with self.subTest(phase=phase,transport=transport):
+                        with self.subTest(phase=phase,status=status,transport=transport):
                             output=io.StringIO()
                             with contextlib.redirect_stdout(output):
                                 code=main(['controller','remote','--endpoint',f'http://127.0.0.1:{server.server_port}',

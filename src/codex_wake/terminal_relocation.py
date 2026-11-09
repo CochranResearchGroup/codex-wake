@@ -132,7 +132,7 @@ class TerminalRelocation:
                 # Source placement after a lost reply does not establish non-submission.
                 effect['status']='undo_uncertain' if undo else 'uncertain'
         statuses=[e['status'] for e in record['outcomes']]
-        record['status']='completed' if all(s in ('moved','undone') for s in statuses) else 'partial' if any(s in ('moved','undone') for s in statuses) else 'held'
+        record['status']='completed' if all(s in ('moved','undone') for s in statuses) else 'partial' if any(s in ('moved','undone') for s in statuses) else 'uncertain' if any(s in ('moving','uncertain','undoing','undo_uncertain') for s in statuses) else 'held'
         self._save(record)
 
     def _adopt(self,session):
