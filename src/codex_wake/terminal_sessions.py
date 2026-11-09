@@ -30,6 +30,9 @@ class TerminalSessions:
     def _restore_bindings(self):
         from .controller_tab_adapters import TmuxAttachmentTransport
         for record in self.state()['sessions'].values():
+            if record.get('backend')=='psmux' and record.get('native_key') and not record.get('deleted'):
+                from .terminal_session_psmux import restore
+                restore(self,record)
             if record.get('deleted') or record.get('backend') not in ('tmux','byobu') or not record.get('native_session_id'):continue
             try:
                 transport=TmuxAttachmentTransport(record['server'],record['native_session_id'])
@@ -57,7 +60,7 @@ class TerminalSessions:
             native_key=_digest({k:snap.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})
             saved=by_native.get(native_key);sid=saved['id'] if saved else 'native-'+native_key[:24]
             label=cfg.get('label') or snap.get('session_name') or workspace
-            record=dict(saved or {},id=sid,name=label if not saved else saved['name'],backend=cfg['kind'],server=str(cfg.get('socket_path') or snap.get('server')),native_key=native_key,workspace=workspace,state='running',tab_count=len(snap['windows']),snapshot=snap,labels=(saved or {}).get('labels',[]),defaults=(saved or {}).get('defaults',{}),description=(saved or {}).get('description',''),managed=bool(saved))
+            record=dict(saved or {},id=sid,name=label if not saved else saved['name'],backend=cfg['kind'],server=(snap.get('server_identity',{}).get('namespace') if cfg['kind']=='psmux' else str(cfg.get('socket_path') or snap.get('server'))),native_key=native_key,workspace=workspace,state='running',tab_count=len(snap['windows']),snapshot=snap,labels=(saved or {}).get('labels',[]),defaults=(saved or {}).get('defaults',{}),description=(saved or {}).get('description',''),managed=bool(saved))
             live[sid]=record
         result=[]
         for sid,saved in state['sessions'].items():
@@ -65,6 +68,10 @@ class TerminalSessions:
             fallback=dict(saved,state='empty',tab_count=0,workspace=None,snapshot=None,managed=True)
             if sid not in live and saved.get('native_session_id'):
                 try:
+                    if saved['backend']=='psmux':
+                        from .terminal_session_psmux import presence
+                        if presence(self,saved)!='absent':fallback.update(state='unavailable',tab_count=None)
+                        result.append(live.pop(sid,fallback));continue
                     check=subprocess.run(['tmux','-S',saved['server'],'has-session','-t',saved['native_session_id']],capture_output=True,timeout=2)
                     if check.returncode!=1:fallback.update(state='unavailable',tab_count=None)
                 except (OSError,subprocess.SubprocessError):fallback.update(state='unavailable',tab_count=None)
@@ -111,7 +118,9 @@ class TerminalSessions:
             if verb in ('create','ensure'):
                 name=_name(args.get('name'));backend=args.get('backend','tmux')
                 if backend not in ('tmux','byobu','psmux'):raise InventoryError('invalid_argument','Unsupported terminal backend.')
-                server=args.get('server') or next((v['server'] for v in records if v['backend'] in ('tmux','byobu')),str(self.directory/'tmux.sock'))
+                server=args.get('server') or next((v['server'] for v in records if (v['backend']=='psmux' if backend=='psmux' else v['backend'] in ('tmux','byobu'))),None)
+                if backend=='psmux' and not server:raise InventoryError('unsupported_target','Select an explicit host-configured psmux namespace.')
+                server=server or str(self.directory/'tmux.sock')
                 existing=[v for v in records if v['name']==name and v['server']==server]
                 if existing and verb=='create':raise InventoryError('name_conflict','Session name already exists on this terminal server.')
                 defaults=self._settings({'defaults':args.get('defaults',{})})['defaults']
@@ -126,7 +135,9 @@ class TerminalSessions:
                 if verb=='update':
                     changes=self._settings(args.get('changes'))
                     if any(v['id']!=record['id'] and v['server']==record['server'] and v['name']==changes.get('name',record['name']) for v in records):raise InventoryError('name_conflict','Session name already exists.')
-                    if 'name' in changes and observed['state']=='running':self.native(observed,'rename',name=changes['name'])
+                    if 'name' in changes and observed['state']=='running':
+                        updated=self.native(observed,'rename',name=changes['name'])
+                        if record['backend']=='psmux':record.update({k:updated[k] for k in ('native_key','native_session_id','psmux_bridge_command')})
                     if 'formatting' in changes and observed['state']=='running':
                         from .tab_formatting import TabFormatting
                         TabFormatting(self.root,tabs=self.tabs).execute('tabs.format.configure',dict(workspace=observed['workspace'],policy=changes['formatting']))

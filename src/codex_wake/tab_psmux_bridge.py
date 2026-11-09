@@ -221,7 +221,7 @@ def check_private_manifest(path):
 
 
 class PsmuxHost:
-    ACTIONS = {'snapshot', 'discover', 'capture', 'visible_screen', 'swap', 'lifecycle', 'attach_saved', 'formatting', 'formatting_batch'}
+    ACTIONS = {'snapshot', 'discover', 'capture', 'visible_screen', 'swap', 'lifecycle', 'attach_saved', 'formatting', 'formatting_batch', 'session_rename'}
 
     def __init__(self, *, namespace, session, server_pid=None, server_birth=None, attach_directory=None):
         if os.name != 'nt':
@@ -322,7 +322,7 @@ class PsmuxHost:
                         window['attach_intent'] = receipt['intent']
                 except (BridgeError, OSError, ValueError, KeyError):
                     pass  # Unknown relay evidence must not become a false binding.
-        return dict(server=str(self.identity['pid']), session_id=next(iter(identities)),
+        return dict(server=str(self.identity['pid']), session_id=next(iter(identities)), session_name=selected[0]['session_name'],
                     socket_identity=[self.identity['pid'], self.identity['creation_filetime']],
                     windows=sorted(windows.values(), key=lambda w: w['index']),
                     server_identity=self.identity, windows_server=self.identity)
@@ -384,6 +384,13 @@ class PsmuxHost:
                 for item in requests:
                     try:result.append(self._formatting(item,snapshot))
                     except BridgeError as error:result.append(dict(error=dict(code=error.code,message=str(error))))
+            elif action == 'session_rename':
+                if set(args)!={'name'}:raise BridgeError('invalid_argument','Exact new session name required')
+                name=self._text(args['name'],'name')
+                if any(c in name for c in ':.'):raise BridgeError('invalid_argument','Exact session name required')
+                self.command('rename-session','-t',self.session,name)
+                self.session=name
+                result=dict(name=name)
             elif action == 'attach_saved':
                 result = self._attach_saved(args, snapshot)
             else:
@@ -552,6 +559,30 @@ class PsmuxHost:
         return dict(window_id=wid, workspace_state='present' if present else 'removed', snapshot=after)
 
 
+def session_management(namespace, session, request):
+    """Finite bootstrap actions for a host-selected namespace, without a live pin."""
+    if os.name != 'nt' or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,95}',namespace):
+        raise BridgeError('unsupported_target','Native Windows and exact host namespace required')
+    PsmuxHost._text(session,'session')
+    if any(c in session for c in ':.'):
+        raise BridgeError('invalid_argument','Exact session name required')
+    if not isinstance(request,dict) or set(request)!={'action','arguments'}:
+        raise BridgeError('invalid_argument','Finite session request required')
+    action,args=request['action'],request['arguments']
+    if action not in ('session_probe','session_create') or args!={}:
+        raise BridgeError('unsupported_operation','Unsupported finite session action')
+    binary=Path(os.environ['LOCALAPPDATA'])/'Microsoft/WinGet/Links/psmux.exe'
+    probe=subprocess.run([str(binary),'-L',namespace,'has-session','-t',session],capture_output=True,text=True,timeout=4)
+    if probe.returncode not in (0,1):
+        raise BridgeError('attachment_unavailable','Native session presence is unknown')
+    if action=='session_probe':return dict(result=dict(present=probe.returncode==0))
+    if probe.returncode==0:raise BridgeError('name_conflict','Native session already exists; reconcile before creating')
+    reply=subprocess.run([str(binary),'-L',namespace,'new-session','-d','-s',session,'--','cmd.exe','/d','/k'],capture_output=True,text=True,timeout=8)
+    if reply.returncode:raise BridgeError('uncertain_effect','Native session creation failed; reconcile before retry')
+    host=PsmuxHost(namespace=namespace,session=session)
+    return dict(result=dict(identity=host.identity,generation=host.generation))
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--namespace', required=True)
@@ -559,10 +590,16 @@ def main(argv=None):
     parser.add_argument('--server-pid', type=int)
     parser.add_argument('--server-birth', type=int)
     parser.add_argument('--describe', action='store_true')
+    parser.add_argument('--session-management', action='store_true')
     parser.add_argument('--attach-directory')
     args = parser.parse_args(argv)
     host = None
     try:
+        if args.session_management:
+            raw=sys.stdin.buffer.read(65537)
+            if len(raw)>65536:raise BridgeError('capacity','Finite bridge input exceeds bound')
+            print(json.dumps(session_management(args.namespace,args.session,json.loads(raw))))
+            return 0
         host = PsmuxHost(namespace=args.namespace, session=args.session,
                          server_pid=args.server_pid, server_birth=args.server_birth, attach_directory=args.attach_directory)
         if args.describe:
