@@ -196,10 +196,10 @@ class TerminalSessions:
             cfg['label']=kwargs['name']
         else:raise InventoryError('unsupported_operation','Unsupported native session action.')
 
-    def open(self,record):
+    def open(self,record,*,container_only=False):
         current=self.resolve(record['id'])
         if current['state']=='running':
-            if current.get('profile_seed',{}).get('status') in ('pending','held','uncertain'):
+            if not container_only and current.get('profile_seed',{}).get('status') in ('pending','held','uncertain'):
                 raise InventoryError('uncertain_effect','Prior profile seed is retained for inspection; no launch was replayed.')
             return current
         if record['backend']=='psmux':
@@ -209,7 +209,7 @@ class TerminalSessions:
         server=Path(record['server'])
         known={str(c.get('socket_path')) for c in self.tabs.workspaces.values() if c['kind'] in ('tmux','byobu')}
         if str(server) not in known and server!=self.directory/'tmux.sock':raise InventoryError('unsupported_target','Select a discovered terminal server or the private session server.')
-        profile=record.get('defaults',{}).get('profile')
+        profile=None if container_only else record.get('defaults',{}).get('profile')
         profile_owner=self.tabs.profile_owner() if profile else None
         if profile_owner is not None:profile_owner.selection(profile)  # Fail before creating any native container.
         if record.get('opening'):
@@ -221,7 +221,7 @@ class TerminalSessions:
         defaults=record.get('defaults',{})
         command=['tmux','-S',str(server),'new-session','-d','-s',record['name'],'-P','-F','#{session_id}']
         if defaults.get('cwd'):command+=['-c',defaults['cwd']]
-        command+=['--',*(['/bin/sh'] if profile else defaults.get('argv',['/bin/sh']))]
+        command+=['--',*(['/bin/sh'] if container_only or profile else defaults.get('argv',['/bin/sh']))]
         result=subprocess.run(command,capture_output=True,text=True,timeout=self._timeout(10))
         if result.returncode:raise InventoryError('session_start_failed',result.stderr[:500])
         session=result.stdout.strip();workspace=record['id']

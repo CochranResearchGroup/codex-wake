@@ -115,3 +115,21 @@ class RelocationTests(unittest.TestCase):
         self.assertIsNone(TabHolds(self.root).get(identity))
         self.execute('undo',receipt_id=moved['receipt_id'])
         self.assertIsNotNone(TabHolds(self.root).get(identity))
+
+    def test_undo_multiple_tabs_after_recreating_the_emptied_original_session(self):
+        self.tmux('new-window','-d','-t','source','sleep 60')
+        self.tmux('kill-session','-t','destination')
+        before=sorted(self.tmux('list-panes','-s','-t','source','-F','#{pane_id}:#{pane_pid}').splitlines())
+        receipt=self.execute('apply',plan_id=self.preview()['plan_id'])
+        self.assertEqual([r['status'] for r in receipt['outcomes']],['moved','moved'])
+        undone=self.execute('undo',receipt_id=receipt['receipt_id'])
+        self.assertEqual([r['status'] for r in undone['outcomes']],['undone','undone'])
+        self.assertEqual(sorted(self.tmux('list-panes','-s','-t','source','-F','#{pane_id}:#{pane_pid}').splitlines()),before)
+
+    def test_materializing_a_destination_never_runs_its_saved_launch_command(self):
+        marker=self.root/'unwanted-agent-launch'
+        self.tabs.execute('tabs.session.update',dict(session='destination',changes={'defaults':{'argv':['/bin/sh','-c','touch '+str(marker)+'; sleep 60']}}))
+        self.tmux('kill-session','-t','destination')
+        receipt=self.execute('apply',plan_id=self.preview()['plan_id'])
+        self.assertEqual(receipt['outcomes'][0]['status'],'moved')
+        self.assertFalse(marker.exists(),'Relocation launched a saved command instead of an inert owned container.')

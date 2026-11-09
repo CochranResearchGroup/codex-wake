@@ -164,14 +164,23 @@ class TerminalRelocation:
             # opening and binding the bootstrap is held, never blindly retried.
             record['materializing']=destination['id'];self._save(record)
             try:
-                dest=self.sessions.open(dest)
+                dest=self.sessions.open(dest,container_only=True)
             except Exception:
                 effect['status']='held';effect['reason']='destination_materialization_uncertain';self._save(record);return
             bootstrap=[r for r in self._resources() if r['target']['workspace']==dest['workspace']]
             if len(bootstrap)!=1:
                 effect['status']='held';effect['reason']='bootstrap_identity_uncertain';self._save(record);return
             record.setdefault('bootstraps',[]).append(dict(session=dest['id'],birth=self._birth(bootstrap[0]),status='owned'))
-            destination.update(self._session(dest))
+            previous=dict(destination);replacement=self._session(dest)
+            references=[record['destination'],*[row['source'] for row in record['outcomes']],
+                        *[row.get('undo_destination') for row in record['outcomes']]]
+            # One owned rematerialization may serve several tabs from the same
+            # saved session. Carry only references to that exact prior identity.
+            fields=('id','server','backend','native_key','native_session_id','server_birth')
+            for reference in references:
+                if reference is not None and all(reference.get(k)==previous.get(k) for k in fields):
+                    reference.update(replacement)
+            destination.update(replacement)
             record.pop('materializing',None);self._save(record)
         # Materializing a destination may take time; refresh the whole-window
         # birth and both namespaces immediately before the move intent.
