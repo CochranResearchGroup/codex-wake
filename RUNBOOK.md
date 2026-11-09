@@ -8658,3 +8658,13 @@ pin admission and missing-terminal global optout at the public entrypoint.
 Native523 console qualification now observes actual Windows tab labels/selection;
 final colour-mode/escaping matrix remains in progress.524 waits on that evidence.
 No broad review or findings-remediation pass has run yet.
+
+## Turn | 2026-11-09 | Integrated acceptance catches startup gap
+
+Tickets518–523 are validated/closed.524 immutable package/transport/docs and full
+local gates are running. Named acceptance found enable/reenable did not start
+the monitor, leaving first setup stale after20s; bounded factory-owned startup
+fix is in a separate worker checkout while source05 full gates remain frozen.
+Nested partial CLI status propagation is also a focused acceptance correction.
+These are pre-closure integration fixes; broad review and findings TDD counters
+remain0. Production formatting/services remain untouched.

@@ -158,7 +158,23 @@
       "owner": "/root/format520",
       "branch": "feat/tab-format-524",
       "worktree": "/tmp/codex-wake-format-524",
-      "worker_base": "05f1d88"
+      "worker_base": "05f1d88",
+      "acceptance_gaps": [
+        {
+          "id": "startup",
+          "state": "running",
+          "owner": "/root/format521",
+          "branch": "feat/tab-format-auto",
+          "worktree": "/tmp/codex-wake-format-auto",
+          "description": "Factory enable/reenable must ensure single monitor; injected owners remain passive; legacy monitor is reported, not restarted"
+        },
+        {
+          "id": "cli_partial",
+          "state": "pending",
+          "owner": "/root",
+          "description": "Nested partial result must propagate nonzero CLI exit; public regression follows startup fix"
+        }
+      ]
     }
   ],
   "readback": true,
