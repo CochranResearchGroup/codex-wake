@@ -5,7 +5,7 @@ here. A backend renders the returned options; its native #W keeps manual names.
 """
 import math
 import time
-import unicodedata
+from .tab_format_rendering import badge_text as _text, styles, capabilities
 
 _FRESH_SECONDS = 20
 _TYPES = {'codex': ('CX?', 'colour238'), 'codex:stock': ('CX', 'blue'),
@@ -32,21 +32,6 @@ def _fresh(observation, now):
     stamp = observation.get('observed_at')
     return (type(stamp) in (int, float) and math.isfinite(stamp)
             and 0 <= now - stamp <= _FRESH_SECONDS)
-
-
-def _text(value, width=16):
-    """Bound badge cell width, remove controls, escape tmux format introducers."""
-    output = []
-    used = 0
-    for char in str(value):
-        if unicodedata.category(char).startswith('C'):
-            continue
-        cells = 0 if unicodedata.combining(char) else 2 if unicodedata.east_asian_width(char) in ('W', 'F') else 1
-        if used + cells > width:
-            break
-        output.append(char)
-        used += cells
-    return ''.join(output).replace('#', '##')
 
 
 def _pane_traits(resource):
@@ -126,11 +111,11 @@ def project(resource, policy=None, *, now=None):
         for key in badges:
             value = qualified[key]
             if value is not None:
-                badges[key].add(_text(value))
+                badges[key].add(_text(value,ascii_only=policy.get('ascii',True)))
             elif key != 'profile' and dimensions[key].get('status') == 'configured':
                 configured = dimensions[key].get('value')
                 if configured not in (None, 'unknown'):
-                    badges[key].add('cfg:' + _text(configured, 12))
+                    badges[key].add('cfg:' + _text(configured,12,ascii_only=policy.get('ascii',True)))
         details.append(dict(pane_id=pane.get('pane_id'), type=_type(traits, now),
                             dimensions=dimensions, attention={key: traits.get(key, {}) for key in ('health', 'error')},
                             fresh=pane_fresh))
@@ -156,10 +141,13 @@ def project(resource, policy=None, *, now=None):
         if policy.get(enabled) and badges[key]:
             pieces.append(next(iter(badges[key])) if len(badges[key]) == 1 else key + ':MIX')
     badge = ' '.join(pieces)
-    intensity = ',bold' if state in ('running', 'error', 'health-warning', 'waiting') else ',dim'
+    normal_style,current_style=styles(colour,state,policy.get('render_mode','full'))
+    rendering=capabilities(resource.get('target',{}).get('presentation','unknown'),
+        identity=resource.get('backend_identity'))
+    rendering['requested_mode']=policy.get('render_mode','full')
     return dict(label=label, state=state, colour=colour,
-                details=dict(panes=details, mixed=len(kinds) > 1, activity=activity),
+                details=dict(panes=details,mixed=len(kinds)>1,activity=activity,rendering=rendering),
                 options={'window-status-format': f' #I {badge} #W ',
-                         'window-status-current-format': f'#[bold,underscore] #I {badge} #W ',
-                         'window-status-style': f'fg=white,bg={colour}{intensity}',
-                         'window-status-current-style': f'fg=white,bg={colour},bold,underscore'})
+                         'window-status-current-format': f'#[bold,underscore] [#I {badge} #W] ',
+                         'window-status-style': normal_style,
+                         'window-status-current-style': current_style})
