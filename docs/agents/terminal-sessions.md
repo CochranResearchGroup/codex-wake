@@ -18,7 +18,9 @@ codex-wake tabs sessions update --session bots --changes '{"name":"workers","des
 codex-wake tabs show --session workers --json
 ```
 
-Names are scoped to a server. Add `--server SERVER` when needed. Ordinary tab
+Names are scoped to a server. Add `--server SERVER` when needed.
+Use `SERVER::NAME` in `--session` or `--destination`, and
+`--tab SERVER::NAME:@N`, to qualify a name with the exact SERVER column value. Ordinary tab
 commands accept `--session NAME`; omission selects the current tmux context when
 unambiguous. Interactive terminals can choose among candidates; noninteractive
 commands return structured candidates without waiting for input. Stable saved IDs
