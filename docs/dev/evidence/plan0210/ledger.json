@@ -125,14 +125,22 @@
         518,
         519
       ],
-      "state": "running",
+      "state": "validated",
       "owner": "/root/format519",
       "branch": "feat/tab-format-523",
       "worktree": "/tmp/codex-wake-format-523",
       "worker_base": "e274810",
       "api_checkpoint_worker": "0dea949",
       "api_checkpoint_integrated": "cdcedfd",
-      "validation_so_far": "15 integrated format-focused checks pass; native rendering still in progress"
+      "validation_so_far": "15 integrated format-focused checks pass; native rendering still in progress",
+      "tracker_state": "CLOSED",
+      "worker_result_sha": "ed1d90c",
+      "integration_sha": "2a865d9",
+      "validation": [
+        "ActualByobuPTY+nativeWindowsconsole full/basic/plain pass;knownownedcleanupverified",
+        "27integratedformat+4psmuxprotocol pass3.12;5renderingpass3.11"
+      ],
+      "evidence": "docs/dev/evidence/plan0210/523/final-native-matrix.json"
     },
     {
       "index": 7,
