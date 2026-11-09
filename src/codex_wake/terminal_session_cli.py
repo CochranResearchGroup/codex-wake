@@ -10,6 +10,8 @@ def sessions(owner):
 
 
 def select_workspace(owner, selector=None, *, server=None, interactive=False):
+    from .terminal_session_contract import split_selector
+    selector,server=split_selector(selector,server)
     records = sessions(owner)
     if selector is not None:
         matches = [r for r in records if selector in (r['id'], r['name'], r.get('workspace'))

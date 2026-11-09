@@ -32,3 +32,14 @@ def specs():
         if not readonly:props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
         result['wake_tabs_route_'+verb]=('controller-tabs','tabs.route.'+verb,'Manage opt-in stable routing rules, explicit pins and manual placement holds.',props,required,readonly)
     return result
+
+
+def split_selector(selector,server=None):
+    """Qualified SERVER::NAME selectors keep names usable across native servers."""
+    if isinstance(selector,str) and '::' in selector:
+        qualifier,selector=selector.rsplit('::',1)
+        if server is not None and qualifier!=server:
+            from .managed_inventory import InventoryError
+            raise InventoryError('invalid_argument','Qualified session and --server must select the same server.')
+        server=qualifier
+    return selector,server

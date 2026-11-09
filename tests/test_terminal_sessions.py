@@ -97,6 +97,8 @@ class TerminalSessionTests(unittest.TestCase):
                 self.assertEqual(caught.exception.code,'ambiguous_target')
                 self.assertEqual(len(caught.exception.candidates),2)
                 self.assertEqual(len(tabs.execute('tabs.session.list',{})['sessions']),2)
+                chosen=tabs.execute('tabs.session.show',{'session':sockets[0]+'::default'})['session']
+                self.assertEqual(chosen['server'],sockets[0])
             finally:
                 for sock in sockets:subprocess.run(['tmux','-S',sock,'kill-server'],capture_output=True)
 

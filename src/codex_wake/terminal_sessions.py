@@ -98,8 +98,10 @@ class TerminalSessions:
         result.extend(live.values());return sorted(result,key=lambda v:(v['name'],v['server'],v['id']))
 
     def resolve(self,selector,*,state=None,server=None):
+        from .terminal_session_contract import split_selector
+        selector,server=split_selector(selector,server)
         records=self.inventory(state)
-        matches=[v for v in records if (v['id']==selector or v['name']==selector) and (server is None or v['server']==server)]
+        matches=[v for v in records if (v['id']==selector or v['name']==selector or v.get('workspace')==selector) and (server is None or v['server']==server)]
         if len(matches)!=1:
             error=InventoryError('ambiguous_target' if matches else 'target_not_found','Select a unique terminal session name or ID; list sessions for candidates.')
             error.candidates=[{k:v[k] for k in ('id','name','server','backend')} for v in matches];raise error
