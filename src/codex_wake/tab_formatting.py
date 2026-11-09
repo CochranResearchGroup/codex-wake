@@ -102,7 +102,11 @@ class TabFormatting:
         if name not in self.tabs.workspaces:raise InventoryError('ambiguous_target','Select one owned workspace.')
         # Preferences can be disabled before terminal availability or custody.
         if verb=='configure':
-            with self.locked():return self.configure(self.read(),arguments.get('policy',{}),workspace=name)
+            with self.locked():
+                supplied=arguments.get('expected_target')
+                if supplied is not None and supplied!=self.target(workspace=name):
+                    raise InventoryError('stale_target','Policy pin does not identify the selected current workspace.')
+                return self.configure(self.read(),arguments.get('policy',{}),workspace=name)
         config=self.tabs.workspaces[name];transport=config['transport'];deadline=time.monotonic()+10
         if not hasattr(transport,'formatting'):raise InventoryError('unsupported_target','Backend formatting is unavailable.')
         from .tab_lifecycle import TabLifecycle
