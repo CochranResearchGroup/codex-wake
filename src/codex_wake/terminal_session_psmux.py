@@ -75,5 +75,6 @@ def restore(owner,record):
         transport=PsmuxAttachmentTransport(ConfiguredBridge(fixed),generation=value['generation'])
         snap=transport.snapshot(time.monotonic()+8)
         key=_digest({k:snap.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})
-        if key==record['native_key']:owner.tabs.workspaces[record['id']]=dict(kind='psmux',label=record['name'],transport=transport)
+        existing=any(cfg['kind']=='psmux' and getattr(cfg['transport'],'generation',None)==value['generation'] for cfg in owner.tabs.workspaces.values())
+        if key==record['native_key'] and not existing:owner.tabs.workspaces[record['id']]=dict(kind='psmux',label=record['name'],transport=transport)
     except (OSError,ValueError,KeyError,subprocess.SubprocessError):pass

@@ -47,6 +47,11 @@ class TerminalSessions:
                 snap=transport.snapshot(self._deadline(2))
                 key=_digest({k:snap.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})
                 if key!=record.get('native_key'):continue
+                existing=next((name for name,cfg in self.tabs.workspaces.items()
+                    if cfg['kind'] in ('tmux','byobu')
+                    and str(cfg.get('socket_path') or getattr(cfg['transport'],'socket',''))==record['server']
+                    and (cfg.get('session_id') or getattr(cfg['transport'],'session',None))==record['native_session_id']),None)
+                if existing is not None:continue
                 self.tabs.workspaces[record['id']]=dict(kind=record['backend'],label=record['name'],socket_path=record['server'],session_id=record['native_session_id'],transport=transport)
             except (OSError,ValueError,subprocess.SubprocessError):continue
 
@@ -73,7 +78,7 @@ class TerminalSessions:
             saved=by_native.get(native_key);sid=saved['id'] if saved else 'native-'+native_key[:24]
             label=cfg.get('label') or snap.get('session_name') or workspace
             record=dict(saved or {},id=sid,name=label if not saved else saved['name'],backend=cfg['kind'],server=(snap.get('server_identity',{}).get('namespace') if cfg['kind']=='psmux' else str(cfg.get('socket_path') or snap.get('server'))),native_key=native_key,workspace=workspace,state='running',tab_count=len(snap['windows']),snapshot=snap,labels=(saved or {}).get('labels',[]),defaults=(saved or {}).get('defaults',{}),description=(saved or {}).get('description',''),managed=bool(saved))
-            live[sid]=record
+            if sid not in live:live[sid]=record
         result=[]
         for sid,saved in state['sessions'].items():
             if saved.get('deleted'):continue
@@ -132,7 +137,17 @@ class TerminalSessions:
             if verb in ('create','ensure'):
                 name=_name(args.get('name'));backend=args.get('backend','tmux')
                 if backend not in ('tmux','byobu','psmux'):raise InventoryError('invalid_argument','Unsupported terminal backend.')
-                server=args.get('server') or next((v['server'] for v in records if (v['backend']=='psmux' if backend=='psmux' else v['backend'] in ('tmux','byobu'))),None)
+                server=args.get('server')
+                eligible=[v for v in records if (v['backend']=='psmux' if backend=='psmux' else v['backend'] in ('tmux','byobu'))]
+                servers=sorted({v['server'] for v in eligible})
+                named=[v for v in eligible if v['name']==name]
+                context=os.environ.get('TMUX','').split(',',1)[0]
+                if server is None and verb=='ensure' and len(named)==1:server=named[0]['server']
+                if server is None and context in servers:server=context
+                if server is None and len(servers)==1:server=servers[0]
+                if server is None and len(servers)>1:
+                    error=InventoryError('ambiguous_target','Select a terminal server with --server; multiple servers are available.')
+                    error.candidates=[dict(server=value,backend=backend) for value in servers];raise error
                 if backend=='psmux' and not server:raise InventoryError('unsupported_target','Select an explicit host-configured psmux namespace.')
                 server=server or str(self.directory/'tmux.sock')
                 existing=[v for v in records if v['name']==name and v['server']==server]

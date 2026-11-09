@@ -81,3 +81,40 @@ class TerminalSessionTests(unittest.TestCase):
                 self.assertEqual(session['state'],'unavailable')
                 with self.assertRaises(ValueError):tabs.execute('tabs.session.delete',{'session':'bots'})
             finally:real_run(['tmux','-S',sock,'kill-server'],capture_output=True)
+
+    def test_new_session_does_not_silently_choose_between_terminal_servers(self):
+        import subprocess
+        from codex_wake.controller_tab_adapters import TmuxAttachmentTransport
+        with tempfile.TemporaryDirectory(prefix='wake-p211-servers-') as d:
+            sockets=[str(Path(d)/name) for name in ('one.sock','two.sock')]
+            try:
+                workspaces={}
+                for i,sock in enumerate(sockets):
+                    subprocess.run(['tmux','-S',sock,'new-session','-d','-s','default','sleep 60'],check=True)
+                    workspaces[str(i)]=dict(kind='tmux',label='default',socket_path=sock,transport=TmuxAttachmentTransport(sock,'$0'))
+                tabs=ControllerTabs(d,workspaces=workspaces,host='test',environment='fixture')
+                with self.assertRaises(ValueError) as caught:tabs.execute('tabs.session.create',{'name':'bots'})
+                self.assertEqual(caught.exception.code,'ambiguous_target')
+                self.assertEqual(len(caught.exception.candidates),2)
+                self.assertEqual(len(tabs.execute('tabs.session.list',{})['sessions']),2)
+            finally:
+                for sock in sockets:subprocess.run(['tmux','-S',sock,'kill-server'],capture_output=True)
+
+    def test_factory_restores_saved_sessions_without_duplicate_configured_aliases(self):
+        import json
+        import subprocess
+        from codex_wake.controller_tabs import controller_tabs_from_root
+        with tempfile.TemporaryDirectory(prefix='wake-p211-factory-') as d:
+            root=Path(d);tabs=ControllerTabs(root,workspaces={},host='test',environment='fixture')
+            session=tabs.execute('tabs.session.create',{'name':'bots','start':True})['session']
+            sock=str(root/'terminal-sessions/tmux.sock');config=root/'controller-tabs.json'
+            try:
+                config.write_text(json.dumps({'schema_version':1,'workspaces':{}}));config.chmod(0o600)
+                self.assertEqual(len(controller_tabs_from_root(root).execute('tabs.list',{})['resources']),1)
+                config.write_text(json.dumps({'schema_version':1,'workspaces':{'friendly':{'kind':'tmux','socket_path':sock,'session_id':'$0'}}}));config.chmod(0o600)
+                reopened=controller_tabs_from_root(root)
+                self.assertEqual(len(reopened.execute('tabs.session.list',{})['sessions']),1)
+                resources=reopened.execute('tabs.list',{})['resources']
+                self.assertEqual(len(resources),1)
+                self.assertEqual(resources[0]['target']['workspace'],'friendly')
+            finally:subprocess.run(['tmux','-S',sock,'kill-server'],capture_output=True)

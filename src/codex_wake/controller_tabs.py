@@ -268,6 +268,12 @@ class AuthorizedTabs:
         return self.runtime.execute(actor, operation, arguments, authorize=authorize, dispatch=self.tabs.execute)
 
 
+def _restore_terminal_sessions(owner):
+    from .terminal_sessions import TerminalSessions
+    TerminalSessions(owner.root,tabs=owner)
+    return owner
+
+
 def controller_tabs_from_root(root, *, host=None, environment=None):
     """Construct host-owned adapters from fixed private controller-tabs.json.
 
@@ -296,7 +302,7 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
         for workspace in workspaces.values():
             workspace['observer']=WorkspaceTraitsObserver(root,workspace['transport'],workspace.get('privacy'))
         owner.discovery_diagnostics = diagnostics
-        return owner
+        return _restore_terminal_sessions(owner)
     try:
         info = os.fstat(fd)
         if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
@@ -332,5 +338,5 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
         from .tab_traits import WorkspaceTraitsObserver
         workspace['observer']=WorkspaceTraitsObserver(root,transport,workspace.get('privacy'))
         workspaces[name] = workspace
-    return ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
-                          environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name,host_managed=True)
+    return _restore_terminal_sessions(ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
+                          environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name,host_managed=True))
