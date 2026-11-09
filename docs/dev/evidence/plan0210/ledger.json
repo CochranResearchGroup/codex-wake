@@ -154,8 +154,11 @@
         522,
         523
       ],
-      "state": "pending",
-      "owner": null
+      "state": "running",
+      "owner": "/root/format520",
+      "branch": "feat/tab-format-524",
+      "worktree": "/tmp/codex-wake-format-524",
+      "worker_base": "05f1d88"
     }
   ],
   "readback": true,
@@ -167,5 +170,5 @@
     "remediation_passes": 0
   },
   "discovery": "Current agreed plan/spec and fresh repository sources sufficient; unrelated memory registry hits not used; no additional Graphiti discovery needed.",
-  "integration_tip": "cdcedfd"
+  "last_validation_checkpoint": "cdcedfd"
 }

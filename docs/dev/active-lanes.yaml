@@ -7,7 +7,7 @@ lanes:
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/517]
     plan: docs/dev/plans/0210-2026-11-08-wake-owned-tab-formatting.md
     branch: feat/tab-formatting-517
-    worker_branches: [feat/tab-format-519, feat/tab-format-520, feat/tab-format-521, feat/tab-format-522, feat/tab-format-523]
+    worker_branches: [feat/tab-format-519, feat/tab-format-520, feat/tab-format-521, feat/tab-format-522, feat/tab-format-523, feat/tab-format-524]
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE
