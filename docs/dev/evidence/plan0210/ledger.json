@@ -162,19 +162,23 @@
       "acceptance_gaps": [
         {
           "id": "startup",
-          "state": "running",
+          "state": "validated",
           "owner": "/root/format521",
           "branch": "feat/tab-format-auto",
           "worktree": "/tmp/codex-wake-format-auto",
-          "description": "Factory enable/reenable must ensure single monitor; injected owners remain passive; legacy monitor is reported, not restarted"
+          "description": "Factory enable/reenable must ensure single monitor; injected owners remain passive; legacy monitor is reported, not restarted",
+          "worker_sha": "9156c15",
+          "integrated_sha": "d55cd7c"
         },
         {
           "id": "cli_partial",
-          "state": "pending",
+          "state": "validated",
           "owner": "/root",
-          "description": "Nested partial result must propagate nonzero CLI exit; public regression follows startup fix"
+          "description": "Nested partial result must propagate nonzero CLI exit; public regression follows startup fix",
+          "integrated_sha": "33218a3"
         }
-      ]
+      ],
+      "postfix_focused": "58PASS each Python3.11/3.12 at0dbb3dc;524/postfix-focused.json"
     }
   ],
   "readback": true,
