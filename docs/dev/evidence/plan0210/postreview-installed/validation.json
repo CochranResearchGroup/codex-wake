@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "phase": "single_TDD_pass_final_installed_verification",
+  "source": "4a5aa6dbf424e7a3c25238707c81ac98d105c8b3",
+  "wheel_sha256": "e353f509b5e3964c11247b243cdc9b7ae88a6fe097550faf0a082a8114983f09",
+  "python_members": 289,
+  "new_bridge_sha256": "9273745f40c3925e8dfe57d0a6ae4c119571bfa272d70d59d26a15281c6de065",
+  "native_psmux_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca",
+  "native_binary_matches_render_qualification": true,
+  "checks": [
+    "source/wheel/Linux289Pythonmembersbyteexact",
+    "nativeWindows289Pythonmembersbyteexact",
+    "publishedWSLCLIpositivecontrols/exactrollback-reenable",
+    "realstdioMCPClientSessioninitialize/list/call",
+    "authenticatedHTTPAPIandOAuthMCPcontrols/errors",
+    "actualnativePowerShellportableCLIAPI/MCPtopsmuxworkspace",
+    "bothnativeWindowsinvalidpolicyexit3",
+    "newstandalonebridgebytesfiniteformatroundtrip",
+    "exactknownownedcleanup"
+  ],
+  "public_linked_guard": "Primary real public tmux red/green is recorded separately; this worker did not repeat it or add a second review.",
+  "excluded": [
+    "full_unit_suites",
+    "native_colour/PTY_matrix",
+    "review",
+    "provider_work",
+    "deployment",
+    "GitHub_mutation",
+    "memory_write"
+  ],
+  "commands": [
+    {
+      "command": "env -u PYTHONPATH PREFIX/bin/python scripts/tab_format_installed_acceptance524.py --wheel WHEEL --output RECEIPT",
+      "log": "/tmp/p210-postreview-byobu.log",
+      "exit_code": 0
+    },
+    {
+      "command": "env -u PYTHONPATH WSL_INTEROP=/run/WSL/1_interop PREFIX/bin/python scripts/tab_format_installed_acceptance524.py --psmux --wheel WHEEL --output RECEIPT --windows-python WINDOWS_TEST_PYTHON",
+      "log": "/tmp/p210-postreview-psmux.log",
+      "exit_code": 0
+    }
+  ],
+  "first_failures": [],
+  "production_touched": false,
+  "provider_calls": 0,
+  "memory_disposition": "forbidden"
+}
