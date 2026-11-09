@@ -26,15 +26,25 @@ def command(args, owner=None):
             from .controller_tabs import controller_tabs_from_root
             owner = controller_tabs_from_root(args.wake_root)
         operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1)
-        value = owner.execute(operation,args.arguments) if operation in owner.READS else operator_execute(operation,args.arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
-        print(json.dumps(value, sort_keys=True))
+        from .terminal_session_cli import select_workspace, render
+        arguments=dict(args.arguments)
+        selector=arguments.pop('session_selector',None)
+        server=arguments.pop('session_server',None)
+        from .tab_contract import BY_OPERATION
+        properties=BY_OPERATION.get(operation,(None,(None,None,None,{})))[1][3]
+        if 'workspace' in properties and arguments.get('scope')!='global' and (selector is not None or 'workspace' not in arguments):
+            arguments['workspace']=select_workspace(owner,selector,server=server,interactive=not getattr(args,'as_json',False))
+        value = owner.execute(operation,arguments) if operation in owner.READS else operator_execute(operation,arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
+        readable=render(value) if operation.startswith('tabs.session.') and not getattr(args,'as_json',False) else None
+        print(readable if readable is not None else json.dumps(value, sort_keys=True))
         from .tab_result import exit_status
         return exit_status(value)
     except (WakeError, OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as error:
         print(json.dumps(dict(status='held', error=dict(
             code=getattr(error,'code','configuration_unavailable'),
             message=str(error) if isinstance(error,WakeError) else
-                    'Tab configuration is unavailable or invalid; inspect the selected controller and refresh workspaces.'))))
+                    'Tab configuration is unavailable or invalid; inspect the selected controller and refresh workspaces.',
+            **({'candidates':error.candidates} if hasattr(error,'candidates') else {})))))
         return 2
 
 

@@ -130,6 +130,9 @@ def register_parser(subparsers):
                 if 'enum' in schema:settings['choices']=schema['enum']
                 if field=='preview':option='--dry-run'
                 command.add_argument(option,**settings)
+                if field=='workspace':
+                    command.add_argument('--session',dest='session_selector',help='Terminal session name or stable ID (alias for --workspace).')
+                    if 'server' not in properties:command.add_argument('--server',dest='session_server',help='Terminal server qualifier.')
             if action in ('preview','view-save','policy-configure'):
                 command.add_argument('--group-by',action='append',default=[],help='Layered grouping trait; repeat in order.')
                 command.add_argument('--sort-by',action='append',default=[],help='Layered sorting trait; repeat in order.')
@@ -166,6 +169,10 @@ def run(args, root, *, observer=None):
             for field in properties:
                 value=getattr(args,field,None)
                 if value is not None:args.arguments.setdefault(field,value)
+        if getattr(args,'session_selector',None) is not None:
+            args.arguments['session_selector']=args.session_selector
+        if getattr(args,'session_server',None) is not None:
+            args.arguments['session_server']=args.session_server
         if getattr(args,'view_name',None):args.arguments.setdefault('name',args.view_name)
         if args.tabs_command=='recovery-apply' and 'intent' not in args.arguments:
             from uuid import uuid4
