@@ -1522,3 +1522,12 @@ Native psmux custom argv/profile defaults and cross-server moves remain unsuppor
 PR535 merged as bae92f9; the exact qualified package is deployed with completion
 and local controller cutover verified. Windows-native service remains separate.
 See the plan's final report and deployment receipt.
+
+
+## P212 | Native mailbox host bootstrap
+
+Source implementation complete: [LOCAL-P212](docs/dev/plans/0212-2026-11-09-native-mailbox-bootstrap.md).
+Opt-in host delegation provisions separate actors for verified native callers in
+already enrolled roots; shared MCP no longer needs a fixed per-thread capability.
+Public question/claim/reply and installed package fixture qualify. Integration,
+working-host activation and real FigureLabs T06 acceptance remain separate.

@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P212
+    owner: primary
+    objective: Fix shared native MCP mailbox actor bootstrap
+    work_items: [LOCAL-P212]
+    plan: docs/dev/plans/0212-2026-11-09-native-mailbox-bootstrap.md
+    branch: fix/native-mailbox-bootstrap
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: PUBLISHED_REVIEW
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-09
+    disposition: Source fix and private installed fixture qualified; working-host activation and real FigureLabs acceptance remain separate
   - id: P211
     owner: primary / ecochran76
     objective: Close named terminal session CRUD and routing tickets

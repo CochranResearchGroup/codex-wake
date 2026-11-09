@@ -1,6 +1,6 @@
 # LOCAL-P212 | Host-managed native mailbox bootstrap
 
-State: OPEN
+State: CLOSED
 Ticket: LOCAL-P212
 Owner: primary
 Priority: P1
@@ -34,3 +34,17 @@ actor capability. Global MCP config supplies neither A2A bus nor actor settings.
 Ranked predictions: host resolver admits approved native callers; fixed actors
 cannot authenticate a different caller; bus selection alone cannot mint authority.
 See user-state a2a-setup-diagnosis/diagnosis.md for earlier bounded probes.
+
+## Current state and delivery
+
+Implemented at bd79923, source branch fix/native-mailbox-bootstrap. Public two-caller
+reproduction went red at missing actor capability, then green without per-thread
+configuration. Final focused Python3.12 selection23PASS/25.652s; Python3.11 selection
+21PASS/15.760s (the two preexisting stdio tests ran only3.12). Exact installed wheel
+public stdio/CLI four-check fixture PASS;305 package members source/wheel/install
+equal. Qualification uses injected private native metadata, not live FigureLabs
+attestation. No live root enrollment, service reconfiguration or production deploy.
+See evidence/plan0212/qualification.md. Original production MCP still needs host
+activation of this opt-in mode after integration. Memory disposition forbidden;
+no explicit memory-write request. Supplied current evidence suffices; Graphiti
+historical discovery skipped to avoid revisiting the established setup diagnosis.

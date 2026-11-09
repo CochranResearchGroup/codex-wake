@@ -1,0 +1,5 @@
+Executing <Task pending name='Task-2' coro=<AgentExchangeMCPTests.test_discovery_has_explicit_actor_tools_without_operator_escape() running at /tmp/codex-wake-mailbox-bootstrap/tests/test_a2a_mcp.py:57> cb=[_run_until_complete_cb() at /home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:181] created at /home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py:100> took 0.599 seconds
+----------------------------------------------------------------------
+Ran 23 tests in 25.652s
+
+OK

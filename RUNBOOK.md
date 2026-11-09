@@ -8790,3 +8790,24 @@ list PASS. Existing stdio clients retain loaded older code until reconnect; not
 forcibly killed. Prior release and exact rollback script retained in user state.
 No provider calls or paid hostedCI. See plan0211/deployment.json. Memory disposition
 forbidden: no explicit memory-write request; non-write receipt retained outsideGit.
+
+
+## Turn | 2026-11-09 | Fix native mailbox bootstrap LOCAL-P212
+
+Repeated diagnosing-bugs invocation continued beyond setup diagnosis. Installed
+CLI/currentMCP rejected absent actor capability; shared MCP config has no actor
+wiring. Minimal public CommandRunner reproduction red at same authorization_denied
+with already enrolled/migrated private bus. Opt-in host operator delegation now
+checks native metadata and runtime identity, selects existing enrolled root and
+issues/reuses one actor per caller. Revocation and rotated generations preserved;
+concurrent first-use serialized with bounded lock, no shared actor-field mutation.
+CLI subprocess uses verified caller cwd. No implicit root enrollment or live
+credential/service changes. Original FigureLabs remains pending activation.
+
+23focused3.12PASS25.652s,21focused3.11PASS15.760s; real stdio+CLI four-check fixture
+question/claim/reply PASS source and exact private-installed wheel53f2a3ef.
+305package members equal sourcebd79923/wheel/install. Native metadata injected;
+not real T06 proof. Static/docs/policy/whitespace checks pass; planning audit keeps
+20accepted historical baseline findings. No broad/full suite or hostedCI run.
+Evidence: docs/dev/evidence/plan0212/qualification.md. Memory forbidden: no explicit
+memory-write request; non-write receipt remains outside Git.
