@@ -51,14 +51,16 @@
       "blockers": [
         527
       ],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/529",
       "node_id": 6289893052,
       "owner": "/root/psmux529",
       "base": "e639397",
       "worktree": "/tmp/codex-wake-session-529",
-      "branch": "feat/terminal-session-529"
+      "branch": "feat/terminal-session-529",
+      "integration_sha": "97a52a6",
+      "validation": "25integratedchecksPASS EACH3.11/3.12;529native8PASS;receipts529/532"
     },
     {
       "index": 4,
@@ -96,14 +98,16 @@
       "blockers": [
         527
       ],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/532",
       "node_id": 6289898541,
       "owner": "/root/ux532",
       "base": "e639397",
       "worktree": "/tmp/codex-wake-session-532",
-      "branch": "feat/terminal-session-532"
+      "branch": "feat/terminal-session-532",
+      "integration_sha": "326e4c5",
+      "validation": "25integratedchecksPASS EACH3.11/3.12;529native8PASS;receipts529/532"
     },
     {
       "index": 7,
@@ -146,5 +150,13 @@
     "comprehensive_budget_seconds": 1800,
     "native_concurrency": 1,
     "hosted_ci": false
+  },
+  "shared_contract_checkpoint": "648af92",
+  "native_qualification": {
+    "529": "Native psmux8checks pass; source-exact bridge, retainedcleanuptransient, finalnamespaceabsenceverified; workercommitpending"
+  },
+  "runtime_effects": {
+    "production": false,
+    "providers": false
   }
 }

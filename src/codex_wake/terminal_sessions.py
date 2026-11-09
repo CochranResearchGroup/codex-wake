@@ -66,7 +66,9 @@ class TerminalSessions:
         for sid,saved in state['sessions'].items():
             if saved.get('deleted'):continue
             fallback=dict(saved,state='empty',tab_count=0,workspace=None,snapshot=None,managed=True)
-            if sid not in live and saved.get('native_session_id'):
+            if saved.get('opening'):
+                fallback.update(state='unavailable',tab_count=None)
+            elif sid not in live and saved.get('native_session_id'):
                 try:
                     if saved['backend']=='psmux':
                         from .terminal_session_psmux import presence

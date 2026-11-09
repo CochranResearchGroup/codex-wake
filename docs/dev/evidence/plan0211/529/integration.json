@@ -1,0 +1,11 @@
+{
+  "source": "326e4c5 plus unknown-opening fix",
+  "tier": "focused",
+  "conflict_resolution": "Preserved psmux-specific namespace inference and core create-or-reuse defaults; neither intent dropped.",
+  "opening_red": "/tmp/p211-opening-red.log:unknown launch falsely empty",
+  "green": "/tmp/p211-529532-final312.log and -311.log;25testsPASS eachPython3.11/3.12",
+  "native": "529/native.json;8nativecheckspass, independent finalabsenceproof despite retainedcleanuptransient",
+  "scope": "All3 originalsessiontests plus2newcorecases; psmuxsession,UX,bot,contract and completion regression",
+  "provider_calls": 0,
+  "production_effects": false
+}

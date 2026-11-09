@@ -62,3 +62,22 @@ class TerminalSessionTests(unittest.TestCase):
                 self.assertTrue(second['reused'])
                 self.assertEqual(first['session']['snapshot']['windows'],second['session']['snapshot']['windows'])
             finally:subprocess.run(['tmux','-S',sock,'kill-server'],capture_output=True)
+
+    def test_unknown_native_launch_is_not_empty_or_deletable(self):
+        import subprocess
+        from unittest.mock import patch
+        real_run=subprocess.run
+        with tempfile.TemporaryDirectory(prefix='wake-p211-') as d:
+            tabs=ControllerTabs(Path(d),workspaces={},host='test',environment='fixture')
+            sock=str(Path(d)/'terminal-sessions/tmux.sock')
+            def lost_reply(command,*a,**kw):
+                value=real_run(command,*a,**kw)
+                if 'new-session' in command:raise subprocess.TimeoutExpired(command,10)
+                return value
+            try:
+                with patch('subprocess.run',side_effect=lost_reply):
+                    with self.assertRaises(subprocess.TimeoutExpired):tabs.execute('tabs.session.create',{'name':'bots','start':True})
+                session=tabs.execute('tabs.session.show',{'session':'bots'})['session']
+                self.assertEqual(session['state'],'unavailable')
+                with self.assertRaises(ValueError):tabs.execute('tabs.session.delete',{'session':'bots'})
+            finally:real_run(['tmux','-S',sock,'kill-server'],capture_output=True)
