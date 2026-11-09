@@ -99,14 +99,22 @@
       "blockers": [
         518
       ],
-      "state": "running",
+      "state": "validated",
       "owner": "/root/format521",
       "branch": "feat/tab-format-522",
       "worktree": "/tmp/codex-wake-format-522",
       "worker_base": "e274810",
       "integration_sha": "8c165ca",
       "factory_fix": "09f2c73",
-      "remaining": "workspace configure target-pin regression fix before closure"
+      "tracker_state": "CLOSED",
+      "worker_result_sha": "66d515a",
+      "pin_fix_worker": "905347e",
+      "pin_fix_integrated": "3166378",
+      "validation": [
+        "26 integrated format tests pass3.12",
+        "25 beforefinalpinpass3.11;finalgate524",
+        "9existingcontrollerregressions pass"
+      ]
     },
     {
       "index": 6,
