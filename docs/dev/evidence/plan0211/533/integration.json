@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "tier": "focused",
+  "source": "201c4e3 plus publicdeletionschemafields",
+  "runs": [
+    {
+      "python": "3.12",
+      "tests": 35,
+      "seconds": 37.634,
+      "log": "/tmp/p211-533-integrated312.log",
+      "selection": "terminal_session_delete,terminal_sessions,terminal_routing,tab_destination_scope,tab_contract"
+    },
+    {
+      "python": "3.11",
+      "tests": 28,
+      "seconds": 21.262,
+      "log": "/tmp/p211-533-integrated311.log",
+      "selection": "terminal_session_delete,terminal_sessions,tab_profile_create,tab_destination_scope,tab_contract"
+    }
+  ],
+  "source_profile_followup": "377210f qualifiedsavedprofile/argv/cwd defaults using inert C fixture; no provider work",
+  "first_failures": "533/validation.md retains old disabled_reason expectation, name-reentry bug, and fixtureautomaticrename transient; no erased failures",
+  "production_effects": false
+}

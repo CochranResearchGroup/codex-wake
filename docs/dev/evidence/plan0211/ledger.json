@@ -124,13 +124,15 @@
         530,
         531
       ],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/533",
       "node_id": 6289900152,
       "owner": "/root/deletion533",
       "branch": "feat/terminal-session-533",
-      "worktree": "/tmp/codex-wake-session-533"
+      "worktree": "/tmp/codex-wake-session-533",
+      "integration_sha": "201c4e3",
+      "validation": "Integrated35PASS312/28PASS311;533/integration.json; worker8PASS each"
     },
     {
       "index": 8,
@@ -142,10 +144,13 @@
         532,
         533
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/534",
-      "node_id": 6289902096
+      "node_id": 6289902096,
+      "owner": "/root/acceptance534",
+      "branch": "test/terminal-session-534",
+      "worktree": "/tmp/codex-wake-session-534"
     }
   ],
   "review": {
@@ -170,7 +175,7 @@
     "production": false,
     "providers": false
   },
-  "current_state": "Sixclosed;533running;534pending;review0/TDDremediation0",
+  "current_state": "Sevenclosed;534installedacceptanceactive;review0/TDDremediation0",
   "pending_acceptance_checks": [
     "534: final installed native psmux rename + formatting baseline/rollback interaction; existing native generation carry remains guarded",
     "534: final public CLI/API/nativeMCP/OAuth/PowerShell parity and cleanup",

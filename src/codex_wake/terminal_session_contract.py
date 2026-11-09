@@ -9,6 +9,8 @@ def specs():
         required=[] if verb=='list' else ['name'] if verb in ('create','ensure') else ['session']
         if verb in ('create','ensure'):props.update(name={'type':'string'},backend={'type':'string','enum':['tmux','byobu','psmux']},start={'type':'boolean'},defaults={'type':'object'})
         if verb=='update':props['changes']={'type':'object'};required+=['changes']
+        if verb=='delete':
+            props.update(destination={'type':'string'},terminate={'type':'boolean'},plan_id={'type':'string'});required=[]
         if not readonly:props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
         result['wake_tabs_session_'+verb]=('controller-tabs','tabs.session.'+verb,'Manage named terminal sessions; empty definitions persist independently of running tabs.',props,required,readonly)
     for verb in ('preview','apply','status','undo'):
