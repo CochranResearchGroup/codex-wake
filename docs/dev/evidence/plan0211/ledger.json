@@ -161,16 +161,22 @@
     "broad_runs": 1,
     "remediation_passes": 1,
     "fixed_point": "f0798e1ede3104caf591ba0b453fbf553bed569e",
-    "state": "adjudicated_remediation_running",
+    "state": "complete",
     "reviewed_tip": "bbfc494d5fe41368eb78ad592b5a85c7992c7170",
     "findings": [
       "R1",
       "R2",
       "R3",
       "R4"
+    ],
+    "resolved_findings": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
     ]
   },
-  "state": "implementing",
+  "state": "complete",
   "integration_worktree": "/tmp/codex-wake-session-design-0211",
   "validation_policy": {
     "focused": "Per-ticket red/green bothPython3.11/3.12; final installed public parity",
@@ -187,6 +193,34 @@
     "production": false,
     "providers": false
   },
-  "current_state": "All8validatedandtrackerclosed; review1starting",
-  "pending_acceptance_checks": []
+  "current_state": "Eight implementation tickets closed; one review and one TDD remediation pass complete; draft PR publication; no merge/deployment",
+  "pending_acceptance_checks": [],
+  "runtime_source": "6afbda8cd166fc3ca08995256729a3353067f34a",
+  "postreview_wheel_sha256": "79d196c249f99ef6ff263d8619cd95e39df77619c07a78dd628162517dc368c6",
+  "postreview_acceptance": {
+    "packet": "postreview/validation.md",
+    "installed_public": {
+      "checks": 9,
+      "seconds": 158.07,
+      "native_powershell_calls": 22,
+      "status": "PASS"
+    },
+    "native_psmux": {
+      "checks": 8,
+      "status": "PASS"
+    },
+    "installed_regressions": {
+      "checks": 6,
+      "status": "PASS"
+    },
+    "package_members": 304,
+    "source_linux_windows_equal": true,
+    "cleanup": {
+      "namespaces": 7,
+      "birth_pins": 42,
+      "active": 0,
+      "pinned_active": 0,
+      "token_files_absent": 4
+    }
+  }
 }

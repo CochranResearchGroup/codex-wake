@@ -8,12 +8,12 @@ lanes:
     plan: docs/dev/plans/0211-2026-11-09-terminal-session-management.md
     branch: feat/terminal-sessions-526
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: PUBLISHED_REVIEW
     dependencies: []
     overlaps: []
     updated_at: 2026-11-09
-    disposition: Eight published tickets; primary527 and independent528 active; review0 TDDremediation0
+    disposition: All eight tickets closed; review1/TDD1 resolved four findings; installed Linux/Windows qualified; no merge or deployment
   - id: P210
     owner: primary / ecochran76
     objective: Implement reversible Wake-owned tab formatting

@@ -1,0 +1,13 @@
+======================================================================
+FAIL: test_ensure_cannot_skip_saved_profile_authority_when_other_backend_shares_name (tests.test_tab_profile_create.ProfileCreateTests.test_ensure_cannot_skip_saved_profile_authority_when_other_backend_shares_name)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-session-design-0211/tests/test_tab_profile_create.py", line 111, in test_ensure_cannot_skip_saved_profile_authority_when_other_backend_shares_name
+    with self.assertRaises(AuthError):facade.execute('token','tabs.session.ensure',arguments)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: AuthError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.829s
+
+FAILED (failures=1)

@@ -8745,3 +8745,29 @@ Five tickets closed.531routing actualdaemon test exposed factorysavedbinding/ali
 defect, reproduced publicred→green; final qualification pending.533/534blocked by
 ledgerdependencies. Source-only delivery so far; installed/fullpublicparitypending.
 Review0/TDDremediation0. No production/provider/merge/deploy effects.
+
+## Turn | 2026-11-09 | Plan0211 tickets and single review remediation complete
+
+All eight tickets527–534 are integrated, validated and tracker-closed; parent526
+remains open. Root527 and ready independent delegated tickets retained isolated
+custody and dependency gates. Exactly one Standards/Spec review (basef0798e1,
+tipbbfc494) accepted four findings; one bounded TDD remediation pass resolved them:
+profile authority target selection, cached session summaries, native Windows cwd
+qualification, and activation exclusion of all preexisting tab births.
+
+Runtime freeze6afbda8; final wheel79d196c249f99ef6ff263d8619cd95e39df77619c07a78dd628162517dc368c6.
+Focused checks82PASS eachPython3.11/3.12 (75.843s/78.398s), final installed workflow
+9PASS158.070s including22actual nativePowerShell calls; native psmux8PASS.
+Source/prefix/Windows member equality and fixture cleanup are preserved in the
+postreview packet. Earlier failed diagnostic receipts remain; validation is
+composite, not a claimed final full-suite run. Static checks pass. An accidental
+system-Python generated-doc check lacked jsonschema; rerun in qualified3.12 venv
+passed. Hosted CI skipped under cost policy. No full-suite/review repetition.
+
+Native Windows custom argv/profile defaults are unsupported before persistence;
+cross-server process-preserving moves and Windows-native service remain future.
+Exact fixture namespace/hash/birth-fenced OS cleanup handles warm psmux servers;
+unrelated sessions/services and working release remain unchanged. See
+`docs/dev/evidence/plan0211/review/final-report.md` and ledger for review/publication.
+No merge, production deployment or real provider prompts. Memory disposition
+forbidden, non-write receipt in user state; no explicit memory-write request.

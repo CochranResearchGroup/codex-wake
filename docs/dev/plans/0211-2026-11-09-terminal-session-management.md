@@ -1,6 +1,6 @@
 # Terminal session management and criteria-based tab relocation
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Work item: #526; implementation #527–#534
 Branch: feat/terminal-sessions-526
@@ -8,14 +8,15 @@ Domain authority: GLOSSARY.md
 
 ## Current State
 
-Operator approved all seventeen decisions and directed spec/ticket publication
-and implementation. Spec #526 and eight tickets #527–#534 have native dependency
-links. Primary delivered #527; #527–#530 and #532 are integrated, validated and
-tracker-closed. Routing #531 is in final focused/native-monitor qualification;
-#533 and #534 wait on its validated dependency. Public factory tests caught and
-fixed missing saved sessions/duplicate aliases. The execution ledger records
-exact custody, commands, first failures and review counts (currently0/0).
-No production mutation, provider prompts, merge or deployment is authorized.
+All seventeen decisions are implemented. Tickets #527–#534 are integrated,
+validated and tracker-closed; parent #526 remains the open discussion authority.
+Exactly one Standards/Spec review accepted four findings; one bounded TDD
+remediation pass resolved all four. Post-review focused checks pass 82 tests each
+on Python 3.11/3.12. The exact rebuilt package passed installed Linux and native
+PowerShell workflows and independently qualified native psmux lifecycle/cwd.
+See evidence/plan0211/review/final-report.md and ledger.json for exact identities,
+commands, earlier diagnostic failures, capability limits and cleanup receipts.
+No production mutation, provider prompts, merge or deployment was performed.
 
 Graphiti discovery: skip; supplied current conversation, deployed source and its
 canonical receipts provide the decisions needed for this bounded interview.
@@ -125,8 +126,8 @@ Settled round2: scoped names/stable rename, defaults, composable selection, part
 bulk outcomes/conditional undo, rule priority/conflicts, manual routing holds/pins.
 Settled round3: launcher reuse, automatic discovery/adoption, routing backfill and
 stability, delete dependencies/partial drain, human/machine interfaces, undo conflicts.
-Frontier: empty. Next step: operator confirmation of the consolidated understanding;
-then derive the formal specification and tickets under subsequent task scope.
+Frontier: empty. Specification and tickets are published; implementation and
+review remediation are complete. Merge and deployment remain separate.
 
 Backend capability facts remain implementation qualification, not operator
 questions or permission gates. First delivery uses the WSL authority and existing
@@ -139,7 +140,7 @@ hosting remains a separate roadmap milestone.
 
 - List terminal sessions by recognizable name; discover `default` immediately.
 - Create/show/edit/rename/delete named sessions; keep empty saved definitions.
-- codex-bots creates/reuses `bots` without disturbing development tabs.
+- codex-bots creates/reuses `codex-bots` without disturbing development tabs.
 - Preview explicit or criteria-selected tabs, then apply process-preserving moves.
 - Save categories/rules and opt into continuous routing where desired.
 - Explain conflicts, unknown traits, held/pinned tabs, unsupported backend actions
