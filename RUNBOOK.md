@@ -8771,3 +8771,7 @@ unrelated sessions/services and working release remain unchanged. See
 `docs/dev/evidence/plan0211/review/final-report.md` and ledger for review/publication.
 No merge, production deployment or real provider prompts. Memory disposition
 forbidden, non-write receipt in user state; no explicit memory-write request.
+
+Publication: draft PR535, all527–534 CLOSED read back; parent526 unchangedOPEN.
+Post-review534 comment6747714328 records exact acceptance. Private review preview
+6fa5c87609e3; feature branch published, merge/deployment remain separate.

@@ -222,5 +222,14 @@
       "pinned_active": 0,
       "token_files_absent": 4
     }
+  },
+  "publication": {
+    "pr": 535,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/pull/535",
+    "draft": true,
+    "base": "main",
+    "validated_product_source": "6afbda8cd166fc3ca08995256729a3353067f34a",
+    "preview": "https://previews.ecochran.dyndns.org/s/6fa5c87609e3",
+    "tracker_readback": "All527-534 CLOSED;534finalcomment6747714328;526 unchangedOPEN"
   }
 }

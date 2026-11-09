@@ -2,7 +2,7 @@
 
 State: CLOSED
 Owner: primary / ecochran76
-Work item: #526; implementation #527–#534
+Work item: #526; implementation #527–#534; draft PR #535
 Branch: feat/terminal-sessions-526
 Domain authority: GLOSSARY.md
 
