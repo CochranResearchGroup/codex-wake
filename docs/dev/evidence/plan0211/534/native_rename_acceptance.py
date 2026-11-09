@@ -49,7 +49,7 @@ try:
   reopened.execute('tabs.session.delete',dict(session=replacement['id']))
   checks.append('native-terminate-reconcile-tombstone-name-reuse-empty-delete')
   final=transport.snapshot(time.monotonic()+10);assert original['windows']==final['windows'];checks.append('peer-server-unchanged')
- result=dict(result,package=codex_wake.__file__,python=sys.executable,prefix=sys.prefix,status='passed',checks=checks,namespace=ns,identity=ident,bridge_sha256=hashlib.sha256(bridge.read_bytes()).hexdigest(),windows_python=py,provider_calls=0,production_touched=False)
+ result=dict(result,owned_servers=[original['server_identity'],opened['snapshot']['server_identity']],package=codex_wake.__file__,python=sys.executable,prefix=sys.prefix,status='passed',checks=checks,namespace=ns,identity=ident,bridge_sha256=hashlib.sha256(bridge.read_bytes()).hexdigest(),windows_python=py,provider_calls=0,production_touched=False)
 except Exception as e:
  result=dict(status='failed',checks=checks,namespace=ns,error=repr(e));raise
 finally:
@@ -61,4 +61,9 @@ finally:
     for w in t.snapshot(time.monotonic()+10)['windows']:t.lifecycle('close',dict(window=w['window_id']),time.monotonic()+10)
   except Exception as e:result['cleanup_error']=repr(e)
  result['final_presence']={name:bootstrap(name,'session_probe') for name in ['workers','bots','seed','unsupported-move']}
+ if result.get('owned_servers'):
+  code="import ctypes,json,sys\nfrom ctypes import wintypes as w\nk=ctypes.WinDLL('kernel32',use_last_error=True)\nk.OpenProcess.argtypes=[w.DWORD,w.BOOL,w.DWORD];k.OpenProcess.restype=w.HANDLE\nk.GetProcessTimes.argtypes=[w.HANDLE,*([ctypes.POINTER(w.FILETIME)]*4)];k.GetProcessTimes.restype=w.BOOL\nk.GetExitCodeProcess.argtypes=[w.HANDLE,ctypes.POINTER(w.DWORD)];k.CloseHandle.argtypes=[w.HANDLE]\ndef observe(p):\n h=k.OpenProcess(0x1000,False,p)\n if not h:return dict(winerror=ctypes.get_last_error())\n try:\n  t=[w.FILETIME() for _ in range(4)];out=w.DWORD()\n  assert k.GetProcessTimes(h,*[ctypes.byref(v) for v in t]) and k.GetExitCodeProcess(h,ctypes.byref(out))\n  return dict(birth=(t[0].dwHighDateTime<<32)|t[0].dwLowDateTime,exit_code=out.value)\n finally:k.CloseHandle(h)\nprint(json.dumps({str(p):observe(p) for p in json.loads(sys.stdin.read())}))"
+  census=subprocess.run([py,'-c',code,wp],input=json.dumps([i['pid'] for i in result['owned_servers']]),text=True,capture_output=True,check=True,timeout=15)
+  result['final_server_births']=json.loads(census.stdout)
+  assert all(result['final_server_births'][str(i['pid'])].get('winerror')==87 or result['final_server_births'][str(i['pid'])].get('birth') not in (None,i['creation_filetime']) or result['final_server_births'][str(i['pid'])].get('exit_code',259)!=259 for i in result['owned_servers']),result['final_server_births']
  Path('/tmp/qualification534-green.json').write_text(json.dumps(result,indent=2));print(json.dumps(result));shutil.rmtree(directory)

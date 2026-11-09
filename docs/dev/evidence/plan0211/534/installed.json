@@ -1,0 +1,290 @@
+{
+  "loaded_modules": {
+    "codex_wake": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/__init__.py",
+    "codex_wake.completion": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/completion.py",
+    "codex_wake.signals": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/signals.py",
+    "codex_wake.signal_records": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/signal_records.py",
+    "codex_wake.time_provider": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/time_provider.py",
+    "codex_wake.records": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/records.py",
+    "codex_wake.wake_control": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/wake_control.py",
+    "codex_wake.injector": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/injector.py",
+    "codex_wake.app_server": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/app_server.py",
+    "codex_wake.hook_config": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/hook_config.py",
+    "codex_wake.openclaw_gateway": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/openclaw_gateway.py",
+    "codex_wake.openclaw_plugin": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/openclaw_plugin.py",
+    "codex_wake.process": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/process.py",
+    "codex_wake.executables": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/executables.py",
+    "codex_wake.service": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/service.py",
+    "codex_wake.monitor": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/monitor.py",
+    "codex_wake.github_polling": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/github_polling.py",
+    "codex_wake.github_source_config": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/github_source_config.py",
+    "codex_wake.http_json_source_config": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/http_json_source_config.py",
+    "codex_wake.signal_store": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/signal_store.py",
+    "codex_wake.source_registry": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/source_registry.py",
+    "codex_wake.signal_support": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/signal_support.py",
+    "codex_wake.builtin_signals": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/builtin_signals.py",
+    "codex_wake.daemon": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/daemon.py",
+    "codex_wake.supervisor": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/supervisor.py",
+    "codex_wake.product_readiness": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/product_readiness.py",
+    "codex_wake.cli": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/cli.py",
+    "codex_wake.controller_auth": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_auth.py",
+    "codex_wake.managed_inventory": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/managed_inventory.py",
+    "codex_wake.controller_runtime": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_runtime.py",
+    "codex_wake.local_session_events": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/local_session_events.py",
+    "codex_wake.local_control_routing": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/local_control_routing.py",
+    "codex_wake.local_control_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/local_control_commands.py",
+    "codex_wake.native_protocol": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/native_protocol.py",
+    "codex_wake.controller_health": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_health.py",
+    "codex_wake.local_health": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/local_health.py",
+    "codex_wake.controller_accounts": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_accounts.py",
+    "codex_wake.controller_daemons": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_daemons.py",
+    "codex_wake.daemon_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/daemon_commands.py",
+    "codex_wake.shared_app_server": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/shared_app_server.py",
+    "codex_wake.sessions": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/sessions.py",
+    "codex_wake.local_sessions": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/local_sessions.py",
+    "codex_wake.local_session_operations": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/local_session_operations.py",
+    "codex_wake.local_slash_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/local_slash_commands.py",
+    "codex_wake.local_control_lifecycle": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/local_control_lifecycle.py",
+    "codex_wake.shortcut_store": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/shortcut_store.py",
+    "codex_wake.goal_supervision": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/goal_supervision.py",
+    "codex_wake.session_permissions": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/session_permissions.py",
+    "codex_wake.self_limits": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/self_limits.py",
+    "codex_wake.local_self_limits": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/local_self_limits.py",
+    "codex_wake.time_inspection": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/time_inspection.py",
+    "codex_wake.sessions_cli": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/sessions_cli.py",
+    "codex_wake.tab_targets": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/tab_targets.py",
+    "codex_wake.controller_operations": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_operations.py",
+    "codex_wake.controller_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_commands.py",
+    "codex_wake.tab_views": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/tab_views.py",
+    "codex_wake.account_observation": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/account_observation.py",
+    "codex_wake.controller_history": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_history.py",
+    "codex_wake.history_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/history_commands.py",
+    "codex_wake.controller_migration": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_migration.py",
+    "codex_wake.migration_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/migration_commands.py",
+    "codex_wake.tab_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/tab_commands.py",
+    "codex_wake.terminal_session_contract": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/terminal_session_contract.py",
+    "codex_wake.tab_contract": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/tab_contract.py",
+    "codex_wake.a2a_identity": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/a2a_identity.py",
+    "codex_wake.a2a_bus": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/a2a_bus.py",
+    "codex_wake.controller_flows": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_flows.py",
+    "codex_wake.flow_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/flow_commands.py",
+    "codex_wake.flow_session_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/flow_session_commands.py",
+    "codex_wake.health_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/health_commands.py",
+    "codex_wake.notice_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/notice_commands.py",
+    "codex_wake.recovery_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/recovery_commands.py",
+    "codex_wake.grok_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/grok_commands.py",
+    "codex_wake.account_management": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/account_management.py",
+    "codex_wake.command_contract": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/command_contract.py",
+    "codex_wake.controller_http": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_http.py",
+    "codex_wake.controller_remote_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_remote_commands.py",
+    "codex_wake.controller_client": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_client.py",
+    "codex_wake.account_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/account_commands.py",
+    "codex_wake.build_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/build_commands.py",
+    "codex_wake.controller_hosts": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_hosts.py",
+    "codex_wake.host_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/host_commands.py",
+    "codex_wake.runtime_signals": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/runtime_signals.py",
+    "codex_wake.process_signals": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/process_signals.py",
+    "codex_wake.task_briefs": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/task_briefs.py",
+    "codex_wake.background_jobs": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/background_jobs.py",
+    "codex_wake.a2a_mailbox": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/a2a_mailbox.py",
+    "codex_wake.controller_mailbox": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_mailbox.py",
+    "codex_wake.controller_job_adapter": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/controller_job_adapter.py",
+    "codex_wake.operation_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/operation_commands.py",
+    "codex_wake.runtime_delivery": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/runtime_delivery.py",
+    "codex_wake.codex_runtime": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/codex_runtime.py",
+    "codex_wake.wake_policy": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/wake_policy.py",
+    "codex_wake.native_delivery": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/native_delivery.py",
+    "codex_wake.grok_runtime": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/grok_runtime.py",
+    "codex_wake.grok_terminal": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/grok_terminal.py",
+    "codex_wake.native_intents": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/native_intents.py",
+    "codex_wake.runtime_wakes": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/runtime_wakes.py",
+    "codex_wake.grok_stdio_host": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/grok_stdio_host.py",
+    "codex_wake.task_brief_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/task_brief_commands.py",
+    "codex_wake.managed_inventory_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/managed_inventory_commands.py",
+    "codex_wake.agent_observation": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/agent_observation.py",
+    "codex_wake.agent_observation_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/agent_observation_commands.py",
+    "codex_wake.operator_overview": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/operator_overview.py",
+    "codex_wake.operator_overview_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/operator_overview_commands.py",
+    "codex_wake.agent_resume": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/agent_resume.py",
+    "codex_wake.agent_resume_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/agent_resume_commands.py",
+    "codex_wake.resource_claims": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/resource_claims.py",
+    "codex_wake.resource_claim_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/resource_claim_commands.py",
+    "codex_wake.attention_queue": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/attention_queue.py",
+    "codex_wake.permission_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/permission_commands.py",
+    "codex_wake.attention_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/attention_commands.py",
+    "codex_wake.work_acceptance": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/work_acceptance.py",
+    "codex_wake.work_acceptance_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/work_acceptance_commands.py",
+    "codex_wake.background_job_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/background_job_commands.py",
+    "codex_wake.tab_organization": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/tab_organization.py",
+    "codex_wake.tab_organization_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/tab_organization_commands.py",
+    "codex_wake.guarded_interactions": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/guarded_interactions.py",
+    "codex_wake.guarded_interaction_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/guarded_interaction_commands.py",
+    "codex_wake.a2a_cli": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/a2a_cli.py",
+    "codex_wake.messages_cli": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/messages_cli.py",
+    "codex_wake.goal_limits_cli": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/goal_limits_cli.py",
+    "codex_wake.goal_usage": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/goal_usage.py",
+    "codex_wake.permission_enforcement": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/permission_enforcement.py",
+    "codex_wake.goal_renewal": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/goal_renewal.py",
+    "codex_wake.goal_renewal_commands": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/goal_renewal_commands.py",
+    "codex_wake.account_shortcuts": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/account_shortcuts.py"
+  },
+  "status": "PASS",
+  "tier": "FOCUSED",
+  "checks": [
+    "installed-generated-help-session-relocation-routing-and-bash-zsh-completion",
+    "installed-cli-empty-open-rename-defaults-new-tab-existing-process-preserved",
+    "installed-human-explicit-tab-group-custom-label-frozen-selection",
+    "frozen-bulk-idempotent-apply-exact-pane-continuity-undo-holds-routing-monitor-drain-terminate-retired-rules-name-reuse",
+    "native-partial-frozen-selection-negative-cli-exit-status-reconcile",
+    "installed-cli-native-command-failure-uncertain-negative-exit-restart-reconcile-no-replay",
+    "real-sdk-installed-stdio-session-crud-relocation-routing-controls",
+    "authenticated-api-oauth-mcp-session-crud-relocation-routing-parity",
+    "native-powershell-portable-installed-api-mcp-session-crud-relocation-routing-parity"
+  ],
+  "python": "/tmp/wake534-third-installed/bin/python",
+  "prefix": "/tmp/wake534-third-installed",
+  "package": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake",
+  "wheel_sha256": "2f72c019f8654d07d0d84638830cf1c30bf8f49cff5cab7a000678cb51408b15",
+  "python_members_verified": 301,
+  "windows": {
+    "prefix": "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\session534-e6935becee4048b9acc65a8c1e1afbc8\\venv",
+    "cli": "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\session534-e6935becee4048b9acc65a8c1e1afbc8\\venv\\Scripts\\codex-wake.exe",
+    "python": "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\session534-e6935becee4048b9acc65a8c1e1afbc8\\venv\\Scripts\\python.exe",
+    "python_members_verified": 301,
+    "wheel_sha256": "2f72c019f8654d07d0d84638830cf1c30bf8f49cff5cab7a000678cb51408b15",
+    "calls": [
+      {
+        "transport": "api",
+        "operation": "tabs.session.create",
+        "status": "created"
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.session.ensure",
+        "status": "ensured"
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.session.open",
+        "status": "opened"
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.session.update",
+        "status": "updated"
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.relocate.preview",
+        "status": "preview"
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.route.pin",
+        "status": null
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.route.hold",
+        "status": null
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.route.resume",
+        "status": null
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.route.unpin",
+        "status": null
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.session.delete",
+        "status": "deleted"
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.route.pin",
+        "status": null,
+        "exit_code": 3,
+        "reason": "invalid_argument"
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.session.create",
+        "status": "created"
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.session.ensure",
+        "status": "ensured"
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.session.open",
+        "status": "opened"
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.session.update",
+        "status": "updated"
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.relocate.preview",
+        "status": "preview"
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.route.pin",
+        "status": null
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.route.hold",
+        "status": null
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.route.resume",
+        "status": null
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.route.unpin",
+        "status": null
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.session.delete",
+        "status": "deleted"
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.route.pin",
+        "status": null,
+        "exit_code": 3,
+        "reason": "invalid_argument"
+      }
+    ],
+    "token_removed": true
+  },
+  "provider_calls": 0,
+  "production_touched": false,
+  "peer_preserved": true,
+  "elapsed_seconds": 154.659,
+  "budget_seconds": 180,
+  "budget_breach": false,
+  "owned_listener_terminated": true,
+  "owned_monitor_stopped": {
+    "status": "stopped",
+    "process": {
+      "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+      "pid": 946330,
+      "start_ticks": 33236625
+    },
+    "generation": "5bc8dfef895246e39111edcbbb55539e"
+  },
+  "owned_namespace_removed": true
+}

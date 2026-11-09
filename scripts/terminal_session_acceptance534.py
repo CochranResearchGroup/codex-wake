@@ -79,7 +79,7 @@ def main():
             changed=local('tabs.session.update',dict(session='source',changes=dict(name='workers',description='inert fixture',labels=['automation'],defaults=dict(cwd=directory,argv=['/bin/sleep','600']))))['session']
             assert changed['id']==sid and births('workers')==first
             # Saved defaults are resolved by the installed public tabs.create path.
-            made=unwrap(command('tabs','create','--session','workers','--name','inert-worker','--json'))
+            made=unwrap(command('tabs','create','--session',sock+'::workers','--name','inert-worker','--json'))
             assert made['status']=='applied',made
             assert directory in tmux('list-panes','-s','-t','workers','-F','#{pane_current_path}')
             checks.append('installed-cli-empty-open-rename-defaults-new-tab-existing-process-preserved')
@@ -89,8 +89,8 @@ def main():
             resources=command('tabs','list')['resources']
             member=next(r for r in resources if r['target']['workspace']==changed['workspace'])
             command('tabs','group-save','--arguments',json.dumps(dict(name='acceptance-category',members=[TabViews.identity(member)['id']],labels=['automation'])))
-            for flag,value in (('--tab','workers:'+member['window']['window_id']),('--group','acceptance-category'),('--label','automation')):
-                preview=unwrap(command('tabs','relocate','preview','--destination','destination',flag,value,'--json'))
+            for flag,value in (('--tab',sock+'::workers:'+member['window']['window_id']),('--group','acceptance-category'),('--label','automation')):
+                preview=unwrap(command('tabs','relocate','preview','--destination',sock+'::destination',flag,value,'--json'))
                 assert len(preview['outcomes'])==1,(flag,preview)
             checks.append('installed-human-explicit-tab-group-custom-label-frozen-selection')
             plan=local('tabs.relocate.preview',dict(session='workers',destination='destination'))
@@ -214,7 +214,10 @@ def main():
             if server:
                 server.terminate();server.wait(timeout=8)
                 if server.stderr:server.stderr.close()
-            try:stopped=unwrap(command('tabs','monitor-stop'))
+            try:
+                stopped=unwrap(command('tabs','monitor-stop'))['monitor']
+                stopped={k:stopped.get(k) for k in ('status','process','generation')}
+                assert stopped['status']=='stopped',stopped
             finally:tmux('kill-server',check=False)
     report.update(elapsed_seconds=round(time.monotonic()-started,3),budget_seconds=180,budget_breach=time.monotonic()-started>180,owned_listener_terminated=server is None or server.poll() is not None,owned_monitor_stopped=stopped,owned_namespace_removed=True)
     args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(report,indent=2)+'\n')
