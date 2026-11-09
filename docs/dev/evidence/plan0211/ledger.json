@@ -88,13 +88,15 @@
       "blockers": [
         530
       ],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/531",
       "node_id": 6289897115,
       "owner": "/root/routing531",
       "branch": "feat/terminal-session-531",
-      "worktree": "/tmp/codex-wake-session-531"
+      "worktree": "/tmp/codex-wake-session-531",
+      "integration_sha": "be4aa3c",
+      "validation": "26integratedchecksPASS EACH3.11/3.12; worker29PASS each + publichistoric-hold; realservice daemonroute redgreen"
     },
     {
       "index": 6,
@@ -122,10 +124,13 @@
         530,
         531
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/533",
-      "node_id": 6289900152
+      "node_id": 6289900152,
+      "owner": "/root/deletion533",
+      "branch": "feat/terminal-session-533",
+      "worktree": "/tmp/codex-wake-session-533"
     },
     {
       "index": 8,
@@ -145,7 +150,8 @@
   ],
   "review": {
     "broad_runs": 0,
-    "remediation_passes": 0
+    "remediation_passes": 0,
+    "fixed_point": "f0798e1ede3104caf591ba0b453fbf553bed569e"
   },
   "state": "implementing",
   "integration_worktree": "/tmp/codex-wake-session-design-0211",
@@ -156,12 +162,18 @@
     "native_concurrency": 1,
     "hosted_ci": false
   },
-  "shared_contract_checkpoint": "648af92",
+  "shared_contract_checkpoint": "3cd8a88",
   "native_qualification": {
     "529": "Native psmux8checks pass; source-exact bridge, retainedcleanuptransient, finalnamespaceabsenceverified; workercommitpending"
   },
   "runtime_effects": {
     "production": false,
     "providers": false
-  }
+  },
+  "current_state": "Sixclosed;533running;534pending;review0/TDDremediation0",
+  "pending_acceptance_checks": [
+    "534: final installed native psmux rename + formatting baseline/rollback interaction; existing native generation carry remains guarded",
+    "534: final public CLI/API/nativeMCP/OAuth/PowerShell parity and cleanup",
+    "531: factory restoration/alias red-green and budgeted automatic service routing"
+  ]
 }

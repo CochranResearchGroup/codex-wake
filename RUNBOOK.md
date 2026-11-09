@@ -8731,3 +8731,17 @@ cleanup and partial-drain retention, readable CLI/structured automation and
 conflict-preserving undo. All seventeen decisions recorded in LOCAL-P211. Decision
 frontier empty; consolidated shared-understanding confirmation pending. No code or
 runtime effects. Memory forbidden: no explicit memory-write request.
+
+
+## Turn | 2026-11-09 | Session CRUD and relocation frontier validated
+
+Published spec526 and527–534 with native blocking/subissue links. Primary527 and
+worker528 source foundation passed24checks eachPython3.11/3.12. Native529 eight
+Windows checks passed with cleanup diagnostic retained and finalabsenceverified;
+UX532 preserves canonical external codex-bots session/owner and nativepane/PID.
+Integrated529/532 checks25PASS eachversion. Bulk530 integrated21PASS eachversion
+with multipane/final-tab continuity, lost-reply reconciliation and conditionalundo.
+Five tickets closed.531routing actualdaemon test exposed factorysavedbinding/alias
+defect, reproduced publicred→green; final qualification pending.533/534blocked by
+ledgerdependencies. Source-only delivery so far; installed/fullpublicparitypending.
+Review0/TDDremediation0. No production/provider/merge/deploy effects.

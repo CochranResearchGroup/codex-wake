@@ -57,7 +57,8 @@ def native(owner,record,verb,**kwargs):
     identity=value['identity'];fixed=command+['--server-pid',str(identity['pid']),'--server-birth',str(identity['creation_filetime'])]
     transport=PsmuxAttachmentTransport(ConfiguredBridge(fixed),generation=value['generation'])
     snap=transport.snapshot(time.monotonic()+10)
-    owner.tabs.workspaces[record['id']]=dict(kind='psmux',label=kwargs.get('name',record['name']),transport=transport)
+    workspace=record.get('workspace') or record['id']
+    owner.tabs.workspaces[workspace]=dict(kind='psmux',label=kwargs.get('name',record['name']),transport=transport)
     record.update(native_session_id=snap['session_id'],native_key=_digest({k:snap.get(k) for k in ('server','session_id','socket_identity','bridge_generation')}),psmux_bridge_command=command)
     record.pop('opening',None)
     state=owner.state();state['sessions'][record['id']]=record;owner.save(state)

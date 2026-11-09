@@ -22,7 +22,7 @@ def specs():
         props=dict(name={'type':'string'},rule_id={'type':'string'}) if verb in ('show','save','delete','enable','pause') else {}
         required=[]
         if verb=='save':
-            props.update(destination={'type':'string'},selection={'type':'object'},priority={'type':'integer'},stability_seconds={'type':'number','minimum':0,'maximum':3600})
+            props.update(destination={'type':'string'},selection={'type':'object'},priority={'type':'integer','minimum':-1000000,'maximum':1000000},stability_seconds={'type':'number','minimum':0,'maximum':3600})
             required=['name','destination','selection']
         if verb=='enable':props['include_existing']={'type':'boolean'}
         if verb in ('hold','resume','pin','unpin'):

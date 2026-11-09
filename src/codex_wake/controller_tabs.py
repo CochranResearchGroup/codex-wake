@@ -271,6 +271,10 @@ class AuthorizedTabs:
 def _restore_terminal_sessions(owner):
     from .terminal_sessions import TerminalSessions
     TerminalSessions(owner.root,tabs=owner)
+    from .tab_traits import WorkspaceTraitsObserver
+    for workspace in owner.workspaces.values():
+        if 'observer' not in workspace:
+            workspace['observer']=WorkspaceTraitsObserver(owner.root,workspace['transport'],workspace.get('privacy'))
     return owner
 
 

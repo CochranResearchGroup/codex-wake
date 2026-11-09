@@ -8,12 +8,14 @@ Domain authority: GLOSSARY.md
 
 ## Current State
 
-Operator approved all seventeen design decisions and explicitly invoked spec,
-ticket publication and implementation. Spec #526 and eight vertical tickets
-#527–#534 are published with native dependencies. Primary owns #527; independent
-#528 is delegated. The execution ledger owns readiness, custody and review counts.
-Public seams are existing controller CLI/API/MCP and disposable native adapters,
-as agreed in the interview; no new interface choice needs operator input.
+Operator approved all seventeen decisions and directed spec/ticket publication
+and implementation. Spec #526 and eight tickets #527–#534 have native dependency
+links. Primary delivered #527; #527–#530 and #532 are integrated, validated and
+tracker-closed. Routing #531 is in final focused/native-monitor qualification;
+#533 and #534 wait on its validated dependency. Public factory tests caught and
+fixed missing saved sessions/duplicate aliases. The execution ledger records
+exact custody, commands, first failures and review counts (currently0/0).
+No production mutation, provider prompts, merge or deployment is authorized.
 
 Graphiti discovery: skip; supplied current conversation, deployed source and its
 canonical receipts provide the decisions needed for this bounded interview.
@@ -24,8 +26,9 @@ Memory disposition: forbidden; no explicit memory-write request.
 Specify session create/list/show/update/delete, human-readable discovery and
 selection, moving tabs by explicit selection or criteria, and saved categories.
 Keep CLI/API/MCP behavior equivalent; qualify Byobu/tmux and psmux independently.
-Do not change terminal layouts, launch codex-bots, stop sessions, implement code,
-merge or deploy during this interview. Stock Codex remains independent.
+Implementation and disposable fixture effects are authorized. Do not change
+production layouts, launch real bots, stop unrelated sessions, merge or deploy.
+Stock Codex remains independent.
 
 ## Confirmed requirements
 
@@ -146,13 +149,26 @@ hosting remains a separate roadmap milestone.
 
 ## Acceptance criteria and definition of done
 
-Interview done when every branch is settled, backend facts are checked and the
-operator confirms the shared understanding. Update this plan and GLOSSARY as
-terms settle; record ADRs only for consequential tradeoffs meeting the skill's
-criteria. A later spec/ticket packet owns executable acceptance and implementation.
+- All eight implementation tickets integrated and validated at the public controller
+  seams and their own native boundaries, with tracker closure readback.
+- Exact installed immutable package qualified through WSL CLI, native stdio MCP,
+  authenticated HTTP/API/OAuth MCP and native PowerShell. Byobu/tmux movement and
+  psmux CRUD qualify independently; cross-server movement remains unsupported.
+- Preserve running processes, pane/conversation identity, manual holds, configured
+  labels, original formatter baselines and unknown outcomes. Prove recovery without
+  blind replay; keep failed receipts and explicit deferred risks.
+- Exactly one broad Standards/Spec review against frozen base
+  f0798e1ede3104caf591ba0b453fbf553bed569e after all tickets close, then one bounded
+  TDD remediation pass and focused verification. No repeated broad review loop.
+- Update glossary, operator docs/help/completion, ROADMAP/RUNBOOK and ledger;
+  publish a coherent validated integration branch. Merge/deploy remain separate.
 
 ## Execution bounds
 
-One primary design lane; a read-only delegated fact check may verify backend
-capabilities. No implementation workers. Next action: confirm consolidated understanding before formal
-specification/ticketing. No runtime tests needed for these documentation-only changes.
+Primary owns shared schemas/authority/integration and took #527. Delegate other
+ready tickets one per agent in isolated worktrees. Maximum three substantive
+implementation lanes, serialized shared-file integration, one native Windows
+qualification job at a time. Readiness requires every blocker validated on the
+integration branch; tracker closure or worker claims alone do not unlock tickets.
+Tests are selected by affected public surface, run on local Python3.11/3.12;
+no paid hosted CI. Final package acceptance is ticket #534, not a source-only claim.

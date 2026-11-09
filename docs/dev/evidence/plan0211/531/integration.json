@@ -1,0 +1,30 @@
+{
+  "tier": "focused",
+  "status": "PASS",
+  "source": "be4aa3c plus core factory observer/psmux workspace integration",
+  "checks": [
+    {
+      "python": "3.12",
+      "tests": 26,
+      "seconds": 24.25,
+      "log": "/tmp/p211-531-integrated312.log"
+    },
+    {
+      "python": "3.11",
+      "tests": 26,
+      "seconds": 24.828,
+      "log": "/tmp/p211-531-integrated311.log"
+    }
+  ],
+  "worker_receipt": "docs/dev/plans/0211/531-routing-validation.md",
+  "factory_red": "/tmp/p211-factory-alias-red.log: saved registry missing from native monitorfactory",
+  "factory_green": "/tmp/p211-factory-alias-green312.log:19PASS",
+  "selector_red_green": [
+    "/tmp/p211-selection-cli-red.log",
+    "/tmp/p211-selection-cli-green.log"
+  ],
+  "deadline_red": "/tmp/p211-routing-deadline-red.log",
+  "deadline_green": "/tmp/p211-routing-shared312.log:25PASS",
+  "production_effects": false,
+  "provider_calls": 0
+}
