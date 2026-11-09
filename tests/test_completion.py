@@ -75,6 +75,7 @@ class CompletionTests(unittest.TestCase):
         import shlex
         import sys
         import time
+        import termios
         with tempfile.TemporaryDirectory(prefix='interactive completion ') as temporary:
             root = Path(temporary)
             (root / 'controller-accounts.toml').write_text('[profiles]\nknown_profiles=["codex-alice"]\n')
@@ -92,11 +93,18 @@ class CompletionTests(unittest.TestCase):
                 def until(marker):
                     data = b''
                     deadline = time.monotonic()+10
-                    while marker not in data and time.monotonic()<deadline:
+                    while time.monotonic()<deadline:
+                        # READY/capture output can precede Readline/ZLE's return
+                        # to input mode. Sending Ctrl-X/Ctrl-V while cooked mode
+                        # still owns the PTY lets its line discipline consume
+                        # those bytes before the editor widget can receive them.
+                        flags = termios.tcgetattr(master)[3]
+                        editor_ready = not flags & (termios.ICANON | termios.ECHO)
+                        if marker in data and editor_ready:
+                            return data
                         if select.select([master],[],[],.2)[0]:
                             data += os.read(master,65536)
-                    self.assertIn(marker,data,(shell,data))
-                    return data
+                    self.fail((shell,'PTY marker/editor readiness deadline',marker,data,flags))
                 try:
                     if shell == 'bash':
                         binding = '"\\C-x\\C-v": printf "\\036%s\\037" "$READLINE_LINE"'
