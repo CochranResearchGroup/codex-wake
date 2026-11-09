@@ -23,8 +23,8 @@ def _command(owner, record):
     return command+['--session',record['name']]
 
 
-def _bootstrap(command, action):
-    reply=subprocess.run(command+['--session-management'],input=json.dumps(dict(action=action,arguments={})),text=True,capture_output=True,timeout=12)
+def _bootstrap(command, action, arguments=None):
+    reply=subprocess.run(command+['--session-management'],input=json.dumps(dict(action=action,arguments=arguments or {})),text=True,capture_output=True,timeout=12)
     if len(reply.stdout)>1048576:raise InventoryError('capacity','Native session reply exceeds bound.')
     try:value=json.loads(reply.stdout)
     except ValueError:raise InventoryError('attachment_unavailable','Native session reply unavailable.') from None
@@ -53,11 +53,11 @@ def native(owner,record,verb,**kwargs):
             # Session name participates in the host generation. Re-pin after rename.
             command[command.index('--session')+1]=kwargs['name']
         elif verb=='open':
-            if record.get('defaults'):raise InventoryError('unsupported_target','psmux launch defaults require a qualified profile launcher; no shell substitution.')
+            if any(k in record.get('defaults',{}) for k in ('profile','argv')):raise InventoryError('unsupported_target','psmux launch defaults require a qualified profile launcher; no shell substitution.')
             if record.get('opening'):raise InventoryError('uncertain_effect','Prior psmux opening requires reconciliation; no replay.')
             record['opening']=True;record['psmux_bridge_command']=command
             state=owner.state();state['sessions'][record['id']]=record;owner.save(state)
-            _bootstrap(command,'session_create')
+            _bootstrap(command,'session_create',record.get('defaults',{}))
         else:raise InventoryError('unsupported_operation','Unsupported native session action.')
         description=subprocess.run(command+['--describe'],text=True,capture_output=True,timeout=10,check=True)
         value=json.loads(description.stdout)

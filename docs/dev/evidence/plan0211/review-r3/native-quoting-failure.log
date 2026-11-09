@@ -1,0 +1,15 @@
+{"session_launch_readback": {"cwd": "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\wakeR3-d40157e215eb", "argv": ["space argument", "semi;literal", "quote\"literal"]}, "owned_servers": [{"platform": "windows", "namespace": "wakeR3-d40157e215eb", "pid": 79024, "session": "seed", "creation_filetime": 134387199457501306, "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"}, {"platform": "windows", "namespace": "wakeR3-d40157e215eb", "pid": 63656, "session": "bots", "creation_filetime": 134387199503359651, "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"}], "status": "failed", "checks": ["native-open-with-updated-windows-defaults"], "namespace": "wakeR3-d40157e215eb", "error": "FileNotFoundError(2, 'No such file or directory')", "final_presence": {"workers": {"present": false}, "bots": {"present": false}, "seed": {"present": false}, "unsupported-move": {"present": false}}, "final_server_births": {"79024": {"birth": 134387199457501306, "exit_code": 0}, "63656": {"winerror": 87}}}
+Traceback (most recent call last):
+  File "/tmp/codex-wake-review-psmux/docs/dev/evidence/plan0211/review-r3/native_acceptance.py", line 42, in <module>
+    result['tab_launch_readback']=await_marker();checks.append('new-tab-inherits-cwd-argv-independent-windows-readback')
+                                  ^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-review-psmux/docs/dev/evidence/plan0211/review-r3/native_acceptance.py", line 34, in await_marker
+    value=json.loads(marker.read_text());assert value==dict(cwd=cwdwin,argv=['space argument','semi;literal','quote"literal']),value
+                     ^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/mnt/c/Users/ecoch/AppData/Local/codex-wake-test/wakeR3-d40157e215eb/launch.json'

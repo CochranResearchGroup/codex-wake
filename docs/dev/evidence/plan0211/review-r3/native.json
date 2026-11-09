@@ -1,0 +1,79 @@
+{
+  "owned_servers": [
+    {
+      "platform": "windows",
+      "namespace": "wakeR3-c7937ead3fff",
+      "pid": 58876,
+      "session": "seed",
+      "creation_filetime": 134387200225531130,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    },
+    {
+      "platform": "windows",
+      "namespace": "wakeR3-c7937ead3fff",
+      "pid": 62688,
+      "session": "bots",
+      "creation_filetime": 134387200271851839,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    }
+  ],
+  "session_cwd_readback": [
+    "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\wakeR3-c7937ead3fff"
+  ],
+  "tab_cwd_readback": [
+    "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\wakeR3-c7937ead3fff",
+    "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\wakeR3-c7937ead3fff"
+  ],
+  "expected_psmux_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca",
+  "first_native_delete_status": "deleted",
+  "package": "/tmp/codex-wake-review-psmux/src/codex_wake/__init__.py",
+  "python": "/home/ecochran76/.local/bin/python3.12",
+  "prefix": "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu",
+  "status": "passed",
+  "checks": [
+    "native-open-with-updated-windows-cwd",
+    "new-tab-inherits-cwd-native-readback",
+    "rename-exact-format-baseline-rollback",
+    "restart-restores-exact-generation",
+    "populated-delete-refused",
+    "psmux-cross-session-move-unsupported-before-effect",
+    "native-terminate-reconcile-tombstone-name-reuse-empty-delete",
+    "peer-server-unchanged"
+  ],
+  "namespace": "wakeR3-c7937ead3fff",
+  "identity": {
+    "platform": "windows",
+    "namespace": "wakeR3-c7937ead3fff",
+    "pid": 58876,
+    "session": "seed",
+    "creation_filetime": 134387200225531130,
+    "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+  },
+  "bridge_sha256": "9ca6c21f4666d9f7e96533237a23a51a72179af2968fba9d5e88646263dbc3f7",
+  "windows_python": "/mnt/c/Users/ecoch/AppData/Local/codex-wake-test/controller405-20261030/venv/Scripts/python.exe",
+  "provider_calls": 0,
+  "production_touched": false,
+  "final_presence": {
+    "workers": {
+      "present": false
+    },
+    "bots": {
+      "present": false
+    },
+    "seed": {
+      "present": false
+    },
+    "unsupported-move": {
+      "present": false
+    }
+  },
+  "final_server_births": {
+    "58876": {
+      "birth": 134387200225531130,
+      "exit_code": 0
+    },
+    "62688": {
+      "winerror": 87
+    }
+  }
+}

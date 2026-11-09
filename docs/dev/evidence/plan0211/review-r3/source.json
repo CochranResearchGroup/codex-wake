@@ -1,0 +1,12 @@
+{
+  "base_commit": "2e8896b7029bf6e6f140314e6e06f6bcac6fe80b",
+  "branch": "fix/session-review-psmux",
+  "qualification": "source-only; no wheel build or deployment",
+  "files": {
+    "src/codex_wake/terminal_sessions.py": "405ca36226d27479dd46fbbec5606992e064e0492c93f8e0a984a1aecb2641e7",
+    "src/codex_wake/terminal_session_psmux.py": "1630491d5374faf2e9ca29047b02e03d5846b87783c09530e978aa12cc09766c",
+    "src/codex_wake/tab_psmux_bridge.py": "9ca6c21f4666d9f7e96533237a23a51a72179af2968fba9d5e88646263dbc3f7",
+    "tests/test_terminal_session_psmux.py": "9f38cd38dffa72b6568129b40b1b4fcb60f886e6d20049e9a08f85cd9ce7b1fd",
+    "docs/dev/evidence/plan0211/review-r3/native_acceptance.py": "3f976cf2fb9bd16398fba6178500cae6915d1a54b7259201b7b423ce384dea61"
+  }
+}

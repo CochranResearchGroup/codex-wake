@@ -3,7 +3,7 @@ import hashlib
 import json
 import os
 import subprocess
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import time
 import uuid
 
@@ -110,7 +110,7 @@ class TerminalSessions:
             error.candidates=[{k:v[k] for k in ('id','name','server','backend')} for v in matches];raise error
         return matches[0]
 
-    def _settings(self,changes):
+    def _settings(self,changes,*,backend=None):
         if not isinstance(changes,dict) or set(changes)-{'name','description','labels','defaults','formatting'}:
             raise InventoryError('invalid_argument','Unknown session setting.')
         if 'name' in changes:_name(changes['name'])
@@ -119,9 +119,14 @@ class TerminalSessions:
         if 'defaults' in changes:
             v=changes['defaults']
             if not isinstance(v,dict) or set(v)-{'cwd','profile','argv'}:raise InventoryError('invalid_argument','Defaults accept cwd, profile and argv.')
-            if 'cwd' in v and (not isinstance(v['cwd'],str) or not Path(v['cwd']).is_absolute() or not Path(v['cwd']).is_dir()):raise InventoryError('invalid_argument','Existing absolute default directory required.')
+            if 'cwd' in v:
+                cwd=v['cwd']
+                valid=isinstance(cwd,str) and 0<len(cwd)<=4096 and not any(ord(c)<32 for c in cwd)
+                if valid:valid=PureWindowsPath(cwd).is_absolute() if backend=='psmux' else Path(cwd).is_absolute() and Path(cwd).is_dir()
+                if not valid:raise InventoryError('invalid_argument','Absolute default directory required; existence is checked on the native host.')
             if 'profile' in v and 'argv' in v:raise InventoryError('invalid_argument','Choose a launch profile or a command argv.')
             if 'profile' in v and (not isinstance(v['profile'],str) or not v['profile'] or len(v['profile'])>128):raise InventoryError('invalid_argument','Profile selector required.')
+            if backend=='psmux' and 'argv' in v:raise InventoryError('unsupported_target','Generic argv defaults are not qualified for native psmux; no launch was applied.')
             if 'argv' in v and (not isinstance(v['argv'],list) or not 1<=len(v['argv'])<=64 or any(not isinstance(x,str) or '\0' in x or len(x)>4096 for x in v['argv'])):raise InventoryError('invalid_argument','Bounded command argv required.')
         if 'formatting' in changes:
             from .tab_format_policy import validate_policy
@@ -171,7 +176,7 @@ class TerminalSessions:
                 selected=self.creation_selection(args,records=records,ensure=verb=='ensure')
                 name,backend,server,existing=(selected[k] for k in ('name','backend','server','existing'))
                 if existing and verb=='create':raise InventoryError('name_conflict','Session name already exists on this terminal server.')
-                defaults=self._settings({'defaults':args.get('defaults',{})})['defaults']
+                defaults=self._settings({'defaults':args.get('defaults',{})},backend=backend)['defaults']
                 if existing:
                     observed=existing[0];record={k:v for k,v in observed.items() if k not in ('snapshot','workspace','state','tab_count','managed','health_summary','activity_summary','error_summary')};reused=True
                 else:record=dict(id='session-'+uuid.uuid4().hex,name=name,backend=backend,server=server,labels=[],defaults=defaults,description='',created_at=time.time())
@@ -181,7 +186,7 @@ class TerminalSessions:
                 record={k:v for k,v in observed.items() if k not in ('snapshot','workspace','state','tab_count','managed','health_summary','activity_summary','error_summary')}
                 state['sessions'][record['id']]=record
                 if verb=='update':
-                    changes=self._settings(args.get('changes'))
+                    changes=self._settings(args.get('changes'),backend=record['backend'])
                     if any(v['id']!=record['id'] and v['server']==record['server'] and v['name']==changes.get('name',record['name']) for v in records):raise InventoryError('name_conflict','Session name already exists.')
                     if 'name' in changes and observed['state']=='running':
                         updated=self.native(observed,'rename',name=changes['name'])

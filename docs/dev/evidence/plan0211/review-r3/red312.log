@@ -1,0 +1,23 @@
+...E
+======================================================================
+ERROR: test_windows_defaults_update_is_accepted_without_linux_path_lookup (test_terminal_session_psmux.PsmuxSessionTests.test_windows_defaults_update_is_accepted_without_linux_path_lookup)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-review-psmux/tests/test_terminal_session_psmux.py", line 37, in test_windows_defaults_update_is_accepted_without_linux_path_lookup
+    updated=tabs.execute('tabs.session.update',dict(session=record['id'],changes={'defaults':defaults}))['session']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-review-psmux/src/codex_wake/controller_tabs.py", line 49, in execute
+    return TerminalSessions(self.root,tabs=self).execute(operation,arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-review-psmux/src/codex_wake/terminal_sessions.py", line 171, in execute
+    changes=self._settings(args.get('changes'))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-review-psmux/src/codex_wake/terminal_sessions.py", line 119, in _settings
+    if 'cwd' in v and (not isinstance(v['cwd'],str) or not Path(v['cwd']).is_absolute() or not Path(v['cwd']).is_dir()):raise InventoryError('invalid_argument','Existing absolute default directory required.')
+                                                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+codex_wake.managed_inventory.InventoryError: Existing absolute default directory required.
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.218s
+
+FAILED (errors=1)

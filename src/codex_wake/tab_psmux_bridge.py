@@ -1,7 +1,7 @@
 """Finite Windows psmux bridge for a WSL-owned Wake controller.
 
 The host fixes the executable, namespace, session and server birth in its bridge
-command. Requests contain typed presentation actions, never shell or argv. This
+command. Requests contain finite presentation actions and new-launch directories. This
 module is stdlib-only so the same installed artifact runs under native Windows
 Python without creating a second Wake execution owner.
 """
@@ -526,14 +526,7 @@ class PsmuxHost:
                 raise BridgeError('name_conflict', 'destination already has that tab name')
         if action == 'create':
             command = ['new-window', '-d', '-P', '-F', '#{window_id}', '-t', destination + ':', '-n', name]
-            cwd_value = args.get('cwd', os.environ['USERPROFILE'])
-            if cwd_value is not None:
-                cwd = self._text(cwd_value, 'cwd')
-                if not Path(cwd).is_absolute() or not Path(cwd).is_dir():
-                    raise BridgeError('invalid_argument', 'native working directory must exist and be absolute')
-                command += ['-c', cwd]
-            # Shell selection belongs to this host adapter, never to requests.
-            wid = self.command(*command, '--', 'cmd.exe', '/d', '/k').strip()
+            wid = self.command(*command, *_launch_arguments(args)).strip()
         elif action == 'rename':
             self.command('rename-window', '-t', self.session + ':' + wid, name)
         elif action == 'focus':
@@ -559,6 +552,16 @@ class PsmuxHost:
         return dict(window_id=wid, workspace_state='present' if present else 'removed', snapshot=after)
 
 
+def _launch_arguments(args):
+    """Validate new-launch fields on Windows; never interpret a shell script."""
+    result=[]
+    cwd=args.get('cwd',os.environ['USERPROFILE'])
+    if not isinstance(cwd,str) or not 0<len(cwd)<=4096 or any(ord(c)<32 for c in cwd) or not Path(cwd).is_absolute() or not Path(cwd).is_dir():
+        raise BridgeError('invalid_argument','native working directory must exist and be absolute')
+    result+=['-c',cwd]
+    return result+['--','cmd.exe','/d','/k']
+
+
 def session_management(namespace, session, request):
     """Finite bootstrap actions for a host-selected namespace, without a live pin."""
     if os.name != 'nt' or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,95}',namespace):
@@ -569,7 +572,7 @@ def session_management(namespace, session, request):
     if not isinstance(request,dict) or set(request)!={'action','arguments'}:
         raise BridgeError('invalid_argument','Finite session request required')
     action,args=request['action'],request['arguments']
-    if action not in ('session_probe','session_create') or args!={}:
+    if action not in ('session_probe','session_create') or not isinstance(args,dict) or set(args)-{'cwd'} or (action=='session_probe' and args):
         raise BridgeError('unsupported_operation','Unsupported finite session action')
     binary=Path(os.environ['LOCALAPPDATA'])/'Microsoft/WinGet/Links/psmux.exe'
     probe=subprocess.run([str(binary),'-L',namespace,'has-session','-t',session],capture_output=True,text=True,timeout=4)
@@ -577,7 +580,8 @@ def session_management(namespace, session, request):
         raise BridgeError('attachment_unavailable','Native session presence is unknown')
     if action=='session_probe':return dict(result=dict(present=probe.returncode==0))
     if probe.returncode==0:raise BridgeError('name_conflict','Native session already exists; reconcile before creating')
-    reply=subprocess.run([str(binary),'-L',namespace,'new-session','-d','-s',session,'--','cmd.exe','/d','/k'],capture_output=True,text=True,timeout=8)
+    launch=_launch_arguments(args)
+    reply=subprocess.run([str(binary),'-L',namespace,'new-session','-d','-s',session,*launch],capture_output=True,text=True,timeout=8)
     if reply.returncode:raise BridgeError('uncertain_effect','Native session creation failed; reconcile before retry')
     host=PsmuxHost(namespace=namespace,session=session)
     return dict(result=dict(identity=host.identity,generation=host.generation))
