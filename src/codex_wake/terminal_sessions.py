@@ -70,7 +70,7 @@ class TerminalSessions:
         except FileNotFoundError:return {}
 
     def inventory(self,state=None):
-        state=state or self.state();live={};by_native={v.get('native_key'):v for v in state['sessions'].values() if not v.get('deleted') and v.get('native_key')}
+        state=state or self.state();live={};aliases={};by_native={v.get('native_key'):v for v in state['sessions'].values() if not v.get('deleted') and v.get('native_key')}
         for workspace,cfg in list(self.tabs.workspaces.items())[:64]:
             try:snap=cfg['transport'].snapshot(self._deadline(2))
             except (OSError,ValueError,subprocess.SubprocessError):continue
@@ -78,6 +78,7 @@ class TerminalSessions:
             saved=by_native.get(native_key);sid=saved['id'] if saved else 'native-'+native_key[:24]
             label=cfg.get('label') or snap.get('session_name') or workspace
             record=dict(saved or {},id=sid,name=label if not saved else saved['name'],backend=cfg['kind'],server=(snap.get('server_identity',{}).get('namespace') if cfg['kind']=='psmux' else str(cfg.get('socket_path') or snap.get('server'))),native_key=native_key,workspace=workspace,state='running',tab_count=len(snap['windows']),snapshot=snap,labels=(saved or {}).get('labels',[]),defaults=(saved or {}).get('defaults',{}),description=(saved or {}).get('description',''),managed=bool(saved))
+            aliases.setdefault(sid,[]).append(workspace)
             if sid not in live:live[sid]=record
         result=[]
         for sid,saved in state['sessions'].items():
@@ -95,7 +96,9 @@ class TerminalSessions:
                     if check.returncode!=1:fallback.update(state='unavailable',tab_count=None)
                 except (OSError,subprocess.SubprocessError):fallback.update(state='unavailable',tab_count=None)
             result.append(live.pop(sid,fallback))
-        result.extend(live.values());return sorted(result,key=lambda v:(v['name'],v['server'],v['id']))
+        result.extend(live.values())
+        from .terminal_session_summary import summarize
+        return summarize(self.root,sorted(result,key=lambda v:(v['name'],v['server'],v['id'])),aliases,self.tabs)
 
     def resolve(self,selector,*,state=None,server=None):
         from .terminal_session_contract import split_selector
@@ -170,12 +173,12 @@ class TerminalSessions:
                 if existing and verb=='create':raise InventoryError('name_conflict','Session name already exists on this terminal server.')
                 defaults=self._settings({'defaults':args.get('defaults',{})})['defaults']
                 if existing:
-                    observed=existing[0];record={k:v for k,v in observed.items() if k not in ('snapshot','workspace','state','tab_count','managed')};reused=True
+                    observed=existing[0];record={k:v for k,v in observed.items() if k not in ('snapshot','workspace','state','tab_count','managed','health_summary','activity_summary','error_summary')};reused=True
                 else:record=dict(id='session-'+uuid.uuid4().hex,name=name,backend=backend,server=server,labels=[],defaults=defaults,description='',created_at=time.time())
                 state['sessions'][record['id']]=record;self.save(state)
             else:
                 observed=self.resolve(args.get('session'),server=args.get('server'),state=state)
-                record={k:v for k,v in observed.items() if k not in ('snapshot','workspace','state','tab_count','managed')}
+                record={k:v for k,v in observed.items() if k not in ('snapshot','workspace','state','tab_count','managed','health_summary','activity_summary','error_summary')}
                 state['sessions'][record['id']]=record
                 if verb=='update':
                     changes=self._settings(args.get('changes'))
