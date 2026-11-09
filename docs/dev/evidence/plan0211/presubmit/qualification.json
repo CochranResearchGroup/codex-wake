@@ -1,0 +1,69 @@
+{
+  "tier": "presubmit_affected",
+  "scope": "50modules: all test_tab*.py/test_terminal*.py plus controller tabs/HTTP/portable client, commandcontract andcompletion; NOT fullrepositorysuite",
+  "first312": {
+    "source": "825543f",
+    "tests": 216,
+    "passed": 215,
+    "failures": 1,
+    "seconds": 134.959,
+    "failure": "Generated commanddocs notyetintegrated from534 worker; product checks passed; first result retained.",
+    "repair": "534generateddocs integrated5ca15fb; test_command_contract3PASS1.861s, /tmp/p211-generated-docs-repair312.log"
+  },
+  "first311": {
+    "source": "0c87ae3",
+    "tests": 218,
+    "passed": 218,
+    "seconds": 160.7,
+    "product_source_changed": []
+  },
+  "postsourcefixes": [
+    {
+      "selection": "relocation/deletion/core session/profile seeds/route+commandcontract",
+      "python": "3.11",
+      "tests": 46,
+      "seconds": 52.348,
+      "log": "/tmp/p211-rematerialization-green311.log"
+    },
+    {
+      "selection": "relocation/deletion/core session/profile seeds",
+      "python": "3.12",
+      "tests": 31,
+      "seconds": 28.547,
+      "log": "/tmp/p211-rematerialization-green312.log"
+    },
+    {
+      "selection": "uncertainCLIportable/native relocation and critical regressions",
+      "python": "3.12",
+      "tests": 31,
+      "seconds": 36.319,
+      "log": "/tmp/p211-uncertain-exit-green312.log"
+    },
+    {
+      "selection": "uncertainCLIportable/native relocation and critical regressions",
+      "python": "3.11",
+      "tests": 31,
+      "seconds": 35.816,
+      "log": "/tmp/p211-uncertain-exit-green311.log"
+    },
+    {
+      "selection": "qualifiedsession/coreCLI/selection/contracts",
+      "python": "3.12",
+      "tests": 18,
+      "seconds": 12.162,
+      "log": "/tmp/p211-qualified-name-green312.log"
+    },
+    {
+      "selection": "qualifiedsession/coreCLI/selection/contracts",
+      "python": "3.11",
+      "tests": 18,
+      "seconds": 8.157,
+      "log": "/tmp/p211-qualified-name-green311.log"
+    }
+  ],
+  "budget_seconds_per_affected_run": 180,
+  "budget_breaches": [],
+  "static": "RuffF821/F822/F823,compileall,policywiring,generatedreferencecheck,diffcheckPASS;activeplanningauditPASSwith20documentedacceptedbaselinefindings",
+  "hosted_ci_used": false,
+  "product_gate": "Composite causallyselected local checks; preserve original results ratherthanclaiming onecleanfullsuite atfinalsource. Exact final installed qualification owned by534."
+}
