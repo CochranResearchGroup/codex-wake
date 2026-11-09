@@ -68,11 +68,17 @@
       "blockers": [
         518
       ],
-      "state": "running",
+      "state": "integrated",
       "owner": "/root/format521",
       "worker_base": "bf1f6b5",
       "branch": "feat/tab-format-521",
-      "worktree": "/tmp/codex-wake-format-521"
+      "worktree": "/tmp/codex-wake-format-521",
+      "worker_result_sha": "87b6686c35afabf615a0c02c0b99a590e3be011b",
+      "integration_sha": "374d4d1",
+      "validation": [
+        "8 integrated formatting/projection tests pass"
+      ],
+      "remaining": "Persist projection details via shared520 owner before tracker closure"
     },
     {
       "index": 5,
@@ -83,7 +89,8 @@
         518
       ],
       "state": "pending",
-      "owner": null
+      "owner": "/root/format521",
+      "reason": "Shared tab_formatting.py write ownership serialized after520"
     },
     {
       "index": 6,
@@ -120,5 +127,6 @@
     "fixed_point": "3a02f9dc9e59eef8151cc6015f19a6cd4b22e2de",
     "broad_runs": 0,
     "remediation_passes": 0
-  }
+  },
+  "discovery": "Current agreed plan/spec and fresh repository sources sufficient; unrelated memory registry hits not used; no additional Graphiti discovery needed."
 }
