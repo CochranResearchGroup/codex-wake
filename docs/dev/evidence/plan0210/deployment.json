@@ -1,0 +1,58 @@
+{
+  "status": "DEPLOYED",
+  "merged_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/525",
+  "source_commit": "cb7cf6216d0bdc4768d4c998b06eb0f84d0e2bf4",
+  "reviewed_tip": "c4739d65e72576d2f1202a4cf3508dcf5bd47631",
+  "merged_tree_equals_reviewed": true,
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-cb7cf62",
+  "previous_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-3a02f9d",
+  "wheel_sha256": "e353f509b5e3964c11247b243cdc9b7ae88a6fe097550faf0a082a8114983f09",
+  "wheel_reused": "Exact qualified post-review wheel; all289 Python files match merged source and installed release. No rebuild or dependency upgrade.",
+  "matching_python_files": 289,
+  "launchers_updated": 9,
+  "local_http": {
+    "old_pid": 3229435,
+    "new_pid": 2945220,
+    "url": "http://127.0.0.1:37185",
+    "authenticated_status": "PASS",
+    "native_endpoint_preserved": true
+  },
+  "installed_smoke": {
+    "status": "PASS",
+    "checks": [
+      "installed-wsl-cli-repeated-exact-rollback-reenable",
+      "installed-parser-help-bash-zsh-completion",
+      "real-installed-stdio-mcp-client-init-list-call-and-invalid-policy",
+      "authenticated-http-api-and-oauth-mcp-exact-format-controls-and-error-reasons"
+    ],
+    "namespace_cleanup": true,
+    "monitor_cleanup": "stopped",
+    "listener_cleanup": true
+  },
+  "review": {
+    "standards": "All3 prior findings resolved; final delta examined, no new blockers",
+    "spec": "Prior blocker resolved; exact final source/package verified",
+    "new_broad_review": false
+  },
+  "validation": "73 focused tests eachPython3.11/3.12 and exact installed Byobu/psmux+PowerShell acceptance carried forward by byte identity; final ruff/policy/generated references and deployment installed public CLI/stdio/HTTP/OAuth smoke PASS.",
+  "completion": "Bash/Zsh installed and refreshed",
+  "live_readback": {
+    "discovered_resources": 42,
+    "formatting_mcp_tools": 9,
+    "tab_monitor": "inactive; deployment did not opt real workspaces into decoration"
+  },
+  "preserved": {
+    "account_files": 10,
+    "account_file_inodes_mtimes_hashes": "unchanged",
+    "native_process_generations": 30,
+    "native_exited_independently": [],
+    "stock_launcher": true,
+    "native_restarts": 0,
+    "provider_calls": 0
+  },
+  "rollback": "python ~/.local/state/codex-wake/formatting-0210-deploy/rollback.py; prepared guarded script, not exercised against live after deployment; previous prefix retained.",
+  "existing_mcp_connections": "Reload individual clients to load the new release; existing unrelated stdio processes were not restarted.",
+  "hosted_ci": "Skipped under operator cost policy; commit uses [skip ci].",
+  "raw_evidence": "~/.local/state/codex-wake/formatting-0210-deploy",
+  "memory_disposition": "forbidden: no explicit memory-write request"
+}

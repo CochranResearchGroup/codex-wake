@@ -8679,3 +8679,19 @@ wheel passes installed Byobu/psmux CLI/API/MCP and native PowerShell checks.
 Earlier full-suite failures and targeted test-only repairs remain preserved as
 composite qualification. See docs/dev/evidence/plan0210/review/final-report.md
 and ledger.json. No paid hosted CI, merge, production activation or provider work.
+
+
+## Turn | 2026-11-09 | Tab formatting reviewed, merged and deployed
+
+Operator authorized review/merge/deploy. Final prior findings and corrective diff
+verified with no remaining blockers; PR525 squash cb7cf62 has identical reviewed
+tree. Reused exact qualified wheel e353f509...;289 Python files match merged source
+and new immutable prefix0.22.0.dev2-cb7cf62, with pinned existing dependencies.
+Installed public CLI/stdio/HTTP/OAuth acceptance passed; fresh real discovery42
+resources,9 formatting tools and inactive real tab monitor read back. Nine Wake
+launchers activated, Bash/Zsh completion refreshed, selected local HTTP listener
+handed over on37185. All30 native generations,10 checked account files and stock
+launcher preserved; no model calls or native restart/build. Existing MCP clients
+reload individually; real workspace decoration still requires enable. Previous
+prefix retained with guarded private rollback command. Deployment receipt:
+docs/dev/evidence/plan0210/deployment.json. Hosted CI skipped; memory forbidden.

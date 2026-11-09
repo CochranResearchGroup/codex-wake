@@ -17,8 +17,12 @@ PowerShell. One broad review and one bounded TDD remediation pass are complete;
 all four findings are resolved. Earlier full-suite failures and their targeted
 repairs remain recorded as composite qualification, not a clean single full run.
 See the execution ledger and review/final-report.md for exact evidence.
-Production formatting, services, stock Codex and launchers remain unchanged.
-Merge and deployment require a separate authorized step. Parent spec #517 stays open.
+Stock Codex, native sessions and real workspace formatting are preserved.
+PR #525 merged as cb7cf62 and its exact qualified wheel is deployed under
+operator authorization. Nine launchers and the local HTTP listener select the new
+release; stock and 30 native process generations are preserved. Deployment receipt:
+`docs/dev/evidence/plan0210/deployment.json`. Real workspaces remain undecorated
+until enabled; existing MCP clients reload individually. Parent spec #517 stays open.
 
 ## Settled operator decisions
 

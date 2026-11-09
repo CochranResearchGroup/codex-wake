@@ -238,7 +238,10 @@
     "number": 525,
     "base": "main",
     "head": "feat/tab-formatting-517",
-    "merge_performed": false,
-    "production_deployed": false
-  }
+    "merge_performed": true,
+    "production_deployed": true,
+    "merge_commit": "cb7cf6216d0bdc4768d4c998b06eb0f84d0e2bf4",
+    "state": "MERGED"
+  },
+  "deployment": "docs/dev/evidence/plan0210/deployment.json"
 }

@@ -10,11 +10,11 @@ lanes:
     worker_branches: [feat/tab-format-519, feat/tab-format-520, feat/tab-format-521, feat/tab-format-522, feat/tab-format-523, feat/tab-format-524]
     target: origin/main
     plan_state: CLOSED
-    custody_state: PUBLISHED_REVIEW
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: []
     updated_at: 2026-11-09
-    disposition: All seven implementation tickets closed; review1/TDD1 complete, four findings resolved; draft PR525 published; runtime4a5aa6d and installed wheel qualified; merge and deployment separate
+    disposition: All seven tickets closed; review1/TDD1 resolved four findings; PR525 merged as cb7cf62 and exact qualified wheel deployed; native sessions and stock preserved
   - id: P209
     owner: primary / ecochran76
     objective: Close spec503 trait-based tab and session hardening tickets

@@ -1500,7 +1500,7 @@ Implemented and locally qualified on `feat/tab-formatting-517`:
 All seven implementation tickets closed; one review and one TDD pass resolved
 four findings. Byobu/tmux and psmux share one WSL owner, with type/state styling,
 manual holds and exact one-command rollback/re-enable. Installed native PowerShell,
-CLI/API/MCP controls qualified. Merge and production deployment remain separate.
+CLI/API/MCP controls qualified. PR #525 merged as cb7cf62 and its exact qualified wheel is deployed.
 Native Windows service hosting remains a later milestone using the same contracts,
 providing Windows-startup availability independently of WSL.
 
