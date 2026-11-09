@@ -43,7 +43,7 @@ class TabViews:
     def execute(self,operation,arguments,*,resources=()):
         if operation not in self.READS|self.MUTATIONS:
             raise InventoryError('unsupported_operation','Unsupported saved tab view operation.')
-        allowed={'name','definition'} if operation=='tabs.view-save' else {'name','members'} if operation=='tabs.group-save' else {'name'}
+        allowed={'name','definition'} if operation=='tabs.view-save' else {'name','members','labels'} if operation=='tabs.group-save' else {'name'}
         if operation in ('tabs.view-list','tabs.group-list'):allowed=set()
         if not isinstance(arguments,dict) or set(arguments)-allowed:
             raise InventoryError('invalid_argument','Unsupported saved-view arguments.')
@@ -60,7 +60,7 @@ class TabViews:
         name=self._name(args.get('name'))
         if operation=='tabs.view-save':
             definition=args.get('definition')
-            if not isinstance(definition,dict) or set(definition)-{'filters','group_by','sort_by','group'}:
+            if not isinstance(definition,dict) or set(definition)-{'filters','group_by','sort_by','group','selection'}:
                 raise InventoryError('invalid_argument','A view definition with filters/group_by/sort_by is required.')
             for field in ('group_by','sort_by'):
                 keys=definition.get(field,[])
@@ -70,15 +70,22 @@ class TabViews:
             if not isinstance(filters,dict) or set(filters)-FIELDS or any(not isinstance(v,(str,list)) or isinstance(v,list) and (len(v)>32 or any(not isinstance(i,str) for i in v)) for v in filters.values()):
                 raise InventoryError('invalid_argument','Filters must match supported traits to bounded values.')
             if 'group' in definition:self._name(definition['group'])
+            if 'selection' in definition:
+                from .tab_selection import validate
+                validate(definition['selection'])
             table[name]=dict(name=name,definition=definition,updated_at=time.time())
         elif operation=='tabs.group-save':
             members=args.get('members',[])
             if not isinstance(members,list) or len(members)>4096 or any(not isinstance(v,str) for v in members):
                 raise InventoryError('invalid_argument','Group members must be observed attachment IDs.')
+            labels=args.get('labels',[])
+            if not isinstance(labels,list) or len(labels)>32:
+                raise InventoryError('invalid_argument','Labels must be a bounded list of names.')
+            labels=list(dict.fromkeys(self._name(label) for label in labels))
             inventory={self.identity(r)['id']:self.identity(r) for r in resources}
             if set(members)-inventory.keys():
                 raise InventoryError('stale_target','A group member is absent; refresh tabs before saving.')
-            table[name]=dict(name=name,members=[inventory[k] for k in dict.fromkeys(members)],updated_at=time.time())
+            table[name]=dict(name=name,members=[inventory[k] for k in dict.fromkeys(members)],labels=labels,updated_at=time.time())
         elif operation.endswith('-delete'):
             if name not in table:raise InventoryError('target_not_found','Saved group/view not found.')
             del table[name]
@@ -93,6 +100,9 @@ class TabViews:
             if definition.get('group'):
                 group=state['groups'].get(definition['group'])
                 if group is None:raise InventoryError('target_not_found','Referenced named group is unavailable.')
+            if 'selection' in definition:
+                from .tab_selection import select
+                resources=select(resources,definition['selection'],groups=state['groups'])
             for resource in resources:
                 if group is not None and self.identity(resource) not in group['members']:continue
                 values=self._values(resource)
