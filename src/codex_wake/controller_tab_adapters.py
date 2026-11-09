@@ -59,6 +59,17 @@ class PsmuxAttachmentTransport:
     def attach_saved(self, intent, manifest_sha256, deadline):
         return self.request('attach_saved', dict(intent=intent, manifest_sha256=manifest_sha256), deadline)
 
+    def formatting(self, action, arguments, deadline):
+        allowed={'read':{'window'},'write':{'window','values'},'read-session':set(),'write-session':{'values'},'refresh':set()}
+        if action not in allowed or not isinstance(arguments,dict) or set(arguments)!=allowed[action]:
+            raise InventoryError('invalid_argument','Unsupported finite formatting arguments.')
+        return self.request('formatting',dict(action=action,**arguments),deadline)
+
+    def formatting_batch(self, requests, deadline):
+        if not isinstance(requests,list) or not 1<=len(requests)<=256:
+            raise InventoryError('invalid_argument','Formatting batch requires 1 through 256 typed requests.')
+        return self.request('formatting_batch',dict(requests=requests),deadline)
+
     def lifecycle(self, action, arguments, deadline):
         allowed = {
             'create': {'name', 'cwd'}, 'rename': {'window', 'name'},
