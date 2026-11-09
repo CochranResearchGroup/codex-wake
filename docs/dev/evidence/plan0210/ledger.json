@@ -1,0 +1,113 @@
+{
+  "actor": "ecochran76",
+  "repository": "CochranResearchGroup/codex-wake",
+  "host": "github.com",
+  "recorded_at": "2026-11-09T10:39:33.498529+00:00",
+  "base": "3a02f9dc9e59eef8151cc6015f19a6cd4b22e2de",
+  "spec": {
+    "number": 517,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/517"
+  },
+  "tickets": [
+    {
+      "index": 1,
+      "number": 518,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/518",
+      "title": "Byobu formatting with one-command rollback and re-enable",
+      "blockers": [],
+      "state": "validated",
+      "owner": "/root",
+      "worktree": "/tmp/codex-wake-formatting-0210",
+      "owned_paths": [
+        "tab_formatting",
+        "tab_format_transport",
+        "shared controller contract"
+      ],
+      "validation": [
+        "test_tab_formatting: 3 passed; installed disposable tmux",
+        "test_tab_contract: 5 passed"
+      ],
+      "red": "/tmp/p210-red1.log",
+      "green": "/tmp/p210-green-final.log"
+    },
+    {
+      "index": 2,
+      "number": 519,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/519",
+      "title": "Native Windows psmux formatting and exact restoration",
+      "blockers": [
+        518
+      ],
+      "state": "pending",
+      "owner": null
+    },
+    {
+      "index": 3,
+      "number": 520,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/520",
+      "title": "Automatic formatting updates and stale-state handling",
+      "blockers": [
+        518
+      ],
+      "state": "pending",
+      "owner": null
+    },
+    {
+      "index": 4,
+      "number": 521,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/521",
+      "title": "Mixed-pane formatting and extensible harness/model identities",
+      "blockers": [
+        518
+      ],
+      "state": "pending",
+      "owner": null
+    },
+    {
+      "index": 5,
+      "number": 522,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/522",
+      "title": "Persistent display policy, manual overrides and reconnect",
+      "blockers": [
+        518
+      ],
+      "state": "pending",
+      "owner": null
+    },
+    {
+      "index": 6,
+      "number": 523,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/523",
+      "title": "Backend rendering compatibility and accessible selection",
+      "blockers": [
+        518,
+        519
+      ],
+      "state": "pending",
+      "owner": null
+    },
+    {
+      "index": 7,
+      "number": 524,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/524",
+      "title": "Integrated formatting acceptance and operator documentation",
+      "blockers": [
+        519,
+        520,
+        521,
+        522,
+        523
+      ],
+      "state": "pending",
+      "owner": null
+    }
+  ],
+  "readback": true,
+  "native_edges_verified": true,
+  "integration_branch": "feat/tab-formatting-517",
+  "review": {
+    "fixed_point": "3a02f9dc9e59eef8151cc6015f19a6cd4b22e2de",
+    "broad_runs": 0,
+    "remediation_passes": 0
+  }
+}

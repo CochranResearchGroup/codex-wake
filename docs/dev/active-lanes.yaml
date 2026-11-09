@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P210
+    owner: primary / ecochran76
+    objective: Implement reversible Wake-owned tab formatting
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/517]
+    plan: docs/dev/plans/0210-2026-11-08-wake-owned-tab-formatting.md
+    branch: feat/tab-formatting-517
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-09
+    disposition: Primary validated foundation518; dependent tickets scheduled from evidence ledger
   - id: P209
     owner: primary / ecochran76
     objective: Close spec503 trait-based tab and session hardening tickets

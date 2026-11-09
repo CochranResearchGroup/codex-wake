@@ -151,7 +151,7 @@ def run(args, root, *, observer=None):
         from .tab_contract import BY_OPERATION
         args.tab_command=args.tabs_command
         args.arguments=dict(args.arguments or {})
-        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1)
+        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1)
         if operation in BY_OPERATION:
             properties=BY_OPERATION[operation][1][3]
             for field in properties:

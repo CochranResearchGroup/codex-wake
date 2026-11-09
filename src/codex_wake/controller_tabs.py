@@ -10,7 +10,7 @@ from .tab_organization import TabOrganization, TabError, digest
 
 
 class ControllerTabs:
-    READS = frozenset(('tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
+    READS = frozenset(('tabs.format.status','tabs.format.inspect','tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
     MUTATIONS = frozenset(('tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input'))
 
     def __init__(self, root, *, workspaces, host, environment):
@@ -26,6 +26,9 @@ class ControllerTabs:
         return TabReattach(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment)
 
     def execute(self, operation, arguments):
+        if operation.startswith('tabs.format.'):
+            from .tab_formatting import TabFormatting
+            return TabFormatting(self.root,tabs=self).execute(operation,arguments)
         if operation.startswith('tabs.reattach-'):
             return self.reattach_owner().execute(operation,arguments)
         if operation.startswith('tabs.recovery.'):

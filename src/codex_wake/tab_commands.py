@@ -25,7 +25,7 @@ def command(args, owner=None):
         if owner is None:
             from .controller_tabs import controller_tabs_from_root
             owner = controller_tabs_from_root(args.wake_root)
-        operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1)
+        operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1)
         value = owner.execute(operation,args.arguments) if operation in owner.READS else operator_execute(operation,args.arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
         print(json.dumps(value, sort_keys=True))
         phase=value.get('result',{}).get('operation',{}).get('phase') if isinstance(value.get('result'),dict) else None
@@ -150,6 +150,6 @@ def _intent_key(operation,payload,request_id=None):
     import hashlib
     from uuid import uuid4
     if request_id is not None:return request_id
-    if operation in ('tabs.preview','tabs.policy.tick','tabs.recovery.capture','tabs.reattach-preview'):
+    if operation.startswith('tabs.format.') or operation in ('tabs.preview','tabs.policy.tick','tabs.recovery.capture','tabs.reattach-preview'):
         return uuid4().hex
     return hashlib.sha256(json.dumps([operation,payload],sort_keys=True).encode()).hexdigest()

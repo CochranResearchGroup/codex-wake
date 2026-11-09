@@ -1492,3 +1492,18 @@ parents retain their own unresolved acceptance.
 Exact source/package/installed/native evidence and retained failed fixtures live
 under [Plan0209 evidence](docs/dev/evidence/plan0209/). No new provider prompts,
 working native restart, merge or deployment is included in this packet.
+
+## P210 | Wake-owned tab formatting
+
+OPEN design interview: [LOCAL-P210](docs/dev/plans/0210-2026-11-08-wake-owned-tab-formatting.md).
+Wake owns tab-trait classification and formatting updates; Byobu/tmux and psmux
+render the policy. Qualify both backends through the WSL service first. Native
+Windows service hosting is a later milestone using the same core/contracts,
+providing Windows-startup availability independently of WSL. Visual behavior,
+manual precedence and reversible theme integration remain under interview.
+
+P210 extensibility direction: plan Claude Code and custom/open harness adapters,
+custom model identities and Ollama/local inference providers as distinct traits.
+Common display policy should support new identifiers/capabilities without
+hard-coded harness/model combinations. Runtime support and control capabilities
+require separate adapter qualification; they are future milestones.

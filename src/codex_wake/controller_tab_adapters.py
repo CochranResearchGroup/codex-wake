@@ -7,6 +7,10 @@ from .tab_organization import TmuxTransport
 
 
 class TmuxAttachmentTransport(TmuxTransport):
+    def formatting(self, action, arguments, deadline):
+        from .tab_format_transport import tmux_formatting
+        return tmux_formatting(self,action,arguments,deadline)
+
     def capture(self, pane, lines, deadline):
         return self.command(deadline, 'capture-pane', '-p', '-t', pane, '-S', '-' + str(lines))
 

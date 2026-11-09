@@ -8586,3 +8586,46 @@ one data-only capability/help statement. All281 installed Python members match
 its immutable wheel. Earlier partial/failed fixtures remain source-attributed.
 No second broad review, provider/model prompt, production change, merge or
 deployment occurred. Review/evidence/ledger own exact source and package bounds.
+
+## Turn | 2026-11-08 | Tab formatting design interview started
+
+Operator approved grill-with-docs for Wake-owned formatting after merge/deploy.
+Retained one WSL service for both backends, with Windows-native hosting on the
+roadmap. Bounded read-only fact legwork confirmed tmux mechanisms and finite
+Windows bridge gaps; installed psmux formatting remains unqualified. No native
+psmux command, production formatting, service change or provider work performed.
+LOCAL-P210 holds settled decisions and the current interview frontier.
+
+## Turn | 2026-11-08 | Highlight precedence and future adapter direction
+
+Operator accepted type/state highlight precedence and requested future Claude
+Code, custom/open harnesses/models and Ollama support. LOCAL-P210 records these
+as future adapter/model-provider milestones. GLOSSARY distinguishes coding
+harness, model identity and inference provider; configured selection is not
+observed use. Label density, automatic activation/ownership and future model/
+provider display remain unsettled. No implementation or live changes performed.
+
+## Turn | 2026-11-08 | Formatting label and activation defaults confirmed
+
+Operator accepted compact type/profile/activity labels, optional model/provider
+badges and configurable rules, automatic owned-tab decoration, global/workspace
+opt-out, manual name preservation and conditional style restoration. Remaining
+frontier concerns refresh/freshness, mixed panes and manual theme precedence.
+LOCAL-P210 remains an interview, not implementation or runtime authority.
+
+## Turn | 2026-11-09 | Refresh, mixed panes and theme precedence confirmed
+
+Operator accepted event-driven updates with roughly five-second polling fallback,
+twenty-second staleness, native immediate selection, mixed-pane attention
+aggregation and explicit unknown health. Manual styling changes pause decoration
+for the affected scope until explicit resume; observations continue. LOCAL-P210
+now narrows the frontier to controls/details, reconnect/fallback and installed
+backend acceptance. No runtime changes performed.
+
+## Turn | 2026-11-09 | Display controls and one-command reversal agreed
+
+Operator accepted persistent CLI/API/MCP controls, reconnect/fallback behavior and
+installed-backend acceptance, and required one-command rollback/re-enable.
+LOCAL-P210 records a durable pre-decoration baseline with exact original option
+restoration, explicit partial failures and no baseline replacement on re-enable.
+Shared-design readback remains; no implementation or runtime change performed.
