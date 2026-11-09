@@ -232,5 +232,13 @@
     "wheel_sha256": "e353f509b5e3964c11247b243cdc9b7ae88a6fe097550faf0a082a8114983f09",
     "report": "review/final-report.md",
     "delivery": "integration branch; no merge or production deployment"
+  },
+  "publication": {
+    "draft_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/525",
+    "number": 525,
+    "base": "main",
+    "head": "feat/tab-formatting-517",
+    "merge_performed": false,
+    "production_deployed": false
   }
 }
