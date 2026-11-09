@@ -78,3 +78,17 @@ class ProfileCreateTests(unittest.TestCase):
         result=self.create('fixture')
         self.assertNotEqual(result['status'],'applied',result)
         self.assertIn(result['status'],('held','uncertain'))
+
+    def test_saved_profile_default_seeds_a_session_without_retaining_bootstrap(self):
+        from codex_wake.controller_tabs import ControllerTabs
+        from codex_wake.tab_commands import operator_execute
+        home,binary=self.configure()
+        tabs=ControllerTabs(self.root,workspaces={'test':dict(kind='tmux',label='test',socket_path=self.socket,session_id='$0',transport=self.transport)},host='fixture',environment='fixture')
+        session=tabs.execute('tabs.session.create',dict(name='bots'))['session']
+        tabs.execute('tabs.session.update',dict(session=session['id'],changes={'defaults':{'profile':'fixture','cwd':str(self.root)}}))
+        result=operator_execute('tabs.session.open',dict(session=session['id']),self.root,owner=tabs,request_id='profile-session')['result']['operation']
+        self.assertEqual(result['phase'],'terminal',result)
+        seeded=result['result']['session']
+        self.assertEqual(seeded['tab_count'],1)
+        self.assertEqual(seeded['profile_seed']['status'],'applied')
+        self.assertEqual(seeded['profile_seed']['profile_target']['home'],str(home))

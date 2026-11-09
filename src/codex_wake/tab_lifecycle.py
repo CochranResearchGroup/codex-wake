@@ -18,7 +18,7 @@ from .tab_organization import TabOrganization, digest
 class TabLifecycle:
     READS = frozenset()
     ARGUMENTS = {
-        'tabs.create': {'workspace', 'expected_target', 'name', 'cwd', 'profile', 'preview'},
+        'tabs.create': {'workspace', 'expected_target', 'name', 'cwd', 'profile', 'argv', 'preview'},
         'tabs.rename': {'workspace', 'expected_target', 'window', 'name', 'preview'},
         'tabs.focus': {'workspace', 'expected_target', 'window', 'preview'},
         'tabs.move': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'index', 'force', 'preview'},
@@ -120,6 +120,9 @@ class TabLifecycle:
                 raise InventoryError('invalid_argument', key + ' must be a Boolean')
         if 'index' in args and (type(args['index']) is not int or not 0 <= args['index'] <= 100000):
             raise InventoryError('invalid_argument', 'destination index must be a nonnegative bounded integer')
+        argv=args.get('argv')
+        if argv is not None and (not isinstance(argv,list) or not 1<=len(argv)<=64 or any(not isinstance(v,str) or '\0' in v or len(v)>4096 for v in argv)):
+            raise InventoryError('invalid_argument','A bounded command argv is required.')
         deadline = time.monotonic() + 10
         with self.records.locked(deadline):
             return self._execute(operation, args, deadline)
@@ -131,7 +134,7 @@ class TabLifecycle:
             raise InventoryError('stale_target', 'exact current workspace generation required')
         config = self.workspaces[workspace]
         transport = config['transport']
-        if operation=='tabs.create' and args.get('profile') and config['kind'] not in ('tmux','byobu'):
+        if operation=='tabs.create' and (args.get('profile') or args.get('argv')) and config['kind'] not in ('tmux','byobu'):
             raise InventoryError('unsupported_target','Selected profile creation is qualified only for Byobu/tmux; no fallback was launched.')
         if config['kind']=='psmux' and hasattr(transport,'lifecycle'):
             return self._psmux(operation,args,before,config,deadline)
@@ -220,7 +223,7 @@ class TabLifecycle:
                 return dict(selected,target=before['target'],receipt_id=receipt_id,action=operation)
             if operation == 'tabs.create':
                 wid = transport.command(deadline, 'new-window', '-d', '-P', '-F', '#{window_id}',
-                    '-t', transport.session + ':', '-n', name, '-c', str(cwd)).strip()
+                    '-t', transport.session + ':', '-n', name, '-c', str(cwd), *(['--',*args['argv']] if args.get('argv') else [])).strip()
             else:
                 wid = window['window_id']
                 if operation == 'tabs.rename':

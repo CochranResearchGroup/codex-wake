@@ -30,7 +30,14 @@ class ControllerTabs:
         from .tab_reattach import TabReattach
         return TabReattach(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment)
 
+    def create_tab(self,arguments,*,defaults_resolved=False):
+        from .terminal_launch_defaults import prepare
+        from .tab_lifecycle import TabLifecycle
+        payload=dict(arguments) if defaults_resolved else prepare(self,arguments)
+        return TabLifecycle(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment).execute('tabs.create',payload)
+
     def execute(self, operation, arguments):
+        if operation=='tabs.create':return self.create_tab(arguments)
         if operation.startswith('tabs.route.'):
             from .terminal_routing import TerminalRouting
             return TerminalRouting(self.root,tabs=self).execute(operation,arguments)
@@ -244,6 +251,9 @@ class AuthorizedTabs:
     def execute(self, token, operation, arguments):
         from .controller_auth import AuthError
         actor = self.authority.authenticate(token)
+        if operation=='tabs.create':
+            from .terminal_launch_defaults import prepare
+            arguments=prepare(self.tabs,arguments)
         if 'control' not in actor.scopes:
             raise AuthError('insufficient_scope')
         target = arguments.get('expected_target') if isinstance(arguments, dict) else None
@@ -257,15 +267,20 @@ class AuthorizedTabs:
             if not isinstance(selected,dict) or not (required|{'generation'})<=selected.keys() or not any(
                     required<=scope.keys() and all(selected.get(k)==v for k,v in scope.items()) for scope in actor.targets):
                 raise AuthError('insufficient_scope')
-        if operation=='tabs.create' and arguments.get('profile') and not actor.issuer.startswith('local://uid/'):
+        from .terminal_launch_defaults import session_profile
+        profile=arguments.get('profile') if operation=='tabs.create' else session_profile(self.tabs,operation,arguments)
+        if profile and not actor.issuer.startswith('local://uid/'):
             from .controller_http import permitted
-            if not permitted(actor,self.tabs.profile_owner().authorization_target(arguments['profile'])):
+            if not permitted(actor,self.tabs.profile_owner().authorization_target(profile)):
                 raise AuthError('insufficient_scope')
         def authorize():
             current = self.authority.authenticate(token)
             if current != actor: raise AuthError()
             return current
-        return self.runtime.execute(actor, operation, arguments, authorize=authorize, dispatch=self.tabs.execute)
+        def dispatch(operation,payload):
+            if operation=='tabs.create':return self.tabs.create_tab(payload,defaults_resolved=True)
+            return self.tabs.execute(operation,payload)
+        return self.runtime.execute(actor, operation, arguments, authorize=authorize, dispatch=dispatch)
 
 
 def _restore_terminal_sessions(owner):

@@ -115,6 +115,7 @@ class TerminalSessions:
             v=changes['defaults']
             if not isinstance(v,dict) or set(v)-{'cwd','profile','argv'}:raise InventoryError('invalid_argument','Defaults accept cwd, profile and argv.')
             if 'cwd' in v and (not isinstance(v['cwd'],str) or not Path(v['cwd']).is_absolute() or not Path(v['cwd']).is_dir()):raise InventoryError('invalid_argument','Existing absolute default directory required.')
+            if 'profile' in v and 'argv' in v:raise InventoryError('invalid_argument','Choose a launch profile or a command argv.')
             if 'profile' in v and (not isinstance(v['profile'],str) or not v['profile'] or len(v['profile'])>128):raise InventoryError('invalid_argument','Profile selector required.')
             if 'argv' in v and (not isinstance(v['argv'],list) or not 1<=len(v['argv'])<=64 or any(not isinstance(x,str) or '\0' in x or len(x)>4096 for x in v['argv'])):raise InventoryError('invalid_argument','Bounded command argv required.')
         if 'formatting' in changes:
@@ -194,7 +195,10 @@ class TerminalSessions:
 
     def open(self,record):
         current=self.resolve(record['id'])
-        if current['state']=='running':return current
+        if current['state']=='running':
+            if current.get('profile_seed',{}).get('status') in ('pending','held','uncertain'):
+                raise InventoryError('uncertain_effect','Prior profile seed is retained for inspection; no launch was replayed.')
+            return current
         if record['backend']=='psmux':
             from .terminal_session_psmux import native
             return native(self,record,'open')
@@ -202,8 +206,9 @@ class TerminalSessions:
         server=Path(record['server'])
         known={str(c.get('socket_path')) for c in self.tabs.workspaces.values() if c['kind'] in ('tmux','byobu')}
         if str(server) not in known and server!=self.directory/'tmux.sock':raise InventoryError('unsupported_target','Select a discovered terminal server or the private session server.')
-        if record.get('defaults',{}).get('profile'):
-            raise InventoryError('unsupported_target','Use the selected-profile tab launcher to seed this session; no shell fallback.')
+        profile=record.get('defaults',{}).get('profile')
+        profile_owner=self.tabs.profile_owner() if profile else None
+        if profile_owner is not None:profile_owner.selection(profile)  # Fail before creating any native container.
         if record.get('opening'):
             raise InventoryError('uncertain_effect','A prior native session launch needs reconciliation; no launch was replayed.')
         record['opening']=True
@@ -211,10 +216,9 @@ class TerminalSessions:
         # Launch argv is an explicit new-tab default, never applied to existing work.
         import subprocess
         defaults=record.get('defaults',{})
-        if defaults.get('profile'):raise InventoryError('unsupported_target','Use the selected-profile tab launcher to seed this session; no shell fallback.')
         command=['tmux','-S',str(server),'new-session','-d','-s',record['name'],'-P','-F','#{session_id}']
         if defaults.get('cwd'):command+=['-c',defaults['cwd']]
-        command+=['--',*defaults.get('argv',['/bin/sh'])]
+        command+=['--',*(['/bin/sh'] if profile else defaults.get('argv',['/bin/sh']))]
         result=subprocess.run(command,capture_output=True,text=True,timeout=self._timeout(10))
         if result.returncode:raise InventoryError('session_start_failed',result.stderr[:500])
         session=result.stdout.strip();workspace=record['id']
@@ -225,6 +229,21 @@ class TerminalSessions:
         record['native_session_id']=session
         record['native_key']=_digest({k:snap.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})
         state=self.state();state['sessions'][record['id']]=record;self.save(state)
+        if profile_owner is not None:
+            bootstrap=snap['windows'][0]
+            record['profile_seed']=dict(status='pending');state=self.state();state['sessions'][record['id']]=record;self.save(state)
+            def guard():
+                now=self.resolve(record['id'])
+                if now['state']!='running' or now.get('native_key')!=record['native_key']:
+                    raise InventoryError('stale_target','New profile session identity changed before launch.')
+            seeded=profile_owner.create(profile,transport=cfg['transport'],name=record['name'],cwd=defaults.get('cwd',str(Path.home())),deadline=self._deadline(10),guard=guard)
+            record['profile_seed']=seeded;state=self.state();state['sessions'][record['id']]=record;self.save(state)
+            if seeded['status']!='applied':raise InventoryError('uncertain_effect','Profile seed was not verified; inspect session profile_seed before recovery.')
+            live=cfg['transport'].snapshot(self._deadline(5))
+            slot=next((w for w in live['windows'] if w['window_id']==bootstrap['window_id']),None)
+            if slot is None or slot['panes']!=bootstrap['panes']:
+                raise InventoryError('uncertain_effect','Bootstrap changed; it was preserved for inspection.')
+            cfg['transport'].command(self._deadline(5),'kill-window','-t',bootstrap['window_id'])
         if record.get('formatting'):
             from .tab_formatting import TabFormatting
             TabFormatting(self.root,tabs=self.tabs).execute('tabs.format.configure',dict(workspace=workspace,policy=record['formatting']))

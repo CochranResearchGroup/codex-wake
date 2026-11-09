@@ -385,6 +385,7 @@ _SPECS = {'wake_tabs_apply': ('controller-tabs',
                          True)}
 
 
+_SPECS['wake_tabs_create'][3]['argv']={'type':'array','minItems':1,'maxItems':64,'items':{'type':'string'},'description':'Explicit new-tab command argv; overrides saved command defaults.'}
 _SPECS['wake_tabs_create'][3]['profile']={'type':'string','description':'Existing account/profile selector or alias; host registry selects build and home. Unsupported backends remain held; no shell fallback.'}
 
 # Formatting uses the same portable schema for CLI, HTTP and native MCP.
