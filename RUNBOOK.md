@@ -8668,3 +8668,14 @@ fix is in a separate worker checkout while source05 full gates remain frozen.
 Nested partial CLI status propagation is also a focused acceptance correction.
 These are pre-closure integration fixes; broad review and findings TDD counters
 remain0. Production formatting/services remain untouched.
+
+
+## 2026-11-09 | P210 final integration closeout (#517)
+
+All seven tickets #518–#524 closed on feat/tab-formatting-517. One broad review and
+one TDD findings pass resolved four findings (two P2 blockers, two P3 cleanups).
+Runtime4a5aa6d passes73 focused tests each Python3.11/3.12 and the exact rebuilt
+wheel passes installed Byobu/psmux CLI/API/MCP and native PowerShell checks.
+Earlier full-suite failures and targeted test-only repairs remain preserved as
+composite qualification. See docs/dev/evidence/plan0210/review/final-report.md
+and ledger.json. No paid hosted CI, merge, production activation or provider work.

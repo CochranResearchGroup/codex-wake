@@ -11,3 +11,6 @@ Frozen review58b1631 against3a02f9d. Primary adjudication:
 - R2 / P2 / blocking: rollback/reset can mutate a saved window newly linked into another workspace. Requirement518: stale identities never affect another namespace; linked windows are documented as held. Primary independently reproduced on a disposable real tmux server: linked=True, rollback returned rolled_back, other workspace option changed. Preserve retryable baseline, report partial linked_window and perform no window writes until unlinked.
 
 One-line summary: Standards3 accepted (highestP2); Spec1 accepted (highestP2). Two blockers; two optional maintenance judgments included in the same bounded remediation, no extra broad review.
+
+Final disposition: all four findings resolved in the single bounded TDD pass.
+See [final report](final-report.md) for fixes and final verification.

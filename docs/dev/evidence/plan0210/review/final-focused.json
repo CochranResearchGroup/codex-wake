@@ -1,0 +1,33 @@
+{
+  "source": "4a5aa6dbf424e7a3c25238707c81ac98d105c8b3",
+  "status": "PASS",
+  "runs": [
+    {
+      "python": "3.11",
+      "tests": 73,
+      "seconds": 57.301,
+      "log": "/tmp/p210-review-final-311.log"
+    },
+    {
+      "python": "3.12",
+      "tests": 73,
+      "seconds": 56.253,
+      "log": "/tmp/p210-review-final-312.log"
+    }
+  ],
+  "selection": [
+    "test_tab_format*.py",
+    "test_tab_psmux_formatting.py",
+    "test_tab_monitor*.py",
+    "test_controller_tabs.py",
+    "test_tab_contract.py",
+    "test_tab_lifecycle_cli.py",
+    "test_command_contract.py",
+    "test_tab_remote_exit.py",
+    "test_controller_portable_client.py",
+    "test_completion.py"
+  ],
+  "runner": "PYTHONPATH=src PYTHON -m unittest discover -s tests -p PATTERN; aggregate all selected modules per interpreter",
+  "broad_reviews": 1,
+  "bounded_tdd_passes": 1
+}

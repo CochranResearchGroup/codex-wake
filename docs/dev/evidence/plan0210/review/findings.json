@@ -7,8 +7,9 @@
       "severity": "P2",
       "disposition": "blocking",
       "scope": "tests/test_tab_format_monitor.py",
-      "state": "accepted",
-      "owner": "/root"
+      "state": "resolved",
+      "owner": "/root",
+      "resolution_source": "c8e9506"
     },
     {
       "id": "R2",
@@ -16,14 +17,15 @@
       "severity": "P2",
       "disposition": "blocking",
       "scope": "linked-window rollback/reset guard",
-      "state": "accepted",
+      "state": "resolved",
       "owner": "/root/format519",
       "primary_reproduction": {
         "status": "rolled_back",
         "linked": true,
         "other_window_changed": true,
         "after_explicit": false
-      }
+      },
+      "resolution_source": "4a5aa6d"
     },
     {
       "id": "R3",
@@ -31,8 +33,9 @@
       "severity": "P3",
       "disposition": "nonblocking_backlog",
       "scope": "unused automatic argument",
-      "state": "accepted_for_bounded_cleanup",
-      "owner": "/root/format519"
+      "state": "resolved",
+      "owner": "/root/format519",
+      "resolution_source": "4a5aa6d"
     },
     {
       "id": "R4",
@@ -40,8 +43,9 @@
       "severity": "P3",
       "disposition": "nonblocking_backlog",
       "scope": "native bridge finite option vocabulary",
-      "state": "accepted_for_bounded_cleanup",
-      "owner": "/root/format519"
+      "state": "resolved",
+      "owner": "/root/format519",
+      "resolution_source": "4a5aa6d"
     }
   ]
 }

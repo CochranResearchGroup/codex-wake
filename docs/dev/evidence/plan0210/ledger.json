@@ -202,7 +202,7 @@
     "fixed_point": "3a02f9dc9e59eef8151cc6015f19a6cd4b22e2de",
     "broad_runs": 1,
     "remediation_passes": 1,
-    "state": "adjudicated_remediation_running",
+    "state": "complete",
     "feature_tip": "d16575289d59cb5e32cf34c780c43aa48bf2bb97",
     "reviewed_tip": "58b163177e545ce97436f61adf78d89a00debd2c",
     "findings": [
@@ -214,8 +214,23 @@
     "blocking": [
       "R1",
       "R2"
-    ]
+    ],
+    "resolved": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
+    ],
+    "remaining_blockers": []
   },
   "discovery": "Current agreed plan/spec and fresh repository sources sufficient; unrelated memory registry hits not used; no additional Graphiti discovery needed.",
-  "last_validation_checkpoint": "cdcedfd"
+  "last_validation_checkpoint": "4a5aa6dbf424e7a3c25238707c81ac98d105c8b3",
+  "final_qualification": {
+    "runtime_source": "4a5aa6dbf424e7a3c25238707c81ac98d105c8b3",
+    "focused": "review/final-focused.json",
+    "installed": "postreview-installed/validation.json",
+    "wheel_sha256": "e353f509b5e3964c11247b243cdc9b7ae88a6fe097550faf0a082a8114983f09",
+    "report": "review/final-report.md",
+    "delivery": "integration branch; no merge or production deployment"
+  }
 }

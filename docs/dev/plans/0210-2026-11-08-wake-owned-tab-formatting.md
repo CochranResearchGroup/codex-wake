@@ -1,6 +1,6 @@
 # Wake-owned tab formatting
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Work item: #517; implementation #518–#524
 Branch: feat/tab-formatting-517
@@ -9,15 +9,16 @@ Domain authority: GLOSSARY.md
 
 ## Current State
 
-Spec #517 and tickets #518–#524 published with native sub-issue/blocking links.
-Tickets518–522 are validated and tracker-closed for integration-branch delivery.
-Native WSL/PowerShell/MCP rollback, monitor-death expiry and sustained40-tab tmux
-updates have passed. Worker523 is finishing native psmux full/basic/plain console
-rendering after fixing a real metadata inline-style difference and UTF8 decoding.
-Policy pin and offline factory defects were corrected before522 closure. Ticket524
-waits on523 for whole-package qualification/docs. Broad review0, remediation0;
-exact counters, custody and checks are in the execution ledger. Production
-formatting, services, stock Codex and launchers remain unchanged.
+Spec #517 and tickets #518–#524 were published with native dependency links.
+All seven implementation tickets are validated and tracker-closed on the integration
+branch. Runtime source 4a5aa6d passed 73 focused tests on each Python 3.11/3.12
+and exact installed Byobu/psmux public CLI, API and MCP acceptance, including native
+PowerShell. One broad review and one bounded TDD remediation pass are complete;
+all four findings are resolved. Earlier full-suite failures and their targeted
+repairs remain recorded as composite qualification, not a clean single full run.
+See the execution ledger and review/final-report.md for exact evidence.
+Production formatting, services, stock Codex and launchers remain unchanged.
+Merge and deployment require a separate authorized step. Parent spec #517 stays open.
 
 ## Settled operator decisions
 
@@ -46,11 +47,11 @@ formatting, services, stock Codex and launchers remain unchanged.
 
 Define visual encoding, installation/ownership/reversal and both-backend runtime
 qualification for Wake-owned tab formatting. Backend-independent policy should
-allow future Windows hosting. This interview does not implement the Windows
-service, publish tickets, modify production formatting, restart services or
+allow future Windows hosting. This delivery does not implement the Windows
+service, modify production formatting, restart production services or
 submit provider/model work. Physical tab rearrangement is a separate policy.
 
-## Current evidence
+## Pre-implementation evidence (historical)
 
 - Byobu6.11 and tmux3.4 installed. Live formats show index/name with selected-tab
   highlight; no Wake formatting projection exists in the current bridge.
