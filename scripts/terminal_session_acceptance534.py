@@ -32,7 +32,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--wheel', type=Path, required=True)
     parser.add_argument('--windows-python', required=True)
-    args=parser.parse_args();os.umask(0o077)
+    args=parser.parse_args();os.umask(0o077);started=time.monotonic()
     import codex_wake
     prefix=Path(sys.prefix).resolve();package=Path(codex_wake.__file__).resolve().parent
     assert package.is_relative_to(prefix) and not os.environ.get('PYTHONPATH')
@@ -65,6 +65,14 @@ def main():
 
         peer=births('peer')
         try:
+            from codex_wake.completion import candidates
+            for family,verbs in (('sessions',{'create','list','show','update','open','delete','ensure'}),('relocate',{'preview','apply','status','undo'}),('routing',{'save','enable','pin','unpin','hold','resume'})):
+                help_text=subprocess.check_output([cli,'tabs',family,'--help'],env=env,text=True)
+                assert all(verb in help_text for verb in verbs)
+                assert verbs<=set(candidates(['tabs',family,''],2)),family
+            for shell in ('bash','zsh'):
+                assert 'codex-wake' in subprocess.check_output([cli,'completion',shell],env=env,text=True)
+            checks.append('installed-generated-help-session-relocation-routing-and-bash-zsh-completion')
             source=local('tabs.session.create',dict(name='source',server=sock))['session'];assert source['state']=='empty'
             assert local('tabs.session.open',dict(session='source'))['session']['state']=='running'
             first=births('source');sid=source['id']
@@ -77,6 +85,14 @@ def main():
             checks.append('installed-cli-empty-open-rename-defaults-new-tab-existing-process-preserved')
             destination=local('tabs.session.create',dict(name='destination',server=sock))['session']
             before=births('workers')
+            from codex_wake.tab_views import TabViews
+            resources=command('tabs','list')['resources']
+            member=next(r for r in resources if r['target']['workspace']==changed['workspace'])
+            command('tabs','group-save','--arguments',json.dumps(dict(name='acceptance-category',members=[TabViews.identity(member)['id']],labels=['automation'])))
+            for flag,value in (('--tab','workers:'+member['window']['window_id']),('--group','acceptance-category'),('--label','automation')):
+                preview=unwrap(command('tabs','relocate','preview','--destination','destination',flag,value,'--json'))
+                assert len(preview['outcomes'])==1,(flag,preview)
+            checks.append('installed-human-explicit-tab-group-custom-label-frozen-selection')
             plan=local('tabs.relocate.preview',dict(session='workers',destination='destination'))
             moved=local('tabs.relocate.apply',dict(plan_id=plan['plan_id']))
             assert moved['status']=='completed' and all(x['status']=='moved' for x in moved['outcomes']),moved
@@ -191,14 +207,16 @@ def main():
             windows=windows_client(args.windows_python,args.wheel,endpoint,token,request,workflow)
             checks.append('native-powershell-portable-installed-api-mcp-session-crud-relocation-routing-parity')
             assert births('peer')==peer,'unrelated peer pane/PID changed'
-            report=dict(status='PASS',tier='FOCUSED',checks=checks,python=sys.executable,prefix=str(prefix),package=str(package),wheel_sha256=hashlib.sha256(args.wheel.read_bytes()).hexdigest(),python_members_verified=len(members),windows=windows,provider_calls=0,production_touched=False,peer_preserved=True)
+            loaded={name:str(Path(module.__file__).resolve()) for name,module in sys.modules.items() if name.startswith('codex_wake') and getattr(module,'__file__',None)}
+            assert all(Path(path).is_relative_to(prefix) for path in loaded.values()),loaded
+            report=dict(loaded_modules=loaded,status='PASS',tier='FOCUSED',checks=checks,python=sys.executable,prefix=str(prefix),package=str(package),wheel_sha256=hashlib.sha256(args.wheel.read_bytes()).hexdigest(),python_members_verified=len(members),windows=windows,provider_calls=0,production_touched=False,peer_preserved=True)
         finally:
             if server:
                 server.terminate();server.wait(timeout=8)
                 if server.stderr:server.stderr.close()
             try:stopped=unwrap(command('tabs','monitor-stop'))
             finally:tmux('kill-server',check=False)
-    report.update(owned_listener_terminated=server is None or server.poll() is not None,owned_monitor_stopped=stopped,owned_namespace_removed=True)
+    report.update(elapsed_seconds=round(time.monotonic()-started,3),budget_seconds=180,budget_breach=time.monotonic()-started>180,owned_listener_terminated=server is None or server.poll() is not None,owned_monitor_stopped=stopped,owned_namespace_removed=True)
     args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(dict(status='PASS',checks=len(checks),receipt=str(args.output))))
 
@@ -226,12 +244,15 @@ print(json.dumps(dict(prefix=str(prefix),cli=str(prefix/'Scripts/codex-wake.exe'
     encoded=base64.b64encode(script.encode('utf-16-le')).decode()
     try:
         for transport in ('api','mcp'):
-            def call(operation,arguments):
+            def call(operation,arguments,expected=0):
                 payload=dict(installed,endpoint=endpoint,transport=transport,operation=operation,arguments=json.dumps(request(arguments)))
                 p=subprocess.run(['/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe','-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',encoded],input=json.dumps(payload),text=True,capture_output=True,timeout=35)
-                assert p.returncode==0,(p.returncode,p.stdout,p.stderr)
+                assert p.returncode==expected,(p.returncode,p.stdout,p.stderr)
                 value=unwrap(json.loads(p.stdout.lstrip('\ufeff')));calls.append(dict(transport=transport,operation=operation,status=value.get('status')));return value
             workflow(call,'windows-'+transport)
+            rejected=call('tabs.route.pin',dict(selection={'bad':True}),expected=3)
+            assert rejected['reason']=='invalid_argument',rejected
+            calls[-1]['exit_code']=3;calls[-1]['reason']='invalid_argument'
     finally:
         subprocess.run([python,'-c','import json,sys;from pathlib import Path;Path(json.loads(sys.stdin.read())).unlink()'],input=json.dumps(installed['token']),text=True,capture_output=True,check=True,timeout=10)
     installed.pop('token');installed.update(calls=calls,token_removed=True);return installed

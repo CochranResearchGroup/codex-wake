@@ -1,4 +1,5 @@
-import json,os,shutil,subprocess,tempfile,time,uuid,hashlib
+import json,os,shutil,subprocess,tempfile,time,uuid,hashlib,sys
+import codex_wake
 from pathlib import Path
 from codex_wake.controller_tabs import ControllerTabs
 from codex_wake.controller_tab_adapters import ConfiguredBridge,PsmuxAttachmentTransport
@@ -43,12 +44,12 @@ try:
   result['first_native_delete_status']=deleted['status']
   if deleted['status']=='partial':deleted=reopened.execute('tabs.session.delete',dict(plan_id=deleted['plan_id']))
   assert deleted['status']=='deleted',deleted
-  replacement=reopened.execute('tabs.session.create',dict(name='workers',backend='psmux'))['session']
+  replacement=reopened.execute('tabs.session.create',dict(name='workers',backend='psmux',server=ns))['session']
   assert replacement['id']!=created['id'] and replacement['state']=='empty'
   reopened.execute('tabs.session.delete',dict(session=replacement['id']))
   checks.append('native-terminate-reconcile-tombstone-name-reuse-empty-delete')
   final=transport.snapshot(time.monotonic()+10);assert original['windows']==final['windows'];checks.append('peer-server-unchanged')
- result=dict(result,status='passed',checks=checks,namespace=ns,identity=ident,bridge_sha256=hashlib.sha256(bridge.read_bytes()).hexdigest(),windows_python=py,provider_calls=0,production_touched=False)
+ result=dict(result,package=codex_wake.__file__,python=sys.executable,prefix=sys.prefix,status='passed',checks=checks,namespace=ns,identity=ident,bridge_sha256=hashlib.sha256(bridge.read_bytes()).hexdigest(),windows_python=py,provider_calls=0,production_touched=False)
 except Exception as e:
  result=dict(status='failed',checks=checks,namespace=ns,error=repr(e));raise
 finally:
