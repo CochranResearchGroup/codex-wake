@@ -28,8 +28,9 @@ def command(args, owner=None):
         operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1)
         value = owner.execute(operation,args.arguments) if operation in owner.READS else operator_execute(operation,args.arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
         print(json.dumps(value, sort_keys=True))
-        phase=value.get('result',{}).get('operation',{}).get('phase') if isinstance(value.get('result'),dict) else None
-        return 3 if phase=='uncertain' or value.get('status') in ('uncertain','partial') else 0
+        retained=value.get('result',{}).get('operation',{}) if isinstance(value.get('result'),dict) else {}
+        outcome=retained.get('result') or {}
+        return 3 if retained.get('phase')=='uncertain' or value.get('status') in ('uncertain','partial') or (isinstance(outcome,dict) and outcome.get('status') in ('uncertain','partial')) else 0
     except (WakeError, OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as error:
         print(json.dumps(dict(status='held', error=dict(
             code=getattr(error,'code','configuration_unavailable'),
