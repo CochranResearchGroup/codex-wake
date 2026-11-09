@@ -29,7 +29,9 @@ survive rename. Deleting and reusing a name creates a different identity.
 Launch defaults use `--changes '{"defaults":{"cwd":"/absolute/path","argv":["/bin/sleep","60"]}}'`.
 They apply to new launches, never existing tabs. A configured launch profile is a
 separate authenticated launch choice; editing defaults grants no provider access.
-Native Windows custom/profile launch remains unsupported without a qualified
+Native Windows cwd defaults accept Windows absolute directories and are checked on Windows.
+Custom argv and selected-profile defaults are explicitly refused before being saved;
+launching them remains unsupported without a qualified
 launcher; no shell substitution is used. The separate codex-bots launcher owns its
 named session reuse and must not restart or duplicate existing bots on reuse.
 
@@ -62,7 +64,8 @@ hold automatic routing until explicitly resumed.
 
 Save a rule with `tabs routing save --name NAME --destination SESSION --selection
 JSON`, optionally setting priority and stability seconds. Enable it explicitly
-with `tabs routing enable --rule-id ID`; add `--include-existing` only when existing
+with `tabs routing enable --rule-id ID`; by default all tabs already present are
+excluded, even if their traits change later. Add `--include-existing` only when existing
 matches should participate. The owned monitor starts for continuous routing.
 Rules require stable observations; conflicting equal-priority destinations hold
 rather than choose arbitrarily. `tabs routing status --json` exposes decisions.
