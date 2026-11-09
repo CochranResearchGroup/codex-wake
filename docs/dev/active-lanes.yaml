@@ -13,7 +13,7 @@ lanes:
     dependencies: []
     overlaps: []
     updated_at: 2026-11-09
-    disposition: Source fix and private installed fixture qualified; working-host activation and real FigureLabs acceptance remain separate
+    disposition: Draft PR536; source fix and private installed fixture qualified; working-host activation and real FigureLabs acceptance remain separate
   - id: P211
     owner: primary / ecochran76
     objective: Close named terminal session CRUD and routing tickets

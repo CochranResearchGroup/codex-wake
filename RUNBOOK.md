@@ -8811,3 +8811,6 @@ not real T06 proof. Static/docs/policy/whitespace checks pass; planning audit ke
 20accepted historical baseline findings. No broad/full suite or hostedCI run.
 Evidence: docs/dev/evidence/plan0212/qualification.md. Memory forbidden: no explicit
 memory-write request; non-write receipt remains outside Git.
+
+LOCAL-P212 publication: draft PR536 on fix/native-mailbox-bootstrap; no merge or
+working-host activation. Exact product inputs remain bd79923.

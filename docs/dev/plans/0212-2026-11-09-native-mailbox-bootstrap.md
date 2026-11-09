@@ -48,3 +48,5 @@ See evidence/plan0212/qualification.md. Original production MCP still needs host
 activation of this opt-in mode after integration. Memory disposition forbidden;
 no explicit memory-write request. Supplied current evidence suffices; Graphiti
 historical discovery skipped to avoid revisiting the established setup diagnosis.
+
+Publication: draft PR536, https://github.com/CochranResearchGroup/codex-wake/pull/536.
