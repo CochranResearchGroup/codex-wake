@@ -58,13 +58,13 @@ hold automatic routing until explicitly resumed.
 
 ## Routing and deletion
 
-Save a rule with `tabs route save --name NAME --destination SESSION --selection
+Save a rule with `tabs routing save --name NAME --destination SESSION --selection
 JSON`, optionally setting priority and stability seconds. Enable it explicitly
-with `tabs route enable --rule-id ID`; add `--include-existing` only when existing
+with `tabs routing enable --rule-id ID`; add `--include-existing` only when existing
 matches should participate. The owned monitor starts for continuous routing.
 Rules require stable observations; conflicting equal-priority destinations hold
-rather than choose arbitrarily. `tabs route status --json` exposes decisions.
-`tabs route pin`, `unpin`, `hold` and `resume` take an explicit `--selection`.
+rather than choose arbitrarily. `tabs routing status --json` exposes decisions.
+`tabs routing pin`, `unpin`, `hold` and `resume` take an explicit `--selection`.
 Resume releases a hold; it does not remove a pin. Holds survive process restart.
 
 ```sh

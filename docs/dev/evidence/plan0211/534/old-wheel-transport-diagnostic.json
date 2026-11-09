@@ -1,0 +1,1214 @@
+{
+  "status": "DIAGNOSTIC_ONLY",
+  "tier": "FOCUSED",
+  "checks": [
+    "installed-cli-empty-open-rename-defaults-new-tab-existing-process-preserved",
+    "native-partial-frozen-selection-negative-cli-exit-status-reconcile",
+    "real-sdk-installed-stdio-session-crud-relocation-routing-controls",
+    "authenticated-api-oauth-mcp-session-crud-relocation-routing-parity",
+    "native-powershell-portable-installed-api-mcp-session-crud-relocation-routing-parity"
+  ],
+  "python": "/tmp/wake534-installed/bin/python",
+  "prefix": "/tmp/wake534-installed",
+  "package": "/tmp/wake534-installed/lib/python3.12/site-packages/codex_wake",
+  "wheel_sha256": "af2f6ea55afe799c7964b43afa2d3d5cb2a44227693951f91de87f5b8f2dc630",
+  "python_members_verified": 301,
+  "windows": {
+    "prefix": "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\session534-757fde1a066847989b759ea8f842c296\\venv",
+    "cli": "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\session534-757fde1a066847989b759ea8f842c296\\venv\\Scripts\\codex-wake.exe",
+    "python": "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\session534-757fde1a066847989b759ea8f842c296\\venv\\Scripts\\python.exe",
+    "python_members_verified": 301,
+    "wheel_sha256": "af2f6ea55afe799c7964b43afa2d3d5cb2a44227693951f91de87f5b8f2dc630",
+    "calls": [
+      {
+        "transport": "api",
+        "operation": "tabs.session.create",
+        "status": "created"
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.session.update",
+        "status": "updated"
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.relocate.preview",
+        "status": "preview"
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.route.pin",
+        "status": null
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.route.hold",
+        "status": null
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.route.resume",
+        "status": null
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.route.unpin",
+        "status": null
+      },
+      {
+        "transport": "api",
+        "operation": "tabs.session.delete",
+        "status": "deleted"
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.session.create",
+        "status": "created"
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.session.update",
+        "status": "updated"
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.relocate.preview",
+        "status": "preview"
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.route.pin",
+        "status": null
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.route.hold",
+        "status": null
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.route.resume",
+        "status": null
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.route.unpin",
+        "status": null
+      },
+      {
+        "transport": "mcp",
+        "operation": "tabs.session.delete",
+        "status": "deleted"
+      }
+    ],
+    "token_removed": true
+  },
+  "provider_calls": 0,
+  "production_touched": false,
+  "peer_preserved": true,
+  "owned_listener_terminated": true,
+  "owned_monitor_stopped": {
+    "application_effects": false,
+    "monitor": {
+      "capabilities": [
+        "tab-formatting-v1",
+        "tab-routing-v1"
+      ],
+      "generation": "0e59b8f1ed4a4981bf1943a97a5e06b6",
+      "last_error": null,
+      "last_formatting": {
+        "status": "completed",
+        "workspaces": [
+          {
+            "failures": [],
+            "status": "applied",
+            "workspace": "peer"
+          },
+          {
+            "failures": [],
+            "status": "applied",
+            "workspace": "session-d211409e1bae47d081d06ff2298d9728"
+          },
+          {
+            "failures": [],
+            "status": "applied",
+            "workspace": "session-f3fc3811a57e40b2828d8812a0aeb5fe"
+          }
+        ]
+      },
+      "last_policy_operation": null,
+      "last_routing": {
+        "outcomes": 0,
+        "pending": 0,
+        "status": "inactive"
+      },
+      "process": {
+        "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+        "pid": 735722,
+        "start_ticks": 33156289
+      },
+      "settings": {
+        "concurrency": 1,
+        "cycle_timeout": 10.0,
+        "interval": 5.0,
+        "max_snapshot_bytes": 1048576,
+        "max_workspaces": 64,
+        "probe_timeout": 1.5,
+        "stale_after": 20.0
+      },
+      "status": "stopped"
+    },
+    "snapshot": {
+      "age_seconds": 1.3123383522033691,
+      "cursor": 0,
+      "discovery": [],
+      "freshness": "stale",
+      "monitor_generation": "0e59b8f1ed4a4981bf1943a97a5e06b6",
+      "observed_at": 1794244473.7970192,
+      "origin": "daemon",
+      "resources": [
+        {
+          "fallback": "explicit_only",
+          "input_custody": {
+            "available": false,
+            "generation": null,
+            "transport": "unowned"
+          },
+          "monitor_freshness": "stale",
+          "monitor_observed_at": 1794244473.504618,
+          "monitor_unavailable": false,
+          "observation_holds": [],
+          "runtime_identity": "unverified",
+          "target": {
+            "environment": "posix",
+            "generation": "fa5a4628f1c272741ef21553b8b58686efb7bc98c3b23214ec7c9e5fddc4e835",
+            "host": "cooper",
+            "presentation": "tmux",
+            "workspace": "peer"
+          },
+          "traits": {
+            "application_effects": false,
+            "mixed": false,
+            "observed_at": 1794244473.4854712,
+            "panes": [
+              {
+                "binding": null,
+                "pane_id": "%0",
+                "process_complete": true,
+                "processes": [
+                  {
+                    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                    "pid": 732727,
+                    "start_ticks": 33154960
+                  }
+                ],
+                "traits": {
+                  "account": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "activity": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "build": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "error": {
+                    "freshness": "stale",
+                    "observed_at": 1794244473.4854362,
+                    "reason": "no_current_bottom_error_marker",
+                    "source": "current_visible_screen",
+                    "status": "stale",
+                    "value": "absent"
+                  },
+                  "harness": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "health": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "remote_host": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "repository": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "session_presence": {
+                    "freshness": "stale",
+                    "observed_at": 1794244473.4794836,
+                    "reason": null,
+                    "source": "process_descendants",
+                    "status": "stale",
+                    "value": "absent"
+                  }
+                }
+              }
+            ],
+            "schema_version": 1,
+            "traits": {
+              "account": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "activity": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "build": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "error": {
+                "freshness": "stale",
+                "observed_at": 1794244473.4854362,
+                "reason": "no_current_bottom_error_marker",
+                "source": "current_visible_screen",
+                "status": "stale",
+                "value": "absent"
+              },
+              "harness": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "health": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "remote_host": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "repository": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "session_presence": {
+                "freshness": "stale",
+                "observed_at": 1794244473.4794836,
+                "reason": null,
+                "source": "process_descendants",
+                "status": "stale",
+                "value": "absent"
+              }
+            }
+          },
+          "window": {
+            "focused": true,
+            "index": 0,
+            "linked": false,
+            "name": "peer",
+            "panes": [
+              {
+                "pane_id": "%0",
+                "pid": 732727,
+                "process_generation": {
+                  "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                  "start_time_ticks": 33154960
+                }
+              }
+            ],
+            "window_id": "@0"
+          },
+          "workspace_label": "peer"
+        },
+        {
+          "fallback": "explicit_only",
+          "input_custody": {
+            "available": false,
+            "generation": null,
+            "transport": "unowned"
+          },
+          "monitor_freshness": "stale",
+          "monitor_observed_at": 1794244473.653064,
+          "monitor_unavailable": false,
+          "observation_holds": [],
+          "runtime_identity": "unverified",
+          "target": {
+            "environment": "posix",
+            "generation": "f3a03cbfc6cbf808ed64e5581ab6bfdd22363c9b554de631d49b26b83e57e861",
+            "host": "cooper",
+            "presentation": "tmux",
+            "workspace": "session-d211409e1bae47d081d06ff2298d9728"
+          },
+          "traits": {
+            "application_effects": false,
+            "mixed": false,
+            "observed_at": 1794244473.622587,
+            "panes": [
+              {
+                "binding": null,
+                "pane_id": "%8",
+                "process_complete": true,
+                "processes": [
+                  {
+                    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                    "pid": 737454,
+                    "start_ticks": 33157002
+                  }
+                ],
+                "traits": {
+                  "account": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "activity": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "build": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "error": {
+                    "freshness": "stale",
+                    "observed_at": 1794244473.6225522,
+                    "reason": "no_current_bottom_error_marker",
+                    "source": "current_visible_screen",
+                    "status": "stale",
+                    "value": "absent"
+                  },
+                  "harness": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "health": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "remote_host": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "repository": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "session_presence": {
+                    "freshness": "stale",
+                    "observed_at": 1794244473.6179166,
+                    "reason": null,
+                    "source": "process_descendants",
+                    "status": "stale",
+                    "value": "absent"
+                  }
+                }
+              }
+            ],
+            "schema_version": 1,
+            "traits": {
+              "account": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "activity": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "build": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "error": {
+                "freshness": "stale",
+                "observed_at": 1794244473.6225522,
+                "reason": "no_current_bottom_error_marker",
+                "source": "current_visible_screen",
+                "status": "stale",
+                "value": "absent"
+              },
+              "harness": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "health": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "remote_host": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "repository": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "session_presence": {
+                "freshness": "stale",
+                "observed_at": 1794244473.6179166,
+                "reason": null,
+                "source": "process_descendants",
+                "status": "stale",
+                "value": "absent"
+              }
+            }
+          },
+          "window": {
+            "focused": true,
+            "index": 0,
+            "linked": false,
+            "name": "sh",
+            "panes": [
+              {
+                "pane_id": "%8",
+                "pid": 737454,
+                "process_generation": {
+                  "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                  "start_time_ticks": 33157002
+                }
+              }
+            ],
+            "window_id": "@8"
+          },
+          "workspace_label": "sink"
+        },
+        {
+          "fallback": "explicit_only",
+          "input_custody": {
+            "available": false,
+            "generation": null,
+            "transport": "unowned"
+          },
+          "monitor_freshness": "stale",
+          "monitor_observed_at": 1794244473.653066,
+          "monitor_unavailable": false,
+          "observation_holds": [],
+          "runtime_identity": "unverified",
+          "target": {
+            "environment": "posix",
+            "generation": "f3a03cbfc6cbf808ed64e5581ab6bfdd22363c9b554de631d49b26b83e57e861",
+            "host": "cooper",
+            "presentation": "tmux",
+            "workspace": "session-d211409e1bae47d081d06ff2298d9728"
+          },
+          "traits": {
+            "application_effects": false,
+            "mixed": false,
+            "observed_at": 1794244473.6293647,
+            "panes": [
+              {
+                "binding": null,
+                "pane_id": "%6",
+                "process_complete": true,
+                "processes": [
+                  {
+                    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                    "pid": 737233,
+                    "start_ticks": 33156884
+                  }
+                ],
+                "traits": {
+                  "account": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "activity": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "build": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "error": {
+                    "freshness": "stale",
+                    "observed_at": 1794244473.6293275,
+                    "reason": "no_current_bottom_error_marker",
+                    "source": "current_visible_screen",
+                    "status": "stale",
+                    "value": "absent"
+                  },
+                  "harness": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "health": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "remote_host": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "repository": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "session_presence": {
+                    "freshness": "stale",
+                    "observed_at": 1794244473.6225975,
+                    "reason": null,
+                    "source": "process_descendants",
+                    "status": "stale",
+                    "value": "absent"
+                  }
+                }
+              }
+            ],
+            "schema_version": 1,
+            "traits": {
+              "account": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "activity": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "build": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "error": {
+                "freshness": "stale",
+                "observed_at": 1794244473.6293275,
+                "reason": "no_current_bottom_error_marker",
+                "source": "current_visible_screen",
+                "status": "stale",
+                "value": "absent"
+              },
+              "harness": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "health": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "remote_host": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "repository": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "session_presence": {
+                "freshness": "stale",
+                "observed_at": 1794244473.6225975,
+                "reason": null,
+                "source": "process_descendants",
+                "status": "stale",
+                "value": "absent"
+              }
+            }
+          },
+          "window": {
+            "focused": false,
+            "index": 1,
+            "linked": false,
+            "name": "sh",
+            "panes": [
+              {
+                "pane_id": "%6",
+                "pid": 737233,
+                "process_generation": {
+                  "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                  "start_time_ticks": 33156884
+                }
+              }
+            ],
+            "window_id": "@6"
+          },
+          "workspace_label": "sink"
+        },
+        {
+          "fallback": "explicit_only",
+          "input_custody": {
+            "available": false,
+            "generation": null,
+            "transport": "unowned"
+          },
+          "monitor_freshness": "stale",
+          "monitor_observed_at": 1794244473.796719,
+          "monitor_unavailable": false,
+          "observation_holds": [],
+          "runtime_identity": "unverified",
+          "target": {
+            "environment": "posix",
+            "generation": "a1e2243523f35764a19c778d2758c1edb5e2d78698e83f328165d3f5fb19adcf",
+            "host": "cooper",
+            "presentation": "tmux",
+            "workspace": "session-f3fc3811a57e40b2828d8812a0aeb5fe"
+          },
+          "traits": {
+            "application_effects": false,
+            "mixed": false,
+            "observed_at": 1794244473.7797124,
+            "panes": [
+              {
+                "binding": null,
+                "pane_id": "%7",
+                "process_complete": true,
+                "processes": [
+                  {
+                    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                    "pid": 737332,
+                    "start_ticks": 33156941
+                  }
+                ],
+                "traits": {
+                  "account": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "activity": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "build": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "error": {
+                    "freshness": "stale",
+                    "observed_at": 1794244473.7796962,
+                    "reason": "no_current_bottom_error_marker",
+                    "source": "current_visible_screen",
+                    "status": "stale",
+                    "value": "absent"
+                  },
+                  "harness": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "health": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "remote_host": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "repository": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "session_presence": {
+                    "freshness": "stale",
+                    "observed_at": 1794244473.7757876,
+                    "reason": null,
+                    "source": "process_descendants",
+                    "status": "stale",
+                    "value": "absent"
+                  }
+                }
+              }
+            ],
+            "schema_version": 1,
+            "traits": {
+              "account": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "activity": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "build": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "error": {
+                "freshness": "stale",
+                "observed_at": 1794244473.7796962,
+                "reason": "no_current_bottom_error_marker",
+                "source": "current_visible_screen",
+                "status": "stale",
+                "value": "absent"
+              },
+              "harness": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "health": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "remote_host": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "repository": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "session_presence": {
+                "freshness": "stale",
+                "observed_at": 1794244473.7757876,
+                "reason": null,
+                "source": "process_descendants",
+                "status": "stale",
+                "value": "absent"
+              }
+            }
+          },
+          "window": {
+            "focused": true,
+            "index": 0,
+            "linked": false,
+            "name": "sh",
+            "panes": [
+              {
+                "pane_id": "%7",
+                "pid": 737332,
+                "process_generation": {
+                  "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                  "start_time_ticks": 33156941
+                }
+              }
+            ],
+            "window_id": "@7"
+          },
+          "workspace_label": "other"
+        },
+        {
+          "fallback": "explicit_only",
+          "input_custody": {
+            "available": false,
+            "generation": null,
+            "transport": "unowned"
+          },
+          "monitor_freshness": "stale",
+          "monitor_observed_at": 1794244473.7967196,
+          "monitor_unavailable": false,
+          "observation_holds": [],
+          "runtime_identity": "unverified",
+          "target": {
+            "environment": "posix",
+            "generation": "a1e2243523f35764a19c778d2758c1edb5e2d78698e83f328165d3f5fb19adcf",
+            "host": "cooper",
+            "presentation": "tmux",
+            "workspace": "session-f3fc3811a57e40b2828d8812a0aeb5fe"
+          },
+          "traits": {
+            "application_effects": false,
+            "mixed": false,
+            "observed_at": 1794244473.7837005,
+            "panes": [
+              {
+                "binding": null,
+                "pane_id": "%9",
+                "process_complete": true,
+                "processes": [
+                  {
+                    "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                    "pid": 737550,
+                    "start_ticks": 33157030
+                  }
+                ],
+                "traits": {
+                  "account": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "activity": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "build": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "error": {
+                    "freshness": "stale",
+                    "observed_at": 1794244473.783672,
+                    "reason": "no_current_bottom_error_marker",
+                    "source": "current_visible_screen",
+                    "status": "stale",
+                    "value": "absent"
+                  },
+                  "harness": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "health": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "remote_host": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "repository": {
+                    "freshness": "unknown",
+                    "observed_at": null,
+                    "reason": "evidence_unavailable",
+                    "source": "none",
+                    "status": "unknown",
+                    "value": "unknown"
+                  },
+                  "session_presence": {
+                    "freshness": "stale",
+                    "observed_at": 1794244473.7797177,
+                    "reason": null,
+                    "source": "process_descendants",
+                    "status": "stale",
+                    "value": "absent"
+                  }
+                }
+              }
+            ],
+            "schema_version": 1,
+            "traits": {
+              "account": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "activity": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "build": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "error": {
+                "freshness": "stale",
+                "observed_at": 1794244473.783672,
+                "reason": "no_current_bottom_error_marker",
+                "source": "current_visible_screen",
+                "status": "stale",
+                "value": "absent"
+              },
+              "harness": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "health": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "remote_host": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "repository": {
+                "freshness": "unknown",
+                "observed_at": null,
+                "reason": "evidence_unavailable",
+                "source": "none",
+                "status": "unknown",
+                "value": "unknown"
+              },
+              "session_presence": {
+                "freshness": "stale",
+                "observed_at": 1794244473.7797177,
+                "reason": null,
+                "source": "process_descendants",
+                "status": "stale",
+                "value": "absent"
+              }
+            }
+          },
+          "window": {
+            "focused": false,
+            "index": 1,
+            "linked": false,
+            "name": "sleep",
+            "panes": [
+              {
+                "pane_id": "%9",
+                "pid": 737550,
+                "process_generation": {
+                  "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a",
+                  "start_time_ticks": 33157030
+                }
+              }
+            ],
+            "window_id": "@9"
+          },
+          "workspace_label": "other"
+        }
+      ],
+      "schema_version": 1,
+      "status": "complete",
+      "unavailable": [],
+      "workspaces": [
+        "peer",
+        "session-d211409e1bae47d081d06ff2298d9728",
+        "session-f3fc3811a57e40b2828d8812a0aeb5fe"
+      ]
+    },
+    "stop_requested": true
+  },
+  "owned_namespace_removed": true,
+  "acceptance_blocker": "multi-tab undo empty-source lineage; explicit diagnostic native return of skipped tab substituted only to reach independent transports"
+}

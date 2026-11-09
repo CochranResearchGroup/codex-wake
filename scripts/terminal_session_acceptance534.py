@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import socket
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -53,12 +54,15 @@ def main():
             return json.loads(p.stdout)
         def local(operation,arguments=None,expected=0):
             family,verb=operation.rsplit('.',1);family=family.rsplit('.',1)[1]
-            return unwrap(command('tabs','sessions' if family=='session' else family,verb,'--json','--arguments',json.dumps(arguments or {}),expected=expected))
+            return unwrap(command('tabs','sessions' if family=='session' else 'routing' if family=='route' else family,verb,'--json','--arguments',json.dumps(arguments or {}),expected=expected))
         def target():return local('tabs.session.list')['target']
         def request(arguments):
             pin=target();key='session534-'+uuid.uuid4().hex
             return dict(arguments,expected_target=pin,_request=dict(operation_id=key,idempotency_key=key,correlation_id=key,binding='private-534',target=pin))
-        def births(name):return tmux('list-panes','-s','-t',name,'-F','#{pane_id}:#{pane_pid}')
+        def births(name):
+            rows=tmux('list-panes','-s','-t',name,'-F','#{pane_id}:#{pane_pid}').splitlines()
+            return sorted((row,Path('/proc/'+row.split(':')[1]+'/stat').read_text().rsplit(')',1)[1].split()[19]) for row in rows)
+
         peer=births('peer')
         try:
             source=local('tabs.session.create',dict(name='source',server=sock))['session'];assert source['state']=='empty'
@@ -67,8 +71,8 @@ def main():
             changed=local('tabs.session.update',dict(session='source',changes=dict(name='workers',description='inert fixture',labels=['automation'],defaults=dict(cwd=directory,argv=['/bin/sleep','600']))))['session']
             assert changed['id']==sid and births('workers')==first
             # Saved defaults are resolved by the installed public tabs.create path.
-            made=unwrap(command('tabs','create','--session','workers','--json'))
-            assert made['status']=='created',made
+            made=unwrap(command('tabs','create','--session','workers','--name','inert-worker','--json'))
+            assert made['status']=='applied',made
             assert directory in tmux('list-panes','-s','-t','workers','-F','#{pane_current_path}')
             checks.append('installed-cli-empty-open-rename-defaults-new-tab-existing-process-preserved')
             destination=local('tabs.session.create',dict(name='destination',server=sock))['session']
@@ -104,8 +108,25 @@ def main():
             second=plan['outcomes'][1]['birth']['window_id'];tmux('move-window','-d','-s',second,'-t','other:')
             partial=local('tabs.relocate.apply',dict(plan_id=plan['plan_id']),expected=3)
             assert partial['status']=='partial' and [x['status'] for x in partial['outcomes']]==['moved','held'],partial
-            assert local('tabs.relocate.status',dict(plan_id=plan['plan_id']))['status']=='partial'
+            assert local('tabs.relocate.status',dict(plan_id=plan['plan_id']),expected=3)['status']=='partial'
             checks.append('native-partial-frozen-selection-negative-cli-exit-status-reconcile')
+            local('tabs.session.create',dict(name='uncertain',server=sock,start=True))
+            plan=local('tabs.relocate.preview',dict(session='uncertain',destination='sink'))
+            tools=Path(directory)/'fault-bin';tools.mkdir();attempts=Path(directory)/'move-attempts'
+            real_tmux=shutil.which('tmux');wrapper=tools/'tmux'
+            wrapper.write_text('#!'+sys.executable+'\nimport os,sys\nfrom pathlib import Path\n'
+                +'if "move-window" in sys.argv and '+repr(sock)+' in sys.argv:\n'
+                +' Path('+repr(str(attempts))+').open("a").write("attempt\\n")\n sys.exit(1)\n'
+                +'os.execv('+repr(real_tmux)+',['+repr(real_tmux)+',*sys.argv[1:]])\n')
+            wrapper.chmod(0o700);previous_path=env['PATH'];env['PATH']=str(tools)+os.pathsep+previous_path
+            try:
+                uncertain=local('tabs.relocate.apply',dict(plan_id=plan['plan_id']),expected=3)
+                assert uncertain['outcomes'][0]['status']=='uncertain',uncertain
+                local('tabs.relocate.status',dict(plan_id=plan['plan_id']),expected=3)
+                local('tabs.relocate.apply',dict(plan_id=plan['plan_id']),expected=3)
+                assert attempts.read_text().count('attempt')==1,'uncertain effect replayed'
+            finally:env['PATH']=previous_path
+            checks.append('installed-cli-native-command-failure-uncertain-negative-exit-restart-reconcile-no-replay')
             async def stdio():
                 from mcp import ClientSession,StdioServerParameters
                 from mcp.client.stdio import stdio_client
@@ -118,10 +139,12 @@ def main():
                             value=await session.call_tool('wake_'+operation.replace('.','_'),request(arguments));assert not value.is_error,value
                             return unwrap(json.loads(value.content[0].text))
                         created=await call('tabs.session.create',dict(name='stdio',server=sock));assert created['session']['state']=='empty'
+                        await call('tabs.session.ensure',dict(name='stdio',server=sock,start=False))
+                        assert (await call('tabs.session.open',dict(session='stdio')))['session']['state']=='running'
                         await call('tabs.session.update',dict(session='stdio',changes={'description':'stdio'}))
                         await call('tabs.relocate.preview',dict(destination='stdio',selection={'tabs':[]}))
                         for verb in ('pin','hold','resume','unpin'):await call('tabs.route.'+verb,dict(selection={'tabs':[]}))
-                        assert (await call('tabs.session.delete',dict(session='stdio')))['status']=='deleted'
+                        assert (await call('tabs.session.delete',dict(session='stdio',terminate=True)))['status']=='deleted'
             asyncio.run(stdio());checks.append('real-sdk-installed-stdio-session-crud-relocation-routing-controls')
             port_socket=socket.socket();port_socket.bind(('127.0.0.1',0));port=port_socket.getsockname()[1];port_socket.close()
             endpoint='http://127.0.0.1:'+str(port);resource=endpoint+'/controller'
@@ -157,10 +180,12 @@ def main():
             def workflow(call,label):
                 name='remote-'+label
                 assert call('tabs.session.create',dict(name=name,server=sock))['session']['state']=='empty'
-                assert call('tabs.session.update',dict(session=name,changes={'description':label}))['session']['description']==label
+                original=call('tabs.session.ensure',dict(name=name,server=sock,start=False))['session']['id']
+                assert call('tabs.session.open',dict(session=name))['session']['state']=='running'
+                assert call('tabs.session.update',dict(session=name,changes={'description':label}))['session']['id']==original
                 call('tabs.relocate.preview',dict(destination=name,selection={'tabs':[]}))
                 for verb in ('pin','hold','resume','unpin'):call('tabs.route.'+verb,dict(selection={'tabs':[]}))
-                assert call('tabs.session.delete',dict(session=name))['status']=='deleted'
+                assert call('tabs.session.delete',dict(session=name,terminate=True))['status']=='deleted'
             for transport in ('api','mcp'):workflow(lambda op,a:remote(transport,op,a),transport)
             checks.append('authenticated-api-oauth-mcp-session-crud-relocation-routing-parity')
             windows=windows_client(args.windows_python,args.wheel,endpoint,token,request,workflow)
