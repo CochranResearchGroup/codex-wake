@@ -1,0 +1,24 @@
+{
+  "status": "failed",
+  "checks": [
+    "empty-definition-host-namespace",
+    "native-open",
+    "rename-exact-format-baseline-rollback",
+    "restart-restores-exact-generation",
+    "populated-delete-refused"
+  ],
+  "namespace": "wake534-6f7cc70c3029",
+  "error": "InventoryError('closed tab remains visible')",
+  "cleanup_error": "InventoryError('closed tab remains visible')",
+  "final_presence": {
+    "workers": {
+      "present": false
+    },
+    "bots": {
+      "present": false
+    },
+    "seed": {
+      "present": false
+    }
+  }
+}
