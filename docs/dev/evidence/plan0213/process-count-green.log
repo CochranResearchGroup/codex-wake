@@ -1,0 +1,2 @@
+tmux process launches: 275
+[{"verb": "enable", "seconds": 3.778, "status": "applied", "failures": 0}, {"verb": "rollback", "seconds": 1.795, "status": "rolled_back", "failures": 0}]

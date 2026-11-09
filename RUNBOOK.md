@@ -8841,3 +8841,15 @@ correcting an overstrict lexical-spacing expectation. See plan0212/deployment.js
 and private native-mailbox-0212-deploy receipts/scripts. No hostedCI/providerturns.
 Preexisting repository .codex/config.toml edit preserved. Memory forbidden: no
 explicit memory-write request; non-write receipt kept outsideGit.
+
+## Turn | 2026-11-09 | LOCAL-P213 formatting sluggishness reproduction and patch
+
+Operator rejected palette/sluggish/STALE. Restored42original window settings and
+stopped monitor; production remains off. Isolated42window process budget red1728;
+native option batches reduce to275. Batching alone failed3.5srefreshbudget at3.859s;
+consolidating growing durable-state saves beforewrites/afterreadbacks produced
+PASS1.143s. Enable2.281srollback0.972s.25focused312PASS20.853s/3focused311PASS1.862s;
+linked-window and manualstyle/baseline protections retained. Source-only patch;
+installed loaded-host observation and palettepreview remain open. No hiddenTTL
+extension/STAL suppression, modelcalls or liveformatreactivation. Evidenceplan0213.
+Memoryforbidden, no explicitmemory-write request.

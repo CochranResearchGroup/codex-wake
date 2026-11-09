@@ -1533,3 +1533,10 @@ Public question/claim/reply and installed package fixture qualify. PR536 merged
 as74d6ea7 and the exact wheel is deployed. Shared MCP host delegation is configured
 and actual native mailbox self-registration/inbox pass; real FigureLabs T06
 question/claim/reply remains separate.
+
+## P213 | Formatting throughput and STALE hardening
+
+[LOCAL-P213](docs/dev/plans/0213-2026-11-09-tab-formatting-throughput.md) OPEN.
+Native process churn and per-tab durable saves reproduced/fixed at source; private
+42tab refresh1.143s. Production rolled back and monitoroff. Installed loaded-host
+qualification plus palette/plain preview required before reactivation.

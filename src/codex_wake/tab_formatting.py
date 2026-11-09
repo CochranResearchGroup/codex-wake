@@ -256,7 +256,6 @@ class TabFormatting:
                 current=read['result']
                 if wid not in record['windows']:
                     record['windows'][wid]=dict(original=current,last_applied=None,restored=False)
-                    self.save(state)
                 saved=record['windows'][wid]
                 last=saved.get('last_applied')
                 changed=(last and not saved.get('restored') and any(
@@ -264,7 +263,7 @@ class TabFormatting:
                     or current[k].get('parent')!=saved.get('parent_at_apply',{}).get(k,current[k].get('parent'))
                     for k,v in last.items()))
                 if not resume_manual and changed:
-                    saved.update(paused=True,pause_reason='manual_style');self.save(state)
+                    saved.update(paused=True,pause_reason='manual_style')
                     failures.append(dict(window=wid,code='manual_override'));continue
                 if resume_manual:saved.pop('paused',None);saved.pop('pause_reason',None)
                 saved['parent_at_apply']={k:v.get('parent') for k,v in current.items()}
@@ -276,9 +275,11 @@ class TabFormatting:
                 # skip writes when reliable events repeat the same sample.
                 if all(current[k]['value']==v for k,v in options.items()):
                     saved['projection']={k:v for k,v in rendered.items() if k!='options'}
-                    self.save(state);continue
+                    continue
                 pending.append((wid,options,rendered))
             except Exception as error:failures.append(dict(window=wid,code=getattr(error,'code','formatting_failed')))
+        # Persist every original baseline before the first native batch write.
+        self.save(state)
         writes=self.batch(transport,[dict(action='write',window=wid,values=options) for wid,options,_ in pending],deadline)
         for (wid,options,rendered),write in zip(pending,writes):
             if 'error' in write:
@@ -288,7 +289,7 @@ class TabFormatting:
                 failures.append(dict(window=wid,code='formatting_mismatch'));continue
             record['windows'][wid].update(last_applied=options,restored=False,
                 projection={k:v for k,v in rendered.items() if k!='options'})
-            self.save(state)
+        self.save(state)
         try:transport.formatting('refresh',{},deadline)
         except Exception as error:failures.append(dict(code=getattr(error,'code','refresh_failed')))
         return failures

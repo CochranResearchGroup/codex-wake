@@ -1,0 +1,6 @@
+tmux process launches: 1728
+Traceback (most recent call last):
+  File "/tmp/wake-format-count-repro.py", line 21, in <module>
+    scope.stop();print('tmux process launches:',len(calls));assert len(calls)<500,'Excessive per-option tmux process launches';print(json.dumps(timings));assert all(x['status'] in ('applied','rolled_back') for x in timings),'Formatting/rollback exceeds workspace deadline'
+                                                                   ^^^^^^^^^^^^^^
+AssertionError: Excessive per-option tmux process launches
