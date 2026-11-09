@@ -9,10 +9,14 @@ Domain authority: GLOSSARY.md
 
 ## Current State
 
-Operator requested a grill-with-docs interview after deployment of503/PR516.
-Existing Wake tab traits, bounded monitoring, identity and terminal adapters are
-implemented. Formatting projection is not implemented. Initial design questions
-remain open; no production formatting or service configuration changed.
+Spec #517 and tickets #518–#524 published with native sub-issue and blocking
+links read back. Operator authorized implementation, evidence-backed ticket
+closure, one broad two-axis review and one bounded TDD findings pass. Foundation
+#518 is validated and tracker-closed on the integration branch. Workers519,
+520 and521 own isolated native Windows, automatic expiry and pure projection
+slices. Policy522 waits for the shared formatting owner to integrate;523 waits
+for native519;524 joins all slices. Production formatting, native daemons and
+installed launchers remain unchanged. Exact custody/evidence lives in the ledger.
 
 ## Settled operator decisions
 
@@ -74,9 +78,8 @@ https://github.com/psmux/psmux/blob/master/src/cli.rs .
 
 ## Open decision frontier
 
-No unresolved product questions. Shared-design readback is pending operator
-confirmation; specification/ticket publication and implementation remain later
-workflow stages.
+No unresolved product questions. Operator approved publication and implementation.
+Runtime compatibility findings are acceptance evidence, not new product decisions.
 
 ## Acceptance target and definition of done
 
@@ -86,7 +89,7 @@ Update domain terms only when a new term is actually resolved. Use ADRs only
 for consequential, surprising tradeoffs. Specification/ticket publication and
 implementation follow their separately invoked stages.
 
-Next action: confirm the shared design, including one-command original-settings rollback and re-enable.
+Next action: integrate validated worker results serially, then schedule remaining ready tickets.
 
 ## Interview steering: type/state highlights
 

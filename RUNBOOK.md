@@ -8629,3 +8629,13 @@ installed-backend acceptance, and required one-command rollback/re-enable.
 LOCAL-P210 records a durable pre-decoration baseline with exact original option
 restoration, explicit partial failures and no baseline replacement on re-enable.
 Shared-design readback remains; no implementation or runtime change performed.
+
+## Turn | 2026-11-09 | Formatting spec517 implementation started
+
+Published spec517 and seven child tickets518–524; native blocker/sub-issue links
+read back. Primary validated reversible tmux foundation518 with public CLI and
+portable contract checks (3 formatting,5 contract tests); initial red and green
+logs retained. Exact originals survive rollback/re-enable and partial restoration
+retry. Workers519/520/521 use isolated worktrees from bf1f6b5; three substantive
+lanes maximum. Native psmux option inheritance and clock-expression differences
+are under bounded qualification; no production backend settings changed.
