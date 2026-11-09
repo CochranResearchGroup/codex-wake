@@ -271,7 +271,7 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
     import stat
     from pathlib import Path
     from .controller_tab_adapters import (TmuxAttachmentTransport,
-        PsmuxAttachmentTransport, ConfiguredBridge, UnixInputBroker)
+        PsmuxAttachmentTransport, ConfiguredBridge, UnixInputBroker, UnavailableAttachmentTransport)
     from .shortcut_store import default_root
     root = default_root(root)
     path = root / 'controller-tabs.json'
@@ -306,7 +306,8 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
     for name,row in config['workspaces'].items():
         kind = row['kind']
         if kind in ('tmux','byobu'):
-            transport = TmuxAttachmentTransport(row['socket_path'],row['session_id'])
+            try:transport = TmuxAttachmentTransport(row['socket_path'],row['session_id'])
+            except FileNotFoundError:transport = UnavailableAttachmentTransport()
         elif kind in ('psmux','stdio'):
             transport = PsmuxAttachmentTransport(ConfiguredBridge(row['bridge_command']),generation=row['bridge_generation'])
         else:

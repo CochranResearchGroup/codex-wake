@@ -6,6 +6,16 @@ from .managed_inventory import InventoryError
 from .tab_organization import TmuxTransport
 
 
+class UnavailableAttachmentTransport:
+    """Retain configured ownership when its terminal has disappeared.
+
+    No runtime capability or input custody is inferred from configuration.
+    Metadata-only global controls remain usable while reads report unavailable.
+    """
+    def snapshot(self, deadline):
+        raise InventoryError('attachment_unavailable','Configured terminal socket is absent; restart or refresh the workspace.')
+
+
 class TmuxAttachmentTransport(TmuxTransport):
     def formatting(self, action, arguments, deadline):
         from .tab_format_transport import tmux_formatting

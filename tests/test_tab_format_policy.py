@@ -144,3 +144,16 @@ class WorkspacePolicyTests(unittest.TestCase):
         self.assertEqual(error.exception.code,'formatting_custody_conflict')
         self.assertEqual(self.call('inspect')['record']['windows']['@0']['original'],original)
         self.assertEqual(self.call('rollback')['status'],'rolled_back')
+
+class OfflineFactoryPolicyTests(unittest.TestCase):
+    def test_global_cli_optout_survives_a_missing_configured_terminal(self):
+        import sys
+        with tempfile.TemporaryDirectory() as directory:
+            config=Path(directory)/'controller-tabs.json'
+            config.write_text(json.dumps(dict(schema_version=1,workspaces={'offline':dict(kind='tmux',socket_path=directory+'/missing.sock',session_id='$0')})));config.chmod(0o600)
+            result=subprocess.run([sys.executable,'-m','codex_wake.entrypoint','--wake-root',directory,'tabs','format','configure','--scope','global','--policy','{"enabled":false}'],capture_output=True,text=True,timeout=10)
+            self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+            from codex_wake.controller_tabs import controller_tabs_from_root
+            owner=controller_tabs_from_root(directory)
+            self.assertFalse(owner.execute('tabs.format.status',{'scope':'global'})['policy']['enabled'])
+            self.assertEqual(owner.execute('tabs.list',{})['unavailable'][0]['workspace'],'offline')
