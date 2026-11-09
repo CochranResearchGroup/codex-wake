@@ -159,9 +159,16 @@
   ],
   "review": {
     "broad_runs": 1,
-    "remediation_passes": 0,
+    "remediation_passes": 1,
     "fixed_point": "f0798e1ede3104caf591ba0b453fbf553bed569e",
-    "state": "running"
+    "state": "adjudicated_remediation_running",
+    "reviewed_tip": "bbfc494d5fe41368eb78ad592b5a85c7992c7170",
+    "findings": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
+    ]
   },
   "state": "implementing",
   "integration_worktree": "/tmp/codex-wake-session-design-0211",

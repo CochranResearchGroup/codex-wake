@@ -1,0 +1,41 @@
+{
+  "frozen_tip": "bbfc494d5fe41368eb78ad592b5a85c7992c7170",
+  "findings": [
+    {
+      "id": "R1",
+      "axis": "Standards",
+      "severity": "P1",
+      "disposition": "blocking",
+      "state": "accepted",
+      "scope": "Actual ensure target/profile resolution differs during authorization and execution",
+      "owner": "/root"
+    },
+    {
+      "id": "R2",
+      "axis": "Spec",
+      "severity": "P2",
+      "disposition": "blocking",
+      "state": "accepted",
+      "scope": "Session listing lacks health/activity summary producer",
+      "owner": "/root/rem_summary211"
+    },
+    {
+      "id": "R3",
+      "axis": "Spec",
+      "severity": "P2",
+      "disposition": "blocking",
+      "state": "accepted",
+      "scope": "psmux open rejects useful cwd/argv defaults indiscriminately",
+      "owner": "/root/rem_psmux211"
+    },
+    {
+      "id": "R4",
+      "axis": "Spec",
+      "severity": "P2",
+      "disposition": "blocking",
+      "state": "accepted",
+      "scope": "Activation exclusion must cover all existing birth identities per frozen spec",
+      "owner": "/root"
+    }
+  ]
+}

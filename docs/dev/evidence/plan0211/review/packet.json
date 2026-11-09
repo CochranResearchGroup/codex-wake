@@ -1,0 +1,22 @@
+{
+  "fixed_point": "f0798e1ede3104caf591ba0b453fbf553bed569e",
+  "frozen_tip": "bbfc494d5fe41368eb78ad592b5a85c7992c7170",
+  "diff": "git diff f0798e1ede3104caf591ba0b453fbf553bed569e...FROZEN_TIP",
+  "commits": "review/commits.txt",
+  "spec": "docs/dev/evidence/plan0211/spec.md;GitHub526",
+  "standards": [
+    "AGENTS.md",
+    "GLOSSARY.md",
+    "docs/adr/0003-saved-terminal-session-lifecycle.md",
+    "docs/dev/policies/0003-runtime-state-and-wake-semantics.md",
+    "docs/dev/policies/0004-agent-runtime-governance.md",
+    "docs/dev/policies/0005-engineering-git-and-release.md",
+    "docs/dev/policies/0006-validation-and-closeout.md",
+    "docs/dev/policies/0014-architecture-guardrails.md",
+    "docs/dev/policies/0016-code-testing-discipline.md",
+    "docs/agents/runtime-proof.md"
+  ],
+  "broad_review_runs": 1,
+  "findings_passes": 0,
+  "execution": "Twofresh independent axes, primaryadjudicates candidates; no sourceedits during frozenreview"
+}
