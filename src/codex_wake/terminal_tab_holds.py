@@ -17,6 +17,12 @@ class TabHolds:
         return _digest(dict(host=target['host'],environment=target['environment'],window=window['window_id'],
             panes=sorted([(p['pane_id'],p.get('process_generation'),p.get('windows_creation_filetime')) for p in window['panes']])))
 
+    def list(self):
+        """List durable holds, including tabs not yet seen by a routing rule."""
+        try:state=read(self.path)
+        except FileNotFoundError:return []
+        return [state[key] for key in sorted(state)]
+
     def get(self,identity):
         try:return read(self.path).get(identity)
         except FileNotFoundError:return None
