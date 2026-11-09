@@ -51,7 +51,7 @@ print(json.dumps(dict(rc=r.returncode,out=r.stdout,err=r.stderr)))
         r=json.loads(subprocess.check_output([py,native_helper,namespace,*values],text=True,timeout=12))
         if check:assert r['rc']==0,r
         return r
-    checks=[];owned=False;started=time.monotonic();identity=None
+    checks=[];owned=False;started=time.monotonic();identity=None;root=None
     try:
         native('new-session','-d','-s','source','-n','manual baseline','--','cmd.exe','/d','/k');owned=True
         native('new-window','-d','-t','source:','-n','inherited peer','--','cmd.exe','/d','/k')
@@ -135,6 +135,8 @@ print(json.dumps(dict(rc=r.returncode,out=r.stdout,err=r.stderr)))
         stale=subprocess.run(wrong,input='{"action":"formatting","arguments":{"action":"read-session"}}',text=True,capture_output=True,timeout=15)
         assert json.loads(stale.stdout)['error']['code']=='stale_target'
         checks.append('replaced-server-generation-refused')
+        from codex_wake.tab_monitor import TabMonitor
+        TabMonitor(root).execute('tabs.monitor.stop',{})
         native('kill-server');owned=False
         census=native('list-sessions','-F','#{session_id}',check=False)
         assert not census['out'].strip(),census
@@ -148,6 +150,9 @@ print(json.dumps(dict(rc=r.returncode,out=r.stdout,err=r.stderr)))
     except Exception as error:
         args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(dict(status='failed',namespace=namespace,checks=checks,error_type=type(error).__name__,message=str(error),provider_calls=0,production_touched=False),indent=2)+'\n');raise
     finally:
+        if root is not None:
+            from codex_wake.tab_monitor import TabMonitor
+            TabMonitor(root).execute('tabs.monitor.stop',{})
         if owned:native('kill-server',check=False)
         shutil.rmtree(native_directory)
 

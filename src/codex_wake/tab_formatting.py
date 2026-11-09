@@ -83,6 +83,41 @@ class TabFormatting:
         return record
 
     def execute(self,operation,arguments):
+        result=self._execute(operation,arguments)
+        if (operation in ('tabs.format.enable','tabs.format.resume','tabs.format.reenable')
+                and result.get('status')=='applied' and getattr(self.tabs,'host_managed',False)):
+            result=self.ensure_monitor(result)
+        return result
+
+    def ensure_monitor(self,result):
+        """Enable continuous projection only for the trusted persisted host owner.
+
+        Injected owners have no persisted discovery contract. The existing monitor
+        is shared; this method never replaces it, adjusts its policy or returns
+        another workspace's observation snapshot.
+        """
+        from .tab_monitor import TabMonitor
+        result=dict(result)
+        try:
+            started=TabMonitor(self.tabs.root).execute('tabs.monitor.start',{})
+            monitor=started['monitor']
+            capable='tab-formatting-v1' in monitor.get('capabilities',[])
+            interval=monitor['settings']['interval']
+            result['monitor']=dict(status=monitor['status'],interval=interval,
+                already_running=started.get('already_running',False),formatting_capability=capable)
+            if monitor['status']!='running':
+                raise InventoryError('monitor_start_failed','Formatting monitor is not running.')
+            if not capable:
+                raise InventoryError('monitor_formatting_unqualified','Existing monitor lacks a qualified formatting capability; no restart was attempted.')
+            if interval>20:
+                raise InventoryError('monitor_interval_exceeds_freshness','Existing monitor interval exceeds the formatting freshness budget; settings were preserved.')
+        except Exception as error:
+            result['status']='partial'
+            result.setdefault('failures',[]).append(dict(code=getattr(error,'code','monitor_start_failed')))
+            result.setdefault('monitor',dict(status='unavailable',interval=None,formatting_capability=False))
+        return result
+
+    def _execute(self,operation,arguments):
         verb=operation.removeprefix('tabs.format.')
         if verb not in VERBS or not isinstance(arguments,dict) or set(arguments)-{'scope','workspace','policy','expected_target'}:
             raise InventoryError('invalid_argument','Unsupported formatting arguments.')

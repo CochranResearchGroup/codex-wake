@@ -13,9 +13,10 @@ class ControllerTabs:
     READS = frozenset(('tabs.format.status','tabs.format.inspect','tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
     MUTATIONS = frozenset(('tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input'))
 
-    def __init__(self, root, *, workspaces, host, environment):
+    def __init__(self, root, *, workspaces, host, environment, host_managed=False):
         self.root, self.workspaces = root, dict(workspaces)
         self.host, self.environment = host, environment
+        self.host_managed = host_managed
 
     def format_target(self, *, scope='workspace', workspace=None):
         from .tab_formatting import TabFormatting
@@ -281,7 +282,7 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
         from .tab_workspace_discovery import discover
         workspaces, diagnostics = discover()
         owner = ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
-                               environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name)
+                               environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name,host_managed=True)
         from .tab_traits import WorkspaceTraitsObserver
         for workspace in workspaces.values():
             workspace['observer']=WorkspaceTraitsObserver(root,workspace['transport'],workspace.get('privacy'))
@@ -323,4 +324,4 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
         workspace['observer']=WorkspaceTraitsObserver(root,transport,workspace.get('privacy'))
         workspaces[name] = workspace
     return ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
-                          environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name)
+                          environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name,host_managed=True)

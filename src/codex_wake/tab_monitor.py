@@ -176,7 +176,8 @@ class TabMonitor:
                                   generation=record.get('generation') if record else None,settings=settings,
                                   last_error=record.get('last_error') if record else None,
                                   last_policy_operation=record.get('last_policy_operation') if record else None,
-                                  last_formatting=record.get('last_formatting') if record else None),
+                                  last_formatting=record.get('last_formatting') if record else None,
+                                  capabilities=record.get('capabilities',[]) if record else []),
                     snapshot=snapshot,application_effects=False)
 
     def start(self,arguments):
@@ -312,7 +313,8 @@ class TabMonitor:
         signal.signal(signal.SIGTERM,lambda signum,frame:stop.set())
         signal.signal(signal.SIGINT,lambda signum,frame:stop.set())
         with _lock(self.directory/'owner.lock'):
-            record=dict(schema_version=1,state='running',generation=uuid4().hex,process=_identity(os.getpid()),started_at=self.clock())
+            record=dict(schema_version=1,state='running',generation=uuid4().hex,process=_identity(os.getpid()),started_at=self.clock(),
+                        capabilities=['tab-formatting-v1'])
             _save(self.directory/'owner.json',record)
             try:
                 while not stop.is_set():

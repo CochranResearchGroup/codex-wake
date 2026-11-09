@@ -47,6 +47,8 @@ class FormattingTests(unittest.TestCase):
         config.write_text(json.dumps(dict(schema_version=1,workspaces={'work':dict(kind='tmux',socket_path=self.socket,session_id='$0')})))
         config.chmod(0o600)
         import sys
+        from codex_wake.tab_monitor import TabMonitor
+        self.addCleanup(lambda:TabMonitor(self.root).execute('tabs.monitor.stop',{}))
         for verb in ('enable','rollback','reenable'):
             tool='wake_tabs_format_'+verb
             self.assertIn(tool,tool_specs());self.assertIn(tool,TOOLS);self.assertIn(tool,SPECS)
