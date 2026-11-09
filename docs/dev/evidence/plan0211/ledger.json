@@ -9,8 +9,8 @@
       "number": 527,
       "title": "Named terminal session CRUD and persistent empty definitions",
       "blockers": [],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/527",
       "node_id": 6289885527,
       "owner": "/root",
@@ -19,15 +19,17 @@
         "terminal_sessions.py",
         "terminal_session_contract.py",
         "shared controller/CLI schema wiring"
-      ]
+      ],
+      "integration_sha": "e639397",
+      "validation": "24 integrated public session/selection/view/contract/controller checks PASS eachPython3.11/3.12; focused logs and527/528receipts"
     },
     {
       "index": 2,
       "number": 528,
       "title": "Composable tab selection and custom categories",
       "blockers": [],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/528",
       "node_id": 6289891795,
       "owner": "/root/selectors528",
@@ -38,7 +40,9 @@
         "tab_selection.py",
         "tab_views.py",
         "selector tests"
-      ]
+      ],
+      "integration_sha": "c33fa94",
+      "validation": "24 integrated public session/selection/view/contract/controller checks PASS eachPython3.11/3.12; focused logs and527/528receipts"
     },
     {
       "index": 3,
@@ -47,10 +51,14 @@
       "blockers": [
         527
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/529",
-      "node_id": 6289893052
+      "node_id": 6289893052,
+      "owner": "/root/psmux529",
+      "base": "e639397",
+      "worktree": "/tmp/codex-wake-session-529",
+      "branch": "feat/terminal-session-529"
     },
     {
       "index": 4,
@@ -60,10 +68,14 @@
         527,
         528
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/530",
-      "node_id": 6289895048
+      "node_id": 6289895048,
+      "owner": "/root/bulk530",
+      "base": "e639397",
+      "worktree": "/tmp/codex-wake-session-530",
+      "branch": "feat/terminal-session-530"
     },
     {
       "index": 5,
@@ -84,10 +96,14 @@
       "blockers": [
         527
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/532",
-      "node_id": 6289898541
+      "node_id": 6289898541,
+      "owner": "/root/ux532",
+      "base": "e639397",
+      "worktree": "/tmp/codex-wake-session-532",
+      "branch": "feat/terminal-session-532"
     },
     {
       "index": 7,
