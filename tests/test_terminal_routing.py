@@ -148,7 +148,7 @@ class RoutingTests(unittest.TestCase):
         self.execute('tick')
         saved=self.execute('show',rule_id=rule['id'])['rule']
         self.assertFalse(saved['enabled'])
-        self.assertEqual(saved['disabled_reason'],'destination_unavailable')
+        self.assertEqual(saved['disabled_reason'],'destination_deleted')
     def test_service_owned_monitor_routes_private_sessions_with_existing_daemon(self):
         import json
         import time

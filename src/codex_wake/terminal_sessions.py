@@ -124,6 +124,9 @@ class TerminalSessions:
         return changes
 
     def execute(self,operation,args):
+        if operation=='tabs.session.delete':
+            from .terminal_session_delete import TerminalSessionDelete
+            return TerminalSessionDelete(self).execute(args)
         verb=operation.rsplit('.',1)[1]
         allowed={'session','server','name','backend','start','changes','defaults','expected_target','_request'}
         if not isinstance(args,dict) or set(args)-allowed:raise InventoryError('invalid_argument','Unsupported session arguments.')

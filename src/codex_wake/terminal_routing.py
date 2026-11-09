@@ -138,6 +138,22 @@ class TerminalRouting:
             if verb=='enable':result.update(existing_matches=[TabViews.identity(r) for r in matches],include_existing=include,monitor=self._monitor(start=True))
             return result
 
+    def disable_deleted_destination(self,session_id):
+        """Retire rules for a confirmed tombstone, under the routing owner lock."""
+        with locked(self.directory):
+            tombstone=self.sessions.state()['sessions'].get(session_id,{})
+            if not tombstone.get('deleted'):
+                raise InventoryError('stale_target','Destination deletion is not confirmed.')
+            state=self._state();changed=[]
+            for rule in state['rules'].values():
+                if rule['destination']!=session_id:continue
+                if rule.get('disabled_reason')=='destination_deleted' and not rule['enabled']:continue
+                rule.setdefault('history',[]).append(dict(revision=rule['revision'],enabled=rule['enabled'],reason='destination_deleted',at=self.clock()))
+                rule.update(enabled=False,disabled_reason='destination_deleted',revision=rule['revision']+1,updated_at=self.clock())
+                changed.append(rule['id'])
+            self._save(state)
+            return dict(status='completed',disabled_rules=changed,destination=session_id)
+
     def tick(self,snapshot=None,*,deadline=None):
         """Monitor seam: one bounded observation cycle; no daemon or probes added."""
         with locked(self.directory):return self._tick(self._state(),snapshot=snapshot,deadline=deadline)
