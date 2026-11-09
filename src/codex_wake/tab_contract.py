@@ -403,6 +403,7 @@ _SPECS.update(_terminal_specs())
 _SPECS['wake_tabs_group_save'][3]['labels']={'type':'array','maxItems':32,'items':{'type':'string'}}
 
 _FIELD_HELP = {
+    'destination':'Destination terminal session name or stable ID; compatible backend/server required.',
     'workspace':'Workspace ID or unique label from tabs list; same-user CLI can select its only workspace.',
     'window':'Exact native window ID from tabs list/show (for example @3); names are not identity pins.',
     'selector':'Window ID or unambiguous friendly name to inspect.',

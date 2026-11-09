@@ -181,7 +181,7 @@ def apply_help(parser):
         item.epilog = 'Examples:\n  codex-wake --wake-root ROOT ' + op.example
         item.formatter_class = argparse.RawDescriptionHelpFormatter
         for action in item._actions:
-            if action.dest in PARAMETERS:
+            if action.dest in PARAMETERS and not op.name.startswith('tabs.'):
                 action.help = PARAMETERS[action.dest][0]
     return parser
 
