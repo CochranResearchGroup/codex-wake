@@ -200,3 +200,21 @@ class RoutingTests(unittest.TestCase):
         result=self.owner.tick({'resources':self.tabs.execute('tabs.list',{})['resources']},deadline=time.monotonic()-1)
         self.assertEqual(result['reason'],'cycle_deadline')
         self.assertEqual(before,self.tmux('list-windows','-t','source','-F','#{window_id}:#{pane_pid}'))
+
+    def test_existing_nonmatch_does_not_become_eligible_without_include_existing(self):
+        from copy import deepcopy
+        rule=self.execute('save',name='later-health',destination='destination',selection={'field':'health','eq':'responsive'},stability_seconds=5)['rule']
+        enabled=self.execute('enable',rule_id=rule['id'])
+        self.assertEqual(enabled['existing_matches'],[])
+        resource=next(r for r in self.tabs.execute('tabs.list',{})['resources'] if r['target']['workspace']==next(k for k,v in self.tabs.workspaces.items() if v.get('label')=='source'))
+        observed=deepcopy(resource)
+        observed['traits']['traits']['health']={'value':'responsive','status':'observed','freshness':'fresh'}
+        # Host-supplied monitor observations change; native tab/process birth does not.
+        self.assertEqual(self.owner.tick({'resources':[observed]})['outcomes'],[])
+        self.now+=6
+        self.assertEqual(self.owner.tick({'resources':[observed]})['outcomes'],[])
+        self.assertEqual(self.tmux('display-message','-p','-t',resource['window']['window_id'],'#{session_name}'),'source')
+        self.execute('enable',rule_id=rule['id'],include_existing=True)
+        self.assertEqual(self.owner.tick({'resources':[observed]})['outcomes'][0]['status'],'stabilizing')
+        self.now+=6
+        self.assertEqual(self.owner.tick({'resources':[observed]})['outcomes'][0]['status'],'moved')

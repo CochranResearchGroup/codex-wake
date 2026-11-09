@@ -251,6 +251,7 @@ class AuthorizedTabs:
     def execute(self, token, operation, arguments):
         from .controller_auth import AuthError
         actor = self.authority.authenticate(token)
+        arguments=dict(arguments)
         if operation=='tabs.create':
             from .terminal_launch_defaults import prepare
             arguments=prepare(self.tabs,arguments)

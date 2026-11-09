@@ -125,6 +125,30 @@ class TerminalSessions:
             validate_policy(changes['formatting'])
         return changes
 
+    def creation_selection(self,args,*,records=None,ensure=False):
+        """Resolve creation/ensure once for both authority and native execution."""
+        records=self.inventory() if records is None else records
+        name=_name(args.get('name'));backend=args.get('backend','tmux')
+        if backend not in ('tmux','byobu','psmux'):raise InventoryError('invalid_argument','Unsupported terminal backend.')
+        server=args.get('server')
+        eligible=[v for v in records if (v['backend']=='psmux' if backend=='psmux' else v['backend'] in ('tmux','byobu'))]
+        servers=sorted({v['server'] for v in eligible})
+        named=[v for v in eligible if v['name']==name]
+        context=os.environ.get('TMUX','').split(',',1)[0]
+        if server is None and ensure and len(named)==1:server=named[0]['server']
+        if server is None and context in servers:server=context
+        if server is None and len(servers)==1:server=servers[0]
+        if server is None and len(servers)>1:
+            error=InventoryError('ambiguous_target','Select a terminal server with --server; multiple servers are available.')
+            error.candidates=[dict(server=value,backend=backend) for value in servers];raise error
+        if backend=='psmux' and not server:raise InventoryError('unsupported_target','Select an explicit host-configured psmux namespace.')
+        server=server or str(self.directory/'tmux.sock')
+        existing=[v for v in records if v['name']==name and v['server']==server]
+        if len(existing)>1:
+            error=InventoryError('ambiguous_target','Several identities share this name; inspect sessions before reuse.')
+            error.candidates=[{k:v[k] for k in ('id','name','server','backend','state')} for v in existing];raise error
+        return dict(name=name,backend=backend,server=server,existing=existing)
+
     def execute(self,operation,args):
         if operation=='tabs.session.delete':
             from .terminal_session_delete import TerminalSessionDelete
@@ -141,22 +165,8 @@ class TerminalSessions:
             state=self.state();records=self.inventory(state)
             reused=False
             if verb in ('create','ensure'):
-                name=_name(args.get('name'));backend=args.get('backend','tmux')
-                if backend not in ('tmux','byobu','psmux'):raise InventoryError('invalid_argument','Unsupported terminal backend.')
-                server=args.get('server')
-                eligible=[v for v in records if (v['backend']=='psmux' if backend=='psmux' else v['backend'] in ('tmux','byobu'))]
-                servers=sorted({v['server'] for v in eligible})
-                named=[v for v in eligible if v['name']==name]
-                context=os.environ.get('TMUX','').split(',',1)[0]
-                if server is None and verb=='ensure' and len(named)==1:server=named[0]['server']
-                if server is None and context in servers:server=context
-                if server is None and len(servers)==1:server=servers[0]
-                if server is None and len(servers)>1:
-                    error=InventoryError('ambiguous_target','Select a terminal server with --server; multiple servers are available.')
-                    error.candidates=[dict(server=value,backend=backend) for value in servers];raise error
-                if backend=='psmux' and not server:raise InventoryError('unsupported_target','Select an explicit host-configured psmux namespace.')
-                server=server or str(self.directory/'tmux.sock')
-                existing=[v for v in records if v['name']==name and v['server']==server]
+                selected=self.creation_selection(args,records=records,ensure=verb=='ensure')
+                name,backend,server,existing=(selected[k] for k in ('name','backend','server','existing'))
                 if existing and verb=='create':raise InventoryError('name_conflict','Session name already exists on this terminal server.')
                 defaults=self._settings({'defaults':args.get('defaults',{})})['defaults']
                 if existing:

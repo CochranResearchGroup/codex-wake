@@ -130,7 +130,7 @@ class TerminalRouting:
                     self.sessions.resolve(rule['destination'])
                     resources=self._resources();matches=select(resources,rule['selection'],groups=self._groups())
                     rule['revision']+=1
-                    rule.update(enabled=True,excluded=[] if include else [self.holds.identity(r) for r in matches],updated_at=self.clock())
+                    rule.update(enabled=True,excluded=[] if include else [self.holds.identity(r) for r in resources],updated_at=self.clock())
                     for r in resources:state['placements'][self.holds.identity(r)]=r['target']['workspace']
                     state['candidates']={}
             self._save(state)

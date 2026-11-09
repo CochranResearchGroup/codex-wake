@@ -28,8 +28,11 @@ def session_profile(tabs,operation,arguments):
         record=owner.resolve(arguments.get('session'),server=arguments.get('server'))
         return None if record['state']=='running' else record.get('defaults',{}).get('profile')
     if verb not in ('create','ensure') or not arguments.get('start',verb=='ensure'):return None
-    candidates=[v for v in owner.inventory() if v['name']==arguments.get('name') and (not arguments.get('server') or v['server']==arguments['server'])]
-    if verb=='ensure' and len(candidates)==1:
-        record=candidates[0]
+    selected=owner.creation_selection(arguments,ensure=verb=='ensure')
+    # The journal and executor use this same selected server/backend. Registry
+    # generation fencing rejects later edits to any saved profile definition.
+    arguments['server']=selected['server'];arguments['backend']=selected['backend']
+    if verb=='ensure' and selected['existing']:
+        record=selected['existing'][0]
         return None if record['state']=='running' else record.get('defaults',{}).get('profile')
     return arguments.get('defaults',{}).get('profile')
