@@ -70,7 +70,8 @@
       "tracker_state": "CLOSED",
       "worker_result_sha": "23cbde12c5dc51d5ae142aacec6d9b11c2ed9700",
       "integration_sha": "e274810",
-      "validation": "11 integrated formatting/projection checks pass; 5 monitor regression checks passed on worker. Installed tmux monitor-death expiry PASS after20-second threshold, process preserved and original session/window settings restored. Forty-window update6.211s under10s deadline, not a5-second cadence claim. Evidence: docs/dev/evidence/plan0210/520-validation.md and native-expiry/forty-window receipts."
+      "validation": "11 integrated formatting/projection checks pass; 5 monitor regression checks passed on worker. Installed tmux monitor-death expiry PASS after20-second threshold, process preserved and original session/window settings restored. Forty-window update6.211s under10s deadline, not a5-second cadence claim. Evidence: docs/dev/evidence/plan0210/520-validation.md and native-expiry/forty-window receipts.",
+      "additional_validation": "Actual monitor3cycles40tmux allapplied, noSTALE/noerrors; cadence~7s, source09f2c73;520-monitor40-integrated.json"
     },
     {
       "index": 4,
@@ -102,7 +103,10 @@
       "owner": "/root/format521",
       "branch": "feat/tab-format-522",
       "worktree": "/tmp/codex-wake-format-522",
-      "worker_base": "e274810"
+      "worker_base": "e274810",
+      "integration_sha": "8c165ca",
+      "factory_fix": "09f2c73",
+      "remaining": "workspace configure target-pin regression fix before closure"
     },
     {
       "index": 6,
@@ -117,7 +121,10 @@
       "owner": "/root/format519",
       "branch": "feat/tab-format-523",
       "worktree": "/tmp/codex-wake-format-523",
-      "worker_base": "e274810"
+      "worker_base": "e274810",
+      "api_checkpoint_worker": "0dea949",
+      "api_checkpoint_integrated": "cdcedfd",
+      "validation_so_far": "15 integrated format-focused checks pass; native rendering still in progress"
     },
     {
       "index": 7,
@@ -143,5 +150,6 @@
     "broad_runs": 0,
     "remediation_passes": 0
   },
-  "discovery": "Current agreed plan/spec and fresh repository sources sufficient; unrelated memory registry hits not used; no additional Graphiti discovery needed."
+  "discovery": "Current agreed plan/spec and fresh repository sources sufficient; unrelated memory registry hits not used; no additional Graphiti discovery needed.",
+  "integration_tip": "cdcedfd"
 }
