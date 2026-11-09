@@ -78,6 +78,10 @@ class PsmuxAttachmentTransport:
     def formatting_batch(self, requests, deadline):
         if not isinstance(requests,list) or not 1<=len(requests)<=256:
             raise InventoryError('invalid_argument','Formatting batch requires 1 through 256 typed requests.')
+        import json
+        frame=json.dumps(dict(action='formatting_batch',arguments=dict(requests=requests))).encode()
+        if len(frame)>65536:
+            raise InventoryError('capacity','Formatting batch exceeds the finite 65536-byte native frame; reduce the batch size.')
         return self.request('formatting_batch',dict(requests=requests),deadline)
 
     def lifecycle(self, action, arguments, deadline):

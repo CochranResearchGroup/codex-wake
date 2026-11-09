@@ -57,3 +57,12 @@ class PsmuxFormattingTests(unittest.TestCase):
         request['arguments']['requests'][1]=dict(action='write',window='@9',values={'window-status-format':'wrong namespace'})
         with self.assertRaises(BridgeError):host.execute(request)
         self.assertEqual(host.writes,[])
+
+    def test_oversized_batch_is_rejected_before_native_bridge_effects(self):
+        called=[]
+        def bridge(*arguments):called.append(arguments);return dict(generation='pinned',result=[])
+        transport=PsmuxAttachmentTransport(bridge,generation='pinned')
+        requests=[dict(action='write',window='@'+str(i),values={'window-status-format':'x'*8192}) for i in range(10)]
+        with self.assertRaises(InventoryError) as error:transport.formatting_batch(requests,time.monotonic()+1)
+        self.assertEqual(error.exception.code,'capacity')
+        self.assertEqual(called,[])

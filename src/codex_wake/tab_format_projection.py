@@ -81,10 +81,13 @@ def project(resource, policy=None, *, now=None):
     """
     now = time.time() if now is None else now
     policy = policy or {}
+    backend=resource.get('target',{}).get('presentation','unknown')
+    def text(value,width=16):
+        return _text(value,width,ascii_only=policy.get('ascii',True),space_style=backend=='psmux')
     panes = _pane_traits(resource)
     kinds = {_type(pane.get('traits', {}), now) for pane in panes}
     kind = next(iter(kinds)) if len(kinds) == 1 else 'mixed'
-    label, colour = _TYPES.get(kind, (_text(kind, 8).upper(), 'colour238'))
+    label, colour = _TYPES.get(kind, (text(kind,8).upper(),'colour238'))
     details = []
     fresh = False
     priorities = set()
@@ -111,11 +114,11 @@ def project(resource, policy=None, *, now=None):
         for key in badges:
             value = qualified[key]
             if value is not None:
-                badges[key].add(_text(value,ascii_only=policy.get('ascii',True)))
+                badges[key].add(text(value))
             elif key != 'profile' and dimensions[key].get('status') == 'configured':
                 configured = dimensions[key].get('value')
                 if configured not in (None, 'unknown'):
-                    badges[key].add('cfg:' + _text(configured,12,ascii_only=policy.get('ascii',True)))
+                    badges[key].add('cfg:' + text(configured,12))
         details.append(dict(pane_id=pane.get('pane_id'), type=_type(traits, now),
                             dimensions=dimensions, attention={key: traits.get(key, {}) for key in ('health', 'error')},
                             fresh=pane_fresh))
@@ -132,7 +135,7 @@ def project(resource, policy=None, *, now=None):
     if state in _ATTENTION:
         marker, colour = _ATTENTION[state]
     else:
-        marker = _ACTIVITY.get(activity, _text(activity, 8).upper())
+        marker = _ACTIVITY.get(activity, text(activity,8).upper())
     pieces = [label]
     if badges['profile']:
         pieces.append(next(iter(badges['profile'])) if len(badges['profile']) == 1 else 'profiles:MIX')

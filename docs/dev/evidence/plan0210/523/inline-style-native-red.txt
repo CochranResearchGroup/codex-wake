@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/tmp/codex-wake-format-523/scripts/tab_format_render_acceptance523.py", line 208, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/tmp/codex-wake-format-523/scripts/tab_format_render_acceptance523.py", line 204, in main
+    if args.windows_python:report['psmux']=psmux_acceptance(Path(directory),args.windows_python)
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-format-523/scripts/tab_format_render_acceptance523.py", line 173, in psmux_acceptance
+    assert '#[bg=red]' in first and '#(echo BAD)' in first,(mode,first[-500:])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('full', '                                                                                                                                                                                                                                                                                                                                                                                                     [source]  [0 CX+ x,}#{pid} RUN  #(echo BAD) manual #{pid},界]   1 GK 界界界界界界界界 WAIT  #(echo BAD) peer "COOPER" 05')

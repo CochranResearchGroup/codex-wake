@@ -242,7 +242,7 @@ class PsmuxHost:
     def command(self, *argv, timeout=4):
         try:
             reply = subprocess.run([str(self.binary), '-L', self.namespace, *argv],
-                text=True, capture_output=True, timeout=timeout, check=True)
+                text=True, encoding='utf-8',capture_output=True, timeout=timeout, check=True)
         except (OSError, subprocess.SubprocessError):
             raise BridgeError('attachment_unavailable', 'native psmux command failed; reconcile effects before retry') from None
         if len(reply.stdout.encode()) > 1048576:

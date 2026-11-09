@@ -48,3 +48,10 @@ class RenderingTests(unittest.TestCase):
         self.assertEqual(known['protocol'],'requires_native_qualification')
         self.assertEqual(known['client_rendering'],'requires_client_acceptance')
         self.assertEqual(known['colour_depth'],'unknown')
+
+    def test_psmux_style_parser_cannot_consume_untrusted_metadata_after_expansion(self):
+        value=tab('#[bg=red]')
+        value['target']['presentation']='psmux'
+        shown=project(value,dict(render_mode='full'),now=105)
+        self.assertIn('## [bg=red]',shown['options']['window-status-format'])
+        self.assertNotIn('##[bg=red]',shown['options']['window-status-format'])

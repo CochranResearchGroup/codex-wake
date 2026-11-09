@@ -7,7 +7,7 @@ _KNOWN_BACKENDS=frozenset(('tmux','byobu','psmux'))
 _PSMUX_SHA='bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca'
 
 
-def badge_text(value,width=16,*,ascii_only=True):
+def badge_text(value,width=16,*,ascii_only=True,space_style=False):
     """Conservatively bound display cells and escape native format introducers.
 
     Native #W expands manual names separately. Only Wake-generated metadata is
@@ -15,6 +15,9 @@ def badge_text(value,width=16,*,ascii_only=True):
     default fallback, while Unicode bounds count each visible codepoint safely.
     """
     value=str(value)
+    # Installed psmux expands formats before scanning inline styles; ##[ would
+    # become an active #[ there. A visible space breaks that second-stage tag.
+    if space_style:value=value.replace('#[','# [')
     if ascii_only:
         value=unicodedata.normalize('NFKD',value).encode('ascii','replace').decode('ascii')
     output=[];used=0
@@ -48,5 +51,5 @@ def capabilities(backend,*,identity=None,colour_depth=None):
                 observed_identity=identity,colour_depth=colour_depth or 'unknown',
                 client_rendering='requires_client_acceptance',
                 native_selection=known,modes=list(MODES) if known else [],
-                ascii_fallback=known,unicode_width='conservative_cells_terminal_dependent',
+                ascii_fallback=known,metadata_style_literal='spaced_hash' if backend=='psmux' else 'escaped_hash',unicode_width='conservative_cells_terminal_dependent',
                 qualification_scope='option readback and native format expansion; client pixels are a separate acceptance boundary')
