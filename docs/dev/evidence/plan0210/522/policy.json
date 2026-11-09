@@ -1,0 +1,35 @@
+{
+  "ticket": 522,
+  "base": "e274810572a8c4b80acb219dc469d04b85b5435e",
+  "branch": "feat/tab-format-522",
+  "shared_dependencies": ["1b05dad (global controller contract)", "0dea949 (rendering/expiry mode API)"],
+  "seam": "ControllerTabs.execute public display operations, actual CLI subprocess, ProtectedOperations authorization boundary, disposable installed tmux readback",
+  "tier": "focused",
+  "commands": [
+    {"command": "PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p test_tab_format_policy.py -q", "result": "9 passed", "elapsed_seconds": 5.048, "log": "/tmp/p522-green5.log"},
+    {"command": "PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p 'test_tab_format*.py' -q", "result": "24 passed", "elapsed_seconds": 10.964, "log": "/tmp/p522-format-regression.log"}
+  ],
+  "red_green_cycles": [
+    {"risk": "global policy blocked on terminal selection", "red": "/tmp/p522-red1.log: unsupported scope", "green": "/tmp/p522-green1.log: one passed"},
+    {"risk": "reenable overwrites manual styling", "red": "/tmp/p522-red2.log: manual green style overwritten", "green": "/tmp/p522-green4.log: seven passed after shared dependency integrated"},
+    {"risk": "reset leaves modified preferences or loses custody", "red": "/tmp/p522-red3.log: reset returned rollback without resetting defaults", "green": "/tmp/p522-green4.log: seven passed"}
+  ],
+  "retained_diagnostics": [
+    {"log": "/tmp/p522-green2.log", "classification": "test expected canonical order for manually supplied style, but installed tmux preserves the original option string; corrected expectation"},
+    {"log": "/tmp/p522-green3.log", "classification": "new render_mode expiry parameter was not yet committed by dependency523; integrated its explicit API checkpoint before final validation"}
+  ],
+  "semantics": {
+    "global": "configure/status/inspect use backend-free dedicated target with workspace * and presentation formatting, generation hash of global policy only",
+    "policy": "global enabled false dominates workspace overrides; workspace preferences stored independently from original terminal custody",
+    "manual": "local affected option or inherited parent change holds affected window; session option changes hold workspace; reenable/restart preserves holds, explicit resume clears",
+    "rollback": "restores exact original explicit/local absent relationship; newer global theme values are not overwritten",
+    "reset": "rollback then clear workspace preferences, retaining immutable baseline; restoration failure remains partial",
+    "disable": "pause or configured enabled false stops future reapplication; rollback is the command that restores original terminal settings",
+    "alias": "duplicate workspace aliases for same native namespace cannot capture already-decorated settings as a new original"
+  },
+  "production_touched": false,
+  "external_inference": false,
+  "remaining_integration_hook": "Eager outer controller workspace construction or local pin resolution may reject a stale configured backend before backend-free global/disabled-workspace execution. Primary owns factory/command adapters and was notified; the owner itself needs no backend for preferences.",
+  "memory_disposition": "forbidden",
+  "memory_reason": "No explicit user request authorizing a memory write"
+}

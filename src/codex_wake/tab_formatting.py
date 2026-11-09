@@ -11,7 +11,7 @@ from .tab_organization import digest
 
 READS=frozenset(('tabs.format.status','tabs.format.inspect'))
 VERBS=('status','inspect','enable','pause','resume','rollback','reenable','reset','configure')
-DEFAULT_POLICY=dict(enabled=True,show_model=False,show_provider=False,ascii=True)
+from .tab_format_policy import DEFAULT_POLICY, effective_policy, validate_policy
 
 
 class TabFormatting:
@@ -39,6 +39,8 @@ class TabFormatting:
         if not self.path.exists():return dict(schema_version=1,policy=dict(DEFAULT_POLICY),workspaces={})
         value=json.loads(self.path.read_text())
         if value.get('schema_version')!=1:raise InventoryError('configuration_unavailable','Unsupported formatting state.')
+        value['policy']=dict(DEFAULT_POLICY,**value.get('policy',{}))
+        value.setdefault('workspace_policies',{})
         return value
 
     def save(self,value):
@@ -53,13 +55,54 @@ class TabFormatting:
     def identity(self,snapshot):
         return digest({k:snapshot.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})
 
+    def target(self,scope='workspace',workspace=None):
+        if scope=='global':
+            return dict(host=self.tabs.host,environment=self.tabs.environment,
+                        workspace='*',presentation='formatting',generation=digest(self.read()['policy']))
+        if scope!='workspace':raise InventoryError('invalid_argument','scope must be global or workspace.')
+        if workspace is None and len(self.tabs.workspaces)==1:workspace=next(iter(self.tabs.workspaces))
+        from .tab_lifecycle import TabLifecycle
+        return TabLifecycle(self.tabs.root,workspaces=self.tabs.workspaces,
+            host=self.tabs.host,environment=self.tabs.environment).inspect(workspace)['target']
+
+    def configure(self,state,policy,*,workspace=None):
+        values=validate_policy(policy)
+        if workspace is None:
+            state['policy'].update(values);result=dict(state['policy'])
+        else:
+            state.setdefault('workspace_policies',{}).setdefault(workspace,{}).update(values)
+            result=effective_policy(state,workspace)
+        self.save(state)
+        return dict(status='configured',policy=result,scope='global' if workspace is None else 'workspace')
+
+    def new_record(self,state,name,identity,*,enabled):
+        if any(other!=name and value.get('identity')==identity for other,value in state['workspaces'].items()):
+            raise InventoryError('formatting_custody_conflict','Another workspace alias owns this namespace baseline; use that workspace.')
+        record=dict(identity=identity,enabled=enabled,paused=False,windows={})
+        state['workspaces'][name]=record
+        return record
+
     def execute(self,operation,arguments):
         verb=operation.removeprefix('tabs.format.')
-        if verb not in VERBS or not isinstance(arguments,dict) or set(arguments)-{'workspace','policy','expected_target'}:
+        if verb not in VERBS or not isinstance(arguments,dict) or set(arguments)-{'scope','workspace','policy','expected_target'}:
             raise InventoryError('invalid_argument','Unsupported formatting arguments.')
+        scope=arguments.get('scope','workspace')
+        if scope not in ('global','workspace'):raise InventoryError('invalid_argument','scope must be global or workspace.')
+        if scope=='global':
+            if arguments.get('workspace') is not None or verb not in ('configure','status','inspect'):
+                raise InventoryError('invalid_argument','Global display scope supports configure/status/inspect without workspace.')
+            with self.locked():
+                state=self.read();target=self.target('global')
+                if arguments.get('expected_target') is not None and arguments['expected_target']!=target:
+                    raise InventoryError('stale_target','Global display policy changed.')
+                if verb=='configure':return dict(self.configure(state,arguments.get('policy',{})),target=target)
+                return dict(status='inspection',scope='global',target=target,policy=state['policy'])
         name=arguments.get('workspace')
         if name is None and len(self.tabs.workspaces)==1:name=next(iter(self.tabs.workspaces))
         if name not in self.tabs.workspaces:raise InventoryError('ambiguous_target','Select one owned workspace.')
+        # Preferences can be disabled before terminal availability or custody.
+        if verb=='configure':
+            with self.locked():return self.configure(self.read(),arguments.get('policy',{}),workspace=name)
         config=self.tabs.workspaces[name];transport=config['transport'];deadline=time.monotonic()+10
         if not hasattr(transport,'formatting'):raise InventoryError('unsupported_target','Backend formatting is unavailable.')
         from .tab_lifecycle import TabLifecycle
@@ -73,19 +116,14 @@ class TabFormatting:
             if record and record['identity']!=identity:
                 raise InventoryError('stale_target','Formatting baseline belongs to a different namespace; preserve it for recovery.')
             if verb in ('status','inspect'):
-                return dict(status='inspection',target=expected,policy=state['policy'],record=record,
+                from .tab_format_rendering import capabilities
+                return dict(status='inspection',target=expected,policy=effective_policy(state,name),record=record,
+                    capabilities=capabilities(config['kind'],identity=config.get('formatting_identity')),
                     windows=[dict(window=w['window_id'],options=transport.formatting('read',dict(window=w['window_id']),deadline)) for w in snapshot['windows']])
-            if verb=='configure':
-                policy=arguments.get('policy',{})
-                if not isinstance(policy,dict) or set(policy)-set(DEFAULT_POLICY) or any(type(v) is not bool for v in policy.values()):
-                    raise InventoryError('invalid_argument','Display policy accepts known boolean options.')
-                state['policy'].update(policy);self.save(state)
-                return dict(status='configured',policy=state['policy'])
             if record is None:
                 if verb in ('rollback','reenable','resume'):
                     raise InventoryError('baseline_missing','No saved original formatting baseline; use enable first.')
-                record=dict(identity=identity,enabled=False,paused=False,windows={})
-                state['workspaces'][name]=record
+                record=self.new_record(state,name,identity,enabled=False)
             if verb in ('pause','rollback','reset'):
                 record.update(enabled=False,paused=verb=='pause');self.save(state)
                 if verb=='pause':return dict(status='paused',target=expected)
@@ -107,30 +145,40 @@ class TabFormatting:
                         actual=transport.formatting('write-session',dict(values=wanted),deadline)
                         if any(actual[k]['explicit']!=v['explicit'] or actual[k]['value']!=v['value'] for k,v in record['session_original'].items()):
                             raise InventoryError('restoration_mismatch','Session restoration differs from saved original.')
+                        record['session_restored']=True
                     except Exception as error:failures.append(dict(code=getattr(error,'code','session_restoration_failed')))
+                if verb=='reset':state.setdefault('workspace_policies',{}).pop(name,None)
                 self.save(state)
                 try:transport.formatting('refresh',{},deadline)
                 except Exception as error:failures.append(dict(code=getattr(error,'code','refresh_failed')))
-                return dict(status='partial' if failures else 'rolled_back',failures=failures,target=expected)
-            from .tab_format_projection import project
+                return dict(status='partial' if failures else 'reset' if verb=='reset' else 'rolled_back',failures=failures,target=expected)
+            policy=effective_policy(state,name)
+            if not policy['enabled']:return dict(status='disabled',target=expected,policy=policy)
+            if verb=='resume':
+                record.pop('pause_reason',None)
+                for saved in record['windows'].values():
+                    saved.pop('paused',None);saved.pop('pause_reason',None)
+            elif record.get('pause_reason')=='manual_session_style':
+                return dict(status='paused',target=expected,reason='manual_session_style')
             record.update(enabled=True,paused=False);self.save(state)
             # Explicit enable uses public observations. Automatic refresh passes
             # its already bounded snapshot directly to the same apply path.
             rows=self.tabs.execute('tabs.list',{})['resources']
             resources={r['window']['window_id']:r for r in rows if r['target']['workspace']==name}
-            failures=self.apply(state,record,snapshot,resources,transport,deadline)
+            failures=self.apply(state,record,snapshot,resources,transport,deadline,policy=policy,resume_manual=verb=='resume')
             return dict(status='partial' if failures else 'applied',target=expected,failures=failures)
 
-    def apply(self,state,record,snapshot,resources,transport,deadline,*,automatic=False):
+    def apply(self,state,record,snapshot,resources,transport,deadline,*,automatic=False,policy=None,resume_manual=False):
         """Apply one snapshot under the owner lock, saving originals first."""
         from .tab_format_projection import project
         from .tab_format_expiry import expiring_options
         failures=[]
+        policy=policy or state['policy']
         try:
             if 'session_original' not in record:
                 record['session_original']=transport.formatting('read-session',{},deadline)
                 self.save(state)
-            if automatic and record.get('session_last_applied'):
+            if not resume_manual and not record.get('session_restored') and record.get('session_last_applied'):
                 current=transport.formatting('read-session',{},deadline)
                 if any(current[k]['value']!=v for k,v in record['session_last_applied'].items()):
                     record['paused']=True;record['pause_reason']='manual_session_style';self.save(state)
@@ -143,6 +191,7 @@ class TabFormatting:
             if any(actual[k]['value']!=v for k,v in session_values.items()):
                 raise InventoryError('formatting_mismatch','Session formatting readback differs from policy.')
             record['session_last_applied']=session_values
+            record['session_restored']=False
             self.save(state)
         except Exception as error:
             return [dict(code=getattr(error,'code','session_formatting_failed'))]
@@ -153,7 +202,8 @@ class TabFormatting:
             wid=window['window_id']
             if window.get('linked'):
                 failures.append(dict(window=wid,code='linked_window'));continue
-            if automatic and record['windows'].get(wid,{}).get('paused'):continue
+            if not resume_manual and record['windows'].get(wid,{}).get('paused'):
+                failures.append(dict(window=wid,code='manual_override'));continue
             eligible.append(window)
         reads=self.batch(transport,[dict(action='read',window=w['window_id']) for w in eligible],deadline)
         pending=[]
@@ -167,16 +217,25 @@ class TabFormatting:
                     record['windows'][wid]=dict(original=current,last_applied=None,restored=False)
                     self.save(state)
                 saved=record['windows'][wid]
-                if automatic and saved.get('last_applied') and any(current[k]['value']!=v for k,v in saved['last_applied'].items()):
-                    saved.update(paused=True,pause_reason='manual_style');self.save(state);continue
-                if not automatic:saved.pop('paused',None);saved.pop('pause_reason',None)
-                rendered=project(resources.get(wid,dict(window=window)),state['policy'],now=time.time())
+                last=saved.get('last_applied')
+                changed=(last and not saved.get('restored') and any(
+                    not current[k]['explicit'] or current[k]['value']!=v or current[k]['effective']!=v
+                    or current[k].get('parent')!=saved.get('parent_at_apply',{}).get(k,current[k].get('parent'))
+                    for k,v in last.items()))
+                if not resume_manual and changed:
+                    saved.update(paused=True,pause_reason='manual_style');self.save(state)
+                    failures.append(dict(window=wid,code='manual_override'));continue
+                if resume_manual:saved.pop('paused',None);saved.pop('pause_reason',None)
+                saved['parent_at_apply']={k:v.get('parent') for k,v in current.items()}
+                rendered=project(resources.get(wid,dict(window=window)),policy,now=time.time())
                 resource=resources.get(wid,{})
                 stamp=resource.get('monitor_observed_at',time.time())
-                options=expiring_options(rendered['options'],observed_at=stamp)
+                options=expiring_options(rendered['options'],observed_at=stamp,render_mode=policy.get('render_mode','full'))
                 # Native deadline changes refresh the TTL; unchanged options can
                 # skip writes when reliable events repeat the same sample.
-                if all(current[k]['value']==v for k,v in options.items()):continue
+                if all(current[k]['value']==v for k,v in options.items()):
+                    saved['projection']={k:v for k,v in rendered.items() if k!='options'}
+                    self.save(state);continue
                 pending.append((wid,options,rendered))
             except Exception as error:failures.append(dict(window=wid,code=getattr(error,'code','formatting_failed')))
         writes=self.batch(transport,[dict(action='write',window=wid,values=options) for wid,options,_ in pending],deadline)
@@ -233,6 +292,9 @@ class TabFormatting:
                 if time.monotonic()>=deadline:
                     results.append(dict(workspace=name,status='unavailable',code='formatting_deadline'));continue
                 record=state['workspaces'].get(name)
+                policy=effective_policy(state,name)
+                if not policy['enabled']:
+                    results.append(dict(workspace=name,status='disabled'));continue
                 if record and (not record.get('enabled') or record.get('paused')):
                     results.append(dict(workspace=name,status='paused' if record.get('paused') else 'disabled'));continue
                 config=self.tabs.workspaces[name];transport=config['transport']
@@ -243,13 +305,12 @@ class TabFormatting:
                     if record and identity!=record['identity']:
                         raise InventoryError('stale_target','Formatting namespace changed; baseline preserved.')
                     if record is None:
-                        record=dict(identity=identity,enabled=True,paused=False,windows={})
-                        state['workspaces'][name]=record;self.save(state)
+                        record=self.new_record(state,name,identity,enabled=True);self.save(state)
                     # Never project onto a newly discovered or replaced window
                     # that was not represented in the trusted bounded sample.
                     physical=dict(physical,windows=[w for w in physical['windows'] if w['window_id'] in rows
                         and w['panes']==rows[w['window_id']]['window']['panes']])
-                    failures=self.apply(state,record,physical,rows,transport,deadline,automatic=True)
+                    failures=self.apply(state,record,physical,rows,transport,deadline,automatic=True,policy=policy)
                     results.append(dict(workspace=name,status='partial' if failures else 'applied',failures=failures))
                 except Exception as error:
                     results.append(dict(workspace=name,status='unavailable',code=getattr(error,'code','formatting_unavailable')))
