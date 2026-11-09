@@ -110,3 +110,23 @@ Finish named Python3.11 failure and native-transient disposition before primary
 closes524. Whole-branch review and bounded findings remediation remain reserved to
 the coordinator. Production, providers, native builds and unrelated processes
 were untouched. Memory disposition: forbidden; no worker memory-write authority.
+
+## Coordinator gate reconciliation
+
+The frozen current-product fff5d24 serial Python3.11 run completed2244tests:
+2242passed,1existing opt-in skip,1completion-harness failure. All9cases from
+the first full311 failure passed in this full run. The remaining trace contains
+correct quoted-root/alice completion but capture keys echoed before ZLE owned
+input. Test-only ca88d04 now waits for actual PTY input readiness, retaining all
+assertions and the same10s bound. The full completion module passes7tests each
+on3.11/3.12 (12.037/12.179s). No product source changed; no third full run.
+See serial-full-311-reconciliation.json and completion-pty-readiness.json.
+
+This is composite local qualification, not a claim that the historical failed
+full runs were clean: full312 passed at05, current-product full311 passed every
+other case,58affected startup/CLI cases and7portable outcome cases passed each
+version, and the repaired completion module passed each version. Current289
+Python members remain identical to the qualified fff wheel4e27754. First failed
+unit/native attempts remain retained with their actual outcomes and unknown
+historical transient causes. Native PowerShell work is serialized for acceptance;
+the hosted Ubuntu lane would not execute its Windows is_file conditional branch.

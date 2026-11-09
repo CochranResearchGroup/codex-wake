@@ -154,7 +154,7 @@
         522,
         523
       ],
-      "state": "running",
+      "state": "validated",
       "owner": "/root/format520",
       "branch": "feat/tab-format-524",
       "worktree": "/tmp/codex-wake-format-524",
@@ -178,7 +178,20 @@
           "integrated_sha": "33218a3"
         }
       ],
-      "postfix_focused": "58PASS each Python3.11/3.12 at0dbb3dc;524/postfix-focused.json"
+      "postfix_focused": "58PASS each Python3.11/3.12 at0dbb3dc;524/postfix-focused.json",
+      "worker_result_sha": "c20780e",
+      "integration_sha": "59ff603",
+      "runtime_source": "fff5d24",
+      "wheel_sha256": "4e27754a918d88cc51bf3962e49fca069b74e3172db45a7303f8f22a7cd2e082",
+      "validation": [
+        "Installed Byobu/psmux WSLCLI,realstdioMCP,HTTP/OAuthMCP,actualPowerShell API/MCP positive+negative exits qualified;289Pythonmembersmatchsource+Linux/Windowsinstall",
+        "Full312 source05:2239tests pass(skip1)",
+        "Full311 sourcefff:2244ran,2242pass/1skip/1completionharnessfailure repairedtestonly;completion7PASS EACHversion",
+        "Affected58startup+7portableexitcasesPASS EACH3.11/3.12;static/generateddocs/planningchecksPASS"
+      ],
+      "composite_gate": "docs/dev/evidence/plan0210/524/serial-full-311-reconciliation.json",
+      "completion_repair_worker": "ca88d04",
+      "completion_repair_integrated": "de2eb32"
     }
   ],
   "readback": true,
