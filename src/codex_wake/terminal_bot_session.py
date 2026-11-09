@@ -6,7 +6,7 @@ Existing bot processes are never restarted or supplemented on reuse.
 """
 
 
-def ensure_bot_session(execute, *, argv, name='bots', server=None, backend='tmux', cwd=None):
+def ensure_bot_session(execute, *, argv, name='codex-bots', server=None, backend='tmux', cwd=None):
     """Call the portable ensure operation through an authorized host client."""
     defaults = {'argv': list(argv)}
     if cwd is not None: defaults['cwd'] = str(cwd)
