@@ -1,0 +1,53 @@
+{
+  "finding": "R1",
+  "review_tip": "58b163177e545ce97436f61adf78d89a00debd2c",
+  "tier": "focused",
+  "seam": "Public TabMonitor status and native restored tmux option readback",
+  "repair": "Replace fixed300ms sleep with bounded public last_formatting/workspaces disabled publication; this record is published only at completed monitor cycles.",
+  "mutation_proof": {
+    "worktree": "/tmp/codex-wake-p210-r1-mutant",
+    "base": "58b1631",
+    "mutation": "rollback/reset wrongly retain enabled=True instead of disabling publication",
+    "fixture_interval_seconds": 3,
+    "old_test": {
+      "result": "PASS",
+      "seconds": 1.187,
+      "log": "/tmp/p210-r1-weak-mutant.log",
+      "meaning": "False positive before any later publisher cycle"
+    },
+    "repaired_test": {
+      "result": "EXPECTED_FAIL",
+      "seconds": 6.06,
+      "log": "/tmp/p210-r1-final-mutant-red.log",
+      "last_published_status": "applied",
+      "meaning": "Actual next publisher cycle ignored rollback and was detected"
+    }
+  },
+  "first_repair_diagnostic": {
+    "log": "/tmp/p210-r1-green312.log",
+    "result": "failed",
+    "reason": "Initial readiness assertion referenced last_cycle_at, which is not exported by public status despite disabled publication; corrected to the actual public publication field, not a product change"
+  },
+  "green": [
+    {
+      "python": "3.12",
+      "tests": 3,
+      "result": "PASS",
+      "seconds": 1.974,
+      "command": "PYTHONPATH=.:src /tmp/codex-wake-p210-py312/bin/python -m unittest discover -s tests -p test_tab_format_monitor.py -q",
+      "log": "/tmp/p210-r1-final-green312.log"
+    },
+    {
+      "python": "3.11",
+      "tests": 3,
+      "result": "PASS",
+      "seconds": 2.013,
+      "command": "PYTHONPATH=.:src /tmp/codex-wake-p210-py311/bin/python -m unittest discover -s tests -p test_tab_format_monitor.py -q",
+      "log": "/tmp/p210-r1-final-green311.log"
+    }
+  ],
+  "no_product_change": true,
+  "production_touched": false,
+  "broad_review_runs": 1,
+  "remediation_passes": 1
+}

@@ -52,7 +52,16 @@ class FormattingMonitorTests(unittest.TestCase):
             self.assertLess(time.monotonic(),until,'automatic decoration never appeared');time.sleep(.02)
         self.assertEqual(self.tmux('show-options','-v','-t','$0','status-interval').strip(),'5')
         self.tabs.execute('tabs.format.rollback',dict(workspace='work'))
-        time.sleep(.3)
+        deadline=time.monotonic()+5
+        while True:
+            report=monitor.execute('tabs.monitor.status',{})
+            rows=(report['monitor'].get('last_formatting') or {}).get('workspaces',[])
+            if any(
+                    row.get('workspace')=='work' and row.get('status')=='disabled' for row in rows):
+                break
+            self.assertLess(time.monotonic(),deadline,
+                            ('no completed monitor cycle consumed rollback',report['monitor'].get('last_formatting')))
+            time.sleep(.02)
         self.assertEqual(self.tmux('show-options','-w','-v','-t','@0','window-status-format'),'')
         self.assertEqual(self.tmux('show-options','-v','-t','$0','status-interval').strip(),'0')
         self.assertNotIn('@wake-format-clock',self.tmux('show-options','-t','$0'))
