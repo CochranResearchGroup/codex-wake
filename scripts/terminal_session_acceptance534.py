@@ -137,7 +137,7 @@ def main():
             wrapper.chmod(0o700);previous_path=env['PATH'];env['PATH']=str(tools)+os.pathsep+previous_path
             try:
                 uncertain=local('tabs.relocate.apply',dict(plan_id=plan['plan_id']),expected=3)
-                assert uncertain['outcomes'][0]['status']=='uncertain',uncertain
+                assert uncertain['status']=='uncertain' and uncertain['outcomes'][0]['status']=='uncertain',uncertain
                 local('tabs.relocate.status',dict(plan_id=plan['plan_id']),expected=3)
                 local('tabs.relocate.apply',dict(plan_id=plan['plan_id']),expected=3)
                 assert attempts.read_text().count('attempt')==1,'uncertain effect replayed'

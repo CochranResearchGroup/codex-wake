@@ -40,7 +40,7 @@ It is invalidated for acceptance by the subsequent product fix.
 independent transports but substitutes an exact native return for the broken
 second undo and cannot establish the complete workflow.
 
-`build-final.json` currently binds source0c3794a to second wheel
+`build-second.json` binds source0c3794a to second wheel
 7f5945f15f423791452295e7cc7390893d35c43353d96395b5031d383780442d.
 It is blocked by the uncertain-exit failure and will be superseded after repair.
 The build used setuptools84.2.1, wheel0.48.0 and SOURCE_DATE_EPOCH1794244632;
