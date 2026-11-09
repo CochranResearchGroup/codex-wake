@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "source": "bd79923",
+  "wheel": "/tmp/native-mailbox-bootstrap-wheel/codex_wake-0.22.0.dev2-py3-none-any.whl",
+  "wheel_sha256": "53f2a3ef358d16bf1fee7dcb05598170e8a0631b4435313d7817340131acc3c0",
+  "prefix": "/tmp/native-mailbox-bootstrap-installed",
+  "package_members": 305,
+  "python_members": 303,
+  "source_wheel_install_equal": true,
+  "dependencies": "Existing production release constraints; no upgrade",
+  "production_effects": false
+}

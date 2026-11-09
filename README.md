@@ -894,6 +894,27 @@ Enroll a root and a live thread with `a2a enroll ROOT --thread 17:wake
 capability. Separate roots require explicit `--allow-cross-root` at configuration.
 Existing identity-only buses require explicit `a2a migrate` with operator authority.
 
+For a shared native Codex MCP launch, opt into host-managed actors instead of
+setting one thread's `--capability` globally. Enroll each approved project once
+with `a2a enroll ROOT --bus-root PATH --operator-capability FILE` (omit `--thread`),
+then launch the MCP host with:
+
+```bash
+codex-wake-mcp --bus-root PATH --mailbox-operator-capability FILE --app-server unix://SOCKET
+```
+
+The operator file stays host-owned and is never a tool argument. Each native
+caller gets a separate actor on its first mailbox call; subsequent calls reuse its
+current generation. Workers should call inbox once before peers send to them.
+The host checks private native call metadata and exact runtime identity, selects
+an already enrolled root, and runs the mailbox command in that caller's verified
+working directory. It never auto-enrolls a root, resets revocation, or substitutes
+another caller's credential. Missing/stale credentials require explicit operator
+reconciliation. This mode requires native Codex metadata and cannot be combined
+with a fixed actor capability or Grok host binding. Existing fixed-actor wiring
+remains supported. Restart/reconnect the MCP host after changing launch settings.
+
+
 Agents supply their issued capability using `--capability FILE` or
 `CODEX_WAKE_A2A_CAPABILITY`; the invoking thread and current root are validated
 against the existing daemon. For example:

@@ -1,0 +1,12 @@
+======================================================================
+FAIL: test_two_callers_get_distinct_reused_actors_without_fixed_capability (test_native_mailbox_bootstrap.NativeMailboxBootstrapTests.test_two_callers_get_distinct_reused_actors_without_fixed_capability)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-mailbox-bootstrap/tests/test_native_mailbox_bootstrap.py", line 69, in test_two_callers_get_distinct_reused_actors_without_fixed_capability
+    self.assertFalse(error,value)
+AssertionError: True is not false : {'error': {'code': 'authorization_denied', 'details': {}, 'message': 'explicit issued actor capability is required'}, 'idempotency_key': None, 'reconciliation_required': False, 'schema_version': 1, 'success': False}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.349s
+
+FAILED (failures=1)

@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "package": "/tmp/native-mailbox-bootstrap-installed/lib/python3.12/site-packages/codex_wake/__init__.py",
+  "python": "/tmp/native-mailbox-bootstrap-installed/bin/python",
+  "native_evidence": "injected private websocket metadata, not real native attestation",
+  "checks": [
+    "shared-stdio-two-distinct-actors",
+    "actual-cli-question-claim-correlated-reply",
+    "no-native-metadata-denied",
+    "actor-count-remains-two"
+  ],
+  "native_methods": [
+    "initialize",
+    "initialized",
+    "thread/read"
+  ],
+  "provider_calls": 0,
+  "production_effects": false,
+  "temporary_state_removed_on_exit": true
+}
