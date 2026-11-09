@@ -168,6 +168,13 @@ binding. Grok invocation checks the managed process generation, inherited sessio
 claim, caller ancestry and enrolled root. This is host delegation, not native Grok
 caller attestation; terminal text and claimed IDs alone grant no work authority.
 
+**Native mailbox host delegation**:
+An explicitly configured MCP host's operator authority to issue and reuse distinct
+mailbox actors for verified native callers within previously enrolled roots.
+Native identity selects an actor; it does not itself grant project enrollment.
+The host keeps credentials outside tool arguments and uses caller-local launch
+context rather than a mutable shared actor credential.
+
 **Definitive pre-I/O non-submission**:
 Positive adapter evidence that a selected method was unavailable before any
 submission bytes. An absent response, missing marker or timeout is insufficient.

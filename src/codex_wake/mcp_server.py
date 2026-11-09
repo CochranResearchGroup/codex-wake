@@ -232,7 +232,11 @@ class CommandRunner:
                  tmux_socket=None, tmux_session=None, wake_root=None, sender_authority=None,
                  call_timeout=90, lifecycle_profiles=None, wake_control_config=None, wake_registry=None,
                  goal_limits_policy=None, goal_limits_root=None, lifecycle_root=None,
-                 actor_runtime="codex", runtime_root=None, harness_policy=None, migration_writer_probe=None):
+                 actor_runtime="codex", runtime_root=None, harness_policy=None, migration_writer_probe=None,
+                 mailbox_operator_capability=None):
+        if mailbox_operator_capability is not None and (capability is not None or actor_runtime != "codex"):
+            raise ValueError("Host mailbox delegation requires native Codex mode without a fixed actor capability")
+        self.mailbox_operator_capability = mailbox_operator_capability
         self.migration_writer_probe = migration_writer_probe
         self.harness_policy = harness_policy
         self.cli = [cli] if cli else [sys.executable, "-m", "codex_wake"]
@@ -650,6 +654,15 @@ class CommandRunner:
                     return {"error": {"code": "body_limit", "message": "Body exceeds 32768 UTF-8 bytes."}}, True
             except UnicodeError:
                 return {"error": {"code": "invalid_argument", "message": "Body must be valid UTF-8."}}, True
+        mailbox_context = None
+        if group == 'messages' and self.mailbox_operator_capability is not None:
+            try:
+                from .native_mailbox_bootstrap import actor_context
+                mailbox_context = actor_context(self.bus_root, self.mailbox_operator_capability,
+                    arguments['caller_thread_id'], native_context, endpoint=self.app_server)
+            except (WakeError, ValueError, OSError) as error:
+                return {'error': {'code': getattr(error, 'code', 'mailbox_caller_unverified'),
+                                  'message': str(error)}}, True
         # Host launch context owns endpoint/capability/root/identity; tools cannot override them.
         if verb in ('spawn', 'refresh', 'handoff', 'configuration'):
             lifecycle_root = self.lifecycle_root if self.lifecycle_root is not None else self.wake_root
@@ -686,7 +699,8 @@ class CommandRunner:
                 command += ['--actor-runtime','grok','--caller-session-id',arguments['caller_thread_id']]
             if self.runtime_root is not None:
                 command += ['--runtime-root',str(self.runtime_root)]
-            for flag, value in (("--bus-root", self.bus_root), ("--capability", self.capability)):
+            for flag, value in (("--bus-root", mailbox_context["bus_root"] if mailbox_context else self.bus_root),
+                                ("--capability", mailbox_context["capability"] if mailbox_context else self.capability)):
                 if value is not None:
                     command += [flag, str(value)]
         if (group == "sessions" and verb not in ('spawn', 'refresh', 'handoff', 'configuration')) or verb == "send":
@@ -717,15 +731,17 @@ class CommandRunner:
                 command += [flag, str(value)]
         if verb == "list":
             command += ["--limit", str(arguments.get("limit", 100))]
+        if mailbox_context:
+            return self._execute(command, arguments, readonly, body, cwd=mailbox_context['cwd'])
         return self._execute(command, arguments, readonly, body)
 
-    def _execute(self, command, arguments, readonly, body=None):
+    def _execute(self, command, arguments, readonly, body=None, *, cwd=None):
         try:
             environment = dict(os.environ)
             if "caller_thread_id" in arguments:
                 environment["CODEX_THREAD_ID"] = arguments["caller_thread_id"]
             result = subprocess.run(command, input=body, capture_output=True, text=True,
-                                    encoding="utf-8", env=environment,
+                                    encoding="utf-8", env=environment, cwd=cwd,
                                     timeout=self.call_timeout, check=False)
         except subprocess.TimeoutExpired:
             return {"error": {"code": "operation_timeout" if readonly else "effect_uncertain"},
@@ -794,6 +810,8 @@ def main(argv=None):
                         help="bounded CLI deadline, >0 and <=90 seconds; timeout never retries effects")
     parser.add_argument("--bus-root", type=Path, default=os.environ.get("CODEX_WAKE_A2A_BUS_ROOT"))
     parser.add_argument("--capability", type=Path, default=os.environ.get("CODEX_WAKE_A2A_CAPABILITY"))
+    parser.add_argument('--mailbox-operator-capability', type=Path,
+                        help='host-only operator delegation: provision separate verified native actors in already enrolled roots; never a tool argument')
     parser.add_argument("--app-server", default="unix://")
     parser.add_argument("--actor-runtime", choices=["codex","grok"], default="codex")
     parser.add_argument("--runtime-root",type=Path,help="host-approved Grok binding root; never a tool argument")
