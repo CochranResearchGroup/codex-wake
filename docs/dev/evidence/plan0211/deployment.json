@@ -1,0 +1,40 @@
+{
+  "status": "DEPLOYED",
+  "pr": 535,
+  "merge_commit": "bae92f9a8c3e20f16c6939bb4637ae03439df01b",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-bae92f9",
+  "previous_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-cb7cf62",
+  "wheel_sha256": "79d196c249f99ef6ff263d8619cd95e39df77619c07a78dd628162517dc368c6",
+  "package_members": 304,
+  "launchers_updated": 9,
+  "http_after": {
+    "version": 1,
+    "url": "http://127.0.0.1:37185",
+    "uid": 1000,
+    "pid": 3563809,
+    "process": {
+      "start_time_ticks": 34554764,
+      "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a"
+    }
+  },
+  "protected_preserved": 10,
+  "native_preserved": 30,
+  "stock_unchanged": true,
+  "completion": "installed",
+  "smoke": {
+    "status": "PASS",
+    "source": "bae92f9a8c3e20f16c6939bb4637ae03439df01b",
+    "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-bae92f9",
+    "package_members": 304,
+    "live_session_count": 1,
+    "stdio": {
+      "tools": 254,
+      "session_list": "PASS"
+    },
+    "provider_calls": 0
+  },
+  "rollback_command": "python /home/ecochran76/.local/state/codex-wake/session-0211-deploy/rollback.py",
+  "long_lived_clients": "Existing stdio MCP clients retain loaded code until reconnected; not forcibly stopped.",
+  "provider_calls": 0,
+  "local_validation": "82focusedchecks eachPython3.11/3.12 plus exact qualified installed9/native8/guards6; no repeated broad review/full suite or hosted CI"
+}

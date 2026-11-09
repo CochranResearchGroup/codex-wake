@@ -8775,3 +8775,18 @@ forbidden, non-write receipt in user state; no explicit memory-write request.
 Publication: draft PR535, all527–534 CLOSED read back; parent526 unchangedOPEN.
 Post-review534 comment6747714328 records exact acceptance. Private review preview
 6fa5c87609e3; feature branch published, merge/deployment remain separate.
+
+## Turn | 2026-11-09 | PR535 merge and qualified package deployment
+
+Operator authorized merge/deploy. PR535 merged as bae92f9; all302 Python package
+members match merged source. Reused qualified wheel79d196c2, no rebuild or
+dependency upgrade. Staged release0.22.0.dev2-bae92f9 with previous constraints,
+verified all304 installed members; switched nine launcher symlinks and restarted
+only local HTTP listener on original37185/native endpoint. Completion installed.
+Ten protected configuration/database files unchanged; all30 observed native
+harness processes retain birth identities; stockCodex hash unchanged. Installed
+read-only session listing and fresh real stdio MCP initialize/list254tools/session
+list PASS. Existing stdio clients retain loaded older code until reconnect; not
+forcibly killed. Prior release and exact rollback script retained in user state.
+No provider calls or paid hostedCI. See plan0211/deployment.json. Memory disposition
+forbidden: no explicit memory-write request; non-write receipt retained outsideGit.

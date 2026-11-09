@@ -16,7 +16,9 @@ on Python 3.11/3.12. The exact rebuilt package passed installed Linux and native
 PowerShell workflows and independently qualified native psmux lifecycle/cwd.
 See evidence/plan0211/review/final-report.md and ledger.json for exact identities,
 commands, earlier diagnostic failures, capability limits and cleanup receipts.
-No production mutation, provider prompts, merge or deployment was performed.
+Initial implementation performed no production mutation or provider prompts.
+Subsequent explicit operator authorization merged PR535 as bae92f9 and deployed
+the exact qualified wheel. See evidence/plan0211/deployment.json.
 
 Graphiti discovery: skip; supplied current conversation, deployed source and its
 canonical receipts provide the decisions needed for this bounded interview.

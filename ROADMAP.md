@@ -1519,5 +1519,6 @@ four findings. Named session CRUD, discovery, durable empty definitions, bot reu
 criteria-based relocation and opt-in routing are implemented with CLI/API/MCP
 parity. Installed Linux/native PowerShell and native psmux lifecycle/cwd qualify.
 Native psmux custom argv/profile defaults and cross-server moves remain unsupported.
-Source branch is ready for review; merge, production deployment and the future
-Windows-native service remain separate work. See the plan's final review report.
+PR535 merged as bae92f9; the exact qualified package is deployed with completion
+and local controller cutover verified. Windows-native service remains separate.
+See the plan's final report and deployment receipt.
