@@ -101,6 +101,8 @@ def register_parser(subparsers):
     formatting_verbs=formatting.add_subparsers(dest='format_command',required=True)
     sessions=verbs.add_parser('sessions',help='Create, list, inspect, edit and delete named terminal sessions.')
     session_verbs=sessions.add_subparsers(dest='session_command',required=True)
+    relocation=verbs.add_parser('relocate',help='Preview, apply and undo criteria-based tab moves.')
+    relocation_verbs=relocation.add_subparsers(dest='relocate_command',required=True)
     aliases = {'pins':'pin', 'members':'member', 'criteria':'criterion'}
     for _, operation, summary, properties, required, readonly in tool_specs().values():
         action=cli_verb(operation)
@@ -109,6 +111,8 @@ def register_parser(subparsers):
             commands.append(formatting_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
         if operation.startswith('tabs.session.'):
             commands.append(session_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
+        if operation.startswith('tabs.relocate.'):
+            commands.append(relocation_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
         for command in commands:
             command.set_defaults(tabs_command=action,group_by=[],sort_by=[],filters=[],pins=[],members=[],mode='activity')
             if action.startswith(('view-','group-')) and not action.endswith('-list'):
@@ -163,7 +167,7 @@ def run(args, root, *, observer=None):
         from .tab_contract import BY_OPERATION
         args.tab_command=args.tabs_command
         args.arguments=dict(args.arguments or {})
-        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1)
+        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1).replace('relocate-','relocate.',1)
         if operation in BY_OPERATION:
             properties=BY_OPERATION[operation][1][3]
             for field in properties:

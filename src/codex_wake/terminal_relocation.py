@@ -72,7 +72,7 @@ class TerminalRelocation:
             if operation.endswith('.preview'):return self._preview(args)
             record=self._read(args.get('plan_id') or args.get('receipt_id'))
             if operation.endswith('.status'):
-                self._reconcile(record);self._cleanup(record);return record
+                self._reconcile(record);return record
             if operation.endswith('.undo'):return self._undo(record)
             return self._apply(record)
 

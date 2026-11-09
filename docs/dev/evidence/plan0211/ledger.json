@@ -70,14 +70,16 @@
         527,
         528
       ],
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/530",
       "node_id": 6289895048,
       "owner": "/root/bulk530",
       "base": "e639397",
       "worktree": "/tmp/codex-wake-session-530",
-      "branch": "feat/terminal-session-530"
+      "branch": "feat/terminal-session-530",
+      "integration_sha": "c9ff4ba plus sharedschemawiring",
+      "validation": "21integratedtestsPASS EACH3.11/3.12;530/integration.json"
     },
     {
       "index": 5,
@@ -86,10 +88,13 @@
       "blockers": [
         530
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/531",
-      "node_id": 6289897115
+      "node_id": 6289897115,
+      "owner": "/root/routing531",
+      "branch": "feat/terminal-session-531",
+      "worktree": "/tmp/codex-wake-session-531"
     },
     {
       "index": 6,

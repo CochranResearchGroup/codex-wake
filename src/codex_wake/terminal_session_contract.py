@@ -11,4 +11,10 @@ def specs():
         if verb=='update':props['changes']={'type':'object'};required+=['changes']
         if not readonly:props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
         result['wake_tabs_session_'+verb]=('controller-tabs','tabs.session.'+verb,'Manage named terminal sessions; empty definitions persist independently of running tabs.',props,required,readonly)
+    for verb in ('preview','apply','status','undo'):
+        readonly=verb=='status'
+        props=dict(session={'type':'string'},destination={'type':'string'},selection={'type':'object'},plan_id={'type':'string'},receipt_id={'type':'string'})
+        required=['destination'] if verb=='preview' else []
+        if not readonly:props.update(expected_target={'type':'object'},_request={'type':'object'});required+=['expected_target','_request']
+        result['wake_tabs_relocate_'+verb]=('controller-tabs','tabs.relocate.'+verb,'Preview and relocate whole tabs by selection; reconcile partial results and conditionally undo.',props,required,readonly)
     return result
