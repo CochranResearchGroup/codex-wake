@@ -9,14 +9,15 @@ Domain authority: GLOSSARY.md
 
 ## Current State
 
-Spec #517 and tickets #518–#524 published with native sub-issue and blocking
-links read back. Operator authorized implementation, evidence-backed ticket
-closure, one broad two-axis review and one bounded TDD findings pass. Foundation
-#518 is validated and tracker-closed on the integration branch. Workers519,
-520 and521 own isolated native Windows, automatic expiry and pure projection
-slices. Policy522 waits for the shared formatting owner to integrate;523 waits
-for native519;524 joins all slices. Production formatting, native daemons and
-installed launchers remain unchanged. Exact custody/evidence lives in the ledger.
+Spec #517 and tickets #518–#524 published with native sub-issue/blocking links.
+Tickets518–522 are validated and tracker-closed for integration-branch delivery.
+Native WSL/PowerShell/MCP rollback, monitor-death expiry and sustained40-tab tmux
+updates have passed. Worker523 is finishing native psmux full/basic/plain console
+rendering after fixing a real metadata inline-style difference and UTF8 decoding.
+Policy pin and offline factory defects were corrected before522 closure. Ticket524
+waits on523 for whole-package qualification/docs. Broad review0, remediation0;
+exact counters, custody and checks are in the execution ledger. Production
+formatting, services, stock Codex and launchers remain unchanged.
 
 ## Settled operator decisions
 

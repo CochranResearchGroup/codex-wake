@@ -8649,3 +8649,12 @@ projection; persisted details expose provenance through inspect. Tracker518–52
 closed for integration-branch delivery.40-tab tmux measurement6.211s is retained
 as a bounded result, not a5s cadence guarantee. Workers522/523 own persistent
 policy/theme holds and installed rendering/fallback;524 remains blocked on them.
+
+## Turn | 2026-11-09 | Persistent policy and scope guards validated
+
+Integrated522 preference/theme ownership, then corrected cross-workspace policy
+pin admission and missing-terminal global optout at the public entrypoint.
+26formatting checks pass on3.12;25 before final pin test pass on3.11.
+Native523 console qualification now observes actual Windows tab labels/selection;
+final colour-mode/escaping matrix remains in progress.524 waits on that evidence.
+No broad review or findings-remediation pass has run yet.
