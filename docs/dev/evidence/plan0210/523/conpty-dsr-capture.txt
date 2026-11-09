@@ -1,0 +1,10 @@
+0 '' ''
+
+0 '' ''
+
+tmux 3.4.0
+psmux 3.4.0 (20aa1d7 2026-10-13)
+{"client_pid": 49588, "initial": "G1s/OTAwMWgbWz8xMDA0aA==", "changed": ""}
+
+0 '' ''
+

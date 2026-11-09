@@ -277,6 +277,18 @@ credentials, permissions or resource allowance.
 A provider or coding runtime's durable record of an exchange. A successor
 conversation has its own identity and retains a relationship to its predecessor.
 
+**Coding harness**:
+The application that owns a coding agent's interaction and workflow. Its identity
+is distinct from the model and inference provider used by a conversation.
+
+**Model identity**:
+The model name or revision reported for a conversation or turn. A configured
+model selection is distinct from an observed model identity.
+
+**Inference provider**:
+The hosted service or local serving runtime through which a model is accessed.
+It is distinct from the coding harness, account profile and execution host.
+
 **Runtime instance**:
 A particular running instance of a coding agent or app server. It is distinct
 from the durable conversations it can serve.
@@ -288,8 +300,8 @@ replace the conversation or logical agent.
 
 **Tab trait**:
 An observed property of a terminal attachment or its associated session, such as
-harness, build, account, remote host, turn activity, responsiveness or visible
-error. Each observation retains its freshness and uncertainty; one trait does
+harness, build, account, reported model, inference provider, remote host, turn
+activity, responsiveness or visible error. Each observation retains its freshness and uncertainty; one trait does
 not establish another.
 
 **Tab group**:

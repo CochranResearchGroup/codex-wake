@@ -1,0 +1,164 @@
+{
+  "ticket": 523,
+  "production_touched": false,
+  "provider_calls": 0,
+  "byobu": {
+    "status": "passed",
+    "tmux_version": "tmux 3.4",
+    "byobu_version": "byobu version 6.11\ntmux 3.4",
+    "modes": {
+      "full": {
+        "native_formats": [
+          {
+            "window": "@1",
+            "normal": "#[default,fg=white,bg=colour30,bold] 0 CX+ x,}#{pid} RUN manual 1189190,\u754c",
+            "selected": "#[default,fg=white,bg=colour30,bold,underscore]#[bold,underscore] [0 CX+ x,}#{pid} RUN manual 1189190,\u754c]"
+          },
+          {
+            "window": "@2",
+            "normal": "#[default,fg=white,bg=yellow,bold] 1 GK \u754c\u754c\u754c\u754c\u754c\u754c\u754c\u754c WAIT peer",
+            "selected": "#[default,fg=white,bg=yellow,bold,underscore]#[bold,underscore] [1 GK \u754c\u754c\u754c\u754c\u754c\u754c\u754c\u754c WAIT peer]"
+          }
+        ],
+        "attached_client_bytes": 1490,
+        "ansi_sha256": "6a95f47285a8eacadf16512dff13e0d0ecaa132770681fec677feba81f443743",
+        "selected_and_unselected_native_cues": true
+      },
+      "basic": {
+        "native_formats": [
+          {
+            "window": "@1",
+            "normal": "#[default,fg=white,bg=cyan,bold] 0 CX+ x,}#{pid} RUN manual 1189190,\u754c",
+            "selected": "#[default,fg=white,bg=cyan,bold,underscore]#[bold,underscore] [0 CX+ x,}#{pid} RUN manual 1189190,\u754c]"
+          },
+          {
+            "window": "@2",
+            "normal": "#[default,fg=white,bg=yellow,bold] 1 GK ?????????? WAIT peer",
+            "selected": "#[default,fg=white,bg=yellow,bold,underscore]#[bold,underscore] [1 GK ?????????? WAIT peer]"
+          }
+        ],
+        "attached_client_bytes": 4080,
+        "ansi_sha256": "db7d34699478e47af35a01adbd6a9814e0baa95fbc06c668b85e7882e8fc7021",
+        "selected_and_unselected_native_cues": true
+      },
+      "plain": {
+        "native_formats": [
+          {
+            "window": "@1",
+            "normal": "#[default,fg=default,bg=default] 0 CX+ x,}#{pid} RUN manual 1189190,\u754c",
+            "selected": "#[default,fg=default,bg=default,bold,underscore]#[bold,underscore] [0 CX+ x,}#{pid} RUN manual 1189190,\u754c]"
+          },
+          {
+            "window": "@2",
+            "normal": "#[default,fg=default,bg=default] 1 GK ?????????? WAIT peer",
+            "selected": "#[default,fg=default,bg=default,bold,underscore]#[bold,underscore] [1 GK ?????????? WAIT peer]"
+          }
+        ],
+        "attached_client_bytes": 3850,
+        "ansi_sha256": "97b5f452be126e291852f1f0a473cd347767e59ef30aa38285599b79e1af735c",
+        "selected_and_unselected_native_cues": true
+      }
+    },
+    "proof": "actual owned attached PTY output plus native format expansion; not screenshot or human colour perception",
+    "manual_name": "manual 1189190,\u754c"
+  },
+  "psmux": {
+    "status": "native_format_engine_passed",
+    "identity": {
+      "platform": "windows",
+      "namespace": "wake523-fa5320d2d98f",
+      "pid": 80232,
+      "session": "source",
+      "creation_filetime": 134386957915140560,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    },
+    "modes": {
+      "full": {
+        "native_formats": [
+          {
+            "window": "@1",
+            "normal": "#[default,fg=white,bg=colour30,bold] 0 CX+ x,}#{pid} RUN manual #{pid},\u754c",
+            "selected": "#[default,fg=white,bg=colour30,bold,underscore]#[bold,underscore] [0 CX+ x,}#{pid} RUN manual #{pid},\u754c]"
+          },
+          {
+            "window": "@2",
+            "normal": "#[default,fg=white,bg=yellow,bold] 1 GK \u754c\u754c\u754c\u754c\u754c\u754c\u754c\u754c WAIT peer",
+            "selected": "#[default,fg=white,bg=yellow,bold,underscore]#[bold,underscore] [1 GK \u754c\u754c\u754c\u754c\u754c\u754c\u754c\u754c WAIT peer]"
+          }
+        ],
+        "exact_write_readback": true
+      },
+      "basic": {
+        "native_formats": [
+          {
+            "window": "@1",
+            "normal": "#[default,fg=white,bg=cyan,bold] 0 CX+ x,}#{pid} RUN manual #{pid},\u754c",
+            "selected": "#[default,fg=white,bg=cyan,bold,underscore]#[bold,underscore] [0 CX+ x,}#{pid} RUN manual #{pid},\u754c]"
+          },
+          {
+            "window": "@2",
+            "normal": "#[default,fg=white,bg=yellow,bold] 1 GK ?????????? WAIT peer",
+            "selected": "#[default,fg=white,bg=yellow,bold,underscore]#[bold,underscore] [1 GK ?????????? WAIT peer]"
+          }
+        ],
+        "exact_write_readback": true
+      },
+      "plain": {
+        "native_formats": [
+          {
+            "window": "@1",
+            "normal": "#[default,fg=default,bg=default] 0 CX+ x,}#{pid} RUN manual #{pid},\u754c",
+            "selected": "#[default,fg=default,bg=default,bold,underscore]#[bold,underscore] [0 CX+ x,}#{pid} RUN manual #{pid},\u754c]"
+          },
+          {
+            "window": "@2",
+            "normal": "#[default,fg=default,bg=default] 1 GK ?????????? WAIT peer",
+            "selected": "#[default,fg=default,bg=default,bold,underscore]#[bold,underscore] [1 GK ?????????? WAIT peer]"
+          }
+        ],
+        "exact_write_readback": true
+      }
+    },
+    "attached_client": {
+      "status": "unqualified",
+      "reason": "no attached status bar observed",
+      "returncode": 0,
+      "bytes": 16,
+      "ansi_sha256": "a572466f12e992a09e95917ce7a7c8c98c6c4d8a0a7c25143eee5a4c196ad1e1",
+      "owned_client_pid": 22116,
+      "client_terminated_and_reaped": true
+    },
+    "capabilities": {
+      "backend": "psmux",
+      "status": "conditional",
+      "protocol": "qualified_identity",
+      "observed_identity": {
+        "platform": "windows",
+        "namespace": "wake523-fa5320d2d98f",
+        "pid": 80232,
+        "session": "source",
+        "creation_filetime": 134386957915140560,
+        "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+      },
+      "colour_depth": "unknown",
+      "client_rendering": "requires_client_acceptance",
+      "native_selection": true,
+      "modes": [
+        "full",
+        "basic",
+        "plain"
+      ],
+      "ascii_fallback": true,
+      "unicode_width": "conservative_cells_terminal_dependent",
+      "qualification_scope": "option readback and native format expansion; client pixels are a separate acceptance boundary"
+    },
+    "exact_originals_restored": true,
+    "process_and_name_continuity": true,
+    "final_owned_namespace": {
+      "rc": 1,
+      "out": "",
+      "err": "psmux: no server running on C:\\Users\\ecoch\\.psmux (-L wake523-fa5320d2d98f)\n"
+    },
+    "proof": "installed native format expansion and style readback; attached client qualification separately reported"
+  }
+}

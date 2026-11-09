@@ -1,0 +1,38 @@
+{
+  "fixed_point": "3a02f9dc9e59eef8151cc6015f19a6cd4b22e2de",
+  "feature_tip": "d16575289d59cb5e32cf34c780c43aa48bf2bb97",
+  "diff_command": "git diff 3a02f9dc9e59eef8151cc6015f19a6cd4b22e2de...HEAD",
+  "commits_command": "git log 3a02f9dc9e59eef8151cc6015f19a6cd4b22e2de..HEAD --oneline",
+  "spec": "docs/dev/evidence/plan0210/spec.md",
+  "tickets": [
+    "docs/dev/evidence/plan0210/ticket-01.md",
+    "docs/dev/evidence/plan0210/ticket-02.md",
+    "docs/dev/evidence/plan0210/ticket-03.md",
+    "docs/dev/evidence/plan0210/ticket-04.md",
+    "docs/dev/evidence/plan0210/ticket-05.md",
+    "docs/dev/evidence/plan0210/ticket-06.md",
+    "docs/dev/evidence/plan0210/ticket-07.md"
+  ],
+  "standards": [
+    "AGENTS.md",
+    "GLOSSARY.md",
+    "docs/agents/codex-code-discovery.md",
+    "docs/agents/runtime-proof.md",
+    "docs/dev/policies/0005-engineering-git-and-release.md",
+    "docs/dev/policies/0006-validation-and-closeout.md",
+    "docs/dev/policies/0014-architecture-guardrails.md",
+    "docs/dev/policies/0016-code-testing-discipline.md",
+    "docs/dev/policies/0017-work-item-traceability.md",
+    "docs/dev/policies/0021-collaborative-development-workflow.md"
+  ],
+  "missing_optional_standards": [
+    "CODING_STANDARDS.md",
+    "CONTRIBUTING.md"
+  ],
+  "review_bounds": {
+    "broad_reviews": 1,
+    "remediation_passes": 1
+  },
+  "runtime": "Read-only sources; private owned POSIX fixtures allowed for concrete evidence, no Windows jobs or production effects, no source edits",
+  "validation": "524/validation.md and serial-full-311-reconciliation.json preserve exact composite gates; no fictitious all-green historical rerun"
+}

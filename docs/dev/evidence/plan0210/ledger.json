@@ -1,0 +1,244 @@
+{
+  "actor": "ecochran76",
+  "repository": "CochranResearchGroup/codex-wake",
+  "host": "github.com",
+  "recorded_at": "2026-11-09T10:39:33.498529+00:00",
+  "base": "3a02f9dc9e59eef8151cc6015f19a6cd4b22e2de",
+  "spec": {
+    "number": 517,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/517"
+  },
+  "tickets": [
+    {
+      "index": 1,
+      "number": 518,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/518",
+      "title": "Byobu formatting with one-command rollback and re-enable",
+      "blockers": [],
+      "state": "validated",
+      "owner": "/root",
+      "worktree": "/tmp/codex-wake-formatting-0210",
+      "owned_paths": [
+        "tab_formatting",
+        "tab_format_transport",
+        "shared controller contract"
+      ],
+      "validation": [
+        "test_tab_formatting: 3 passed; installed disposable tmux",
+        "test_tab_contract: 5 passed"
+      ],
+      "red": "/tmp/p210-red1.log",
+      "green": "/tmp/p210-green-final.log",
+      "result_sha": "bf1f6b5",
+      "tracker_state": "CLOSED"
+    },
+    {
+      "index": 2,
+      "number": 519,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/519",
+      "title": "Native Windows psmux formatting and exact restoration",
+      "blockers": [
+        518
+      ],
+      "state": "validated",
+      "owner": "/root/format519",
+      "worker_base": "bf1f6b5",
+      "branch": "feat/tab-format-519",
+      "worktree": "/tmp/codex-wake-format-519",
+      "tracker_state": "CLOSED",
+      "worker_result_sha": "98d1d6d",
+      "integration_sha": "c3a7c73",
+      "validation": [
+        "native-pass.json:9 checks pass; namespace absent",
+        "Python3.11/3.12:6 focused each",
+        "integrated:8 format/projection+3 protocol pass"
+      ]
+    },
+    {
+      "index": 3,
+      "number": 520,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/520",
+      "title": "Automatic formatting updates and stale-state handling",
+      "blockers": [
+        518
+      ],
+      "state": "validated",
+      "owner": "/root/format520",
+      "worker_base": "bf1f6b5",
+      "branch": "feat/tab-format-520",
+      "worktree": "/tmp/codex-wake-format-520",
+      "tracker_state": "CLOSED",
+      "worker_result_sha": "23cbde12c5dc51d5ae142aacec6d9b11c2ed9700",
+      "integration_sha": "e274810",
+      "validation": "11 integrated formatting/projection checks pass; 5 monitor regression checks passed on worker. Installed tmux monitor-death expiry PASS after20-second threshold, process preserved and original session/window settings restored. Forty-window update6.211s under10s deadline, not a5-second cadence claim. Evidence: docs/dev/evidence/plan0210/520-validation.md and native-expiry/forty-window receipts.",
+      "additional_validation": "Actual monitor3cycles40tmux allapplied, noSTALE/noerrors; cadence~7s, source09f2c73;520-monitor40-integrated.json"
+    },
+    {
+      "index": 4,
+      "number": 521,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/521",
+      "title": "Mixed-pane formatting and extensible harness/model identities",
+      "blockers": [
+        518
+      ],
+      "state": "validated",
+      "owner": "/root/format521",
+      "worker_base": "bf1f6b5",
+      "branch": "feat/tab-format-521",
+      "worktree": "/tmp/codex-wake-format-521",
+      "worker_result_sha": "87b6686c35afabf615a0c02c0b99a590e3be011b",
+      "integration_sha": "374d4d1",
+      "validation": "Pure projection5 and controller3 pass, integrated11 formatting checks pass after520. Mixed independently fresh attention, type/activity hues, optional configured/observed model/provider badges and exact-dimension style rules. Projection details/provenance now persisted by520 shared apply and exposed in inspect. Evidence: docs/dev/evidence/plan0210/521/projection.json. Final native rendering/fallback remains523.",
+      "tracker_state": "CLOSED"
+    },
+    {
+      "index": 5,
+      "number": 522,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/522",
+      "title": "Persistent display policy, manual overrides and reconnect",
+      "blockers": [
+        518
+      ],
+      "state": "validated",
+      "owner": "/root/format521",
+      "branch": "feat/tab-format-522",
+      "worktree": "/tmp/codex-wake-format-522",
+      "worker_base": "e274810",
+      "integration_sha": "8c165ca",
+      "factory_fix": "09f2c73",
+      "tracker_state": "CLOSED",
+      "worker_result_sha": "66d515a",
+      "pin_fix_worker": "905347e",
+      "pin_fix_integrated": "3166378",
+      "validation": [
+        "26 integrated format tests pass3.12",
+        "25 beforefinalpinpass3.11;finalgate524",
+        "9existingcontrollerregressions pass"
+      ]
+    },
+    {
+      "index": 6,
+      "number": 523,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/523",
+      "title": "Backend rendering compatibility and accessible selection",
+      "blockers": [
+        518,
+        519
+      ],
+      "state": "validated",
+      "owner": "/root/format519",
+      "branch": "feat/tab-format-523",
+      "worktree": "/tmp/codex-wake-format-523",
+      "worker_base": "e274810",
+      "api_checkpoint_worker": "0dea949",
+      "api_checkpoint_integrated": "cdcedfd",
+      "validation_so_far": "15 integrated format-focused checks pass; native rendering still in progress",
+      "tracker_state": "CLOSED",
+      "worker_result_sha": "ed1d90c",
+      "integration_sha": "2a865d9",
+      "validation": [
+        "ActualByobuPTY+nativeWindowsconsole full/basic/plain pass;knownownedcleanupverified",
+        "27integratedformat+4psmuxprotocol pass3.12;5renderingpass3.11"
+      ],
+      "evidence": "docs/dev/evidence/plan0210/523/final-native-matrix.json"
+    },
+    {
+      "index": 7,
+      "number": 524,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/524",
+      "title": "Integrated formatting acceptance and operator documentation",
+      "blockers": [
+        519,
+        520,
+        521,
+        522,
+        523
+      ],
+      "state": "validated",
+      "owner": "/root/format520",
+      "branch": "feat/tab-format-524",
+      "worktree": "/tmp/codex-wake-format-524",
+      "worker_base": "05f1d88",
+      "acceptance_gaps": [
+        {
+          "id": "startup",
+          "state": "validated",
+          "owner": "/root/format521",
+          "branch": "feat/tab-format-auto",
+          "worktree": "/tmp/codex-wake-format-auto",
+          "description": "Factory enable/reenable must ensure single monitor; injected owners remain passive; legacy monitor is reported, not restarted",
+          "worker_sha": "9156c15",
+          "integrated_sha": "d55cd7c"
+        },
+        {
+          "id": "cli_partial",
+          "state": "validated",
+          "owner": "/root",
+          "description": "Nested partial result must propagate nonzero CLI exit; public regression follows startup fix",
+          "integrated_sha": "33218a3"
+        }
+      ],
+      "postfix_focused": "58PASS each Python3.11/3.12 at0dbb3dc;524/postfix-focused.json",
+      "worker_result_sha": "c20780e",
+      "integration_sha": "59ff603",
+      "runtime_source": "fff5d24",
+      "wheel_sha256": "4e27754a918d88cc51bf3962e49fca069b74e3172db45a7303f8f22a7cd2e082",
+      "validation": [
+        "Installed Byobu/psmux WSLCLI,realstdioMCP,HTTP/OAuthMCP,actualPowerShell API/MCP positive+negative exits qualified;289Pythonmembersmatchsource+Linux/Windowsinstall",
+        "Full312 source05:2239tests pass(skip1)",
+        "Full311 sourcefff:2244ran,2242pass/1skip/1completionharnessfailure repairedtestonly;completion7PASS EACHversion",
+        "Affected58startup+7portableexitcasesPASS EACH3.11/3.12;static/generateddocs/planningchecksPASS"
+      ],
+      "composite_gate": "docs/dev/evidence/plan0210/524/serial-full-311-reconciliation.json",
+      "completion_repair_worker": "ca88d04",
+      "completion_repair_integrated": "de2eb32",
+      "tracker_state": "CLOSED"
+    }
+  ],
+  "readback": true,
+  "native_edges_verified": true,
+  "integration_branch": "feat/tab-formatting-517",
+  "review": {
+    "fixed_point": "3a02f9dc9e59eef8151cc6015f19a6cd4b22e2de",
+    "broad_runs": 1,
+    "remediation_passes": 1,
+    "state": "complete",
+    "feature_tip": "d16575289d59cb5e32cf34c780c43aa48bf2bb97",
+    "reviewed_tip": "58b163177e545ce97436f61adf78d89a00debd2c",
+    "findings": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
+    ],
+    "blocking": [
+      "R1",
+      "R2"
+    ],
+    "resolved": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
+    ],
+    "remaining_blockers": []
+  },
+  "discovery": "Current agreed plan/spec and fresh repository sources sufficient; unrelated memory registry hits not used; no additional Graphiti discovery needed.",
+  "last_validation_checkpoint": "4a5aa6dbf424e7a3c25238707c81ac98d105c8b3",
+  "final_qualification": {
+    "runtime_source": "4a5aa6dbf424e7a3c25238707c81ac98d105c8b3",
+    "focused": "review/final-focused.json",
+    "installed": "postreview-installed/validation.json",
+    "wheel_sha256": "e353f509b5e3964c11247b243cdc9b7ae88a6fe097550faf0a082a8114983f09",
+    "report": "review/final-report.md",
+    "delivery": "integration branch; no merge or production deployment"
+  },
+  "publication": {
+    "draft_pr": "https://github.com/CochranResearchGroup/codex-wake/pull/525",
+    "number": 525,
+    "base": "main",
+    "head": "feat/tab-formatting-517",
+    "merge_performed": false,
+    "production_deployed": false
+  }
+}

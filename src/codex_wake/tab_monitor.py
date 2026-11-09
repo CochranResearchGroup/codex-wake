@@ -175,7 +175,9 @@ class TabMonitor:
                                   process=record.get('process') if record else None,
                                   generation=record.get('generation') if record else None,settings=settings,
                                   last_error=record.get('last_error') if record else None,
-                                  last_policy_operation=record.get('last_policy_operation') if record else None),
+                                  last_policy_operation=record.get('last_policy_operation') if record else None,
+                                  last_formatting=record.get('last_formatting') if record else None,
+                                  capabilities=record.get('capabilities',[]) if record else []),
                     snapshot=snapshot,application_effects=False)
 
     def start(self,arguments):
@@ -256,10 +258,10 @@ class TabMonitor:
         except ValueError:
             return dict(status='unavailable',reason='invalid_probe')
 
-    def refresh(self,*,origin='manual'):
+    def refresh(self,*,origin='manual',deadline=None):
         settings=self._settings()
         with _lock(self.directory/'refresh.lock'):
-            deadline=time.monotonic()+settings['cycle_timeout']
+            deadline=deadline or time.monotonic()+settings['cycle_timeout']
             previous=_read(self.directory/'snapshot.json') or {}
             known=self._probe(None,min(settings['probe_timeout'],max(.1,deadline-time.monotonic())))
             names=known.get('workspaces',[])[:settings['max_workspaces']]
@@ -311,13 +313,18 @@ class TabMonitor:
         signal.signal(signal.SIGTERM,lambda signum,frame:stop.set())
         signal.signal(signal.SIGINT,lambda signum,frame:stop.set())
         with _lock(self.directory/'owner.lock'):
-            record=dict(schema_version=1,state='running',generation=uuid4().hex,process=_identity(os.getpid()),started_at=self.clock())
+            record=dict(schema_version=1,state='running',generation=uuid4().hex,process=_identity(os.getpid()),started_at=self.clock(),
+                        capabilities=['tab-formatting-v1'])
             _save(self.directory/'owner.json',record)
             try:
                 while not stop.is_set():
                     started=time.monotonic()
                     try:
-                        self.refresh(origin='daemon')
+                        cycle_deadline=started+self._settings()['cycle_timeout']
+                        observed=self.refresh(origin='daemon',deadline=started+self._settings()['cycle_timeout']*.65)
+                        from .tab_format_monitor import refresh_formatting
+                        record['last_formatting']=refresh_formatting(self.root,observed.get('snapshot') or {},
+                            deadline=cycle_deadline)
                         self._policy_tick(record)
                         record.pop('last_error',None)
                     except (InventoryError,OSError,ValueError) as error:

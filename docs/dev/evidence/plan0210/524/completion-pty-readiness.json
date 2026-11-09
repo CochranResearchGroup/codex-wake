@@ -1,0 +1,51 @@
+{
+  "ticket": 524,
+  "phase": "bounded acceptance repair before the single broad review",
+  "base": "59ff603e4f9d971433220bf51fb08743a93f6ddf",
+  "product_source": "fff5d24ac0f9b9cb706aea5c6b2b0babb7c57b68",
+  "full_failure": {
+    "manifest": "/tmp/codex-wake-p210-311-final-gate/manifest.json",
+    "log": "/tmp/codex-wake-p210-311-final-gate/unit-311-final.log",
+    "failure_boundaries": "/tmp/codex-wake-p210-311-final-gate/failure-boundaries.jsonl",
+    "tests": 2244,
+    "passed": 2242,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 1,
+    "unittest_reported_seconds": 1176.995,
+    "watchdog_elapsed_seconds": 1183.0269627200323,
+    "case": "test_completion.CompletionTests.test_interactive_tab_completion_in_both_shells_preserves_quoted_root",
+    "assertion": "zsh capture terminator byte0x1f missing at until(marker); failed terminal output already contains the correct accounts login alice and quoted space-containing root",
+    "additional_evidence": "Raw TAB/Ctrl-X/Ctrl-V echo precedes bracketed-paste/ZLE activation in the failed PTY transcript. READY output alone did not establish that the line editor had retaken input mode.",
+    "source_clean": true
+  },
+  "isolated_old_case": {
+    "result": "passed once in8.566seconds; does not erase the full-run failure",
+    "log": "/tmp/codex-wake-p210-311-final-gate/completion-only.log"
+  },
+  "repair": {
+    "surface": "test harness only; tests/test_completion.py",
+    "behavior": "The existing marker wait returns only after both marker receipt and actual PTY local-mode ICANON/ECHO bits cleared, establishing Readline/ZLE input readiness before subsequent key batches.",
+    "preserved": "Same real Bash/Zsh processes, generated completion scripts, quoted-root and alice/account=alice buffer assertions, Ctrl-X/Ctrl-V widgets and existing ten-second bound.",
+    "not_used": "No fixed readiness sleep, timeout increase, stubbed completion, weakened candidate assertion or product-code change."
+  },
+  "focused_validation": [
+    {
+      "command": "PYTHONPATH=.:src XDG_CONFIG_HOME=/tmp/p210-completion-fixed-config311 XDG_STATE_HOME=/tmp/p210-completion-fixed-state311 CODEX_WAKE_STABLE_TIME_CONFIG='' /tmp/codex-wake-p210-py311/bin/python -m unittest discover -s tests -p test_completion.py -v",
+      "result": "7 passed in12.037seconds",
+      "log": "/tmp/p210-completion-fixed-311.log"
+    },
+    {
+      "command": "PYTHONPATH=.:src XDG_CONFIG_HOME=/tmp/p210-completion-fixed-config312 XDG_STATE_HOME=/tmp/p210-completion-fixed-state312 CODEX_WAKE_STABLE_TIME_CONFIG='' /tmp/codex-wake-p210-py312/bin/python -m unittest discover -s tests -p test_completion.py -v",
+      "result": "7 passed in12.179seconds",
+      "log": "/tmp/p210-completion-fixed-312.log"
+    }
+  ],
+  "claim_boundary": "The full run remains failed at its immutable source. Focused repair of its sole harness defect passed both interpreters; this is not a claim that one new full2244-test run passed.",
+  "full_reruns_after_repair": 0,
+  "windows_jobs_in_repair": 0,
+  "production_touched": false,
+  "completion_wake_cleanup": "Own wake_intent_3d1de0d8efb347039b6a0f214acf0522 explicitly cancelled after the same completed job was reconciled, preventing duplicate delivery.",
+  "memory_disposition": "forbidden",
+  "memory_reason": "No explicit memory-write request"
+}

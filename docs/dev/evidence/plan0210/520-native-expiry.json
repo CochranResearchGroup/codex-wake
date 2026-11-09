@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "tmux_version": "tmux 3.4",
+  "monitor_pid": 1082599,
+  "monitor_dead": true,
+  "native_clock_expiry": true,
+  "stale_after_seconds": 20,
+  "observed_expiry_after_monitor_death_seconds": 19.293,
+  "pane_process_preserved": true,
+  "original_options_restored": true,
+  "production_touched": false,
+  "external_inference": false,
+  "seam": "native format expansion and option readback; attached screen rendering qualified separately"
+}

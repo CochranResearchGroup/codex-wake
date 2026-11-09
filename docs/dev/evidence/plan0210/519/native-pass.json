@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "ticket": 519,
+  "checks": [
+    "native-explicit-vs-inherited-baseline-read",
+    "wsl-public-cli-applies-native-formatting",
+    "actual-powershell-pinned-native-formatting-read",
+    "actual-powershell-public-cli-exact-rollback",
+    "public-mcp-exact-original-restoration-and-reenable",
+    "names-pane-process-births-and-peer-continuity",
+    "native-clock-expression-session-baseline-and-restore",
+    "finite-batch-read-write-readback",
+    "replaced-server-generation-refused"
+  ],
+  "namespace": "wake519-97d8b9ae40fd",
+  "identity": {
+    "platform": "windows",
+    "namespace": "wake519-97d8b9ae40fd",
+    "pid": 28964,
+    "session": "source",
+    "creation_filetime": 134386950924247881,
+    "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+  },
+  "bridge_sha256": "d4d7fa3b963bdec1f17adbb2960b1f4d83106fca3a57f46749561c8f5e84da27",
+  "elapsed_seconds": 32.614,
+  "provider_calls": 0,
+  "production_touched": false,
+  "actual_powershell": true,
+  "final_owned_namespace": {
+    "rc": 1,
+    "out": "",
+    "err": "psmux: no server running on C:\\Users\\ecoch\\.psmux (-L wake519-97d8b9ae40fd)\n"
+  },
+  "qualification": "Installed native psmux and source-exact public WSL CLI/MCP; rendered pixel fidelity and final installed-package HTTP/PowerShell CLI acceptance belong to integrated tickets523/524."
+}

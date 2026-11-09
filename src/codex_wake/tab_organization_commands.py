@@ -97,44 +97,49 @@ def register_parser(subparsers):
     from .tab_contract import tool_specs, cli_verb
     parser = subparsers.add_parser('tabs', help='observe, group and control exact owned terminal attachments')
     verbs = parser.add_subparsers(dest='tabs_command', required=True)
+    formatting=verbs.add_parser('format',help='Reversible tab decoration; rollback restores originals, reenable reapplies saved policy.')
+    formatting_verbs=formatting.add_subparsers(dest='format_command',required=True)
     aliases = {'pins':'pin', 'members':'member', 'criteria':'criterion'}
     for _, operation, summary, properties, required, readonly in tool_specs().values():
         action=cli_verb(operation)
-        command=verbs.add_parser(action, help=summary, description=summary)
-        command.set_defaults(group_by=[],sort_by=[],filters=[],pins=[],members=[],mode='activity')
-        if action.startswith(('view-','group-')) and not action.endswith('-list'):
-            command.add_argument('view_name',nargs='?',help='Saved logical view or group name.')
-        command.add_argument('--arguments',type=json.loads,help='Advanced operation JSON; typed flags fill only omitted fields.')
-        command.add_argument('--json',dest='as_json',action='store_true',help='Emit structured results.')
-        if not readonly:
-            command.add_argument('--request-id',help='Stable intent ID; reuse only for identical inputs. Retrieve with tabs result.')
-        for field, schema in sorted(properties.items()):
-            if field=='_request':continue
-            option='--'+aliases.get(field,field.replace('_','-'))
-            settings={'dest':field,'default':None,'help':schema.get('description',field.replace('_',' ')+'.').replace('%','%%')}
-            kind=schema.get('type')
-            if kind=='boolean':settings['action']='store_true'
-            elif kind=='array':settings.update(action='append')
-            elif kind=='object':settings['type']=json.loads
-            elif kind=='integer':settings['type']=int
-            elif kind=='number':settings['type']=float
-            if 'enum' in schema:settings['choices']=schema['enum']
-            if field=='preview':option='--dry-run'
-            command.add_argument(option,**settings)
-        if action in ('preview','view-save','policy-configure'):
-            command.add_argument('--group-by',action='append',default=[],help='Layered grouping trait; repeat in order.')
-            command.add_argument('--sort-by',action='append',default=[],help='Layered sorting trait; repeat in order.')
-        if action=='view-save':
-            command.add_argument('--filter',action='append',dest='filters',default=[],help='Read-only trait=value filter.')
-            command.add_argument('--group',help='Saved named group restriction.')
-        if action in ('preview','show','apply','undo'):
-            for field in ('socket-path','session-id','app-server'):
-                command.add_argument('--'+field,help='Legacy explicit tmux adapter option.')
-            command.add_argument('--timeout',type=float,default=30)
-            for field in ('bus-root','operator-capability','actor-capability'):
-                command.add_argument('--'+field,type=Path)
-            if action=='show':
-                command.add_argument('--plan-id');command.add_argument('--receipt-id')
+        commands=[verbs.add_parser(action,help=summary,description=summary)]
+        if operation.startswith('tabs.format.'):
+            commands.append(formatting_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
+        for command in commands:
+            command.set_defaults(tabs_command=action,group_by=[],sort_by=[],filters=[],pins=[],members=[],mode='activity')
+            if action.startswith(('view-','group-')) and not action.endswith('-list'):
+                command.add_argument('view_name',nargs='?',help='Saved logical view or group name.')
+            command.add_argument('--arguments',type=json.loads,help='Advanced operation JSON; typed flags fill only omitted fields.')
+            command.add_argument('--json',dest='as_json',action='store_true',help='Emit structured results.')
+            if not readonly:
+                command.add_argument('--request-id',help='Stable intent ID; reuse only for identical inputs. Retrieve with tabs result.')
+            for field, schema in sorted(properties.items()):
+                if field=='_request':continue
+                option='--'+aliases.get(field,field.replace('_','-'))
+                settings={'dest':field,'default':None,'help':schema.get('description',field.replace('_',' ')+'.').replace('%','%%')}
+                kind=schema.get('type')
+                if kind=='boolean':settings['action']='store_true'
+                elif kind=='array':settings.update(action='append')
+                elif kind=='object':settings['type']=json.loads
+                elif kind=='integer':settings['type']=int
+                elif kind=='number':settings['type']=float
+                if 'enum' in schema:settings['choices']=schema['enum']
+                if field=='preview':option='--dry-run'
+                command.add_argument(option,**settings)
+            if action in ('preview','view-save','policy-configure'):
+                command.add_argument('--group-by',action='append',default=[],help='Layered grouping trait; repeat in order.')
+                command.add_argument('--sort-by',action='append',default=[],help='Layered sorting trait; repeat in order.')
+            if action=='view-save':
+                command.add_argument('--filter',action='append',dest='filters',default=[],help='Read-only trait=value filter.')
+                command.add_argument('--group',help='Saved named group restriction.')
+            if action in ('preview','show','apply','undo'):
+                for field in ('socket-path','session-id','app-server'):
+                    command.add_argument('--'+field,help='Legacy explicit tmux adapter option.')
+                command.add_argument('--timeout',type=float,default=30)
+                for field in ('bus-root','operator-capability','actor-capability'):
+                    command.add_argument('--'+field,type=Path)
+                if action=='show':
+                    command.add_argument('--plan-id');command.add_argument('--receipt-id')
     result=verbs.add_parser('result',help='Read the retained same-user request result, including after a workspace closes.')
     result.add_argument('--request-id',required=True)
     result.add_argument('--json',dest='as_json',action='store_true')
@@ -151,7 +156,7 @@ def run(args, root, *, observer=None):
         from .tab_contract import BY_OPERATION
         args.tab_command=args.tabs_command
         args.arguments=dict(args.arguments or {})
-        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1)
+        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1)
         if operation in BY_OPERATION:
             properties=BY_OPERATION[operation][1][3]
             for field in properties:

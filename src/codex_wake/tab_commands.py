@@ -25,11 +25,11 @@ def command(args, owner=None):
         if owner is None:
             from .controller_tabs import controller_tabs_from_root
             owner = controller_tabs_from_root(args.wake_root)
-        operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1)
+        operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1)
         value = owner.execute(operation,args.arguments) if operation in owner.READS else operator_execute(operation,args.arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
         print(json.dumps(value, sort_keys=True))
-        phase=value.get('result',{}).get('operation',{}).get('phase') if isinstance(value.get('result'),dict) else None
-        return 3 if phase=='uncertain' or value.get('status') in ('uncertain','partial') else 0
+        from .tab_result import exit_status
+        return exit_status(value)
     except (WakeError, OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as error:
         print(json.dumps(dict(status='held', error=dict(
             code=getattr(error,'code','configuration_unavailable'),
@@ -105,6 +105,13 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
         from dataclasses import replace
         actor=replace(actor,targets=[*actor.targets,*owner.reattach_owner().authorization_targets(payload['plan_id'])])
         return AuthorizedTabs(SimpleNamespace(authenticate=lambda unused:actor),owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
+    if operation.startswith('tabs.format.') and payload.get('scope')=='global':
+        payload.setdefault('expected_target',owner.format_target(scope='global'))
+        key=_intent_key(operation,payload,request_id)
+        payload.setdefault('_request',dict(operation_id='tab-cli-'+key,idempotency_key='tab-cli-'+key,
+            correlation_id=key,binding='local-cli',target=payload['expected_target']))
+        actor=local_operator(payload['expected_target'],('control','observe'))
+        return AuthorizedTabs(SimpleNamespace(authenticate=lambda unused:actor),owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
     workspace = payload.get('workspace')
     if workspace is None and len(owner.workspaces) == 1:
         workspace = next(iter(owner.workspaces))
@@ -150,6 +157,6 @@ def _intent_key(operation,payload,request_id=None):
     import hashlib
     from uuid import uuid4
     if request_id is not None:return request_id
-    if operation in ('tabs.preview','tabs.policy.tick','tabs.recovery.capture','tabs.reattach-preview'):
+    if operation.startswith('tabs.format.') or operation in ('tabs.preview','tabs.policy.tick','tabs.recovery.capture','tabs.reattach-preview'):
         return uuid4().hex
     return hashlib.sha256(json.dumps([operation,payload],sort_keys=True).encode()).hexdigest()

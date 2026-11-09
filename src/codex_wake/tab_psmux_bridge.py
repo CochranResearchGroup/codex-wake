@@ -20,6 +20,13 @@ import sys
 import time
 
 
+# Immutable standalone vocabulary: the validator and reader/writer must expose
+# exactly the same finite options without importing Linux controller owners.
+FORMATTING_WINDOW_OPTIONS=('window-status-format','window-status-current-format',
+                           'window-status-style','window-status-current-style')
+FORMATTING_SESSION_OPTIONS=('status-interval','@wake-format-clock')
+
+
 class BridgeError(ValueError):
     def __init__(self, code, message):
         super().__init__(message)
@@ -214,7 +221,7 @@ def check_private_manifest(path):
 
 
 class PsmuxHost:
-    ACTIONS = {'snapshot', 'discover', 'capture', 'visible_screen', 'swap', 'lifecycle', 'attach_saved'}
+    ACTIONS = {'snapshot', 'discover', 'capture', 'visible_screen', 'swap', 'lifecycle', 'attach_saved', 'formatting', 'formatting_batch'}
 
     def __init__(self, *, namespace, session, server_pid=None, server_birth=None, attach_directory=None):
         if os.name != 'nt':
@@ -242,7 +249,7 @@ class PsmuxHost:
     def command(self, *argv, timeout=4):
         try:
             reply = subprocess.run([str(self.binary), '-L', self.namespace, *argv],
-                text=True, capture_output=True, timeout=timeout, check=True)
+                text=True, encoding='utf-8',capture_output=True, timeout=timeout, check=True)
         except (OSError, subprocess.SubprocessError):
             raise BridgeError('attachment_unavailable', 'native psmux command failed; reconcile effects before retry') from None
         if len(reply.stdout.encode()) > 1048576:
@@ -366,6 +373,17 @@ class PsmuxHost:
                 self.command('swap-window', '-d', '-s', self.session + ':' + args['first'], '-t', self.session + ':' + args['second'])
                 self.command('select-window', '-t', self.session + ':' + focused)
                 result = {}
+            elif action == 'formatting':
+                result = self._formatting(args, snapshot)
+            elif action == 'formatting_batch':
+                requests=args.get('requests')
+                if set(args)!={'requests'} or not isinstance(requests,list) or not 1<=len(requests)<=256:
+                    raise BridgeError('invalid_argument','Formatting batch requires 1 through 256 typed requests')
+                for item in requests:self._formatting_validate(item,snapshot)
+                result=[]
+                for item in requests:
+                    try:result.append(self._formatting(item,snapshot))
+                    except BridgeError as error:result.append(dict(error=dict(code=error.code,message=str(error))))
             elif action == 'attach_saved':
                 result = self._attach_saved(args, snapshot)
             else:
@@ -374,6 +392,66 @@ class PsmuxHost:
                 and result.get('workspace_state') == 'removed'):
             self._current()
         return dict(generation=self.generation, result=result)
+
+    def _formatting_validate(self,args,snapshot):
+        if not isinstance(args,dict):raise BridgeError('invalid_argument','Typed formatting request required')
+        action=args.get('action')
+        allowed={'read':{'action','window'},'write':{'action','window','values'},
+                 'read-session':{'action'},'write-session':{'action','values'},'refresh':{'action'}}
+        if action not in allowed or set(args)!=allowed[action]:
+            raise BridgeError('invalid_argument','Unsupported finite formatting arguments')
+        session=action.endswith('-session')
+        if action!='refresh' and not session and args.get('window') not in {w['window_id'] for w in snapshot['windows']}:
+            raise BridgeError('stale_target','Exact current window required')
+        options=FORMATTING_SESSION_OPTIONS if session else FORMATTING_WINDOW_OPTIONS
+        if action.startswith('write'):
+            values=args['values']
+            if (not isinstance(values,dict) or set(values)-set(options)
+                    or any(v is not None and (not isinstance(v,str) or len(v)>8192 or
+                               any(ord(c)<32 and c not in '\t' for c in v)) for v in values.values())):
+                raise BridgeError('invalid_argument','Only bounded managed formatting option values are accepted')
+            if 'status-interval' in values and values['status-interval'] is not None:
+                interval=values['status-interval']
+                if not interval.isdecimal() or not 0<=int(interval)<=3600:
+                    raise BridgeError('invalid_argument','Status interval must be 0 through 3600 seconds')
+
+    def _formatting(self, args, snapshot):
+        """Finite read/write/unset/readback protocol for managed display options.
+
+        psmux single-option reads return inherited values even without -A.
+        Full local-window listings identify which built-ins are actually set.
+        Session options live in this pinned session server's own option store.
+        """
+        self._formatting_validate(args,snapshot)
+        action=args['action']
+        if action=='refresh':
+            self.command('refresh-client','-S')
+            return dict(status='refreshed')
+        session=action.endswith('-session')
+        options=FORMATTING_SESSION_OPTIONS if session else FORMATTING_WINDOW_OPTIONS
+        if session:
+            flags=[];target=self.session
+        else:
+            windows={w['window_id']:w for w in snapshot['windows']}
+            window=args.get('window')
+            if not isinstance(window,str) or window not in windows:
+                raise BridgeError('stale_target','Exact current window required')
+            flags=['-w'];target=self.session+':'+str(windows[window]['index'])
+        if action.startswith('write'):
+            values=args['values']
+            for name,value in values.items():
+                if value is None:self.command('set-option',*flags,'-u','-t',target,name)
+                else:self.command('set-option',*flags,'-t',target,name,value)
+        raw=self.command('show-options',*flags,'-t',target)
+        explicit={line.split(' ',1)[0] for line in raw.splitlines() if line and not line[0].isspace()}
+        result={}
+        for name in options:
+            # Absent user options must not be queried: psmux may reject them.
+            effective=self.command('show-options',*flags,'-v','-t',target,name).removesuffix('\n') if name in explicit or not name.startswith('@') else ''
+            result[name]=dict(explicit=name in explicit,value=effective if name in explicit else None,effective=effective)
+            if not session:
+                result[name]['parent']=self.command('show-options','-g','-w','-v','-t',target,name).removesuffix('\n')
+        return result
 
     def _attach_saved(self, args, snapshot):
         if self.attach_directory is None:

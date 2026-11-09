@@ -1,0 +1,17 @@
+{
+  "source": "4a5aa6dbf424e7a3c25238707c81ac98d105c8b3",
+  "native_server": {
+    "pid": 51776,
+    "expected_birth": 134387023407098116,
+    "bridge_sha256": "9273745f40c3925e8dfe57d0a6ae4c119571bfa272d70d59d26a15281c6de065",
+    "open_error": 87,
+    "status": "gone",
+    "original_server_active": false
+  },
+  "linux_candidate_processes": [],
+  "known_owned_scope": "exact native psmux server PID/birth and Linux candidate executable prefix; not a full host or individual pane/conhost census",
+  "monitor_final": "stopped",
+  "listener_terminated": true,
+  "namespace_removed": true,
+  "token_removed": true
+}

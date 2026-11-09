@@ -1,0 +1,36 @@
+{
+  "source": "fff5d24ac0f9b9cb706aea5c6b2b0babb7c57b68",
+  "tier": "comprehensive_serial",
+  "tests": 2244,
+  "passed": 2242,
+  "skipped": 1,
+  "failures": 1,
+  "errors": 0,
+  "unittest_seconds": 1176.995,
+  "original_status": "failed",
+  "log_sha256": "efcfbae6f7eaa43894407ddf5fc4212ae5dae4524b75a73f77e11e07b2bba403",
+  "log": "/tmp/codex-wake-p210-311-final-gate/unit-311-final.log",
+  "completion": "/tmp/codex-wake-p210-311-final-gate/complete.json",
+  "sole_failure": "test_completion.CompletionTests.test_interactive_tab_completion_in_both_shells_preserves_quoted_root",
+  "cause": "Zsh completed alice correctly, but test capture keys arrived before the PTY line editor owned input; captured raw control echoes and later correct candidate prove the harness readiness race.",
+  "repair_scope": "test-only: same10s bound and all candidate/buffer/quoted-root assertions; require termios ICANON/ECHO clear before sending next keys",
+  "repair_verification": {
+    "python3.11": {
+      "tests": 7,
+      "result": "PASS",
+      "seconds": 12.037
+    },
+    "python3.12": {
+      "tests": 7,
+      "result": "PASS",
+      "seconds": 12.179
+    }
+  },
+  "product_changes_after_frozen_source": false,
+  "remaining_failures": false,
+  "qualification": "Composite evidence: all other full-suite cases passed; sole failing harness repaired and affected module passed both versions. No claim of an additional single clean full run.",
+  "prior_nine_failures": "All passed in this complete serial run as well as the bounded exact05 isolated audit; original first-full311 failure retained. No historical contention cause asserted.",
+  "production_touched": false,
+  "repair_worker": "ca88d04a2fc2ddb6b0cbdc99f02043befefa9b00",
+  "repair_integrated": "de2eb32"
+}

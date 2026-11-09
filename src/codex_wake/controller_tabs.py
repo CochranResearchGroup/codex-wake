@@ -10,12 +10,17 @@ from .tab_organization import TabOrganization, TabError, digest
 
 
 class ControllerTabs:
-    READS = frozenset(('tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
+    READS = frozenset(('tabs.format.status','tabs.format.inspect','tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
     MUTATIONS = frozenset(('tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input'))
 
-    def __init__(self, root, *, workspaces, host, environment):
+    def __init__(self, root, *, workspaces, host, environment, host_managed=False):
         self.root, self.workspaces = root, dict(workspaces)
         self.host, self.environment = host, environment
+        self.host_managed = host_managed
+
+    def format_target(self, *, scope='workspace', workspace=None):
+        from .tab_formatting import TabFormatting
+        return TabFormatting(self.root,tabs=self).target(scope=scope,workspace=workspace)
 
     def profile_owner(self):
         from .tab_profile_create import TabProfileCreate
@@ -26,6 +31,9 @@ class ControllerTabs:
         return TabReattach(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment)
 
     def execute(self, operation, arguments):
+        if operation.startswith('tabs.format.'):
+            from .tab_formatting import TabFormatting
+            return TabFormatting(self.root,tabs=self).execute(operation,arguments)
         if operation.startswith('tabs.reattach-'):
             return self.reattach_owner().execute(operation,arguments)
         if operation.startswith('tabs.recovery.'):
@@ -264,7 +272,7 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
     import stat
     from pathlib import Path
     from .controller_tab_adapters import (TmuxAttachmentTransport,
-        PsmuxAttachmentTransport, ConfiguredBridge, UnixInputBroker)
+        PsmuxAttachmentTransport, ConfiguredBridge, UnixInputBroker, UnavailableAttachmentTransport)
     from .shortcut_store import default_root
     root = default_root(root)
     path = root / 'controller-tabs.json'
@@ -274,7 +282,7 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
         from .tab_workspace_discovery import discover
         workspaces, diagnostics = discover()
         owner = ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
-                               environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name)
+                               environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name,host_managed=True)
         from .tab_traits import WorkspaceTraitsObserver
         for workspace in workspaces.values():
             workspace['observer']=WorkspaceTraitsObserver(root,workspace['transport'],workspace.get('privacy'))
@@ -299,7 +307,8 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
     for name,row in config['workspaces'].items():
         kind = row['kind']
         if kind in ('tmux','byobu'):
-            transport = TmuxAttachmentTransport(row['socket_path'],row['session_id'])
+            try:transport = TmuxAttachmentTransport(row['socket_path'],row['session_id'])
+            except FileNotFoundError:transport = UnavailableAttachmentTransport()
         elif kind in ('psmux','stdio'):
             transport = PsmuxAttachmentTransport(ConfiguredBridge(row['bridge_command']),generation=row['bridge_generation'])
         else:
@@ -315,4 +324,4 @@ def controller_tabs_from_root(root, *, host=None, environment=None):
         workspace['observer']=WorkspaceTraitsObserver(root,transport,workspace.get('privacy'))
         workspaces[name] = workspace
     return ControllerTabs(root,workspaces=workspaces,host=host or socket.gethostname(),
-                          environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name)
+                          environment=environment or os.environ.get('WSL_DISTRO_NAME') or os.name,host_managed=True)

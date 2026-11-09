@@ -188,6 +188,7 @@ class ProtectedOperations:
         'configuration.explain': ('configuration.observe', None, 'account'),
     }
 
+    READ_POLICIES.update({'tabs.format.'+v:('observe' if v in ('status','inspect') else 'control',None,None) for v in ('status','inspect','enable','pause','resume','rollback','reenable','reset','configure')})
     READ_POLICIES.update({'tabs.monitor.'+v:('observe' if v in ('status','refresh') else 'control',None,None) for v in ('start','status','refresh','stop')})
     READ_POLICIES.update({'tabs.policy.'+v:('observe' if v=='status' else 'control',None,None) for v in ('configure','status','enable','pause','disable','tick')})
     READ_POLICIES.update({'tabs.reattach-'+v:('observe' if v=='status' else 'control',None,None) for v in ('preview','apply','status')})
@@ -277,6 +278,12 @@ class ProtectedOperations:
             result=self.operations.execute(operation,arguments)
             target=result['result']['target'] if operation.endswith('preview') else tabs.recovery_target()
             if not permitted(actor,target):raise AuthError('insufficient_scope')
+        elif operation in ('tabs.format.status','tabs.format.inspect'):
+            tabs=self.operations.tabs
+            if tabs is None:raise InventoryError('configuration_unavailable','host presentation owner unavailable')
+            scope=tabs.format_target(scope=arguments.get('scope','workspace'),workspace=arguments.get('workspace'))
+            if not permitted(actor,scope):raise AuthError('insufficient_scope')
+            result=self.operations.execute(operation,arguments)
         elif operation=='tabs.policy.status':
             tabs=self.operations.tabs
             if tabs is None or not permitted(actor,tabs.policy_target()):

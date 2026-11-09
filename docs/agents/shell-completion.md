@@ -44,3 +44,8 @@ ambiguous activation markers and edited completion files are refused without
 overwriting them. Uninstall retains edited content and reports its paths;
 unrelated startup-file text and explicit user activation lines remain untouched.
 `--home PATH` is available for explicit alternate/disposable user homes.
+
+Formatting commands, including nested `tabs format rollback` and `reenable`, use
+the same parser-derived Bash/Zsh candidates. Native PowerShell supports the
+portable controller client, but PowerShell completion generation/installation is
+not currently provided. See [tab formatting](tab-formatting.md).

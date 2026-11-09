@@ -8586,3 +8586,96 @@ one data-only capability/help statement. All281 installed Python members match
 its immutable wheel. Earlier partial/failed fixtures remain source-attributed.
 No second broad review, provider/model prompt, production change, merge or
 deployment occurred. Review/evidence/ledger own exact source and package bounds.
+
+## Turn | 2026-11-08 | Tab formatting design interview started
+
+Operator approved grill-with-docs for Wake-owned formatting after merge/deploy.
+Retained one WSL service for both backends, with Windows-native hosting on the
+roadmap. Bounded read-only fact legwork confirmed tmux mechanisms and finite
+Windows bridge gaps; installed psmux formatting remains unqualified. No native
+psmux command, production formatting, service change or provider work performed.
+LOCAL-P210 holds settled decisions and the current interview frontier.
+
+## Turn | 2026-11-08 | Highlight precedence and future adapter direction
+
+Operator accepted type/state highlight precedence and requested future Claude
+Code, custom/open harnesses/models and Ollama support. LOCAL-P210 records these
+as future adapter/model-provider milestones. GLOSSARY distinguishes coding
+harness, model identity and inference provider; configured selection is not
+observed use. Label density, automatic activation/ownership and future model/
+provider display remain unsettled. No implementation or live changes performed.
+
+## Turn | 2026-11-08 | Formatting label and activation defaults confirmed
+
+Operator accepted compact type/profile/activity labels, optional model/provider
+badges and configurable rules, automatic owned-tab decoration, global/workspace
+opt-out, manual name preservation and conditional style restoration. Remaining
+frontier concerns refresh/freshness, mixed panes and manual theme precedence.
+LOCAL-P210 remains an interview, not implementation or runtime authority.
+
+## Turn | 2026-11-09 | Refresh, mixed panes and theme precedence confirmed
+
+Operator accepted event-driven updates with roughly five-second polling fallback,
+twenty-second staleness, native immediate selection, mixed-pane attention
+aggregation and explicit unknown health. Manual styling changes pause decoration
+for the affected scope until explicit resume; observations continue. LOCAL-P210
+now narrows the frontier to controls/details, reconnect/fallback and installed
+backend acceptance. No runtime changes performed.
+
+## Turn | 2026-11-09 | Display controls and one-command reversal agreed
+
+Operator accepted persistent CLI/API/MCP controls, reconnect/fallback behavior and
+installed-backend acceptance, and required one-command rollback/re-enable.
+LOCAL-P210 records a durable pre-decoration baseline with exact original option
+restoration, explicit partial failures and no baseline replacement on re-enable.
+Shared-design readback remains; no implementation or runtime change performed.
+
+## Turn | 2026-11-09 | Formatting spec517 implementation started
+
+Published spec517 and seven child tickets518–524; native blocker/sub-issue links
+read back. Primary validated reversible tmux foundation518 with public CLI and
+portable contract checks (3 formatting,5 contract tests); initial red and green
+logs retained. Exact originals survive rollback/re-enable and partial restoration
+retry. Workers519/520/521 use isolated worktrees from bf1f6b5; three substantive
+lanes maximum. Native psmux option inheritance and clock-expression differences
+are under bounded qualification; no production backend settings changed.
+
+## Turn | 2026-11-09 | Native formatting and expiry slices validated
+
+Integrated519 Windows finite bridge with exact local/inherited originals and
+read-back native PowerShell/WSL/MCP acceptance; owned namespace cleanup confirmed.
+Integrated520 automatic projection/native clock expiry and521 mixed-pane visual
+projection; persisted details expose provenance through inspect. Tracker518–521
+closed for integration-branch delivery.40-tab tmux measurement6.211s is retained
+as a bounded result, not a5s cadence guarantee. Workers522/523 own persistent
+policy/theme holds and installed rendering/fallback;524 remains blocked on them.
+
+## Turn | 2026-11-09 | Persistent policy and scope guards validated
+
+Integrated522 preference/theme ownership, then corrected cross-workspace policy
+pin admission and missing-terminal global optout at the public entrypoint.
+26formatting checks pass on3.12;25 before final pin test pass on3.11.
+Native523 console qualification now observes actual Windows tab labels/selection;
+final colour-mode/escaping matrix remains in progress.524 waits on that evidence.
+No broad review or findings-remediation pass has run yet.
+
+## Turn | 2026-11-09 | Integrated acceptance catches startup gap
+
+Tickets518–523 are validated/closed.524 immutable package/transport/docs and full
+local gates are running. Named acceptance found enable/reenable did not start
+the monitor, leaving first setup stale after20s; bounded factory-owned startup
+fix is in a separate worker checkout while source05 full gates remain frozen.
+Nested partial CLI status propagation is also a focused acceptance correction.
+These are pre-closure integration fixes; broad review and findings TDD counters
+remain0. Production formatting/services remain untouched.
+
+
+## 2026-11-09 | P210 final integration closeout (#517)
+
+All seven tickets #518–#524 closed on feat/tab-formatting-517. One broad review and
+one TDD findings pass resolved four findings (two P2 blockers, two P3 cleanups).
+Runtime4a5aa6d passes73 focused tests each Python3.11/3.12 and the exact rebuilt
+wheel passes installed Byobu/psmux CLI/API/MCP and native PowerShell checks.
+Earlier full-suite failures and targeted test-only repairs remain preserved as
+composite qualification. See docs/dev/evidence/plan0210/review/final-report.md
+and ledger.json. No paid hosted CI, merge, production activation or provider work.

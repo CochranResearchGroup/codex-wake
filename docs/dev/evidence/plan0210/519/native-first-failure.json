@@ -1,0 +1,9 @@
+{
+  "status": "failed",
+  "namespace": "wake519-104995773b48",
+  "checks": [],
+  "error_type": "CalledProcessError",
+  "message": "Command '['/mnt/c/Users/ecoch/AppData/Local/codex-wake-test/controller405-20261030/venv/Scripts/python.exe', '\\\\\\\\wsl.localhost\\\\Ubuntu\\\\tmp\\\\codex-wake-format-519\\\\src\\\\codex_wake\\\\tab_psmux_bridge.py', '--namespace', 'wake519-104995773b48', '--session', 'source', '--describe']' returned non-zero exit status 1.",
+  "provider_calls": 0,
+  "production_touched": false
+}

@@ -1,0 +1,19 @@
+{
+  "ticket": 522,
+  "phase": "unfinished acceptance before broad review",
+  "defect": "A granted expected_target for one workspace could accompany a different workspace argument and change that workspace's preferences before target validation.",
+  "fix": "Validate every supplied workspace configure pin against the selected workspace's current target before saving policy. Trusted direct owner calls without a supplied pin retain backend-free preference access. Global configure remains independently pinned.",
+  "red_command": "PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p test_tab_format_scope.py -q",
+  "red_result": "1 failed: ProtectedOperations admitted cross-workspace configuration, reason was null",
+  "red_log": "/tmp/p522-scope-red.log",
+  "green_command": "PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p test_tab_format_scope.py -q",
+  "green_result": "1 passed: mismatched workspace refused before preference save; correctly scoped workspace configuration still succeeds",
+  "green_log": "/tmp/p522-scope-green.log",
+  "regression_command": "PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p test_tab_format_policy.py -q",
+  "regression_result": "9 passed",
+  "regression_log": "/tmp/p522-scope-policy.log",
+  "global_offline_integration": "Coordinator reports 09f2c73 fixes eager factory failure for missing configured tmux sockets; that commit is outside this worker checkout and must be validated on integration.",
+  "workspace_offline": "Remote supplied workspace pins require a currently observable presentation. Use the independent global opt-out when a configured backend is offline.",
+  "production_touched": false,
+  "broad_review_runs": 0
+}

@@ -1,0 +1,23 @@
+{
+  "ticket": 521,
+  "base": "bf1f6b5",
+  "branch": "feat/tab-format-521",
+  "seam": "public pure project(resource, policy, now) and existing ControllerTabs execution on disposable installed tmux",
+  "tier": "focused",
+  "commands": [
+    {"command": "PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p test_tab_format_projection.py -q", "red": "1 test failed: mixed fresh error projected as SH", "green": "5 tests passed", "logs": ["/tmp/p521-red1.log", "/tmp/p521-green1.log", "/tmp/p521-red2.log", "/tmp/p521-green2.log", "/tmp/p521-native-green.log"]},
+    {"command": "PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p test_tab_formatting.py -q", "result": "3 tests passed", "log": "/tmp/p521-controller.log"}
+  ],
+  "red_green_cycles": [
+    "Mixed-pane attention: SH instead of MIX/error -> independently fresh error precedence and per-pane details implemented",
+    "Activity intensity: RUN and IDLE identical styles -> bold running/attention and dim idle/unknown styles"
+  ],
+  "native_fact": "tmux expands format expressions while accepting new-session/rename-window names; escaped creation seeded a literal expression, then stored #W remained nonrecursive. Metadata hash expressions remained literal and all four options were accepted.",
+  "retained_diagnostic": {"log": "/tmp/p521-native.log", "classification": "test fixture initially passed unescaped format expression to new-session; fixed seed to preserve literal name; product not changed for fixture mismatch"},
+  "scope": ["pure visual projection", "projection tests", "this receipt"],
+  "production_touched": false,
+  "external_inference": false,
+  "limitations": ["No installed psmux qualification in this ticket", "Final capability/ASCII fallback belongs to ticket523", "Model/provider traits render only when qualified input supplies them; this slice starts no new adapter", "Primary must persist project details in formatting window records for inspect visibility"],
+  "memory_disposition": "forbidden",
+  "memory_reason": "No explicit user request authorizing a memory write"
+}

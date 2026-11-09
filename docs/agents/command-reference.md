@@ -4197,6 +4197,493 @@ Examples:
 |---|---|---|
 | `name` | yes | name. |
 
+## tabs format status
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_format_status`).
+
+```sh
+codex-wake --wake-root ROOT tabs format-status --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs format-status [-h] [--arguments ARGUMENTS] [--json]
+                                     [--scope {workspace,global}]
+                                     [--workspace WORKSPACE]
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --scope {workspace,global}
+                        Workspace display control (default) or global display
+                        policy; global requires a matching formatting
+                        authority grant.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs format-status --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `workspace` | no | workspace. |
+| `scope` | no | scope. |
+
+## tabs format inspect
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_format_inspect`).
+
+```sh
+codex-wake --wake-root ROOT tabs format-inspect --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs format-inspect [-h] [--arguments ARGUMENTS] [--json]
+                                      [--scope {workspace,global}]
+                                      [--workspace WORKSPACE]
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --scope {workspace,global}
+                        Workspace display control (default) or global display
+                        policy; global requires a matching formatting
+                        authority grant.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs format-inspect --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `workspace` | no | workspace. |
+| `scope` | no | scope. |
+
+## tabs format enable
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_format_enable`).
+
+```sh
+codex-wake --wake-root ROOT tabs format-enable --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs format-enable [-h] [--arguments ARGUMENTS] [--json]
+                                     [--request-id REQUEST_ID]
+                                     [--expected-target EXPECTED_TARGET]
+                                     [--scope {workspace,global}]
+                                     [--workspace WORKSPACE]
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --scope {workspace,global}
+                        Workspace display control (default) or global display
+                        policy; global requires a matching formatting
+                        authority grant.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs format-enable --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `workspace` | no | workspace. |
+| `scope` | no | scope. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs format pause
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_format_pause`).
+
+```sh
+codex-wake --wake-root ROOT tabs format-pause --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs format-pause [-h] [--arguments ARGUMENTS] [--json]
+                                    [--request-id REQUEST_ID]
+                                    [--expected-target EXPECTED_TARGET]
+                                    [--scope {workspace,global}]
+                                    [--workspace WORKSPACE]
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --scope {workspace,global}
+                        Workspace display control (default) or global display
+                        policy; global requires a matching formatting
+                        authority grant.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs format-pause --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `workspace` | no | workspace. |
+| `scope` | no | scope. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs format resume
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_format_resume`).
+
+```sh
+codex-wake --wake-root ROOT tabs format-resume --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs format-resume [-h] [--arguments ARGUMENTS] [--json]
+                                     [--request-id REQUEST_ID]
+                                     [--expected-target EXPECTED_TARGET]
+                                     [--scope {workspace,global}]
+                                     [--workspace WORKSPACE]
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --scope {workspace,global}
+                        Workspace display control (default) or global display
+                        policy; global requires a matching formatting
+                        authority grant.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs format-resume --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `workspace` | no | workspace. |
+| `scope` | no | scope. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs format rollback
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_format_rollback`).
+
+```sh
+codex-wake --wake-root ROOT tabs format-rollback --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs format-rollback [-h] [--arguments ARGUMENTS] [--json]
+                                       [--request-id REQUEST_ID]
+                                       [--expected-target EXPECTED_TARGET]
+                                       [--scope {workspace,global}]
+                                       [--workspace WORKSPACE]
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --scope {workspace,global}
+                        Workspace display control (default) or global display
+                        policy; global requires a matching formatting
+                        authority grant.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs format-rollback --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `workspace` | no | workspace. |
+| `scope` | no | scope. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs format reenable
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_format_reenable`).
+
+```sh
+codex-wake --wake-root ROOT tabs format-reenable --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs format-reenable [-h] [--arguments ARGUMENTS] [--json]
+                                       [--request-id REQUEST_ID]
+                                       [--expected-target EXPECTED_TARGET]
+                                       [--scope {workspace,global}]
+                                       [--workspace WORKSPACE]
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --scope {workspace,global}
+                        Workspace display control (default) or global display
+                        policy; global requires a matching formatting
+                        authority grant.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs format-reenable --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `workspace` | no | workspace. |
+| `scope` | no | scope. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs format reset
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_format_reset`).
+
+```sh
+codex-wake --wake-root ROOT tabs format-reset --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs format-reset [-h] [--arguments ARGUMENTS] [--json]
+                                    [--request-id REQUEST_ID]
+                                    [--expected-target EXPECTED_TARGET]
+                                    [--scope {workspace,global}]
+                                    [--workspace WORKSPACE]
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --scope {workspace,global}
+                        Workspace display control (default) or global display
+                        policy; global requires a matching formatting
+                        authority grant.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs format-reset --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `workspace` | no | workspace. |
+| `scope` | no | scope. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs format configure
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_format_configure`).
+
+```sh
+codex-wake --wake-root ROOT tabs format-configure --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs format-configure [-h] [--arguments ARGUMENTS] [--json]
+                                        [--request-id REQUEST_ID]
+                                        [--expected-target EXPECTED_TARGET]
+                                        [--policy POLICY]
+                                        [--scope {workspace,global}]
+                                        [--workspace WORKSPACE]
+
+Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced JSON object of operation arguments; preserved
+                        for scripts. See generated command reference.
+  --json                Emit structured results for this command.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --expected-target EXPECTED_TARGET
+                        Exact target JSON from the corresponding resolve, list
+                        or status command; replacement is refused.
+  --policy POLICY       Persistent display policy JSON.
+  --scope {workspace,global}
+                        Workspace display control (default) or global display
+                        policy; global requires a matching formatting
+                        authority grant.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+
+Examples:
+  codex-wake --wake-root ROOT tabs format-configure --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `workspace` | no | workspace. |
+| `scope` | no | scope. |
+| `policy` | no | policy. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
 ## tabs result
 
 Read a retained local UID-owned tab request after disconnect or workspace closure.

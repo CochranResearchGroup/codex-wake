@@ -1,0 +1,27 @@
+{
+  "previous_source": "fff5d24ac0f9b9cb706aea5c6b2b0babb7c57b68",
+  "source": "4a5aa6dbf424e7a3c25238707c81ac98d105c8b3",
+  "changed_members": {
+    "codex_wake/tab_formatting.py": {
+      "previous": "9afabe359eaad8e72dea2f35daa9fe29cd0c00c5a333ed6b3bcabf3b1ee23704",
+      "current": "daf7eac04919a156dc9e6cf733e28670ed5e7c36c7aad1a3c5b6222e5d5af3cc"
+    },
+    "codex_wake/tab_psmux_bridge.py": {
+      "previous": "8663d27be7c974edb6a2b6ba032305e8286468ae39389c98344b63a645a08c4a",
+      "current": "9273745f40c3925e8dfe57d0a6ae4c119571bfa272d70d59d26a15281c6de065"
+    }
+  },
+  "reused_members": {
+    "codex_wake/tab_format_projection.py": "8cc9b1a6495529b77baef7aa57b40eeeb001a3d29b58d65b9629c51bc71ce4b0",
+    "codex_wake/tab_format_expiry.py": "ee89a75e236b43dc90b346e666e404e4cc72bf1782aa2b7bc43435ddc1ffd1a8",
+    "codex_wake/tab_format_rendering.py": "9c945a624a1a0f620fe14215f7ba1cdd28f5cfc4aa3024443b4a4ca4f2a731d5",
+    "codex_wake/controller_tab_adapters.py": "047fb5c6b4f1e399a530d20554b947466cdb7f9fc01206c01725d75acf914d00",
+    "codex_wake/controller_client.py": "ef20db8e05b8d81ee545fae1334ece3d3eea91359262e307a490d0727db9b673",
+    "codex_wake/tab_result.py": "19402c74176b0311658d890765b74b29bf561384f876aa41b15bbb75de161518",
+    "codex_wake/tab_contract.py": "7f4a793b6650c89eda1f1d1f0770cb5de015f348de78858882a1d4a5092ff7a2",
+    "codex_wake/command_contract.py": "3d9bdedfe8f6b7102d859880aba0530494bdbef8a209bba7f1915e8979e06e35"
+  },
+  "causal_reuse": "Projection, expiry, rendering, terminal adapters, portable client, exit helper and command schemas remain byte-identical to qualifiedfff. Formatter linked-window reversal guard is covered by primary real public tmux red/green and installed public rollback. Standalone bridge finite tuples moved to constants with semantics covered by primary finite protocol tests and this final native frontend new-byte roundtrip.",
+  "rendering_receipt": "docs/dev/evidence/plan0210/523/final-native-matrix.json",
+  "rendering_source_link": "docs/dev/evidence/plan0210/524/rendering-reuse.json"
+}

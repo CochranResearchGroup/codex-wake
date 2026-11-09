@@ -121,7 +121,12 @@ def execute_cli(args):
     """Shared bounded caller behavior for portable and full native CLI parsers."""
     try:
         value,failed=invoke(args.endpoint,args.token_file,args.operation,args.arguments,transport=args.transport)
-        print(json.dumps(value,sort_keys=True));return 2 if failed else 0
+        print(json.dumps(value,sort_keys=True))
+        if failed:return 2
+        if args.operation.startswith('tabs.'):
+            from .tab_result import exit_status
+            return exit_status(value)
+        return 0
     except (ClientError,OSError,URLError,ValueError):
         error=sys.exception()
         code=error.code if isinstance(error,ClientError) else 'controller_unavailable'

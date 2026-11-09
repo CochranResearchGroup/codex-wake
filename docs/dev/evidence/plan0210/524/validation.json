@@ -1,0 +1,148 @@
+{
+  "state": "validated_composite_local_and_installed",
+  "source_runtime": "fff5d24ac0f9b9cb706aea5c6b2b0babb7c57b68",
+  "full_runtime": "05f1d88cbdc321fbdf1ca5a998a30d96c0b171a8",
+  "full_worktree_note": "Python runtime files remained05; documentation/harness checkpoint17109 committed in same worktree during execution. This was not a whole-Git-input immutable run.",
+  "first_full": {
+    "311": {
+      "tests": 2239,
+      "skipped": 1,
+      "failures": 4,
+      "errors": 5,
+      "exit_code": 1,
+      "unittest_seconds": 1931.697,
+      "initial_unresolved": [
+        "test_auto_connection_api_and_mcp_share_owned_discovery",
+        "test_manual_style_hold_survives_reenable_and_restart_until_explicit_resume",
+        "test_namespace_alias_cannot_capture_decorated_settings_as_another_original",
+        "test_theme_parent_changes_hold_and_rollback_preserves_new_global_theme",
+        "test_workspace_preferences_reset_without_discarding_original_custody",
+        "test_refresh_uses_existing_sample_and_reports_unavailable_without_extending_ttl",
+        "test_global_optout_dominates_workspace_override_and_inspection_keeps_details",
+        "test_default_disabled_then_debounced_opt_in_effect_is_reversible",
+        "test_trait_grouping_physically_reorders_and_conditionally_undoes"
+      ],
+      "reconciled_by": "serial-full-311-reconciliation.json"
+    },
+    "312": {
+      "tests": 2239,
+      "skipped": 1,
+      "failures": 0,
+      "errors": 0,
+      "exit_code": 0,
+      "unittest_seconds": 1221.808,
+      "runner_receipt_elapsed_note": "runner waited311 before collecting312, so raw receipt elapsed1934.889 overstates actual312 unittest duration"
+    }
+  },
+  "primary_focused": {
+    "0dbb3dc": {
+      "tests_each": 58,
+      "python311_seconds": 41.123,
+      "python312_seconds": 40.636,
+      "logs": [
+        "/tmp/p210-postfix-311.log",
+        "/tmp/p210-postfix-312.log"
+      ]
+    },
+    "fff5d24": {
+      "tests_each": 7,
+      "python311_seconds": 5.966,
+      "python312_seconds": 5.991,
+      "logs": [
+        "/tmp/p210-remote-postfix-311.log",
+        "/tmp/p210-remote-postfix-312.log"
+      ]
+    }
+  },
+  "static": {
+    "source": "fff5d24",
+    "ruff_F821_F822_F823": "passed",
+    "compileall": "passed",
+    "policy_wiring": "passed",
+    "active_planning": "passed_with_documented_existing_baseline",
+    "generated_reference": "passed"
+  },
+  "failure_history": [
+    {
+      "kind": "harness_assumption",
+      "path": "/tmp/p210-524-installed.log",
+      "reason": "Invalid mutation journal was conservatively uncertain, not MCP is_errorTrue; compare canonicalreason plus no-policy-mutation."
+    },
+    {
+      "kind": "powershell_quoting",
+      "path": "/tmp/p210-524-installed-v2.log",
+      "reason": "WindowsPowerShell5 native argument quotes stripped; verified native escaping documented."
+    },
+    {
+      "kind": "harness_cleanup_unwrap",
+      "path": "/tmp/p210-524-installed-final0db.log",
+      "reason": "Monitor-stop is journaled; cleanup already called before wrong bare-envelope indexing; fixed harness only."
+    },
+    {
+      "kind": "unclassified_bounded_native_transient",
+      "path": "/tmp/p210-524-native519-final0db.json",
+      "reason": "Early configured nativeCLI observation held; retained, not causally attributed to infrastructure."
+    },
+    {
+      "kind": "unclassified_bounded_native_transient",
+      "path": "/tmp/p210-524-native519-final0db-v2.json",
+      "reason": "Nested PowerShell-wslCLI rollback reported partial; direct nativePowerShellHTTP/MCP route separately qualified."
+    },
+    {
+      "kind": "unclassified_bounded_native_transient",
+      "path": "/tmp/p210-524-installed-psmux0db.log",
+      "reason": "Late directpsmux status read held during first pipeline; retained, not erased by newfff candidate pass."
+    },
+    {
+      "kind": "interop_failure",
+      "path": "/tmp/p210-524-installed-render-final0db.log",
+      "reason": "Overlapping native render run returned WSLvsock accept4 timeout110; exact named namespaces reconciledempty; final matrix reused via byte-exact causal hash proof."
+    }
+  ],
+  "diagnostics": {
+    "default_vs_forced_relay": "/tmp/p210-native-relay-diagnostic.json",
+    "one_pane": "/tmp/p210-psmux-status-diagnostic.json",
+    "two_pane": "/tmp/p210-psmux-two-pane-diagnostic.json",
+    "verdict": "One/two-pane read-only probes did not reproduce transport exceptions or1.5s monitor expiry. Monitoring increased status latency. Two-pane Windows instrumentation recorded80starts/80exits and empty owned-helper-birth census afterstop; no orphan hypothesis established."
+  },
+  "no_deployment": true,
+  "production_touched": false,
+  "hosted_ci": "not_run_per_cost_policy",
+  "memory_disposition": "forbidden",
+  "coordinator_reconciliation": {
+    "source": "fff5d24ac0f9b9cb706aea5c6b2b0babb7c57b68",
+    "tier": "comprehensive_serial",
+    "tests": 2244,
+    "passed": 2242,
+    "skipped": 1,
+    "failures": 1,
+    "errors": 0,
+    "unittest_seconds": 1176.995,
+    "original_status": "failed",
+    "log_sha256": "efcfbae6f7eaa43894407ddf5fc4212ae5dae4524b75a73f77e11e07b2bba403",
+    "log": "/tmp/codex-wake-p210-311-final-gate/unit-311-final.log",
+    "completion": "/tmp/codex-wake-p210-311-final-gate/complete.json",
+    "sole_failure": "test_completion.CompletionTests.test_interactive_tab_completion_in_both_shells_preserves_quoted_root",
+    "cause": "Zsh completed alice correctly, but test capture keys arrived before the PTY line editor owned input; captured raw control echoes and later correct candidate prove the harness readiness race.",
+    "repair": "ca88d04a2fc2ddb6b0cbdc99f02043befefa9b00",
+    "repair_scope": "test-only: same10s bound and all candidate/buffer/quoted-root assertions; require termios ICANON/ECHO clear before sending next keys",
+    "repair_verification": {
+      "python3.11": {
+        "tests": 7,
+        "result": "PASS",
+        "seconds": 12.037
+      },
+      "python3.12": {
+        "tests": 7,
+        "result": "PASS",
+        "seconds": 12.179
+      }
+    },
+    "product_changes_after_frozen_source": false,
+    "remaining_failures": false,
+    "qualification": "Composite evidence: all other full-suite cases passed; sole failing harness repaired and affected module passed both versions. No claim of an additional single clean full run.",
+    "prior_nine_failures": "All passed in this complete serial run as well as the bounded exact05 isolated audit; original first-full311 failure retained. No historical contention cause asserted.",
+    "production_touched": false
+  },
+  "status": "validated_composite_local_and_installed"
+}

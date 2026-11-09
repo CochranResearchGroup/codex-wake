@@ -1,0 +1,53 @@
+{
+  "receipt": "docs/dev/evidence/plan0210/523/final-native-matrix.json",
+  "candidate": "fff5d24ac0f9b9cb706aea5c6b2b0babb7c57b68",
+  "checks": {
+    "src/codex_wake/tab_format_projection.py": {
+      "expected": "8cc9b1a6495529b77baef7aa57b40eeeb001a3d29b58d65b9629c51bc71ce4b0",
+      "actual": "8cc9b1a6495529b77baef7aa57b40eeeb001a3d29b58d65b9629c51bc71ce4b0",
+      "matches": true
+    },
+    "src/codex_wake/tab_format_expiry.py": {
+      "expected": "ee89a75e236b43dc90b346e666e404e4cc72bf1782aa2b7bc43435ddc1ffd1a8",
+      "actual": "ee89a75e236b43dc90b346e666e404e4cc72bf1782aa2b7bc43435ddc1ffd1a8",
+      "matches": true
+    },
+    "src/codex_wake/tab_format_rendering.py": {
+      "expected": "9c945a624a1a0f620fe14215f7ba1cdd28f5cfc4aa3024443b4a4ca4f2a731d5",
+      "actual": "9c945a624a1a0f620fe14215f7ba1cdd28f5cfc4aa3024443b4a4ca4f2a731d5",
+      "matches": true
+    },
+    "src/codex_wake/tab_psmux_bridge.py": {
+      "expected": "8663d27be7c974edb6a2b6ba032305e8286468ae39389c98344b63a645a08c4a",
+      "actual": "8663d27be7c974edb6a2b6ba032305e8286468ae39389c98344b63a645a08c4a",
+      "matches": true
+    },
+    "src/codex_wake/controller_tab_adapters.py": {
+      "expected": "2d39cf0cdc46e0c4cbdb3c846ff53abe6748afd72efaee3fec12caf31168043f",
+      "actual": "047fb5c6b4f1e399a530d20554b947466cdb7f9fc01206c01725d75acf914d00",
+      "matches": false
+    },
+    "scripts/tab_format_windows_capture523.py": {
+      "expected": "f57192192aaef233177a21ca09cbf1d7bb1b47eebb89f25e8cc0247b3c1dc33b",
+      "actual": "f57192192aaef233177a21ca09cbf1d7bb1b47eebb89f25e8cc0247b3c1dc33b",
+      "matches": true
+    },
+    "scripts/tab_format_render_acceptance523.py": {
+      "expected": "92fa5d30a270b78df00d79a19a14ae0d67cd7cee59093dc251b1014a792b8df5",
+      "actual": "92fa5d30a270b78df00d79a19a14ae0d67cd7cee59093dc251b1014a792b8df5",
+      "matches": true
+    }
+  },
+  "class_checks": {
+    "TmuxAttachmentTransport": {
+      "source_bytes_identical": true,
+      "sha256": "2edd4b0a67368381933d90c45f1efa348f77aaf57e0378e220b713ef591fb178"
+    },
+    "PsmuxAttachmentTransport": {
+      "source_bytes_identical": true,
+      "sha256": "1c4ad2e60f80d2db0835e93801393318738dd76655eb2c4946fb6108670783d8"
+    }
+  },
+  "material_difference": "controller_tab_adapters adds only UnavailableAttachmentTransport for absent sockets; both rendering transports are byte-identical to qualified523 classes.",
+  "causal_render_reuse": true
+}

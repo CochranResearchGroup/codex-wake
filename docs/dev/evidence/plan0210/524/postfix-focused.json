@@ -1,0 +1,41 @@
+{
+  "source": "0dbb3dc5ac9386b2a4bbd5f91c71bd894dcea9a3",
+  "tier": "focused",
+  "selection": [
+    "test_tab_format*.py",
+    "test_tab_psmux_formatting.py",
+    "test_tab_monitor*.py",
+    "test_controller_tabs.py",
+    "test_tab_contract.py",
+    "test_tab_lifecycle_cli.py",
+    "test_command_contract.py"
+  ],
+  "environment": "Local WSL, isolated fixture roots; no hosted CI",
+  "results": [
+    {
+      "python": "3.11",
+      "tests": 58,
+      "result": "PASS",
+      "seconds": 41.123,
+      "log": "/tmp/p210-postfix-311.log"
+    },
+    {
+      "python": "3.12",
+      "tests": 58,
+      "result": "PASS",
+      "seconds": 40.636,
+      "log": "/tmp/p210-postfix-312.log"
+    }
+  ],
+  "cli_partial_regression": {
+    "red": "/tmp/p210-partial-red.log",
+    "green": "/tmp/p210-partial-green-final.log",
+    "command": "PYTHONPATH=.:src /tmp/codex-wake-p210-py312/bin/python -m unittest discover -s tests -p test_tab_format_cli_status.py -q",
+    "before": "Retained partial/unqualified monitor exited0",
+    "after": "Same public partial outcome exits3; exact fixture monitor PID retained",
+    "fixture": "Owned real publisher paused during legacy-capability record injection, then continued and stopped safely",
+    "initial_harness_note": "Initial red/green discovery imported a fixture TestCase and ran4 tests; final module-import form avoids duplicate discovery and runs1 dedicated test"
+  },
+  "production_touched": false,
+  "external_inference": false
+}
