@@ -1,0 +1,140 @@
+# Tab formatting
+
+Wake can decorate owned Byobu/tmux and native Windows psmux tabs from one WSL
+controller. It preserves your tab names, placement, conversations and processes.
+Plain `codex` remains stock Codex. No model request is needed to draw a tab.
+
+## Everyday commands
+
+Use your remembered controller; no `WAKE_ROOT` environment variable is needed.
+List workspaces, then select one ID or unique label:
+
+```sh
+codex-wake tabs list
+codex-wake tabs format status --workspace WORKSPACE
+codex-wake tabs format enable --workspace WORKSPACE
+codex-wake tabs format inspect --workspace WORKSPACE
+```
+
+The existing tab monitor automatically decorates sampled owned tabs when the
+persistent policy permits it. Start it with `codex-wake tabs monitor-start` if it
+is not already running; inspect it with `tabs monitor-status`. Defaults are a
+five-second interval, bounded probes and a ten-second whole-cycle budget.
+These are scheduling targets, not a promise that every workspace updates in five
+seconds under load. An isolated forty-tab tmux acceptance run completed successive
+cycles in roughly seven seconds. Unavailable/over-budget observations report
+partial results and do not extend freshness.
+
+Labels show harness/build, profile when known, activity and your existing name.
+`CX` is stock Codex, `CX+` is modded Codex, `GK` is Grok, `SSH` is a remote shell,
+and `MIX` marks mixed panes. Inspect returns pane observations and the last
+projection. Unknown health remains unknown; a shell is not unhealthy simply
+because it lacks agent health telemetry.
+
+Fresh error overrides health warning, then waiting, then the type/activity base
+colour. The type badge remains visible. Selection uses native current-tab
+formatting with brackets and a bold/underline cue. Twenty-second native expiry
+adds `STALE` and a neutral appearance if observations stop, even when Wake dies.
+Actual visibility also follows the backend's redraw interval, which Wake bounds
+at five seconds while decoration owns it.
+
+## One-command rollback and re-enable
+
+```sh
+codex-wake tabs format rollback --workspace WORKSPACE
+codex-wake tabs format reenable --workspace WORKSPACE
+```
+
+Rollback stops automatic reapplication for that workspace and restores the
+original affected settings captured before the first decoration, including
+unset/inherited options. It restores those original values even if you manually
+edited an affected setting afterward. Re-enable reapplies saved Wake preferences
+without replacing that original baseline. Neither command needs a service restart
+or a theme-file edit. Repeating rollback is safe.
+
+The baseline covers the four window format/style options and the session refresh
+interval/native-clock option. Unrelated settings remain yours. A missing baseline,
+changed namespace identity or incomplete native readback is an error or partial
+result, never a successful restoration. Inspect failures before retrying; preserve
+the baseline for recovery. The commands act on one selected workspace, not every
+terminal on the machine.
+
+## Policy and manual changes
+
+```sh
+codex-wake tabs format configure --scope global --policy '{"enabled":false}'
+codex-wake tabs format configure --scope global --policy '{"enabled":true}'
+codex-wake tabs format configure --workspace WORKSPACE --policy '{"enabled":false}'
+codex-wake tabs format configure --workspace WORKSPACE --policy '{"show_model":true,"show_provider":true}'
+codex-wake tabs format pause --workspace WORKSPACE
+codex-wake tabs format resume --workspace WORKSPACE
+```
+
+Global opt-out takes precedence over workspace opt-in. Configuration changes
+persist; disabling a policy stops future application but does not restore old
+styles—use rollback for restoration. Pause leaves the current decoration in place.
+Reset restores original settings and removes workspace preference overrides while
+retaining the original baseline. Re-enable retains preferences; resume is the
+explicit action that clears manual-style holds.
+
+Manual renaming works normally. Editing an affected local or parent/global theme
+setting makes Wake yield for that scope; observations continue. Refresh/reconnect
+and ordinary enable/re-enable respect those holds. After reviewing the new theme,
+use resume to let Wake decorate again. A rolled-back workspace stays disabled
+across monitor restart/reconnect until explicitly re-enabled.
+
+Model and inference provider are optional reported dimensions, separate from the
+coding harness, profile and execution host. Configured selection is not proof of
+observed use. Claude Code, custom/open harnesses and Ollama are future adapter
+families; merely naming one does not grant health, prompt or lifecycle support.
+
+## Rendering and platform limits
+
+```sh
+codex-wake tabs format configure --workspace WORKSPACE --policy '{"render_mode":"basic"}'
+codex-wake tabs format configure --workspace WORKSPACE --policy '{"render_mode":"plain","ascii":true}'
+```
+
+`full` uses the palette supported by the terminal; `basic` restricts colours;
+`plain` retains text and selection cues without state colour. ASCII metadata is
+the default. Unicode display-cell bounds are conservative; grapheme appearance
+and colour fidelity depend on the client. User names remain native names. Literal
+metadata is escaped; installed psmux displays a separating space in `#[` metadata
+to prevent its second-stage style parser treating it as an instruction.
+
+Qualification covers installed tmux 3.4 / Byobu 6.11 and psmux executable SHA256
+`bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca` in disposable
+namespaces, including actual attached clients. A backend name or a different
+binary does not inherit that qualification. Capability inspection distinguishes
+protocol support, observed identity and client-rendering acceptance. Linked
+windows and changed namespace identities are held rather than changing another
+workspace. A Windows-native server is future work; current Windows clients talk
+to the WSL authority.
+
+## CLI, API and MCP
+
+`tabs format --help` and each verb's `--help` come from the shared command parser.
+Flat `tabs format-rollback` aliases remain available. Bash/Zsh completion uses that
+same parser; the supported installer activates it. Native PowerShell clients use
+the portable `controller remote` interface with `tabs.format.*` operation names:
+
+```powershell
+# Windows PowerShell 5.x needs embedded quotes escaped for native executables.
+$Arguments = '{"workspace":"WORKSPACE"}'.Replace('"', '\"')
+codex-wake controller remote --endpoint $Endpoint --token-file $TokenFile --transport api tabs.format.status --arguments $Arguments
+```
+
+Use `--transport mcp` for OAuth MCP. Mutations require the exact `expected_target`
+from status/inspect plus the common `_request` intent envelope; ordinary local WSL
+CLI resolves those pins. Registered MCP tools are `wake_tabs_format_STATUS`, with
+the lowercase verb substituted, for example `wake_tabs_format_rollback`. Remote
+calls retain existing authentication/scoped-authority requirements. PowerShell
+completion generation is not currently provided. See the [generated command
+reference](command-reference.md) and [completion installation](shell-completion.md).
+
+Mutation replies retain the common operation journal. Inspect the operation's
+`phase`, `reason` and `result`; an admitted rejection can be conservatively
+reported as `uncertain` with `reason: invalid_argument`. A successful HTTP/MCP
+exchange or a false MCP transport-error flag alone does not prove the formatting
+operation succeeded. Local CLI returns3 for uncertain work; use the retained
+request result to reconcile rather than blindly resubmitting an effect.

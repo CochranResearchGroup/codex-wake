@@ -206,6 +206,15 @@ CLI/API/MCP slice and its explicit exceptions.
 The [everyday shortcuts](docs/agents/account-shortcuts.md) add `open ACCOUNT`,
 `resume ACCOUNT`, recent browsing and frozen recent-conversation copies.
 
+## Tab formatting
+
+Use `codex-wake tabs format enable --workspace WORKSPACE` for type/activity badges
+and state-sensitive highlights on owned Byobu/tmux and Windows psmux tabs.
+`tabs format rollback --workspace WORKSPACE` restores original settings in one
+command; `tabs format reenable --workspace WORKSPACE` reapplies saved preferences.
+See the [formatting workflow](docs/agents/tab-formatting.md) for automatic updates,
+manual-style holds, rendering fallbacks and CLI/API/MCP controls.
+
 ## Local WSL session control
 
 Use the [local controller workflow](docs/agents/local-session-control.md) for WSL,

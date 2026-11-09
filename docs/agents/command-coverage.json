@@ -49,6 +49,15 @@
     "tabs.close",
     "tabs.create",
     "tabs.focus",
+    "tabs.format.configure",
+    "tabs.format.enable",
+    "tabs.format.inspect",
+    "tabs.format.pause",
+    "tabs.format.reenable",
+    "tabs.format.reset",
+    "tabs.format.resume",
+    "tabs.format.rollback",
+    "tabs.format.status",
     "tabs.group-delete",
     "tabs.group-list",
     "tabs.group-save",
@@ -465,7 +474,16 @@
     "tabs.view-evaluate": "wake_tabs_view_evaluate",
     "tabs.view-list": "wake_tabs_view_list",
     "tabs.view-save": "wake_tabs_view_save",
-    "tabs.view-show": "wake_tabs_view_show"
+    "tabs.view-show": "wake_tabs_view_show",
+    "tabs.format.status": "wake_tabs_format_status",
+    "tabs.format.inspect": "wake_tabs_format_inspect",
+    "tabs.format.enable": "wake_tabs_format_enable",
+    "tabs.format.pause": "wake_tabs_format_pause",
+    "tabs.format.resume": "wake_tabs_format_resume",
+    "tabs.format.rollback": "wake_tabs_format_rollback",
+    "tabs.format.reenable": "wake_tabs_format_reenable",
+    "tabs.format.reset": "wake_tabs_format_reset",
+    "tabs.format.configure": "wake_tabs_format_configure"
   },
   "tab_capabilities": {
     "selected_profile_create": {

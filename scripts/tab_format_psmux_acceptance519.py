@@ -92,10 +92,10 @@ print(json.dumps(dict(rc=r.returncode,out=r.stdout,err=r.stderr)))
         reply=subprocess.run([POWERSHELL,'-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',encoded],input=json.dumps(request),text=True,capture_output=True,timeout=25,check=True)
         observed=json.loads(reply.stdout.lstrip('\ufeff'));assert observed['generation']==description['generation'] and 'result' in observed,observed
         checks.append('actual-powershell-pinned-native-formatting-read')
-        command="$ErrorActionPreference='Stop';$r=[Console]::In.ReadToEnd()|ConvertFrom-Json;& wsl.exe --distribution $r.distro --user $r.user --exec /usr/bin/env ('PYTHONPATH='+$r.source) $r.python -m codex_wake.entrypoint --wake-root $r.root tabs format-rollback --workspace work;if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}"
+        command="$ErrorActionPreference='Stop';$r=[Console]::In.ReadToEnd()|ConvertFrom-Json;if($r.installed){& wsl.exe --distribution $r.distro --user $r.user --exec /usr/bin/env -u PYTHONPATH $r.python -m codex_wake.entrypoint --wake-root $r.root tabs format-rollback --workspace work}else{& wsl.exe --distribution $r.distro --user $r.user --exec /usr/bin/env ('PYTHONPATH='+$r.source) $r.python -m codex_wake.entrypoint --wake-root $r.root tabs format-rollback --workspace work};if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}"
         import pwd
         distro=os.environ.get('WSL_DISTRO_NAME') or 'Ubuntu'
-        payload=dict(distro=distro,user=pwd.getpwuid(os.getuid()).pw_name,source=str(Path(tab_psmux_bridge.__file__).resolve().parents[1]),python=sys.executable,root=str(root))
+        payload=dict(distro=distro,user=pwd.getpwuid(os.getuid()).pw_name,source=str(Path(tab_psmux_bridge.__file__).resolve().parents[1]),python=sys.executable,root=str(root),installed=not bool(os.environ.get('PYTHONPATH')))
         encoded=base64.b64encode(command.encode('utf-16-le')).decode()
         reply=subprocess.run([POWERSHELL,'-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',encoded],input=json.dumps(payload),text=True,capture_output=True,timeout=35,check=True)
         value=json.loads(reply.stdout.lstrip('\ufeff'));assert value['result']['operation']['result']['status']=='rolled_back',value
