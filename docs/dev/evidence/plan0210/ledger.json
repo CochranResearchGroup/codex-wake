@@ -28,7 +28,9 @@
         "test_tab_contract: 5 passed"
       ],
       "red": "/tmp/p210-red1.log",
-      "green": "/tmp/p210-green-final.log"
+      "green": "/tmp/p210-green-final.log",
+      "result_sha": "bf1f6b5",
+      "tracker_state": "CLOSED"
     },
     {
       "index": 2,
@@ -38,8 +40,11 @@
       "blockers": [
         518
       ],
-      "state": "pending",
-      "owner": null
+      "state": "running",
+      "owner": "/root/format519",
+      "worker_base": "bf1f6b5",
+      "branch": "feat/tab-format-519",
+      "worktree": "/tmp/codex-wake-format-519"
     },
     {
       "index": 3,
@@ -49,8 +54,11 @@
       "blockers": [
         518
       ],
-      "state": "pending",
-      "owner": null
+      "state": "running",
+      "owner": "/root/format520",
+      "worker_base": "bf1f6b5",
+      "branch": "feat/tab-format-520",
+      "worktree": "/tmp/codex-wake-format-520"
     },
     {
       "index": 4,
@@ -60,8 +68,11 @@
       "blockers": [
         518
       ],
-      "state": "pending",
-      "owner": null
+      "state": "running",
+      "owner": "/root/format521",
+      "worker_base": "bf1f6b5",
+      "branch": "feat/tab-format-521",
+      "worktree": "/tmp/codex-wake-format-521"
     },
     {
       "index": 5,

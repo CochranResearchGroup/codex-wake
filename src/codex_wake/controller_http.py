@@ -283,7 +283,8 @@ class ProtectedOperations:
             if tabs is None:raise InventoryError('configuration_unavailable','host presentation owner unavailable')
             workspace=arguments.get('workspace')
             if workspace not in tabs.workspaces:raise InventoryError('unsupported_target','Select an owned workspace.')
-            scope=dict(host=tabs.host,environment=tabs.environment,workspace=workspace,presentation=tabs.workspaces[workspace]['kind'])
+            from .tab_lifecycle import TabLifecycle
+            scope=TabLifecycle(tabs.root,workspaces=tabs.workspaces,host=tabs.host,environment=tabs.environment).inspect(workspace)['target']
             if not permitted(actor,scope):raise AuthError('insufficient_scope')
             result=self.operations.execute(operation,arguments)
         elif operation=='tabs.policy.status':
