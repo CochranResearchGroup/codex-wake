@@ -1,3 +1,4 @@
+58b1631 docs: freeze the single two-axis formatting review packet
 d165752 docs: reconcile complete local gates and the test-only completion repair (#524)
 de2eb32 test: await actual shell editor readiness before completion key batches (#524)
 59ff603 test: qualify installed formatting clients and retain validation gates (#524)

@@ -1,0 +1,47 @@
+{
+  "frozen_tip": "58b163177e545ce97436f61adf78d89a00debd2c",
+  "findings": [
+    {
+      "id": "R1",
+      "axis": "Standards",
+      "severity": "P2",
+      "disposition": "blocking",
+      "scope": "tests/test_tab_format_monitor.py",
+      "state": "accepted",
+      "owner": "/root"
+    },
+    {
+      "id": "R2",
+      "axis": "Spec",
+      "severity": "P2",
+      "disposition": "blocking",
+      "scope": "linked-window rollback/reset guard",
+      "state": "accepted",
+      "owner": "/root/format519",
+      "primary_reproduction": {
+        "status": "rolled_back",
+        "linked": true,
+        "other_window_changed": true,
+        "after_explicit": false
+      }
+    },
+    {
+      "id": "R3",
+      "axis": "Standards",
+      "severity": "P3",
+      "disposition": "nonblocking_backlog",
+      "scope": "unused automatic argument",
+      "state": "accepted_for_bounded_cleanup",
+      "owner": "/root/format519"
+    },
+    {
+      "id": "R4",
+      "axis": "Standards",
+      "severity": "P3",
+      "disposition": "nonblocking_backlog",
+      "scope": "native bridge finite option vocabulary",
+      "state": "accepted_for_bounded_cleanup",
+      "owner": "/root/format519"
+    }
+  ]
+}
