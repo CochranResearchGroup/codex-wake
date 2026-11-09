@@ -21,11 +21,18 @@ class TabFormatting:
         self.path=self.root/'state.json'
 
     @contextmanager
-    def locked(self):
+    def locked(self,deadline=None):
         import fcntl
         fd=os.open(self.root/'lock',os.O_CREAT|os.O_RDWR,0o600)
         try:
-            fcntl.flock(fd,fcntl.LOCK_EX);yield
+            deadline=deadline or time.monotonic()+10
+            while True:
+                try:fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB);break
+                except BlockingIOError:
+                    if time.monotonic()>=deadline:
+                        raise InventoryError('formatting_busy','Formatting owner lock deadline exhausted.')
+                    time.sleep(.01)
+            yield
         finally:os.close(fd)
 
     def read(self):
@@ -60,7 +67,7 @@ class TabFormatting:
         snapshot=inspected['snapshot'];expected=inspected['target']
         if arguments.get('expected_target') is not None and arguments['expected_target']!=expected:
             raise InventoryError('stale_target','Presentation changed before formatting.')
-        with self.locked():
+        with self.locked(deadline):
             state=self.read();record=state['workspaces'].get(name)
             identity=self.identity(snapshot)
             if record and record['identity']!=identity:
@@ -94,28 +101,156 @@ class TabFormatting:
                             raise InventoryError('restoration_mismatch','Restoration readback differs from saved original.')
                         saved['restored']=True
                     except Exception as error:failures.append(dict(window=window,code=getattr(error,'code','restoration_failed')))
+                if 'session_original' in record:
+                    try:
+                        wanted={k:v['value'] if v['explicit'] else None for k,v in record['session_original'].items()}
+                        actual=transport.formatting('write-session',dict(values=wanted),deadline)
+                        if any(actual[k]['explicit']!=v['explicit'] or actual[k]['value']!=v['value'] for k,v in record['session_original'].items()):
+                            raise InventoryError('restoration_mismatch','Session restoration differs from saved original.')
+                    except Exception as error:failures.append(dict(code=getattr(error,'code','session_restoration_failed')))
                 self.save(state)
+                try:transport.formatting('refresh',{},deadline)
+                except Exception as error:failures.append(dict(code=getattr(error,'code','refresh_failed')))
                 return dict(status='partial' if failures else 'rolled_back',failures=failures,target=expected)
             from .tab_format_projection import project
             record.update(enabled=True,paused=False);self.save(state)
-            # Use public observed traits when available; projection itself never probes.
+            # Explicit enable uses public observations. Automatic refresh passes
+            # its already bounded snapshot directly to the same apply path.
             rows=self.tabs.execute('tabs.list',{})['resources']
             resources={r['window']['window_id']:r for r in rows if r['target']['workspace']==name}
-            failures=[]
-            for window in snapshot['windows']:
-                wid=window['window_id']
-                if window.get('linked'):
-                    failures.append(dict(window=wid,code='linked_window'));continue
-                try:
-                    if wid not in record['windows']:
-                        original=transport.formatting('read',dict(window=wid),deadline)
-                        record['windows'][wid]=dict(original=original,last_applied=None,restored=False)
-                        self.save(state) # Write-ahead original: never decorate without durable custody.
-                    rendered=project(resources.get(wid,dict(window=window)),state['policy'],now=time.time())
-                    actual=transport.formatting('write',dict(window=wid,values=rendered['options']),deadline)
-                    if any(actual[k]['value']!=v for k,v in rendered['options'].items()):
-                        raise InventoryError('formatting_mismatch','Formatting readback differs from policy.')
-                    record['windows'][wid].update(last_applied=rendered['options'],restored=False)
-                    self.save(state)
-                except Exception as error:failures.append(dict(window=wid,code=getattr(error,'code','formatting_failed')))
+            failures=self.apply(state,record,snapshot,resources,transport,deadline)
             return dict(status='partial' if failures else 'applied',target=expected,failures=failures)
+
+    def apply(self,state,record,snapshot,resources,transport,deadline,*,automatic=False):
+        """Apply one snapshot under the owner lock, saving originals first."""
+        from .tab_format_projection import project
+        from .tab_format_expiry import expiring_options
+        failures=[]
+        try:
+            if 'session_original' not in record:
+                record['session_original']=transport.formatting('read-session',{},deadline)
+                self.save(state)
+            if automatic and record.get('session_last_applied'):
+                current=transport.formatting('read-session',{},deadline)
+                if any(current[k]['value']!=v for k,v in record['session_last_applied'].items()):
+                    record['paused']=True;record['pause_reason']='manual_session_style';self.save(state)
+                    return [dict(code='manual_override')]
+            effective=record['session_original']['status-interval']['effective']
+            interval=float(effective)
+            interval=str(int(interval)) if 0<interval<=5 else '5'
+            session_values={'status-interval':interval,'@wake-format-clock':'%s'}
+            actual=transport.formatting('write-session',dict(values=session_values),deadline)
+            if any(actual[k]['value']!=v for k,v in session_values.items()):
+                raise InventoryError('formatting_mismatch','Session formatting readback differs from policy.')
+            record['session_last_applied']=session_values
+            self.save(state)
+        except Exception as error:
+            return [dict(code=getattr(error,'code','session_formatting_failed'))]
+        windows=snapshot['windows'][:128]
+        if len(snapshot['windows'])>128:failures.append(dict(code='formatting_window_capacity'))
+        eligible=[]
+        for window in windows:
+            wid=window['window_id']
+            if window.get('linked'):
+                failures.append(dict(window=wid,code='linked_window'));continue
+            if automatic and record['windows'].get(wid,{}).get('paused'):continue
+            eligible.append(window)
+        reads=self.batch(transport,[dict(action='read',window=w['window_id']) for w in eligible],deadline)
+        pending=[]
+        for window,read in zip(eligible,reads):
+            wid=window['window_id']
+            if 'error' in read:
+                failures.append(dict(window=wid,code=read['error']));continue
+            try:
+                current=read['result']
+                if wid not in record['windows']:
+                    record['windows'][wid]=dict(original=current,last_applied=None,restored=False)
+                    self.save(state)
+                saved=record['windows'][wid]
+                if automatic and saved.get('last_applied') and any(current[k]['value']!=v for k,v in saved['last_applied'].items()):
+                    saved.update(paused=True,pause_reason='manual_style');self.save(state);continue
+                if not automatic:saved.pop('paused',None);saved.pop('pause_reason',None)
+                rendered=project(resources.get(wid,dict(window=window)),state['policy'],now=time.time())
+                resource=resources.get(wid,{})
+                stamp=resource.get('monitor_observed_at',time.time())
+                options=expiring_options(rendered['options'],observed_at=stamp)
+                # Native deadline changes refresh the TTL; unchanged options can
+                # skip writes when reliable events repeat the same sample.
+                if all(current[k]['value']==v for k,v in options.items()):continue
+                pending.append((wid,options,rendered))
+            except Exception as error:failures.append(dict(window=wid,code=getattr(error,'code','formatting_failed')))
+        writes=self.batch(transport,[dict(action='write',window=wid,values=options) for wid,options,_ in pending],deadline)
+        for (wid,options,rendered),write in zip(pending,writes):
+            if 'error' in write:
+                failures.append(dict(window=wid,code=write['error']));continue
+            actual=write['result']
+            if any(actual[k]['value']!=v for k,v in options.items()):
+                failures.append(dict(window=wid,code='formatting_mismatch'));continue
+            record['windows'][wid].update(last_applied=options,restored=False,
+                projection={k:v for k,v in rendered.items() if k!='options'})
+            self.save(state)
+        try:transport.formatting('refresh',{},deadline)
+        except Exception as error:failures.append(dict(code=getattr(error,'code','refresh_failed')))
+        return failures
+
+    @staticmethod
+    def batch(transport,requests,deadline):
+        """Bounded finite batches avoid a host bridge startup per window."""
+        if not requests:return []
+        if hasattr(transport,'formatting_batch'):
+            try:
+                results=transport.formatting_batch(requests,deadline)
+                if not isinstance(results,list) or len(results)!=len(requests):
+                    raise InventoryError('formatting_mismatch','Native batch readback count differs.')
+                return [dict(error=value['error'].get('code','formatting_failed')) if isinstance(value,dict) and 'error' in value else dict(result=value) for value in results]
+            except Exception as error:
+                return [dict(error=getattr(error,'code','formatting_batch_failed')) for _ in requests]
+        results=[]
+        for request in requests:
+            args={k:v for k,v in request.items() if k!='action'}
+            try:results.append(dict(result=transport.formatting(request['action'],args,deadline)))
+            except Exception as error:results.append(dict(error=getattr(error,'code','formatting_failed')))
+        return results
+
+    def refresh(self,snapshot,*,deadline=None):
+        """Project a trusted monitor/event snapshot without repeating probes.
+
+        Unavailable observations retain existing native expiry rather than
+        extending apparently fresh display. No observed workspace is invented.
+        """
+        deadline=deadline or time.monotonic()+10
+        resources=snapshot.get('resources',[])
+        grouped={}
+        for resource in resources:
+            name=resource.get('target',{}).get('workspace')
+            if name in self.tabs.workspaces and not resource.get('monitor_unavailable'):
+                grouped.setdefault(name,{})[resource['window']['window_id']]=resource
+        results=[dict(workspace=value.get('workspace'),status='unavailable',code=value.get('reason',value.get('code','observation_unavailable'))) for value in snapshot.get('unavailable',[])[:64]]
+        with self.locked(deadline):
+            state=self.read()
+            if not state['policy'].get('enabled',True):return dict(status='disabled',workspaces=[])
+            for name,rows in grouped.items():
+                if time.monotonic()>=deadline:
+                    results.append(dict(workspace=name,status='unavailable',code='formatting_deadline'));continue
+                record=state['workspaces'].get(name)
+                if record and (not record.get('enabled') or record.get('paused')):
+                    results.append(dict(workspace=name,status='paused' if record.get('paused') else 'disabled'));continue
+                config=self.tabs.workspaces[name];transport=config['transport']
+                try:
+                    from .tab_lifecycle import TabLifecycle
+                    physical=TabLifecycle(self.tabs.root,workspaces=self.tabs.workspaces,host=self.tabs.host,environment=self.tabs.environment).inspect(name,deadline=deadline)['snapshot']
+                    identity=self.identity(physical)
+                    if record and identity!=record['identity']:
+                        raise InventoryError('stale_target','Formatting namespace changed; baseline preserved.')
+                    if record is None:
+                        record=dict(identity=identity,enabled=True,paused=False,windows={})
+                        state['workspaces'][name]=record;self.save(state)
+                    # Never project onto a newly discovered or replaced window
+                    # that was not represented in the trusted bounded sample.
+                    physical=dict(physical,windows=[w for w in physical['windows'] if w['window_id'] in rows
+                        and w['panes']==rows[w['window_id']]['window']['panes']])
+                    failures=self.apply(state,record,physical,rows,transport,deadline,automatic=True)
+                    results.append(dict(workspace=name,status='partial' if failures else 'applied',failures=failures))
+                except Exception as error:
+                    results.append(dict(workspace=name,status='unavailable',code=getattr(error,'code','formatting_unavailable')))
+        return dict(status='partial' if any(r['status'] in ('partial','unavailable') for r in results) else 'completed',workspaces=results)

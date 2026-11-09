@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "workspaces": [
+    {
+      "workspace": "work",
+      "status": "applied",
+      "failures": []
+    }
+  ],
+  "elapsed_seconds": 6.211,
+  "windows": 40,
+  "production_touched": false
+}
