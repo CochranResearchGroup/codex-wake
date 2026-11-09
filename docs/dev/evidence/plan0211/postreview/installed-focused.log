@@ -1,0 +1,9 @@
+test_ensure_cannot_skip_saved_profile_authority_when_other_backend_shares_name (test_tab_profile_create.ProfileCreateTests.test_ensure_cannot_skip_saved_profile_authority_when_other_backend_shares_name) ... ok
+test_listing_uses_fresh_cached_traits_and_renders_both_summaries (test_terminal_session_summary.SummaryTests.test_listing_uses_fresh_cached_traits_and_renders_both_summaries) ... ok
+test_unobserved_empty_listing_does_not_create_monitor_state (test_terminal_session_summary.SummaryTests.test_unobserved_empty_listing_does_not_create_monitor_state) ... ok
+test_existing_nonmatch_does_not_become_eligible_without_include_existing (test_terminal_routing.RoutingTests.test_existing_nonmatch_does_not_become_eligible_without_include_existing) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 2.487s
+
+OK

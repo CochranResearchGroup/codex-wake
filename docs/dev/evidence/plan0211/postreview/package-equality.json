@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "source_commit": "6afbda8cd166fc3ca08995256729a3353067f34a",
+  "wheel_sha256": "79d196c249f99ef6ff263d8619cd95e39df77619c07a78dd628162517dc368c6",
+  "all_members": 304,
+  "python_members": 302,
+  "linux_prefix": "/tmp/wake-p211-postreview-installed",
+  "windows_prefix": "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\session534-cf8604b7d9b449298394401b00a0486d\\venv",
+  "source": "git archive exact frozen commit",
+  "windows_evidence": "docs/dev/evidence/plan0211/postreview/windows-package.json"
+}

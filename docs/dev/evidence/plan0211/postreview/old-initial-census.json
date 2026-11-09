@@ -1,0 +1,373 @@
+{
+  "namespaces": [
+    "wake534-0b9272f7562c",
+    "wake534-203cc3a69e8c",
+    "wake534-6f7cc70c3029",
+    "wake534-abc56fc21b99",
+    "wake534-de91b9caf1e3",
+    "wake534-e435839b04e3"
+  ],
+  "matching_processes": [
+    {
+      "pid": 9956,
+      "parent": 78952,
+      "name": "psmux.exe",
+      "root": true,
+      "namespace": "wake534-de91b9caf1e3",
+      "birth": 134387175860423443,
+      "exit_code": 259,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    },
+    {
+      "pid": 31572,
+      "parent": 44864,
+      "name": "psmux.exe",
+      "root": true,
+      "namespace": "wake534-6f7cc70c3029",
+      "birth": 134387176368175969,
+      "exit_code": 259,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    },
+    {
+      "pid": 55236,
+      "parent": 81832,
+      "name": "psmux.exe",
+      "root": true,
+      "namespace": "wake534-abc56fc21b99",
+      "birth": 134387176727641958,
+      "exit_code": 259,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    },
+    {
+      "pid": 72676,
+      "parent": 67772,
+      "name": "psmux.exe",
+      "root": true,
+      "namespace": "wake534-203cc3a69e8c",
+      "birth": 134387183558107681,
+      "exit_code": 259,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    },
+    {
+      "pid": 62668,
+      "parent": 81344,
+      "name": "psmux.exe",
+      "root": true,
+      "namespace": "wake534-0b9272f7562c",
+      "birth": 134387189428582694,
+      "exit_code": 259,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    },
+    {
+      "pid": 34388,
+      "parent": 51656,
+      "name": "psmux.exe",
+      "root": true,
+      "namespace": "wake534-e435839b04e3",
+      "birth": 134387190782673786,
+      "exit_code": 259,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    },
+    {
+      "pid": 34188,
+      "parent": 9956,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387175860576739,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 76056,
+      "parent": 9956,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387175862187701,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 72640,
+      "parent": 9956,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387175862415581,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    },
+    {
+      "pid": 37484,
+      "parent": 9956,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387175865496758,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 25596,
+      "parent": 9956,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387175865788149,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    },
+    {
+      "pid": 57476,
+      "parent": 31572,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387176368300919,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 15948,
+      "parent": 31572,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387176369752463,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 84920,
+      "parent": 31572,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387176370032132,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    },
+    {
+      "pid": 7612,
+      "parent": 31572,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387176373097567,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 81044,
+      "parent": 31572,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387176373353464,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    },
+    {
+      "pid": 84392,
+      "parent": 55236,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387176727801082,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 41132,
+      "parent": 55236,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387176729310339,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 26300,
+      "parent": 55236,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387176729551554,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    },
+    {
+      "pid": 69100,
+      "parent": 55236,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387176732489185,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 81612,
+      "parent": 55236,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387176732687024,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    },
+    {
+      "pid": 63504,
+      "parent": 72676,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387183558222537,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 18336,
+      "parent": 72676,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387183559890634,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 85596,
+      "parent": 72676,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387183560193540,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    },
+    {
+      "pid": 80908,
+      "parent": 72676,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387183563281430,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 49792,
+      "parent": 72676,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387183563516285,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    },
+    {
+      "pid": 58536,
+      "parent": 62668,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387189428752839,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 67408,
+      "parent": 62668,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387189430445263,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 33172,
+      "parent": 62668,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387189430706084,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    },
+    {
+      "pid": 33536,
+      "parent": 62668,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387189433996608,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 68676,
+      "parent": 62668,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387189434228955,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    },
+    {
+      "pid": 76968,
+      "parent": 34388,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387190782781619,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 45192,
+      "parent": 34388,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387190784487124,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 67308,
+      "parent": 34388,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387190784734736,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    },
+    {
+      "pid": 51048,
+      "parent": 34388,
+      "name": "conhost.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387190787734031,
+      "exit_code": 259,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac"
+    },
+    {
+      "pid": 20216,
+      "parent": 34388,
+      "name": "pwsh.exe",
+      "root": false,
+      "namespace": null,
+      "birth": 134387190788013436,
+      "exit_code": 259,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+    }
+  ],
+  "active_count": 36
+}

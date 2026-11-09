@@ -1,0 +1,61 @@
+{
+  "namespaces": [
+    "wake534-0b9272f7562c",
+    "wake534-203cc3a69e8c",
+    "wake534-6f7cc70c3029",
+    "wake534-abc56fc21b99",
+    "wake534-de91b9caf1e3",
+    "wake534-e435839b04e3",
+    "wake534post-a2d6353ad351"
+  ],
+  "terminated_owned_processes": [
+    {
+      "pid": 39280,
+      "parent": 42480,
+      "name": "pwsh.exe",
+      "birth": 134387210363039179,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233",
+      "after_exit_code": 0
+    },
+    {
+      "pid": 47780,
+      "parent": 42480,
+      "name": "conhost.exe",
+      "birth": 134387210362875767,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac",
+      "after_exit_code": 0
+    },
+    {
+      "pid": 1272,
+      "parent": 42480,
+      "name": "pwsh.exe",
+      "birth": 134387210359826987,
+      "executable_sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233",
+      "after_exit_code": 0
+    },
+    {
+      "pid": 21040,
+      "parent": 42480,
+      "name": "conhost.exe",
+      "birth": 134387210359642658,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac",
+      "after_exit_code": 0
+    },
+    {
+      "pid": 86520,
+      "parent": 42480,
+      "name": "conhost.exe",
+      "birth": 134387210358254043,
+      "executable_sha256": "c86146188b78e484f32cc29e2331689659943b47689a85570342044f499938ac",
+      "after_exit_code": 0
+    },
+    {
+      "pid": 42480,
+      "parent": 72200,
+      "name": "psmux.exe",
+      "birth": 134387210358153110,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca",
+      "after_exit_code": 0
+    }
+  ]
+}

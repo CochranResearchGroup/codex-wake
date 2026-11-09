@@ -1,0 +1,24 @@
+{
+  "known_receipts": {
+    "wake534-6f7cc70c3029": [
+      "docs/dev/evidence/plan0211/534/native-rename-close-firstfailure.json"
+    ],
+    "wake534-de91b9caf1e3": [
+      "docs/dev/evidence/plan0211/534/native-rename-red.json"
+    ],
+    "wake534-abc56fc21b99": [
+      "docs/dev/evidence/plan0211/534/native-rename-green.json"
+    ],
+    "wake534-e435839b04e3": [
+      "docs/dev/evidence/plan0211/534/native-installed.json"
+    ]
+  },
+  "retained_fixture_directories": [
+    {
+      "namespace": "wake534-0b9272f7562c",
+      "path": "/mnt/c/Users/ecoch/AppData/Local/codex-wake-test/wake534-0b9272f7562c",
+      "bridge_sha256": "9623575122d5809b7e48ce7776312b14f8bb3740e9e8cfabe6f676504fe3a902",
+      "receipt_sources": []
+    }
+  ]
+}

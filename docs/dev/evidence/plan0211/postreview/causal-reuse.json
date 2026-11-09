@@ -1,0 +1,30 @@
+{
+  "pre_remediation_wheel": "2f72c019f8654d07d0d84638830cf1c30bf8f49cff5cab7a000678cb51408b15",
+  "final_postreview_wheel": "79d196c249f99ef6ff263d8619cd95e39df77619c07a78dd628162517dc368c6",
+  "changed_package_members": [
+    "codex_wake/controller_tabs.py",
+    "codex_wake/tab_psmux_bridge.py",
+    "codex_wake/terminal_launch_defaults.py",
+    "codex_wake/terminal_routing.py",
+    "codex_wake/terminal_session_cli.py",
+    "codex_wake/terminal_session_psmux.py",
+    "codex_wake/terminal_session_summary.py",
+    "codex_wake/terminal_sessions.py"
+  ],
+  "unchanged_package_members": 296,
+  "r3_source_evidence_matches": {
+    "src/codex_wake/terminal_sessions.py": false,
+    "src/codex_wake/terminal_session_psmux.py": true,
+    "src/codex_wake/tab_psmux_bridge.py": true,
+    "tests/test_terminal_session_psmux.py": true,
+    "docs/dev/evidence/plan0211/review-r3/native_acceptance.py": true
+  },
+  "causal_reuse": {
+    "unchanged_rendering": "Prior installed rendering/rollback matrix remains applicable by exact member bytes; native formatter carry is rerun on final package.",
+    "unsupported_psmux_argv_profile": "Bridge/native adapter and R3 test bytes match source evidence; terminal_sessions differs after integration, so final installed cwd syntax and argv-before-registry-refusal tests were rerun (2 PASS). Prior native argv/quoting failures remain as scope evidence, not final runtime success.",
+    "r1_r2_r4": "Installed exact focused tests rerun, no reliance on old wheel authority.",
+    "public_transports": "Full installed9 workflow rerun on final package, not inherited."
+  },
+  "review_runs": 1,
+  "remediation_passes": 1
+}
