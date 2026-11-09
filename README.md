@@ -208,6 +208,9 @@ The [everyday shortcuts](docs/agents/account-shortcuts.md) add `open ACCOUNT`,
 
 ## Tab formatting
 
+Manage named terminal sessions, frozen tab relocation and opt-in routing with the
+[terminal session workflow](docs/agents/terminal-sessions.md).
+
 Use `codex-wake tabs format enable --workspace WORKSPACE` for type/activity badges
 and state-sensitive highlights on owned Byobu/tmux and Windows psmux tabs.
 `tabs format rollback --workspace WORKSPACE` restores original settings in one

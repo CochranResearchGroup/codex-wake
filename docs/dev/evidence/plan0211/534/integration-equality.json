@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "qualified_source": "a5ee8d40f20bbb1d451f07ba989c65b6f4bd2fc1",
+  "primary_runtime_source": "3ed879124f1c6a754aa42827e078431c0a7079bf",
+  "primary_before_closeout": "4a4efd831334ffffc4e95419a4f8f295c952fbc6",
+  "package_members_equal": 303,
+  "readme_and_pyproject_equal": true,
+  "wheel_sha256": "2f72c019f8654d07d0d84638830cf1c30bf8f49cff5cab7a000678cb51408b15",
+  "installed_linux_prefix": "/tmp/wake534-third-installed",
+  "source_effects": "No productchangesafterqualifiedsource; onlyscript/evidence/docs integration."
+}

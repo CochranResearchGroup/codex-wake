@@ -1,0 +1,38 @@
+{
+  "status": "passed",
+  "checks": [
+    "empty-definition-host-namespace",
+    "native-open",
+    "rename-preserves-identity",
+    "restart-restores-exact-generation",
+    "populated-delete-refused",
+    "last-tab-close-retains-empty",
+    "empty-delete",
+    "peer-server-unchanged"
+  ],
+  "namespace": "wake529-36768fbc5b0c",
+  "identity": {
+    "platform": "windows",
+    "namespace": "wake529-36768fbc5b0c",
+    "pid": 45704,
+    "session": "seed",
+    "creation_filetime": 134387151149381512,
+    "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+  },
+  "bridge_sha256": "9623575122d5809b7e48ce7776312b14f8bb3740e9e8cfabe6f676504fe3a902",
+  "windows_python": "/mnt/c/Users/ecoch/AppData/Local/codex-wake-test/controller405-20261030/venv/Scripts/python.exe",
+  "provider_calls": 0,
+  "production_touched": false,
+  "cleanup_error": "InventoryError('closed tab remains visible')",
+  "final_presence": {
+    "workers": {
+      "present": false
+    },
+    "bots": {
+      "present": false
+    },
+    "seed": {
+      "present": false
+    }
+  }
+}

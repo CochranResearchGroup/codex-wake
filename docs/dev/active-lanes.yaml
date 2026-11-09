@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P211
+    owner: primary / ecochran76
+    objective: Close named terminal session CRUD and routing tickets
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/526]
+    plan: docs/dev/plans/0211-2026-11-09-terminal-session-management.md
+    branch: feat/terminal-sessions-526
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: PUBLISHED_REVIEW
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-09
+    disposition: All eight tickets closed; review1/TDD1 resolved four findings; installed Linux/Windows qualified; draft PR535 published; no merge or deployment
   - id: P210
     owner: primary / ecochran76
     objective: Implement reversible Wake-owned tab formatting

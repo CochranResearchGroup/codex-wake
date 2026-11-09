@@ -1,0 +1,20 @@
+{
+  "red": "/tmp/p211-uncertain-exit-red.log:2tests failed3assertions; nativeunknown-only aggregateheld and realHTTP/API+MCPheldexit0",
+  "green": [
+    {
+      "python": "3.12",
+      "tests": 31,
+      "seconds": 36.319,
+      "log": "/tmp/p211-uncertain-exit-green312.log"
+    },
+    {
+      "python": "3.11",
+      "tests": 31,
+      "seconds": 35.816,
+      "log": "/tmp/p211-uncertain-exit-green311.log"
+    }
+  ],
+  "repair": "Aggregate unknown-only relocation as uncertain; partial/uncertain/held tab outcomes returnCLI3 onlocal/API/MCP while preservingexactpayload. Retaineduncertain receipts neverredispatch native move.",
+  "native_fault": "PrivatePATHshim recorded exactoneattempt andfailedpreeffect; sourcewindowremained; status/reapplysentno native retry.",
+  "production_effects": false
+}

@@ -40,3 +40,21 @@ class TabViewTests(unittest.TestCase):
             owner.execute('tabs.view-save',dict(name='work',definition=dict(group='work')))
             row['window']['panes'][0]['windows_creation_filetime']=11
             self.assertEqual(owner.execute('tabs.view-evaluate',dict(name='work'),resources=[row])['resources'],[])
+
+    def test_controller_composes_explicit_tabs_groups_and_custom_labels(self):
+        from test_tab_selection import row
+        from codex_wake.tab_views import TabViews
+        rows=[row('@1'),row('@2','other')]
+        class FixtureController(ControllerTabs):
+            def execute(self, operation, arguments):
+                if operation=='tabs.list': return {'resources':rows}
+                return super().execute(operation,arguments)
+        with tempfile.TemporaryDirectory() as directory:
+            owner=FixtureController(directory,workspaces={},host='h',environment='e')
+            owner.execute('tabs.group-save',dict(name='work',members=['w/@1'],labels=['urgent']))
+            owner.execute('tabs.view-save',dict(name='picked',definition={'selection':{'any':[{'label':'urgent'},{'group':'work'},{'tabs':[TabViews.identity(rows[1])]}]}}))
+            self.assertEqual(owner.execute('tabs.view-evaluate',{'name':'picked'})['resources'],rows)
+            recreated=FixtureController(directory,workspaces={},host='h',environment='e')
+            rows[0]['window']['panes'][0]['process_generation']=2
+            rows[1]['window']['panes'][0]['process_generation']=2
+            self.assertEqual(recreated.execute('tabs.view-evaluate',{'name':'picked'})['resources'],[])

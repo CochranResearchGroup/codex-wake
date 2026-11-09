@@ -1,0 +1,226 @@
+{
+  "namespaces": [
+    "wakeR3-11f34e6c85e4",
+    "wakeR3-517aa09fc3f3",
+    "wakeR3-c2e6c58c7bdf",
+    "wakeR3-c7937ead3fff",
+    "wakeR3-d40157e215eb"
+  ],
+  "matching_processes": [
+    {
+      "ProcessId": 52720,
+      "ParentProcessId": 68692,
+      "Name": "psmux.exe",
+      "CreationDate": "/Date(1794246234504)/",
+      "CommandLine": "\"C:\\Users\\ecoch\\AppData\\Local\\Microsoft\\WinGet\\Links\\psmux.exe\" server -s __warm__ -L wakeR3-11f34e6c85e4 -x 120 -y 30 --spawner 68692:134387198336974870",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 87104,
+      "ParentProcessId": 44272,
+      "Name": "psmux.exe",
+      "CreationDate": "/Date(1794246261392)/",
+      "CommandLine": "\"C:\\Users\\ecoch\\AppData\\Local\\Microsoft\\WinGet\\Links\\psmux.exe\" server -s __warm__ -L wakeR3-c2e6c58c7bdf -x 120 -y 30 --spawner 44272:134387198605537294",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 63844,
+      "ParentProcessId": 59604,
+      "Name": "psmux.exe",
+      "CreationDate": "/Date(1794246293212)/",
+      "CommandLine": "\"C:\\Users\\ecoch\\AppData\\Local\\Microsoft\\WinGet\\Links\\psmux.exe\" server -s __warm__ -L wakeR3-517aa09fc3f3 -x 120 -y 30 --spawner 59604:134387198924352261",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 7620,
+      "ParentProcessId": 79024,
+      "Name": "psmux.exe",
+      "CreationDate": "/Date(1794246346572)/",
+      "CommandLine": "\"C:\\Users\\ecoch\\AppData\\Local\\Microsoft\\WinGet\\Links\\psmux.exe\" server -s __warm__ -L wakeR3-d40157e215eb -x 120 -y 30 --spawner 79024:134387199457501306",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 45068,
+      "ParentProcessId": 58876,
+      "Name": "psmux.exe",
+      "CreationDate": "/Date(1794246423383)/",
+      "CommandLine": "\"C:\\Users\\ecoch\\AppData\\Local\\Microsoft\\WinGet\\Links\\psmux.exe\" server -s __warm__ -L wakeR3-c7937ead3fff -x 120 -y 30 --spawner 58876:134387200225531130",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 62184,
+      "ParentProcessId": 52720,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246234515)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 78996,
+      "ParentProcessId": 52720,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246234666)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 76272,
+      "ParentProcessId": 52720,
+      "Name": "pwsh.exe",
+      "CreationDate": "/Date(1794246234683)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 82724,
+      "ParentProcessId": 52720,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246234988)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 60856,
+      "ParentProcessId": 52720,
+      "Name": "pwsh.exe",
+      "CreationDate": "/Date(1794246235004)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 87876,
+      "ParentProcessId": 87104,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246261410)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 16636,
+      "ParentProcessId": 87104,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246261575)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 76556,
+      "ParentProcessId": 87104,
+      "Name": "pwsh.exe",
+      "CreationDate": "/Date(1794246261591)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 46392,
+      "ParentProcessId": 87104,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246261895)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 59892,
+      "ParentProcessId": 87104,
+      "Name": "pwsh.exe",
+      "CreationDate": "/Date(1794246261912)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 76840,
+      "ParentProcessId": 63844,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246293239)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 46916,
+      "ParentProcessId": 63844,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246293409)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 72184,
+      "ParentProcessId": 63844,
+      "Name": "pwsh.exe",
+      "CreationDate": "/Date(1794246293427)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 7644,
+      "ParentProcessId": 63844,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246293734)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 44776,
+      "ParentProcessId": 63844,
+      "Name": "pwsh.exe",
+      "CreationDate": "/Date(1794246293754)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 69972,
+      "ParentProcessId": 7620,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246346583)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 12128,
+      "ParentProcessId": 7620,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246346756)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 65472,
+      "ParentProcessId": 7620,
+      "Name": "pwsh.exe",
+      "CreationDate": "/Date(1794246346775)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 79828,
+      "ParentProcessId": 7620,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246347083)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 82996,
+      "ParentProcessId": 7620,
+      "Name": "pwsh.exe",
+      "CreationDate": "/Date(1794246347100)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 82212,
+      "ParentProcessId": 45068,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246423393)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 13660,
+      "ParentProcessId": 45068,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246423545)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 46764,
+      "ParentProcessId": 45068,
+      "Name": "pwsh.exe",
+      "CreationDate": "/Date(1794246423566)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 59388,
+      "ParentProcessId": 45068,
+      "Name": "conhost.exe",
+      "CreationDate": "/Date(1794246423867)/",
+      "exit_code": 259
+    },
+    {
+      "ProcessId": 52308,
+      "ParentProcessId": 45068,
+      "Name": "pwsh.exe",
+      "CreationDate": "/Date(1794246423885)/",
+      "exit_code": 259
+    }
+  ]
+}

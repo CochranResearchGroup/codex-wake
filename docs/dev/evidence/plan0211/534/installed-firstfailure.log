@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/tmp/codex-wake-session-534/scripts/terminal_session_acceptance534.py", line 215, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/tmp/codex-wake-session-534/scripts/terminal_session_acceptance534.py", line 70, in main
+    made=unwrap(command('tabs','create','--session','workers','--json'))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-session-534/scripts/terminal_session_acceptance534.py", line 52, in command
+    assert p.returncode==expected,(argv,p.returncode,p.stdout,p.stderr)
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (('tabs', 'create', '--session', 'workers', '--json'), 3, '{"operation": "tabs.create", "result": {"operation": {"acceptance": "unknown", "binding": "local-cli", "cancellation": "not_requested", "correlation_id": "e7c571300130440c4ca22cd6c17931b115d0e8ab5a7203421b7844fb0f2f13ad", "created_at": 1794244281.2868311, "delivery": "uncertain", "execution": "unknown", "operation": "tabs.create", "operation_id": "tab-cli-e7c571300130440c4ca22cd6c17931b115d0e8ab5a7203421b7844fb0f2f13ad", "original_binding": "local-cli", "payload_sha256": "e16138f96c79a930298e77c15f8dcb46bc1b7fcabc213d1b7f52cd6ea43a0905", "phase": "uncertain", "reason": "invalid_argument", "result": null, "schema_version": 1, "submission": "admitted", "target": {"environment": "posix", "generation": "47394323f241f87a5db852c951d710e7e23a905eb6a06e6619c3e0c057e9d062", "host": "cooper", "presentation": "tmux", "workspace": "session-c6a731687a0549a5b434898a0234f785"}}}, "schema_version": 1, "status": "completed"}\n', '')

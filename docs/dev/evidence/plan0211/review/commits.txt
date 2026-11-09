@@ -1,0 +1,37 @@
+bbfc494 docs: close final session acceptance and freeze one broad review (#526) [skip ci]
+4a4efd8 test: qualify exact installed terminal session workflow across platforms
+134ec56 docs: explain qualified terminal session selectors
+8dbfef7 test: preserve second wheel identity and require explicit uncertain aggregate
+410c401 test: retain uncertain exit failure and complete independent installed diagnostics
+55d5af6 test: qualify native session termination and unsupported relocation
+536d4f0 test: retain installed failures and strengthen transport session acceptance
+b8dc0dd test: retain bounded local qualification and causal repairs (#534) [skip ci]
+3ed8791 feat: resolve qualified session names without opaque workspace IDs (#534) [skip ci]
+cf281cd fix: preserve uncertain tab outcomes and nonzero portable exits (#534) [skip ci]
+0c87ae3 fix: restore every relocated tab without launching saved commands (#534) [skip ci]
+5ca15fb docs: regenerate terminal session command reference and coverage
+84cb8c7 test: add installed terminal session acceptance and operator workflow
+825543f fix: keep terminal command help scoped to session semantics (#534) [skip ci]
+f26c27d fix: preserve exact psmux formatter custody across session rename
+1c3c384 feat: expose explicit session drain and termination controls (#533) [skip ci]
+201c4e3 docs: record focused terminal deletion validation (#533)
+d21092e feat: journal explicit terminal session drain and termination (#533)
+377210f fix: apply session launch defaults through qualified tab owners (#527) [skip ci]
+1b8b224 feat: qualify automatic routing and expose manual holds (#531) [skip ci]
+be4aa3c feat: persist prioritized terminal routing and manual holds (#531) [skip ci]
+cf2d88c feat: expose durable holds before routing rule activation (#531) [skip ci]
+3cd8a88 fix: restore saved terminal sessions once and fence ambiguous server selection (#531) [skip ci]
+1c333eb feat: add friendly selectors and bounded shared routing contracts (#531) [skip ci]
+279b8be feat: expose durable bulk relocation through all tab transports (#530) [skip ci]
+c9ff4ba feat: journal criteria-based bulk tab relocation and conditional undo #530 [skip ci]
+cc65824 fix: retain uncertain native session launch state and validate529532 [skip ci]
+326e4c5 test: qualify canonical bot destination and installed launcher readback (#532) [skip ci]
+0d2388c fix: retain codex-bots native destination default (#532) [skip ci]
+2c9f3f4 feat: friendly terminal session selection and reusable bot launch seam (#532) [skip ci]
+97a52a6 feat: manage native psmux terminal sessions #529 [skip ci]
+648af92 feat: expose journaled create-or-reuse session operation for bot launcher (#532) [skip ci]
+56202a5 docs: validate527 and528 and dispatch ready session tickets [skip ci]
+e639397 feat: add named terminal session CRUD with durable empty definitions (#527) [skip ci]
+c33fa94 feat(tabs): compose birth-bound selections and custom categories #528 [skip ci]
+e76f999 docs: publish session management spec526 and eight dependent tickets [skip ci]
+bfff13c docs: capture accepted session CRUD and routing design interview [skip ci]

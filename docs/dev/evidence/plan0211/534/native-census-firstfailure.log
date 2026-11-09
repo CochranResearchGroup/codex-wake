@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/codex-wake-session-534/docs/dev/evidence/plan0211/534/native_rename_acceptance.py", line 68, in <module>
+    assert all(result['final_server_births'][str(i['pid'])].get('winerror')==87 or result['final_server_births'][str(i['pid'])].get('birth') not in (None,i['creation_filetime']) for i in result['owned_servers']),result['final_server_births']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'81344': {'birth': 134387189419952388}, '77508': {'winerror': 87}}

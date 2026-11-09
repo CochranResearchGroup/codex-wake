@@ -1,0 +1,22 @@
+{
+  "tier": "focused",
+  "multi_undo": {
+    "red": "/tmp/p211-multi-undo-red.log:9tests, unchanged2tabundo returnedundone/skipped",
+    "first_green": "/tmp/p211-multi-undo-green.log:9PASS",
+    "repair": "Carry all frozen references to the exact prior saved source nativeidentity after one operation-owned rematerialization; never rebind unrelated identities."
+  },
+  "inert_bootstrap": {
+    "red": "/tmp/p211-bootstrap-defaults-red.log:relocation ran configured command and created marker",
+    "repair": "Host-only container_only materialization always starts inert owned shell, preserving saved launch defaults and existing runtime processes."
+  },
+  "final312": {
+    "tests": 31,
+    "seconds": 28.547,
+    "log": "/tmp/p211-rematerialization-green312.log",
+    "status": "PASS"
+  },
+  "final311": "/tmp/p211-rematerialization-green311.log running; qualifiedbeforeticketclosure",
+  "old_wheel": "af2f6ea55afe799c7964b43afa2d3d5cb2a44227693951f91de87f5b8f2dc630 nonaccepting; all affected installed proof invalid until rebuilt",
+  "production_effects": false,
+  "provider_calls": 0
+}

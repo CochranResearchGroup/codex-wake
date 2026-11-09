@@ -1,0 +1,8 @@
+{"session_launch_readback": {"cwd": "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\wakeR3-11f34e6c85e4", "argv": ["space argument", "semi;literal", "quote\"literal"]}, "status": "failed", "checks": ["native-open-with-updated-windows-defaults"], "namespace": "wakeR3-11f34e6c85e4", "error": "InventoryError('unsupported attachment operation')", "final_presence": {"workers": {"present": false}, "bots": {"present": false}, "seed": {"present": false}, "unsupported-move": {"present": false}}}
+Traceback (most recent call last):
+  File "/tmp/codex-wake-review-psmux/docs/dev/evidence/plan0211/review-r3/native_acceptance.py", line 39, in <module>
+    target=tabs.execute('tabs.inspect',dict(workspace=workspace))['target']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-review-psmux/src/codex_wake/controller_tabs.py", line 105, in execute
+    raise InventoryError('unsupported_operation', 'unsupported attachment operation')
+codex_wake.managed_inventory.InventoryError: unsupported attachment operation

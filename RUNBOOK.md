@@ -8695,3 +8695,83 @@ launcher preserved; no model calls or native restart/build. Existing MCP clients
 reload individually; real workspace decoration still requires enable. Previous
 prefix retained with guarded private rollback command. Deployment receipt:
 docs/dev/evidence/plan0210/deployment.json. Hosted CI skipped; memory forbidden.
+
+
+## Turn | 2026-11-09 | Terminal session management interview started
+
+Operator invoked grill-with-docs after requesting session CRUD and category-based
+tab relocation. Started LOCAL-P211 on isolated docs/session-management-0211;
+clarified terminal session/tab in existing glossary. Round1 decisions pending;
+read-only backend fact check delegated. No terminal/runtime changes or implementation.
+
+
+## Turn | 2026-11-09 | Session management round1 accepted
+
+Operator accepted all five recommendations: names/current-session inference, saved
+empty definitions, explicit populated deletion, process-preserving tab movement
+and opt-in continuous routing. Updated LOCAL-P211 and glossary; recorded ADR0003
+for durable saved definitions independent of native liveness. Round2 remains
+pending; no implementation or terminal effects. Memory forbidden: no write request.
+
+
+## Turn | 2026-11-09 | Session management round2 accepted
+
+Operator accepted Q6–Q11: scoped names/stable renaming, editable new-tab defaults,
+composable selectors, frozen bulk plans with explicit partial outcomes and
+conditional undo, priority-based routing and manual holds/pins. Updated LOCAL-P211
+and glossary. Round3 remains pending. No runtime effects or implementation.
+Memory forbidden: no explicit write request.
+
+
+## Turn | 2026-11-09 | Session management round3 accepted
+
+Operator accepted Q12–Q17: bots session reuse, immediate existing-session discovery,
+explicit initial routing backfill/stability/restart reconciliation, deletion rule
+cleanup and partial-drain retention, readable CLI/structured automation and
+conflict-preserving undo. All seventeen decisions recorded in LOCAL-P211. Decision
+frontier empty; consolidated shared-understanding confirmation pending. No code or
+runtime effects. Memory forbidden: no explicit memory-write request.
+
+
+## Turn | 2026-11-09 | Session CRUD and relocation frontier validated
+
+Published spec526 and527–534 with native blocking/subissue links. Primary527 and
+worker528 source foundation passed24checks eachPython3.11/3.12. Native529 eight
+Windows checks passed with cleanup diagnostic retained and finalabsenceverified;
+UX532 preserves canonical external codex-bots session/owner and nativepane/PID.
+Integrated529/532 checks25PASS eachversion. Bulk530 integrated21PASS eachversion
+with multipane/final-tab continuity, lost-reply reconciliation and conditionalundo.
+Five tickets closed.531routing actualdaemon test exposed factorysavedbinding/alias
+defect, reproduced publicred→green; final qualification pending.533/534blocked by
+ledgerdependencies. Source-only delivery so far; installed/fullpublicparitypending.
+Review0/TDDremediation0. No production/provider/merge/deploy effects.
+
+## Turn | 2026-11-09 | Plan0211 tickets and single review remediation complete
+
+All eight tickets527–534 are integrated, validated and tracker-closed; parent526
+remains open. Root527 and ready independent delegated tickets retained isolated
+custody and dependency gates. Exactly one Standards/Spec review (basef0798e1,
+tipbbfc494) accepted four findings; one bounded TDD remediation pass resolved them:
+profile authority target selection, cached session summaries, native Windows cwd
+qualification, and activation exclusion of all preexisting tab births.
+
+Runtime freeze6afbda8; final wheel79d196c249f99ef6ff263d8619cd95e39df77619c07a78dd628162517dc368c6.
+Focused checks82PASS eachPython3.11/3.12 (75.843s/78.398s), final installed workflow
+9PASS158.070s including22actual nativePowerShell calls; native psmux8PASS.
+Source/prefix/Windows member equality and fixture cleanup are preserved in the
+postreview packet. Earlier failed diagnostic receipts remain; validation is
+composite, not a claimed final full-suite run. Static checks pass. An accidental
+system-Python generated-doc check lacked jsonschema; rerun in qualified3.12 venv
+passed. Hosted CI skipped under cost policy. No full-suite/review repetition.
+
+Native Windows custom argv/profile defaults are unsupported before persistence;
+cross-server process-preserving moves and Windows-native service remain future.
+Exact fixture namespace/hash/birth-fenced OS cleanup handles warm psmux servers;
+unrelated sessions/services and working release remain unchanged. See
+`docs/dev/evidence/plan0211/review/final-report.md` and ledger for review/publication.
+No merge, production deployment or real provider prompts. Memory disposition
+forbidden, non-write receipt in user state; no explicit memory-write request.
+
+Publication: draft PR535, all527–534 CLOSED read back; parent526 unchangedOPEN.
+Post-review534 comment6747714328 records exact acceptance. Private review preview
+6fa5c87609e3; feature branch published, merge/deployment remain separate.

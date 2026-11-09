@@ -1,0 +1,14 @@
+{"status": "failed", "checks": ["empty-definition-host-namespace", "native-open"], "namespace": "wake534-de91b9caf1e3", "error": "InventoryError('Formatting baseline belongs to a different namespace; preserve it for recovery.')", "cleanup_error": "InventoryError('closed tab remains visible')", "final_presence": {"workers": {"present": false}, "bots": {"present": false}, "seed": {"present": false}}}
+Traceback (most recent call last):
+  File "/tmp/codex-wake-session-534/docs/dev/evidence/plan0211/534/native_rename_acceptance.py", line 28, in <module>
+    rollback=tabs.execute('tabs.format.rollback',dict(workspace=workspace));assert rollback['status']=='rolled_back',rollback
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-session-534/src/codex_wake/controller_tabs.py", line 52, in execute
+    return TabFormatting(self.root,tabs=self).execute(operation,arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-session-534/src/codex_wake/tab_formatting.py", line 86, in execute
+    result=self._execute(operation,arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-session-534/src/codex_wake/tab_formatting.py", line 156, in _execute
+    raise InventoryError('stale_target','Formatting baseline belongs to a different namespace; preserve it for recovery.')
+codex_wake.managed_inventory.InventoryError: Formatting baseline belongs to a different namespace; preserve it for recovery.

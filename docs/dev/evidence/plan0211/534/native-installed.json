@@ -1,0 +1,75 @@
+{
+  "first_native_delete_status": "deleted",
+  "owned_servers": [
+    {
+      "platform": "windows",
+      "namespace": "wake534-e435839b04e3",
+      "pid": 51656,
+      "session": "seed",
+      "creation_filetime": 134387190774226393,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    },
+    {
+      "platform": "windows",
+      "namespace": "wake534-e435839b04e3",
+      "pid": 57312,
+      "session": "bots",
+      "creation_filetime": 134387190808892234,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    }
+  ],
+  "package": "/tmp/wake534-third-installed/lib/python3.12/site-packages/codex_wake/__init__.py",
+  "python": "/tmp/wake534-third-installed/bin/python",
+  "prefix": "/tmp/wake534-third-installed",
+  "status": "passed",
+  "checks": [
+    "empty-definition-host-namespace",
+    "native-open",
+    "rename-exact-format-baseline-rollback",
+    "restart-restores-exact-generation",
+    "populated-delete-refused",
+    "psmux-cross-session-move-unsupported-before-effect",
+    "native-terminate-reconcile-tombstone-name-reuse-empty-delete",
+    "peer-server-unchanged"
+  ],
+  "namespace": "wake534-e435839b04e3",
+  "identity": {
+    "platform": "windows",
+    "namespace": "wake534-e435839b04e3",
+    "pid": 51656,
+    "session": "seed",
+    "creation_filetime": 134387190774226393,
+    "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+  },
+  "bridge_sha256": "9623575122d5809b7e48ce7776312b14f8bb3740e9e8cfabe6f676504fe3a902",
+  "windows_python": "/mnt/c/Users/ecoch/AppData/Local/codex-wake-test/controller405-20261030/venv/Scripts/python.exe",
+  "provider_calls": 0,
+  "production_touched": false,
+  "cleanup_error": "InventoryError('native presentation process is unavailable')",
+  "final_presence": {
+    "workers": {
+      "present": false
+    },
+    "bots": {
+      "present": false
+    },
+    "seed": {
+      "present": false
+    },
+    "unsupported-move": {
+      "present": false
+    }
+  },
+  "final_server_births": {
+    "51656": {
+      "birth": 134387190774226393,
+      "exit_code": 0
+    },
+    "57312": {
+      "winerror": 87
+    }
+  },
+  "cleanup_reconciled": true,
+  "cleanup_disposition": "Native close reply unavailable; all names absent and exact server processes exited or absent.",
+  "wheel_sha256": "2f72c019f8654d07d0d84638830cf1c30bf8f49cff5cab7a000678cb51408b15"
+}

@@ -1,0 +1,57 @@
+{
+  "session_launch_readback": {
+    "cwd": "C:\\Users\\ecoch\\AppData\\Local\\codex-wake-test\\wakeR3-517aa09fc3f3",
+    "argv": [
+      "space argument",
+      "semi;literal",
+      "quote\"literal"
+    ]
+  },
+  "owned_servers": [
+    {
+      "platform": "windows",
+      "namespace": "wakeR3-517aa09fc3f3",
+      "pid": 59604,
+      "session": "seed",
+      "creation_filetime": 134387198924352261,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    },
+    {
+      "platform": "windows",
+      "namespace": "wakeR3-517aa09fc3f3",
+      "pid": 3556,
+      "session": "bots",
+      "creation_filetime": 134387198971584385,
+      "executable_sha256": "bbe825a30f7cddc91b043084049143a381aba5f7e9e36e4d0bb587e296d262ca"
+    }
+  ],
+  "status": "failed",
+  "checks": [
+    "native-open-with-updated-windows-defaults"
+  ],
+  "namespace": "wakeR3-517aa09fc3f3",
+  "error": "AssertionError({'cwd': 'C:\\\\Users\\\\ecoch\\\\AppData\\\\Local\\\\codex-wake-test\\\\wakeR3-517aa09fc3f3', 'argv': ['space argument', 'semi']})",
+  "final_presence": {
+    "workers": {
+      "present": false
+    },
+    "bots": {
+      "present": false
+    },
+    "seed": {
+      "present": false
+    },
+    "unsupported-move": {
+      "present": false
+    }
+  },
+  "final_server_births": {
+    "59604": {
+      "birth": 134387198924352261,
+      "exit_code": 0
+    },
+    "3556": {
+      "winerror": 87
+    }
+  }
+}

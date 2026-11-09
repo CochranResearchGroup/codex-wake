@@ -1,0 +1,66 @@
+{
+  "repository": "CochranResearchGroup/codex-wake",
+  "spec": 526,
+  "subissues": [
+    527,
+    528,
+    529,
+    530,
+    531,
+    532,
+    533,
+    534
+  ],
+  "dependencies": [
+    {
+      "number": 527,
+      "blockers": []
+    },
+    {
+      "number": 528,
+      "blockers": []
+    },
+    {
+      "number": 529,
+      "blockers": [
+        527
+      ]
+    },
+    {
+      "number": 530,
+      "blockers": [
+        527,
+        528
+      ]
+    },
+    {
+      "number": 531,
+      "blockers": [
+        530
+      ]
+    },
+    {
+      "number": 532,
+      "blockers": [
+        527
+      ]
+    },
+    {
+      "number": 533,
+      "blockers": [
+        530,
+        531
+      ]
+    },
+    {
+      "number": 534,
+      "blockers": [
+        529,
+        531,
+        532,
+        533
+      ]
+    }
+  ],
+  "status": "PASS"
+}

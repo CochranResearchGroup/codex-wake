@@ -1,0 +1,18 @@
+{
+  "tier": "focused",
+  "seam": "Public ControllerTabs and journaled local CLI operator; real owned tmux native session",
+  "red": [
+    "/tmp/p211-527-red1.log:unsupported operation",
+    "/tmp/p211-527-red2.log:reopened session incorrectly empty"
+  ],
+  "green": [
+    "/tmp/p211-527-green1.log",
+    "/tmp/p211-527-green2-final.log",
+    "/tmp/p211-527-green3.log"
+  ],
+  "first_integrated_failure": "Nested tabs.sessions aliases omitted from command coverage mapping on both versions; fixed by explicit schema-derived aliases, assertions retained.",
+  "checks": "24 affected tests eachPython3.11/3.12; final logs /tmp/p211-foundation-final-311.log and -312.log",
+  "native_effects": "Disposable private tmux socket only; shell PID unchanged across rename/default updates and reopening",
+  "shared_contract": "Six session verbs portable; @terminal-sessions management target distinct from ordinary resource grants; generated help and schema reuse",
+  "installed_acceptance": "Pending ticket534; no production or provider effects"
+}

@@ -177,6 +177,7 @@ class TabMonitor:
                                   last_error=record.get('last_error') if record else None,
                                   last_policy_operation=record.get('last_policy_operation') if record else None,
                                   last_formatting=record.get('last_formatting') if record else None,
+                                  last_routing=record.get('last_routing') if record else None,
                                   capabilities=record.get('capabilities',[]) if record else []),
                     snapshot=snapshot,application_effects=False)
 
@@ -308,13 +309,27 @@ class TabMonitor:
         record['last_policy_operation']=dict(operation_id=operation['operation_id'],execution=operation['execution'],
                                               policy_revision=state['revision'])
 
+    def _routing_tick(self,snapshot,deadline):
+        # Reuse the service-owned bounded observations; never create another monitor.
+        from .terminal_routing import TerminalRouting
+        from .controller_tabs import controller_tabs_from_root
+        from .shortcut_store import read as routing_read
+        try:state=routing_read(self.root/'terminal-routing'/'routing.json')
+        except FileNotFoundError:state=None
+        if not state or not (state.get('pending') or any(r['enabled'] for r in state.get('rules',{}).values())):
+            return dict(status='inactive',outcomes=[])
+        if time.monotonic()>=deadline:return dict(status='partial',reason='cycle_deadline')
+        owner=controller_tabs_from_root(self.root)
+        if not owner.host_managed:return dict(status='partial',reason='host_inventory_required')
+        return TerminalRouting(self.root,tabs=owner).tick(snapshot,deadline=deadline)
+
     def serve(self):
         stop=threading.Event()
         signal.signal(signal.SIGTERM,lambda signum,frame:stop.set())
         signal.signal(signal.SIGINT,lambda signum,frame:stop.set())
         with _lock(self.directory/'owner.lock'):
             record=dict(schema_version=1,state='running',generation=uuid4().hex,process=_identity(os.getpid()),started_at=self.clock(),
-                        capabilities=['tab-formatting-v1'])
+                        capabilities=['tab-formatting-v1','tab-routing-v1'])
             _save(self.directory/'owner.json',record)
             try:
                 while not stop.is_set():
@@ -326,6 +341,8 @@ class TabMonitor:
                         record['last_formatting']=refresh_formatting(self.root,observed.get('snapshot') or {},
                             deadline=cycle_deadline)
                         self._policy_tick(record)
+                        routed=self._routing_tick(observed.get('snapshot') or {},cycle_deadline)
+                        record['last_routing']=dict(status=routed.get('status','completed'),outcomes=len(routed.get('outcomes',[])),pending=len(routed.get('pending',[])))
                         record.pop('last_error',None)
                     except (InventoryError,OSError,ValueError) as error:
                         record['last_error']=getattr(error,'code','observation_unavailable')

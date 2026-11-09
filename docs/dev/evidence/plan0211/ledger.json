@@ -1,0 +1,235 @@
+{
+  "spec": 526,
+  "spec_url": "https://github.com/CochranResearchGroup/codex-wake/issues/526",
+  "base": "f0798e1ede3104caf591ba0b453fbf553bed569e",
+  "branch": "feat/terminal-sessions-526",
+  "tickets": [
+    {
+      "index": 1,
+      "number": 527,
+      "title": "Named terminal session CRUD and persistent empty definitions",
+      "blockers": [],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/527",
+      "node_id": 6289885527,
+      "owner": "/root",
+      "worktree": "/tmp/codex-wake-session-design-0211",
+      "owned_paths": [
+        "terminal_sessions.py",
+        "terminal_session_contract.py",
+        "shared controller/CLI schema wiring"
+      ],
+      "integration_sha": "e639397",
+      "validation": "24 integrated public session/selection/view/contract/controller checks PASS eachPython3.11/3.12; focused logs and527/528receipts"
+    },
+    {
+      "index": 2,
+      "number": 528,
+      "title": "Composable tab selection and custom categories",
+      "blockers": [],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/528",
+      "node_id": 6289891795,
+      "owner": "/root/selectors528",
+      "worktree": "/tmp/codex-wake-session-selectors-528",
+      "branch": "feat/session-selectors-528",
+      "base": "bfff13c",
+      "owned_paths": [
+        "tab_selection.py",
+        "tab_views.py",
+        "selector tests"
+      ],
+      "integration_sha": "c33fa94",
+      "validation": "24 integrated public session/selection/view/contract/controller checks PASS eachPython3.11/3.12; focused logs and527/528receipts"
+    },
+    {
+      "index": 3,
+      "number": 529,
+      "title": "Native psmux session lifecycle and capability readback",
+      "blockers": [
+        527
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/529",
+      "node_id": 6289893052,
+      "owner": "/root/psmux529",
+      "base": "e639397",
+      "worktree": "/tmp/codex-wake-session-529",
+      "branch": "feat/terminal-session-529",
+      "integration_sha": "97a52a6",
+      "validation": "25integratedchecksPASS EACH3.11/3.12;529native8PASS;receipts529/532"
+    },
+    {
+      "index": 4,
+      "number": 530,
+      "title": "Criteria-based bulk relocation, reconciliation and conditional undo",
+      "blockers": [
+        527,
+        528
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/530",
+      "node_id": 6289895048,
+      "owner": "/root/bulk530",
+      "base": "e639397",
+      "worktree": "/tmp/codex-wake-session-530",
+      "branch": "feat/terminal-session-530",
+      "integration_sha": "c9ff4ba plus sharedschemawiring",
+      "validation": "21integratedtestsPASS EACH3.11/3.12;530/integration.json"
+    },
+    {
+      "index": 5,
+      "number": 531,
+      "title": "Persistent prioritized routing with manual holds",
+      "blockers": [
+        530
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/531",
+      "node_id": 6289897115,
+      "owner": "/root/routing531",
+      "branch": "feat/terminal-session-531",
+      "worktree": "/tmp/codex-wake-session-531",
+      "integration_sha": "be4aa3c",
+      "validation": "26integratedchecksPASS EACH3.11/3.12; worker29PASS each + publichistoric-hold; realservice daemonroute redgreen"
+    },
+    {
+      "index": 6,
+      "number": 532,
+      "title": "Human-friendly session UX and bot-session reuse",
+      "blockers": [
+        527
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/532",
+      "node_id": 6289898541,
+      "owner": "/root/ux532",
+      "base": "e639397",
+      "worktree": "/tmp/codex-wake-session-532",
+      "branch": "feat/terminal-session-532",
+      "integration_sha": "326e4c5",
+      "validation": "25integratedchecksPASS EACH3.11/3.12;529native8PASS;receipts529/532"
+    },
+    {
+      "index": 7,
+      "number": 533,
+      "title": "Populated deletion with drain or terminate and rule cleanup",
+      "blockers": [
+        530,
+        531
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/533",
+      "node_id": 6289900152,
+      "owner": "/root/deletion533",
+      "branch": "feat/terminal-session-533",
+      "worktree": "/tmp/codex-wake-session-533",
+      "integration_sha": "201c4e3",
+      "validation": "Integrated35PASS312/28PASS311;533/integration.json; worker8PASS each"
+    },
+    {
+      "index": 8,
+      "number": 534,
+      "title": "Installed cross-platform session workflow and operator documentation",
+      "blockers": [
+        529,
+        531,
+        532,
+        533
+      ],
+      "state": "validated",
+      "tracker_state": "CLOSED",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/534",
+      "node_id": 6289902096,
+      "owner": "/root/acceptance534",
+      "branch": "test/terminal-session-534",
+      "worktree": "/tmp/codex-wake-session-534",
+      "integration_sha": "4a4efd8",
+      "validation": "InstalledPASS9/154.659s, nativepsmuxPASS8,303memberssource/wheel/Linux/Windows equal, cleanupPASS;534/validation.md",
+      "runtime_source": "3ed879124f1c6a754aa42827e078431c0a7079bf",
+      "wheel_sha256": "2f72c019f8654d07d0d84638830cf1c30bf8f49cff5cab7a000678cb51408b15"
+    }
+  ],
+  "review": {
+    "broad_runs": 1,
+    "remediation_passes": 1,
+    "fixed_point": "f0798e1ede3104caf591ba0b453fbf553bed569e",
+    "state": "complete",
+    "reviewed_tip": "bbfc494d5fe41368eb78ad592b5a85c7992c7170",
+    "findings": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
+    ],
+    "resolved_findings": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
+    ]
+  },
+  "state": "complete",
+  "integration_worktree": "/tmp/codex-wake-session-design-0211",
+  "validation_policy": {
+    "focused": "Per-ticket red/green bothPython3.11/3.12; final installed public parity",
+    "presubmit_budget_seconds": 180,
+    "comprehensive_budget_seconds": 1800,
+    "native_concurrency": 1,
+    "hosted_ci": false
+  },
+  "shared_contract_checkpoint": "3cd8a88",
+  "native_qualification": {
+    "529": "Passed8 sourcechecks and final534installed8checks inclrenamebaselinecarry/explicitdelete/OSexitreadback"
+  },
+  "runtime_effects": {
+    "production": false,
+    "providers": false
+  },
+  "current_state": "Eight implementation tickets closed; one review and one TDD remediation pass complete; draft PR publication; no merge/deployment",
+  "pending_acceptance_checks": [],
+  "runtime_source": "6afbda8cd166fc3ca08995256729a3353067f34a",
+  "postreview_wheel_sha256": "79d196c249f99ef6ff263d8619cd95e39df77619c07a78dd628162517dc368c6",
+  "postreview_acceptance": {
+    "packet": "postreview/validation.md",
+    "installed_public": {
+      "checks": 9,
+      "seconds": 158.07,
+      "native_powershell_calls": 22,
+      "status": "PASS"
+    },
+    "native_psmux": {
+      "checks": 8,
+      "status": "PASS"
+    },
+    "installed_regressions": {
+      "checks": 6,
+      "status": "PASS"
+    },
+    "package_members": 304,
+    "source_linux_windows_equal": true,
+    "cleanup": {
+      "namespaces": 7,
+      "birth_pins": 42,
+      "active": 0,
+      "pinned_active": 0,
+      "token_files_absent": 4
+    }
+  },
+  "publication": {
+    "pr": 535,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/pull/535",
+    "draft": true,
+    "base": "main",
+    "validated_product_source": "6afbda8cd166fc3ca08995256729a3353067f34a",
+    "preview": "https://previews.ecochran.dyndns.org/s/6fa5c87609e3",
+    "tracker_readback": "All527-534 CLOSED;534finalcomment6747714328;526 unchangedOPEN"
+  }
+}

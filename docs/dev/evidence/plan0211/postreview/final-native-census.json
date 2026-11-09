@@ -1,0 +1,184 @@
+{
+  "namespaces": [
+    "wake534-0b9272f7562c",
+    "wake534-203cc3a69e8c",
+    "wake534-6f7cc70c3029",
+    "wake534-abc56fc21b99",
+    "wake534-de91b9caf1e3",
+    "wake534-e435839b04e3",
+    "wake534post-a2d6353ad351"
+  ],
+  "matching_processes": [],
+  "active_count": 0,
+  "pinned_processes": [
+    {
+      "pid": 9956,
+      "winerror": 87
+    },
+    {
+      "pid": 31572,
+      "winerror": 87
+    },
+    {
+      "pid": 55236,
+      "winerror": 87
+    },
+    {
+      "pid": 72676,
+      "winerror": 87
+    },
+    {
+      "pid": 62668,
+      "winerror": 87
+    },
+    {
+      "pid": 34388,
+      "winerror": 87
+    },
+    {
+      "pid": 34188,
+      "winerror": 87
+    },
+    {
+      "pid": 76056,
+      "winerror": 87
+    },
+    {
+      "pid": 72640,
+      "winerror": 87
+    },
+    {
+      "pid": 37484,
+      "winerror": 87
+    },
+    {
+      "pid": 25596,
+      "winerror": 87
+    },
+    {
+      "pid": 57476,
+      "winerror": 87
+    },
+    {
+      "pid": 15948,
+      "winerror": 87
+    },
+    {
+      "pid": 84920,
+      "winerror": 87
+    },
+    {
+      "pid": 7612,
+      "winerror": 87
+    },
+    {
+      "pid": 81044,
+      "winerror": 87
+    },
+    {
+      "pid": 84392,
+      "winerror": 87
+    },
+    {
+      "pid": 41132,
+      "winerror": 87
+    },
+    {
+      "pid": 26300,
+      "winerror": 87
+    },
+    {
+      "pid": 69100,
+      "winerror": 87
+    },
+    {
+      "pid": 81612,
+      "winerror": 87
+    },
+    {
+      "pid": 63504,
+      "winerror": 87
+    },
+    {
+      "pid": 18336,
+      "winerror": 87
+    },
+    {
+      "pid": 85596,
+      "winerror": 87
+    },
+    {
+      "pid": 80908,
+      "winerror": 87
+    },
+    {
+      "pid": 49792,
+      "winerror": 87
+    },
+    {
+      "pid": 58536,
+      "winerror": 87
+    },
+    {
+      "pid": 67408,
+      "winerror": 87
+    },
+    {
+      "pid": 33172,
+      "winerror": 87
+    },
+    {
+      "pid": 33536,
+      "winerror": 87
+    },
+    {
+      "pid": 68676,
+      "winerror": 87
+    },
+    {
+      "pid": 76968,
+      "winerror": 87
+    },
+    {
+      "pid": 45192,
+      "winerror": 87
+    },
+    {
+      "pid": 67308,
+      "winerror": 87
+    },
+    {
+      "pid": 51048,
+      "winerror": 87
+    },
+    {
+      "pid": 20216,
+      "winerror": 87
+    },
+    {
+      "pid": 42480,
+      "winerror": 87
+    },
+    {
+      "pid": 86520,
+      "winerror": 87
+    },
+    {
+      "pid": 21040,
+      "winerror": 87
+    },
+    {
+      "pid": 1272,
+      "winerror": 87
+    },
+    {
+      "pid": 47780,
+      "winerror": 87
+    },
+    {
+      "pid": 39280,
+      "winerror": 87
+    }
+  ],
+  "pinned_active_count": 0
+}

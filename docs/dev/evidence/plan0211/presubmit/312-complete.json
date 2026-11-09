@@ -1,0 +1,15 @@
+{
+  "tests": 216,
+  "passed": 215,
+  "failures": [
+    [
+      "tests.test_command_contract.CommandContractTests.test_generated_reference_can_be_checked_for_staleness",
+      "Traceback (most recent call last):\n  File \"/tmp/codex-wake-session-design-0211/tests/test_command_contract.py\", line 26, in test_generated_reference_can_be_checked_for_staleness\n    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)\nAssertionError: 1 != 0 : Command reference/coverage is stale; run scripts/generate_command_reference.py: /tmp/codex-wake-session-design-0211/docs/agents/command-reference.md, /tmp/codex-wake-session-design-0211/docs/agents/command-coverage.json\n\n"
+    ]
+  ],
+  "errors": [],
+  "skipped": [],
+  "seconds": 134.959,
+  "product_source_changed": [],
+  "status": "FAIL"
+}

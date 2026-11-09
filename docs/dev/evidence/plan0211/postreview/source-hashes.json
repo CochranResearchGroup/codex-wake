@@ -1,0 +1,9 @@
+{
+  "scripts/terminal_session_acceptance534.py": "7d8f998335f9ef85c88e71311593ac0230685d4d6e8bda5f22c6fd2459ad55ab",
+  "docs/dev/evidence/plan0211/review-r3/native_acceptance.py": "3f976cf2fb9bd16398fba6178500cae6915d1a54b7259201b7b423ce384dea61",
+  "docs/dev/evidence/plan0211/review-r3/native_census.py": "a6e999a0d737fb4a743070a36e1a30fbbc068ef22782192bf84d10da5246a0ff",
+  "docs/dev/evidence/plan0211/review-r3/native_cleanup.py": "458b74f46014cfb5b6b0208d84f269850b0947d14aee88fa246a4e5ea751243f",
+  "docs/dev/evidence/plan0211/postreview/native_acceptance.py": "9583e766a2d2cd8a10c6491d439e14b7d897931b30ee0298c32d4085bd8bc4a1",
+  "docs/dev/evidence/plan0211/postreview/native_owned_processes.py": "1109c197cc03e7d196e1b3b92bcdba02fc28859307734a9dc2dac3ab7cb843b7",
+  "docs/dev/evidence/plan0211/postreview/verify_package.py": "7071ca34fd8139826456819388a80eabc113b021a1d544c95f15aaffcae2f6b5"
+}

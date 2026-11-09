@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "owned_processes_remaining": [],
+  "monitor_pid": 1418491,
+  "monitor_process_current": null,
+  "listener_terminated": true,
+  "namespace_removed": true
+}

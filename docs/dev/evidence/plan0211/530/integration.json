@@ -1,0 +1,26 @@
+{
+  "tier": "focused",
+  "selection": [
+    "test_terminal_relocation",
+    "test_terminal_sessions",
+    "test_tab_selection",
+    "test_tab_contract"
+  ],
+  "runs": [
+    {
+      "python": "3.12",
+      "tests": 21,
+      "seconds": 12.944,
+      "log": "/tmp/p211-530-integrated312.log"
+    },
+    {
+      "python": "3.11",
+      "tests": 21,
+      "seconds": 13.13,
+      "log": "/tmp/p211-530-integrated311.log"
+    }
+  ],
+  "status": "PASS",
+  "public_wiring": "PortableCLI/API/MCP schemas + nested relocate group + managementtarget authorization; read-only status reconciles ledger but performs no nativebootstrap cleanup.",
+  "native": "Real private tmux; all processpreservation and conditionalundo/lostreply tests passed; noproductioneffects"
+}

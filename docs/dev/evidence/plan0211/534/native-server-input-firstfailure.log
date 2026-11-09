@@ -1,0 +1,12 @@
+{"status": "failed", "checks": ["empty-definition-host-namespace", "native-open", "rename-exact-format-baseline-rollback", "restart-restores-exact-generation", "populated-delete-refused", "psmux-cross-session-move-unsupported-before-effect"], "namespace": "wake534-203cc3a69e8c", "error": "InventoryError('Select an explicit host-configured psmux namespace.')", "final_presence": {"workers": {"present": false}, "bots": {"present": false}, "seed": {"present": false}, "unsupported-move": {"present": false}}}
+Traceback (most recent call last):
+  File "/tmp/codex-wake-session-534/docs/dev/evidence/plan0211/534/native_rename_acceptance.py", line 46, in <module>
+    replacement=reopened.execute('tabs.session.create',dict(name='workers',backend='psmux'))['session']
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/wake534-final-installed/lib/python3.12/site-packages/codex_wake/controller_tabs.py", line 49, in execute
+    return TerminalSessions(self.root,tabs=self).execute(operation,arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/wake534-final-installed/lib/python3.12/site-packages/codex_wake/terminal_sessions.py", line 155, in execute
+    if backend=='psmux' and not server:raise InventoryError('unsupported_target','Select an explicit host-configured psmux namespace.')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+codex_wake.managed_inventory.InventoryError: Select an explicit host-configured psmux namespace.

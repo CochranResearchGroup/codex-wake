@@ -1,0 +1,9 @@
+{
+  "base_commit": "e639397bce41f5df20c7fdd2a31d08335bde6364",
+  "branch": "feat/terminal-session-530",
+  "sha256": {
+    "src/codex_wake/terminal_relocation.py": "722855c8f8d0ba8218aba2b605d415b0dc2b13c0fd958f0669bce7d2d8f18643",
+    "src/codex_wake/terminal_tab_holds.py": "ede65e6ac5d6bfed74603e2242909b04c04e453aff069eddb306261f9b852bb5",
+    "tests/test_terminal_relocation.py": "0e568cd1346a2c3c0e1c14aa9f12da4f947f396bea36f658207821f2b86dbea1"
+  }
+}

@@ -1,0 +1,11 @@
+{"status": "failed", "checks": ["empty-definition-host-namespace", "native-open", "rename-exact-format-baseline-rollback", "restart-restores-exact-generation", "populated-delete-refused"], "namespace": "wake534-6f7cc70c3029", "error": "InventoryError('closed tab remains visible')", "cleanup_error": "InventoryError('closed tab remains visible')", "final_presence": {"workers": {"present": false}, "bots": {"present": false}, "seed": {"present": false}}}
+Traceback (most recent call last):
+  File "/tmp/codex-wake-session-534/docs/dev/evidence/plan0211/534/native_rename_acceptance.py", line 36, in <module>
+    cfg=reopened.workspaces[created['id']];snapshot=cfg['transport'].snapshot(time.monotonic()+10);cfg['transport'].lifecycle('close',dict(window=snapshot['windows'][0]['window_id']),time.monotonic()+10)
+                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-session-534/src/codex_wake/controller_tab_adapters.py", line 97, in lifecycle
+    return self.request('lifecycle', dict(action=action, **arguments), deadline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-session-534/src/codex_wake/controller_tab_adapters.py", line 43, in request
+    raise InventoryError(error.get('code', 'attachment_unavailable'),
+codex_wake.managed_inventory.InventoryError: closed tab remains visible

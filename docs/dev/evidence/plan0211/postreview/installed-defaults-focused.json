@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "selection": [
+    "test_terminal_session_psmux.PsmuxSessionTests.test_windows_defaults_update_is_accepted_without_linux_path_lookup",
+    "test_terminal_session_psmux.PsmuxSessionTests.test_psmux_argv_defaults_are_refused_before_registry_change"
+  ],
+  "count": 2,
+  "python": "/tmp/wake-p211-postreview-installed/bin/python",
+  "loaded_modules": {
+    "codex_wake": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/__init__.py",
+    "codex_wake.signals": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/signals.py",
+    "codex_wake.signal_records": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/signal_records.py",
+    "codex_wake.time_provider": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/time_provider.py",
+    "codex_wake.records": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/records.py",
+    "codex_wake.managed_inventory": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/managed_inventory.py",
+    "codex_wake.tab_organization": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/tab_organization.py",
+    "codex_wake.controller_tabs": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/controller_tabs.py",
+    "codex_wake.shortcut_store": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/shortcut_store.py",
+    "codex_wake.terminal_sessions": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/terminal_sessions.py",
+    "codex_wake.controller_tab_adapters": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/controller_tab_adapters.py",
+    "codex_wake.terminal_session_summary": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/terminal_session_summary.py",
+    "codex_wake.terminal_session_contract": "/tmp/wake-p211-postreview-installed/lib/python3.12/site-packages/codex_wake/terminal_session_contract.py"
+  },
+  "test_sha256": "9f38cd38dffa72b6568129b40b1b4fcb60f886e6d20049e9a08f85cd9ce7b1fd"
+}

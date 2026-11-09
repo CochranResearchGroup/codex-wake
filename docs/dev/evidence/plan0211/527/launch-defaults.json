@@ -1,0 +1,20 @@
+{
+  "tier": "focused",
+  "seams": [
+    "Public journaled tabs.create plus independent native CWD/argv readback",
+    "Public session.open plus existing selected-profile foreground ownership witness"
+  ],
+  "red": [
+    "/tmp/p211-defaults-red.log:initial test referenced non-exported pane cwd; corrected to native pane_current_path",
+    "/tmp/p211-defaults-red-final.log:new tab ignored saved cwd",
+    "/tmp/p211-profile-session-red.log:saved profile seed unsupported, retained journal uncertain"
+  ],
+  "green": [
+    "/tmp/p211-defaults-green.log:8testsPASS",
+    "/tmp/p211-profile-session-green312.log:15public profile/defaults/remote destination scopesPASS",
+    "/tmp/p211-launch-defaults312.log:27affectedPASS before profile seeding addition"
+  ],
+  "behavior": "Resolve new-tab defaults before profile-scope authorization and durable intent freezing; later default changes cannot recast admitted launch. Existing tabs are unchanged. New session profile seed uses existing qualified foreground launch owner and removes only exact owned bootstrap after success; unknown seed never replayed. Windows custom/profile launch remains unsupported, no shell substitution.",
+  "provider": "Owned C sleep fixture, no external model/provider calls",
+  "production_effects": false
+}

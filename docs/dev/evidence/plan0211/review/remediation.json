@@ -1,0 +1,76 @@
+{
+  "pass": 1,
+  "review_runs": 1,
+  "frozen_review_tip": "bbfc494d5fe41368eb78ad592b5a85c7992c7170",
+  "runtime_source": "6afbda8cd166fc3ca08995256729a3353067f34a",
+  "findings": {
+    "R1": {
+      "red": "/tmp/p211-r1-red.log:remote management-only actor bypassed saved-profile grant when psmux/tmux names collide",
+      "initial_fix_diagnostic": "/tmp/p211-r1-green312.log missing refactored ensure parameter; corrected before green",
+      "fix": "Shared owning creation_selection resolves backend/server for authority and execution; normalize/freeze target fields before journal; registry generation fences saved profiles.",
+      "green312": "/tmp/p211-r1-finalgreen312.log 17PASS9.032s"
+    },
+    "R2": {
+      "fix_commit": "7251446",
+      "receipt": "../review-r2/validation.md"
+    },
+    "R3": {
+      "fix_commit": "7196359",
+      "receipt": "../review-r3/validation.md",
+      "qualified": "Windowscwd-only; genericargv/profile unsupported beforepersist; WSLdefaults unchanged"
+    },
+    "R4": {
+      "red": "/tmp/p211-r4-red.log:existing nonmatching tab became eligible after trait change",
+      "fix": "Freeze all existing birth IDs; preview still lists only matches; explicitinclude-existing enablesprior tabs",
+      "green312": "/tmp/p211-r1r4-green312.log30PASS40.367s"
+    }
+  },
+  "final_focused": {
+    "selection": "profile,scope,terminalcore/bot/routing/summary/psmux,psmuxprotocol,contract,friendlyselectors,deletion,relocation,portableexits/client,completion",
+    "python312": {
+      "tests": 82,
+      "seconds": 78.398,
+      "log": "/tmp/p211-postreview-focused312.log",
+      "status": "PASS"
+    },
+    "python311": {
+      "log": "/tmp/p211-postreview-focused311.log",
+      "status": "PASS",
+      "tests": 82,
+      "seconds": 75.843
+    },
+    "modules": [
+      "test_tab_profile_create",
+      "test_tab_destination_scope",
+      "test_terminal_sessions",
+      "test_terminal_bot_session",
+      "test_terminal_routing",
+      "test_terminal_session_summary",
+      "test_terminal_session_psmux",
+      "test_tab_psmux",
+      "test_tab_psmux_formatting",
+      "test_tab_contract",
+      "test_terminal_selection_cli",
+      "test_terminal_session_delete",
+      "test_terminal_relocation",
+      "test_tab_remote_exit",
+      "test_controller_portable_client",
+      "test_completion"
+    ],
+    "reproduction": "PYTHONPATH=src:tests <qualified-python> -m unittest test_tab_profile_create test_tab_destination_scope test_terminal_sessions test_terminal_bot_session test_terminal_routing test_terminal_session_summary test_terminal_session_psmux test_tab_psmux test_tab_psmux_formatting test_tab_contract test_terminal_selection_cli test_terminal_session_delete test_terminal_relocation test_tab_remote_exit test_controller_portable_client test_completion"
+  },
+  "full_suite_repeated": false,
+  "new_broad_review": false,
+  "provider_calls": 0,
+  "production_effects": false,
+  "state": "complete",
+  "installed_packet": "../postreview/",
+  "retained_logs": [
+    "p211-postreview-focused311.log",
+    "p211-r1-finalgreen312.log",
+    "p211-r1-red.log",
+    "p211-r4-red.log",
+    "p211-r1r4-green312.log",
+    "p211-postreview-focused312.log"
+  ]
+}

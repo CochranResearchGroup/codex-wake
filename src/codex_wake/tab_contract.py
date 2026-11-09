@@ -385,6 +385,7 @@ _SPECS = {'wake_tabs_apply': ('controller-tabs',
                          True)}
 
 
+_SPECS['wake_tabs_create'][3]['argv']={'type':'array','minItems':1,'maxItems':64,'items':{'type':'string'},'description':'Explicit new-tab command argv; overrides saved command defaults.'}
 _SPECS['wake_tabs_create'][3]['profile']={'type':'string','description':'Existing account/profile selector or alias; host registry selects build and home. Unsupported backends remain held; no shell fallback.'}
 
 # Formatting uses the same portable schema for CLI, HTTP and native MCP.
@@ -397,7 +398,12 @@ for _verb in ('status','inspect','enable','pause','resume','rollback','reenable'
         'Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.',
         _fields,([] if _read else ['expected_target','_request']),_read)
 
+from .terminal_session_contract import specs as _terminal_specs
+_SPECS.update(_terminal_specs())
+_SPECS['wake_tabs_group_save'][3]['labels']={'type':'array','maxItems':32,'items':{'type':'string'}}
+
 _FIELD_HELP = {
+    'destination':'Destination terminal session name or stable ID; compatible backend/server required.',
     'workspace':'Workspace ID or unique label from tabs list; same-user CLI can select its only workspace.',
     'window':'Exact native window ID from tabs list/show (for example @3); names are not identity pins.',
     'selector':'Window ID or unambiguous friendly name to inspect.',

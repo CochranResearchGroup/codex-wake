@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "checks": [
+    "empty-definition-host-namespace",
+    "native-open"
+  ],
+  "namespace": "wake534-de91b9caf1e3",
+  "error": "InventoryError('Formatting baseline belongs to a different namespace; preserve it for recovery.')",
+  "cleanup_error": "InventoryError('closed tab remains visible')",
+  "final_presence": {
+    "workers": {
+      "present": false
+    },
+    "bots": {
+      "present": false
+    },
+    "seed": {
+      "present": false
+    }
+  }
+}

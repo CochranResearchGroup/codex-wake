@@ -7,6 +7,6 @@ def exit_status(value):
     retained=result.get('operation',{}) if isinstance(result,dict) else {}
     retained=retained if isinstance(retained,dict) else {}
     outcome=retained.get('result')
-    incomplete=(value.get('status') in ('partial','uncertain') or retained.get('phase')=='uncertain'
-                or isinstance(outcome,dict) and outcome.get('status') in ('partial','uncertain'))
+    incomplete=(value.get('status') in ('partial','uncertain','held') or retained.get('phase')=='uncertain'
+                or isinstance(outcome,dict) and outcome.get('status') in ('partial','uncertain','held'))
     return 3 if incomplete else 0

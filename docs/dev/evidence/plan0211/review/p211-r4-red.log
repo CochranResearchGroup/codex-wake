@@ -1,0 +1,24 @@
+======================================================================
+FAIL: test_existing_nonmatch_does_not_become_eligible_without_include_existing (tests.test_terminal_routing.RoutingTests.test_existing_nonmatch_does_not_become_eligible_without_include_existing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-session-design-0211/tests/test_terminal_routing.py", line 213, in test_existing_nonmatch_does_not_become_eligible_without_include_existing
+    self.assertEqual(self.owner.tick({'resources':[observed]})['outcomes'],[])
+AssertionError: Lists differ: [{'identity': '01ee16efa8d5c8fb16206f41605[271 chars]0.0}] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+{'identity': '01ee16efa8d5c8fb16206f41605e043b96d744db42ad57423df16afa2f52163f', 'tab': {'id': 'session-aa21f4008ee346ecaa3cad1ca80903c6/@0', 'identity': 'e1925dc272f086fb98c353e44c82b4e8202a6b8191a68d5590c558feb59131b2'}, 'status': 'stabilizing', 'rule_id': 'route_c8fbd14e5e9040de96e8ed55505b3933', 'since': 100.0}
+
++ []
+- [{'identity': '01ee16efa8d5c8fb16206f41605e043b96d744db42ad57423df16afa2f52163f',
+-   'rule_id': 'route_c8fbd14e5e9040de96e8ed55505b3933',
+-   'since': 100.0,
+-   'status': 'stabilizing',
+-   'tab': {'id': 'session-aa21f4008ee346ecaa3cad1ca80903c6/@0',
+-           'identity': 'e1925dc272f086fb98c353e44c82b4e8202a6b8191a68d5590c558feb59131b2'}}]
+
+----------------------------------------------------------------------
+Ran 1 test in 0.882s
+
+FAILED (failures=1)
