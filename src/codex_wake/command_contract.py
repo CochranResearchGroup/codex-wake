@@ -169,6 +169,8 @@ def apply_help(parser):
     """Enrich the existing compatibility parser from migrated operation metadata."""
     for path, item in parser_paths(parser):
         op = BY_NAME.get('.'.join(path))
+        if not op and len(path)==3 and path[:2]==('tabs','sessions'):
+            op=BY_NAME.get('tabs.session.'+path[2])
         if not op and len(path)==2 and path[0]=='tabs':
             op=next((candidate for candidate in OPERATIONS if candidate.name.startswith('tabs.') and tab_cli_verb(candidate.name)==path[1]),None)
         if not op:
@@ -243,6 +245,7 @@ def coverage_report(parser):
             'mcp_tools': {op.name: op.tool for op in OPERATIONS if op.tool}}
 
     tab_paths={'tabs.'+tab_cli_verb(op.name) for op in OPERATIONS if op.name.startswith('tabs.')}
+    tab_paths.update('tabs.sessions.'+op.name.rsplit('.',1)[1] for op in OPERATIONS if op.name.startswith('tabs.session.'))
     result['deferred_commands']=[name for name in result['deferred_commands'] if name not in tab_paths]
     from .tab_contract import CAPABILITIES
     result['tab_capabilities']=deepcopy(CAPABILITIES)

@@ -397,6 +397,10 @@ for _verb in ('status','inspect','enable','pause','resume','rollback','reenable'
         'Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.',
         _fields,([] if _read else ['expected_target','_request']),_read)
 
+from .terminal_session_contract import specs as _terminal_specs
+_SPECS.update(_terminal_specs())
+_SPECS['wake_tabs_group_save'][3]['labels']={'type':'array','maxItems':32,'items':{'type':'string'}}
+
 _FIELD_HELP = {
     'workspace':'Workspace ID or unique label from tabs list; same-user CLI can select its only workspace.',
     'window':'Exact native window ID from tabs list/show (for example @3); names are not identity pins.',

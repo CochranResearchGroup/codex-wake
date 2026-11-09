@@ -1,0 +1,186 @@
+"""Persistent named terminal sessions, separate from native container liveness."""
+import hashlib
+import json
+import os
+import subprocess
+from pathlib import Path
+import time
+import uuid
+
+from .managed_inventory import InventoryError
+from .shortcut_store import read, write, locked
+
+
+def _name(value):
+    if not isinstance(value,str) or not value.strip() or len(value.encode())>128 or any(ord(c)<32 or c in ':.' for c in value):
+        raise InventoryError('invalid_argument','Use a nonempty session name without control characters, dots or colons.')
+    return value
+
+
+def _digest(value):
+    return hashlib.sha256(json.dumps(value,sort_keys=True).encode()).hexdigest()
+
+
+class TerminalSessions:
+    READS=frozenset(('tabs.session.list','tabs.session.show'))
+    def __init__(self,root,*,tabs):
+        self.root=Path(root);self.tabs=tabs;self.directory=self.root/'terminal-sessions';self.path=self.directory/'registry.json'
+        self._restore_bindings()
+
+    def _restore_bindings(self):
+        from .controller_tab_adapters import TmuxAttachmentTransport
+        for record in self.state()['sessions'].values():
+            if record.get('deleted') or record.get('backend') not in ('tmux','byobu') or not record.get('native_session_id'):continue
+            try:
+                transport=TmuxAttachmentTransport(record['server'],record['native_session_id'])
+                snap=transport.snapshot(time.monotonic()+2)
+                key=_digest({k:snap.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})
+                if key!=record.get('native_key'):continue
+                self.tabs.workspaces[record['id']]=dict(kind=record['backend'],label=record['name'],socket_path=record['server'],session_id=record['native_session_id'],transport=transport)
+            except (OSError,ValueError,subprocess.SubprocessError):continue
+
+    def state(self):
+        try:return read(self.path)
+        except FileNotFoundError:return dict(version=1,sessions={})
+
+    def save(self,state):
+        write(self.path,state)
+
+    def target(self):
+        return dict(host=self.tabs.host,environment=self.tabs.environment,workspace='@terminal-sessions',presentation='terminal',generation=_digest(self.state()))
+
+    def inventory(self,state=None):
+        state=state or self.state();live={};by_native={v.get('native_key'):v for v in state['sessions'].values() if not v.get('deleted') and v.get('native_key')}
+        for workspace,cfg in list(self.tabs.workspaces.items())[:64]:
+            try:snap=cfg['transport'].snapshot(time.monotonic()+2)
+            except (OSError,ValueError,subprocess.SubprocessError):continue
+            native_key=_digest({k:snap.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})
+            saved=by_native.get(native_key);sid=saved['id'] if saved else 'native-'+native_key[:24]
+            label=cfg.get('label') or snap.get('session_name') or workspace
+            record=dict(saved or {},id=sid,name=label if not saved else saved['name'],backend=cfg['kind'],server=str(cfg.get('socket_path') or snap.get('server')),native_key=native_key,workspace=workspace,state='running',tab_count=len(snap['windows']),snapshot=snap,labels=(saved or {}).get('labels',[]),defaults=(saved or {}).get('defaults',{}),description=(saved or {}).get('description',''),managed=bool(saved))
+            live[sid]=record
+        result=[]
+        for sid,saved in state['sessions'].items():
+            if saved.get('deleted'):continue
+            fallback=dict(saved,state='empty',tab_count=0,workspace=None,snapshot=None,managed=True)
+            if sid not in live and saved.get('native_session_id'):
+                try:
+                    check=subprocess.run(['tmux','-S',saved['server'],'has-session','-t',saved['native_session_id']],capture_output=True,timeout=2)
+                    if check.returncode!=1:fallback.update(state='unavailable',tab_count=None)
+                except (OSError,subprocess.SubprocessError):fallback.update(state='unavailable',tab_count=None)
+            result.append(live.pop(sid,fallback))
+        result.extend(live.values());return sorted(result,key=lambda v:(v['name'],v['server'],v['id']))
+
+    def resolve(self,selector,*,state=None,server=None):
+        records=self.inventory(state)
+        matches=[v for v in records if (v['id']==selector or v['name']==selector) and (server is None or v['server']==server)]
+        if len(matches)!=1:
+            error=InventoryError('ambiguous_target' if matches else 'target_not_found','Select a unique terminal session name or ID; list sessions for candidates.')
+            error.candidates=[{k:v[k] for k in ('id','name','server','backend')} for v in matches];raise error
+        return matches[0]
+
+    def _settings(self,changes):
+        if not isinstance(changes,dict) or set(changes)-{'name','description','labels','defaults','formatting'}:
+            raise InventoryError('invalid_argument','Unknown session setting.')
+        if 'name' in changes:_name(changes['name'])
+        if 'description' in changes and (not isinstance(changes['description'],str) or len(changes['description'])>2048):raise InventoryError('invalid_argument','Bounded description required.')
+        if 'labels' in changes and (not isinstance(changes['labels'],list) or len(changes['labels'])>64 or any(not isinstance(v,str) or not v or len(v)>128 for v in changes['labels'])):raise InventoryError('invalid_argument','Bounded labels required.')
+        if 'defaults' in changes:
+            v=changes['defaults']
+            if not isinstance(v,dict) or set(v)-{'cwd','profile','argv'}:raise InventoryError('invalid_argument','Defaults accept cwd, profile and argv.')
+            if 'cwd' in v and (not isinstance(v['cwd'],str) or not Path(v['cwd']).is_absolute() or not Path(v['cwd']).is_dir()):raise InventoryError('invalid_argument','Existing absolute default directory required.')
+            if 'profile' in v and (not isinstance(v['profile'],str) or not v['profile'] or len(v['profile'])>128):raise InventoryError('invalid_argument','Profile selector required.')
+            if 'argv' in v and (not isinstance(v['argv'],list) or not 1<=len(v['argv'])<=64 or any(not isinstance(x,str) or '\0' in x or len(x)>4096 for x in v['argv'])):raise InventoryError('invalid_argument','Bounded command argv required.')
+        if 'formatting' in changes:
+            from .tab_format_policy import validate_policy
+            validate_policy(changes['formatting'])
+        return changes
+
+    def execute(self,operation,args):
+        verb=operation.rsplit('.',1)[1]
+        allowed={'session','server','name','backend','start','changes','expected_target','_request'}
+        if not isinstance(args,dict) or set(args)-allowed:raise InventoryError('invalid_argument','Unsupported session arguments.')
+        if operation in self.READS:
+            state=self.state()
+            if verb=='list':return dict(sessions=self.inventory(state),target=self.target())
+            return dict(session=self.resolve(args.get('session'),server=args.get('server'),state=state),target=self.target())
+        with locked(self.directory):
+            if args.get('expected_target') is not None and args['expected_target']!=self.target():raise InventoryError('stale_target','Session registry changed; inspect again.')
+            state=self.state();records=self.inventory(state)
+            if verb=='create':
+                name=_name(args.get('name'));backend=args.get('backend','tmux')
+                if backend not in ('tmux','byobu','psmux'):raise InventoryError('invalid_argument','Unsupported terminal backend.')
+                server=args.get('server') or next((v['server'] for v in records if v['backend'] in ('tmux','byobu')),str(self.directory/'tmux.sock'))
+                if any(v['name']==name and v['server']==server for v in records):raise InventoryError('name_conflict','Session name already exists on this terminal server.')
+                record=dict(id='session-'+uuid.uuid4().hex,name=name,backend=backend,server=server,labels=[],defaults={},description='',created_at=time.time())
+                state['sessions'][record['id']]=record;self.save(state)
+            else:
+                observed=self.resolve(args.get('session'),server=args.get('server'),state=state)
+                record={k:v for k,v in observed.items() if k not in ('snapshot','workspace','state','tab_count','managed')}
+                state['sessions'][record['id']]=record
+                if verb=='update':
+                    changes=self._settings(args.get('changes'))
+                    if any(v['id']!=record['id'] and v['server']==record['server'] and v['name']==changes.get('name',record['name']) for v in records):raise InventoryError('name_conflict','Session name already exists.')
+                    if 'name' in changes and observed['state']=='running':self.native(observed,'rename',name=changes['name'])
+                    if 'formatting' in changes and observed['state']=='running':
+                        from .tab_formatting import TabFormatting
+                        TabFormatting(self.root,tabs=self.tabs).execute('tabs.format.configure',dict(workspace=observed['workspace'],policy=changes['formatting']))
+                    record.update(changes)
+                elif verb=='delete':
+                    if observed['state']=='unavailable' or observed['tab_count']:raise InventoryError('session_not_empty','Choose explicit drain or terminate for a populated session.')
+                    record.update(deleted=True,deleted_at=time.time());self.save(state)
+                    return dict(status='deleted',session=record)
+                elif verb!='open':raise InventoryError('unsupported_operation','Unsupported terminal session operation.')
+                self.save(state)
+            if verb=='open' or args.get('start'):
+                self.open(record)
+                state=self.state();record=state['sessions'][record['id']]
+            return dict(status='created' if verb=='create' else 'updated' if verb=='update' else 'opened',session=self.resolve(record['id']))
+
+    def native(self,record,verb,**kwargs):
+        if record['backend']=='psmux':
+            from .terminal_session_psmux import native
+            return native(self,record,verb,**kwargs)
+        cfg=self.tabs.workspaces[record['workspace']];transport=cfg['transport'];deadline=time.monotonic()+10
+        if verb=='rename':
+            transport.command(deadline,'rename-session','-t',transport.session,kwargs['name'])
+            cfg['label']=kwargs['name']
+        else:raise InventoryError('unsupported_operation','Unsupported native session action.')
+
+    def open(self,record):
+        current=self.resolve(record['id'])
+        if current['state']=='running':return current
+        if record['backend']=='psmux':
+            from .terminal_session_psmux import native
+            return native(self,record,'open')
+        from .controller_tab_adapters import TmuxAttachmentTransport
+        server=Path(record['server'])
+        known={str(c.get('socket_path')) for c in self.tabs.workspaces.values() if c['kind'] in ('tmux','byobu')}
+        if str(server) not in known and server!=self.directory/'tmux.sock':raise InventoryError('unsupported_target','Select a discovered terminal server or the private session server.')
+        if record.get('defaults',{}).get('profile'):
+            raise InventoryError('unsupported_target','Use the selected-profile tab launcher to seed this session; no shell fallback.')
+        if record.get('opening'):
+            raise InventoryError('uncertain_effect','A prior native session launch needs reconciliation; no launch was replayed.')
+        record['opening']=True
+        state=self.state();state['sessions'][record['id']]=record;self.save(state)
+        # Launch argv is an explicit new-tab default, never applied to existing work.
+        import subprocess
+        defaults=record.get('defaults',{})
+        if defaults.get('profile'):raise InventoryError('unsupported_target','Use the selected-profile tab launcher to seed this session; no shell fallback.')
+        command=['tmux','-S',str(server),'new-session','-d','-s',record['name'],'-P','-F','#{session_id}']
+        if defaults.get('cwd'):command+=['-c',defaults['cwd']]
+        command+=['--',*defaults.get('argv',['/bin/sh'])]
+        result=subprocess.run(command,capture_output=True,text=True,timeout=10)
+        if result.returncode:raise InventoryError('session_start_failed',result.stderr[:500])
+        session=result.stdout.strip();workspace=record['id']
+        cfg=dict(kind=record['backend'],label=record['name'],socket_path=str(server),session_id=session,transport=TmuxAttachmentTransport(str(server),session))
+        self.tabs.workspaces[workspace]=cfg
+        snap=cfg['transport'].snapshot(time.monotonic()+5)
+        record.pop('opening',None)
+        record['native_session_id']=session
+        record['native_key']=_digest({k:snap.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})
+        state=self.state();state['sessions'][record['id']]=record;self.save(state)
+        if record.get('formatting'):
+            from .tab_formatting import TabFormatting
+            TabFormatting(self.root,tabs=self.tabs).execute('tabs.format.configure',dict(workspace=workspace,policy=record['formatting']))
+        return self.resolve(record['id'])

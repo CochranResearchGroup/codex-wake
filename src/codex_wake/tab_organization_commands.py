@@ -99,12 +99,16 @@ def register_parser(subparsers):
     verbs = parser.add_subparsers(dest='tabs_command', required=True)
     formatting=verbs.add_parser('format',help='Reversible tab decoration; rollback restores originals, reenable reapplies saved policy.')
     formatting_verbs=formatting.add_subparsers(dest='format_command',required=True)
+    sessions=verbs.add_parser('sessions',help='Create, list, inspect, edit and delete named terminal sessions.')
+    session_verbs=sessions.add_subparsers(dest='session_command',required=True)
     aliases = {'pins':'pin', 'members':'member', 'criteria':'criterion'}
     for _, operation, summary, properties, required, readonly in tool_specs().values():
         action=cli_verb(operation)
         commands=[verbs.add_parser(action,help=summary,description=summary)]
         if operation.startswith('tabs.format.'):
             commands.append(formatting_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
+        if operation.startswith('tabs.session.'):
+            commands.append(session_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
         for command in commands:
             command.set_defaults(tabs_command=action,group_by=[],sort_by=[],filters=[],pins=[],members=[],mode='activity')
             if action.startswith(('view-','group-')) and not action.endswith('-list'):
@@ -156,7 +160,7 @@ def run(args, root, *, observer=None):
         from .tab_contract import BY_OPERATION
         args.tab_command=args.tabs_command
         args.arguments=dict(args.arguments or {})
-        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1)
+        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1)
         if operation in BY_OPERATION:
             properties=BY_OPERATION[operation][1][3]
             for field in properties:
