@@ -2,20 +2,18 @@
 
 State: OPEN
 Owner: primary / ecochran76
-Work item: LOCAL-P211 (TRIAGE; design interview)
-Branch: docs/session-management-0211
+Work item: #526; implementation #527–#534
+Branch: feat/terminal-sessions-526
 Domain authority: GLOSSARY.md
 
 ## Current State
 
-Operator requests first-class terminal session CRUD and moving selected tabs
-between sessions by arbitrary categories or criteria. Existing development tabs
-occupy `default`; a future codex-bots launch should use its own dedicated session.
-Prior implementation exposed terminal namespaces as workspaces, making discovery
-and formatting difficult. Public terminology should distinguish terminal sessions
-from agent conversations and repositories. All seventeen round1–3 decisions are accepted and documented. The decision
-frontier is empty; consolidated design awaits shared-understanding confirmation.
-No implementation or runtime changes have been authorized by this interview.
+Operator approved all seventeen design decisions and explicitly invoked spec,
+ticket publication and implementation. Spec #526 and eight vertical tickets
+#527–#534 are published with native dependencies. Primary owns #527; independent
+#528 is delegated. The execution ledger owns readiness, custody and review counts.
+Public seams are existing controller CLI/API/MCP and disposable native adapters,
+as agreed in the interview; no new interface choice needs operator input.
 
 Graphiti discovery: skip; supplied current conversation, deployed source and its
 canonical receipts provide the decisions needed for this bounded interview.

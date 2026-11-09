@@ -1,0 +1,134 @@
+{
+  "spec": 526,
+  "spec_url": "https://github.com/CochranResearchGroup/codex-wake/issues/526",
+  "base": "f0798e1ede3104caf591ba0b453fbf553bed569e",
+  "branch": "feat/terminal-sessions-526",
+  "tickets": [
+    {
+      "index": 1,
+      "number": 527,
+      "title": "Named terminal session CRUD and persistent empty definitions",
+      "blockers": [],
+      "state": "running",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/527",
+      "node_id": 6289885527,
+      "owner": "/root",
+      "worktree": "/tmp/codex-wake-session-design-0211",
+      "owned_paths": [
+        "terminal_sessions.py",
+        "terminal_session_contract.py",
+        "shared controller/CLI schema wiring"
+      ]
+    },
+    {
+      "index": 2,
+      "number": 528,
+      "title": "Composable tab selection and custom categories",
+      "blockers": [],
+      "state": "running",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/528",
+      "node_id": 6289891795,
+      "owner": "/root/selectors528",
+      "worktree": "/tmp/codex-wake-session-selectors-528",
+      "branch": "feat/session-selectors-528",
+      "base": "bfff13c",
+      "owned_paths": [
+        "tab_selection.py",
+        "tab_views.py",
+        "selector tests"
+      ]
+    },
+    {
+      "index": 3,
+      "number": 529,
+      "title": "Native psmux session lifecycle and capability readback",
+      "blockers": [
+        527
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/529",
+      "node_id": 6289893052
+    },
+    {
+      "index": 4,
+      "number": 530,
+      "title": "Criteria-based bulk relocation, reconciliation and conditional undo",
+      "blockers": [
+        527,
+        528
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/530",
+      "node_id": 6289895048
+    },
+    {
+      "index": 5,
+      "number": 531,
+      "title": "Persistent prioritized routing with manual holds",
+      "blockers": [
+        530
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/531",
+      "node_id": 6289897115
+    },
+    {
+      "index": 6,
+      "number": 532,
+      "title": "Human-friendly session UX and bot-session reuse",
+      "blockers": [
+        527
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/532",
+      "node_id": 6289898541
+    },
+    {
+      "index": 7,
+      "number": 533,
+      "title": "Populated deletion with drain or terminate and rule cleanup",
+      "blockers": [
+        530,
+        531
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/533",
+      "node_id": 6289900152
+    },
+    {
+      "index": 8,
+      "number": 534,
+      "title": "Installed cross-platform session workflow and operator documentation",
+      "blockers": [
+        529,
+        531,
+        532,
+        533
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/534",
+      "node_id": 6289902096
+    }
+  ],
+  "review": {
+    "broad_runs": 0,
+    "remediation_passes": 0
+  },
+  "state": "implementing",
+  "integration_worktree": "/tmp/codex-wake-session-design-0211",
+  "validation_policy": {
+    "focused": "Per-ticket red/green bothPython3.11/3.12; final installed public parity",
+    "presubmit_budget_seconds": 180,
+    "comprehensive_budget_seconds": 1800,
+    "native_concurrency": 1,
+    "hosted_ci": false
+  }
+}
