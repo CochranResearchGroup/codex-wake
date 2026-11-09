@@ -22,6 +22,7 @@ class BotSessionTests(unittest.TestCase):
             try:
                 first=ensure_bot_session(execute,argv=['/bin/sleep','300'],server=sock)
                 birth=panes()
+                self.assertIn('codex-bots:',birth)
                 second=ensure_bot_session(execute,argv=['/bin/false'],server=sock)
                 self.assertEqual(panes(),birth)
                 self.assertIn(before.strip(),birth)
