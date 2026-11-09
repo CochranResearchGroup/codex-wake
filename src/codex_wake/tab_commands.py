@@ -105,6 +105,13 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
         from dataclasses import replace
         actor=replace(actor,targets=[*actor.targets,*owner.reattach_owner().authorization_targets(payload['plan_id'])])
         return AuthorizedTabs(SimpleNamespace(authenticate=lambda unused:actor),owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
+    if operation.startswith('tabs.format.') and payload.get('scope')=='global':
+        payload.setdefault('expected_target',owner.format_target(scope='global'))
+        key=_intent_key(operation,payload,request_id)
+        payload.setdefault('_request',dict(operation_id='tab-cli-'+key,idempotency_key='tab-cli-'+key,
+            correlation_id=key,binding='local-cli',target=payload['expected_target']))
+        actor=local_operator(payload['expected_target'],('control','observe'))
+        return AuthorizedTabs(SimpleNamespace(authenticate=lambda unused:actor),owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
     workspace = payload.get('workspace')
     if workspace is None and len(owner.workspaces) == 1:
         workspace = next(iter(owner.workspaces))

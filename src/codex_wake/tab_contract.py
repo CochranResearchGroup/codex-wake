@@ -390,12 +390,12 @@ _SPECS['wake_tabs_create'][3]['profile']={'type':'string','description':'Existin
 # Formatting uses the same portable schema for CLI, HTTP and native MCP.
 for _verb in ('status','inspect','enable','pause','resume','rollback','reenable','reset','configure'):
     _read = _verb in ('status','inspect')
-    _fields = {'workspace': {'type':'string'}}
+    _fields = {'workspace': {'type':'string'}, 'scope': {'type':'string','enum':['workspace','global'],'description':'Workspace display control (default) or global display policy; global requires a matching formatting authority grant.'}}
     if _verb == 'configure':_fields['policy']={'type':'object','description':'Persistent display policy JSON.'}
     if not _read:_fields.update(expected_target={'type':'object'},_request={'type':'object'})
     _SPECS['wake_tabs_format_'+_verb]=('controller-tabs','tabs.format.'+_verb,
         'Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.',
-        _fields,['workspace']+([] if _read else ['expected_target','_request']),_read)
+        _fields,([] if _read else ['expected_target','_request']),_read)
 
 _FIELD_HELP = {
     'workspace':'Workspace ID or unique label from tabs list; same-user CLI can select its only workspace.',

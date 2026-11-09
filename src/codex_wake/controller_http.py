@@ -281,10 +281,7 @@ class ProtectedOperations:
         elif operation in ('tabs.format.status','tabs.format.inspect'):
             tabs=self.operations.tabs
             if tabs is None:raise InventoryError('configuration_unavailable','host presentation owner unavailable')
-            workspace=arguments.get('workspace')
-            if workspace not in tabs.workspaces:raise InventoryError('unsupported_target','Select an owned workspace.')
-            from .tab_lifecycle import TabLifecycle
-            scope=TabLifecycle(tabs.root,workspaces=tabs.workspaces,host=tabs.host,environment=tabs.environment).inspect(workspace)['target']
+            scope=tabs.format_target(scope=arguments.get('scope','workspace'),workspace=arguments.get('workspace'))
             if not permitted(actor,scope):raise AuthError('insufficient_scope')
             result=self.operations.execute(operation,arguments)
         elif operation=='tabs.policy.status':

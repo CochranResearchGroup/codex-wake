@@ -17,6 +17,10 @@ class ControllerTabs:
         self.root, self.workspaces = root, dict(workspaces)
         self.host, self.environment = host, environment
 
+    def format_target(self, *, scope='workspace', workspace=None):
+        from .tab_formatting import TabFormatting
+        return TabFormatting(self.root,tabs=self).target(scope=scope,workspace=workspace)
+
     def profile_owner(self):
         from .tab_profile_create import TabProfileCreate
         return TabProfileCreate(self.root,host=self.host,environment=self.environment)
