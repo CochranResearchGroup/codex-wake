@@ -8695,3 +8695,39 @@ launcher preserved; no model calls or native restart/build. Existing MCP clients
 reload individually; real workspace decoration still requires enable. Previous
 prefix retained with guarded private rollback command. Deployment receipt:
 docs/dev/evidence/plan0210/deployment.json. Hosted CI skipped; memory forbidden.
+
+
+## Turn | 2026-11-09 | Terminal session management interview started
+
+Operator invoked grill-with-docs after requesting session CRUD and category-based
+tab relocation. Started LOCAL-P211 on isolated docs/session-management-0211;
+clarified terminal session/tab in existing glossary. Round1 decisions pending;
+read-only backend fact check delegated. No terminal/runtime changes or implementation.
+
+
+## Turn | 2026-11-09 | Session management round1 accepted
+
+Operator accepted all five recommendations: names/current-session inference, saved
+empty definitions, explicit populated deletion, process-preserving tab movement
+and opt-in continuous routing. Updated LOCAL-P211 and glossary; recorded ADR0003
+for durable saved definitions independent of native liveness. Round2 remains
+pending; no implementation or terminal effects. Memory forbidden: no write request.
+
+
+## Turn | 2026-11-09 | Session management round2 accepted
+
+Operator accepted Q6–Q11: scoped names/stable renaming, editable new-tab defaults,
+composable selectors, frozen bulk plans with explicit partial outcomes and
+conditional undo, priority-based routing and manual holds/pins. Updated LOCAL-P211
+and glossary. Round3 remains pending. No runtime effects or implementation.
+Memory forbidden: no explicit write request.
+
+
+## Turn | 2026-11-09 | Session management round3 accepted
+
+Operator accepted Q12–Q17: bots session reuse, immediate existing-session discovery,
+explicit initial routing backfill/stability/restart reconciliation, deletion rule
+cleanup and partial-drain retention, readable CLI/structured automation and
+conflict-preserving undo. All seventeen decisions recorded in LOCAL-P211. Decision
+frontier empty; consolidated shared-understanding confirmation pending. No code or
+runtime effects. Memory forbidden: no explicit memory-write request.

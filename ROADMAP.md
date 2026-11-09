@@ -1509,3 +1509,14 @@ custom model identities and Ollama/local inference providers as distinct traits.
 Common display policy should support new identifiers/capabilities without
 hard-coded harness/model combinations. Runtime support and control capabilities
 require separate adapter qualification; they are future milestones.
+
+
+## P211 | Terminal session CRUD and criteria-based relocation
+
+OPEN design interview: [LOCAL-P211](docs/dev/plans/0211-2026-11-09-terminal-session-management.md).
+All seventeen design decisions accepted; consolidated understanding awaits final
+confirmation. First-class named session CRUD, discovery, persistent empty sessions,
+dedicated bot session reuse, criteria-based relocation and opt-in stable routing.
+Moves preserve processes; manual holds, partial results and conditional undo remain
+explicit. CLI/API/MCP share semantics; psmux capabilities qualify independently.
+No implementation or runtime changes during the interview.

@@ -298,6 +298,30 @@ A terminal pane, TUI connection or structured client connection through which a
 runtime can be presented or accessed. Replacing an attachment does not by itself
 replace the conversation or logical agent.
 
+**Terminal session**:
+A named collection of terminal tabs whose saved definition can remain when it
+has no tabs. It is distinct from an agent conversation and a code repository.
+_Avoid_: Workspace when referring to the user-facing terminal session.
+
+**Empty terminal session**:
+A saved terminal session with no tabs. Its existence does not imply a running
+terminal container or agent process.
+
+**Tab routing rule**:
+A saved criterion and destination terminal session for relocating matching tabs.
+Continuous application is an explicitly enabled behavior of the rule.
+
+**Routing hold**:
+A per-tab suspension of automatic relocation following a manual move. It remains
+until routing is explicitly resumed for that tab.
+
+**Tab pin**:
+An explicit instruction to retain a tab's placement against automatic routing.
+
+**Terminal tab**:
+A terminal window within a terminal session, containing one or more panes.
+Moving a tab between terminal sessions does not itself replace its conversations.
+
 **Tab trait**:
 An observed property of a terminal attachment or its associated session, such as
 harness, build, account, reported model, inference provider, remote host, turn
