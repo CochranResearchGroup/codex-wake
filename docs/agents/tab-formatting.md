@@ -16,9 +16,13 @@ codex-wake tabs format enable --workspace WORKSPACE
 codex-wake tabs format inspect --workspace WORKSPACE
 ```
 
-The existing tab monitor automatically decorates sampled owned tabs when the
-persistent policy permits it. Start it with `codex-wake tabs monitor-start` if it
-is not already running; inspect it with `tabs monitor-status`. Defaults are a
+Enable, resume and re-enable ensure that the existing single tab monitor is
+running for the selected controller when persistent policy permits it. They do
+not restart an incompatible legacy monitor or any agent. A startup failure is a
+partial result with actionable monitor details. Rollback leaves this shared
+monitor running while keeping the selected workspace disabled. Inspect it with
+`codex-wake tabs monitor-status`; `tabs monitor-start` is also available explicitly.
+Defaults are a
 five-second interval, bounded probes and a ten-second whole-cycle budget.
 These are scheduling targets, not a promise that every workspace updates in five
 seconds under load. An isolated forty-tab tmux acceptance run completed successive
