@@ -50,3 +50,15 @@ class TerminalSessionTests(unittest.TestCase):
             second=operator_execute('tabs.session.create',{'name':'bots'},d,owner=tabs,request_id='session-1')
             self.assertEqual(first['result']['operation']['result']['session']['id'],second['result']['operation']['result']['session']['id'])
             self.assertEqual(len(tabs.execute('tabs.session.list',{})['sessions']),1)
+
+    def test_ensure_reuses_running_named_session_without_restarting_command(self):
+        import subprocess
+        with tempfile.TemporaryDirectory(prefix='wake-p211-') as d:
+            tabs=ControllerTabs(Path(d),workspaces={},host='test',environment='fixture')
+            first=tabs.execute('tabs.session.ensure',{'name':'bots','defaults':{'argv':['/bin/sh']}})
+            sock=str(Path(d)/'terminal-sessions/tmux.sock')
+            try:
+                second=tabs.execute('tabs.session.ensure',{'name':'bots','defaults':{'argv':['/bin/false']}})
+                self.assertTrue(second['reused'])
+                self.assertEqual(first['session']['snapshot']['windows'],second['session']['snapshot']['windows'])
+            finally:subprocess.run(['tmux','-S',sock,'kill-server'],capture_output=True)

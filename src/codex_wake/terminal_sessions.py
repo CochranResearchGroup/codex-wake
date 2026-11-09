@@ -98,7 +98,7 @@ class TerminalSessions:
 
     def execute(self,operation,args):
         verb=operation.rsplit('.',1)[1]
-        allowed={'session','server','name','backend','start','changes','expected_target','_request'}
+        allowed={'session','server','name','backend','start','changes','defaults','expected_target','_request'}
         if not isinstance(args,dict) or set(args)-allowed:raise InventoryError('invalid_argument','Unsupported session arguments.')
         if operation in self.READS:
             state=self.state()
@@ -107,12 +107,17 @@ class TerminalSessions:
         with locked(self.directory):
             if args.get('expected_target') is not None and args['expected_target']!=self.target():raise InventoryError('stale_target','Session registry changed; inspect again.')
             state=self.state();records=self.inventory(state)
-            if verb=='create':
+            reused=False
+            if verb in ('create','ensure'):
                 name=_name(args.get('name'));backend=args.get('backend','tmux')
                 if backend not in ('tmux','byobu','psmux'):raise InventoryError('invalid_argument','Unsupported terminal backend.')
                 server=args.get('server') or next((v['server'] for v in records if v['backend'] in ('tmux','byobu')),str(self.directory/'tmux.sock'))
-                if any(v['name']==name and v['server']==server for v in records):raise InventoryError('name_conflict','Session name already exists on this terminal server.')
-                record=dict(id='session-'+uuid.uuid4().hex,name=name,backend=backend,server=server,labels=[],defaults={},description='',created_at=time.time())
+                existing=[v for v in records if v['name']==name and v['server']==server]
+                if existing and verb=='create':raise InventoryError('name_conflict','Session name already exists on this terminal server.')
+                defaults=self._settings({'defaults':args.get('defaults',{})})['defaults']
+                if existing:
+                    observed=existing[0];record={k:v for k,v in observed.items() if k not in ('snapshot','workspace','state','tab_count','managed')};reused=True
+                else:record=dict(id='session-'+uuid.uuid4().hex,name=name,backend=backend,server=server,labels=[],defaults=defaults,description='',created_at=time.time())
                 state['sessions'][record['id']]=record;self.save(state)
             else:
                 observed=self.resolve(args.get('session'),server=args.get('server'),state=state)
@@ -132,10 +137,10 @@ class TerminalSessions:
                     return dict(status='deleted',session=record)
                 elif verb!='open':raise InventoryError('unsupported_operation','Unsupported terminal session operation.')
                 self.save(state)
-            if verb=='open' or args.get('start'):
+            if verb=='open' or args.get('start',verb=='ensure'):
                 self.open(record)
                 state=self.state();record=state['sessions'][record['id']]
-            return dict(status='created' if verb=='create' else 'updated' if verb=='update' else 'opened',session=self.resolve(record['id']))
+            return dict(status='created' if verb=='create' else 'ensured' if verb=='ensure' else 'updated' if verb=='update' else 'opened',session=self.resolve(record['id']),reused=reused)
 
     def native(self,record,verb,**kwargs):
         if record['backend']=='psmux':
