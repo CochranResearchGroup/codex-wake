@@ -1,0 +1,38 @@
+Tue Nov 10 13:48:00 2026    /tmp/wake547-results/copy-after.prof
+
+         1929541 function calls (1730139 primitive calls) in 19.507 seconds
+
+   Ordered by: cumulative time
+   List reduced from 393 to 20 due to restriction <'tab_observer'>
+   List reduced from 20 to 8 due to restriction <8>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       20    0.002    0.000    0.739    0.037 /tmp/wake547-copysource/src/codex_wake/tab_observer.py:310(tick)
+        3    0.004    0.001    0.582    0.194 /tmp/wake547-copysource/src/codex_wake/tab_observer.py:246(_inventory)
+       30    0.000    0.000    0.096    0.003 /tmp/wake547-copysource/src/codex_wake/tab_observer.py:37(command)
+        3    0.000    0.000    0.049    0.016 /tmp/wake547-copysource/src/codex_wake/tab_observer.py:144(_session_rows)
+       23    0.000    0.000    0.043    0.002 /tmp/wake547-copysource/src/codex_wake/tab_observer.py:170(_native_events)
+       19    0.002    0.000    0.043    0.002 /tmp/wake547-copysource/src/codex_wake/tab_observer.py:215(_project_activity)
+     2200    0.005    0.000    0.041    0.000 /tmp/wake547-copysource/src/codex_wake/tab_observer.py:233(_summary)
+        3    0.000    0.000    0.008    0.003 /tmp/wake547-copysource/src/codex_wake/tab_observer.py:21(snapshot)
+
+
+   Ordered by: cumulative time
+   List reduced from 393 to 5 due to restriction <'deepcopy'>
+   List reduced from 5 to 1 due to restriction <1>
+
+Function                                   was called by...
+                                               ncalls  tottime  cumtime
+/usr/lib/python3.12/copy.py:118(deepcopy)  <-       1    0.000    0.000  /tmp/wake547-copysource/src/codex_wake/tab_native_feed.py:216(poll)
+                                                  300    0.000    0.010  /tmp/wake547-copysource/src/codex_wake/tab_observation.py:44(processes)
+                                                    3    0.000    0.124  /tmp/wake547-copysource/src/codex_wake/tab_observation.py:62(observe)
+                                                  630    0.001    0.010  /tmp/wake547-copysource/src/codex_wake/tab_observation_checks.py:29(run)
+                                                    3    0.000    0.007  /tmp/wake547-copysource/src/codex_wake/tab_observer.py:21(snapshot)
+                                                    3    0.000    0.004  /tmp/wake547-copysource/src/codex_wake/tab_observer.py:72(loaded_threads)
+                                                 2200    0.002    0.034  /tmp/wake547-copysource/src/codex_wake/tab_observer.py:233(_summary)
+                                                   19    0.000    0.000  /tmp/wake547-copysource/src/codex_wake/tab_observer.py:310(tick)
+                                            3622/1506    0.002    0.101  /usr/lib/python3.12/copy.py:191(_deepcopy_list)
+                                                  606    0.000    0.133  /usr/lib/python3.12/copy.py:200(_deepcopy_tuple)
+                                            180220/48820    0.085    0.172  /usr/lib/python3.12/copy.py:217(_deepcopy_dict)
+
+

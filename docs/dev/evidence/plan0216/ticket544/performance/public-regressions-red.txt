@@ -1,0 +1,24 @@
+FF
+======================================================================
+FAIL: test_default_owned_error_classification_is_redacted_through_cached_transport (test_tab_observer.ObserverTests.test_default_owned_error_classification_is_redacted_through_cached_transport)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-copycost-544/tests/test_tab_observer.py", line 123, in test_default_owned_error_classification_is_redacted_through_cached_transport
+    self.assertEqual(error['value'],'present')
+AssertionError: 'unknown' != 'present'
+- unknown
++ present
+
+
+======================================================================
+FAIL: test_hundred_tab_idle_snapshots_are_independent_and_source_stays_available (test_tab_observer.ObserverTests.test_hundred_tab_idle_snapshots_are_independent_and_source_stays_available)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-copycost-544/tests/test_tab_observer.py", line 151, in test_hundred_tab_idle_snapshots_are_independent_and_source_stays_available
+    self.assertTrue(all(not value['unavailable'] for value in snapshots))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.221s
+
+FAILED (failures=2)
