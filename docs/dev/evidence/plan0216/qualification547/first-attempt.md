@@ -162,3 +162,15 @@ formatting; active count0then10. Activation was separately6.189wall seconds/
 0.37CPU seconds. All20ordinary events projected, p951.017s, sampledRSS43.69MB,
 owned controls0. No wheel rebuilt; root notified that another warm causal profile
 is needed rather than attributing remaining work from an older source variant.
+
+Correctedc65 steady-only profile after both barriers: true idle had no inventory,
+10ticks0.053s; formatting0.044s (two quiet renewals0.040),13monitor saves0.039,
+53JSONloads0.043;4native commands0.021. Active10ticks: formatter0.849/apply0.635,
+80format command batches0.421 plus20errorcaptures=100subprocesses0.488; inventory1/
+0.145;20format saves0.135,20monitor saves0.117;451JSONdumps0.190;
+1233process_identity calls0.139, mostly full100-pane physical fences each format
+refresh despite only2changed windows per tick. Formatting state360,979idle/
+363,625active bytes; observed inode versions2/15. External inode sampling is a
+lower bound, and observer counters are last-published values. These explicit
+profiling/diagnostic limits are included in the receipt. No new product patch,
+wheel build or acceptance claim; warm profiles remain user-scoped artifacts.

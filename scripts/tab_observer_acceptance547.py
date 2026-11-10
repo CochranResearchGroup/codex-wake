@@ -244,7 +244,7 @@ main(['--serve',sys.argv[-1]])
                         until=time.monotonic()+2
                         while not marker.exists():
                             assert time.monotonic()<until;time.sleep(.01)
-                    begin=time.monotonic();cpu0,_=sample();components0=dict(components);self0=resource.getrusage(resource.RUSAGE_SELF);child0=resource.getrusage(resource.RUSAGE_CHILDREN);thread0=time.thread_time();maxrss=0;sequence=[0];pending={}
+                    begin=time.monotonic();cpu0,_=sample();components0=dict(components);state_versions=set();state_max_bytes=0;observer_costs0=dict(value.get('observer',{}).get('costs',{}));self0=resource.getrusage(resource.RUSAGE_SELF);child0=resource.getrusage(resource.RUSAGE_CHILDREN);thread0=time.thread_time();maxrss=0;sequence=[0];pending={}
                     stopping=threading.Event()
                     def produce():
                         next_event=begin
@@ -275,6 +275,10 @@ main(['--serve',sys.argv[-1]])
                         assert len(value['resources'])==100
                         project_pending(value)
                         _,rss=sample();maxrss=max(maxrss,rss)
+                        try:
+                            info=(root/'tab-formatting/state.json').stat()
+                            state_versions.add((info.st_ino,info.st_mtime_ns));state_max_bytes=max(state_max_bytes,info.st_size)
+                        except OSError:pass
                         time.sleep(max(0,(args.poll_interval if monitor else args.tick_interval)-(time.monotonic()-current)))
                     stopping.set()
                     if producer:producer.join(2)
@@ -303,6 +307,11 @@ main(['--serve',sys.argv[-1]])
                     while pending and time.monotonic()<until:
                         time.sleep(.05);project_pending(tick())
                     receipt[phase]['unprojected_events']=len(pending)
+                    receipt[phase]['format_state_max_bytes']=state_max_bytes
+                    receipt[phase]['format_state_versions_observed']=len(state_versions)
+                    receipt[phase]['observer_costs_start']=observer_costs0
+                    receipt[phase]['observer_costs_end']=dict(value.get('observer',{}).get('costs',{}))
+                    receipt[phase]['counter_limit']='observer counters are last published values; state inode sampling is a lower bound on writes'
                     Path(args.receipt).write_text(json.dumps(receipt,indent=2)+'\n')
                 if args.diagnostic_profile and args.diagnostic_profile!='none':
                     profiler.disable();profiler.dump_stats(args.diagnostic_profile)

@@ -1,0 +1,167 @@
+{
+  "source_commit": "c65c4eb9-STEADY-ONLY-PROFILE-SOURCE-OVERRIDE",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "package": "/tmp/wake216-c65-source/src/codex_wake/__init__.py",
+  "uid": 1017,
+  "tabs": 100,
+  "initial_idle_active_turns": 0,
+  "active_conversations": 10,
+  "windows_seconds": 10.0,
+  "tiers": {
+    "activity": true,
+    "health": true,
+    "errors": true
+  },
+  "cpu_denominator": "one core",
+  "measurement": "actual installed TabMonitor owner plus all current owned descendants and reaped child CPU via proc cutime/cstime; fixture/driver/workload processes excluded",
+  "fixture_limit": "metadata-only Unix WebSocket fixture; no provider turns or proof of real native broadcasts",
+  "latency_measure": "fixture send to public projection, upper bound on receive-to-projection",
+  "production_effects": false,
+  "tick_interval_seconds": 1.0,
+  "public_status_poll_seconds": 0.1,
+  "source_override": true,
+  "fixture_setup_seconds": 0.9254177750008239,
+  "startup_barrier": {
+    "boundary_at": 1794344531.3479645,
+    "first_qualified_snapshot_at": 1794344532.4498067,
+    "subsequent_snapshot_at": 1794344537.467686,
+    "bound_panes": 100,
+    "active_turns": 0,
+    "formatting_status": "applied",
+    "failures": [],
+    "source_states": [
+      {
+        "kind": "tmux",
+        "state": "available"
+      },
+      {
+        "kind": "native",
+        "state": "connected"
+      }
+    ],
+    "enable_returned_at": 1794344531.3479645
+  },
+  "formatting_enabled": "slate100tabs; configured through installed CLI",
+  "cold_start_seconds": 12.810884325999723,
+  "owner_cold_start_seconds": 11.88373000699903,
+  "native_bound_panes": 100,
+  "mode": "short diagnostic profile, not acceptance",
+  "idle": {
+    "wall_seconds": 10.01919476400144,
+    "cpu_seconds": 0.1299999999999999,
+    "cpu_percent_one_core": 1.2975094612102422,
+    "max_aggregate_rss_bytes": 39227392,
+    "status_changes": 0,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.12,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 0.784324,
+    "reaped_child_cpu_seconds": 0.010000000000000009,
+    "live_child_cpu_seconds": 0.0,
+    "format_state_max_bytes": 360979,
+    "format_state_versions_observed": 2,
+    "observer_costs_start": {
+      "fallback_probes": 0,
+      "inventory_passes": 3,
+      "last_tick_seconds": 0.004345781000665738,
+      "native_events": 1,
+      "ticks": 9,
+      "total_seconds": 0.7298436900036904
+    },
+    "observer_costs_end": {
+      "fallback_probes": 0,
+      "inventory_passes": 3,
+      "last_tick_seconds": 0.004569585998979164,
+      "native_events": 1,
+      "ticks": 19,
+      "total_seconds": 0.7768321029998333
+    },
+    "counter_limit": "observer counters are last published values; state inode sampling is a lower bound on writes"
+  },
+  "active_activation": {
+    "events": 10,
+    "burst_send_seconds": 0.0005596640003204811,
+    "total_wall_seconds": 6.248683488000097,
+    "cpu_seconds": 0.4500000000000002,
+    "barrier": {
+      "boundary_at": 1794344547.5024369,
+      "first_qualified_snapshot_at": 1794344548.5422819,
+      "subsequent_snapshot_at": 1794344553.662951,
+      "bound_panes": 100,
+      "active_turns": 10,
+      "formatting_status": "applied",
+      "failures": [],
+      "source_states": [
+        {
+          "kind": "tmux",
+          "state": "available"
+        },
+        {
+          "kind": "native",
+          "state": "connected"
+        }
+      ]
+    },
+    "excluded_from_ordinary_window": true
+  },
+  "active": {
+    "wall_seconds": 10.026172236999628,
+    "cpu_seconds": 1.19,
+    "cpu_percent_one_core": 11.868936338521472,
+    "max_aggregate_rss_bytes": 40435712,
+    "status_changes": 20,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.8699999999999999,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 0.8262619999999998,
+    "reaped_child_cpu_seconds": 0.32000000000000006,
+    "live_child_cpu_seconds": 0.0,
+    "format_state_max_bytes": 363625,
+    "format_state_versions_observed": 15,
+    "observer_costs_start": {
+      "fallback_probes": 0,
+      "inventory_passes": 5,
+      "last_tick_seconds": 0.13431648799996765,
+      "native_events": 11,
+      "ticks": 27,
+      "total_seconds": 1.0608974890001264
+    },
+    "observer_costs_end": {
+      "fallback_probes": 0,
+      "inventory_passes": 6,
+      "last_tick_seconds": 0.016841550001117866,
+      "native_events": 30,
+      "ticks": 36,
+      "total_seconds": 1.4405703310003446
+    },
+    "counter_limit": "observer counters are last published values; state inode sampling is a lower bound on writes"
+  },
+  "p95_send_to_projection_seconds": 0.925960810000106,
+  "latency_samples": 20,
+  "checks": {
+    "checks": {
+      "errors": 130,
+      "health": 100
+    },
+    "enabled": {
+      "errors": true,
+      "health": true
+    },
+    "intervals": {
+      "errors": 5.0,
+      "health": 60.0
+    },
+    "retained_checks": 200
+  },
+  "native_methods": {
+    "initialize": 3,
+    "initialized": 3,
+    "thread/loaded/list": 4,
+    "thread/read": 400
+  },
+  "all_ordinary_events_projected": true,
+  "thresholds_pass": false,
+  "owned_control_processes_remaining": 0
+}
