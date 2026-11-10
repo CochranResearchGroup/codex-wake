@@ -1,0 +1,30 @@
+{
+  "status": "DEPLOYED",
+  "pr": 537,
+  "source": "3a4ae8b6f8c5f1831898af9d7bf4a4fbe7580b16",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-3a4ae8b",
+  "previous_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-74d6ea7",
+  "wheel_sha256": "6e4c2aee484920e2912b17691abe520f958af198f6c831f7e0a70fdcfe2a85e7",
+  "verified_python_members": 303,
+  "qualified_package_members": 305,
+  "review": "review.md",
+  "local_http": {
+    "version": 1,
+    "url": "http://127.0.0.1:37185",
+    "uid": 1000,
+    "pid": 2944607,
+    "process": {
+      "start_time_ticks": 37051558,
+      "boot_id": "7ec44209-736c-4cc9-93ee-83dbe6f4aa2a"
+    }
+  },
+  "stock_unchanged": true,
+  "native_preserved": 30,
+  "protected_preserved": 10,
+  "completion": "installed",
+  "live_rollback": "rolled_back; zero failures",
+  "formatting": "disabled; palette unchanged",
+  "rollback_command": "python /home/ecochran76/.local/state/codex-wake/format-performance-0213-deploy/rollback.py",
+  "full_live_monitor_cycle": "not qualified",
+  "hosted_ci": false
+}

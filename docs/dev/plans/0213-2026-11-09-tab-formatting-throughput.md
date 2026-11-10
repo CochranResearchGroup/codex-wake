@@ -40,3 +40,7 @@ plan0213/diagnosis.md. No production deployment/reactivation. Remains OPEN for
 installed loaded-host observation qualification and user-visible palette/plain
 preview. Memory forbidden: no explicit memory-write request. Prior current runtime
 receipts sufficient; Graphiti historical lookup skipped for this bounded incident.
+
+Subsequent operator-authorized deployment: PR537merged3a4ae8b, exact qualified
+wheel installed, live public rollback PASSzerofailures. See deployment.json.
+Palette/full live monitor qualification remains OPEN; formatting disabled.

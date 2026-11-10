@@ -8853,3 +8853,17 @@ linked-window and manualstyle/baseline protections retained. Source-only patch;
 installed loaded-host observation and palettepreview remain open. No hiddenTTL
 extension/STAL suppression, modelcalls or liveformatreactivation. Evidenceplan0213.
 Memoryforbidden, no explicitmemory-write request.
+
+
+## Turn | 2026-11-10 | Deploy formatting performance correction PR537
+
+Operator identified missing deployment and directed completion. Standards/Spec
+review0blocking, exact private installed42tab enable/refresh/rollback PASS;
+305members match frozen source andwheel6e4c2aee. MergedPR537as3a4ae8b, staged
+immutable release0.22.0.dev2-3a4ae8b with existing constraints, switched9launchers,
+restarted only controller HTTP on original37185/nativeendpoint.30nativeharness
+births preserved,10protectedfilesunchanged, stockunchanged,completioninstalled.
+New public live rollback successfully cleared partial prior formatting with
+zerofailures. Formattingoff; palette unchanged. Full live monitorcycle remains
+unqualified. Previousprefix/rollbackscript retained; no paidCI/providerprompts.
+See plan0213/deployment.json. Memoryforbidden:no explicitmemory-write request.
