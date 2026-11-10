@@ -57,6 +57,15 @@ class FormattingReadChannelTests(unittest.TestCase):
         self.assertFalse(Path('/proc',str(owned)).exists())
         self.assertNotIn(str(owned),self.tmux('list-clients','-F','#{client_pid}'))
 
+    def test_readonly_attach_preserves_session_environment(self):
+        key='WAKE_FORMAT_READ_FIXTURE'
+        self.tmux('set-option','-t','$0','update-environment',key)
+        self.tmux('set-environment','-t','$0',key,'session-value')
+        self.retained_owner()
+        with patch.dict(os.environ,{key:'monitor-value'}):
+            self.transport.formatting('read',dict(window='@0'),time.monotonic()+2)
+        self.assertEqual(self.tmux('show-environment','-t','$0',key).strip(),key+'=session-value')
+
     def test_read_seam_rejects_nonmanaged_commands_before_creating_a_client(self):
         channel=FormattingReadChannel(self.transport);self.addCleanup(channel.close)
         invalid=[ [('set-option','-w','-t','@0','window-status-format','bad')],
