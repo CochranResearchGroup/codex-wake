@@ -47,7 +47,7 @@ class TabFormatting:
         fd,name=tempfile.mkstemp(dir=self.root,prefix='.state-')
         try:
             with os.fdopen(fd,'w') as stream:
-                stream.write(json.dumps(value,sort_keys=True,allow_nan=False,separators=(',',':')));stream.flush();os.fsync(stream.fileno())
+                stream.write(json.dumps(value,allow_nan=False,separators=(',',':')));stream.flush();os.fsync(stream.fileno())
             os.replace(name,self.path)
         finally:
             if os.path.exists(name):os.unlink(name)
