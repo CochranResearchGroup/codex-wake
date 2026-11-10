@@ -26,7 +26,7 @@ def tmux_formatting(transport, action, arguments, deadline):
             for name,value in values.items():
                 if value is None:commands.append(('set-option','-u','-t',target,name))
                 elif isinstance(value,str) and len(value)<=128 and '\x00' not in value:
-                    commands.append(('set-option','-t',target,name,value))
+                    commands.append(('set-option','-t',target,name,value[:-1]+'\\;' if value.endswith(';') else value))
                 else:raise InventoryError('invalid_argument','Invalid session formatting value.')
         writes=len(commands)
         for name in SESSION_OPTIONS:
@@ -40,37 +40,84 @@ def tmux_formatting(transport, action, arguments, deadline):
             result[name]=dict(explicit=bool(raw),value=value.removesuffix('\n') if raw else None,
                               effective=effective.removesuffix('\n'))
         return result
-    window=arguments.get('window')
-    if not isinstance(window,str) or not re.fullmatch(r'@[0-9]+',window):
-        raise InventoryError('invalid_argument','Exact window identity required.')
-    if action=='read':
-        commands=[]
-        for name in WINDOW_OPTIONS:
-            commands += [('show-options','-w','-t',window,name),
+    if action not in ('read','write'):
+        raise InventoryError('unsupported_operation','Unsupported formatting action.')
+    result=tmux_formatting_batch(transport,[dict(arguments,action=action)],deadline)[0]
+    if 'error' in result:
+        raise InventoryError(result['error']['code'],'Native formatting target or readback changed.')
+    return result
+
+
+def _window_reads(window):
+    commands=[('display-message','-p','-t',window,'#{window_id}')]
+    for name in WINDOW_OPTIONS:
+        commands.extend((('show-options','-w','-t',window,name),
                          ('show-options','-w','-v','-t',window,name),
                          ('show-options','-w','-A','-v','-t',window,name),
-                         ('show-options','-g','-w','-v',name)]
-        values=_command_batch(transport,commands,deadline)
-        result={}
-        for index,name in enumerate(WINDOW_OPTIONS):
-            raw,value,effective,parent=values[index*4:index*4+4]
-            result[name]=dict(explicit=bool(raw),value=value.removesuffix('\n') if raw else None,
-                              effective=effective.removesuffix('\n'),parent=parent.removesuffix('\n'))
-        return result
-    if action=='write':
-        values=arguments.get('values')
-        if not isinstance(values,dict) or set(values)-set(WINDOW_OPTIONS):
-            raise InventoryError('invalid_argument','Only managed formatting options may change.')
+                         ('show-options','-g','-w','-v',name)))
+    return commands
+
+
+def tmux_formatting_batch(transport,requests,deadline):
+    """Execute only finite window option operations, with bounded cohort readback.
+
+    Four windows bound worst-case 8KiB option readback below the transport's 1MiB
+    limit. All members are validated before any cohort can write. Each write and
+    its complete explicit/effective/parent readback share one native client.
+    """
+    if not isinstance(requests,list) or len(requests)>128:
+        raise InventoryError('invalid_argument','Native formatting batch exceeds128 windows.')
+    prepared=[]
+    for request in requests:
+        if not isinstance(request,dict) or request.get('action') not in ('read','write'):
+            raise InventoryError('invalid_argument','Only finite window reads and writes may be batched.')
+        action=request['action'];window=request.get('window')
+        allowed={'action','window'}|({'values'} if action=='write' else set())
+        if set(request)-allowed or not isinstance(window,str) or not re.fullmatch(r'@[0-9]+',window):
+            raise InventoryError('invalid_argument','Exact native window identity required.')
         commands=[]
-        for name,value in values.items():
-            if value is None:
-                commands.append(('set-option','-w','-u','-t',window,name))
-            elif isinstance(value,str) and len(value)<=8192 and '\x00' not in value:
-                commands.append(('set-option','-w','-t',window,name,value))
-            else:raise InventoryError('invalid_argument','Invalid formatting option value.')
-        if commands:_command_batch(transport,commands,deadline)
-        return tmux_formatting(transport,'read',dict(window=window),deadline)
-    raise InventoryError('unsupported_operation','Unsupported formatting action.')
+        if action=='write':
+            values=request.get('values')
+            if not isinstance(values,dict) or set(values)-set(WINDOW_OPTIONS):
+                raise InventoryError('invalid_argument','Only managed formatting options may change.')
+            for name,value in values.items():
+                if value is None:commands.append(('set-option','-w','-u','-t',window,name))
+                elif isinstance(value,str) and len(value)<=8192 and '\x00' not in value:
+                    commands.append(('set-option','-w','-t',window,name,value[:-1]+'\\;' if value.endswith(';') else value))
+                else:raise InventoryError('invalid_argument','Invalid formatting option value.')
+        prepared.append((window,commands))
+    results=[]
+    for offset in range(0,len(prepared),4):
+        commands=[];reads=[]
+        for window,writes in prepared[offset:offset+4]:
+            commands.extend(writes);reads.append((window,len(commands)))
+            commands.extend(_window_reads(window))
+        try:values=_command_batch(transport,commands,deadline)
+        except subprocess.CalledProcessError:
+            cohort=prepared[offset:offset+4]
+            # Isolate failures with reads only. A write cohort may have partly
+            # applied; reconcile each member without ever repeating its effects.
+            if len(cohort)==1 and not cohort[0][1]:
+                results.append(dict(error=dict(code='stale_target')))
+            else:
+                for request,(window,_) in zip(requests[offset:offset+4],cohort):
+                    observed=tmux_formatting_batch(transport,[dict(action='read',window=window)],deadline)[0]
+                    if request['action']=='write' and 'error' not in observed:
+                        if any((observed[name]['explicit'] if wanted is None else observed[name]['value']!=wanted)
+                               for name,wanted in request['values'].items()):
+                            observed=dict(error=dict(code='formatting_native_failed'))
+                    results.append(observed)
+            continue
+        for window,start in reads:
+            if values[start].strip()!=window:
+                results.append(dict(error=dict(code='stale_target')));continue
+            observed={}
+            for index,name in enumerate(WINDOW_OPTIONS):
+                raw,value,effective,parent=values[start+1+index*4:start+1+index*4+4]
+                observed[name]=dict(explicit=bool(raw),value=value.removesuffix('\n') if raw else None,
+                    effective=effective.removesuffix('\n'),parent=parent.removesuffix('\n'))
+            results.append(observed)
+    return results
 
 
 def _command_batch(transport,commands,deadline):
