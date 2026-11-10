@@ -141,6 +141,13 @@ class NativeStatusFeed:
         server = self._request('initialize', dict(clientInfo=dict(name='codex_wake_status', version=__version__),
                                                  capabilities=dict(experimentalApi=True)), deadline)
         self.connection.send(json.dumps(dict(method='initialized')))
+        self._baseline(deadline, server, reset_sequence=True)
+        self.server_metadata = {key:server[key] for key in ('codexHome','userAgent','platformFamily','platformOs')
+                                if isinstance(server.get(key),str) and len(server[key])<=8192}
+        self.startup_seconds = self.monotonic() - started
+        self.state, self.reason, self.failures = 'connected', None, 0
+
+    def _baseline(self, deadline, server, *, reset_sequence=False):
         threads, seen, cursors, cursor = [], set(), set(), None
         while True:
             page = self._request('thread/loaded/list', dict(cursor=cursor, limit=100), deadline)
@@ -156,7 +163,7 @@ class NativeStatusFeed:
                 value = self._request('thread/read', dict(threadId=thread_id, includeTurns=False), deadline).get('thread')
                 if not isinstance(value, dict) or value.get('id') != thread_id:
                     raise ValueError('thread_identity_mismatch')
-                row = {key: value[key] for key in ('id', 'cwd', 'modelProvider')
+                row = {key: value[key] for key in ('id', 'name', 'cwd', 'modelProvider')
                        if isinstance(value.get(key), str) and len(value[key]) <= 8192}
                 row['status'] = self._status(value.get('status'))
                 # A later metadata response supersedes earlier notifications for
@@ -173,14 +180,25 @@ class NativeStatusFeed:
         # Updates received while reading bootstrap are replayed after baseline.
         pending = list(self.events)
         self.events.clear()
-        self.sequence = 0
+        if reset_sequence:
+            self.sequence = 0
         metadata = {key: server[key] for key in ('codexHome', 'userAgent', 'platformFamily', 'platformOs')
                     if isinstance(server.get(key), str) and len(server[key]) <= 8192}
         self._event('baseline', dict(threads=threads, server=metadata, peer=self.peer))
         for event in pending:
             self._event('update', event['data'])
-        self.startup_seconds = self.monotonic() - started
-        self.state, self.reason, self.failures = 'connected', None, 0
+
+    def refresh_metadata(self):
+        """Complete bounded metadata rebaseline over the same read-only connection."""
+        if self.closed or self.connection is None:
+            return []
+        try:
+            self._baseline(self.monotonic()+self.timeout, self.server_metadata)
+        except Exception as exc:
+            self._lost('metadata_' + type(exc).__name__)
+        events = list(self.events)
+        self.events.clear()
+        return events
 
     def _lost(self, reason):
         connection, self.connection = self.connection, None

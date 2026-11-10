@@ -39,7 +39,7 @@ class NativeFeedTests(unittest.TestCase):
                             result = dict(data=['t1'], nextCursor=None)
                         elif method == 'thread/read':
                             self.assertIs(message['params']['includeTurns'], False)
-                            result = dict(thread=dict(id='t1', cwd='/synthetic', modelProvider='openai',
+                            result = dict(thread=dict(id='t1', name='fixture-name', cwd='/synthetic', modelProvider='openai',
                                                       status=dict(type='idle'), turns=[dict(secret='excluded')],
                                                       preview='excluded'))
                         else:
@@ -70,6 +70,7 @@ class NativeFeedTests(unittest.TestCase):
                     self.assertEqual(first[0]['kind'], 'baseline')
                     self.assertEqual(first[0]['data']['peer']['pid'], os.getpid())
                     self.assertNotIn('excluded', json.dumps(first))
+                    self.assertEqual(first[0]['data']['threads'][0]['name'], 'fixture-name')
                     self.assertTrue(ready.wait(1))
                     events = first[1:] + feed.poll(.5)
                     self.assertEqual(events[-1]['data'], dict(thread_id='t1', status=dict(type='active', activeFlags=[])))
@@ -77,6 +78,10 @@ class NativeFeedTests(unittest.TestCase):
                     self.assertEqual(events[-1]['epoch'], first[0]['epoch'])
                     self.assertEqual(feed.status()['state'], 'connected')
                     self.assertEqual(set(methods), {'initialize', 'initialized', 'thread/loaded/list', 'thread/read'})
+                    rebaseline = feed.refresh_metadata()
+                    self.assertEqual(rebaseline[0]['kind'], 'baseline')
+                    self.assertEqual(rebaseline[0]['epoch'], first[0]['epoch'])
+                    self.assertGreater(rebaseline[0]['sequence'], events[-1]['sequence'])
                     old_epoch = feed.status()['epoch']
                     connections[-1].close()
                     lost = feed.poll(.5)
