@@ -1,0 +1,6 @@
+monitor-formatting-budget: {"status": "partial", "workspaces": [{"workspace": "work", "status": "partial", "failures": [{"code": "workspace_timeout"}]}]} seconds 3.859
+Traceback (most recent call last):
+  File "/tmp/wake-format-monitor-repro.py", line 22, in <module>
+    assert all(x['status']=='applied' for x in r['workspaces']),r
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'status': 'partial', 'workspaces': [{'workspace': 'work', 'status': 'partial', 'failures': [{'code': 'workspace_timeout'}]}]}

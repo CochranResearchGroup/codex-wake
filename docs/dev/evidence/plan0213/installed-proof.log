@@ -1,0 +1,2 @@
+monitor-formatting-budget: {"status": "completed", "workspaces": [{"workspace": "work", "status": "applied", "failures": []}]} seconds 0.271
+[{"verb": "enable", "seconds": 0.818, "status": "applied", "failures": 0}, {"verb": "rollback", "seconds": 0.43, "status": "rolled_back", "failures": 0}]
