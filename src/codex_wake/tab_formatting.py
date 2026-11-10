@@ -217,12 +217,8 @@ class TabFormatting:
             failures=self.apply(state,record,snapshot,resources,transport,deadline,policy=policy,resume_manual=verb=='resume')
             return dict(status='partial' if failures else 'applied',target=expected,failures=failures)
 
-    def apply(self,state,record,snapshot,resources,transport,deadline,*,policy=None,resume_manual=False,trust_unchanged=False):
-        """Apply one snapshot under the owner lock, saving originals first."""
-        from .tab_format_projection import project
-        from .tab_format_expiry import expiring_options
-        failures=[]
-        policy=policy or state['policy']
+    def renew_session(self,state,record,transport,deadline,*,resume_manual=False):
+        """Check managed session custody and renew its shared clock only."""
         try:
             if 'session_original' not in record:
                 record['session_original']=transport.formatting('read-session',{},deadline)
@@ -244,7 +240,20 @@ class TabFormatting:
             record['session_restored']=False
         except Exception as error:
             return [dict(code=getattr(error,'code','session_formatting_failed'))]
+        return []
+
+    def apply(self,state,record,snapshot,resources,transport,deadline,*,policy=None,resume_manual=False,trust_unchanged=False,trusted_revisions=False):
+        """Apply one snapshot under the owner lock, saving originals first."""
+        from .tab_format_projection import project
+        from .tab_format_expiry import expiring_options
+        from .tab_format_monitor import semantic_revision
+        failures=[]
+        policy=policy or state['policy']
+        policy_revision=digest(policy)
+        failures=self.renew_session(state,record,transport,deadline,resume_manual=resume_manual)
+        if failures:return failures
         windows=snapshot['windows'][:128]
+        record['current_windows']=[window['window_id'] for window in windows]
         if len(snapshot['windows'])>128:failures.append(dict(code='formatting_window_capacity'))
         eligible=[]
         for window in windows:
@@ -256,16 +265,29 @@ class TabFormatting:
             eligible.append(window)
         # A trusted monitor sample may reuse a settled projection between audits.
         # Any changed projection is still read and custody-checked before writing.
+        prepared={}
         if trust_unchanged:
             dirty=[]
             for window in eligible:
                 wid=window['window_id'];saved=record['windows'].get(wid,{})
-                rendered=project(resources.get(wid,dict(window=window)),dict(policy,_source_lease=True),now=time.time())
-                options=expiring_options(rendered['options'],observed_at=time.time(),shared_lease=True,
-                                         fallback_styles=rendered['fallback_styles'])
+                resource=resources.get(wid,dict(window=window))
+                revision=semantic_revision(resource,trusted=trusted_revisions and not resource.get('monitor_unavailable'))
+                reusable=(revision is not None and saved.get('projection_revision')==revision
+                    and saved.get('projection_policy')==policy_revision and saved.get('panes')==window.get('panes')
+                    and saved.get('projection') and saved.get('last_applied') and not saved.get('restored'))
+                if reusable and saved.get('evidence_revision')==resource.get('evidence_revision'):
+                    rendered=dict(saved['projection'],options=saved['last_applied'])
+                    options=saved['last_applied']
+                else:
+                    rendered=project(resource,dict(policy,_source_lease=True),now=time.time())
+                    options=expiring_options(rendered['options'],observed_at=time.time(),shared_lease=True,
+                                             fallback_styles=rendered['fallback_styles'])
+                prepared[wid]=(rendered,options,revision,resource.get('evidence_revision'))
                 if (not saved.get('restored') and saved.get('last_applied')==options
                         and time.time()-saved.get('last_audited_at',0)<60):
                     saved['projection']={k:v for k,v in rendered.items() if k!='options'}
+                    saved.update(projection_revision=revision,projection_policy=policy_revision,
+                                 evidence_revision=resource.get('evidence_revision'))
                 else:dirty.append(window)
             eligible=dirty
         reads=self.batch(transport,[dict(action='read',window=w['window_id']) for w in eligible],deadline)
@@ -291,28 +313,35 @@ class TabFormatting:
                     failures.append(dict(window=wid,code='manual_override'));continue
                 if resume_manual:saved.pop('paused',None);saved.pop('pause_reason',None)
                 saved['parent_at_apply']={k:v.get('parent') for k,v in current.items()}
-                rendered=project(resources.get(wid,dict(window=window)),dict(policy,_source_lease=True),now=time.time())
                 resource=resources.get(wid,{})
-                stamp=resource.get('monitor_observed_at',time.time())
-                options=expiring_options(rendered['options'],observed_at=stamp,render_mode=policy.get('render_mode','full'),show_stale=False,shared_lease=True,fallback_styles=rendered['fallback_styles'])
+                if wid in prepared:
+                    rendered,options,revision,evidence=prepared[wid]
+                else:
+                    rendered=project(resource,dict(policy,_source_lease=True),now=time.time())
+                    stamp=resource.get('monitor_observed_at',time.time())
+                    options=expiring_options(rendered['options'],observed_at=stamp,render_mode=policy.get('render_mode','full'),show_stale=False,shared_lease=True,fallback_styles=rendered['fallback_styles'])
+                    revision=semantic_revision(resource,trusted=trusted_revisions and not resource.get('monitor_unavailable'))
+                    evidence=resource.get('evidence_revision')
                 # One shared publisher lease changes independently of window options.
                 # Unchanged projections do not trigger native window writes.
                 if all(current[k]['value']==v for k,v in options.items()):
                     saved['projection']={k:v for k,v in rendered.items() if k!='options'}
+                    saved.update(projection_revision=revision,projection_policy=policy_revision,evidence_revision=evidence)
                     continue
-                pending.append((wid,options,rendered))
+                pending.append((wid,options,rendered,revision,evidence))
             except Exception as error:failures.append(dict(window=wid,code=getattr(error,'code','formatting_failed')))
         # Existing baselines are already durable. Persist new originals before
         # a window effect; settled refreshes need only the final checkpoint.
         if pending:self.save(state)
-        writes=self.batch(transport,[dict(action='write',window=wid,values=options) for wid,options,_ in pending],deadline)
-        for (wid,options,rendered),write in zip(pending,writes):
+        writes=self.batch(transport,[dict(action='write',window=wid,values=options) for wid,options,_,_,_ in pending],deadline)
+        for (wid,options,rendered,revision,evidence),write in zip(pending,writes):
             if 'error' in write:
                 failures.append(dict(window=wid,code=write['error']));continue
             actual=write['result']
             if any(actual[k]['value']!=v for k,v in options.items()):
                 failures.append(dict(window=wid,code='formatting_mismatch'));continue
             record['windows'][wid].update(last_applied=options,restored=False,
+                projection_revision=revision,projection_policy=policy_revision,evidence_revision=evidence,
                 projection={k:v for k,v in rendered.items() if k!='options'})
         self.save(state)
         try:
@@ -339,7 +368,68 @@ class TabFormatting:
             except Exception as error:results.append(dict(error=getattr(error,'code','formatting_failed')))
         return results
 
-    def refresh(self,snapshot,*,deadline=None):
+    def renew_unchanged(self,snapshot,previous,*,deadline):
+        """Renew settled daemon projections without rescanning physical windows.
+
+        The caller has matched the exact trusted whole-source revision, transport
+        configuration and state-file identity. Native session custody is still
+        checked; socket replacement or a due window audit forces full qualification.
+        """
+        import copy
+        import stat
+        from .tab_format_monitor import semantic_revision
+        from .tab_format_projection import project
+        from .tab_format_expiry import expiring_options
+        grouped={}
+        for resource in snapshot.get('resources',[]):
+            grouped.setdefault(resource.get('target',{}).get('workspace'),{})[resource['window']['window_id']]=resource
+        with self.locked(deadline):
+            state=self.read()
+            if not state['policy'].get('enabled',True):return dict(status='disabled',workspaces=[])
+            plans=[]
+            for outcome in previous.get('workspaces',[]):
+                if outcome.get('status')!='applied':continue
+                name=outcome['workspace'];record=state['workspaces'].get(name)
+                config=self.tabs.workspaces.get(name,{})
+                policy=effective_policy(state,name)
+                if (not record or not record.get('enabled') or record.get('paused') or not policy['enabled']
+                        or config.get('kind') not in ('tmux','byobu') or 'session_original' not in record):return None
+                transport=config['transport']
+                try:
+                    info=Path(transport.socket).lstat()
+                    if (not stat.S_ISSOCK(info.st_mode) or info.st_uid!=os.geteuid()
+                            or [info.st_dev,info.st_ino]!=transport.socket_identity):return None
+                except (OSError,AttributeError):return None
+                rows=grouped.get(name,{})
+                if set(rows)!=set(record.get('current_windows',[])):return None
+                policy_revision=digest(policy)
+                for wid,resource in rows.items():
+                    saved=record['windows'].get(wid,{})
+                    revision=semantic_revision(resource,trusted=not resource.get('monitor_unavailable'))
+                    if (revision is None or saved.get('projection_revision')!=revision
+                            or saved.get('projection_policy')!=policy_revision or saved.get('restored')
+                            or saved.get('paused') or not saved.get('last_applied')
+                            or saved.get('panes')!=resource.get('window',{}).get('panes')
+                            or time.time()-saved.get('last_audited_at',0)>=60):return None
+                    if saved.get('evidence_revision')!=resource.get('evidence_revision'):
+                        rendered=project(resource,dict(policy,_source_lease=True),now=time.time())
+                        options=expiring_options(rendered['options'],observed_at=time.time(),shared_lease=True,
+                                                 fallback_styles=rendered['fallback_styles'])
+                        if options!=saved['last_applied']:return None
+                        saved.update(projection={k:v for k,v in rendered.items() if k!='options'},
+                                     evidence_revision=resource.get('evidence_revision'))
+                plans.append((outcome,record,transport))
+            result=copy.deepcopy(previous)
+            for outcome,record,transport in plans:
+                failures=self.renew_session(state,record,transport,deadline)
+                if failures:
+                    result['status']='partial'
+                    for row in result['workspaces']:
+                        if row.get('workspace')==outcome['workspace']:row.update(status='partial',failures=failures)
+            if plans:self.save(state)
+            return result
+
+    def refresh(self,snapshot,*,deadline=None,trusted_revisions=False):
         """Project a trusted monitor/event snapshot without repeating probes.
 
         Unavailable retained observations clear dynamic cues immediately while
@@ -404,7 +494,7 @@ class TabFormatting:
                     # that was not represented in the trusted bounded sample.
                     physical=dict(physical,windows=[w for w in physical['windows'] if w['window_id'] in rows
                         and w['panes']==rows[w['window_id']]['window']['panes']])
-                    failures=self.apply(state,record,physical,rows,transport,deadline,policy=policy,trust_unchanged=True)
+                    failures=self.apply(state,record,physical,rows,transport,deadline,policy=policy,trust_unchanged=True,trusted_revisions=trusted_revisions)
                     results.append(dict(workspace=name,status='partial' if failures else 'applied',failures=failures))
                 except Exception as error:
                     results.append(dict(workspace=name,status='unavailable',code=getattr(error,'code','formatting_unavailable')))
