@@ -5,11 +5,13 @@ confer input authority; exact pane process births and existing title/CWD matchin
 remain the attachment boundary. No transcript subscription is created here.
 """
 from copy import deepcopy
+import json
 from pathlib import Path
 import time
 
 from .managed_inventory import InventoryError
 from .process import process_identity
+from .tab_organization import TmuxTransport
 
 
 class _SnapshotTransport:
@@ -23,6 +25,17 @@ class _SnapshotTransport:
 
     def __getattr__(self, name):
         return getattr(self.original, name)
+
+
+class _TmuxSnapshotTransport(_SnapshotTransport, TmuxTransport):
+    """Preserve the concrete ownership guard of an already qualified adapter."""
+    def __init__(self, original):
+        if not isinstance(original,TmuxTransport):
+            raise ValueError('A qualified tmux adapter is required.')
+        super().__init__(original)
+
+    def command(self, deadline, *arguments):
+        return self.original.command(deadline, *arguments)
 
 
 class _NativeReader:
@@ -91,6 +104,8 @@ class TabObserver:
         self.metadata_at = {}
         self.metadata_due = set()
         self.resources, self.unavailable = [], []
+        self._resource_json = None
+        self._projection_dirty = True
         self.closed = False
         self.last_inventory = self.last_discovery = -float('inf')
         self.cursor = self.tmux_cursor = self.native_cursor = 0
@@ -122,8 +137,9 @@ class TabObserver:
             if config['kind'] not in ('tmux', 'byobu'):
                 continue
             self.tmux[name] = (self.tmux_factory or TmuxMetadataFeed)(
-                config['socket_path'], config['session_id'], timeout=.5)
-            config['transport'] = _SnapshotTransport(config['transport'])
+                config['socket_path'], config['session_id'], timeout=2.)
+            wrapper = _TmuxSnapshotTransport if isinstance(config['transport'],TmuxTransport) else _SnapshotTransport
+            config['transport'] = wrapper(config['transport'])
 
     def _session_rows(self, root, **kwargs):
         from .tab_traits import session_rows
@@ -179,6 +195,7 @@ class TabObserver:
                 self._project_activity(endpoint, data['thread_id'], data['status'], event['epoch'])
 
     def _source_lost(self, endpoint):
+        self._projection_dirty = True
         for resource in self.resources:
             for pane in resource.get('traits', {}).get('panes', []):
                 if pane.get('native_endpoint') == endpoint:
@@ -198,6 +215,7 @@ class TabObserver:
     def _project_activity(self, endpoint, thread_id, status, epoch):
         if not self.settings['activity']:
             return
+        self._projection_dirty = True
         for resource in self.resources:
             for pane in resource.get('traits', {}).get('panes', []):
                 binding = pane.get('binding') or {}
@@ -226,6 +244,7 @@ class TabObserver:
         observation.setdefault('traits', {})['activity'] = summary
 
     def _inventory(self, deadline):
+        self._projection_dirty = True
         from .controller_tabs import ControllerTabs
         rows, unavailable = [], []
         names = list(self.owner.workspaces)[:64]
@@ -317,7 +336,7 @@ class TabObserver:
                         from .tab_tmux_feed import TmuxMetadataFeed
                         feed.close()
                         config=self.owner.workspaces[name]
-                        self.tmux[name]=(self.tmux_factory or TmuxMetadataFeed)(config['socket_path'],config['session_id'],timeout=.5)
+                        self.tmux[name]=(self.tmux_factory or TmuxMetadataFeed)(config['socket_path'],config['session_id'],timeout=2.)
                 else:
                     self.source_errors.pop('tmux:'+name,None)
                     transport.value, transport.available = event['data']['snapshot'], True
@@ -340,7 +359,13 @@ class TabObserver:
         self.costs['ticks'] += 1
         self.costs['last_tick_seconds'] = self.monotonic()-started
         self.costs['total_seconds'] += self.costs['last_tick_seconds']
-        resources = deepcopy(self.resources)
+        # Resources are JSON contract data. Keep the canonical encoding until
+        # evidence changes; C decoding gives each caller fully independent nested
+        # containers without Python deepcopy walking the same idle graph each tick.
+        if self._projection_dirty or self._resource_json is None:
+            self._resource_json = json.dumps(self.resources, separators=(',', ':'), allow_nan=False)
+            self._projection_dirty = False
+        resources = json.loads(self._resource_json)
         for row in resources:
             row.update(monitor_observed_at=now)
             row.setdefault('monitor_unavailable',False)

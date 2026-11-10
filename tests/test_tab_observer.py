@@ -107,6 +107,57 @@ class ObserverTests(unittest.TestCase):
                     observer.close();server.shutdown();thread.join(2)
                     subprocess.run([*tmux,'kill-server'],capture_output=True)
 
+    def test_default_owned_error_classification_is_redacted_through_cached_transport(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            tmux=['tmux','-S',str(root/'tmux.sock')]
+            subprocess.run([*tmux,'new-session','-d','-s','fixture',
+                "printf '\\033[31mError: synthetic_private_text\\033[0m\\n'; exec sleep 60"],check=True)
+            path=root/'controller-tabs.json'
+            path.write_text(json.dumps(dict(schema_version=1,workspaces=dict(fixture=dict(
+                kind='tmux',socket_path=str(root/'tmux.sock'),session_id='$0')))));path.chmod(0o600)
+            observer=TabObserver(root)
+            try:
+                result=observer.tick()
+                error=result['resources'][0]['traits']['panes'][0]['traits']['error']
+                self.assertEqual(error['value'],'present')
+                self.assertEqual(error['message'],'Terminal error (content redacted)')
+                self.assertNotIn('synthetic_private_text',json.dumps(result))
+            finally:
+                observer.close()
+                subprocess.run([*tmux,'kill-server'],capture_output=True)
+
+    def test_hundred_tab_idle_snapshots_are_independent_and_source_stays_available(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);tmux=['tmux','-S',str(root/'tmux.sock')]
+            subprocess.run([*tmux,'new-session','-d','-s','fixture','sleep 60'],check=True)
+            for _ in range(99):
+                subprocess.run([*tmux,'new-window','-d','-t','fixture','sleep 60'],check=True)
+            path=root/'controller-tabs.json'
+            path.write_text(json.dumps(dict(schema_version=1,workspaces=dict(fixture=dict(
+                kind='tmux',socket_path=str(root/'tmux.sock'),session_id='$0')))));path.chmod(0o600)
+            observer=TabObserver(root)
+            try:
+                initial=observer.tick(deadline=time.monotonic()+10)
+                self.assertEqual(len(initial['resources']),100)
+                expected=json.loads(json.dumps(initial['resources']))
+                initial['resources'][0]['window']['panes'][0]['pane_id']='caller-mutated'
+                initial['resources'][0]['traits']['traits']['error']['value']='caller-mutated'
+                # Subscription command responses arrive between service ticks.
+                # They must not expire before the normal one-second next poll.
+                time.sleep(1.05)
+                snapshots=[observer.tick() for _ in range(4)]
+                self.assertTrue(all(len(value['resources'])==100 for value in snapshots))
+                self.assertTrue(all(not value['unavailable'] for value in snapshots))
+                self.assertEqual(snapshots[-1]['resources'][0]['window'],expected[0]['window'])
+                snapshots[0]['resources'][0]['window']['panes'][0]['pane_id']='second-caller-mutated'
+                self.assertEqual(snapshots[-1]['resources'][0]['window'],expected[0]['window'])
+                self.assertEqual(snapshots[-1]['observer']['sources'][0]['state'],'available')
+                self.assertEqual(snapshots[-1]['observer']['costs']['fallback_probes'],0)
+            finally:
+                observer.close()
+                subprocess.run([*tmux,'kill-server'],capture_output=True)
+
     def test_monitor_tier_controls_are_independent_and_validated(self):
         from codex_wake.managed_inventory import InventoryError
         with tempfile.TemporaryDirectory() as directory:

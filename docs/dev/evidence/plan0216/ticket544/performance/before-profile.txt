@@ -1,0 +1,42 @@
+Tue Nov 10 13:45:14 2026    /tmp/wake547-results/copy-before.prof
+
+         8997780 function calls (7562759 primitive calls) in 19.326 seconds
+
+   Ordered by: cumulative time
+   List reduced from 391 to 18 due to restriction <'tab_observer'>
+   List reduced from 18 to 8 due to restriction <8>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       20    0.009    0.000    2.918    0.146 /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:291(tick)
+       12    0.024    0.002    1.717    0.143 /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:228(_inventory)
+        6    0.001    0.000    0.134    0.022 /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:128(_session_rows)
+     3700    0.013    0.000    0.102    0.000 /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:215(_summary)
+       26    0.000    0.000    0.055    0.002 /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:154(_native_events)
+       19    0.003    0.000    0.055    0.003 /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:198(_project_activity)
+       12    0.000    0.000    0.018    0.002 /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:19(snapshot)
+        6    0.000    0.000    0.013    0.002 /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:59(loaded_threads)
+
+
+   Ordered by: cumulative time
+   List reduced from 391 to 5 due to restriction <'deepcopy'>
+   List reduced from 5 to 1 due to restriction <1>
+
+Function                                   was called by...
+                                               ncalls  tottime  cumtime
+/usr/lib/python3.12/copy.py:118(deepcopy)  <-     600    0.001    0.025  /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observation.py:44(processes)
+                                                    6    0.000    0.321  /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observation.py:62(observe)
+                                                 1230    0.002    0.021  /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observation_checks.py:29(run)
+                                                    6    0.000    0.018  /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:19(snapshot)
+                                                    6    0.000    0.013  /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:59(loaded_threads)
+                                                    2    0.000    0.041  /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:104(_configuration)
+                                                 3700    0.005    0.083  /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:215(_summary)
+                                                  600    0.001    0.386  /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:228(_inventory)
+                                                   36    0.000    0.966  /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_observer.py:291(tick)
+                                                    2    0.000    0.045  /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/tab_tmux_feed.py:180(poll)
+                                                154/9    0.000    0.000  /usr/lib/python3.12/copy.py:118(deepcopy)
+                                            16967/4529    0.022    1.179  /usr/lib/python3.12/copy.py:191(_deepcopy_list)
+                                                 1212    0.001    0.343  /usr/lib/python3.12/copy.py:200(_deepcopy_tuple)
+                                            1305394/63062    0.858    1.158  /usr/lib/python3.12/copy.py:217(_deepcopy_dict)
+                                                 19/8    0.001    0.000  /usr/lib/python3.12/selectors.py:451(select)
+
+
