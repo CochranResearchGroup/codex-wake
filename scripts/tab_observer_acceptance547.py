@@ -29,6 +29,14 @@ def main():
     parser.add_argument('--tick-interval',type=float,default=1.0)
     args=parser.parse_args()
     assert args.seconds>=60 or args.diagnostic_profile,'short windows require explicitly labeled diagnostic profile'
+    assert not Path(args.receipt).exists(),'use a unique receipt path; failed attempts must remain retained'
+    profile_paths=[]
+    if args.monitor_profile:profile_paths.append(Path(args.monitor_profile))
+    if args.diagnostic_profile and args.diagnostic_profile!='none':profile_paths.append(Path(args.diagnostic_profile))
+    if args.steady_profile_prefix:
+        profile_paths.extend(Path(args.steady_profile_prefix+'.'+phase+'.'+suffix)
+                             for phase in ('idle','active') for suffix in ('started','prof'))
+    assert not any(path.exists() for path in profile_paths),'use unique profile paths; prior runs are immutable'
     if args.diagnostic_source:
         assert args.diagnostic_profile,'source overrides are diagnostics only'
         os.environ['PYTHONPATH']=args.diagnostic_source;sys.path.insert(0,args.diagnostic_source)
