@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "source": "645909c",
+  "wheel_sha256": "1762346515e06d706dfdd16fe96db04acfc7c3f2e5ff30e49e5f7d665f746828",
+  "package_members": 306,
+  "prefix": "/tmp/wake-presets-installed",
+  "installed_tests": "4PASS",
+  "native": "private tmux preset switching/expiry/rollback; no Windows pixel claim"
+}
