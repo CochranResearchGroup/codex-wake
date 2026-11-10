@@ -62,6 +62,20 @@ def main():
         pane_ids=command('list-panes','-a','-F','#{pane_id}').splitlines()
         assert len(pane_ids)==100
         for i,pane in enumerate(pane_ids): command('select-pane','-t',pane,'-T','fixture-thread-'+str(i))
+        from codex_wake.process import process_identity
+        fixture_tmux_pid=int(command('display-message','-p','#{pid}'))
+        fixture_tmux_birth=process_identity(fixture_tmux_pid)
+        assert fixture_tmux_birth and Path('/proc',str(fixture_tmux_pid)).stat().st_uid==os.geteuid()
+        receipt['fixture_tmux_identity']=dict(pid=fixture_tmux_pid,start_ticks=fixture_tmux_birth['start_time_ticks'],boot_id=fixture_tmux_birth['boot_id'])
+        def fixture_tmux_sample():
+            try:
+                info=Path('/proc',str(fixture_tmux_pid)).stat()
+                fields=Path('/proc',str(fixture_tmux_pid),'stat').read_text().rsplit(')',1)[1].split()
+                if info.st_uid!=os.geteuid() or str(fields[19])!=str(fixture_tmux_birth['start_time_ticks']):
+                    return dict(status='identity_changed')
+                return dict(status='qualified',cpu_seconds=sum(int(fields[i]) for i in (11,12))/os.sysconf('SC_CLK_TCK'),
+                    rss_bytes=int(fields[21])*os.sysconf('SC_PAGE_SIZE'))
+            except (OSError,ValueError):return dict(status='unavailable')
         path=root/'controller-tabs.json';path.write_text(json.dumps(dict(schema_version=1,workspaces=dict(fixture=dict(
             kind='tmux',socket_path=str(root/'tmux.sock'),session_id='$0')))));path.chmod(0o600)
         connections=[];lock=threading.Lock(); methods={}
@@ -251,6 +265,7 @@ main(['--serve',sys.argv[-1]])
                         until=time.monotonic()+2
                         while not marker.exists():
                             assert time.monotonic()<until;time.sleep(.01)
+                    fixture_tmux0=fixture_tmux_sample()
                     begin=time.monotonic();cpu0,_=sample();components0=dict(components);state_versions=set();state_max_bytes=0;observer_costs0=dict(value.get('observer',{}).get('costs',{}));self0=resource.getrusage(resource.RUSAGE_SELF);child0=resource.getrusage(resource.RUSAGE_CHILDREN);thread0=time.thread_time();maxrss=0;sequence=[0];pending={}
                     stopping=threading.Event()
                     def produce():
@@ -293,6 +308,7 @@ main(['--serve',sys.argv[-1]])
                     cpu1,_=sample();components1=dict(components);wall=time.monotonic()-begin
                     self1=resource.getrusage(resource.RUSAGE_SELF);child1=resource.getrusage(resource.RUSAGE_CHILDREN)
                     own_delta=self1.ru_utime+self1.ru_stime-self0.ru_utime-self0.ru_stime
+                    fixture_tmux1=fixture_tmux_sample()
                     main_delta=time.thread_time()-thread0
                     reaped_delta=child1.ru_utime+child1.ru_stime-child0.ru_utime-child0.ru_stime
                     receipt[phase]=dict(wall_seconds=wall,cpu_seconds=cpu1-cpu0,cpu_percent_one_core=100*(cpu1-cpu0)/wall,
@@ -300,6 +316,14 @@ main(['--serve',sys.argv[-1]])
                         owner_cpu_seconds=components1['owner']-components0['owner'] if args.monitor else own_delta,main_thread_cpu_seconds=main_delta if not args.monitor else None,
                         non_main_threads_cpu_seconds=own_delta-main_delta if not args.monitor else None,
                         fixture_driver_cpu_seconds=own_delta if args.monitor else None,
+                        fixture_driver_main_thread_cpu_seconds=main_delta if args.monitor else None,
+                        fixture_native_and_driver_other_threads_cpu_seconds=own_delta-main_delta if args.monitor else None,
+                        fixture_cpu_attribution_limit='native protocol server and producer share driver process; other-thread CPU cannot isolate server from workload producer',
+                        fixture_tmux_server=dict(before=fixture_tmux0,after=fixture_tmux1,
+                            cpu_seconds=fixture_tmux1['cpu_seconds']-fixture_tmux0['cpu_seconds']
+                                if fixture_tmux0['status']==fixture_tmux1['status']=='qualified' else None,
+                            excluded_from_observer_gate=True,
+                            attribution='private tmux server own CPU; workload panes excluded; formatting/shared terminal service work not separable by client'),
                         reaped_child_cpu_seconds=components1['reaped']-components0['reaped'] if args.monitor else reaped_delta,
                         live_child_cpu_seconds=components1['live']-components0['live'] if args.monitor else (cpu1-cpu0)-own_delta-reaped_delta)
                     if args.steady_profile_prefix:
