@@ -13,8 +13,12 @@ from .process import process_identity
 
 class ObservationCache:
     def __init__(self, root, *, process_probe=None, identity_probe=process_identity,
-                 monotonic=time.monotonic, ttl=2.0, max_entries=512, session_reader=None):
+                 monotonic=time.monotonic, ttl=2.0, max_entries=512, session_reader=None, health_probe=None):
         self.root = Path(root)
+        from .tab_observation_checks import TieredChecks
+        self.checks=TieredChecks(monotonic=monotonic)
+        self.activity_enabled=True
+        self.health_probe=health_probe
         self.session_reader = session_reader
         self.process_probe = process_probe
         self.identity_probe = identity_probe
@@ -56,9 +60,10 @@ class ObservationCache:
         return result
 
     def observe(self, workspace, snapshot, *, socket_path=None, transport=None,
-                privacy=None, deadline=None):
+                privacy=None, deadline=None, explicit_checks=False, dirty_panes=()):
         from .tab_organization import digest
         from .tab_traits import TabTraits, session_rows
+        deadline=deadline or time.monotonic()+2
         generation = digest(snapshot)
         if self._generations.get(workspace) != generation:
             self._processes.clear()
@@ -68,7 +73,7 @@ class ObservationCache:
         births = tuple(self._birth(p.get('pid')) for p in panes)
         now = self.monotonic()
         prior = self._observations.get(workspace)
-        if prior and prior[0] == (generation,births) and all(b is not None for b in births) and now < prior[1]:
+        if not explicit_checks and not dirty_panes and prior and prior[0] == (generation,births) and all(b is not None for b in births) and now < prior[1]:
             # Descendant birth validation prevents retaining a dead agent under a live shell.
             for p in panes:
                 self.processes(p.get('pid'),deadline)
@@ -94,12 +99,32 @@ class ObservationCache:
                 socket=socket_path))
         rows = (self.session_reader or session_rows)(self.root,socket_path=socket_path,panes=native_panes,
                             deadline=min(deadline,time.monotonic()+2)) if needs_native else dict(sessions=[],holds=[])
-        traits = TabTraits(self.root,sessions=rows['sessions'],process_probe=lambda pid,limit: investigated.get(pid,([],False)))
+        traits = TabTraits(self.root,sessions=rows['sessions'],process_probe=lambda pid,limit: investigated.get(pid,([],False)),
+                           health_probe=self.health_probe,check_scheduler=self.checks,
+                           check_namespace=(workspace,snapshot.get('server'),tuple(snapshot.get('socket_identity',()))),
+                           explicit_checks=explicit_checks,dirty_panes=dirty_panes)
         observed = {w['window_id']:traits.observe_window(w,transport=transport,privacy=privacy,deadline=deadline)
                     for w in snapshot['windows']}
+        if not self.activity_enabled:
+            from .tab_traits import _trait
+            for window in observed.values():
+                window['traits']['activity']=_trait(reason='activity_observation_disabled')
+                for pane in window['panes']:
+                    pane['traits']['activity']=_trait(reason='activity_observation_disabled')
+                    pane['binding']=None
         result = (observed,rows)
         self._put(self._observations,workspace,((generation,births),now+self.ttl,deepcopy(result),digest(self._processes)))
         return result
+
+    def configure_checks(self, *, activity=True, health=True, errors=True, health_interval=60,error_interval=5):
+        """Configure independent tiers; interval floors preserve the resource budget."""
+        if type(activity) is not bool:
+            raise ValueError('activity switch must be boolean')
+        previous=(self.activity_enabled,self.checks.enabled,self.checks.intervals)
+        self.checks.configure(health=health,errors=errors,health_interval=health_interval,error_interval=error_interval)
+        self.activity_enabled=activity
+        if previous != (activity,self.checks.enabled,self.checks.intervals):
+            self._observations.clear()
 
     def invalidate(self, workspace=None):
         """Fence retained evidence when a feed disconnects or changes epoch."""
