@@ -56,10 +56,19 @@ class _SnapshotTransport:
     def __init__(self, original):
         self.original, self.value, self.available = original, None, False
 
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+        self._encoded = json.dumps(value, separators=(',', ':'), allow_nan=False)
+
     def snapshot(self, deadline):
         if not self.available or self.value is None:
             raise InventoryError('attachment_unavailable', 'Metadata source is unavailable.')
-        return deepcopy(self.value)
+        return json.loads(self._encoded)
 
     def __getattr__(self, name):
         return getattr(self.original, name)
