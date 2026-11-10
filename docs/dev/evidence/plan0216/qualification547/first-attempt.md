@@ -200,3 +200,11 @@ profiles remain private. These elapsed profiler timings include waits/fsync
 and cannot be added as CPU costs. No materialize-cache-hit counter was exposed
 in sampled public costs; none invented. All20events projected, p951.018s,
 ownedcontrols0 and fresh test-user OS census0. No wheel or product edits.
+
+Combined source5e6e6ab9 corrected unprofiled10+10 diagnostic: idle0.6988%
+(onecore;0.07CPU/10.017s), active5.2909% (0.53CPU/10.017s), so active
+still exceeds5% and no immutable-package/full60+60 gate was started. Active
+parent0.41CPU/reapedchildren0.12; idleparent0.06/children0.01. All20ordinary
+events projected, p951.0166s, aggregateRSS41,103,360bytes, controls0. Fresh
+OS test-user census0. Sourceoverride is diagnostic only; previous failures
+remain unchanged. No new wheel/product edit or relaxed threshold.
