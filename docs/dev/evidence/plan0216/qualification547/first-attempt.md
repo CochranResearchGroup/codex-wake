@@ -248,3 +248,17 @@ fixturealive, hashes/headers retained without fullstate inGit; lateactivecopy
 foundfixturealreadycleaned, so no active-stateartifact exists. Initial logopen
 underUIDprivate directory failed beforebuild; a primary-owned log destination
 allowed the one successfulbuild. No package-source or workload change.
+
+Exactwheel3 source49435e8e directcanonical60+60 gate FAILED.312source/
+wheel/installed members equal, wheelSHAf7edf716c44926860a080b45e523019c
+cb8ce495eb6a0c08992b02cee8a69471. Idle2.5625%onecore (1.54CPU/60.097s;
+parent1.40/children0.14), active5.4582% (3.28CPU/60.093s;parent2.55/
+children0.73). All120ordinaryevents projected,p951.0603s,RSS76,603,392B,
+controls0. Idle ticks199→778 despite1sdefault exposed deadline mismatch:
+root confirmed serve sleep retained5s publicationdeadline while newpublisher
+used10s, causing busy ticks during latter5s. Active59ticks/60s unaffected
+by that specific spin. Retained firstfailure; no furtherprofile/retry from
+qualifier. Immediate postrunOS snapshot had101defunct fixtureprocesses
+awaitinginitreap; report refreshedcensus separately rather than equate
+ownedcontrols0 with fullOScleanup. Initial HEADguard caught docs-only
+127b4dc7 beforebuild; exact494gitarchive and empty srcdiff establishedsource.

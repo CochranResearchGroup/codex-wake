@@ -1,0 +1,7 @@
+{
+  "source_commit": "49435e8eef466cd91e567035696b0b3522745a73",
+  "build_log_sha256": "391c9868e827d86077c64ebf3d5929b58c9451997e5b7309b2165f532be2963c",
+  "install_log_sha256": "5e5d32b0f773eab2bf8406f10e8487600a235fed5d67eb69c9ecd85ac2d31a35",
+  "build": "gitarchive exactsource SOURCE_DATE_EPOCH=1794355200 pip wheel --no-deps",
+  "install": "UID1017 pip install --no-deps --force-reinstall exactwheel"
+}
