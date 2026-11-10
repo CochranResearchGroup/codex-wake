@@ -27,5 +27,6 @@
   "merge_authorized": false,
   "deploy_authorized": false,
   "production_enablement_authorized": false,
-  "validation_hold": "Exact5e6e6ab9 corrected10s diagnostic: idle0.6988%, active5.2909% exceeds5%. p951.0166s, all20events, RSS41MB, cleanup0. No60second installedqualification yet. Combining custody/window read-only tmux batches next; fixedgates unchanged."
+  "validation_hold": "Canonical immutablewheel2 UID1017 qualification pending60s idle+60sactive. Same-sourceprofile confirms2formatclients/changedframe; short628CPU6.284% failedandretained (rootCodeGraphsync7.6s overlapconfound). No acceptance claimed. Broadreview0/TDDremediation0; remaining541544546547.",
+  "qualification_source": "62877702b7b101fd49468db7a605d74b27de1b1b"
 }
