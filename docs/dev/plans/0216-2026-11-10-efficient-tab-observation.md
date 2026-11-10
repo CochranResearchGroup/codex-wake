@@ -8,7 +8,12 @@ Scope: approved specification and seven implementation tickets; user authorized 
 
 ## Current State
 
-Research completed in notes/0011-2026-11-10-tab-observation-efficiency-research.md.
+Implementation authorized by the operator. Specification #540 and seven tickets
+are published; #541/#542/#543/#545 are accepted and closed, #544/#546 implement
+the persistent owner and projection, #547 owns installed qualification. The
+execution ledger below is authoritative for implementation status.
+
+Historical interview context: research completed in notes/0011-2026-11-10-tab-observation-efficiency-research.md.
 Stock tmux/Byobu already supplies metadata notifications; source shows Codex
 status broadcasts, not yet passive-stream runtime acceptance. Current observer
 spawns isolated probes, can walk panes twice, loses process-local caches between
@@ -147,11 +152,11 @@ existing44+tab read-onlylivequalification underthesamecaps. No artificialprovide
 requests/agentrestarts. Passingreportedreceipts required beforecontinuousdefault
 activation. Slate/Dusk/Graphite andexistingoriginalsettingscustody preserved.
 
-Decision frontier: empty. Await operator confirmation that this consolidation
-matches intent; then formal spec/tickets are next, not implementation under this
-interview. Productcode/liveconfiguration have not changed during this interview.
+Decision frontier: empty. The operator subsequently approved consolidation,
+formal specification, tickets and implementation. No product code or live
+configuration changed during the interview; implementation follows below.
 
-## Scope, non-goals and definition of done
+## Interview scope, non-goals and definition of done (historical)
 
 Reach confirmed shared understanding, recording accepted decisions and remaining
 frontier. Then formal spec/tickets under explicit next scope. No implementation,
@@ -172,7 +177,7 @@ Fixed review base fa2363c24bf921ecf0bd8390739e96041e620e8f.
 | #542 native feed | /root/native542 | CLOSED; integrated cf1dede | none |
 | #543 tmux feed | /root/tmux543 | CLOSED; integrated7617727 | none |
 | #544 observer lifecycle | /root/native542 | implementing | #541 #542 #543 closed |
-| #545 tiered checks | /root/checks545 | implementing | #541 closed |
+| #545 tiered checks | /root/checks545 | CLOSED; integrated3f75ef9a | #541 closed |
 | #546 stable projection | /root/tmux543 | implementing | #541 closed |
 | #547 installed acceptance | pending | blocked | #544 #545 #546 |
 
