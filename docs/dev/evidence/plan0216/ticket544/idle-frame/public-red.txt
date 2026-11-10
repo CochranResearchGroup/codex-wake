@@ -1,0 +1,23 @@
+EE
+======================================================================
+ERROR: test_persistent_inventory_source_loss_and_owned_cleanup (test_tab_observer.ObserverTests.test_persistent_inventory_source_loss_and_owned_cleanup)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-idle-frame-544/tests/test_tab_observer.py", line 39, in test_persistent_inventory_source_loss_and_owned_cleanup
+    metadata=observer.tick(materialize=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: TabObserver.tick() got an unexpected keyword argument 'materialize'
+
+======================================================================
+ERROR: test_metadata_frames_are_materialized_only_for_actual_publication (test_tab_monitor_publication.MonitorPublicationTests.test_metadata_frames_are_materialized_only_for_actual_publication)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-idle-frame-544/tests/test_tab_monitor_publication.py", line 110, in test_metadata_frames_are_materialized_only_for_actual_publication
+    self.assertTrue(monitor.publish_observation(first,record,resources_loader=loader(first)))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: TabMonitor.publish_observation() got an unexpected keyword argument 'resources_loader'
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.029s
+
+FAILED (errors=2)

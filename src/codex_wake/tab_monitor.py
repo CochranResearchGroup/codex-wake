@@ -342,7 +342,7 @@ class TabMonitor:
         record['last_policy_operation']=dict(operation_id=operation['operation_id'],execution=operation['execution'],
                                               policy_revision=state['revision'])
 
-    def _routing_tick(self,snapshot,deadline):
+    def _routing_tick(self,snapshot,deadline,*,resources_loader=None):
         # Reuse the service-owned bounded observations; never create another monitor.
         from .terminal_routing import TerminalRouting
         from .controller_tabs import controller_tabs_from_root
@@ -354,9 +354,12 @@ class TabMonitor:
         if time.monotonic()>=deadline:return dict(status='partial',reason='cycle_deadline')
         owner=controller_tabs_from_root(self.root)
         if not owner.host_managed:return dict(status='partial',reason='host_inventory_required')
+        if resources_loader is not None:resources_loader()
+        if not isinstance(snapshot.get('resources'),list):
+            raise InventoryError('observation_unavailable','Routing requires observed resource rows.')
         return TerminalRouting(self.root,tabs=owner).tick(snapshot,deadline=deadline)
 
-    def publish_observation(self, snapshot, record):
+    def publish_observation(self, snapshot, record, *, resources_loader=None):
         """Persist changed evidence immediately, or a bounded liveness heartbeat.
 
         Only trusted producer revisions admit the quiet fast path. Legacy callers
@@ -383,6 +386,9 @@ class TabMonitor:
         now=self.monotonic()
         publish=(not qualified or revision!=self._published_revision or now-self._published_at>=heartbeat)
         if publish:
+            if resources_loader is not None:resources_loader()
+            if not isinstance(snapshot.get('resources'),list):
+                raise InventoryError('observation_unavailable','Metadata-only frames cannot be persisted as inventory.')
             _save(self.directory/'snapshot.json',snapshot)
             self._published_revision=revision if qualified else None
             self._published_at=now
@@ -404,15 +410,19 @@ class TabMonitor:
                     started=time.monotonic()
                     try:
                         cycle_deadline=started+self._settings()['cycle_timeout']
-                        snapshot=observer.tick(deadline=started+self._settings()['cycle_timeout']*.65)
+                        snapshot=observer.tick(deadline=started+self._settings()['cycle_timeout']*.65,materialize=False)
+                        def ensure_resources():
+                            if 'resources' not in snapshot:
+                                snapshot['resources']=observer.materialize_resources(snapshot['observed_at'])
+                            return snapshot['resources']
                         snapshot.update(origin='daemon',monitor_generation=record['generation'])
-                        self.publish_observation(snapshot,record)
+                        self.publish_observation(snapshot,record,resources_loader=ensure_resources)
                         observed=dict(snapshot=snapshot)
                         from .tab_format_monitor import refresh_formatting
                         record['last_formatting']=refresh_formatting(self.root,observed.get('snapshot') or {},
-                            tabs=observer.owner,deadline=cycle_deadline)
+                            tabs=observer.owner,deadline=cycle_deadline,resources_loader=ensure_resources)
                         self._policy_tick(record)
-                        routed=self._routing_tick(observed.get('snapshot') or {},cycle_deadline)
+                        routed=self._routing_tick(observed.get('snapshot') or {},cycle_deadline,resources_loader=ensure_resources)
                         record['last_routing']=dict(status=routed.get('status','completed'),outcomes=len(routed.get('outcomes',[])),pending=len(routed.get('pending',[])))
                         record.pop('last_error',None)
                     except (InventoryError,OSError,ValueError) as error:

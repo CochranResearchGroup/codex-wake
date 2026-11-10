@@ -36,6 +36,12 @@ class ObserverTests(unittest.TestCase):
                     self.assertLess(time.monotonic(), until)
                 row = result['resources'][0]
                 self.assertEqual(row['target']['workspace'], 'fixture')
+                metadata=observer.tick(materialize=False)
+                self.assertNotIn('resources',metadata)
+                self.assertEqual(metadata['resource_count'],1)
+                decoded=observer.materialize_resources(metadata['observed_at'])
+                decoded[0]['window']['panes'][0]['pane_id']='caller-mutated'
+                self.assertEqual(observer.materialize_resources(metadata['observed_at'])[0]['window'],row['window'])
                 owner_pid = observer.status()['sources'][0]['owned_pid']
                 self.assertIsNotNone(owner_pid)
                 second = observer.tick()
