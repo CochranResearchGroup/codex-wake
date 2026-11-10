@@ -50,13 +50,15 @@ class ObservationCache:
             raise ValueError('process cache lifetime must be .1..30 seconds')
         self.process_ttl=float(seconds)
 
-    def _tree_matches(self, pid, rows):
+    def _tree_matches(self, pid, rows, deadline):
         if self.process_probe is not None:
             # Injected host-owned process observers provide their own metadata fence.
             return True
         try:
             children=set()
             for row in rows:
+                if time.monotonic()>=deadline:
+                    return False
                 current=row['process']['pid'];base=Path('/proc')/str(current)
                 if os.readlink(base/'exe')!=row['executable'] or os.readlink(base/'cwd')!=row['cwd']:
                     return False
@@ -75,10 +77,10 @@ class ObservationCache:
         if birth is not None and previous and previous[0] == birth and now < previous[1]:
             # Validate all retained descendants, not just the pane's shell.
             rows, complete = previous[2]
-            valid = all((birth if row['process']['pid']==pid else self._birth(row['process']['pid'])) ==
+            valid = all(time.monotonic()<deadline and (birth if row['process']['pid']==pid else self._birth(row['process']['pid'])) ==
                         (row['process']['pid'],row['process']['boot_id'],str(row['process']['start_ticks']))
                         for row in rows)
-            if valid and self._tree_matches(pid,rows):
+            if valid and self._tree_matches(pid,rows,deadline):
                 return deepcopy((rows, complete))
         result = (self.process_probe or _processes)(pid, deadline)
         if birth is not None and result[1]:
