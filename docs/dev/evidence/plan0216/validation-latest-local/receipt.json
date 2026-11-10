@@ -1,0 +1,35 @@
+{
+  "tier": "presubmit",
+  "selection": "tests/test_tab*.py",
+  "source_commit": "828dc2ce",
+  "documentation_only_followup": "8a249981",
+  "results": {
+    "Python3.11.15": {
+      "tests": 211,
+      "seconds": 58.701,
+      "status": "PASS"
+    },
+    "Python3.12.13": {
+      "tests": 211,
+      "seconds": 58.399,
+      "status": "PASS"
+    }
+  },
+  "budget_seconds": 180,
+  "retries": 0,
+  "hosted_ci": false,
+  "environment_difference": "WSL local Linux, Python virtualenvs; hosted GitHub Actions intentionally skipped per cost policy.",
+  "subsequent_change": "Formatting baseline checkpoint5e6e6ab9 independently qualified by70focused tests on eachPython; source-specific logs in ticket546-checkpoint-cost.md.",
+  "checks": {
+    "ruff_F821_F822_F823": "PASS",
+    "generated_reference_check": "PASS",
+    "policy_wiring": "PASS",
+    "compileall": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "limitations": [
+    "Selected tab suite only, not fullrepository regression.",
+    "100tab60second installedqualification pending; activeCPU remains blocking.",
+    "Review and postreviewTDD reserved afterticketclosure."
+  ]
+}
