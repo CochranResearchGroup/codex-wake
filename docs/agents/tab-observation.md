@@ -47,6 +47,9 @@ claim. Every reused process tree is checked for live births and changed children
 Visible-error reads use bounded batches of only due panes. Failed reads remain
 unknown and retain prior redacted positive evidence; they do not clear errors.
 Raw screen text is transient and never enters the persisted observation snapshot.
+Retained JSON snapshots use a faster decoder with a standard-library fallback
+for legacy values. Stored values, canonical digests and strict finite-number
+serialization stay unchanged.
 Formatting consumes producer revisions, checks changed windows before writing and
 uses a 20-second shared lease for dynamic cues. Unchanged sources renew every
 10 seconds; failed renewals retry on the next monitor tick. Source changes still
