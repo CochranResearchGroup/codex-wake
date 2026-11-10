@@ -65,6 +65,10 @@ def _read(path):
         os.close(fd)
 
 
+def _publication_interval(settings):
+    return min(10.,settings['stale_after']/2)
+
+
 def _save(path,value):
     raw=json.dumps(value,allow_nan=False,separators=(',',':')).encode()
     if len(raw)>MAX_STATE:
@@ -382,7 +386,7 @@ class TabMonitor:
         revision=(snapshot.get('projection_revision'),snapshot.get('evidence_revision'))
         qualified=all(isinstance(value,str) and 0<len(value)<=128 for value in revision)
         settings=self._settings()
-        heartbeat=min(10.,settings['stale_after']/2)
+        heartbeat=_publication_interval(settings)
         now=self.monotonic()
         publish=(not qualified or revision!=self._published_revision or now-self._published_at>=heartbeat)
         if publish:
@@ -432,7 +436,7 @@ class TabMonitor:
                     settings=self._settings()
                     delay=settings['interval']-(time.monotonic()-started)
                     if math.isfinite(self._published_at):
-                        delay=min(delay,self._published_at+min(5.,settings['stale_after']/2)-self.monotonic())
+                        delay=min(delay,self._published_at+_publication_interval(settings)-self.monotonic())
                     stop.wait(max(.05,delay))
             finally:
                 observer.close()

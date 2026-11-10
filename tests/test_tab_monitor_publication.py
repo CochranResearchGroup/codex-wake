@@ -49,6 +49,34 @@ class MonitorPublicationTests(unittest.TestCase):
             finally:
                 monitor.execute('tabs.monitor.stop',{})
 
+    def test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            path=root/'controller-tabs.json'
+            path.write_text(json.dumps(dict(schema_version=1,workspaces={})));path.chmod(0o600)
+            monitor=TabMonitor(root)
+            monitor.execute('tabs.monitor.start',dict(interval=.5,stale_after=12.))
+            try:
+                until=time.monotonic()+3
+                while True:
+                    status=monitor.execute('tabs.monitor.status',{})
+                    if status['snapshot'] and status['monitor']['observer']:
+                        break
+                    self.assertLess(time.monotonic(),until)
+                    time.sleep(.02)
+                first=status['snapshot']['observed_at']
+                ticks=status['monitor']['observer']['costs']['ticks']
+                until=time.monotonic()+9
+                while status['snapshot']['observed_at']<first+5.9:
+                    self.assertLess(time.monotonic(),until)
+                    time.sleep(.05)
+                    status=monitor.execute('tabs.monitor.status',{})
+                self.assertLessEqual(status['monitor']['observer']['costs']['ticks']-ticks,18,
+                                     'quiet heartbeat deadline must not create a busy loop')
+                self.assertEqual(status['snapshot']['freshness'],'fresh')
+            finally:
+                monitor.execute('tabs.monitor.stop',{})
+
     @unittest.skipUnless(shutil.which('tmux'),'tmux unavailable')
     def test_daemon_persists_full_rows_and_enabled_routing_receives_them(self):
         from codex_wake.controller_tabs import controller_tabs_from_root
