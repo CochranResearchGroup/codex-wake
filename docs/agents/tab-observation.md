@@ -48,8 +48,10 @@ Visible-error reads use bounded batches of only due panes. Failed reads remain
 unknown and retain prior redacted positive evidence; they do not clear errors.
 Raw screen text is transient and never enters the persisted observation snapshot.
 Formatting consumes producer revisions, checks changed windows before writing and
-uses a bounded shared lease for dynamic cues. Loss of that lease removes uncertain
-cues while keeping the selected palette and stable labels.
+uses a 20-second shared lease for dynamic cues. Unchanged sources renew every
+10 seconds; failed renewals retry on the next monitor tick. Source changes still
+project immediately. Loss of the lease removes uncertain cues while keeping the
+selected palette and stable labels.
 
 Background health checks run no faster than once per 60 seconds per exact client
 birth/build; errors use their separate minimum five-second cadence when eligible.
