@@ -363,7 +363,7 @@ class TabMonitor:
             raise InventoryError('observation_unavailable','Routing requires observed resource rows.')
         return TerminalRouting(self.root,tabs=owner).tick(snapshot,deadline=deadline)
 
-    def publish_observation(self, snapshot, record, *, resources_loader=None):
+    def publish_observation(self, snapshot, record, *, resources_loader=None, settings=None):
         """Persist changed evidence immediately, or a bounded liveness heartbeat.
 
         Only trusted producer revisions admit the quiet fast path. Legacy callers
@@ -385,7 +385,7 @@ class TabMonitor:
         record['observer']=diagnostics
         revision=(snapshot.get('projection_revision'),snapshot.get('evidence_revision'))
         qualified=all(isinstance(value,str) and 0<len(value)<=128 for value in revision)
-        settings=self._settings()
+        settings=self._settings() if settings is None else settings
         heartbeat=_publication_interval(settings)
         now=self.monotonic()
         publish=(not qualified or revision!=self._published_revision or now-self._published_at>=heartbeat)
@@ -408,19 +408,21 @@ class TabMonitor:
                         capabilities=['tab-formatting-v1','tab-routing-v1','tab-observer-events-v1'])
             _save(self.directory/'owner.json',record)
             from .tab_observer import TabObserver
-            observer=TabObserver(self.root,settings=self._settings(),fallback_probe=self._probe)
+            settings=self._settings()
+            observer=TabObserver(self.root,settings=settings,fallback_probe=self._probe)
             try:
                 while not stop.is_set():
                     started=time.monotonic()
                     try:
-                        cycle_deadline=started+self._settings()['cycle_timeout']
-                        snapshot=observer.tick(deadline=started+self._settings()['cycle_timeout']*.65,materialize=False)
+                        settings=self._settings()
+                        cycle_deadline=started+settings['cycle_timeout']
+                        snapshot=observer.tick(deadline=started+settings['cycle_timeout']*.65,materialize=False)
                         def ensure_resources():
                             if 'resources' not in snapshot:
                                 snapshot['resources']=observer.materialize_resources(snapshot['observed_at'])
                             return snapshot['resources']
                         snapshot.update(origin='daemon',monitor_generation=record['generation'])
-                        self.publish_observation(snapshot,record,resources_loader=ensure_resources)
+                        self.publish_observation(snapshot,record,resources_loader=ensure_resources,settings=settings)
                         observed=dict(snapshot=snapshot)
                         from .tab_format_monitor import refresh_formatting
                         record['last_formatting']=refresh_formatting(self.root,observed.get('snapshot') or {},
@@ -433,7 +435,6 @@ class TabMonitor:
                         record['last_error']=getattr(error,'code','observation_unavailable')
                     record['last_cycle_at']=self.clock()
                     _save(self.directory/'owner.json',record)
-                    settings=self._settings()
                     delay=settings['interval']-(time.monotonic()-started)
                     if math.isfinite(self._published_at):
                         delay=min(delay,self._published_at+_publication_interval(settings)-self.monotonic())
