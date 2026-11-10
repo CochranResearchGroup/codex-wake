@@ -27,5 +27,5 @@
   "merge_authorized": false,
   "deploy_authorized": false,
   "production_enablement_authorized": false,
-  "validation_hold": "Steady actual100tab monitor+Slate CPU4.591%idle/8.784%active exceeds1/5%; phase-only profile in progress, candidate source overrides not acceptance."
+  "validation_hold": "Exact de2346d3 corrected diagnostic: idle0.9953%, active7.4771% over10s; not60s acceptance. Active exceeds5%. Profiling-guided row-summary, snapshot-copy, baseline-save and immutable-boot-read improvements in progress. Broad review and post-review TDD each remain0."
 }
