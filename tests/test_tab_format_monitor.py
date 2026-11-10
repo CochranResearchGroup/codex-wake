@@ -117,3 +117,47 @@ class FormattingMonitorTests(unittest.TestCase):
         self.assertEqual(result['status'],'partial')
         self.assertEqual(result['workspaces'][0]['code'],'probe_deadline')
         self.assertEqual(self.tmux('show-options','-w','-v','-t','@0','window-status-format'),first)
+
+    def test_unchanged_event_tick_defers_native_io_but_policy_change_is_immediate(self):
+        from unittest.mock import patch
+        from codex_wake.tab_format_monitor import refresh_formatting
+        observed=self.tabs.execute('tabs.list',{})
+        self.assertEqual(refresh_formatting(self.root,observed,tabs=self.tabs)['status'],'completed')
+        commands=[];original=subprocess.run
+        def counted(*args,**kwargs):
+            commands.append(args[0]);return original(*args,**kwargs)
+        repeated=dict(observed,resources=[dict(resource,monitor_observed_at=time.time()+1) for resource in observed['resources']])
+        with patch('subprocess.run',side_effect=counted):
+            self.assertEqual(refresh_formatting(self.root,repeated,tabs=self.tabs)['status'],'completed')
+        self.assertEqual(commands,[])
+        def trait(value):return dict(value=value,status='observed',observed_at=time.time(),source_available=True)
+        changed=dict(observed,resources=[dict(resource,traits=dict(panes=[dict(
+            pane_id=resource['window']['panes'][0]['pane_id'],traits=dict(
+                harness=trait('codex'),build=trait('stock'),activity=trait('running')))]))
+            for resource in observed['resources']])
+        self.assertEqual(refresh_formatting(self.root,changed,tabs=self.tabs)['status'],'completed')
+        self.assertIn('RUN',self.tmux('display-message','-p','-t','@0','#{E:window-status-format}'))
+        changed['resources'][0]['traits']['panes'][0]['traits']['activity']['source_available']=False
+        self.assertEqual(refresh_formatting(self.root,changed,tabs=self.tabs)['status'],'completed')
+        self.assertNotIn('RUN',self.tmux('display-message','-p','-t','@0','#{E:window-status-format}'))
+        self.tabs.execute('tabs.format.rollback',dict(workspace='work'))
+        report=refresh_formatting(self.root,repeated,tabs=self.tabs)
+        self.assertTrue(any(row['status']=='disabled' for row in report['workspaces']))
+
+    def test_idle_projection_renews_before_shared_publisher_lease_can_expire(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from codex_wake.tab_format_monitor import refresh_formatting
+        observed=self.tabs.execute('tabs.list',{})
+        self.assertEqual(refresh_formatting(self.root,observed,tabs=self.tabs)['status'],'completed')
+        now=time.monotonic();commands=[];original=subprocess.run
+        def counted(*args,**kwargs):
+            commands.append(args[0]);return original(*args,**kwargs)
+        # Substitute only the scheduler clock boundary, leaving native wall-clock
+        # lease evaluation and transport deadlines on their real system clocks.
+        with patch('codex_wake.tab_format_monitor.time',SimpleNamespace(monotonic=lambda:now+6)),patch('subprocess.run',side_effect=counted):
+            result=refresh_formatting(self.root,observed,tabs=self.tabs)
+        self.assertEqual(result['status'],'completed')
+        self.assertTrue(commands)
+        lease=int(self.tmux('show-options','-v','-t','$0','@wake-format-clock'))
+        self.assertGreater(lease,time.time())
