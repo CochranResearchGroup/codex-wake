@@ -174,3 +174,15 @@ refresh despite only2changed windows per tick. Formatting state360,979idle/
 lower bound, and observer counters are last-published values. These explicit
 profiling/diagnostic limits are included in the receipt. No new product patch,
 wheel build or acceptance claim; warm profiles remain user-scoped artifacts.
+
+Correctedde2346d3 source-override diagnostic after metadata-only idle frames, due
+error cohorts and dirty-window native batching: idle0.9953%onecore (0.10CPU/
+10.047s), active7.4771% (0.75CPU/10.031s), still not accepted. Active owner
+0.61CPU plus reapedchildren0.14CPU; idle owner0.09 plus reaped0.01. All20
+ordinary events projected, p951.0867s, aggregateRSS45,031,424bytes, controls0.
+Fresh OS census found no remaining test-user processes. This short diagnostic
+uses source override and cannot establish immutable installed-package acceptance.
+No wheel rebuilt. Active inventory passes advanced2during10s; attribution needs
+a same-source steady-only profile rather than extrapolation fromc65 timings.
+An initial helper-copy command failed on private worktree permissions before
+starting any workload; helper was transferred by stdin without widening access.
