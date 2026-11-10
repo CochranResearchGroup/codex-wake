@@ -54,7 +54,7 @@ class ResourceClaimCommandTests(unittest.TestCase):
             parser = argparse.ArgumentParser()
             register_parser(parser.add_subparsers(dest='command', required=True))
             def cli(*arguments):
-                args = parser.parse_args(['resources', *arguments])
+                args = parser.parse_args(['resources', *arguments, '--json'])
                 output = io.StringIO()
                 with contextlib.redirect_stdout(output):
                     code = run(args, wake, observer=lambda args: sample, now=lambda: 100)

@@ -148,7 +148,7 @@ class TabOrderingTests(unittest.TestCase):
         def cli(verb, *options, cap=capability):
             args = parser.parse_args(['tabs', verb, '--socket-path', self.socket,
                 '--session-id', self.session, '--bus-root', str(bus.root),
-                '--operator-capability', str(cap), *options])
+                '--operator-capability', str(cap), *options, '--json'])
             output = io.StringIO()
             with contextlib.redirect_stdout(output):
                 code = run(args, self.root / 'wake', observer=self.evidence)

@@ -1,4 +1,5 @@
 """CLI and MCP adapter for Wake build operations; no caller-supplied host paths."""
+from .cli_output import emit
 import json
 
 
@@ -21,6 +22,7 @@ def register_parser(subparsers):
             item.add_argument('--max-items', type=int)
             item.add_argument('--confirm', action='store_true', default=None)
             continue
+        item.add_argument('--json', dest='as_json', action='store_true')
         if verb == 'stage':
             item.add_argument('--recipe')
         else:
@@ -58,11 +60,11 @@ def command(args, owner):
             arguments[key] = value
         result = execute(owner, args.build_command, arguments)
     except (ValueError, OSError) as error:
-        print(json.dumps({'schema_version': 1, 'operation': 'builds.' + args.build_command,
-                          'status': 'failed', 'error': {'code': getattr(error, 'code', 'build_held'), 'message': str(error)}}, sort_keys=True))
+        emit({'schema_version': 1, 'operation': 'builds.' + args.build_command,
+                          'status': 'failed', 'error': {'code': getattr(error, 'code', 'build_held'), 'message': str(error)}}, args)
         return 2
-    print(json.dumps({'schema_version': 1, 'operation': 'builds.' + args.build_command,
-                      'status': 'completed', 'result': result}, sort_keys=True))
+    emit({'schema_version': 1, 'operation': 'builds.' + args.build_command,
+                      'status': 'completed', 'result': result}, args)
     return 0
 
 

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+
+from .cli_output import emit
 from pathlib import Path
 import sys
 import time
@@ -46,6 +48,8 @@ def register_parser(subparsers):
     route.add_argument('--operation', required=True)
     route.add_argument('--arguments', type=json.loads, default={})
     route.add_argument('--operation-id', required=True); route.add_argument('--idempotency-key', required=True)
+    for item in commands.choices.values():
+        item.add_argument('--json', dest='as_json', action='store_true')
     receiver = commands.add_parser('ssh-serve', help='fixed sshd forced-command receiver, one bounded JSON frame')
     receiver.add_argument('--principal-id', required=True)
     receiver.add_argument('--target', type=json.loads, required=True)
@@ -107,7 +111,10 @@ def command(args, root=None):
         result = dict(schema_version=1, operation=operation, status='completed', result=value)
     except (ValueError, OSError, KeyError) as error:
         result = dict(schema_version=1, operation=operation, status='failed', error=dict(code=getattr(error, 'code', 'invalid_argument'), message=str(error)))
-    print(json.dumps(result, sort_keys=True))
+    if args.host_verb == 'ssh-serve':
+        print(json.dumps(result, sort_keys=True))
+    else:
+        emit(result, args)
     return 0 if result['status'] == 'completed' else 2
 
 

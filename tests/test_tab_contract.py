@@ -101,7 +101,7 @@ assert 'wake_tabs_recovery_apply' in tool_specs()
             config.write_text(json.dumps(dict(schema_version=1,workspaces={'work':dict(kind='tmux',socket_path=socket,session_id='$0')})))
             config.chmod(0o600)
             def cli(*args,expected=0):
-                result=subprocess.run([sys.executable,'-m','codex_wake.entrypoint','--wake-root',directory,'tabs',*args],capture_output=True,text=True,timeout=10)
+                result=subprocess.run([sys.executable,'-m','codex_wake.entrypoint','--wake-root',directory,'tabs',*args,'--json'],capture_output=True,text=True,timeout=10)
                 self.assertEqual(result.returncode,expected,result.stdout+result.stderr)
                 return json.loads(result.stdout)
             try:

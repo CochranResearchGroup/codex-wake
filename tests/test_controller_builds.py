@@ -320,7 +320,7 @@ class PublicBuildAdapterTests(unittest.TestCase):
             (root / 'controller-accounts.toml').write_text('[profiles]\nstate_root = "' + str(homes) + '"\nknown_profiles = ["alice"]\n[builds]\nmanifest = "' + str(manifest) + '"\n')
             output = io.StringIO()
             with contextlib.redirect_stdout(output):
-                code = main(['--wake-root', str(root), 'builds', 'list', '--arguments', '{"account":"alice"}'])
+                code = main(['--wake-root', str(root), 'builds', 'list', '--arguments', '{"account":"alice"}', '--json'])
             mcp, failed = CommandRunner(wake_root=root).call('wake_builds_list', {'account': 'alice'})
             self.assertFalse(failed)
             self.assertEqual(code, 0)

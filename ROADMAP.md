@@ -1549,3 +1549,10 @@ Slate/Dusk/Graphite presets shipped via PR539/7010cbe. Slate active fordefault,
 44nativewindowreadbacks verified compact/noSTALE and subduedselection. Named
 presets persist through shared configure and originalrollbackcustody. Automatic
 monitor remains stopped pending separate loaded-host cycle qualification.
+
+## P217 | Human-friendly CLI output
+
+[LOCAL-P217](docs/dev/plans/0217-2026-11-10-human-cli-output.md) CLOSED for source
+and private installed-wheel validation; unreleased. Controller/agent adapters use
+readable defaults and explicit JSON. Protocol frames and machine envelopes retained.
+Working installation unchanged; validation and corrective-run history in plan evidence.

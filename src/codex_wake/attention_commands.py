@@ -1,4 +1,5 @@
 """Public CLI/host adapter; no model can assign operator authority or live context."""
+from .cli_output import emit
 import json
 from pathlib import Path
 import time
@@ -94,9 +95,9 @@ def run(args, root, *, context_validator=None, now=time.time):
                 principal = Principal(principal.subject, tasks=tasks)
         result = execute(args.attention_command, arguments, root, principal=principal,
             context_validator=context_validator, now=now)
-        print(json.dumps(result, sort_keys=True))
+        emit(result, args)
         return 0
     except (WakeError, ValueError, TypeError, KeyError, OSError) as error:
-        print(json.dumps(dict(status='held', error=dict(code=getattr(error, 'code', 'attention_unavailable'),
-            message=str(error) if isinstance(error, WakeError) else 'Attention authority or evidence unavailable.')), sort_keys=True))
+        emit(dict(status='held', error=dict(code=getattr(error, 'code', 'attention_unavailable'),
+            message=str(error) if isinstance(error, WakeError) else 'Attention authority or evidence unavailable.')), args)
         return 2

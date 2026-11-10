@@ -612,6 +612,7 @@ class GoalRenewalTests(unittest.TestCase):
                 "--deadline",
                 str(NOW + 180),
                 "--apply",
+                "--json",
             ]
             with (
                 self.controller(root),

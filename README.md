@@ -88,7 +88,7 @@ for shell setup. See [completion installation](docs/agents/shell-completion.md).
 After the first release tag exists, a fresh machine can install from GitHub:
 
 ```bash
-uv tool install git+https://github.com/CochranResearchGroup/codex-wake.git@v0.15.1
+bash scripts/install.sh --source git+https://github.com/CochranResearchGroup/codex-wake.git@v0.15.1
 ```
 
 Verify the installed commands:
@@ -108,7 +108,7 @@ scheduling unattended wakes:
 
 ```bash
 tag=<release-tag>
-uv tool install --force --reinstall "git+https://github.com/CochranResearchGroup/codex-wake.git@$tag"
+bash scripts/install.sh --source "git+https://github.com/CochranResearchGroup/codex-wake.git@$tag"
 
 codex-wake hook user install
 codex-wake hook user check
@@ -192,6 +192,12 @@ This writes or checks this `.codex/hooks.json` shape:
 ```
 
 Codex may require a one-time `/hooks` review before a new repo-local hook runs. Codex Wake reports that prerequisite, but it does not bypass Codex hook trust. If `/hooks` does not list this repo hook source, the active TUI has not loaded the repo hook file; restart or resume Codex in this repo, then review hooks before testing wake ack behavior.
+
+## CLI output
+
+Commands show readable tables and details by default. Add `--json` to the leaf
+command for scripts, for example `codex-wake accounts list --json`. See
+[CLI output](docs/agents/cli-output.md) for compatibility and protocol exceptions.
 
 ## Accounts and native daemons
 

@@ -73,6 +73,8 @@ def main():
     registry=wake/'controller-recovery.json';registry.write_text(json.dumps(dict(version=1,profiles={'fixture':dict(target=target,refresh=profile)})));registry.chmod(0o600)
     cli=args.bin_dir.resolve()/'codex-wake'
     def command(*items):
+        if items and items[0] == 'recovery' and '--json' not in items:
+            items = (*items, '--json')
         result=subprocess.run([str(cli),'--wake-root',str(wake),*items],cwd=work,env=env,capture_output=True,text=True,timeout=30)
         assert result.returncode==0,(result.returncode,result.stdout,result.stderr)
         return json.loads(result.stdout)

@@ -149,7 +149,7 @@ profiles="{fixture.profiles}"
         register_parser(parser.add_subparsers(dest='command', required=True))
         args = parser.parse_args(['history', 'resume', THREAD, '--owner', 'alice', '--intent', 'cli-history',
             '--expires-at', '2027-01-16T09:00:00+00:00', '--expected-target', json.dumps(public['target']),
-            '--bus-root', str(bus.root), '--operator-capability', str(capability)])
+            '--bus-root', str(bus.root), '--operator-capability', str(capability), '--json'])
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             self.assertEqual(command(args, fixture.root, runtime=fixture.runtime, now=lambda: fixture.inv.now()), 0)

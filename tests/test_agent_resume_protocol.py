@@ -102,7 +102,7 @@ class ResumeProtocolTests(unittest.TestCase):
         parser=argparse.ArgumentParser();register_parser(parser.add_subparsers(dest='command'))
         args=parser.parse_args(['resume','--managed-agent-id',self.agent['managed_agent_id'],'--profile','saved',
             '--intent','operator','--expires-at',self.arguments['expires_at'],'--profiles',str(self.profiles),
-            '--bus-root',str(bus.root),'--operator-capability',str(cap)])
+            '--bus-root',str(bus.root),'--operator-capability',str(cap),'--json'])
         out=StringIO()
         with redirect_stdout(out):status=run(args,self.root,runtime=self.runtime,now=lambda:NOW)
         return status,json.loads(out.getvalue())

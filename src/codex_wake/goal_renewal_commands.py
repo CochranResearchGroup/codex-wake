@@ -1,5 +1,6 @@
 """Public renewal adapters. Native MCP may propose/consume; it cannot approve."""
 
+from .cli_output import emit
 import json
 from pathlib import Path
 
@@ -170,20 +171,16 @@ def command(args, root):
         result = execute(
             args.goal_limits_command, arguments, root, args.policy, principal=principal
         )
-        print(json.dumps(result, sort_keys=True))
+        emit(result, args)
         return 0
     except (ValueError, OSError, KeyError, TypeError, WakeError) as error:
-        print(
-            json.dumps(
-                dict(
+        emit(dict(
                     state="held",
                     error=dict(
                         code=getattr(error, "code", "renewal_unavailable"),
                         message=str(error),
                     ),
-                )
-            )
-        )
+                ), args)
         return 2
 
 

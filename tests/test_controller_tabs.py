@@ -242,7 +242,7 @@ for line in sys.stdin:
                 parser = argparse.ArgumentParser()
                 parser.add_argument('--wake-root',default=directory)
                 register_parser(parser.add_subparsers())
-                args = parser.parse_args(['tabs','list'])
+                args = parser.parse_args(['tabs','list','--json'])
                 with contextlib.redirect_stdout(io.StringIO()) as output:
                     self.assertEqual(command(args),0)
                 self.assertEqual(json.loads(output.getvalue())['resources'][0]['target']['workspace'],'fixture')

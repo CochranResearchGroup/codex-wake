@@ -1,5 +1,7 @@
 """Public CLI, API and MCP adapters for explicit account daemon lifecycle."""
 import json
+
+from .cli_output import emit
 import os
 import time
 import hashlib
@@ -127,7 +129,7 @@ def command(args, root):
     except (ValueError, OSError) as error:
         value = dict(schema_version=1, operation=operation, status='failed',
                      error=dict(code=getattr(error, 'code', 'daemon_held'), message=str(error)))
-    print(json.dumps(value, sort_keys=True))
+    emit(value, args)
     record = value.get('result', {}).get('operation', {})
     return 0 if value['status'] == 'completed' and record.get('phase', 'terminal') == 'terminal' else 2
 
