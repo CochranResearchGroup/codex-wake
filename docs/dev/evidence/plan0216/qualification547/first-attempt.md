@@ -137,3 +137,20 @@ formatter10/1.014s→apply10/0.722;80format batches/0.400 and109total subprocess
 These instrumented timings identify steady bottlenecks without claiming a passing
 resource gate. Root owns cache/serialization and formatter worker owns native I/O.
 Fresh test-user census again showed no surviving owned processes.
+
+Workload-state correction found by primary before final qualification: all prior
+helpers initialized10active turns during their phase named idle. Thus that label
+measured quiet-active conversations, not100idle conversations. Original receipts,
+labels, thresholds_pass=false values and failed-attempt records remain unchanged.
+They cannot prove the100-idle/1% gate. Final helper initializes all100threads idle,
+records initial_idle_active_turns=0 and active_conversations=10. The1%idle/5%active
+caps remain unchanged; exact active-phase activation boundary is frozen separately
+before the next run. No new resource run was performed for this correction.
+
+Final workload boundary frozen by primary:100idle conversations for the idle
+window. Before ordinary-active measurement, activate10conversations at once and
+record that activation burst wall/CPU cost separately; require the same healthy
+source/100binding/completed-formatting/newer-snapshot barrier plus10active/waiting
+turn states. Then measure120staggered state changes at2/s with all10remaining
+turn-active. No CPU-based settling is used. Caps remain1%/5%; no new benchmark has
+run yet with this corrected workload pending the next frozen product source.

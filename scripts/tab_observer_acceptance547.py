@@ -45,7 +45,7 @@ def main():
     from websockets.sync.server import unix_serve
     assert args.diagnostic_source or 'site-packages' in codex_wake.__file__, 'source shadow is prohibited'
     receipt=dict(source_commit=args.source_commit,python=sys.version,package=codex_wake.__file__,uid=os.geteuid(),
-        tabs=100,windows_seconds=args.seconds,tiers=dict(activity=True,health=True,errors=True),
+        tabs=100,initial_idle_active_turns=0,active_conversations=10,windows_seconds=args.seconds,tiers=dict(activity=True,health=True,errors=True),
         cpu_denominator='one core',measurement='Python observer plus fixture server and driver (conservative upper bound), live owned children plus reaped child CPU; excludes disposable pane workload and tmux server',
         fixture_limit='metadata-only Unix WebSocket fixture; no provider turns or proof of real native broadcasts',
         latency_measure='fixture send to public projection, upper bound on receive-to-projection',production_effects=False,tick_interval_seconds=args.tick_interval,public_status_poll_seconds=args.poll_interval if args.monitor else args.tick_interval,source_override=bool(args.diagnostic_source))
@@ -65,7 +65,7 @@ def main():
         path=root/'controller-tabs.json';path.write_text(json.dumps(dict(schema_version=1,workspaces=dict(fixture=dict(
             kind='tmux',socket_path=str(root/'tmux.sock'),session_id='$0')))));path.chmod(0o600)
         connections=[];lock=threading.Lock(); methods={}
-        states={f't{i}':dict(type='active' if i<10 else 'idle',activeFlags=[]) for i in range(100)}
+        states={f't{i}':dict(type='idle',activeFlags=[]) for i in range(100)}
         def handler(connection):
             with lock:connections.append(connection)
             try:
@@ -123,6 +123,33 @@ def main():
             if monitor:
                 return monitor.execute('tabs.monitor.status',{}).get('snapshot') or dict(resources=[])
             return observer.tick(**kwargs)
+        def active_count(value):
+            return sum(pane['traits']['activity']['value'] in ('running','waiting-for-input')
+                       for row in value['resources'] for pane in row['traits']['panes'])
+        def barrier(since_wall,required_active):
+            until=time.monotonic()+30;qualified_at=None
+            while True:
+                report=monitor.execute('tabs.monitor.status',{})
+                value=report.get('snapshot') or dict(resources=[])
+                sources=value.get('observer',{}).get('sources',[])
+                formatting=report['monitor'].get('last_formatting') or {}
+                workspace=next((row for row in formatting.get('workspaces',[]) if row.get('workspace')=='fixture'),{})
+                bound=sum(bool(p.get('binding')) for r in value['resources'] for p in r['traits']['panes'])
+                qualified=(len(value['resources'])==100 and bound==100 and sources and
+                    {'tmux','native'}<={row.get('source_kind') for row in sources} and
+                    all(row.get('state')=={'tmux':'available','native':'connected'}.get(row.get('source_kind')) for row in sources) and
+                    formatting.get('status')=='completed' and workspace.get('status')=='applied' and
+                    not workspace.get('failures') and value.get('observed_at',0)>since_wall and active_count(value)==required_active)
+                if qualified:
+                    if qualified_at is not None and value['observed_at']>qualified_at:
+                        return value,dict(boundary_at=since_wall,first_qualified_snapshot_at=qualified_at,
+                            subsequent_snapshot_at=value['observed_at'],bound_panes=bound,active_turns=active_count(value),
+                            formatting_status=workspace['status'],failures=workspace.get('failures',[]),
+                            source_states=[dict(kind=row['source_kind'],state=row['state']) for row in sources])
+                    qualified_at=value['observed_at'] if qualified_at is None else qualified_at
+                assert time.monotonic()<until,('deterministic barrier failed',len(value['resources']),bound,
+                    active_count(value),required_active,[dict(kind=row.get('source_kind'),state=row.get('state')) for row in sources],formatting)
+                time.sleep(.05)
         try:
             with unix_serve(handler,path=str(native_path)) as server:
                 worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
@@ -161,30 +188,8 @@ main(['--serve',sys.argv[-1]])
                     cli('tabs','format','enable','--workspace','fixture')
                     enabled_at=time.time()
                     monitor_pid=monitor.execute('tabs.monitor.status',{})['monitor']['process']['pid']
-                    until=time.monotonic()+30;qualified_at=None
-                    while True:
-                        report=monitor.execute('tabs.monitor.status',{})
-                        value=report.get('snapshot') or dict(resources=[])
-                        sources=value.get('observer',{}).get('sources',[])
-                        formatting=report['monitor'].get('last_formatting') or {}
-                        workspace=next((row for row in formatting.get('workspaces',[]) if row.get('workspace')=='fixture'),{})
-                        bound=sum(bool(p.get('binding')) for r in value['resources'] for p in r['traits']['panes'])
-                        qualified=(len(value['resources'])==100 and bound==100 and sources and
-                            {'tmux','native'}<={row.get('source_kind') for row in sources} and
-                            all(row.get('state')=={'tmux':'available','native':'connected'}.get(row.get('source_kind')) for row in sources) and
-                            formatting.get('status')=='completed' and workspace.get('status')=='applied' and
-                            not workspace.get('failures') and value.get('observed_at',0)>enabled_at)
-                        if qualified:
-                            if qualified_at is not None and value['observed_at']>qualified_at:
-                                receipt['startup_barrier']=dict(enable_returned_at=enabled_at,
-                                    first_qualified_snapshot_at=qualified_at,subsequent_snapshot_at=value['observed_at'],
-                                    bound_panes=bound,formatting_status=workspace['status'],failures=workspace.get('failures',[]),
-                                    source_states=[dict(kind=row['source_kind'],state=row['state']) for row in sources])
-                                break
-                            qualified_at=value['observed_at'] if qualified_at is None else qualified_at
-                        assert time.monotonic()<until,('deterministic startup barrier failed',len(value['resources']),bound,
-                            [dict(kind=row.get('source_kind'),state=row.get('state')) for row in sources],formatting)
-                        time.sleep(.05)
+                    value,receipt['startup_barrier']=barrier(enabled_at,0)
+                    receipt['startup_barrier']['enable_returned_at']=enabled_at
                     receipt['measurement']='actual installed TabMonitor owner plus all current owned descendants and reaped child CPU via proc cutime/cstime; fixture/driver/workload processes excluded'
                     receipt['formatting_enabled']='slate100tabs; configured through installed CLI'
                 else:
@@ -204,6 +209,29 @@ main(['--serve',sys.argv[-1]])
                         profiler=cProfile.Profile();profiler.enable()
                     receipt['mode']='short diagnostic profile, not acceptance'
                 for phase in ('idle','active'):
+                    if phase=='active':
+                        activation_start=time.monotonic();activation_cpu0,_=sample();activation_wall=time.time()
+                        with lock:
+                            for index in range(10):
+                                thread_id='t'+str(index);states[thread_id]=dict(type='active',activeFlags=[])
+                                message=json.dumps(dict(method='thread/status/changed',params=dict(threadId=thread_id,status=states[thread_id])))
+                                for connection in list(connections):
+                                    try:connection.send(message)
+                                    except Exception:connections.remove(connection)
+                        burst_sent=time.monotonic()
+                        if monitor:
+                            value,activation_barrier=barrier(activation_wall,10)
+                        else:
+                            until=time.monotonic()+3
+                            while True:
+                                value=tick()
+                                if active_count(value)==10:break
+                                assert time.monotonic()<until;time.sleep(.01)
+                            activation_barrier=dict(active_turns=10)
+                        activation_cpu1,_=sample()
+                        receipt['active_activation']=dict(events=10,burst_send_seconds=burst_sent-activation_start,
+                            total_wall_seconds=time.monotonic()-activation_start,cpu_seconds=activation_cpu1-activation_cpu0,
+                            barrier=activation_barrier,excluded_from_ordinary_window=True)
                     if args.steady_profile_prefix:
                         import signal
                         from codex_wake.process import process_identity
