@@ -26,3 +26,10 @@ Commands: PYTHONPATH=src /tmp/wake216-py31x/bin/python -m unittest discover -s t
 -p test_tab_error_capture.py; corresponding test_tab_observation*.py and
  test_tab_traits*.py selections. Undefined-name lint and whitespace passed.
 This proves the batching invariant, not the final60second installed CPU gate.
+
+Cadence-boundary follow-up: candidates are retained without raw reads, and due
+selection occurs when the first screen is actually requested. Another inquiry
+can advance the boundary during inventory preparation. The public protocol test
+against the original committed adapter reproduced6roundtrips instead of4 after
+that transition; the lazy cohort fix passes with4. Additional newly-due cohorts
+may be read, but a failed batch is never retried within this inventory pass.

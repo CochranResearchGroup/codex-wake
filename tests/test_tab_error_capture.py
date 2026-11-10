@@ -49,5 +49,23 @@ class ErrorCaptureTests(unittest.TestCase):
                 self.assertTrue(all(error['value']=='unknown' for error in errors))
                 self.assertEqual(errors[0]['last_observation']['value'],'present')
                 self.assertNotIn('private fixture text',str(failed))
+                # A preceding inquiry can cross a cadence boundary between
+                # preparing the inventory and reading the first visible screen.
+                from codex_wake.tab_error_capture import capture_transport
+                from codex_wake.tab_traits import TabTraits
+                transport.fail_capture=False;now[0]=71.9
+                panes=[pane for window in snapshot['windows'] for pane in window['panes']]
+                investigated={pane['pid']:cache.processes(pane['pid'],time.monotonic()+3) for pane in panes}
+                namespace=('fixture',snapshot['server'],tuple(snapshot['socket_identity']))
+                screen=capture_transport(transport,panes,investigated=investigated,
+                    scheduler=cache.checks,namespace=namespace)
+                now[0]=72.1
+                traits=TabTraits(directory,process_probe=lambda pid,deadline:investigated[pid],
+                    check_scheduler=cache.checks,check_namespace=namespace)
+                recovered=[traits.observe_window(window,transport=screen,deadline=time.monotonic()+3)
+                           for window in snapshot['windows']]
+                self.assertEqual(transport.capture_roundtrips,4,'late-due panes must still share one cohort')
+                self.assertEqual(recovered[0]['panes'][0]['traits']['error']['value'],'present')
+                self.assertNotIn('private fixture text',str(recovered))
             finally:
                 subprocess.run([*tmux,'kill-server'],check=False,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
