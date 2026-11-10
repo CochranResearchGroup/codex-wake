@@ -18,25 +18,27 @@ def tmux_formatting(transport, action, arguments, deadline):
         return dict(status='refreshed')
     if action in ('read-session','write-session'):
         target=transport.session
+        commands=[]
         if action=='write-session':
             values=arguments.get('values')
             if not isinstance(values,dict) or set(values)-set(SESSION_OPTIONS):
                 raise InventoryError('invalid_argument','Only managed session formatting options may change.')
             for name,value in values.items():
-                if value is None:transport.command(deadline,'set-option','-u','-t',target,name)
+                if value is None:commands.append(('set-option','-u','-t',target,name))
                 elif isinstance(value,str) and len(value)<=128 and '\x00' not in value:
-                    transport.command(deadline,'set-option','-t',target,name,value)
+                    commands.append(('set-option','-t',target,name,value))
                 else:raise InventoryError('invalid_argument','Invalid session formatting value.')
-        names={line.split(' ',1)[0] for line in transport.command(deadline,'show-options','-t',target).splitlines()}
-        result={}
+        writes=len(commands)
         for name in SESSION_OPTIONS:
-            present=name in names
-            value=transport.command(deadline,'show-options','-v','-t',target,name).removesuffix('\n') if present else None
-            try:effective=transport.command(deadline,'show-options','-A','-v','-t',target,name).removesuffix('\n')
-            except subprocess.CalledProcessError:
-                if not name.startswith('@'):raise
-                effective=''
-            result[name]=dict(explicit=present,value=value,effective=effective)
+            commands.extend((('show-options','-q','-t',target,name),
+                             ('show-options','-q','-v','-t',target,name),
+                             ('show-options','-q','-A','-v','-t',target,name)))
+        observations=_command_batch(transport,commands,deadline)[writes:]
+        result={}
+        for index,name in enumerate(SESSION_OPTIONS):
+            raw,value,effective=observations[index*3:index*3+3]
+            result[name]=dict(explicit=bool(raw),value=value.removesuffix('\n') if raw else None,
+                              effective=effective.removesuffix('\n'))
         return result
     window=arguments.get('window')
     if not isinstance(window,str) or not re.fullmatch(r'@[0-9]+',window):

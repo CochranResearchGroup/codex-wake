@@ -47,7 +47,7 @@ class TabFormatting:
         fd,name=tempfile.mkstemp(dir=self.root,prefix='.state-')
         try:
             with os.fdopen(fd,'w') as stream:
-                json.dump(value,stream,sort_keys=True,allow_nan=False);stream.flush();os.fsync(stream.fileno())
+                stream.write(json.dumps(value,sort_keys=True,allow_nan=False,separators=(',',':')));stream.flush();os.fsync(stream.fileno())
             os.replace(name,self.path)
         finally:
             if os.path.exists(name):os.unlink(name)
@@ -242,7 +242,6 @@ class TabFormatting:
                 raise InventoryError('formatting_mismatch','Session formatting readback differs from policy.')
             record['session_last_applied']=session_values
             record['session_restored']=False
-            self.save(state)
         except Exception as error:
             return [dict(code=getattr(error,'code','session_formatting_failed'))]
         windows=snapshot['windows'][:128]
@@ -303,8 +302,9 @@ class TabFormatting:
                     continue
                 pending.append((wid,options,rendered))
             except Exception as error:failures.append(dict(window=wid,code=getattr(error,'code','formatting_failed')))
-        # Persist every original baseline before the first native batch write.
-        self.save(state)
+        # Existing baselines are already durable. Persist new originals before
+        # a window effect; settled refreshes need only the final checkpoint.
+        if pending:self.save(state)
         writes=self.batch(transport,[dict(action='write',window=wid,values=options) for wid,options,_ in pending],deadline)
         for (wid,options,rendered),write in zip(pending,writes):
             if 'error' in write:
