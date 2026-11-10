@@ -27,6 +27,6 @@
   "merge_authorized": false,
   "deploy_authorized": false,
   "production_enablement_authorized": false,
-  "validation_hold": "Canonical immutablewheel2 UID1017 qualification pending60s idle+60sactive. Same-sourceprofile confirms2formatclients/changedframe; short628CPU6.284% failedandretained (rootCodeGraphsync7.6s overlapconfound). No acceptance claimed. Broadreview0/TDDremediation0; remaining541544546547.",
-  "qualification_source": "62877702b7b101fd49468db7a605d74b27de1b1b"
+  "validation_hold": "Wheel2 exact62877702 canonicalFAIL: idle1.3313%, active5.1597%, RSS45182976bytes,p951.0493s,120events,cleanup0. Wheel3 source49435e8e pendingcanonical60+60 after measuredquietheartbeat/lease10s andphysicalJSONsorting removal. Gatesunchanged; review0/remediation0.",
+  "qualification_source": "49435e8e"
 }
