@@ -124,3 +124,16 @@ projected, p951.073s with0.1s public-status sampling and default1s daemon cadenc
 Sampled aggregateRSS73.21MB; monitor-stop now returned success and owned control
 cleanup0. This failure survives CPU-independent separation of startup work.
 No immutable candidate rebuilt yet; these explicit source overrides are diagnostics.
+
+Primary approved steady-only publicserve profiling after the startup barrier,
+separate10s idle/active phases. Diagnostic wrapper enables/disables cProfile via
+signals only to the owned monitor after UID/PID/start/boot verification; no product
+patch or production signal. Profiles remain private runtime artifacts, not Git.
+Idle10ticks:tick0.225s, inventory1/0.180, cache.observe0.158; formatting10/0.110
+(projection_key0.065), monitor_save20/0.090, dumps37/0.070;12native subprocesses
+(10error captures plus2format batches), no full process-tree walk. Active10ticks:
+formatter10/1.014s→apply10/0.722;80format batches/0.400 and109total subprocesses/
+0.515; inventory2/0.416/cache.observe0.377; monitor_save19/0.288;dumps84/0.174.
+These instrumented timings identify steady bottlenecks without claiming a passing
+resource gate. Root owns cache/serialization and formatter worker owns native I/O.
+Fresh test-user census again showed no surviving owned processes.
