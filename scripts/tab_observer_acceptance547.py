@@ -74,6 +74,7 @@ def main():
             except Exception:pass
         native_path=home/'app-server-control/app-server-control.sock'
         endpoint='unix://'+str(native_path)
+        receipt['fixture_setup_seconds']=time.monotonic()-start
         control_pids=set();latencies=[];monitor_pid=None
         components={}
         def sample():
@@ -116,6 +117,7 @@ def main():
         try:
             with unix_serve(handler,path=str(native_path)) as server:
                 worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
+                owner_start=time.monotonic()
                 if args.monitor:
                     from codex_wake.tab_monitor import TabMonitor
                     monitor=TabMonitor(root)
@@ -132,13 +134,32 @@ def main():
                             assert time.monotonic()<until;time.sleep(.05)
                     cli('tabs','format','configure','--workspace','fixture','--preset','slate')
                     cli('tabs','format','enable','--workspace','fixture')
+                    enabled_at=time.time()
                     monitor_pid=monitor.execute('tabs.monitor.status',{})['monitor']['process']['pid']
-                    report=monitor.execute('tabs.monitor.status',{})
-                    value=report.get('snapshot') or dict(resources=[])
-                    until=time.monotonic()+15
-                    while len(value['resources'])!=100:
-                        assert time.monotonic()<until,'installed monitor did not publish100tabs'
-                        time.sleep(.1);value=tick()
+                    until=time.monotonic()+30;qualified_at=None
+                    while True:
+                        report=monitor.execute('tabs.monitor.status',{})
+                        value=report.get('snapshot') or dict(resources=[])
+                        sources=value.get('observer',{}).get('sources',[])
+                        formatting=report['monitor'].get('last_formatting') or {}
+                        workspace=next((row for row in formatting.get('workspaces',[]) if row.get('workspace')=='fixture'),{})
+                        bound=sum(bool(p.get('binding')) for r in value['resources'] for p in r['traits']['panes'])
+                        qualified=(len(value['resources'])==100 and bound==100 and sources and
+                            {'tmux','native'}<={row.get('source_kind') for row in sources} and
+                            all(row.get('state')=={'tmux':'available','native':'connected'}.get(row.get('source_kind')) for row in sources) and
+                            formatting.get('status')=='completed' and workspace.get('status')=='applied' and
+                            not workspace.get('failures') and value.get('observed_at',0)>enabled_at)
+                        if qualified:
+                            if qualified_at is not None and value['observed_at']>qualified_at:
+                                receipt['startup_barrier']=dict(enable_returned_at=enabled_at,
+                                    first_qualified_snapshot_at=qualified_at,subsequent_snapshot_at=value['observed_at'],
+                                    bound_panes=bound,formatting_status=workspace['status'],failures=workspace.get('failures',[]),
+                                    source_states=[dict(kind=row['source_kind'],state=row['state']) for row in sources])
+                                break
+                            qualified_at=value['observed_at'] if qualified_at is None else qualified_at
+                        assert time.monotonic()<until,('deterministic startup barrier failed',len(value['resources']),bound,
+                            [dict(kind=row.get('source_kind'),state=row.get('state')) for row in sources],formatting)
+                        time.sleep(.05)
                     receipt['measurement']='actual installed TabMonitor owner plus all current owned descendants and reaped child CPU via proc cutime/cstime; fixture/driver/workload processes excluded'
                     receipt['formatting_enabled']='slate100tabs; configured through installed CLI'
                 else:
@@ -148,6 +169,7 @@ def main():
                 bound=sum(bool(p.get('binding')) for r in value['resources'] for p in r['traits']['panes'])
                 assert bound==100,('native bindings',bound)
                 receipt['cold_start_seconds']=time.monotonic()-start
+                receipt['owner_cold_start_seconds']=time.monotonic()-owner_start
                 receipt['native_bound_panes']=bound
                 control_pids.update(s['owned_pid'] for s in (value.get('observer',{}).get('sources',[]) if monitor else observer.status()['sources']) if s.get('owned_pid'))
                 if monitor_pid:control_pids.add(monitor_pid)
