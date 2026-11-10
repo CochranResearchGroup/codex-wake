@@ -27,6 +27,6 @@
   "merge_authorized": false,
   "deploy_authorized": false,
   "production_enablement_authorized": false,
-  "validation_hold": "Wheel2 exact62877702 canonicalFAIL: idle1.3313%, active5.1597%, RSS45182976bytes,p951.0493s,120events,cleanup0. Wheel3 source49435e8e pendingcanonical60+60 after measuredquietheartbeat/lease10s andphysicalJSONsorting removal. Gatesunchanged; review0/remediation0.",
-  "qualification_source": "49435e8e"
+  "validation_hold": "Wheel3 source49435e8e canonicalFAIL idle2.5625%/active5.4582%; quietspinconfirmed579ticks/60s frompublication10s/sleep5s mismatch. Fixedsharedtimer publicrealownertest red30ticks/6s\u2192green<=18 bothPython. Removedredundantbackgroundtmuxrefreshfork publicPTYnativeclients5\u21924,72formatPASSboth. Exactwheel4 canonical60+60 pending; review0/remediation0.",
+  "qualification_source": "fd44a35a37268c8ec4d36f2664f53f93e861c039"
 }
