@@ -157,6 +157,9 @@ def tmux_formatting_batch(transport,requests,deadline):
 
 def _command_batch(transport,commands,deadline):
     """One native invocation; random boundaries preserve whitespace and newlines."""
+    reader=getattr(transport,'_format_read_channel',None)
+    if reader is not None and commands and all(command[0] in ('show-options','display-message') for command in commands):
+        return reader.read(commands,deadline)
     marker='wake-format-'+uuid.uuid4().hex
     argv=[]
     for index,command in enumerate(commands):

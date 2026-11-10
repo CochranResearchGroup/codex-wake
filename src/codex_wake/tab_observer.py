@@ -148,6 +148,7 @@ class TabObserver:
         self.native_endpoints = tuple(native_endpoints)
         self.fallback_probe = fallback_probe
         self.tmux, self.native, self.native_state = {}, {}, {}
+        self.format_reads = {}
         self.fallback_sources = {}
         self.metadata_at = {}
         self.metadata_due = set()
@@ -193,6 +194,14 @@ class TabObserver:
                 continue
             self.tmux[name] = (self.tmux_factory or TmuxMetadataFeed)(
                 config['socket_path'], config['session_id'], timeout=2.)
+            original=config['transport']
+            if isinstance(original,TmuxTransport):
+                from .tab_format_read_channel import FormattingReadChannel
+                if getattr(original,'_format_read_channel',None) is not None:
+                    raise InventoryError('formatting_read_owner_conflict','A retained owner already holds the formatting reader.')
+                channel=FormattingReadChannel(original)
+                original._format_read_channel=channel
+                self.format_reads[name]=(original,channel)
             wrapper = _TmuxSnapshotTransport if isinstance(config['transport'],TmuxTransport) else _SnapshotTransport
             config['transport'] = wrapper(config['transport'])
 
@@ -552,10 +561,15 @@ class TabObserver:
                     tiers={k:self.settings[k] for k in ('activity','health','errors','health_interval','error_interval')},
                     fallback_sources=len(self.fallback_sources),scheduler=self._scheduler_status(),
                     checks=self.owner.observation_cache.checks.status(),
+                    formatting_reads=[dict(workspace=name,**channel.status()) for name,(_,channel) in self.format_reads.items()],
                     unknown_reasons=sorted(set(self.source_errors.values()) | {v.get('reason',v.get('code','observation_unavailable'))
                                             for v in self.unavailable}), closed=self.closed)
 
     def _close_feeds(self):
+        for original,channel in self.format_reads.values():
+            channel.close()
+            if getattr(original,'_format_read_channel',None) is channel:del original._format_read_channel
+        self.format_reads.clear()
         for feed in [*self.tmux.values(), *self.native.values()]:
             feed.close()
         self.tmux.clear()
