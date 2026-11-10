@@ -119,8 +119,15 @@ class TabFormatting:
 
     def _execute(self,operation,arguments):
         verb=operation.removeprefix('tabs.format.')
-        if verb not in VERBS or not isinstance(arguments,dict) or set(arguments)-{'scope','workspace','policy','expected_target'}:
+        if verb not in VERBS or not isinstance(arguments,dict) or set(arguments)-{'scope','workspace','policy','expected_target','preset'}:
             raise InventoryError('invalid_argument','Unsupported formatting arguments.')
+        if 'preset' in arguments:
+            if verb != 'configure':raise InventoryError('invalid_argument','Preset selection requires configure.')
+            arguments=dict(arguments)
+            policy=dict(arguments.get('policy',{}))
+            if 'preset' in policy and policy['preset']!=arguments['preset']:
+                raise InventoryError('invalid_argument','Conflicting preset selections.')
+            policy['preset']=arguments['preset'];arguments['policy']=policy
         scope=arguments.get('scope','workspace')
         if scope not in ('global','workspace'):raise InventoryError('invalid_argument','scope must be global or workspace.')
         if scope=='global':
@@ -158,6 +165,7 @@ class TabFormatting:
                 from .tab_format_rendering import capabilities
                 return dict(status='inspection',target=expected,policy=effective_policy(state,name),record=record,
                     capabilities=capabilities(config['kind'],identity=config.get('formatting_identity')),
+                    available_presets=['slate','dusk','graphite','legacy'],
                     windows=[dict(window=w['window_id'],options=transport.formatting('read',dict(window=w['window_id']),deadline)) for w in snapshot['windows']])
             if record is None:
                 if verb in ('rollback','reenable','resume'):

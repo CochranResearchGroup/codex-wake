@@ -155,9 +155,12 @@ def project(resource, policy=None, *, now=None):
     rendering=capabilities(resource.get('target',{}).get('presentation','unknown'),
         identity=resource.get('backend_identity'))
     rendering['requested_mode']=policy.get('render_mode','full')
+    options={'window-status-format': compact_normal if policy.get('compact') else f' #I {badge} #W ',
+             'window-status-current-format': compact_current if policy.get('compact') else f'#[bold,underscore] [#I {badge} #W] ',
+             'window-status-style': normal_style,'window-status-current-style':current_style}
+    from .tab_format_presets import PALETTES,preset_options
+    if policy.get('preset') in PALETTES and policy.get('render_mode','full')=='full':
+        options=preset_options(policy['preset'],kind,label,state)
     return dict(label=label, state=state, colour=colour,
                 details=dict(panes=details,mixed=len(kinds)>1,activity=activity,rendering=rendering),
-                options={'window-status-format': compact_normal if policy.get('compact') else f' #I {badge} #W ',
-                         'window-status-current-format': compact_current if policy.get('compact') else f'#[bold,underscore] [#I {badge} #W] ',
-                         'window-status-style': normal_style,
-                         'window-status-current-style': current_style})
+                options=options)

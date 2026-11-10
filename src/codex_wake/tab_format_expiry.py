@@ -28,6 +28,8 @@ def expiring_options(options, *, observed_at, stale_after=STALE_AFTER, render_mo
         stale_style='#[default,'+stale_colour+(',bold,underscore' if current else '')+']'
         # Keep projected/user text OUTSIDE the conditional branches. This avoids
         # reinterpreting literal commas/braces in profile/model/provider labels.
+        if not show_stale:
+            stale_style='#[default,'+style+',dim]'
         stale_label = ' STALE ' if show_stale else ''
         result[name]='#{?'+condition+','+stale_style.replace(',','#,')+stale_label+','+fresh_style.replace(',','#,')+'}'+options[name]
     return result

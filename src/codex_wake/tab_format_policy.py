@@ -4,7 +4,7 @@ import re
 from .managed_inventory import InventoryError
 
 DEFAULT_POLICY = dict(enabled=True, show_model=False, show_provider=False,
-                      ascii=True, render_mode='full', style_rules=[], compact=False, show_stale=True)
+                      ascii=True, render_mode='full', style_rules=[], compact=False, show_stale=True, preset="legacy")
 _DIMENSIONS = frozenset(('harness', 'build', 'profile', 'model', 'inference_provider',
                          'execution_host', 'activity'))
 _COLOURS = frozenset(('black', 'red', 'green', 'yellow', 'blue', 'magenta',
@@ -15,11 +15,18 @@ def validate_policy(policy):
     """Return independent, finite preferences; reject terminal-format injection."""
     if not isinstance(policy, dict) or set(policy) - set(DEFAULT_POLICY):
         raise InventoryError('invalid_argument', 'Unknown display policy field.')
-    result = {}
+    from .tab_format_presets import PRESETS, PALETTES
+    preset=policy.get('preset')
+    if preset is not None and (not isinstance(preset,str) or preset not in PRESETS):
+        raise InventoryError('invalid_argument', 'Unknown tab preset; choose slate, dusk, graphite or legacy.')
+    result = dict(compact=True, show_stale=False, render_mode='full',
+                  show_model=False,show_provider=False,style_rules=[]) if preset in PALETTES else {}
     for key, value in policy.items():
         if key in ('enabled', 'show_model', 'show_provider', 'ascii', 'compact', 'show_stale'):
             if type(value) is not bool:
                 raise InventoryError('invalid_argument', key + ' must be boolean.')
+        elif key == 'preset':
+            pass
         elif key == 'render_mode':
             if value not in ('full', 'basic', 'plain'):
                 raise InventoryError('invalid_argument', 'render_mode must be full, basic or plain.')

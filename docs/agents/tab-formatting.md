@@ -156,3 +156,26 @@ profile, idle and unknown badges are omitted. Plain rendering uses terminal
 default colors. `show_stale:false` removes repeated STALE text, while backend
 expiry still neutralizes stale decoration and inspection retains freshness.
 Use `compact:false` or `show_stale:true` to restore those individual preferences.
+
+## Named color presets
+
+Built-in `slate`, `dusk` and `graphite` presets match the compact palette preview.
+They select compact labels, no repeated STALE text and full-color rendering.
+Only short type/attention badges carry accent colors; names remain soft gray and
+the selected tab has a subtle background. Quiet expiry dims the palette without
+adding labels or gray blocks. Detailed freshness remains available in inspection.
+
+```sh
+codex-wake tabs format configure --session default --preset slate
+codex-wake tabs format resume --session default
+# Switch later: use --preset dusk or --preset graphite, then resume.
+```
+
+Selection persists per session. Presets are discoverable in `tabs format status`
+(`available_presets`) and generated configure help/completion. `legacy` disables
+the named palette; other explicit display preferences persist until changed.
+Configure saves preferences; resume applies and clears manual-style holds.
+Normal automatic updates can also apply configured changes when the monitor runs.
+Rollback always restores the original captured baseline, including after switching
+presets. Native Windows pixel/color fidelity remains separately qualified; this
+preset release is accepted on tmux, not a new Windows rendering claim.
