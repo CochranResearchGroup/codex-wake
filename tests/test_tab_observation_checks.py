@@ -89,3 +89,39 @@ class TieredChecksTests(unittest.TestCase):
             self.assertEqual(result['error']['reason'],'check_disabled')
             observe(explicit_checks=True)
             self.assertEqual(probes,[0,5])
+
+    def test_dirty_idle_pane_gets_five_second_error_check_without_health_probe(self):
+        import os
+        import tempfile
+        import time
+        from codex_wake.process import process_identity
+        from codex_wake.tab_observation import ObservationCache
+        birth=process_identity(os.getpid());now=[0.0];captures=[];text=['']
+        def processes(pid,deadline):
+            return [dict(process=dict(pid=pid,start_ticks=birth['start_time_ticks'],boot_id=birth['boot_id']),
+                         executable='/fixture/codex',argv=['codex'],cwd='/tmp')],True
+        def reader(root,**options):
+            return dict(holds=[],sessions=[dict(target=dict(provider='codex',account='fixture',conversation_id='thread'),
+                runtime_state='idle',active_flags=[],cwd='/tmp',attachments=[dict(pane_id='%1',client_pid=os.getpid(),
+                client_start_time_ticks=birth['start_time_ticks'])])])
+        class Screen:
+            def visible_screen(self,pane,deadline):
+                captures.append(now[0]);return text[0]
+        with tempfile.TemporaryDirectory() as directory:
+            cache=ObservationCache(directory,process_probe=processes,session_reader=reader,monotonic=lambda:now[0])
+            snapshot=dict(server='fixture',session_id='$1',socket_identity=[1,2],windows=[dict(window_id='@1',name='fixture',
+                panes=[dict(pane_id='%1',pid=os.getpid(),pane_title='thread',pane_current_path='/tmp')])])
+            def observe():
+                return cache.observe('fixture',snapshot,transport=Screen(),privacy=lambda pane:'safe',
+                    deadline=time.monotonic()+1)[0]['@1']['traits']['error']
+            self.assertEqual(observe()['value'],'absent')
+            now[0]=6;text[0]='Error: private fixture text'
+            self.assertEqual(observe()['value'],'absent')
+            cache.mark_dirty('fixture',['%1'])
+            self.assertTrue(cache.has_dirty('fixture'))
+            result=observe()
+            self.assertEqual(result['value'],'present')
+            self.assertEqual(captures,[0,6])
+            self.assertNotIn('private fixture text',str(result))
+            now[0]=37
+            self.assertFalse(cache.has_dirty('fixture'))
