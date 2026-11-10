@@ -1,0 +1,17 @@
+{
+  "python": "3.12.13",
+  "selection": [
+    "test_tab_observer",
+    "test_tab_monitor",
+    "test_tab_native_feed",
+    "test_tab_contract",
+    "test_tab_format_monitor",
+    "test_tab_format_autostart"
+  ],
+  "tier": "focused",
+  "tests": 21,
+  "passed": true,
+  "failures": 0,
+  "errors": 0,
+  "seconds": 11.93598687299982
+}

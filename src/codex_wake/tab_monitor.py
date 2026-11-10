@@ -1,10 +1,10 @@
-"""Bounded derived tab observations; inventory and health remain with their owners.
+"""Bounded derived tab observations owned by one persistent host monitor.
 
-Defaults: interval5s, per-workspace probe1.5s, stale20s, whole-cycle10s;
-concurrency1,64workspaces,1MiB snapshot and32KiB diagnostics. A single owned
-monitor starts at most one isolated read-only probe at a time. Both probe and
-parent enforce deadlines, including after monitor loss. Observation generates no input/model notices or layout effects. A separately
-enabled same-root organization policy may receive journaled ticks from the daemon.
+Default tick1s; exact background health>=60s and eligible visible errors>=5s.
+Retained metadata feeds and the shared cache avoid per-cycle inventory children.
+Unsupported backends and explicit one-shot refresh use bounded isolated probes.
+Observation generates no input/model calls or layout effects; separately enabled
+formatting, organization and routing owners consume the same derived snapshot.
 """
 from __future__ import annotations
 
@@ -26,8 +26,9 @@ from uuid import uuid4
 from .managed_inventory import InventoryError
 from .process import process_identity
 
-DEFAULTS = dict(interval=5.0, probe_timeout=1.5, stale_after=20.0, cycle_timeout=10.0,
-                concurrency=1, max_workspaces=64, max_snapshot_bytes=1048576)
+DEFAULTS = dict(interval=1.0, probe_timeout=1.5, stale_after=20.0, cycle_timeout=10.0,
+                concurrency=1, max_workspaces=64, max_snapshot_bytes=1048576,
+                activity=True, health=True, errors=True, health_interval=60., error_interval=5.)
 OPERATIONS = frozenset('tabs.monitor.'+verb for verb in ('start','status','refresh','stop'))
 MAX_STATE = DEFAULTS['max_snapshot_bytes']
 _OWNED_CHILDREN = {}
@@ -93,7 +94,8 @@ def _lock(path):
 
 
 class TabMonitor:
-    ARGUMENTS = {'tabs.monitor.start':{'interval','probe_timeout','stale_after','cycle_timeout'},
+    ARGUMENTS = {'tabs.monitor.start':{'interval','probe_timeout','stale_after','cycle_timeout',
+                    'activity','health','errors','health_interval','error_interval'},
                  'tabs.monitor.refresh':set(),'tabs.monitor.status':set(),'tabs.monitor.stop':{'timeout'}}
 
     def __init__(self,root,*,clock=time.time):
@@ -130,6 +132,13 @@ class TabMonitor:
             value=result[key]
             if type(value) not in (int,float) or not math.isfinite(value) or not low<=value<=high:
                 raise InventoryError('invalid_argument',key+' is outside the monitor bounds.')
+        for key, low in (('health_interval',60),('error_interval',5)):
+            value=result[key]
+            if type(value) not in (int,float) or not math.isfinite(value) or not low<=value<=3600:
+                raise InventoryError('invalid_argument',key+' is outside the monitor bounds.')
+        for key in ('activity','health','errors'):
+            if type(result[key]) is not bool:
+                raise InventoryError('invalid_argument',key+' must be boolean.')
         if result['stale_after']<result['interval']:
             raise InventoryError('invalid_argument','stale_after must cover at least one monitor interval.')
         return result
@@ -165,6 +174,7 @@ class TabMonitor:
                         if isinstance(value,dict):
                             if {'value','status','source','freshness'}<=value.keys() and value.get('status')=='observed':
                                 value.update(status='stale',freshness='stale')
+                                value['source_available']=False
                             if value.get('fresh') is True:value['fresh']=False
                             for item in value.values():mark(item)
                         elif isinstance(value,list):
@@ -178,6 +188,7 @@ class TabMonitor:
                                   last_policy_operation=record.get('last_policy_operation') if record else None,
                                   last_formatting=record.get('last_formatting') if record else None,
                                   last_routing=record.get('last_routing') if record else None,
+                                  observer=snapshot.get('observer') if snapshot else None,
                                   capabilities=record.get('capabilities',[]) if record else []),
                     snapshot=snapshot,application_effects=False)
 
@@ -329,17 +340,22 @@ class TabMonitor:
         signal.signal(signal.SIGINT,lambda signum,frame:stop.set())
         with _lock(self.directory/'owner.lock'):
             record=dict(schema_version=1,state='running',generation=uuid4().hex,process=_identity(os.getpid()),started_at=self.clock(),
-                        capabilities=['tab-formatting-v1','tab-routing-v1'])
+                        capabilities=['tab-formatting-v1','tab-routing-v1','tab-observer-events-v1'])
             _save(self.directory/'owner.json',record)
+            from .tab_observer import TabObserver
+            observer=TabObserver(self.root,settings=self._settings(),fallback_probe=self._probe)
             try:
                 while not stop.is_set():
                     started=time.monotonic()
                     try:
                         cycle_deadline=started+self._settings()['cycle_timeout']
-                        observed=self.refresh(origin='daemon',deadline=started+self._settings()['cycle_timeout']*.65)
+                        snapshot=observer.tick(deadline=started+self._settings()['cycle_timeout']*.65)
+                        snapshot.update(origin='daemon',monitor_generation=record['generation'])
+                        _save(self.directory/'snapshot.json',snapshot)
+                        observed=dict(snapshot=snapshot)
                         from .tab_format_monitor import refresh_formatting
                         record['last_formatting']=refresh_formatting(self.root,observed.get('snapshot') or {},
-                            deadline=cycle_deadline)
+                            tabs=observer.owner,deadline=cycle_deadline)
                         self._policy_tick(record)
                         routed=self._routing_tick(observed.get('snapshot') or {},cycle_deadline)
                         record['last_routing']=dict(status=routed.get('status','completed'),outcomes=len(routed.get('outcomes',[])),pending=len(routed.get('pending',[])))
@@ -350,6 +366,7 @@ class TabMonitor:
                     _save(self.directory/'owner.json',record)
                     stop.wait(max(.05,self._settings()['interval']-(time.monotonic()-started)))
             finally:
+                observer.close()
                 record.update(state='stopped',stopped_at=self.clock())
                 _save(self.directory/'owner.json',record)
 

@@ -40,6 +40,9 @@ def command(args, owner=None):
             arguments['workspace']=select_workspace(owner,selector,server=server,interactive=not getattr(args,'as_json',False))
         value = owner.execute(operation,arguments) if operation in owner.READS else operator_execute(operation,arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
         readable=render(value) if operation.startswith('tabs.session.') and not getattr(args,'as_json',False) else None
+        if operation.startswith('tabs.monitor.') and not getattr(args,'as_json',False):
+            from .tab_observer import render_status
+            readable=render_status(value)
         print(readable if readable is not None else json.dumps(value, sort_keys=True))
         from .tab_result import exit_status
         return exit_status(value)
