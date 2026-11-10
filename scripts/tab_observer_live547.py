@@ -14,6 +14,7 @@ import time
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--receipt',required=True);parser.add_argument('--seconds',type=float,default=20);args=parser.parse_args()
+    assert not Path(args.receipt).exists(),'use a unique receipt path'
     import codex_wake
     from codex_wake.shortcut_store import default_root
     from codex_wake.tab_observer import TabObserver
@@ -41,25 +42,70 @@ def main():
                         '-F','#{session_id}\t#{window_id}\t#{pane_id}\t#{pane_pid}\t#{window_layout}'],text=True)
                     values.append(result)
             return hashlib.sha256(json.dumps(values,sort_keys=True).encode()).hexdigest()
-        before=physical();start=time.monotonic();cpu0=time.process_time();peak=0;counts=[]
+        def sample_owned_tree():
+            stack=[os.getpid()];seen=set();cpu=0.;rss=0
+            while stack:
+                pid=stack.pop()
+                if pid in seen:continue
+                seen.add(pid)
+                try:
+                    fields=Path('/proc',str(pid),'stat').read_text().rsplit(')',1)[1].split()
+                    cpu+=sum(int(fields[i]) for i in (11,12,13,14))/os.sysconf('SC_CLK_TCK')
+                    rss+=int(fields[21])*os.sysconf('SC_PAGE_SIZE')
+                    for task in Path('/proc',str(pid),'task').iterdir():
+                        try:stack.extend(int(child) for child in (task/'children').read_text().split())
+                        except OSError:pass
+                except (OSError,ValueError):pass
+            return cpu,rss
+        before=physical();start=time.monotonic();cpu0=time.process_time();tree_cpu0,_=sample_owned_tree();peak=0;tree_peak=0;counts=[];formatting_read_done=False
+        report['formatting_read_probe']=dict(workspaces=0,windows_attempted=0,windows_read=0,failures=[])
+        def track_controls(status):
+            for source in [*status.get('sources',[]),*status.get('formatting_reads',[])]:
+                if source.get('owned_pid'):controls.add(source['owned_pid'])
         try:
             while time.monotonic()-start<args.seconds:
                 value=observer.tick();counts.append(len(value['resources']))
-                status=observer.status();updates=status['costs']['native_events']
-                for source in status['sources']:
-                    if source.get('owned_pid'):controls.add(source['owned_pid'])
+                if not formatting_read_done:
+                    probe=report['formatting_read_probe']
+                    for name,config in observer.owner.workspaces.items():
+                        if config['kind'] not in ('tmux','byobu'):continue
+                        windows=list(dict.fromkeys(row['window']['window_id'] for row in value['resources']
+                            if row['target']['workspace']==name))[:2]
+                        if not windows:continue
+                        probe['workspaces']+=1
+                        for window in windows:
+                            probe['windows_attempted']+=1
+                            try:
+                                config['transport'].formatting('read',{'window':window},time.monotonic()+2)
+                                probe['windows_read']+=1
+                            except Exception as error:
+                                probe['failures'].append(dict(code=getattr(error,'code','formatting_read_failed')))
+                    formatting_read_done=True
+                status=observer.status();updates=status['costs']['native_events'];track_controls(status)
                 for row in value['resources']:
                     for pane in row['traits']['panes']:
                         if pane.get('binding'):observed.add(hashlib.sha256(str(pane['binding'].get('conversation_id')).encode()).hexdigest())
                         for process in pane.get('processes',[]):births[str(process['pid'])]=(str(process.get('start_ticks')),process.get('boot_id'))
                 peak=max(peak,resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024)
+                _,tree_rss=sample_owned_tree();tree_peak=max(tree_peak,tree_rss)
                 time.sleep(.5)
-            report.update(wall_seconds=time.monotonic()-start,cpu_seconds=time.process_time()-cpu0,
+            tree_cpu1,_=sample_owned_tree()
+            report.update(aggregate_owned_cpu_seconds=tree_cpu1-tree_cpu0,peak_aggregate_owned_rss_bytes=tree_peak,
+                measurement='owner and recursive owned children across all threads, including reaped child CPU; shared WSL kernel',
+                wall_seconds=time.monotonic()-start,cpu_seconds=time.process_time()-cpu0,
                 observed_tab_count=max(counts,default=0),min_observed_tab_count=min(counts,default=0),
                 bound_conversation_count=len(observed),native_events_including_baselines=updates,
                 native_status_transitions=transitions[0],
                 native_source_count=len(observer.native),peak_owner_rss_bytes=peak,
                 exact_pane_layout_unchanged=before==physical())
+            report['formatting_read_states']=[{key:row.get(key) for key in ('state','owned_pid','requests','failures','read_only')}
+                for row in observer.status().get('formatting_reads',[])]
+            probe=report['formatting_read_probe'];readers=[row for row in report['formatting_read_states'] if row.get('requests',0)]
+            probe['qualified']=bool(probe['windows_attempted'] and not probe['failures'] and
+                probe['windows_attempted']==probe['windows_read'] and len(readers)==probe['workspaces'] and
+                sum(row.get('requests',0) for row in readers)>=probe['windows_read'] and
+                all(row.get('read_only') and row.get('state')=='connected' and row.get('owned_pid') for row in readers))
+            report['owned_control_pids']=sorted(controls)
             report['source_states']=[dict(kind=s.get('source_kind'),state=s.get('state'),reason=s.get('reason')) for s in observer.status()['sources']]
         finally:observer.close()
         report['owned_controls_remaining']=sum(Path('/proc',str(pid)).exists() for pid in controls)
