@@ -11,6 +11,7 @@ import math
 from pathlib import Path
 import time
 
+from .json_decode import decode_json
 from .managed_inventory import InventoryError
 from .process import process_identity
 from .tab_organization import TmuxTransport
@@ -68,7 +69,7 @@ class _SnapshotTransport:
     def snapshot(self, deadline):
         if not self.available or self.value is None:
             raise InventoryError('attachment_unavailable', 'Metadata source is unavailable.')
-        return json.loads(self._encoded)
+        return decode_json(self._encoded)
 
     def __getattr__(self, name):
         return getattr(self.original, name)
@@ -534,7 +535,7 @@ class TabObserver:
             raise ValueError('No live observed frame is available.')
         if type(observed_at) not in (int,float) or not math.isfinite(observed_at):
             raise ValueError('A finite observation timestamp is required.')
-        resources = json.loads(self._resource_json)
+        resources = decode_json(self._resource_json)
         for row in resources:
             row.update(monitor_observed_at=observed_at)
             row.setdefault('monitor_unavailable',False)

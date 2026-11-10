@@ -23,6 +23,7 @@ import threading
 import time
 from uuid import uuid4
 
+from .json_decode import decode_json
 from .managed_inventory import InventoryError
 from .process import process_identity
 
@@ -60,7 +61,7 @@ def _read(path):
             raw=stream.read(MAX_STATE+1)
         if len(raw)>MAX_STATE:
             raise InventoryError('monitor_state_unavailable','Monitor state exceeds its bound.')
-        return json.loads(raw)
+        return decode_json(raw)
     finally:
         os.close(fd)
 

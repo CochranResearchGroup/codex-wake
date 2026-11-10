@@ -11,6 +11,7 @@ import time
 import os
 import math
 
+from .json_decode import decode_json
 from .process import process_identity
 
 
@@ -134,7 +135,7 @@ class ObservationCache:
             for p in panes:
                 self.processes(p.get('pid'),deadline)
             if prior[3] == digest(self._processes):
-                observed,rows=json.loads(prior[2])
+                observed,rows=decode_json(prior[2])
                 return observed,rows
         # Discover each pane once, then enrich that evidence with native metadata.
         needs_native = False
