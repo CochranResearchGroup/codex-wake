@@ -66,7 +66,7 @@ def _projection_key(snapshot):
     return hashlib.sha256(raw).hexdigest()
 
 
-def refresh_formatting(root,snapshot,*,tabs=None,deadline=None):
+def refresh_formatting(root,snapshot,*,tabs=None,deadline=None,resources_loader=None):
     """Project semantic changes immediately; renew the shared lease every five seconds.
 
     The cache belongs to the retained trusted host owner, never a global/per-tab
@@ -82,6 +82,8 @@ def refresh_formatting(root,snapshot,*,tabs=None,deadline=None):
     cache=getattr(tabs,'_format_projection_cache',None)
     if cache and cache['key']==key and now<cache['renew_at']:
         return copy.deepcopy(cache['result'])
+    if resources_loader is not None:
+        resources_loader()
     trusted=key[1][0]=='revision' if isinstance(key[1],tuple) else False
     formatter=TabFormatting(root,tabs=tabs)
     result=None
