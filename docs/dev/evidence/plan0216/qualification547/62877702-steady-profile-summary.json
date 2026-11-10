@@ -1,0 +1,978 @@
+{
+  "source_commit": "62877702b7b101fd49468db7a605d74b27de1b1b",
+  "limitation": "Elapsed profiler timings include blocked IO/thread waits; not CPU gate or additive attribution",
+  "phases": {
+    "idle": {
+      "top30_cumulative": [
+        {
+          "file": "threading.py",
+          "line": 637,
+          "function": "wait",
+          "calls": 12,
+          "self_seconds": 0.00011903300000000001,
+          "cumulative_seconds": 8.059703648000001
+        },
+        {
+          "file": "threading.py",
+          "line": 323,
+          "function": "wait",
+          "calls": 12,
+          "self_seconds": 0.0002619,
+          "cumulative_seconds": 8.059556415000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'acquire' of '_thread.lock' objects>",
+          "calls": 50,
+          "self_seconds": 8.059318554,
+          "cumulative_seconds": 7.909017894000001
+        },
+        {
+          "file": "tab_format_monitor.py",
+          "line": 69,
+          "function": "refresh_formatting",
+          "calls": 10,
+          "self_seconds": 0.0015483,
+          "cumulative_seconds": 0.050651690000000006
+        },
+        {
+          "file": "tab_formatting.py",
+          "line": 408,
+          "function": "renew_unchanged",
+          "calls": 2,
+          "self_seconds": 0.0011181890000000001,
+          "cumulative_seconds": 0.038412234
+        },
+        {
+          "file": "tab_monitor.py",
+          "line": 68,
+          "function": "_save",
+          "calls": 12,
+          "self_seconds": 0.000245401,
+          "cumulative_seconds": 0.027837865000000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method posix.fsync>",
+          "calls": 14,
+          "self_seconds": 0.02094323,
+          "cumulative_seconds": 0.02094323
+        },
+        {
+          "file": "__init__.py",
+          "line": 299,
+          "function": "loads",
+          "calls": 46,
+          "self_seconds": 0.000136973,
+          "cumulative_seconds": 0.020524312000000003
+        },
+        {
+          "file": "decoder.py",
+          "line": 332,
+          "function": "decode",
+          "calls": 46,
+          "self_seconds": 0.000146694,
+          "cumulative_seconds": 0.020212215000000002
+        },
+        {
+          "file": "decoder.py",
+          "line": 343,
+          "function": "raw_decode",
+          "calls": 46,
+          "self_seconds": 0.019925914000000003,
+          "cumulative_seconds": 0.019925914000000003
+        },
+        {
+          "file": "tab_formatting.py",
+          "line": 250,
+          "function": "renew_session",
+          "calls": 2,
+          "self_seconds": 2.3910000000000003e-05,
+          "cumulative_seconds": 0.0185342
+        },
+        {
+          "file": "controller_tab_adapters.py",
+          "line": 20,
+          "function": "formatting",
+          "calls": 4,
+          "self_seconds": 4.8416000000000005e-05,
+          "cumulative_seconds": 0.018410994
+        },
+        {
+          "file": "tab_format_transport.py",
+          "line": 12,
+          "function": "tmux_formatting",
+          "calls": 4,
+          "self_seconds": 4.8586000000000005e-05,
+          "cumulative_seconds": 0.018353172
+        },
+        {
+          "file": "tab_monitor.py",
+          "line": 362,
+          "function": "publish_observation",
+          "calls": 10,
+          "self_seconds": 0.00017499800000000002,
+          "cumulative_seconds": 0.018343578000000003
+        },
+        {
+          "file": "tab_format_transport.py",
+          "line": 158,
+          "function": "_command_batch",
+          "calls": 4,
+          "self_seconds": 0.000120506,
+          "cumulative_seconds": 0.018254846
+        },
+        {
+          "file": "tab_organization.py",
+          "line": 41,
+          "function": "command",
+          "calls": 4,
+          "self_seconds": 9.4005e-05,
+          "cumulative_seconds": 0.017994142
+        },
+        {
+          "file": "subprocess.py",
+          "line": 506,
+          "function": "run",
+          "calls": 4,
+          "self_seconds": 6.9589e-05,
+          "cumulative_seconds": 0.017705167
+        },
+        {
+          "file": "subprocess.py",
+          "line": 1165,
+          "function": "communicate",
+          "calls": 4,
+          "self_seconds": 3.7989000000000005e-05,
+          "cumulative_seconds": 0.015534907
+        },
+        {
+          "file": "subprocess.py",
+          "line": 2062,
+          "function": "_communicate",
+          "calls": 4,
+          "self_seconds": 0.00026986100000000004,
+          "cumulative_seconds": 0.015489808
+        },
+        {
+          "file": "tab_monitor.py",
+          "line": 414,
+          "function": "ensure_resources",
+          "calls": 4,
+          "self_seconds": 1.3699e-05,
+          "cumulative_seconds": 0.01485437
+        },
+        {
+          "file": "tab_observer.py",
+          "line": 527,
+          "function": "materialize_resources",
+          "calls": 4,
+          "self_seconds": 0.000310294,
+          "cumulative_seconds": 0.014840671000000001
+        },
+        {
+          "file": "selectors.py",
+          "line": 402,
+          "function": "select",
+          "calls": 9,
+          "self_seconds": 0.000129696,
+          "cumulative_seconds": 0.014530237000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'poll' of 'select.poll' objects>",
+          "calls": 9,
+          "self_seconds": 0.014374818000000001,
+          "cumulative_seconds": 0.014374818000000001
+        },
+        {
+          "file": "__init__.py",
+          "line": 183,
+          "function": "dumps",
+          "calls": 26,
+          "self_seconds": 0.000120914,
+          "cumulative_seconds": 0.012750246000000002
+        },
+        {
+          "file": "encoder.py",
+          "line": 183,
+          "function": "encode",
+          "calls": 26,
+          "self_seconds": 8.260900000000001e-05,
+          "cumulative_seconds": 0.012595393000000002
+        },
+        {
+          "file": "encoder.py",
+          "line": 205,
+          "function": "iterencode",
+          "calls": 26,
+          "self_seconds": 0.01247147,
+          "cumulative_seconds": 0.01247147
+        },
+        {
+          "file": "tab_formatting.py",
+          "line": 46,
+          "function": "save",
+          "calls": 2,
+          "self_seconds": 0.00014841500000000002,
+          "cumulative_seconds": 0.011781868000000001
+        },
+        {
+          "file": "tab_observer.py",
+          "line": 446,
+          "function": "tick",
+          "calls": 10,
+          "self_seconds": 0.00040609900000000004,
+          "cumulative_seconds": 0.011306607000000002
+        },
+        {
+          "file": "tab_formatting.py",
+          "line": 241,
+          "function": "commit_session",
+          "calls": 2,
+          "self_seconds": 2.3399e-05,
+          "cumulative_seconds": 0.009342084
+        },
+        {
+          "file": "tab_formatting.py",
+          "line": 220,
+          "function": "session_plan",
+          "calls": 2,
+          "self_seconds": 4.5019000000000004e-05,
+          "cumulative_seconds": 0.009168206
+        }
+      ],
+      "top30_self": [
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'acquire' of '_thread.lock' objects>",
+          "calls": 50,
+          "self_seconds": 8.059318554,
+          "cumulative_seconds": 7.909017894000001
+        },
+        {
+          "file": "selectors.py",
+          "line": 451,
+          "function": "select",
+          "calls": 12,
+          "self_seconds": 0.8893131740000001,
+          "cumulative_seconds": 5.2217000000000005e-05
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method posix.fsync>",
+          "calls": 14,
+          "self_seconds": 0.02094323,
+          "cumulative_seconds": 0.02094323
+        },
+        {
+          "file": "decoder.py",
+          "line": 343,
+          "function": "raw_decode",
+          "calls": 46,
+          "self_seconds": 0.019925914000000003,
+          "cumulative_seconds": 0.019925914000000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'poll' of 'select.poll' objects>",
+          "calls": 9,
+          "self_seconds": 0.014374818000000001,
+          "cumulative_seconds": 0.014374818000000001
+        },
+        {
+          "file": "encoder.py",
+          "line": 205,
+          "function": "iterencode",
+          "calls": 26,
+          "self_seconds": 0.01247147,
+          "cumulative_seconds": 0.01247147
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "calls": 28040,
+          "self_seconds": 0.004692598,
+          "cumulative_seconds": 0.004692598
+        },
+        {
+          "file": "tab_observer.py",
+          "line": 413,
+          "function": "_fallback_schedule",
+          "calls": 20,
+          "self_seconds": 0.0027921680000000003,
+          "cumulative_seconds": 0.0068401650000000005
+        },
+        {
+          "file": "tab_format_monitor.py",
+          "line": 69,
+          "function": "refresh_formatting",
+          "calls": 10,
+          "self_seconds": 0.0015483,
+          "cumulative_seconds": 0.050651690000000006
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method posix.open>",
+          "calls": 76,
+          "self_seconds": 0.001516116,
+          "cumulative_seconds": 0.0027495700000000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method posix.replace>",
+          "calls": 14,
+          "self_seconds": 0.0013130560000000002,
+          "cumulative_seconds": 0.0014992570000000002
+        },
+        {
+          "file": "tab_formatting.py",
+          "line": 408,
+          "function": "renew_unchanged",
+          "calls": 2,
+          "self_seconds": 0.0011181890000000001,
+          "cumulative_seconds": 0.038412234
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method _posixsubprocess.fork_exec>",
+          "calls": 4,
+          "self_seconds": 0.000996369,
+          "cumulative_seconds": 0.000996369
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method _io.open>",
+          "calls": 75,
+          "self_seconds": 0.000979316,
+          "cumulative_seconds": 0.001159049
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'write' of '_io.TextIOWrapper' objects>",
+          "calls": 3,
+          "self_seconds": 0.00075316,
+          "cumulative_seconds": 0.00075316
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method posix.stat>",
+          "calls": 86,
+          "self_seconds": 0.000733392,
+          "cumulative_seconds": 0.001666429
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'write' of '_io.BufferedWriter' objects>",
+          "calls": 12,
+          "self_seconds": 0.0006606120000000001,
+          "cumulative_seconds": 0.0006606120000000001
+        },
+        {
+          "file": "pathlib.py",
+          "line": 437,
+          "function": "__str__",
+          "calls": 231,
+          "self_seconds": 0.000555039,
+          "cumulative_seconds": 0.002705527
+        },
+        {
+          "file": "tab_monitor.py",
+          "line": 128,
+          "function": "_settings",
+          "calls": 40,
+          "self_seconds": 0.0005172660000000001,
+          "cumulative_seconds": 0.0050346570000000005
+        },
+        {
+          "file": "pathlib.py",
+          "line": 357,
+          "function": "__init__",
+          "calls": 265,
+          "self_seconds": 0.000516235,
+          "cumulative_seconds": 0.000720495
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method sys.intern>",
+          "calls": 689,
+          "self_seconds": 0.000447127,
+          "cumulative_seconds": 0.000447127
+        },
+        {
+          "file": "pathlib.py",
+          "line": 387,
+          "function": "_parse_path",
+          "calls": 187,
+          "self_seconds": 0.000445064,
+          "cumulative_seconds": 0.0011424340000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method '__exit__' of '_io._IOBase' objects>",
+          "calls": 67,
+          "self_seconds": 0.00042130000000000005,
+          "cumulative_seconds": 0.00042130000000000005
+        },
+        {
+          "file": "tab_observer.py",
+          "line": 446,
+          "function": "tick",
+          "calls": 10,
+          "self_seconds": 0.00040609900000000004,
+          "cumulative_seconds": 0.011306607000000002
+        },
+        {
+          "file": "<frozen posixpath>",
+          "line": 71,
+          "function": "join",
+          "calls": 212,
+          "self_seconds": 0.000386345,
+          "cumulative_seconds": 0.000577173
+        },
+        {
+          "file": "tab_monitor.py",
+          "line": 50,
+          "function": "_read",
+          "calls": 40,
+          "self_seconds": 0.00037656,
+          "cumulative_seconds": 0.003638834
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'read' of '_io.TextIOWrapper' objects>",
+          "calls": 12,
+          "self_seconds": 0.000369956,
+          "cumulative_seconds": 0.0005072900000000001
+        },
+        {
+          "file": "pathlib.py",
+          "line": 711,
+          "function": "joinpath",
+          "calls": 162,
+          "self_seconds": 0.000329721,
+          "cumulative_seconds": 0.001301174
+        },
+        {
+          "file": "tab_observer.py",
+          "line": 527,
+          "function": "materialize_resources",
+          "calls": 4,
+          "self_seconds": 0.000310294,
+          "cumulative_seconds": 0.014840671000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "calls": 1746,
+          "self_seconds": 0.000290562,
+          "cumulative_seconds": 0.00036312400000000004
+        }
+      ]
+    },
+    "active": {
+      "top30_cumulative": [
+        {
+          "file": "threading.py",
+          "line": 637,
+          "function": "wait",
+          "calls": 9,
+          "self_seconds": 0.0005491070000000001,
+          "cumulative_seconds": 8.274287137
+        },
+        {
+          "file": "selectors.py",
+          "line": 451,
+          "function": "select",
+          "calls": 130,
+          "self_seconds": 0.00085276,
+          "cumulative_seconds": 5.24345087
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'poll' of 'select.epoll' objects>",
+          "calls": 130,
+          "self_seconds": 5.242312304,
+          "cumulative_seconds": 5.242290936000001
+        },
+        {
+          "file": "threading.py",
+          "line": 323,
+          "function": "wait",
+          "calls": 9,
+          "self_seconds": 0.000114351,
+          "cumulative_seconds": 3.5517272770000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'acquire' of '_thread.lock' objects>",
+          "calls": 67,
+          "self_seconds": 3.551628093,
+          "cumulative_seconds": 3.551628093
+        },
+        {
+          "file": "tab_observer.py",
+          "line": 446,
+          "function": "tick",
+          "calls": 10,
+          "self_seconds": 0.000950112,
+          "cumulative_seconds": 0.37317397900000004
+        },
+        {
+          "file": "tab_format_monitor.py",
+          "line": 69,
+          "function": "refresh_formatting",
+          "calls": 9,
+          "self_seconds": 0.008748232,
+          "cumulative_seconds": 0.33169880300000004
+        },
+        {
+          "file": "tab_formatting.py",
+          "line": 469,
+          "function": "refresh",
+          "calls": 9,
+          "self_seconds": 0.01185273,
+          "cumulative_seconds": 0.319870229
+        },
+        {
+          "file": "tab_formatting.py",
+          "line": 259,
+          "function": "apply",
+          "calls": 9,
+          "self_seconds": 0.008429755,
+          "cumulative_seconds": 0.25667821
+        },
+        {
+          "file": "tab_observer.py",
+          "line": 344,
+          "function": "_inventory",
+          "calls": 2,
+          "self_seconds": 0.0037118430000000003,
+          "cumulative_seconds": 0.21995714500000002
+        },
+        {
+          "file": "controller_tabs.py",
+          "line": 41,
+          "function": "execute",
+          "calls": 2,
+          "self_seconds": 0.0010654170000000001,
+          "cumulative_seconds": 0.208478201
+        },
+        {
+          "file": "tab_observation.py",
+          "line": 111,
+          "function": "observe",
+          "calls": 2,
+          "self_seconds": 0.002249544,
+          "cumulative_seconds": 0.19373029700000002
+        },
+        {
+          "file": "tab_organization.py",
+          "line": 41,
+          "function": "command",
+          "calls": 29,
+          "self_seconds": 0.000786592,
+          "cumulative_seconds": 0.16775765
+        },
+        {
+          "file": "subprocess.py",
+          "line": 506,
+          "function": "run",
+          "calls": 29,
+          "self_seconds": 0.000490655,
+          "cumulative_seconds": 0.16512058200000002
+        },
+        {
+          "file": "subprocess.py",
+          "line": 1165,
+          "function": "communicate",
+          "calls": 29,
+          "self_seconds": 0.00017553700000000002,
+          "cumulative_seconds": 0.14379138900000002
+        },
+        {
+          "file": "subprocess.py",
+          "line": 2062,
+          "function": "_communicate",
+          "calls": 29,
+          "self_seconds": 0.001592688,
+          "cumulative_seconds": 0.143559183
+        },
+        {
+          "file": "__init__.py",
+          "line": 183,
+          "function": "dumps",
+          "calls": 643,
+          "self_seconds": 0.001289186,
+          "cumulative_seconds": 0.137977772
+        },
+        {
+          "file": "encoder.py",
+          "line": 183,
+          "function": "encode",
+          "calls": 643,
+          "self_seconds": 0.0011074980000000002,
+          "cumulative_seconds": 0.13642885300000002
+        },
+        {
+          "file": "selectors.py",
+          "line": 402,
+          "function": "select",
+          "calls": 53,
+          "self_seconds": 0.000853398,
+          "cumulative_seconds": 0.135878897
+        },
+        {
+          "file": "encoder.py",
+          "line": 205,
+          "function": "iterencode",
+          "calls": 643,
+          "self_seconds": 0.13482465800000001,
+          "cumulative_seconds": 0.13487342100000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'poll' of 'select.poll' objects>",
+          "calls": 53,
+          "self_seconds": 0.134871093,
+          "cumulative_seconds": 0.134871093
+        },
+        {
+          "file": "tab_format_transport.py",
+          "line": 158,
+          "function": "_command_batch",
+          "calls": 20,
+          "self_seconds": 0.0014730210000000001,
+          "cumulative_seconds": 0.12891128000000002
+        },
+        {
+          "file": "tab_monitor.py",
+          "line": 362,
+          "function": "publish_observation",
+          "calls": 10,
+          "self_seconds": 0.000355847,
+          "cumulative_seconds": 0.11312324200000001
+        },
+        {
+          "file": "tab_monitor.py",
+          "line": 68,
+          "function": "_save",
+          "calls": 19,
+          "self_seconds": 0.000582092,
+          "cumulative_seconds": 0.08843511500000001
+        },
+        {
+          "file": "tab_observation.py",
+          "line": 93,
+          "function": "processes",
+          "calls": 200,
+          "self_seconds": 0.001166877,
+          "cumulative_seconds": 0.08577683500000001
+        },
+        {
+          "file": "__init__.py",
+          "line": 299,
+          "function": "loads",
+          "calls": 190,
+          "self_seconds": 0.000473889,
+          "cumulative_seconds": 0.073765862
+        },
+        {
+          "file": "decoder.py",
+          "line": 332,
+          "function": "decode",
+          "calls": 190,
+          "self_seconds": 0.0005981550000000001,
+          "cumulative_seconds": 0.07299562700000001
+        },
+        {
+          "file": "decoder.py",
+          "line": 343,
+          "function": "raw_decode",
+          "calls": 190,
+          "self_seconds": 0.07181137600000001,
+          "cumulative_seconds": 0.07181137600000001
+        },
+        {
+          "file": "controller_tab_adapters.py",
+          "line": 33,
+          "function": "formatting_read_session_windows",
+          "calls": 9,
+          "self_seconds": 0.000156894,
+          "cumulative_seconds": 0.063073268
+        },
+        {
+          "file": "tab_format_transport.py",
+          "line": 58,
+          "function": "tmux_formatting_read_session_windows",
+          "calls": 9,
+          "self_seconds": 0.000206813,
+          "cumulative_seconds": 0.062891998
+        }
+      ],
+      "top30_self": [
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'poll' of 'select.epoll' objects>",
+          "calls": 130,
+          "self_seconds": 5.242312304,
+          "cumulative_seconds": 5.242290936000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'acquire' of '_thread.lock' objects>",
+          "calls": 67,
+          "self_seconds": 3.551628093,
+          "cumulative_seconds": 3.551628093
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'poll' of 'select.poll' objects>",
+          "calls": 53,
+          "self_seconds": 0.134871093,
+          "cumulative_seconds": 0.134871093
+        },
+        {
+          "file": "encoder.py",
+          "line": 205,
+          "function": "iterencode",
+          "calls": 643,
+          "self_seconds": 0.13482465800000001,
+          "cumulative_seconds": 0.13487342100000002
+        },
+        {
+          "file": "decoder.py",
+          "line": 343,
+          "function": "raw_decode",
+          "calls": 190,
+          "self_seconds": 0.07181137600000001,
+          "cumulative_seconds": 0.07181137600000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method posix.fsync>",
+          "calls": 27,
+          "self_seconds": 0.056056402000000005,
+          "cumulative_seconds": 0.056056402000000005
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "calls": 264524,
+          "self_seconds": 0.038813139,
+          "cumulative_seconds": 0.038813139
+        },
+        {
+          "file": "tab_observer.py",
+          "line": 27,
+          "function": "_semantic",
+          "calls": 37850,
+          "self_seconds": 0.026367709000000003,
+          "cumulative_seconds": 0.035102788
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method _io.open>",
+          "calls": 1198,
+          "self_seconds": 0.017237512,
+          "cumulative_seconds": 0.030359607
+        },
+        {
+          "file": "tab_formatting.py",
+          "line": 469,
+          "function": "refresh",
+          "calls": 9,
+          "self_seconds": 0.01185273,
+          "cumulative_seconds": 0.319870229
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method _posixsubprocess.fork_exec>",
+          "calls": 29,
+          "self_seconds": 0.011828508000000001,
+          "cumulative_seconds": 0.011828508000000001
+        },
+        {
+          "file": "tab_traits.py",
+          "line": 419,
+          "function": "_session",
+          "calls": 200,
+          "self_seconds": 0.010707361,
+          "cumulative_seconds": 0.020334496
+        },
+        {
+          "file": "copy.py",
+          "line": 118,
+          "function": "deepcopy",
+          "calls": 16399,
+          "self_seconds": 0.010455736,
+          "cumulative_seconds": 0.022357971
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "calls": 103099,
+          "self_seconds": 0.009315442,
+          "cumulative_seconds": 0.009564534000000001
+        },
+        {
+          "file": "tab_format_monitor.py",
+          "line": 69,
+          "function": "refresh_formatting",
+          "calls": 9,
+          "self_seconds": 0.008748232,
+          "cumulative_seconds": 0.33169880300000004
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'read' of '_io.TextIOWrapper' objects>",
+          "calls": 869,
+          "self_seconds": 0.008466966000000001,
+          "cumulative_seconds": 0.009794095000000001
+        },
+        {
+          "file": "tab_formatting.py",
+          "line": 259,
+          "function": "apply",
+          "calls": 9,
+          "self_seconds": 0.008429755,
+          "cumulative_seconds": 0.25667821
+        },
+        {
+          "file": "records.py",
+          "line": 251,
+          "function": "_canonical_tmux_title",
+          "calls": 20000,
+          "self_seconds": 0.007490959,
+          "cumulative_seconds": 0.012504904
+        },
+        {
+          "file": "pathlib.py",
+          "line": 387,
+          "function": "_parse_path",
+          "calls": 3527,
+          "self_seconds": 0.006897558000000001,
+          "cumulative_seconds": 0.01424918
+        },
+        {
+          "file": "pathlib.py",
+          "line": 357,
+          "function": "__init__",
+          "calls": 5004,
+          "self_seconds": 0.00677242,
+          "cumulative_seconds": 0.010039147
+        },
+        {
+          "file": "tab_traits.py",
+          "line": 291,
+          "function": "_pane",
+          "calls": 200,
+          "self_seconds": 0.006477752000000001,
+          "cumulative_seconds": 0.050121875
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method posix.lstat>",
+          "calls": 2407,
+          "self_seconds": 0.006315737,
+          "cumulative_seconds": 0.006315737
+        },
+        {
+          "file": "<frozen posixpath>",
+          "line": 71,
+          "function": "join",
+          "calls": 4376,
+          "self_seconds": 0.006029303000000001,
+          "cumulative_seconds": 0.009481671
+        },
+        {
+          "file": "pathlib.py",
+          "line": 437,
+          "function": "__str__",
+          "calls": 3884,
+          "self_seconds": 0.005494185,
+          "cumulative_seconds": 0.030989071000000003
+        },
+        {
+          "file": "sessions.py",
+          "line": 56,
+          "function": "build_snapshot",
+          "calls": 2,
+          "self_seconds": 0.0046104760000000005,
+          "cumulative_seconds": 0.017556243000000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'split' of 'str' objects>",
+          "calls": 25371,
+          "self_seconds": 0.0042066840000000005,
+          "cumulative_seconds": 0.0042066840000000005
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method '__exit__' of '_io._IOBase' objects>",
+          "calls": 1136,
+          "self_seconds": 0.003949506,
+          "cumulative_seconds": 0.003949506
+        },
+        {
+          "file": "pathlib.py",
+          "line": 1159,
+          "function": "__init__",
+          "calls": 5004,
+          "self_seconds": 0.003947611,
+          "cumulative_seconds": 0.013986758
+        },
+        {
+          "file": "pathlib.py",
+          "line": 407,
+          "function": "_load_parts",
+          "calls": 3525,
+          "self_seconds": 0.003823167,
+          "cumulative_seconds": 0.023865329
+        },
+        {
+          "file": "copy.py",
+          "line": 217,
+          "function": "_deepcopy_dict",
+          "calls": 1448,
+          "self_seconds": 0.003740506,
+          "cumulative_seconds": 0.018024568
+        }
+      ]
+    }
+  }
+}
