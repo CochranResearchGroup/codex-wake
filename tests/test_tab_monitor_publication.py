@@ -118,6 +118,49 @@ class MonitorPublicationTests(unittest.TestCase):
                 monitor.execute('tabs.monitor.stop',{})
                 subprocess.run([*tmux,'kill-server'],capture_output=True)
 
+    def test_encoded_publication_preserves_full_rows_without_materializing_frame(self):
+        with tempfile.TemporaryDirectory() as directory:
+            monitor=TabMonitor(directory)
+            frame=dict(schema_version=1,origin='manual',observed_at=time.time(),resource_count=1,
+                projection_revision='one',evidence_revision='one',workspaces=['fixture'],unavailable=[])
+            rows=[dict(target=dict(workspace='fixture'),window=dict(window_id='@1'),
+                monitor_observed_at=frame['observed_at'],monitor_unavailable=True,traits={})]
+            def forbidden_loader():
+                self.fail('encoded publication must not materialize rows')
+            self.assertTrue(monitor.publish_observation(frame,{},resources_loader=forbidden_loader,
+                resources_serializer=lambda:json.dumps(rows,allow_nan=False,separators=(',',':'))))
+            self.assertNotIn('resources',frame)
+            snapshot=monitor.execute('tabs.monitor.status',{})['snapshot']
+            self.assertEqual(snapshot['resources'],[dict(rows[0],monitor_freshness='stale')])
+            target=Path(directory)/'tab-monitor'/'snapshot.json'
+            self.assertEqual(json.loads(target.read_text())['resources'],rows)
+            self.assertEqual(target.stat().st_mode & 0o777,0o600)
+
+    def test_encoded_publication_failure_preserves_previous_snapshot(self):
+        from codex_wake.managed_inventory import InventoryError
+        with tempfile.TemporaryDirectory() as directory:
+            monitor=TabMonitor(directory)
+            initial=dict(schema_version=1,origin='manual',observed_at=time.time(),resources=[],
+                workspaces=[],unavailable=[],projection_revision='one',evidence_revision='one')
+            monitor.publish_observation(initial,{})
+            target=Path(directory)/'tab-monitor'/'snapshot.json'
+            previous=target.read_bytes()
+            frame={key:value for key,value in initial.items() if key!='resources'}
+            frame['projection_revision']='two'
+            # Rows fit alone; metadata pushes the complete document over1MiB.
+            rows='["'+'x'*(1048576-5)+'"]'
+            with self.assertRaises(InventoryError) as error:
+                monitor.publish_observation(frame,{},resources_serializer=lambda:rows)
+            self.assertEqual(error.exception.code,'monitor_capacity')
+            self.assertEqual(target.read_bytes(),previous)
+            self.assertEqual(list(target.parent.glob('.monitor-*')),[])
+            frame['observed_at']=float('nan')
+            with self.assertRaises(ValueError):
+                monitor.publish_observation(frame,{},resources_serializer=lambda:'[]')
+            self.assertEqual(target.read_bytes(),previous)
+            frame['observed_at']=initial['observed_at']
+            self.assertTrue(monitor.publish_observation(frame,{},resources_serializer=lambda:'[]'))
+
     def test_metadata_frames_are_materialized_only_for_actual_publication(self):
         from codex_wake.managed_inventory import InventoryError
         with tempfile.TemporaryDirectory() as directory:

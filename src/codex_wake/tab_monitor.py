@@ -72,6 +72,10 @@ def _publication_interval(settings):
 
 def _save(path,value):
     raw=json.dumps(value,allow_nan=False,separators=(',',':')).encode()
+    _save_bytes(path,raw)
+
+
+def _save_bytes(path,raw):
     if len(raw)>MAX_STATE:
         raise InventoryError('monitor_capacity','Derived monitor snapshot exceeds1MiB; reduce selected workspaces.')
     fd,name=tempfile.mkstemp(prefix='.monitor-',dir=path.parent)
@@ -364,12 +368,18 @@ class TabMonitor:
             raise InventoryError('observation_unavailable','Routing requires observed resource rows.')
         return TerminalRouting(self.root,tabs=owner).tick(snapshot,deadline=deadline)
 
-    def publish_observation(self, snapshot, record, *, resources_loader=None, settings=None):
+    def publish_observation(self, snapshot, record, *, resources_loader=None, resources_serializer=None, settings=None):
         """Persist changed evidence immediately, or a bounded liveness heartbeat.
 
         Only trusted producer revisions admit the quiet fast path. Legacy callers
         without a revision retain unconditional publication. Small diagnostics go
         to the owner heartbeat so status remains current between large writes.
+
+        resources_serializer is an internal trusted producer seam: it returns a
+        strict stdlib-encoded JSON array of complete retained resource rows. Only
+        the service-owned observer supplies it; portable command input must never
+        supply encoded JSON. Metadata remains strictly encoded here, while rows
+        are neither materialized nor parsed or encoded a second time.
         """
         diagnostics=dict(snapshot.get('observer') or {})
         fields=('source_id','source_kind','workspace','state','reason','epoch','sequence',
@@ -391,10 +401,17 @@ class TabMonitor:
         now=self.monotonic()
         publish=(not qualified or revision!=self._published_revision or now-self._published_at>=heartbeat)
         if publish:
-            if resources_loader is not None:resources_loader()
-            if not isinstance(snapshot.get('resources'),list):
-                raise InventoryError('observation_unavailable','Metadata-only frames cannot be persisted as inventory.')
-            _save(self.directory/'snapshot.json',snapshot)
+            if resources_serializer is not None:
+                metadata={key:value for key,value in snapshot.items() if key!='resources'}
+                encoded=json.dumps(metadata,allow_nan=False,separators=(',',':'))
+                rows=resources_serializer()
+                _save_bytes(self.directory/'snapshot.json',
+                    (encoded[:-1]+',"resources":'+rows+'}').encode())
+            else:
+                if resources_loader is not None:resources_loader()
+                if not isinstance(snapshot.get('resources'),list):
+                    raise InventoryError('observation_unavailable','Metadata-only frames cannot be persisted as inventory.')
+                _save(self.directory/'snapshot.json',snapshot)
             self._published_revision=revision if qualified else None
             self._published_at=now
         record['last_snapshot_published_at']=self.clock() if publish else record.get('last_snapshot_published_at')
@@ -423,7 +440,8 @@ class TabMonitor:
                                 snapshot['resources']=observer.materialize_resources(snapshot['observed_at'])
                             return snapshot['resources']
                         snapshot.update(origin='daemon',monitor_generation=record['generation'])
-                        self.publish_observation(snapshot,record,resources_loader=ensure_resources,settings=settings)
+                        self.publish_observation(snapshot,record,resources_loader=ensure_resources,
+                            resources_serializer=lambda:observer.serialize_resources(snapshot['observed_at']),settings=settings)
                         observed=dict(snapshot=snapshot)
                         from .tab_format_monitor import refresh_formatting
                         record['last_formatting']=refresh_formatting(self.root,observed.get('snapshot') or {},
