@@ -7,6 +7,7 @@ import tempfile
 import time
 
 from .managed_inventory import InventoryError
+from .json_decode import decode_json
 from .tab_organization import digest, TmuxTransport
 
 READS=frozenset(('tabs.format.status','tabs.format.inspect'))
@@ -37,7 +38,7 @@ class TabFormatting:
 
     def read(self):
         if not self.path.exists():return dict(schema_version=1,policy=dict(DEFAULT_POLICY),workspaces={})
-        value=json.loads(self.path.read_text())
+        value=decode_json(self.path.read_text())
         if value.get('schema_version')!=1:raise InventoryError('configuration_unavailable','Unsupported formatting state.')
         value['policy']=dict(DEFAULT_POLICY,**value.get('policy',{}))
         value.setdefault('workspace_policies',{})
