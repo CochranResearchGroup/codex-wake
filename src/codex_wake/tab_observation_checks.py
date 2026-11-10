@@ -26,6 +26,15 @@ class TieredChecks:
         self.enabled=dict(health=health,errors=errors)
         self.intervals=dict(health=float(health_interval),errors=float(error_interval))
 
+    def is_due(self, kind, key, *, force=False, eligible=True):
+        if kind not in self.enabled:
+            raise ValueError('unknown observation tier')
+        if not self.enabled[kind]:
+            return False
+        entry=self._entries.get((kind,key))
+        interval=self.intervals[kind] if eligible or kind=='health' else max(60,self.intervals[kind])
+        return force or entry is None or self.monotonic()>=entry[0]+interval
+
     def run(self, kind, key, callback, *, force=False, eligible=True):
         if kind not in self.enabled:
             raise ValueError('unknown observation tier')
@@ -33,8 +42,7 @@ class TieredChecks:
             return dict(value='unknown',status='unknown',source='none',observed_at=None,
                         freshness='unknown',reason='check_disabled')
         now=self.monotonic(); entry=self._entries.get((kind,key))
-        interval=self.intervals[kind] if eligible or kind=='health' else max(60,self.intervals[kind])
-        if entry and not force and now < entry[0]+interval:
+        if not self.is_due(kind,key,force=force,eligible=eligible):
             return deepcopy(entry[1])
         result=deepcopy(callback())
         if kind=='errors':

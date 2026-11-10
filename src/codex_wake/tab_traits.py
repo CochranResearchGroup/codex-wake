@@ -217,6 +217,11 @@ def session_rows(root, *, socket_path=None, endpoints=(), deadline=None, reader_
                 holds=holds, observed_at=time.time(), application_effects=False)
 
 
+def error_check_key(namespace, pane_id, identities):
+    return (namespace,pane_id,tuple((row.get('pid'),str(row.get('start_ticks')),row.get('boot_id'))
+                                    for row in identities))
+
+
 class TabTraits:
     """Observe one window at the host-owned public attachment boundary.
 
@@ -357,8 +362,7 @@ class TabTraits:
             traits['health']=(self.check_scheduler.run('health',key,probe,force=self.explicit_checks)
                               if self.check_scheduler else probe())
         error=lambda:self._error(pane,transport,privacy,deadline)
-        key=(self.check_namespace,pane.get('pane_id'),tuple((r.get('pid'),str(r.get('start_ticks')),
-                                                        r.get('boot_id')) for r in identities))
+        key=error_check_key(self.check_namespace,pane.get('pane_id'),identities)
         traits['error']=(self.check_scheduler.run('errors',key,error,force=self.explicit_checks,
                            eligible=pane.get('pane_id') in self.dirty_panes or
                                     traits['activity'].get('value') in ('running','waiting-for-input'))

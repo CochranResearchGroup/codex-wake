@@ -156,11 +156,17 @@ class ObservationCache:
                 socket=socket_path))
         rows = (self.session_reader or session_rows)(self.root,socket_path=socket_path,panes=native_panes,
                             deadline=min(deadline,time.monotonic()+2)) if needs_native else dict(sessions=[],holds=[])
+        namespace=(workspace,snapshot.get('server'),tuple(snapshot.get('socket_identity',())))
+        active={attachment.get('pane_id') for row in rows['sessions'] if row.get('runtime_state')=='active'
+                for attachment in row.get('attachments',[])}
+        from .tab_error_capture import capture_transport
+        screen_transport=capture_transport(transport,panes,investigated=investigated,scheduler=self.checks,
+            namespace=namespace,active_panes=active,dirty_panes=dirty_panes,privacy=privacy,force=explicit_checks)
         traits = TabTraits(self.root,sessions=rows['sessions'],process_probe=lambda pid,limit: investigated.get(pid,([],False)),
                            health_probe=self.health_probe,check_scheduler=self.checks,
-                           check_namespace=(workspace,snapshot.get('server'),tuple(snapshot.get('socket_identity',()))),
+                           check_namespace=namespace,
                            explicit_checks=explicit_checks,dirty_panes=dirty_panes)
-        observed = {w['window_id']:traits.observe_window(w,transport=transport,privacy=privacy,deadline=deadline)
+        observed = {w['window_id']:traits.observe_window(w,transport=screen_transport,privacy=privacy,deadline=deadline)
                     for w in snapshot['windows']}
         if not self.activity_enabled:
             from .tab_traits import _trait
