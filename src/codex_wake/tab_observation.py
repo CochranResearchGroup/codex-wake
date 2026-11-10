@@ -183,11 +183,11 @@ class ObservationCache:
         if previous != (activity,self.checks.enabled,self.checks.intervals):
             self._observations.clear()
 
-    def invalidate(self, workspace=None):
+    def invalidate(self, workspace=None, *, preserve_dirty=False):
         """Fence retained evidence when a feed disconnects or changes epoch."""
         self._processes.clear()
         for key in list(self._dirty_panes):
-            if workspace is None or key[0]==workspace:
+            if not preserve_dirty and (workspace is None or key[0]==workspace):
                 self._dirty_panes.pop(key,None)
         if workspace is None:
             self._observations.clear()

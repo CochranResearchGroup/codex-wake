@@ -119,6 +119,8 @@ class TieredChecksTests(unittest.TestCase):
             self.assertEqual(observe()['value'],'absent')
             cache.mark_dirty('fixture',['%1'])
             self.assertTrue(cache.has_dirty('fixture'))
+            cache.invalidate('fixture',preserve_dirty=True)
+            self.assertTrue(cache.has_dirty('fixture'))
             result=observe()
             self.assertEqual(result['value'],'present')
             self.assertEqual(captures,[0,6])
