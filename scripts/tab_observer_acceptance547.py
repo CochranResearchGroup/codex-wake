@@ -22,18 +22,23 @@ def main():
     parser.add_argument('--seconds',type=float,default=60)
     parser.add_argument('--diagnostic-profile')
     parser.add_argument('--monitor',action='store_true')
+    parser.add_argument('--diagnostic-source')
+    parser.add_argument('--monitor-profile')
     parser.add_argument('--tick-interval',type=float,default=1.0)
     args=parser.parse_args()
     assert args.seconds>=60 or args.diagnostic_profile,'short windows require explicitly labeled diagnostic profile'
+    if args.diagnostic_source:
+        assert args.diagnostic_profile,'source overrides are diagnostics only'
+        os.environ['PYTHONPATH']=args.diagnostic_source;sys.path.insert(0,args.diagnostic_source)
     import codex_wake
     from codex_wake.tab_observer import TabObserver
     from websockets.sync.server import unix_serve
-    assert 'site-packages' in codex_wake.__file__, 'source shadow is prohibited'
+    assert args.diagnostic_source or 'site-packages' in codex_wake.__file__, 'source shadow is prohibited'
     receipt=dict(source_commit=args.source_commit,python=sys.version,package=codex_wake.__file__,uid=os.geteuid(),
         tabs=100,windows_seconds=args.seconds,tiers=dict(activity=True,health=True,errors=True),
         cpu_denominator='one core',measurement='Python observer plus fixture server and driver (conservative upper bound), live owned children plus reaped child CPU; excludes disposable pane workload and tmux server',
         fixture_limit='metadata-only Unix WebSocket fixture; no provider turns or proof of real native broadcasts',
-        latency_measure='fixture send to public projection, upper bound on receive-to-projection',production_effects=False,tick_interval_seconds=args.tick_interval)
+        latency_measure='fixture send to public projection, upper bound on receive-to-projection',production_effects=False,tick_interval_seconds=args.tick_interval,source_override=bool(args.diagnostic_source))
     with tempfile.TemporaryDirectory(prefix='wake547-') as directory:
         root=Path(directory); home=root/'home';home.mkdir();(home/'app-server-control').mkdir()
         binary=root/'codex';shutil.copyfile('/bin/sleep',binary);binary.chmod(0o700)
@@ -96,9 +101,10 @@ def main():
                     if (pane.get('binding') or {}).get('conversation_id')==thread_id:
                         return pane['traits']['activity']['value']
             return None
-        server=None;observer=None;monitor=None
+        server=None;observer=None;monitor=None;profile_process=None
         def cli(*parts):
-            env=dict(os.environ,CODEX_HOME=str(home));env.pop('PYTHONPATH',None)
+            env=dict(os.environ,CODEX_HOME=str(home))
+            if not args.diagnostic_source:env.pop('PYTHONPATH',None)
             result=subprocess.run([str(Path(sys.executable).parent/'codex-wake'),'--wake-root',str(root),*parts],env=env,cwd=root,text=True,capture_output=True,timeout=60)
             assert result.returncode==0,(parts,result.returncode,result.stdout,result.stderr)
             return result.stdout
@@ -113,6 +119,16 @@ def main():
                     from codex_wake.tab_monitor import TabMonitor
                     monitor=TabMonitor(root)
                     cli('tabs','monitor-start')
+                    if args.monitor_profile:
+                        assert args.diagnostic_profile,'profiling is diagnostics only'
+                        monitor.execute('tabs.monitor.stop',dict(timeout=5))
+                        env=dict(os.environ,CODEX_HOME=str(home))
+                        profile_process=subprocess.Popen([sys.executable,'-m','cProfile','-o',args.monitor_profile,
+                            '-m','codex_wake.tab_monitor','--serve',str(root)],env=env,cwd=root,
+                            stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True)
+                        until=time.monotonic()+5
+                        while monitor.execute('tabs.monitor.status',{})['monitor']['status']!='running':
+                            assert time.monotonic()<until;time.sleep(.05)
                     cli('tabs','format','configure','--workspace','fixture','--preset','slate')
                     cli('tabs','format','enable','--workspace','fixture')
                     monitor_pid=monitor.execute('tabs.monitor.status',{})['monitor']['process']['pid']
@@ -144,7 +160,7 @@ def main():
                     stopping=threading.Event()
                     def produce():
                         next_event=begin
-                        while not stopping.is_set():
+                        while not stopping.is_set() and next_event<begin+args.seconds:
                             if stopping.wait(max(0,next_event-time.monotonic())):break
                             index=sequence[0]%10;thread_id='t'+str(index)
                             flags=[] if (sequence[0]//10)%2 else ['waitingOnUserInput']
@@ -187,6 +203,10 @@ def main():
                         fixture_driver_cpu_seconds=own_delta if args.monitor else None,
                         reaped_child_cpu_seconds=components1['reaped']-components0['reaped'] if args.monitor else reaped_delta,
                         live_child_cpu_seconds=components1['live']-components0['live'] if args.monitor else (cpu1-cpu0)-own_delta-reaped_delta)
+                    until=time.monotonic()+2
+                    while pending and time.monotonic()<until:
+                        time.sleep(.05);project_pending(tick())
+                    receipt[phase]['unprojected_events']=len(pending)
                     Path(args.receipt).write_text(json.dumps(receipt,indent=2)+'\n')
                 if args.diagnostic_profile and args.diagnostic_profile!='none':
                     profiler.disable();profiler.dump_stats(args.diagnostic_profile)
@@ -194,13 +214,15 @@ def main():
                 receipt['latency_samples']=len(latencies)
                 receipt['checks']=(tick().get('observer',{}).get('checks',{}) if monitor else observer.status()['checks'])
                 receipt['native_methods']=methods
-                receipt['thresholds_pass']=not args.diagnostic_profile and receipt['idle']['cpu_percent_one_core']<=1 and receipt['active']['cpu_percent_one_core']<=5 and max(receipt[p]['max_aggregate_rss_bytes'] for p in ('idle','active'))<=256*1024*1024 and receipt['p95_send_to_projection_seconds'] is not None and receipt['p95_send_to_projection_seconds']<=2
+                receipt['all_ordinary_events_projected']=len(latencies)==receipt['active']['status_changes'] and receipt['active']['unprojected_events']==0
+                receipt['thresholds_pass']=not args.diagnostic_profile and receipt['all_ordinary_events_projected'] and receipt['idle']['cpu_percent_one_core']<=1 and receipt['active']['cpu_percent_one_core']<=5 and max(receipt[p]['max_aggregate_rss_bytes'] for p in ('idle','active'))<=256*1024*1024 and receipt['p95_send_to_projection_seconds'] is not None and receipt['p95_send_to_projection_seconds']<=2
                 if observer:
                     observer.close();observer=None
                 if monitor:
                     cli('tabs','monitor-stop')
                     cli('tabs','format','rollback','--workspace','fixture')
                     monitor=None
+                if profile_process:profile_process.wait(timeout=5)
                 server.shutdown();worker.join(2)
         finally:
             try:
@@ -211,6 +233,7 @@ def main():
                         # Cleanup must survive a product CLI rendering failure.
                         monitor.execute('tabs.monitor.stop',dict(timeout=5))
                     monitor=None
+                if profile_process:profile_process.wait(timeout=5)
             finally:
                 subprocess.run([*tmux,'kill-server'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
                 receipt['owned_control_processes_remaining']=sum(Path('/proc',str(pid)).exists() for pid in control_pids)

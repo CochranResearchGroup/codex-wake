@@ -69,3 +69,19 @@ prevented its finally block from killing the disposable tmux server. That harnes
 cleanup was repaired to remain effective on CLI rendering failure. Only the
 ownedUID1017fixture tmuxserver was terminated; freshOSreadback showed zero testuser
 processes afterward. This is a retained failed attempt, not clean-first-run proof.
+
+Source-override diagnostic (NOT installed-package qualification):0ee92b48 plus
+primary's uncommitted JSON cache staged in /tmp/wake216-cache-source/src. Actual
+monitor+Slate10s idle10.692%, active15.589%; reapedchildren alone active0.58CPU s.
+This retains evidence that observer copy fixes alone do not satisfy the full
+monitor+formatting resource gate. Source override never qualifies immutable package
+identity and diagnostics cannot set thresholds_pass=true. Parent requested a
+bounded publicserve profile to locate the remaining formatter/owner cost.
+
+Bounded actual publicserve profile on the same source override attributed remaining
+cost to formatting:23refreshes/11.542s cumulative,22apply calls/9.603s,
+66saves/6.129s,66json.dump/5.794s with3,329,362TextIOWrapper.write calls.
+743subprocess.run calls cost3.668s cumulative;360native formatting command batches
+cost1.984s. Observer.tick23calls cost1.661s and deepcopytotal0.264s after the copy
+repair. These are profiler timings, not CPU-gate numbers. The primary and formatter
+worker received the exact profile locator before modifying formatting code.
