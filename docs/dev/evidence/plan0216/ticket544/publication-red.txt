@@ -1,0 +1,22 @@
+FE
+======================================================================
+ERROR: test_native_delta_projects_without_inventory_and_source_loss_removes_authority (test_tab_observer.ObserverTests.test_native_delta_projects_without_inventory_and_source_loss_removes_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-publication-544/tests/test_tab_observer.py", line 96, in test_native_delta_projects_without_inventory_and_source_loss_removes_authority
+    original_projection=result['projection_revision']
+                        ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'projection_revision'
+
+======================================================================
+FAIL: test_background_owner_heartbeats_without_rewriting_unchanged_inventory (test_tab_monitor_publication.MonitorPublicationTests.test_background_owner_heartbeats_without_rewriting_unchanged_inventory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-publication-544/tests/test_tab_monitor_publication.py", line 38, in test_background_owner_heartbeats_without_rewriting_unchanged_inventory
+    self.assertEqual(snapshot_path.stat().st_mtime_ns,original_snapshot)
+AssertionError: 1794342890808394359 != 1794342890608179982
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.379s
+
+FAILED (failures=1, errors=1)

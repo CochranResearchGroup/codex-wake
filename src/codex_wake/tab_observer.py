@@ -6,12 +6,50 @@ remain the attachment boundary. No transcript subscription is created here.
 """
 from copy import deepcopy
 import json
+import hashlib
+import math
 from pathlib import Path
 import time
 
 from .managed_inventory import InventoryError
 from .process import process_identity
 from .tab_organization import TmuxTransport
+
+
+_REVISION_FIELDS=frozenset(('projection_revision','evidence_revision','projection_valid_until'))
+_CLOCK_FIELDS=frozenset(('observed_at','monitor_observed_at','age_seconds'))
+
+
+def _revision(value):
+    return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
+
+
+def _semantic(value, now, boundaries, trait_name=None):
+    """Timeless display facts plus qualified freshness, with scheduled boundaries."""
+    if isinstance(value,dict):
+        result={key:_semantic(item,now,boundaries,key) for key,item in value.items()
+                if key not in _REVISION_FIELDS and key not in _CLOCK_FIELDS}
+        if {'value','status','source'}<=value.keys():
+            stamp=value.get('observed_at')
+            finite=type(stamp) in (int,float) and math.isfinite(stamp)
+            eligible=(value.get('source_available') is not False
+                      and value.get('status') not in ('unknown','unsupported','stale','configured',None)
+                      and value.get('freshness') not in ('stale','unknown','unsupported','configured'))
+            result['_display_known']=bool(finite and stamp<=now and value.get('status') in ('observed','stale'))
+            dynamic=(trait_name=='activity' or trait_name=='error' and value.get('value')=='present'
+                     or trait_name=='health' and value.get('value') in
+                     ('unresponsive','offline','degraded','warning','error'))
+            if dynamic:
+                result['_display_fresh']=bool(finite and eligible and stamp<=now
+                    and (value.get('source_available') is True or now-stamp<=20))
+            if finite and stamp>now and (eligible or value.get('status') in ('observed','stale')):
+                boundaries.append(stamp)
+            if dynamic and finite and eligible and value.get('source_available') is not True and stamp<=now<=stamp+20:
+                boundaries.append(stamp+20+.000001)
+        return result
+    if isinstance(value,(list,tuple)):
+        return [_semantic(item,now,boundaries,trait_name) for item in value]
+    return value
 
 
 class _SnapshotTransport:
@@ -106,6 +144,11 @@ class TabObserver:
         self.resources, self.unavailable = [], []
         self._resource_json = None
         self._projection_dirty = True
+        self._all_revisions_dirty = True
+        self._dirty_resources = set()
+        self._resource_revisions = {}
+        self._next_projection_boundary = None
+        self._snapshot_projection_revision = self._snapshot_evidence_revision = None
         self.closed = False
         self.last_inventory = self.last_discovery = -float('inf')
         self.cursor = self.tmux_cursor = self.native_cursor = 0
@@ -196,11 +239,44 @@ class TabObserver:
                     self.metadata_due.add(endpoint)
                 self._project_activity(endpoint, data['thread_id'], data['status'], event['epoch'])
 
+    @staticmethod
+    def _resource_key(resource):
+        return (resource.get('target',{}).get('workspace'),resource.get('window',{}).get('window_id'))
+
+    def _prepare_revisions(self, now):
+        """Hash changed producer records once; idle ticks reuse opaque tokens."""
+        active=set()
+        for resource in self.resources:
+            key=self._resource_key(resource);active.add(key)
+            previous=self._resource_revisions.get(key)
+            expired=bool(previous and previous[2] is not None and now>=previous[2])
+            if self._all_revisions_dirty or key in self._dirty_resources or previous is None or expired:
+                evidence={name:value for name,value in resource.items()
+                          if name not in _REVISION_FIELDS and name!='monitor_observed_at'}
+                boundaries=[]
+                semantic=_semantic(evidence,now,boundaries)
+                previous=(_revision(semantic),_revision(evidence),min(boundaries) if boundaries else None)
+                self._resource_revisions[key]=previous
+            resource['projection_revision'],resource['evidence_revision'],resource['projection_valid_until']=previous
+        self._resource_revisions={key:value for key,value in self._resource_revisions.items() if key in active}
+        self._next_projection_boundary=min((value[2] for value in self._resource_revisions.values()
+                                            if value[2] is not None),default=None)
+        source_facts=sorted((key,self.epochs.get(key),self.source_errors.get(key))
+                            for key in set(self.epochs)|set(self.source_errors))
+        self._snapshot_projection_revision=_revision(dict(resources=[(self._resource_key(row),row['projection_revision'])
+            for row in self.resources],workspaces=list(self.owner.workspaces),
+            unavailable=_semantic(self.unavailable,now,[]),source_errors=source_facts))
+        self._snapshot_evidence_revision=_revision(dict(resources=[(self._resource_key(row),row['evidence_revision'])
+            for row in self.resources],workspaces=list(self.owner.workspaces),
+            unavailable=self.unavailable,source_errors=source_facts))
+        self._dirty_resources.clear();self._all_revisions_dirty=False
+
     def _source_lost(self, endpoint):
         self._projection_dirty = True
         for resource in self.resources:
             for pane in resource.get('traits', {}).get('panes', []):
                 if pane.get('native_endpoint') == endpoint:
+                    self._dirty_resources.add(self._resource_key(resource))
                     pane['traits']['activity'].update(source_available=False, status='unknown',freshness='unknown',
                         source_reason='native_source_unavailable',reason='native_source_unavailable')
             self._summary(resource)
@@ -223,6 +299,7 @@ class TabObserver:
                 binding = pane.get('binding') or {}
                 if pane.get('native_endpoint') != endpoint or binding.get('conversation_id') != thread_id:
                     continue
+                self._dirty_resources.add(self._resource_key(resource))
                 expected = binding.get('process') or {}
                 current = process_identity(expected.get('pid', 0))
                 valid = bool(current and str(current.get('start_time_ticks')) == str(expected.get('start_ticks'))
@@ -247,6 +324,7 @@ class TabObserver:
 
     def _inventory(self, deadline):
         self._projection_dirty = True
+        self._all_revisions_dirty = True
         from .controller_tabs import ControllerTabs
         rows, unavailable = [], []
         names = list(self.owner.workspaces)[:64]
@@ -285,6 +363,10 @@ class TabObserver:
         self.resources, self.unavailable = rows, unavailable
         # Attach source identities only after exact existing metadata/process binding.
         for resource in self.resources:
+            workspace=resource.get('target',{}).get('workspace')
+            if workspace in self.tmux:
+                resource['presentation_source']=dict(epoch=self.tmux[workspace].status().get('epoch'),
+                    available=self.owner.workspaces[workspace]['transport'].available)
             if resource.get('monitor_unavailable'):
                 for pane in resource.get('traits',{}).get('panes',[]):
                     for key in ('activity','health','error'):
@@ -359,12 +441,13 @@ class TabObserver:
             self._inventory(deadline)
         now = self.clock()
         self.costs['ticks'] += 1
-        self.costs['last_tick_seconds'] = self.monotonic()-started
-        self.costs['total_seconds'] += self.costs['last_tick_seconds']
+        if self._next_projection_boundary is not None and now>=self._next_projection_boundary:
+            self._projection_dirty=True
         # Resources are JSON contract data. Keep the canonical encoding until
         # evidence changes; C decoding gives each caller fully independent nested
         # containers without Python deepcopy walking the same idle graph each tick.
         if self._projection_dirty or self._resource_json is None:
+            self._prepare_revisions(now)
             self._resource_json = json.dumps(self.resources, separators=(',', ':'), allow_nan=False)
             self._projection_dirty = False
         resources = json.loads(self._resource_json)
@@ -374,7 +457,12 @@ class TabObserver:
             name = row['target']['workspace']
             if name in self.tmux and not self.owner.workspaces[name]['transport'].available:
                 row['monitor_unavailable'] = True
+        self.costs['last_tick_seconds'] = self.monotonic()-started
+        self.costs['total_seconds'] += self.costs['last_tick_seconds']
         return dict(schema_version=1, observed_at=now, resources=resources,
+                    projection_revision=self._snapshot_projection_revision,
+                    evidence_revision=self._snapshot_evidence_revision,
+                    projection_valid_until=self._next_projection_boundary,
                     unavailable=deepcopy(self.unavailable), workspaces=list(self.owner.workspaces)[:64],
                     status='partial' if self.unavailable else 'complete' if self.owner.workspaces else 'not_found',
                     observer=self.status())

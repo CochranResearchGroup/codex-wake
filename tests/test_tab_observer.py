@@ -84,13 +84,24 @@ class ObserverTests(unittest.TestCase):
             with unix_serve(handler,path=native_path) as server:
                 thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
                 owner=controller_tabs_from_root(root)
-                owner.observation_cache=ObservationCache(root,process_probe=process_probe)
-                observer=TabObserver(root,owner=owner,settings=dict(health=False,errors=False),native_endpoints=['unix://'+native_path])
+                mono=[0.];wall_offset=[0.]
+                owner.observation_cache=ObservationCache(root,process_probe=process_probe,monotonic=lambda:mono[0])
+                observer=TabObserver(root,owner=owner,settings=dict(health=False,errors=False),
+                    monotonic=lambda:mono[0],clock=lambda:time.time()+wall_offset[0],native_endpoints=['unix://'+native_path])
                 try:
                     result=observer.tick()
                     pane=result['resources'][0]['traits']['panes'][0]
                     self.assertEqual(pane['binding']['conversation_id'],'t1')
                     self.assertTrue(pane['traits']['activity']['source_available'])
+                    original_projection=result['projection_revision']
+                    original_resource=result['resources'][0]['projection_revision']
+                    quiet=observer.tick()
+                    self.assertEqual(quiet['projection_revision'],original_projection)
+                    self.assertEqual(quiet['resources'][0]['projection_revision'],original_resource)
+                    mono[0]=6.
+                    refreshed=observer.tick()
+                    self.assertEqual(refreshed['projection_revision'],original_projection)
+                    self.assertNotEqual(refreshed['evidence_revision'],result['evidence_revision'])
                     passes=observer.status()['costs']['inventory_passes']
                     connections[-1].send(json.dumps(dict(method='thread/status/changed',params=dict(threadId='t1',status=dict(type='active',activeFlags=[])))))
                     until=time.monotonic()+2
@@ -100,9 +111,15 @@ class ObserverTests(unittest.TestCase):
                         self.assertLess(time.monotonic(),until)
                     self.assertEqual(observer.status()['costs']['inventory_passes'],passes)
                     self.assertTrue(activity['source_available'])
+                    self.assertNotEqual(result['projection_revision'],original_projection)
+                    running_projection=result['projection_revision']
+                    self.assertEqual(observer.tick()['projection_revision'],running_projection)
+                    wall_offset[0]=30.
+                    self.assertEqual(observer.tick()['projection_revision'],running_projection)
                     connections[-1].close()
                     result=observer.tick()
                     self.assertFalse(result['resources'][0]['traits']['traits']['activity']['source_available'])
+                    self.assertNotEqual(result['projection_revision'],running_projection)
                 finally:
                     observer.close();server.shutdown();thread.join(2)
                     subprocess.run([*tmux,'kill-server'],capture_output=True)
@@ -116,13 +133,26 @@ class ObserverTests(unittest.TestCase):
             path=root/'controller-tabs.json'
             path.write_text(json.dumps(dict(schema_version=1,workspaces=dict(fixture=dict(
                 kind='tmux',socket_path=str(root/'tmux.sock'),session_id='$0')))));path.chmod(0o600)
-            observer=TabObserver(root)
+            wall_offset=[-30.]
+            observer=TabObserver(root,clock=lambda:time.time()+wall_offset[0])
             try:
                 result=observer.tick()
                 error=result['resources'][0]['traits']['panes'][0]['traits']['error']
                 self.assertEqual(error['value'],'present')
                 self.assertEqual(error['message'],'Terminal error (content redacted)')
                 self.assertNotIn('synthetic_private_text',json.dumps(result))
+                self.assertIsNotNone(result['resources'][0]['projection_valid_until'])
+                original_projection=result['projection_revision']
+                original_evidence=result['evidence_revision']
+                wall_offset[0]=0.
+                qualified=observer.tick()
+                self.assertNotEqual(qualified['projection_revision'],original_projection)
+                self.assertEqual(qualified['evidence_revision'],original_evidence)
+                original_projection=qualified['projection_revision']
+                wall_offset[0]=30.
+                expired=observer.tick()
+                self.assertNotEqual(expired['projection_revision'],original_projection)
+                self.assertEqual(expired['evidence_revision'],original_evidence)
             finally:
                 observer.close()
                 subprocess.run([*tmux,'kill-server'],capture_output=True)

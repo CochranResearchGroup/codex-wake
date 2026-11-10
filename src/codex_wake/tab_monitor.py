@@ -66,7 +66,7 @@ def _read(path):
 
 
 def _save(path,value):
-    raw=json.dumps(value,sort_keys=True,allow_nan=False).encode()
+    raw=json.dumps(value,sort_keys=True,allow_nan=False,separators=(',',':')).encode()
     if len(raw)>MAX_STATE:
         raise InventoryError('monitor_capacity','Derived monitor snapshot exceeds1MiB; reduce selected workspaces.')
     fd,name=tempfile.mkstemp(prefix='.monitor-',dir=path.parent)
@@ -98,7 +98,7 @@ class TabMonitor:
                     'activity','health','errors','health_interval','error_interval'},
                  'tabs.monitor.refresh':set(),'tabs.monitor.status':set(),'tabs.monitor.stop':{'timeout'}}
 
-    def __init__(self,root,*,clock=time.time):
+    def __init__(self,root,*,clock=time.time,monotonic=time.monotonic):
         self.root=Path(root).resolve()
         self.root.mkdir(parents=True,exist_ok=True,mode=0o700)
         info=self.root.stat()
@@ -110,6 +110,9 @@ class TabMonitor:
         if not stat.S_ISDIR(info.st_mode) or info.st_uid!=os.geteuid() or info.st_mode&0o077:
             raise InventoryError('monitor_state_unavailable','Monitor directory must be private and canonical.')
         self.clock=clock
+        self.monotonic=monotonic
+        self._published_revision=None
+        self._published_at=-float('inf')
 
     def execute(self,operation,arguments):
         if operation not in self.ARGUMENTS:
@@ -162,14 +165,21 @@ class TabMonitor:
         snapshot=_read(self.directory/'snapshot.json')
         now=self.clock()
         if snapshot:
+            if running and snapshot.get('monitor_generation')==record.get('generation') and record.get('observer'):
+                snapshot['observer']=record['observer']
             age=now-snapshot['observed_at']
             fresh=0<=age<=settings['stale_after'] and (snapshot.get('origin')=='manual' or (running and snapshot.get('monitor_generation')==record.get('generation')))
             snapshot['freshness']='fresh' if fresh else 'stale'
             snapshot['age_seconds']=max(0,age)
+            if not fresh:
+                for key in ('projection_revision','evidence_revision','projection_valid_until'):
+                    snapshot.pop(key,None)
             for row in snapshot.get('resources',[]):
                 row_age=now-row.get('monitor_observed_at',0)
                 row['monitor_freshness']='fresh' if fresh and 0<=row_age<=settings['stale_after'] and not row.get('monitor_unavailable') else 'stale'
                 if row['monitor_freshness']=='stale':
+                    for key in ('projection_revision','evidence_revision','projection_valid_until'):
+                        snapshot.pop(key,None);row.pop(key,None)
                     def mark(value):
                         if isinstance(value,dict):
                             if {'value','status','source','freshness'}<=value.keys() and value.get('status')=='observed':
@@ -346,6 +356,39 @@ class TabMonitor:
         if not owner.host_managed:return dict(status='partial',reason='host_inventory_required')
         return TerminalRouting(self.root,tabs=owner).tick(snapshot,deadline=deadline)
 
+    def publish_observation(self, snapshot, record):
+        """Persist changed evidence immediately, or a bounded liveness heartbeat.
+
+        Only trusted producer revisions admit the quiet fast path. Legacy callers
+        without a revision retain unconditional publication. Small diagnostics go
+        to the owner heartbeat so status remains current between large writes.
+        """
+        diagnostics=dict(snapshot.get('observer') or {})
+        fields=('source_id','source_kind','workspace','state','reason','epoch','sequence',
+                'owned_pid','backlog','pending_commands','buffered_bytes','startup_seconds')
+        sources=diagnostics.get('sources',[])
+        diagnostics['sources']=[{key:source[key] for key in fields if key in source}
+                                for source in sources[:64]]
+        diagnostics['source_count']=len(sources)
+        diagnostics['sources_truncated']=len(sources)>64
+        diagnostics['unknown_reasons']=diagnostics.get('unknown_reasons',[])[:32]
+        if len(json.dumps(diagnostics,separators=(',',':')).encode())>32768:
+            diagnostics['sources']=[];diagnostics['sources_truncated']=True
+            diagnostics['unknown_reasons']=['observer_diagnostics_capacity']
+        record['observer']=diagnostics
+        revision=(snapshot.get('projection_revision'),snapshot.get('evidence_revision'))
+        qualified=all(isinstance(value,str) and 0<len(value)<=128 for value in revision)
+        settings=self._settings()
+        heartbeat=min(5.,settings['stale_after']/2)
+        now=self.monotonic()
+        publish=(not qualified or revision!=self._published_revision or now-self._published_at>=heartbeat)
+        if publish:
+            _save(self.directory/'snapshot.json',snapshot)
+            self._published_revision=revision if qualified else None
+            self._published_at=now
+        record['last_snapshot_published_at']=self.clock() if publish else record.get('last_snapshot_published_at')
+        return publish
+
     def serve(self):
         stop=threading.Event()
         signal.signal(signal.SIGTERM,lambda signum,frame:stop.set())
@@ -363,7 +406,7 @@ class TabMonitor:
                         cycle_deadline=started+self._settings()['cycle_timeout']
                         snapshot=observer.tick(deadline=started+self._settings()['cycle_timeout']*.65)
                         snapshot.update(origin='daemon',monitor_generation=record['generation'])
-                        _save(self.directory/'snapshot.json',snapshot)
+                        self.publish_observation(snapshot,record)
                         observed=dict(snapshot=snapshot)
                         from .tab_format_monitor import refresh_formatting
                         record['last_formatting']=refresh_formatting(self.root,observed.get('snapshot') or {},
@@ -376,7 +419,11 @@ class TabMonitor:
                         record['last_error']=getattr(error,'code','observation_unavailable')
                     record['last_cycle_at']=self.clock()
                     _save(self.directory/'owner.json',record)
-                    stop.wait(max(.05,self._settings()['interval']-(time.monotonic()-started)))
+                    settings=self._settings()
+                    delay=settings['interval']-(time.monotonic()-started)
+                    if math.isfinite(self._published_at):
+                        delay=min(delay,self._published_at+min(5.,settings['stale_after']/2)-self.monotonic())
+                    stop.wait(max(.05,delay))
             finally:
                 observer.close()
                 record.update(state='stopped',stopped_at=self.clock())
