@@ -75,7 +75,7 @@ class ObservationCache:
         if birth is not None and previous and previous[0] == birth and now < previous[1]:
             # Validate all retained descendants, not just the pane's shell.
             rows, complete = previous[2]
-            valid = all(self._birth(row['process']['pid']) ==
+            valid = all((birth if row['process']['pid']==pid else self._birth(row['process']['pid'])) ==
                         (row['process']['pid'],row['process']['boot_id'],str(row['process']['start_ticks']))
                         for row in rows)
             if valid and self._tree_matches(pid,rows):
@@ -96,7 +96,13 @@ class ObservationCache:
             self._observations.pop(workspace, None)
             self._put(self._generations,workspace,generation)
         panes = [p for w in snapshot['windows'] for p in w.get('panes', [])]
-        births = tuple(self._birth(p.get('pid')) for p in panes)
+        # Controller inventory already captured these same-user pane births.
+        # Reuse that host-owned evidence here; processes() independently checks
+        # the live root again before reusing any retained descendant tree.
+        births = tuple((p.get('pid'),p['process_generation'].get('boot_id'),
+                        str(p['process_generation'].get('start_time_ticks')))
+                       if isinstance(p.get('process_generation'),dict) else self._birth(p.get('pid'))
+                       for p in panes)
         now = self.monotonic()
         prior = self._observations.get(workspace)
         if not explicit_checks and not dirty_panes and prior and prior[0] == (generation,births) and all(b is not None for b in births) and now < prior[1]:

@@ -19,3 +19,9 @@ acknowledgement; fixture processes are reaped. Undefined-name lint/whitespace pa
 
 These functional checks do not prove the frozen CPU target. Actual100tab monitor
 plus formatting resource qualification remains #547; no caps were changed.
+
+The retained fast path also reuses the host inventory's captured root birth for
+its observation key, and avoids rereading that root a second time inside the
+same validation pass. It still obtains a fresh live root birth before cache
+reuse, checks every descendant birth and verifies process metadata. Existing
+replaced-birth/generation tests and the real descendant regression remain green.
