@@ -25,19 +25,25 @@ class FormattingMonitorTests(unittest.TestCase):
     def tmux(self,*args,check=True):
         return subprocess.run(['tmux','-S',self.socket,*args],text=True,capture_output=True,check=check,timeout=5).stdout
 
-    def test_native_expiry_still_renders_after_publisher_is_gone(self):
+    def test_publisher_lease_expires_dynamic_cue_without_dimming_type_or_name(self):
         from codex_wake.tab_format_expiry import expiring_options
-        options={'window-status-format':' #I CX running #W ',
-                 'window-status-current-format':'#[bold,underscore] #I CX running #W ',
-                 'window-status-style':'fg=white,bg=blue',
-                 'window-status-current-style':'fg=white,bg=blue,bold,underscore'}
-        self.tmux('set-option','-t','$0','@wake-format-clock','%s')
-        expired=expiring_options(options,observed_at=time.time()-21)
-        for name,value in expired.items():self.tmux('set-option','-w','-t','@0',name,value)
-        rendered=self.tmux('display-message','-p','-t','@0','#{E:window-status-format}')
-        self.assertIn('STALE',rendered);self.assertIn('colour238',rendered)
-        self.assertIn('kept name',rendered)
-        self.assertNotIn('#(',expired['window-status-format'])
+        from codex_wake.tab_format_projection import project
+        def trait(value):return dict(value=value,status='observed',observed_at=time.time(),source_available=True)
+        resource=dict(traits=dict(panes=[dict(traits=dict(harness=trait('codex'),build=trait('stock'),activity=trait('running')))]))
+        shown=project(resource,dict(preset='slate',_source_lease=True))
+        options=expiring_options(shown['options'],observed_at=time.time(),shared_lease=True,fallback_styles=shown['fallback_styles'])
+        self.tmux('set-option','-t','$0','@wake-format-clock',str(int(time.time()+20)))
+        for name,value in options.items():self.tmux('set-option','-w','-t','@0',name,value)
+        active=self.tmux('display-message','-p','-t','@0','#{E:window-status-format}')
+        self.assertIn('*',active)
+        self.tmux('set-option','-t','$0','@wake-format-clock',str(int(time.time()-1)))
+        expired=self.tmux('display-message','-p','-t','@0','#{E:window-status-format}')
+        self.assertNotIn('*',expired)
+        self.assertNotIn('STALE',expired)
+        self.assertNotIn('dim',expired)
+        self.assertIn('CX',expired)
+        self.assertIn('kept name',expired)
+        self.assertEqual(self.tmux('show-options','-w','-v','-t','@0','window-status-style').strip(),shown['options']['window-status-style'])
 
     def test_public_monitor_automatically_decorates_then_rollback_holds(self):
         from codex_wake.tab_monitor import TabMonitor
@@ -68,6 +74,36 @@ class FormattingMonitorTests(unittest.TestCase):
         report=monitor.execute('tabs.monitor.status',{})
         self.assertIn('last_formatting',report['monitor'])
         self.assertFalse(report['application_effects'])
+
+    def test_unchanged_projection_skips_window_commands_and_source_loss_clears_cues(self):
+        from unittest.mock import patch
+        from codex_wake.tab_format_monitor import refresh_formatting
+        self.tmux('new-window','-d','-t','fixture:','exec sleep 90')
+        observed=self.tabs.execute('tabs.list',{})
+        def trait(value):return dict(value=value,status='observed',observed_at=time.time(),source_available=True)
+        for resource in observed['resources']:
+            resource['traits']=dict(panes=[dict(pane_id=resource['window']['panes'][0]['pane_id'],
+                traits=dict(harness=trait('codex'),build=trait('stock'),activity=trait('running')))])
+        self.tabs.execute('tabs.format.configure',dict(workspace='work',preset='slate'))
+        self.assertEqual(refresh_formatting(self.root,observed,tabs=self.tabs)['status'],'completed')
+        original=subprocess.run;commands=[]
+        def counted(*args,**kwargs):
+            commands.append(args[0]);return original(*args,**kwargs)
+        with patch('subprocess.run',side_effect=counted):
+            repeated=dict(observed,resources=[dict(resource,monitor_observed_at=time.time()+5) for resource in observed['resources']])
+            self.assertEqual(refresh_formatting(self.root,repeated,tabs=self.tabs)['status'],'completed')
+        self.assertFalse(any('show-options' in command and '-w' in command for command in commands))
+        self.assertFalse(any('set-option' in command and '-w' in command for command in commands))
+        lost=dict(observed,resources=[dict(observed['resources'][0],monitor_unavailable=True)],
+                  unavailable=[dict(workspace='work',reason='source_lost')])
+        refresh_formatting(self.root,lost,tabs=self.tabs)
+        for wid in ('@0','@1'):
+            rendered=self.tmux('display-message','-p','-t',wid,'#{E:window-status-format}')
+            self.assertIn('CX',rendered)
+            self.assertNotIn('*',rendered)
+            self.assertNotIn('STALE',rendered)
+        self.tabs.execute('tabs.format.rollback',dict(workspace='work'))
+        self.assertNotIn('@wake-format-clock',self.tmux('show-options','-t','$0'))
 
     def test_refresh_uses_existing_sample_and_reports_unavailable_without_extending_ttl(self):
         from codex_wake.tab_format_monitor import refresh_formatting

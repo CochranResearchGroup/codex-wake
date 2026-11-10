@@ -25,11 +25,15 @@ _WARNING_HEALTH = frozenset(('unresponsive', 'offline', 'degraded', 'warning', '
 def _fresh(observation, now):
     if not isinstance(observation, dict):
         return False
+    if observation.get('source_available') is False:
+        return False
     if observation.get('status') in ('unknown', 'unsupported', 'stale', 'configured', None):
         return False
     if observation.get('freshness') in ('stale', 'unknown', 'unsupported', 'configured'):
         return False
     stamp = observation.get('observed_at')
+    if observation.get('source_available') is True:
+        return type(stamp) in (int, float) and math.isfinite(stamp) and stamp <= now
     return (type(stamp) in (int, float) and math.isfinite(stamp)
             and 0 <= now - stamp <= _FRESH_SECONDS)
 
@@ -52,13 +56,21 @@ def _dimension_traits(traits, resource):
     return values
 
 
+def _known(observation, now):
+    """Qualified static metadata survives source silence until identity invalidation."""
+    if not isinstance(observation, dict) or observation.get('status') not in ('observed', 'stale'):
+        return False
+    stamp=observation.get('observed_at')
+    return type(stamp) in (int,float) and math.isfinite(stamp) and stamp <= now
+
+
 def _type(traits, now):
     harness = traits.get('harness', {}).get('value', 'unknown')
     remote = traits.get('remote_host', {})
-    if harness in ('unknown', None) and _fresh(remote, now) and remote.get('value') not in ('unknown', None):
+    if harness in ('unknown', None) and _known(remote, now) and remote.get('value') not in ('unknown', None):
         return 'ssh'
     build = traits.get('build', {})
-    if harness == 'codex' and _fresh(build, now) and build.get('value') in ('stock', 'modded'):
+    if harness == 'codex' and _known(build, now) and build.get('value') in ('stock', 'modded'):
         return 'codex:' + build['value']
     if harness not in ('unknown', None):
         return str(harness)
@@ -67,9 +79,9 @@ def _type(traits, now):
     return 'unknown'
 
 
-def _observed_value(observation, now):
+def _observed_value(observation, now, *, static=False):
     value = observation.get('value') if isinstance(observation, dict) else None
-    return value if value not in (None, 'unknown') and _fresh(observation, now) else None
+    return value if value not in (None, 'unknown') and (_known(observation, now) if static else _fresh(observation, now)) else None
 
 
 def project(resource, policy=None, *, now=None):
@@ -81,6 +93,8 @@ def project(resource, policy=None, *, now=None):
     """
     now = time.time() if now is None else now
     policy = policy or {}
+    from .tab_format_expiry import leased_fragment
+    lease = leased_fragment if policy.get('_source_lease') else lambda value:value
     backend=resource.get('target',{}).get('presentation','unknown')
     def text(value,width=16):
         return _text(value,width,ascii_only=policy.get('ascii',True),space_style=backend=='psmux')
@@ -97,7 +111,7 @@ def project(resource, policy=None, *, now=None):
     for pane in panes:
         traits = pane.get('traits', {})
         dimensions = _dimension_traits(traits, resource)
-        qualified = {key: _observed_value(value, now) for key, value in dimensions.items()}
+        qualified = {key: _observed_value(value, now, static=key!='activity') for key, value in dimensions.items()}
         matches.append(qualified)
         pane_fresh = any(_fresh(value, now) for value in traits.values() if isinstance(value, dict))
         fresh = fresh or pane_fresh
@@ -126,11 +140,9 @@ def project(resource, policy=None, *, now=None):
         if any(all(values.get(key) == value for key, value in rule['match'].items()) for values in matches):
             colour = rule['colour']
             break
+    base_colour = colour
     activity = next(iter(activities)) if len(activities) == 1 else 'mixed'
     state = next((state for state in ('error', 'health-warning', 'waiting') if state in priorities), None)
-    if state is None and not fresh:
-        state = 'stale' if any(trait.get('observed_at') is not None for pane in panes
-                               for trait in pane.get('traits', {}).values() if isinstance(trait, dict)) else 'unknown'
     state = state or activity
     if state in _ATTENTION:
         marker, colour = _ATTENTION[state]
@@ -139,19 +151,19 @@ def project(resource, policy=None, *, now=None):
     pieces = [label]
     if badges['profile']:
         pieces.append(next(iter(badges['profile'])) if len(badges['profile']) == 1 else 'profiles:MIX')
-    if state != 'stale' or policy.get('show_stale', True):
-        pieces.append(marker)
+    pieces.append(lease(marker) if state != 'unknown' else marker)
     for key, enabled in (('model', 'show_model'), ('inference_provider', 'show_provider')):
         if policy.get(enabled) and badges[key]:
             pieces.append(next(iter(badges[key])) if len(badges[key]) == 1 else key + ':MIX')
     if policy.get('compact'):
         pieces = [] if kind in ('shell', 'unknown') else [label]
         cue = {'running': '*', 'waiting': '?', 'error': '!', 'health-warning': '!'}.get(state, '')
-        if cue:pieces.append(cue)
+        if cue:pieces.append(lease(cue))
     badge = ' '.join(pieces)
     compact_normal = f' #I:{badge + " " if badge else ""}#W '
     compact_current = f'#[bold,underscore] [#I:{badge + " " if badge else ""}#W] '
-    normal_style,current_style=styles(colour,state,policy.get('render_mode','full'))
+    normal_style,current_style=styles(colour,state if state!='unknown' else 'running',policy.get('render_mode','full'))
+    fallback_normal,fallback_current=styles(base_colour,state if state!='unknown' else 'running',policy.get('render_mode','full'))
     rendering=capabilities(resource.get('target',{}).get('presentation','unknown'),
         identity=resource.get('backend_identity'))
     rendering['requested_mode']=policy.get('render_mode','full')
@@ -161,6 +173,13 @@ def project(resource, policy=None, *, now=None):
     from .tab_format_presets import PALETTES,preset_options
     if policy.get('preset') in PALETTES and policy.get('render_mode','full')=='full':
         options=preset_options(policy['preset'],kind,label,state)
+        fallback_normal=options['window-status-style']
+        fallback_current=options['window-status-current-style']
+        cue={'running':'*','waiting':'?','error':'!','health-warning':'!'}.get(state,'')
+        if cue and policy.get('_source_lease'):
+            for key in ('window-status-format','window-status-current-format'):
+                options[key]=options[key].replace(']'+cue,']'+lease(cue))
     return dict(label=label, state=state, colour=colour,
+                fallback_styles={'window-status-style':fallback_normal,'window-status-current-style':fallback_current},
                 details=dict(panes=details,mixed=len(kinds)>1,activity=activity,rendering=rendering),
                 options=options)

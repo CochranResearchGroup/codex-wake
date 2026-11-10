@@ -34,7 +34,7 @@ class RenderingTests(unittest.TestCase):
         from codex_wake.tab_format_expiry import expiring_options
         shown=project(tab(),dict(render_mode='plain'),now=105)
         stale=expiring_options(shown['options'],observed_at=100,render_mode='plain')
-        self.assertIn('STALE',stale['window-status-current-format'])
+        self.assertNotIn('STALE',stale['window-status-current-format'])
         self.assertIn('[#I',stale['window-status-current-format'])
         self.assertNotIn('colour',stale['window-status-current-format'])
         self.assertNotIn('bg=red',stale['window-status-current-format'])

@@ -42,7 +42,7 @@ class PresetNativeTests(FormattingTests):
         self.assertEqual(self.tmux('show-options','-w','-t','@0'),before)
 
 class PresetExpiryTests(unittest.TestCase):
-    def test_quiet_expiry_dims_selected_palette_without_gray_background(self):
+    def test_quiet_observation_keeps_selected_palette_without_dimming(self):
         from codex_wake.tab_format_expiry import expiring_options
         options={'window-status-format':' #I:#W ','window-status-current-format':' [#I:#W] ',
                  'window-status-style':'fg=#aeb9ca,bg=#171c24',
@@ -50,6 +50,5 @@ class PresetExpiryTests(unittest.TestCase):
         expired=expiring_options(options,observed_at=100,show_stale=False)
         self.assertNotIn('STALE',str(expired))
         self.assertNotIn('colour238',str(expired))
-        self.assertIn('bg=#171c24',expired['window-status-format'])
-        self.assertIn('bg=#2b3544',expired['window-status-current-format'])
-        self.assertIn('dim',expired['window-status-format'])
+        self.assertEqual(expired,options)
+        self.assertNotIn('dim',str(expired))

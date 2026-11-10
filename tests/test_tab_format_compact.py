@@ -17,8 +17,8 @@ class CompactFormatTests(unittest.TestCase):
         self.assertEqual(shown['options']['window-status-style'],'fg=default,bg=default')
         expired=expiring_options(shown['options'],observed_at=100,render_mode='plain',show_stale=False)
         self.assertNotIn('STALE',str(expired))
-        self.assertIn('120',expired['window-status-format'])
-        self.assertEqual(project(resource,policy,now=125)['state'],'stale')
+        self.assertEqual(expired,shown['options'])
+        self.assertEqual(project(resource,policy,now=125)['state'],'unknown')
         self.assertNotIn('STALE',str(project(resource,policy,now=125)['options']))
 
     def test_compact_shell_is_just_native_number_and_name(self):

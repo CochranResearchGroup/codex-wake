@@ -48,7 +48,7 @@ class ProjectionTests(unittest.TestCase):
         tab=resource(dict(harness=trait('codex',at=1),health=trait('unresponsive',at=1),
                           activity=trait('waiting-for-input',at=1),error=trait('present')))
         self.assertEqual(project(tab,now=105)['state'],'error')
-        self.assertEqual(project(tab,now=121)['state'],'stale')
+        self.assertEqual(project(tab,now=121)['state'],'unknown')
         tab=resource(dict(session_presence=trait('absent'),health=trait('unknown',status='unsupported'),
                           error=trait('absent')))
         shown=project(tab,now=105)
@@ -67,6 +67,28 @@ class ProjectionTests(unittest.TestCase):
         self.assertNotEqual(running['options']['window-status-style'],idle['options']['window-status-style'])
         for shown in (running,idle):
             self.assertIn('bold,underscore',shown['options']['window-status-current-style'])
+
+    def test_quiet_valid_source_keeps_running_and_type_without_freshness_dimming(self):
+        tab=resource(dict(harness=trait('codex',at=1),build=trait('modded',at=1),
+                          activity=trait('running',at=1,source_available=True,source_epoch='one')))
+        early=project(tab,dict(preset='slate'),now=5)
+        quiet=project(tab,dict(preset='slate'),now=1000)
+        self.assertEqual(quiet['state'],'running')
+        self.assertEqual(quiet['label'],'CX+')
+        self.assertEqual(quiet['options'],early['options'])
+        self.assertNotIn('STALE',str(quiet['options']))
+        self.assertNotIn('dim',str(quiet['options']))
+
+    def test_source_loss_removes_cues_but_retains_inspect_evidence_and_type(self):
+        tab=resource(dict(harness=trait('codex',at=1),build=trait('stock',at=1),
+                          activity=trait('running',source_available=False),
+                          error=trait('present',source_available=False)))
+        shown=project(tab,dict(preset='slate'),now=105)
+        self.assertEqual(shown['label'],'CX')
+        self.assertEqual(shown['state'],'unknown')
+        self.assertNotIn('*',shown['options']['window-status-format'])
+        self.assertNotIn('!',shown['options']['window-status-format'])
+        self.assertEqual(shown['details']['panes'][0]['attention']['error']['value'],'present')
 
     def test_untrusted_badges_and_native_manual_name_are_literal_on_tmux(self):
         import shutil
