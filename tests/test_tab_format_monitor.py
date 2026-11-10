@@ -150,7 +150,7 @@ class FormattingMonitorTests(unittest.TestCase):
         from codex_wake.tab_format_monitor import refresh_formatting
         observed=self.tabs.execute('tabs.list',{})
         self.assertEqual(refresh_formatting(self.root,observed,tabs=self.tabs)['status'],'completed')
-        now=time.monotonic();commands=[];original=subprocess.run
+        now=time.monotonic();wall=time.time();commands=[];original=subprocess.run
         def counted(*args,**kwargs):
             commands.append(args[0]);return original(*args,**kwargs)
         # Substitute only the scheduler clock boundary, leaving native wall-clock
@@ -158,9 +158,15 @@ class FormattingMonitorTests(unittest.TestCase):
         with patch('codex_wake.tab_format_monitor.time',SimpleNamespace(monotonic=lambda:now+6)),patch('subprocess.run',side_effect=counted):
             result=refresh_formatting(self.root,observed,tabs=self.tabs)
         self.assertEqual(result['status'],'completed')
+        self.assertFalse(commands,'Quiet projection need not perform native IO at six seconds.')
+        clock=SimpleNamespace(time=lambda:wall+11,monotonic=time.monotonic,sleep=time.sleep)
+        with patch('codex_wake.tab_format_monitor.time',SimpleNamespace(monotonic=lambda:now+11)),patch('codex_wake.tab_formatting.time',clock),patch('subprocess.run',side_effect=counted):
+            result=refresh_formatting(self.root,observed,tabs=self.tabs)
+        self.assertEqual(result['status'],'completed')
         self.assertTrue(commands)
         lease=int(self.tmux('show-options','-v','-t','$0','@wake-format-clock'))
-        self.assertGreater(lease,time.time())
+        self.assertGreater(lease,wall+29)
+        self.assertLessEqual(lease,wall+31)
 
     def test_trusted_revision_lease_renewal_avoids_repeated_physical_inventory(self):
         from types import SimpleNamespace
@@ -174,12 +180,36 @@ class FormattingMonitorTests(unittest.TestCase):
         now=time.monotonic();commands=[];original=subprocess.run
         def counted(*args,**kwargs):
             commands.append(args[0]);return original(*args,**kwargs)
-        with patch('codex_wake.tab_format_monitor.time',SimpleNamespace(monotonic=lambda:now+6,time=time.time)),patch('subprocess.run',side_effect=counted):
+        with patch('codex_wake.tab_format_monitor.time',SimpleNamespace(monotonic=lambda:now+11,time=time.time)),patch('subprocess.run',side_effect=counted):
             result=refresh_formatting(self.root,observed,tabs=self.tabs)
         self.assertEqual(result['status'],'completed')
         self.assertFalse(any('list-panes' in command for command in commands),commands)
         self.assertTrue(any('show-options' in command for command in commands))
         self.assertLessEqual(len(commands),2)
+
+    def test_failed_quiet_renewal_retries_on_next_tick_before_twenty_second_expiry(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from codex_wake.tab_format_monitor import refresh_formatting
+        observed=dict(self.tabs.execute('tabs.list',{}),origin='daemon',projection_revision='steady')
+        for resource in observed['resources']:resource['projection_revision']='window'
+        self.assertEqual(refresh_formatting(self.root,observed,tabs=self.tabs)['status'],'completed')
+        mono=time.monotonic();wall=time.time();original=self.transport.formatting
+        def unavailable(action,arguments,deadline):
+            if action=='read-session':raise OSError('temporary native read failure')
+            return original(action,arguments,deadline)
+        self.transport.formatting=unavailable
+        with patch('codex_wake.tab_format_monitor.time',SimpleNamespace(monotonic=lambda:mono+11,time=time.time)):
+            report=refresh_formatting(self.root,observed,tabs=self.tabs)
+        self.assertEqual(report['status'],'partial')
+        self.transport.formatting=original
+        clock=SimpleNamespace(time=lambda:wall+12,monotonic=time.monotonic,sleep=time.sleep)
+        with patch('codex_wake.tab_format_monitor.time',SimpleNamespace(monotonic=lambda:mono+12,time=time.time)),patch('codex_wake.tab_formatting.time',clock):
+            report=refresh_formatting(self.root,observed,tabs=self.tabs)
+        self.assertEqual(report['status'],'completed')
+        lease=int(self.tmux('show-options','-v','-t','$0','@wake-format-clock'))
+        self.assertGreater(lease,wall+30)
+        self.assertLessEqual(lease,wall+32)
 
     def test_trusted_revision_keeps_native_manual_custody_audit(self):
         from types import SimpleNamespace

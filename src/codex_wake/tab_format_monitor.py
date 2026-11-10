@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 import time
 
-LEASE_RENEW_SECONDS=5.0
+LEASE_RENEW_SECONDS=10.0
 _DIMENSIONS=('harness','build','profile','account','model_identity','model',
              'inference_provider','execution_host','remote_host','session_presence',
              'activity','health','error')
@@ -67,7 +67,7 @@ def _projection_key(snapshot):
 
 
 def refresh_formatting(root,snapshot,*,tabs=None,deadline=None,resources_loader=None):
-    """Project semantic changes immediately; renew the shared lease every five seconds.
+    """Project semantic changes immediately; renew the shared lease every ten seconds.
 
     The cache belongs to the retained trusted host owner, never a global/per-tab
     process. Its one small result is invalidated by source/binding changes or any
