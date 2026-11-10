@@ -15,14 +15,21 @@ def register_parser(subparsers):
 def render_monitor(value):
     """Render actual status or retained operation uncertainty without inventing state."""
     from .tab_observer import render_status
-    if isinstance(value.get('monitor'),dict):
-        return render_status(value)
+    payload=value if isinstance(value.get('monitor'),dict) else None
     result=value.get('result')
     retained=result.get('operation') if isinstance(result,dict) else None
     retained=retained if isinstance(retained,dict) else {}
     outcome=retained.get('result')
     if isinstance(outcome,dict) and isinstance(outcome.get('monitor'),dict):
-        return render_status(outcome)
+        payload=outcome
+    if payload is not None:
+        if 'snapshot' in payload:
+            return render_status(payload)
+        monitor=payload['monitor'];settings=monitor.get('settings') or {}
+        return ('Tab monitor: '+str(monitor.get('status','unknown'))+'\nTiers: '+
+                ', '.join(key+'='+('on' if settings.get(key,True) else 'off')
+                          for key in ('activity','health','errors'))+'\n'
+                'Inspect current inventory with tabs monitor-status --json.')
     outcome_status=outcome.get('status') if isinstance(outcome,dict) else None
     phase=('uncertain' if retained.get('phase')=='uncertain' else
            outcome_status if outcome_status in ('partial','uncertain','held') else

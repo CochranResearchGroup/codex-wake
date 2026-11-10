@@ -192,13 +192,25 @@ class TabMonitor:
                                   capabilities=record.get('capabilities',[]) if record else []),
                     snapshot=snapshot,application_effects=False)
 
+    def _control_status(self, **flags):
+        """Keep mutation acknowledgements below the retained-operation bound.
+
+        Inventory and potentially large per-workspace diagnostics remain in the
+        separate status/refresh reads, never the journaled start/stop result.
+        """
+        value=self.status()
+        monitor=value['monitor']
+        fields=('status','process','generation','settings','last_error','capabilities')
+        return dict(monitor={key:monitor[key] for key in fields},
+                    application_effects=False,**flags)
+
     def start(self,arguments):
         record,running=self._running()
         settings=self._settings(arguments)
         if running:
             if arguments and any(self._settings()[key]!=value for key,value in arguments.items()):
                 raise InventoryError('monitor_running','Stop the current monitor before changing its settings.')
-            return dict(self.status(),already_running=True)
+            return self._control_status(already_running=True)
         _save(self.directory/'settings.json',settings)
         env=dict(os.environ)
         for key in ('CODEX_THREAD_ID','CODEX_TURN_ID','CODEX_SESSION_ID'):
@@ -211,7 +223,7 @@ class TabMonitor:
         while time.monotonic()<until:
             record,running=self._running()
             if running:
-                return dict(self.status(),already_running=False)
+                return self._control_status(already_running=False)
             if child.poll() is not None:
                 raise InventoryError('monitor_start_failed','Monitor exited before publishing a verified owner.')
             time.sleep(.02)
@@ -231,15 +243,15 @@ class TabMonitor:
             if child is not None:
                 try:child.wait(timeout=.5)
                 except subprocess.TimeoutExpired:_OWNED_CHILDREN[str(self.root)]=child
-            return dict(self.status(),already_stopped=True)
+            return self._control_status(already_stopped=True)
         expected=record['process']
         if _identity(expected['pid'])!=expected:
-            return dict(self.status(),already_stopped=True)
+            return self._control_status(already_stopped=True)
         os.kill(expected['pid'],signal.SIGTERM)
         until=time.monotonic()+timeout
         while time.monotonic()<until and _identity(expected['pid'])==expected:
             time.sleep(.02)
-        result=self.status()
+        result=self._control_status()
         if result['monitor']['status']!='running':
             child=_OWNED_CHILDREN.pop(str(self.root),None)
             if child is not None:
