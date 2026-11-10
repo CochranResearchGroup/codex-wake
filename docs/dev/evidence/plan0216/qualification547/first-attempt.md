@@ -154,3 +154,11 @@ source/100binding/completed-formatting/newer-snapshot barrier plus10active/waiti
 turn states. Then measure120staggered state changes at2/s with all10remaining
 turn-active. No CPU-based settling is used. Caps remain1%/5%; no new benchmark has
 run yet with this corrected workload pending the next frozen product source.
+
+Corrected-sourcec65c4eb9 diagnostic used100truly idle conversations and a separate
+10activation burst/barrier. Idle1.296%onecore, active8.883%, still not accepted.
+Both barriers qualified100bindings, healthy sources and applied/no-failure
+formatting; active count0then10. Activation was separately6.189wall seconds/
+0.37CPU seconds. All20ordinary events projected, p951.017s, sampledRSS43.69MB,
+owned controls0. No wheel rebuilt; root notified that another warm causal profile
+is needed rather than attributing remaining work from an older source variant.
