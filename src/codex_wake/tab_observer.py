@@ -300,6 +300,7 @@ class TabObserver:
                 if pane.get('native_endpoint') != endpoint or binding.get('conversation_id') != thread_id:
                     continue
                 self._dirty_resources.add(self._resource_key(resource))
+                self.owner.observation_cache.mark_dirty(resource['target']['workspace'],[pane['pane_id']])
                 expected = binding.get('process') or {}
                 current = process_identity(expected.get('pid', 0))
                 valid = bool(current and str(current.get('start_time_ticks')) == str(expected.get('start_ticks'))
@@ -391,6 +392,39 @@ class TabObserver:
         self.last_inventory = self.monotonic()
         self.costs['inventory_passes'] += 1
 
+    def _fallback_schedule(self):
+        """Slow only fully qualified continuous native idle workspaces."""
+        fast=min(5.,max(.05,float(self.settings['fallback_interval'])))
+        cache=self.owner.observation_cache
+        if cache.has_dirty():
+            return fast,'recent_pane_change'
+        if self.unavailable or self.source_errors:
+            return fast,'source_unavailable'
+        if not self.resources:
+            return fast,'inventory_empty'
+        for resource in self.resources:
+            if resource.get('monitor_unavailable') or not resource.get('presentation_source',{}).get('available'):
+                return fast,'presentation_unavailable'
+            panes=resource.get('traits',{}).get('panes',[])
+            if not panes:
+                return fast,'pane_evidence_unknown'
+            for pane in panes:
+                activity=pane.get('traits',{}).get('activity',{})
+                if (not pane.get('binding') or not pane.get('native_endpoint')
+                        or activity.get('source_available') is not True
+                        or activity.get('status')!='observed'):
+                    return fast,'activity_evidence_unknown'
+                if activity.get('value')!='idle':
+                    return fast,'activity_'+str(activity.get('value','unknown'))
+        return 30.,'qualified_native_idle'
+
+    def _scheduler_status(self):
+        interval,reason=self._fallback_schedule()
+        age=max(0.,self.monotonic()-self.last_inventory) if math.isfinite(self.last_inventory) else None
+        return dict(fallback_interval_seconds=interval,reason=reason,inventory_age_seconds=age,
+                    recent_dirty=self.owner.observation_cache.has_dirty(),
+                    overdue=age is not None and age>interval+max(.1,self.settings.get('interval',1.)))
+
     def tick(self, *, deadline=None):
         if self.closed:
             raise ValueError('Observer is closed.')
@@ -412,6 +446,8 @@ class TabObserver:
                 break
             for event in feed.poll():
                 transport = self.owner.workspaces[name]['transport']
+                previous=transport.value
+                previous_epoch=self.epochs.get('tmux:'+name)
                 valid = self._accept('tmux:'+name, event)
                 if not valid or event['kind'] == 'unavailable':
                     transport.available = False
@@ -424,7 +460,13 @@ class TabObserver:
                 else:
                     self.source_errors.pop('tmux:'+name,None)
                     transport.value, transport.available = event['data']['snapshot'], True
-                self.owner.observation_cache.invalidate(name)
+                same_source=bool(valid and event['kind']=='update' and event.get('epoch')==previous_epoch)
+                self.owner.observation_cache.invalidate(name,preserve_dirty=same_source)
+                if same_source and previous is not None:
+                    old={window['window_id']:window for window in previous.get('windows',[])}
+                    changed=[pane['pane_id'] for window in transport.value.get('windows',[])
+                             if window!=old.get(window['window_id']) for pane in window.get('panes',[])]
+                    self.owner.observation_cache.mark_dirty(name,changed)
                 dirty = True
         native_items=list(self.native.items())
         offset=self.native_cursor % len(native_items) if native_items else 0
@@ -437,7 +479,8 @@ class TabObserver:
             if hasattr(feed,'refresh_metadata') and (age>=30 or (endpoint in self.metadata_due and age>=1)):
                 self._native_events(endpoint,feed.refresh_metadata())
                 self.metadata_due.discard(endpoint)
-        if dirty or started-self.last_inventory >= self.settings['fallback_interval']:
+        fallback_interval,_=self._fallback_schedule()
+        if dirty or started-self.last_inventory >= fallback_interval:
             self._inventory(deadline)
         now = self.clock()
         self.costs['ticks'] += 1
@@ -473,7 +516,7 @@ class TabObserver:
                     backlog=sum(feed.status().get('backlog', feed.status().get('pending_commands', 0))
                                 for feed in [*self.tmux.values(), *self.native.values()]),
                     tiers={k:self.settings[k] for k in ('activity','health','errors','health_interval','error_interval')},
-                    fallback_sources=len(self.fallback_sources),
+                    fallback_sources=len(self.fallback_sources),scheduler=self._scheduler_status(),
                     checks=self.owner.observation_cache.checks.status(),
                     unknown_reasons=sorted(set(self.source_errors.values()) | {v.get('reason',v.get('code','observation_unavailable'))
                                             for v in self.unavailable}), closed=self.closed)
