@@ -27,7 +27,7 @@ class TaskBriefCommandTests(unittest.TestCase):
             root = directory / 'wake'
             worker = BriefAuthority('native:worker', 'worker', ('task-1',))
             def command(verb, *extra, authority=None):
-                args = parser.parse_args(['task-briefs', verb, '--task-id', 'task-1', *extra])
+                args = parser.parse_args(['task-briefs', verb, '--task-id', 'task-1', *extra, '--json'])
                 output = StringIO()
                 with redirect_stdout(output):
                     code = task_briefs_command(args, root, authority=authority)
@@ -72,7 +72,7 @@ class TaskBriefCommandTests(unittest.TestCase):
                 with redirect_stdout(output):
                     code = run(['--wake-root', str(directory / 'wake'), 'task-briefs', 'propose',
                         '--task-id', 'task', '--brief-json', json.dumps(dict(content, dispatch=options)),
-                        '--bus-root', str(bus.root), '--operator-capability', str(capability)])
+                        '--bus-root', str(bus.root), '--operator-capability', str(capability), '--json'])
                 self.assertEqual(code, 5, output.getvalue())
                 self.assertFalse(json.loads(output.getvalue())['success'])
 
@@ -88,7 +88,7 @@ class TaskBriefCommandTests(unittest.TestCase):
             parser = argparse.ArgumentParser()
             register_parser(parser.add_subparsers(dest='command', required=True))
             def command(verb, *extra):
-                args = parser.parse_args(['task-briefs', verb, '--task-id', 'task', *extra])
+                args = parser.parse_args(['task-briefs', verb, '--task-id', 'task', *extra, '--json'])
                 output = StringIO()
                 with redirect_stdout(output):
                     code = task_briefs_command(args, root / 'wake', authority=worker)

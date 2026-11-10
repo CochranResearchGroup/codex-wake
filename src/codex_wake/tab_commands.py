@@ -1,5 +1,7 @@
 """Controller attachment CLI adapter over the host-owned operation service."""
 import json
+
+from .cli_output import emit
 import subprocess
 
 
@@ -8,6 +10,7 @@ def register_parser(subparsers):
     commands = parser.add_subparsers(dest='tab_command', required=True)
     for verb in ('list','show','preview','apply','undo','capture','input'):
         item = commands.add_parser(verb)
+        item.add_argument('--json', dest='as_json', action='store_true')
         item.add_argument('--arguments', type=json.loads, default={})
     return parser
 
@@ -21,7 +24,7 @@ def command(args, owner=None):
         if args.tab_command=='result':
             from .controller_runtime import ControllerRuntime
             value=ControllerRuntime(args.wake_root).local_tab_result('tab-cli-'+args.request_id)
-            print(json.dumps(value,sort_keys=True));return 0
+            emit(value, args);return 0
         if owner is None:
             from .controller_tabs import controller_tabs_from_root
             owner = controller_tabs_from_root(args.wake_root)
@@ -40,15 +43,18 @@ def command(args, owner=None):
             arguments['workspace']=select_workspace(owner,selector,server=server,interactive=not getattr(args,'as_json',False))
         value = owner.execute(operation,arguments) if operation in owner.READS else operator_execute(operation,arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
         readable=render(value) if operation.startswith('tabs.session.') and not getattr(args,'as_json',False) else None
-        print(readable if readable is not None else json.dumps(value, sort_keys=True))
+        if readable is not None:
+            print(readable)
+        else:
+            emit(value, args)
         from .tab_result import exit_status
         return exit_status(value)
     except (WakeError, OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as error:
-        print(json.dumps(dict(status='held', error=dict(
+        emit(dict(status='held', error=dict(
             code=getattr(error,'code','configuration_unavailable'),
             message=str(error) if isinstance(error,WakeError) else
                     'Tab configuration is unavailable or invalid; inspect the selected controller and refresh workspaces.',
-            **({'candidates':error.candidates} if hasattr(error,'candidates') else {})))))
+            **({'candidates':error.candidates} if hasattr(error,'candidates') else {}))), args)
         return 2
 
 

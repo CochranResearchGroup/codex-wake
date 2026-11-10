@@ -1,6 +1,7 @@
 """CLI/MCP caller adapter for approved task briefs; no model-supplied roles."""
 from __future__ import annotations
 
+from .cli_output import emit
 import json
 from pathlib import Path
 
@@ -94,10 +95,10 @@ def execute_task_briefs(args, root, *, authority=None):
 def task_briefs_command(args, root, *, authority=None):
     try:
         result = execute_task_briefs(args, root, authority=authority)
-        print(json.dumps(dict(schema_version=1, success=True, brief=result), sort_keys=True))
+        emit(dict(schema_version=1, success=True, brief=result), args)
         return 0
     except (WakeError, OSError, ValueError, KeyError, TypeError) as error:
         code = getattr(error, 'code', 'brief_unavailable')
         message = str(error) if isinstance(error, WakeError) else 'task brief data or evidence is unavailable'
-        print(json.dumps(dict(schema_version=1, success=False, error=dict(code=code, message=message)), sort_keys=True))
+        emit(dict(schema_version=1, success=False, error=dict(code=code, message=message)), args)
         return 5

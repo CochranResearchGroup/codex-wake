@@ -25,7 +25,7 @@ class ReattachPublicTests(unittest.TestCase):
         def cli(*args):
             out=io.StringIO()
             with patch('codex_wake.controller_tabs.controller_tabs_from_root',return_value=tabs),contextlib.redirect_stdout(out):
-                code=run(['--wake-root',str(self.root),'tabs',*args])
+                code=run(['--wake-root',str(self.root),'tabs',*args,'--json'])
             self.assertEqual(code,0,out.getvalue())
             return json.loads(out.getvalue())
         preview=cli('reattach-preview','--workspace','source','--window',self.source_window,'--destination','destination')

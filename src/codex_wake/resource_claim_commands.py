@@ -1,6 +1,7 @@
 """CLI/MCP adapter for host-verified cooperative mutation-resource custody."""
 from __future__ import annotations
 
+from .cli_output import emit
 from pathlib import Path
 import time
 
@@ -113,9 +114,9 @@ def run(args, root, *, native_context=None, observer=None, now=time.time):
                 return reader(dict(identity, binding_id=args.binding_id, binding_sha256=args.binding_sha256))
         result = execute(action, arguments, root, native_context=native_context,
                          observer=observer, operator=operator, now=now)
-        print(json.dumps(result, sort_keys=True))
+        emit(result, args)
         return 0
     except (WakeError, OSError, ValueError, KeyError, TypeError) as error:
-        print(json.dumps(dict(status='held', error=dict(code=getattr(error, 'code', 'resource_unavailable'),
-            message=str(error) if isinstance(error, WakeError) else 'Resource custody or runtime evidence is unavailable.')), sort_keys=True))
+        emit(dict(status='held', error=dict(code=getattr(error, 'code', 'resource_unavailable'),
+            message=str(error) if isinstance(error, WakeError) else 'Resource custody or runtime evidence is unavailable.')), args)
         return 2

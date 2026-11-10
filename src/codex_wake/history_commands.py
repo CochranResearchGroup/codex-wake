@@ -1,5 +1,7 @@
 """History CLI/MCP adapters; authenticated context is never an operation input."""
 import json
+
+from .cli_output import emit
 import os
 from pathlib import Path
 import socket
@@ -88,7 +90,7 @@ def command(args, root, *, runtime=None, now=None):
     except (WakeError, ValueError, OSError) as error:
         value = dict(schema_version=1, operation='history.' + args.history_verb, status='failed',
                      error=dict(code=getattr(error, 'code', 'unauthorized_target'), message='history caller could not be authorized'))
-    print(json.dumps(value, sort_keys=True))
+    emit(value, args)
     return 0 if value['status'] == 'completed' else 2
 
 
@@ -190,5 +192,5 @@ def import_command(args, root):
     except (WakeError, ValueError, OSError, TypeError) as error:
         value = dict(schema_version=1, operation='history.import', status='failed',
             error=dict(code=getattr(error, 'code', 'invalid_argument'), message=str(error)))
-    print(json.dumps(value, sort_keys=True))
+    emit(value, args)
     return 0 if value['status'] == 'completed' and value.get('result', {}).get('operation', {}).get('execution') == 'completed' else 2

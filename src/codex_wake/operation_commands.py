@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+
+from .cli_output import emit
 from pathlib import Path
 import sys
 
@@ -78,14 +80,23 @@ def command(args, root=None):
             if args.operation_verb == 'rebind': arguments.update(successor=args.successor, binding=args.binding)
         value = execute(operation, arguments, root)
         record = value['result']['operation']
-        print(json.dumps(dict(event='operation_status', operation_id=record['operation_id'], correlation_id=record['correlation_id'],
-            execution=record['execution'], wait=value['result'].get('wait')), sort_keys=True), file=sys.stderr)
+        status = dict(event='operation_status', operation_id=record['operation_id'], correlation_id=record['correlation_id'],
+            execution=record['execution'], wait=value['result'].get('wait'))
+        if args.operation_verb == 'stream':
+            print(json.dumps(status, sort_keys=True), file=sys.stderr)
+        else:
+            emit(status, args, file=sys.stderr)
         if not args.as_json and args.operation_verb != 'stream' and record.get('answer'):
             print(record['answer']['text'], end='' if record['answer']['text'].endswith('\n') else '\n')
-        else: print(json.dumps(value, sort_keys=True))
+        elif args.operation_verb == 'stream': print(json.dumps(value, sort_keys=True))
+        else: emit(value, args)
         return 0
     except (ValueError, OSError, KeyError) as error:
-        print(json.dumps(dict(schema_version=1, operation=operation, status='failed', error=dict(code=getattr(error, 'code', 'invalid_argument'), message=str(error))), sort_keys=True))
+        value = dict(schema_version=1, operation=operation, status='failed', error=dict(code=getattr(error, 'code', 'invalid_argument'), message=str(error)))
+        if args.operation_verb == 'stream':
+            print(json.dumps(value, sort_keys=True))
+        else:
+            emit(value, args)
         return 2
 
 

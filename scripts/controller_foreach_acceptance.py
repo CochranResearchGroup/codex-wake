@@ -80,7 +80,8 @@ def main():
         sender='11111111-1111-4111-8111-111111111111'
         path=root/'controller-messaging.json';path.write_text(json.dumps(dict(version=1,local_caller=caller,flow_callers={sender:dict(caller,grant_id='native-fixture')})));path.chmod(0o600)
         def cli(group,verb,args):
-            value=subprocess.run([sys.executable,'-m','codex_wake.cli','--wake-root',str(root),group,verb,'--arguments',json.dumps(args)],text=True,capture_output=True)
+            output_flags = ['--json'] if group in ('flows', 'flow-sessions') else []
+            value=subprocess.run([sys.executable,'-m','codex_wake.cli','--wake-root',str(root),group,verb,'--arguments',json.dumps(args),*output_flags],text=True,capture_output=True)
             assert value.returncode==0,(value.stdout,value.stderr)
             return json.loads(value.stdout)['result']
         def definition(version,mode,pinned,items):

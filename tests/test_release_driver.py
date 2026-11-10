@@ -52,7 +52,7 @@ class ReleasePreparationTests(unittest.TestCase):
                 targets=[dict(host=socket.gethostname(), environment=os.environ.get('WSL_DISTRO_NAME') or os.name)]))))
             messaging.chmod(0o600)
             cli = subprocess.run([sys.executable, '-m', 'codex_wake.entrypoint', '--wake-root', str(root),
-                'builds', 'status', '--run-id', state['run_id']], capture_output=True, text=True)
+                'builds', 'status', '--run-id', state['run_id'], '--json'], capture_output=True, text=True)
             self.assertEqual(cli.returncode, 0, cli.stderr)
             native, failed = CommandRunner(wake_root=root).call('wake_builds_status', {'run_id': state['run_id']})
             self.assertFalse(failed, native)

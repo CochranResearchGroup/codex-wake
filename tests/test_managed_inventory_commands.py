@@ -67,7 +67,7 @@ class ManagedInventoryCommandTests(unittest.TestCase):
         result = execute('enroll', {'conversation_id': THREAD}, self.root / 'wake',
                          native_context=native_context(), observer=observer)
         self.assertEqual(result['status'], 'suppressed')
-        args = parser.parse_args(['agents', 'reenable', '--managed-agent-id', agent])
+        args = parser.parse_args(['agents', 'reenable', '--managed-agent-id', agent, '--json'])
         with patch('sys.stdout', new_callable=io.StringIO) as out:
             self.assertEqual(run(args, self.root / 'wake'), 2)
         self.assertEqual(json.loads(out.getvalue())['error']['code'], 'policy_denied')

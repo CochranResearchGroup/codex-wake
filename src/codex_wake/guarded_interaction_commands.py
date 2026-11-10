@@ -1,4 +1,5 @@
 """Public operator CLI and read-only model inspection seam for guarded menus."""
+from .cli_output import emit
 from pathlib import Path
 import json
 from .guarded_interactions import GuardedInteractions, MenuError
@@ -61,10 +62,10 @@ def run(args, root):
             _private(path)
             arguments['binding'] = json.loads(path.read_text())
         value = execute(args.interaction_command, arguments, root, operator=getattr(args, 'operator', False))
-        print(json.dumps(value, sort_keys=True))
+        emit(value, args)
         return 0 if value.get('state') not in ('uncertain', 'held') else 5
     except (ValueError, OSError, KeyError, TypeError) as exc:
-        print(json.dumps(dict(error=dict(code=getattr(exc, 'code', 'guarded_interaction_refused'), message=str(exc)))))
+        emit(dict(error=dict(code=getattr(exc, 'code', 'guarded_interaction_refused'), message=str(exc))), args)
         return 5
 
 

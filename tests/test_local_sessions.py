@@ -36,7 +36,7 @@ class LocalSessionTests(unittest.TestCase):
             with unix_serve(handler,str(root/'native.sock')) as server:
                 thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
                 def call(*args):
-                    p=subprocess.run([sys.executable,'-m','codex_wake','--wake-root',str(root),'control',*args,'--endpoint',endpoint],capture_output=True,text=True)
+                    p=subprocess.run([sys.executable,'-m','codex_wake','--wake-root',str(root),'control',*args,'--endpoint',endpoint,'--json'],capture_output=True,text=True)
                     return p,json.loads(p.stdout)
                 p,listing=call('list');self.assertEqual(p.returncode,0,p.stderr)
                 self.assertEqual([x['thread_id'] for x in listing['sessions']],['one','two'])

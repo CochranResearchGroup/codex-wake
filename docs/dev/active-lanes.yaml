@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P217
+    owner: primary / ecochran76
+    objective: Ship readable human CLI output and refreshed shell completion
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/548]
+    plan: docs/dev/plans/0217-2026-11-10-human-cli-output.md
+    branch: feat/human-cli-output-217
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-10
+    disposition: Operator authorized PR/merge/deploy/cleanup; Python CLI only, native owners unchanged
   - id: P212
     owner: primary
     objective: Fix shared native MCP mailbox actor bootstrap

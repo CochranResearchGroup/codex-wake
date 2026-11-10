@@ -1,6 +1,8 @@
 """Flow command/schema adapter; definitions never supply executable host code."""
 from pathlib import Path
 import json
+
+from .cli_output import emit
 import os
 import socket
 
@@ -70,6 +72,7 @@ def register_parser(subparsers):
     verbs = parser.add_subparsers(dest='flow_verb', required=True)
     for name, spec in tool_specs().items():
         item = verbs.add_parser(spec[1].split('.')[1])
+        item.add_argument('--json', dest='as_json', action='store_true')
         item.add_argument('--arguments', type=json.loads, required=True)
     return parser
 
@@ -88,7 +91,7 @@ def protected_execute(operation, arguments, root, *, authority=None, protected_t
 
 def command(args, root):
     result = protected_execute('flows.' + args.flow_verb, args.arguments, root)
-    print(json.dumps(result, sort_keys=True))
+    emit(result, args)
     return 0 if result['status'] == 'completed' else 2
 
 

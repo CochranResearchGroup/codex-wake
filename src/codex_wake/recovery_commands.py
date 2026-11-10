@@ -1,6 +1,8 @@
 """Shared public contracts for explicit scoped controller recovery policies."""
 import json
 
+from .cli_output import emit
+
 
 def tool_specs():
     from .notice_commands import tool_specs as notice_specs
@@ -36,10 +38,12 @@ def register_parser(subparsers):
     parser=subparsers.add_parser('recovery',help='inspect, drive and deactivate explicit scoped recovery policies')
     commands=parser.add_subparsers(dest='recovery_verb',required=True)
     for verb in ('list','show','configure','enable','disable','check','tick','apply','reconcile'):
-        commands.add_parser(verb).add_argument('--arguments',type=json.loads,required=True)
+        item = commands.add_parser(verb)
+        item.add_argument('--json', dest='as_json', action='store_true')
+        item.add_argument('--arguments',type=json.loads,required=True)
 
 
 def command(args,root):
     result=protected_execute('recovery.'+args.recovery_verb,args.arguments,root)
-    print(json.dumps(result,sort_keys=True))
+    emit(result, args)
     return 0 if result['status']=='completed' else 2

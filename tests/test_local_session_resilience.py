@@ -104,7 +104,7 @@ class SessionResilienceTests(unittest.TestCase):
                 cancelled=state['owner'].cancel(identifier)['result']['operation']
                 self.assertEqual(cancelled['cancellation'],'uncertain')
                 self.assertEqual(state['interrupts'],[])
-                caller=subprocess.run([sys.executable,'-m','codex_wake','--wake-root',str(state['root']),'control','prompt','thread:one',
+                caller=subprocess.run([sys.executable,'-m','codex_wake','--wake-root',str(state['root']),'control','prompt','thread:one','--json',
                     'Bounded fixture prompt','--idempotency-key','intent','--endpoint',state['endpoint']],capture_output=True,text=True,timeout=10)
                 self.assertEqual(caller.returncode,3,caller.stderr)
                 self.assertEqual(json.loads(caller.stdout)['result']['operation']['operation_id'],identifier)

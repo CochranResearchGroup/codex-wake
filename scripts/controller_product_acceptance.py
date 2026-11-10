@@ -55,6 +55,8 @@ def main():
         with (root / 'events.jsonl').open('a') as stream:
             stream.write(json.dumps(events[-1], sort_keys=True) + '\n')
     def call(*command, check=True):
+        if command and command[0] in ('daemons', 'builds', 'history') and '--json' not in command:
+            command = (*command, '--json')
         result = subprocess.run([cli, '--wake-root', str(root), *command], env=env,
             capture_output=True, text=True, timeout=125)
         value = json.loads(result.stdout)
@@ -140,9 +142,9 @@ def main():
     receipt = dict(status='incomplete',provider_model_turns=0,real_authenticated_accounts=False,
                    host_uid=int(Path('/proc/self/uid_map').read_text().split()[1]),namespace_uid=os.getuid(),root=str(root))
     try:
-        call('accounts','init')
-        call('accounts','create','alice','--alias','work')
-        call('accounts','create','bob')
+        call('accounts','init','--json')
+        call('accounts','create','alice','--alias','work','--json')
+        call('accounts','create','bob','--json')
         shared=root/'accounts/shared/config.toml'
         shared.write_text('model="gpt-5.1"\nmodel_provider="offline_demo"\ncheck_for_update_on_startup=false\n[analytics]\nenabled=false\n[model_providers.offline_demo]\nname="Provider-free saved-history demonstration"\nbase_url="http://127.0.0.1:9/v1"\nwire_api="responses"\nrequires_openai_auth=false\n[projects.'+json.dumps(str(root))+']\ntrust_level="trusted"\n')
         manifest = dict(schema_version=1,builds={})
@@ -153,7 +155,7 @@ def main():
         (root/'builds.json').write_text(json.dumps(manifest))
         with (root/'controller-accounts.toml').open('a') as stream:
             stream.write(f'\n[builds]\nmanifest={json.dumps(str(root/"builds.json"))}\n[history]\nreadable_accounts=["alice","bob"]\n')
-        config=call('configuration','explain','work')['result']
+        config=call('configuration','explain','work','--json')['result']
         assert config['configuration']['settings']['shared'] and config['configuration']['skills']['shared']
         receipt['configuration_provenance']=config['configuration']
         a,unused,unused_op=mutate('start','alice','start-alice');owned.append('alice')

@@ -26,7 +26,7 @@ class FormattingCLIStatusTests(unittest.TestCase):
             record=json.loads(path.read_text());record['capabilities']=[]
             path.write_text(json.dumps(record))
             completed=subprocess.run([sys.executable,'-m','codex_wake.entrypoint','--wake-root',str(self.root),
-                'tabs','format','enable','--workspace','work'],capture_output=True,text=True,timeout=15)
+                'tabs','format','enable','--workspace','work','--json'],capture_output=True,text=True,timeout=15)
             value=json.loads(completed.stdout)['result']['operation']['result']
             self.assertEqual(value['status'],'partial')
             self.assertIn('monitor_formatting_unqualified',[f['code'] for f in value['failures']])

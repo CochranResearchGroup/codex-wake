@@ -1,5 +1,7 @@
 """Read-only health CLI and shared public API/MCP schema adapters."""
 import json
+
+from .cli_output import emit
 from pathlib import Path
 
 from .controller_health import ControllerHealth
@@ -47,7 +49,7 @@ def register_parser(subparsers):
 def command(args, root=None):
     value = execute('health.' + args.health_verb,
         dict(expected_target=args.expected_target, timeout=args.timeout), root or args.wake_root)
-    print(json.dumps(value, sort_keys=True))
+    emit(value, args)
     return 0 if value['status'] == 'completed' else 2
 
 

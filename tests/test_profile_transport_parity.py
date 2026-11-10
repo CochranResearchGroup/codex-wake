@@ -99,7 +99,7 @@ class ProfileTransportParityTests(unittest.TestCase):
             execute('accounts.init', {}, root)
             execute('stores.register', {'selector':'stock','home':str(stock)}, root)
             parser = build_parser()
-            args = parser.parse_args(['--wake-root', str(root), 'accounts', 'create', 'alice', '--mode', 'independent', '--source', 'stock'])
+            args = parser.parse_args(['--wake-root', str(root), 'accounts', 'create', 'alice', '--mode', 'independent', '--source', 'stock', '--json'])
             with contextlib.redirect_stdout(io.StringIO()) as output:
                 self.assertEqual(command(args, root), 0)
             self.assertTrue(json.loads(output.getvalue())['result']['store']['independent'])

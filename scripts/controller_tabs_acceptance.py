@@ -31,6 +31,8 @@ def main():
         subprocess.run(['tmux','-S',mux,'new-session','-d','-s','fixture','sleep 60'],check=True)
         listener = None
         def cli(*args):
+            if args and args[0] == 'tabs' and '--json' not in args:
+                args = (*args, '--json')
             result = subprocess.run([executable,'--wake-root',str(root),*args],env=env,cwd=directory,text=True,capture_output=True,timeout=30)
             assert result.returncode==0,(result.stdout,result.stderr)
             return json.loads(result.stdout)

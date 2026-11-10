@@ -8902,3 +8902,32 @@ selected#2b3544background/noSTALE/compact andall306installedmembersverified.
 Automaticmonitorremainsstopped; no newloaded-host healthclaim/providerturn.
 Evidenceplan0215/deployment.json,userstate tab-presets-0215-deploy. Memoryforbidden:
 noexplicitmemory-write request. Preexistingrepo.codex/config.tomleditpreserved.
+
+## 2026-11-10 — Completion installation and repeat builds
+
+- Source: `fa2363c24bf921ecf0bd8390739e96041e620e8f` plus this working-tree patch. Preserved unrelated `.codex/config.toml`, `GLOSSARY.md` and Plan0216 work.
+- `scripts/install.sh` now uses `uv tool install --force --reinstall` so same-version rebuild/install cycles refresh the package before its completion installer runs. README release/upgrade examples now use this installer; `docs/agents/shell-completion.md` records the required completion step for custom-prefix installs. Build-only operations remain free of shell effects.
+- Installed Bash and Zsh completion using the current `/home/ecochran76/.local/bin/codex-wake completion install`; status completed, preserved paths empty. Fresh `zsh -i` registered `_comps[codex-wake]=_codex_wake`; fresh `bash --noprofile -i` reported `complete -F _codex_wake codex-wake`. No package replacement or daemon restart was needed.
+- Focused local validation: `PYTHONPATH=src uv run --with 'websockets>=17,<18' --with 'dbus-next>=0.2.3,<0.3' --with 'jsonschema>=4.26,<5' --no-project python -m unittest discover -s tests -p test_completion.py -q` passed 7 tests; same command with `test_shell_completion.py` passed 6. `bash -n scripts/install.sh` and `git diff --check` passed. Initial plain-Python completion tests failed because that interpreter lacked declared `websockets`; the dependency-qualified rerun passed without code changes.
+- Environment difference: local Linux/Python 3.13 focused checks, rather than the hosted Python 3.11/3.12 full suite. Hosted CI was not run under the cost policy. No full package reinstall was performed on the working account; only completion setup was installed and checked.
+- Memory disposition: `forbidden` — session developer instructions allow memory updates only on explicit user request; repository docs retain the install contract.
+
+## 2026-11-10 — LOCAL-P217 human CLI output
+
+Implemented shared human presentation across controller/account/agent command
+adapters; accounts list now shows ACCOUNT/ALIASES/HOME. Explicit JSON preserves
+full envelopes; updated machine consumers, docs, generated reference and unreleased
+compatibility note. Independent audit/review workers completed bounded lanes;
+primary accepted and corrected SSH-frame, nested-history and stream-diagnostic
+findings. Preserved preexisting completion/config/glossary/Plan0216 work.
+
+327 focused, 69 compatibility and five private-installed presentation checks pass.
+Full discovery ran2338/555.834s with20errors/2failures/1skip; retained first result.
+Missing JSON flags and existing Plan0214 missing status heading corrected; final
+64 affected checks PASS24.129s, including every full-run failure. Full discovery
+not repeated. Static/policy/generated/planning checks PASS. See
+`docs/dev/evidence/plan0217/validation.md` for exact commands, limitations and logs.
+Private wheel42cab43f56 matches305source/install members. Source/main fa2363c plus
+uncommitted patch; not deployed, committed or pushed. Working release7010cbe
+unchanged. Plan217 closed for source/private validation. Memory forbidden by
+session developer boundary; explicit non-write receipt retained outside Git.

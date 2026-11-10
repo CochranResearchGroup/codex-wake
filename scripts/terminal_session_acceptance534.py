@@ -49,6 +49,8 @@ def main():
         tmux('set-option','-g','automatic-rename','off')
         config=root/'controller-tabs.json';config.write_text(json.dumps(dict(schema_version=1,workspaces=dict(peer=dict(kind='tmux',socket_path=sock,session_id='$0')))));config.chmod(0o600)
         def command(*argv,expected=0):
+            if argv and argv[0] == 'tabs' and '--json' not in argv:
+                argv = (*argv, '--json')
             p=subprocess.run([cli,'--wake-root',str(root),*argv],env=env,cwd=directory,text=True,capture_output=True,timeout=30)
             assert p.returncode==expected,(argv,p.returncode,p.stdout,p.stderr)
             return json.loads(p.stdout)
