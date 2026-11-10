@@ -405,8 +405,9 @@ class TabMonitor:
                 metadata={key:value for key,value in snapshot.items() if key!='resources'}
                 encoded=json.dumps(metadata,allow_nan=False,separators=(',',':'))
                 rows=resources_serializer()
+                separator=',' if metadata else ''
                 _save_bytes(self.directory/'snapshot.json',
-                    (encoded[:-1]+',"resources":'+rows+'}').encode())
+                    (encoded[:-1]+separator+'"resources":'+rows+'}').encode())
             else:
                 if resources_loader is not None:resources_loader()
                 if not isinstance(snapshot.get('resources'),list):
