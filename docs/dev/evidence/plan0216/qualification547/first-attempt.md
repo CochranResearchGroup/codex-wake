@@ -273,3 +273,13 @@ and inventory+11. All120ordinaryeventsprojected,p951.0083s,RSS45,428,736B,
 controls0/freshOSUIDcensus0. No roundingnear1% to pass; no retry, surfaces,
 livequalification or workingaccountdeployment afterfailure. Default1s ticks,
 alltiersON,100Slatefixturetabs and immutableinstalledsource retained.
+
+Exactwheel5 source36f42dbe canonicalgate: idlePASS0.898787%onecore
+(0.54CPU/60.081s;parent0.41/children0.13), activeFAIL5.226410%
+(3.14CPU/60.0795s;parent2.54/children0.60).313package membersmatch
+source/wheel/installed; wheelSHA b63584973e9a9a16f4b97d160e8501a65209965a
+66102e2753d50bc472b7aff4. Installer resolved declareddependencies, including
+msgspec0.22.0 with module/native member hashes retained. Idle61ticks/2inventory
+passes, active60ticks/11inventory passes, all120eventsprojected/p950.9799s,
+RSS78,278,656bytes, controls0/freshOSUIDcensus0. Activeexceedsstrict5%;
+no rounding, retry, surfaces/liveacceptance or productiondeployment.
