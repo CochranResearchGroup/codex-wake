@@ -5,6 +5,7 @@ fence entries; live process metadata also detects new descendants below a stable
 No terminal capture or conversation contents are stored here.
 """
 from copy import deepcopy
+import json
 from pathlib import Path
 import time
 import os
@@ -31,6 +32,7 @@ class ObservationCache:
         self._processes = {}
         self._observations = {}
         self._generations = {}
+        self._dirty_panes = {}
 
     def _birth(self, pid):
         try:
@@ -43,6 +45,25 @@ class ObservationCache:
         if key not in mapping and len(mapping) >= self.max_entries:
             mapping.pop(next(iter(mapping)))
         mapping[key] = value
+
+    def _pending_dirty(self, workspace=None):
+        now=self.monotonic()
+        for key,until in list(self._dirty_panes.items()):
+            if now>=until:
+                self._dirty_panes.pop(key,None)
+        return {pane for (name,pane) in self._dirty_panes if workspace is None or name==workspace}
+
+    def mark_dirty(self, workspace, pane_ids):
+        """Prioritize host-observed changes for bounded recent error checks."""
+        if not isinstance(workspace,str):
+            raise ValueError('workspace must be a string')
+        self._pending_dirty()
+        for pane in list(pane_ids)[:self.max_entries]:
+            if isinstance(pane,str) and 0<len(pane)<=256:
+                self._put(self._dirty_panes,(workspace,pane),self.monotonic()+30)
+
+    def has_dirty(self, workspace=None):
+        return bool(self._pending_dirty(workspace))
 
     def set_process_ttl(self, seconds):
         """Retained owners can reuse complete trees while live metadata agrees."""
@@ -92,6 +113,7 @@ class ObservationCache:
         from .tab_organization import digest
         from .tab_traits import TabTraits, session_rows
         deadline=deadline or time.monotonic()+2
+        dirty_panes=set(dirty_panes)|self._pending_dirty(workspace)
         generation = digest(snapshot)
         if self._generations.get(workspace) != generation:
             self._processes.clear()
@@ -112,7 +134,8 @@ class ObservationCache:
             for p in panes:
                 self.processes(p.get('pid'),deadline)
             if prior[3] == digest(self._processes):
-                return deepcopy(prior[2])
+                observed,rows=json.loads(prior[2])
+                return observed,rows
         # Discover each pane once, then enrich that evidence with native metadata.
         needs_native = False
         investigated = {}
@@ -147,7 +170,7 @@ class ObservationCache:
                     pane['traits']['activity']=_trait(reason='activity_observation_disabled')
                     pane['binding']=None
         result = (observed,rows)
-        self._put(self._observations,workspace,((generation,births),now+self.ttl,deepcopy(result),digest(self._processes)))
+        self._put(self._observations,workspace,((generation,births),now+self.ttl,json.dumps(result,separators=(',',':'),allow_nan=False),digest(self._processes)))
         return result
 
     def configure_checks(self, *, activity=True, health=True, errors=True, health_interval=60,error_interval=5):
@@ -163,6 +186,9 @@ class ObservationCache:
     def invalidate(self, workspace=None):
         """Fence retained evidence when a feed disconnects or changes epoch."""
         self._processes.clear()
+        for key in list(self._dirty_panes):
+            if workspace is None or key[0]==workspace:
+                self._dirty_panes.pop(key,None)
         if workspace is None:
             self._observations.clear()
             self._generations.clear()
