@@ -14,17 +14,18 @@
   "broad_review_runs": 0,
   "tdd_remediation_runs": 0,
   "closed": [
-    541,
     542,
     543,
-    545,
-    546
+    545
   ],
   "remaining": [
+    541,
     544,
+    546,
     547
   ],
   "merge_authorized": false,
   "deploy_authorized": false,
-  "production_enablement_authorized": false
+  "production_enablement_authorized": false,
+  "validation_hold": "Steady actual100tab monitor+Slate CPU4.591%idle/8.784%active exceeds1/5%; phase-only profile in progress, candidate source overrides not acceptance."
 }

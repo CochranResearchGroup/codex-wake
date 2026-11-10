@@ -9,9 +9,10 @@ Scope: approved specification and seven implementation tickets; user authorized 
 ## Current State
 
 Implementation authorized by the operator. Specification #540 and seven tickets
-are published; #541/#542/#543/#545/#546 are accepted and closed, #544 implements
-the persistent owner and projection, #547 owns installed qualification. The
-execution ledger below is authoritative for implementation status.
+are published. #542/#543/#545 are accepted and closed. #541/#544/#546 were
+reopened for actual100tab owner qualification repairs; #547 owns installed proof.
+Functional changes pass focused checks, but the frozen1%/5%CPU gate remains open.
+The execution ledger and qualification receipts below separate these boundaries.
 
 Historical interview context: research completed in notes/0011-2026-11-10-tab-observation-efficiency-research.md.
 Stock tmux/Byobu already supplies metadata notifications; source shows Codex
@@ -176,10 +177,10 @@ Fixed review base fa2363c24bf921ecf0bd8390739e96041e620e8f.
 | #541 cached inventory | primary | locally validated; integrated | none |
 | #542 native feed | /root/native542 | CLOSED; integrated cf1dede | none |
 | #543 tmux feed | /root/tmux543 | CLOSED; integrated7617727 | none |
-| #544 observer lifecycle | /root/native542 | implementing | #541 #542 #543 closed |
+| #544 observer lifecycle | /root/native542 | CLOSED; integrated72bda0b7 | #541 #542 #543 closed |
 | #545 tiered checks | /root/checks545 | CLOSED; integrated3f75ef9a | #541 closed |
-| #546 stable projection | /root/tmux543 | CLOSED; integrated433a966b | #541 closed |
-| #547 installed acceptance | pending | blocked | #544 #545 #546 |
+| #546 stable projection | /root/tmux543 | REOPENED; test freeze barrier diagnosis | #541 closed |
+| #547 installed acceptance | /root/checks545 | provisional measurements; wait546 fixture | #544 #545 closed; #546 pending |
 
 No nested delegation; three implementation lanes maximum. Inherited model/effort
 for bounded implementation workers; deterministic tool checks qualify their work.
@@ -189,3 +190,50 @@ blocking affected presubmit once integrated; comprehensive and provider runs exc
 unless a concrete unresolved risk requires widening. Hosted CI skipped by policy.
 After all seven accepted closures: one broad Standards/Spec review, then one bounded
 TDD remediation pass, followed by focused regression checks and draft PR.
+
+### Integrated presubmit checkpoint
+
+Source72bda0b7: Python3.11 affected tab selection185PASS/51.116s; Python3.12
+185tests/57.418s with one formatting CLI status test error. IsolatedretryPASS
+does not clear first failure. Causal real-monitor probe confirms test SIGSTOP
+can freeze formatting lock: public CLI exit3, reason formatting_busy, phase
+uncertain, result null. Product correctly refuses concurrent effect; #546
+reopened for test readiness-barrier repair. No product/source image change
+needed. First candidate wheel retained. #547 runs provisional100tab windows
+underUID1017; acceptance waits correctedfixture green. Static global undefined
+name lint, compileall, policy wiring, generated references and whitespace PASS.
+
+### Actual-owner resource checkpoint
+
+First exact72b package100tab driver: idle4.753%FAIL, active3.834%PASS,
+RSS37MiB/p95.075secPASS. Actualinstalledmonitor+Slate then exposed additional
+formatting costs; diagnostic sourceoverride after observer fixes remains over
+CPU caps. No successful fullresource acceptance claimed. #541/#544/#546
+reopened for bounded qualification repairs; #547 retains every first failure.
+Observer fixes0ee92b48: freshJSONpubliccopies, typedownedTmux proxy restores
+redactederrors,2scommanddeadline avoids false1stick reconnects. Nullrenderer
+fix4c15717d preserves uncertain/resultnull JSON and exit3 without crashing.
+
+Root cacheJSON experiment did not establish a qualified improvement and was
+reverted before shipping. Actualserve profile instead identifies66whole-state
+saves/23refreshes,5.794s json.dump and3.3million streamwrites, plus session-option
+subprocess overhead. Originalformatterworker repairs only measured hot paths;
+original baseline durability/manual custody/rollback stay required. Finalgate
+must measure actualinstalledmonitor+Slate100tabs, ownedlive/reapedhelpers,
+60sidle/60sactive with unchanged1%/5%onecore and256MiB thresholds.
+
+### Frozen steady-only diagnosis checkpoint
+
+Rootproductsourcebb54d262 includes boundedcontrol replies, formattermemo/batching,
+retainedmetadata-fencedprocesscache and deduplicatedrootbirthchecks. Candidate
+wheel1 remains exact72b source; no additional wheel rebuilt while CPU gatesfail.
+Combined2ce sourceoverride with a deterministic startupbarrier measured
+4.591%idle/8.784%active, p951.073sec, all20ordinaryeventsprojected; no gatepass.
+Readiness requires100bound/allnativeconnected/tmuxavailable/formattingfixture
+applied with nofailures, then a strictly newer qualifying publicsnapshot.
+Sourceoverride diagnostics can never pass installed acceptance.
+
+Nextpacket: separate actualserve idle/active profiles after thatbarrier, owned
+UID1017 SIGUSR handlers only; no productprofilinghooks. Source2ce frozen for
+causality; newerroot birth-dedup does not change algorithms materially. No
+broadreview or postreview TDD remediation has run; eachreservedcounter remains0.
