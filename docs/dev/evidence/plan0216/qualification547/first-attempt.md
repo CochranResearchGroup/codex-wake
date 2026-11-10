@@ -262,3 +262,14 @@ qualifier. Immediate postrunOS snapshot had101defunct fixtureprocesses
 awaitinginitreap; report refreshedcensus separately rather than equate
 ownedcontrols0 with fullOScleanup. Initial HEADguard caught docs-only
 127b4dc7 beforebuild; exact494gitarchive and empty srcdiff establishedsource.
+
+Exactwheel4 sourcefd44a35a directcanonical60+60 gate FAILED unchanged strict
+CPUcaps: idle1.016516% (0.61CPU/60.0089s;parent0.47/children0.14),
+active5.293387% (3.18CPU/60.075s;parent2.62/children0.56).312package
+memberssource/wheel/installedmatch, wheelSHA bdc56f6af53d503634d26f700912
+cf950896b32503fe6166bc8cbade25769a92. Fixedidle cadence22→83ticks in60s
+confirms prior spin removed; idleinventory+2/nativebaselines+2, active60ticks
+and inventory+11. All120ordinaryeventsprojected,p951.0083s,RSS45,428,736B,
+controls0/freshOSUIDcensus0. No roundingnear1% to pass; no retry, surfaces,
+livequalification or workingaccountdeployment afterfailure. Default1s ticks,
+alltiersON,100Slatefixturetabs and immutableinstalledsource retained.
