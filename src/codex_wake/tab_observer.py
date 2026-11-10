@@ -132,6 +132,8 @@ class TabObserver:
         if hasattr(cache, 'configure_checks'):
             cache.configure_checks(**{k:self.settings[k] for k in
                 ('activity', 'health', 'errors', 'health_interval', 'error_interval')})
+        if hasattr(cache, 'set_process_ttl'):
+            cache.set_process_ttl(30)
         cache.session_reader = self._session_rows
         for name, config in list(self.owner.workspaces.items())[:64]:
             if config['kind'] not in ('tmux', 'byobu'):

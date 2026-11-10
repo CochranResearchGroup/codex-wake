@@ -1,12 +1,14 @@
 """Bounded host-owned metadata cache shared across inventory and enrichment.
 
 Cached evidence is never input authority. Process births and presentation generations
-fence entries; a short TTL also detects descendants starting below a stable shell.
+fence entries; live process metadata also detects new descendants below a stable shell.
 No terminal capture or conversation contents are stored here.
 """
 from copy import deepcopy
 from pathlib import Path
 import time
+import os
+import math
 
 from .process import process_identity
 
@@ -24,6 +26,7 @@ class ObservationCache:
         self.identity_probe = identity_probe
         self.monotonic = monotonic
         self.ttl = min(5.0, max(.1, float(ttl)))
+        self.process_ttl = self.ttl
         self.max_entries = min(4096, max(1, int(max_entries)))
         self._processes = {}
         self._observations = {}
@@ -41,6 +44,29 @@ class ObservationCache:
             mapping.pop(next(iter(mapping)))
         mapping[key] = value
 
+    def set_process_ttl(self, seconds):
+        """Retained owners can reuse complete trees while live metadata agrees."""
+        if type(seconds) not in (int,float) or not math.isfinite(seconds) or not .1<=seconds<=30:
+            raise ValueError('process cache lifetime must be .1..30 seconds')
+        self.process_ttl=float(seconds)
+
+    def _tree_matches(self, pid, rows):
+        if self.process_probe is not None:
+            # Injected host-owned process observers provide their own metadata fence.
+            return True
+        try:
+            children=set()
+            for row in rows:
+                current=row['process']['pid'];base=Path('/proc')/str(current)
+                if os.readlink(base/'exe')!=row['executable'] or os.readlink(base/'cwd')!=row['cwd']:
+                    return False
+                if (base/'cmdline').read_bytes()[:16384].decode(errors='replace').split('\0')!=row['argv']:
+                    return False
+                children.update(int(value) for value in (base/'task'/str(current)/'children').read_text().split())
+            return children=={row['process']['pid'] for row in rows}-{pid}
+        except (OSError,ValueError,KeyError,TypeError):
+            return False
+
     def processes(self, pid, deadline):
         from .tab_traits import _processes
         birth = self._birth(pid)
@@ -52,11 +78,11 @@ class ObservationCache:
             valid = all(self._birth(row['process']['pid']) ==
                         (row['process']['pid'],row['process']['boot_id'],str(row['process']['start_ticks']))
                         for row in rows)
-            if valid:
+            if valid and self._tree_matches(pid,rows):
                 return deepcopy((rows, complete))
         result = (self.process_probe or _processes)(pid, deadline)
         if birth is not None and result[1]:
-            self._put(self._processes, pid, (birth, now+self.ttl, deepcopy(result)))
+            self._put(self._processes, pid, (birth, now+self.process_ttl, deepcopy(result)))
         return result
 
     def observe(self, workspace, snapshot, *, socket_path=None, transport=None,

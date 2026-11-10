@@ -74,3 +74,44 @@ class ObservationTests(unittest.TestCase):
             self.assertEqual(calls,[os.getpid()])
             self.assertEqual(len(inventories),1)
             self.assertEqual(inventories[0][0]['client_pid'],os.getpid())
+
+    def test_live_descendant_change_invalidates_cached_process_tree_before_expiry(self):
+        import selectors
+        import subprocess
+        import sys
+        from codex_wake.tab_observation import ObservationCache
+        code = """import subprocess,sys
+child=None
+print('ready',flush=True)
+try:
+ for line in sys.stdin:
+  if line.strip()=='spawn':
+   child=subprocess.Popen(['/bin/sleep','60'])
+   print(child.pid,flush=True)
+  else: break
+finally:
+ if child is not None:
+  child.terminate();child.wait(timeout=3)
+"""
+        process=subprocess.Popen([sys.executable,'-c',code],stdin=subprocess.PIPE,stdout=subprocess.PIPE,text=True)
+        def reply():
+            with selectors.DefaultSelector() as selector:
+                selector.register(process.stdout,selectors.EVENT_READ)
+                self.assertTrue(selector.select(3),'fixture readiness deadline')
+                return process.stdout.readline().strip()
+        try:
+            self.assertEqual(reply(),'ready')
+            with tempfile.TemporaryDirectory() as root:
+                cache=ObservationCache(root,ttl=5)
+                before,complete=cache.processes(process.pid,time.monotonic()+1)
+                self.assertTrue(complete)
+                self.assertEqual({r['process']['pid'] for r in before},{process.pid})
+                process.stdin.write('spawn\n');process.stdin.flush()
+                child=int(reply())
+                after,complete=cache.processes(process.pid,time.monotonic()+1)
+                self.assertTrue(complete)
+                self.assertIn(child,{r['process']['pid'] for r in after})
+        finally:
+            process.stdin.write('quit\n');process.stdin.flush()
+            process.wait(timeout=3)
+            process.stdin.close();process.stdout.close()
