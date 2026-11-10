@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--monitor',action='store_true')
     parser.add_argument('--diagnostic-source')
     parser.add_argument('--monitor-profile')
+    parser.add_argument('--poll-interval',type=float,default=.1)
     parser.add_argument('--tick-interval',type=float,default=1.0)
     args=parser.parse_args()
     assert args.seconds>=60 or args.diagnostic_profile,'short windows require explicitly labeled diagnostic profile'
@@ -38,7 +39,7 @@ def main():
         tabs=100,windows_seconds=args.seconds,tiers=dict(activity=True,health=True,errors=True),
         cpu_denominator='one core',measurement='Python observer plus fixture server and driver (conservative upper bound), live owned children plus reaped child CPU; excludes disposable pane workload and tmux server',
         fixture_limit='metadata-only Unix WebSocket fixture; no provider turns or proof of real native broadcasts',
-        latency_measure='fixture send to public projection, upper bound on receive-to-projection',production_effects=False,tick_interval_seconds=args.tick_interval,source_override=bool(args.diagnostic_source))
+        latency_measure='fixture send to public projection, upper bound on receive-to-projection',production_effects=False,tick_interval_seconds=args.tick_interval,public_status_poll_seconds=args.poll_interval if args.monitor else args.tick_interval,source_override=bool(args.diagnostic_source))
     with tempfile.TemporaryDirectory(prefix='wake547-') as directory:
         root=Path(directory); home=root/'home';home.mkdir();(home/'app-server-control').mkdir()
         binary=root/'codex';shutil.copyfile('/bin/sleep',binary);binary.chmod(0o700)
@@ -187,7 +188,7 @@ def main():
                         assert len(value['resources'])==100
                         project_pending(value)
                         _,rss=sample();maxrss=max(maxrss,rss)
-                        time.sleep(max(0,args.tick_interval-(time.monotonic()-current)))
+                        time.sleep(max(0,(args.poll_interval if monitor else args.tick_interval)-(time.monotonic()-current)))
                     stopping.set()
                     if producer:producer.join(2)
                     project_pending(tick())

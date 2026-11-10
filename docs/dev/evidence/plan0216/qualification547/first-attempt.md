@@ -99,3 +99,11 @@ The100tab monitor-stop uncertainty was traced to the existing262144byte retained
 operation-result limit versus the full monitor snapshot. Native worker reproduced
 it through the public CLI/journal and is fixing bounded control summaries without
 raising the global result cap. Human renderer now reports uncertainty honestly.
+
+Second formatter candidate (only semantic memo/5slease file changed) diagnostic:
+idle4.797%, active8.390%, all20events projected, RSS45.04MB, clean owned processes.
+Still not accepted. Driver1Hz public-status sampling aliased the daemon1Hz publish
+cadence and yielded p95send-to-observed2.005s, an upper bound containing up to an
+extra second of consumer sampling latency. Final monitor harness samples public
+status at0.1s while keeping actual daemon default1s, workload2events/s and all
+thresholds unchanged. Driver CPU is excluded from owner resource accounting.
