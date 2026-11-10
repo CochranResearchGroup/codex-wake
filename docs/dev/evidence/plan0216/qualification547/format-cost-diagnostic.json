@@ -1,0 +1,78 @@
+{
+  "source_commit": "4c15717d+formatter-transport-dirty-SOURCE-OVERRIDE",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "package": "/tmp/wake216-format-source/src/codex_wake/__init__.py",
+  "uid": 1017,
+  "tabs": 100,
+  "windows_seconds": 10.0,
+  "tiers": {
+    "activity": true,
+    "health": true,
+    "errors": true
+  },
+  "cpu_denominator": "one core",
+  "measurement": "actual installed TabMonitor owner plus all current owned descendants and reaped child CPU via proc cutime/cstime; fixture/driver/workload processes excluded",
+  "fixture_limit": "metadata-only Unix WebSocket fixture; no provider turns or proof of real native broadcasts",
+  "latency_measure": "fixture send to public projection, upper bound on receive-to-projection",
+  "production_effects": false,
+  "tick_interval_seconds": 1.0,
+  "source_override": true,
+  "formatting_enabled": "slate100tabs; configured through installed CLI",
+  "cold_start_seconds": 4.227973203999682,
+  "native_bound_panes": 100,
+  "mode": "short diagnostic profile, not acceptance",
+  "idle": {
+    "wall_seconds": 10.008783287999904,
+    "cpu_seconds": 0.6700000000000002,
+    "cpu_percent_one_core": 6.694120361296073,
+    "max_aggregate_rss_bytes": 42319872,
+    "status_changes": 0,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.54,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 0.07190099999999999,
+    "reaped_child_cpu_seconds": 0.1299999999999999,
+    "live_child_cpu_seconds": 0.0
+  },
+  "active": {
+    "wall_seconds": 10.007303372999559,
+    "cpu_seconds": 0.73,
+    "cpu_percent_one_core": 7.294672428634408,
+    "max_aggregate_rss_bytes": 74264576,
+    "status_changes": 20,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.49,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 0.06428700000000002,
+    "reaped_child_cpu_seconds": 0.24,
+    "live_child_cpu_seconds": 0.0
+  },
+  "p95_send_to_projection_seconds": 1.5060901779997948,
+  "latency_samples": 20,
+  "checks": {
+    "checks": {
+      "errors": 130,
+      "health": 100
+    },
+    "enabled": {
+      "errors": true,
+      "health": true
+    },
+    "intervals": {
+      "errors": 5.0,
+      "health": 60.0
+    },
+    "retained_checks": 200
+  },
+  "native_methods": {
+    "initialize": 2,
+    "initialized": 2,
+    "thread/loaded/list": 2,
+    "thread/read": 200
+  },
+  "all_ordinary_events_projected": true,
+  "thresholds_pass": false,
+  "owned_control_processes_remaining": 0
+}
