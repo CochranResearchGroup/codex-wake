@@ -27,5 +27,5 @@
   "merge_authorized": false,
   "deploy_authorized": false,
   "production_enablement_authorized": false,
-  "validation_hold": "Exact de2346d3 corrected diagnostic: idle0.9953%, active7.4771% over10s; not60s acceptance. Active exceeds5%. Profiling-guided row-summary, snapshot-copy, baseline-save and immutable-boot-read improvements in progress. Broad review and post-review TDD each remain0."
+  "validation_hold": "Exact5e6e6ab9 corrected10s diagnostic: idle0.6988%, active5.2909% exceeds5%. p951.0166s, all20events, RSS41MB, cleanup0. No60second installedqualification yet. Combining custody/window read-only tmux batches next; fixedgates unchanged."
 }
