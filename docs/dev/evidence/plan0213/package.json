@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "source": "076a7bb4e481ebef45ae8098dcd827480134fdc2",
+  "wheel_sha256": "6e4c2aee484920e2912b17691abe520f958af198f6c831f7e0a70fdcfe2a85e7",
+  "package_members": 305,
+  "installed_prefix": "/tmp/wake-format-performance-installed",
+  "native_fixture": "42window private tmux enable/refresh3.5sbudget/rollback PASS; no production formatting",
+  "review": "review.md"
+}
