@@ -1,0 +1,30 @@
+{
+  "parent": 540,
+  "tickets": [
+    541,
+    542,
+    543,
+    544,
+    545,
+    546,
+    547
+  ],
+  "fixed_review_base": "fa2363c24bf921ecf0bd8390739e96041e620e8f",
+  "integration_branch": "feat/efficient-tab-observer",
+  "broad_review_runs": 0,
+  "tdd_remediation_runs": 0,
+  "closed": [
+    541,
+    542,
+    543,
+    545,
+    546
+  ],
+  "remaining": [
+    544,
+    547
+  ],
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "production_enablement_authorized": false
+}
