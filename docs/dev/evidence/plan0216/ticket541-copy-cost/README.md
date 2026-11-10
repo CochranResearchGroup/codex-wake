@@ -16,6 +16,7 @@ Benchmark baseline source e5beb4c7. Default recorddata already follows the share
 JSON transport contract; outer (observations,session_rows) tuple is retained.
 
 Commands: PYTHONPATH=src /tmp/wake216-py312/bin/python
-/tmp/wake216-cache-copy-bench.py (cached and explicit-check refresh variants).
+docs/dev/evidence/plan0216/ticket541-copy-cost/benchmark.py (explicit-check
+refresh; documented cached-read variant).
 Receipts preserve raw four-sampleCPU/wall measurements. No service/provider/live
 configuration changed. Parent #547 must rerun exact installed package metrics.
