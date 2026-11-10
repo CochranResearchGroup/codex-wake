@@ -4,7 +4,7 @@ import re
 from .managed_inventory import InventoryError
 
 DEFAULT_POLICY = dict(enabled=True, show_model=False, show_provider=False,
-                      ascii=True, render_mode='full', style_rules=[])
+                      ascii=True, render_mode='full', style_rules=[], compact=False, show_stale=True)
 _DIMENSIONS = frozenset(('harness', 'build', 'profile', 'model', 'inference_provider',
                          'execution_host', 'activity'))
 _COLOURS = frozenset(('black', 'red', 'green', 'yellow', 'blue', 'magenta',
@@ -17,7 +17,7 @@ def validate_policy(policy):
         raise InventoryError('invalid_argument', 'Unknown display policy field.')
     result = {}
     for key, value in policy.items():
-        if key in ('enabled', 'show_model', 'show_provider', 'ascii'):
+        if key in ('enabled', 'show_model', 'show_provider', 'ascii', 'compact', 'show_stale'):
             if type(value) is not bool:
                 raise InventoryError('invalid_argument', key + ' must be boolean.')
         elif key == 'render_mode':

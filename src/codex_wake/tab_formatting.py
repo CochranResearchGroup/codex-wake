@@ -270,7 +270,7 @@ class TabFormatting:
                 rendered=project(resources.get(wid,dict(window=window)),policy,now=time.time())
                 resource=resources.get(wid,{})
                 stamp=resource.get('monitor_observed_at',time.time())
-                options=expiring_options(rendered['options'],observed_at=stamp,render_mode=policy.get('render_mode','full'))
+                options=expiring_options(rendered['options'],observed_at=stamp,render_mode=policy.get('render_mode','full'),show_stale=policy.get('show_stale',True))
                 # Native deadline changes refresh the TTL; unchanged options can
                 # skip writes when reliable events repeat the same sample.
                 if all(current[k]['value']==v for k,v in options.items()):
