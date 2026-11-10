@@ -335,6 +335,14 @@ harness, build, account, reported model, inference provider, remote host, turn
 activity, responsiveness or visible error. Each observation retains its freshness and uncertainty; one trait does
 not establish another.
 
+**Tab activity**:
+The observed work state of a conversation associated with a tab, such as running,
+idle or waiting for input. It does not establish that the terminal interface is responsive.
+
+**Observation availability**:
+Whether the source supplying a tab trait is currently usable. Losing that source
+makes affected evidence uncertain without changing the tab's identity or appearance preferences.
+
 **Tab group**:
 A named or criteria-based collection of terminal attachments. Group membership
 alone does not move attachments or change their conversations.

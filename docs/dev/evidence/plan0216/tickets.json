@@ -1,0 +1,113 @@
+[
+  {
+    "index": 1,
+    "title": "Shared cached observation without repeated pane investigation",
+    "blockers": [],
+    "owner_kind": "root",
+    "acceptance": [
+      "Single public inventory pass reuses bounded process/build/native metadata evidence.",
+      "Identity/birth/source generations fence cache entries; no raw content.",
+      "Unchanged reads do not repeat pane discovery or health work; public controller tests both Python versions."
+    ],
+    "number": 541,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/541",
+    "id": 6314054138
+  },
+  {
+    "index": 2,
+    "title": "Passive native Codex activity feed",
+    "blockers": [],
+    "owner_kind": "native",
+    "acceptance": [
+      "Same-user existing native status feed and metadata baseline; no resume/turn/input methods.",
+      "Epoch/reconnect/gap bounded handling and live-protocol fixture p95 proof.",
+      "Own connection only; close and generation replacement tests."
+    ],
+    "number": 542,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/542",
+    "id": 6314054974
+  },
+  {
+    "index": 3,
+    "title": "Persistent tmux metadata change feed",
+    "blockers": [],
+    "owner_kind": "tmux",
+    "acceptance": [
+      "Private native control-mode baseline/changes with no-output and noresize/detach/input.",
+      "Literal names, session/window/PID replacement, bounded reconnect and cleanup.",
+      "Existing pane processes/focus/layout remain unchanged."
+    ],
+    "number": 543,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/543",
+    "id": 6314055679
+  },
+  {
+    "index": 4,
+    "title": "Shared observer lifecycle controls and readable diagnostics",
+    "blockers": [
+      1,
+      2,
+      3
+    ],
+    "owner_kind": "lifecycle",
+    "acceptance": [
+      "Integrate feeds/cache with one host owner and bounded fair scheduling.",
+      "Independent activity/health/errors settings, readable CLI and JSON/API/MCP equivalent controls.",
+      "Automatic reconnect/fallback, source gap and cost/backlog diagnostics; no per-tab processes."
+    ],
+    "number": 544,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/544",
+    "id": 6314056516
+  },
+  {
+    "index": 5,
+    "title": "Tiered responsiveness and redacted visible-error observation",
+    "blockers": [
+      1
+    ],
+    "owner_kind": "checks",
+    "acceptance": [
+      "Health background no faster than60s/exact agent; explicit checks immediate bounded.",
+      "Qualified visible-error events or bounded dirty-screen local classification, target5s.",
+      "No raw capture retained; unknown not fresh-negative; separate configurable tiers."
+    ],
+    "number": 545,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/545",
+    "id": 6314057255
+  },
+  {
+    "index": 6,
+    "title": "Stable palette and dirty-only projection on source loss",
+    "blockers": [
+      1
+    ],
+    "owner_kind": "format",
+    "acceptance": [
+      "Palette/native names/qualified type never freshness-dim or gain STALE.",
+      "Lost source removes uncertain activity/attention, retains redacted detail; longturn silence stays active with valid source.",
+      "Dirty-only rendering and baseline-preserving rollback/reenable across reconnect."
+    ],
+    "number": 546,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/546",
+    "id": 6314057988
+  },
+  {
+    "index": 7,
+    "title": "Installed100tab resource and existing-host acceptance",
+    "blockers": [
+      4,
+      5,
+      6
+    ],
+    "owner_kind": "acceptance",
+    "acceptance": [
+      "Exact immutable package CLI/stdio/API/MCP and source member equality.",
+      "100tab idle/active60s CPU<=1/5%onecore,RSS<=256MiB includingchildren,p95<=2s; coldstart separate.",
+      "Existing44+tab read-only measurement without layout/provider/agent effects; fresh cleanup/resource receipts.",
+      "Docs/help/completion and truthful accepted/deferred limits; no production enable/deployment."
+    ],
+    "number": 547,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/547",
+    "id": 6314058686
+  }
+]
