@@ -47,6 +47,28 @@ class FormattingProcessBudgetTests(FormattingTests):
         import time
         from codex_wake.tab_format_monitor import refresh_formatting
         for _ in range(3):self.tmux('new-window','-d','-t','fixture:','exec sleep 90')
+        import fcntl
+        import os
+        import pty
+        import selectors
+        import struct
+        import termios
+        master,slave=pty.openpty()
+        fcntl.ioctl(slave,termios.TIOCSWINSZ,struct.pack('HHHH',24,160,0,0))
+        attached=subprocess.Popen(['tmux','-S',self.socket,'attach-session','-t','$0'],
+            stdin=slave,stdout=slave,stderr=slave,env={**os.environ,'TERM':'xterm-256color','TMUX':''})
+        os.close(slave)
+        def close_client():
+            if attached.poll() is None:attached.terminate()
+            attached.wait(timeout=2);os.close(master)
+        self.addCleanup(close_client)
+        ready=time.monotonic()+2
+        while self.tmux('display-message','-p','-t','$0','#{session_attached}').strip()!='1':
+            self.assertIsNone(attached.poll(),'Owned rendering client exited before attachment.')
+            self.assertLess(time.monotonic(),ready,'Owned rendering client did not attach.')
+            time.sleep(.01)
+        selector=selectors.DefaultSelector();selector.register(master,selectors.EVENT_READ)
+        self.addCleanup(selector.close)
         observed=dict(self.tabs.execute('tabs.list',{}),origin='daemon',projection_revision='first')
         wall=time.time()
         def trait(value):return dict(value=value,status='observed',observed_at=wall,source_available=True)
@@ -60,7 +82,6 @@ class FormattingProcessBudgetTests(FormattingTests):
         for resource in changed['resources'][:2]:
             resource['projection_revision']=resource['window']['window_id']+'-running'
             resource['traits']['panes'][0]['traits']['activity']=trait('running')
-        import os
         commands=[];stat_pids=[];flushes=[];run=subprocess.run;read_text=Path.read_text;sync=os.fsync
         def synced(fd):flushes.append(fd);return sync(fd)
         def counted(*args,**kwargs):commands.append(args[0]);return run(*args,**kwargs)
@@ -74,9 +95,14 @@ class FormattingProcessBudgetTests(FormattingTests):
         self.assertLessEqual(len(flushes),1,'Existing durable originals need only the final checkpoint.')
         native_reads_and_writes=[c for c in commands if any(v in c for v in ('show-options','set-option'))]
         self.assertLessEqual(len(native_reads_and_writes),2,'Session custody and dirty window reads share one native client.')
-        self.assertLessEqual(len(commands),5)
+        self.assertLessEqual(len(commands),4,'Native set-option redraws attached clients without a separate refresh fork.')
         self.assertEqual(set(stat_pids),{r['window']['panes'][0]['pid'] for r in changed['resources'][:2]})
         self.assertEqual(self.tmux('show-options','-v','-t','$0','@wake-format-clock'),lease)
+        output=b'';until=time.monotonic()+2
+        while b'RUN' not in output:
+            self.assertLess(time.monotonic(),until,'Native option write did not redraw the attached terminal.')
+            if selector.select(max(0.,until-time.monotonic())):output+=os.read(master,65536)
+        self.assertNotIn('refresh-client',[word for command in commands for word in command])
         for resource in changed['resources'][:2]:
             rendered=self.tmux('display-message','-p','-t',resource['window']['window_id'],'#{E:window-status-format}')
             self.assertIn('RUN',rendered)

@@ -7,7 +7,7 @@ import tempfile
 import time
 
 from .managed_inventory import InventoryError
-from .tab_organization import digest
+from .tab_organization import digest, TmuxTransport
 
 READS=frozenset(('tabs.format.status','tabs.format.inspect'))
 VERBS=('status','inspect','enable','pause','resume','rollback','reenable','reset','configure')
@@ -382,7 +382,10 @@ class TabFormatting:
             except Exception as error:failures.append(dict(code=getattr(error,'code','session_formatting_failed')))
         self.save(state)
         try:
-            if pending:transport.formatting('refresh',{},deadline)
+            # Native set-option already schedules redraw for attached clients.
+            # Keep explicit refresh for CLI and non-tmux host adapters.
+            if pending and not (trust_unchanged and isinstance(transport,TmuxTransport)):
+                transport.formatting('refresh',{},deadline)
         except Exception as error:failures.append(dict(code=getattr(error,'code','refresh_failed')))
         return failures
 
