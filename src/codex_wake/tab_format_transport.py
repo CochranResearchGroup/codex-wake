@@ -29,23 +29,65 @@ def tmux_formatting(transport, action, arguments, deadline):
                     commands.append(('set-option','-t',target,name,value[:-1]+'\\;' if value.endswith(';') else value))
                 else:raise InventoryError('invalid_argument','Invalid session formatting value.')
         writes=len(commands)
-        for name in SESSION_OPTIONS:
-            commands.extend((('show-options','-q','-t',target,name),
-                             ('show-options','-q','-v','-t',target,name),
-                             ('show-options','-q','-A','-v','-t',target,name)))
-        observations=_command_batch(transport,commands,deadline)[writes:]
-        result={}
-        for index,name in enumerate(SESSION_OPTIONS):
-            raw,value,effective=observations[index*3:index*3+3]
-            result[name]=dict(explicit=bool(raw),value=value.removesuffix('\n') if raw else None,
-                              effective=effective.removesuffix('\n'))
-        return result
+        commands.extend(_session_reads(target))
+        return _session_observation(_command_batch(transport,commands,deadline)[writes:])
     if action not in ('read','write'):
         raise InventoryError('unsupported_operation','Unsupported formatting action.')
     result=tmux_formatting_batch(transport,[dict(arguments,action=action)],deadline)[0]
     if 'error' in result:
         raise InventoryError(result['error']['code'],'Native formatting target or readback changed.')
     return result
+
+
+def _session_reads(target):
+    return [command for name in SESSION_OPTIONS for command in (
+        ('show-options','-q','-t',target,name),
+        ('show-options','-q','-v','-t',target,name),
+        ('show-options','-q','-A','-v','-t',target,name))]
+
+
+def _session_observation(observations):
+    result={}
+    for index,name in enumerate(SESSION_OPTIONS):
+        raw,value,effective=observations[index*3:index*3+3]
+        result[name]=dict(explicit=bool(raw),value=value.removesuffix('\n') if raw else None,
+                          effective=effective.removesuffix('\n'))
+    return result
+
+
+def tmux_formatting_read_session_windows(transport,windows,deadline):
+    """Read custody and the first bounded window cohort in one native client.
+
+    All work is read-only. Failed cohorts may be isolated using ordinary reads;
+    this helper never performs or repeats formatting writes.
+    """
+    if (not isinstance(windows,list) or len(windows)>128 or any(
+            not isinstance(window,str) or not re.fullmatch(r'@[0-9]+',window) for window in windows)):
+        raise InventoryError('invalid_argument','Exact native window identities required.')
+    commands=_session_reads(transport.session)
+    starts=[]
+    for window in windows[:4]:
+        starts.append(len(commands));commands.extend(_window_reads(window))
+    try:values=_command_batch(transport,commands,deadline)
+    except subprocess.CalledProcessError:
+        current=tmux_formatting(transport,'read-session',{},deadline)
+        return current,tmux_formatting_batch(transport,[dict(action='read',window=w) for w in windows],deadline)
+    current=_session_observation(values[:6]);results=[]
+    for window,start in zip(windows[:4],starts):
+        results.append(_window_observation(window,values,start))
+    if len(windows)>4:
+        results.extend(tmux_formatting_batch(transport,[dict(action='read',window=w) for w in windows[4:]],deadline))
+    return current,results
+
+
+def _window_observation(window,values,start):
+    if values[start].strip()!=window:return dict(error=dict(code='stale_target'))
+    observed={}
+    for index,name in enumerate(WINDOW_OPTIONS):
+        raw,value,effective,parent=values[start+1+index*4:start+1+index*4+4]
+        observed[name]=dict(explicit=bool(raw),value=value.removesuffix('\n') if raw else None,
+            effective=effective.removesuffix('\n'),parent=parent.removesuffix('\n'))
+    return observed
 
 
 def _window_reads(window):
@@ -109,14 +151,7 @@ def tmux_formatting_batch(transport,requests,deadline):
                     results.append(observed)
             continue
         for window,start in reads:
-            if values[start].strip()!=window:
-                results.append(dict(error=dict(code='stale_target')));continue
-            observed={}
-            for index,name in enumerate(WINDOW_OPTIONS):
-                raw,value,effective,parent=values[start+1+index*4:start+1+index*4+4]
-                observed[name]=dict(explicit=bool(raw),value=value.removesuffix('\n') if raw else None,
-                    effective=effective.removesuffix('\n'),parent=parent.removesuffix('\n'))
-            results.append(observed)
+            results.append(_window_observation(window,values,start))
     return results
 
 

@@ -72,7 +72,9 @@ class FormattingProcessBudgetTests(FormattingTests):
             report=refresh_formatting(self.root,changed,tabs=self.tabs)
         self.assertEqual(report['status'],'completed')
         self.assertLessEqual(len(flushes),1,'Existing durable originals need only the final checkpoint.')
-        self.assertLessEqual(len(commands),6)
+        native_reads_and_writes=[c for c in commands if any(v in c for v in ('show-options','set-option'))]
+        self.assertLessEqual(len(native_reads_and_writes),2,'Session custody and dirty window reads share one native client.')
+        self.assertLessEqual(len(commands),5)
         self.assertEqual(set(stat_pids),{r['window']['panes'][0]['pid'] for r in changed['resources'][:2]})
         self.assertEqual(self.tmux('show-options','-v','-t','$0','@wake-format-clock'),lease)
         for resource in changed['resources'][:2]:

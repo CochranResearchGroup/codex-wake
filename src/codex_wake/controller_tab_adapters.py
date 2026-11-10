@@ -30,6 +30,13 @@ class TmuxAttachmentTransport(TmuxTransport):
                     for request in requests]
         return tmux_formatting_batch(self,requests,deadline)
 
+    def formatting_read_session_windows(self, windows, deadline):
+        if getattr(self.formatting,'__func__',None) is not TmuxAttachmentTransport.formatting:
+            return (self.formatting('read-session',{},deadline),
+                    self.formatting_batch([dict(action='read',window=w) for w in windows],deadline))
+        from .tab_format_transport import tmux_formatting_read_session_windows
+        return tmux_formatting_read_session_windows(self,windows,deadline)
+
     def capture(self, pane, lines, deadline):
         return self.command(deadline, 'capture-pane', '-p', '-t', pane, '-S', '-' + str(lines))
 

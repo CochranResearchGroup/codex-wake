@@ -217,12 +217,12 @@ class TabFormatting:
             failures=self.apply(state,record,snapshot,resources,transport,deadline,policy=policy,resume_manual=verb=='resume')
             return dict(status='partial' if failures else 'applied',target=expected,failures=failures)
 
-    def session_plan(self,state,record,transport,deadline,*,resume_manual=False):
+    def session_plan(self,state,record,transport,deadline,*,resume_manual=False,current=None):
         """Read custody before window effects; prepare a deferred clock renewal."""
         if 'session_original' not in record:
             record['session_original']=transport.formatting('read-session',{},deadline)
             self.save(state)
-        current=transport.formatting('read-session',{},deadline)
+        if current is None:current=transport.formatting('read-session',{},deadline)
         if not resume_manual and not record.get('session_restored') and record.get('session_last_applied'):
             if any(current[k]['value']!=v for k,v in record['session_last_applied'].items()):
                 record['paused']=True;record['pause_reason']='manual_session_style';self.save(state)
@@ -264,8 +264,6 @@ class TabFormatting:
         failures=[]
         policy=policy or state['policy']
         policy_revision=digest(policy)
-        try:session=self.session_plan(state,record,transport,deadline,resume_manual=resume_manual)
-        except Exception as error:return [dict(code=getattr(error,'code','session_formatting_failed'))]
         windows=snapshot['windows'][:128]
         record['current_windows']=snapshot.get('all_window_ids',[window['window_id'] for window in windows])
         if len(snapshot['windows'])>128:failures.append(dict(code='formatting_window_capacity'))
@@ -304,7 +302,18 @@ class TabFormatting:
                                  evidence_revision=resource.get('evidence_revision'))
                 else:dirty.append(window)
             eligible=dirty
-        reads=self.batch(transport,[dict(action='read',window=w['window_id']) for w in eligible],deadline)
+        try:
+            combined=getattr(transport,'formatting_read_session_windows',None)
+            if eligible and 'session_original' in record and callable(combined):
+                current,observed=combined([w['window_id'] for w in eligible],deadline)
+                if not isinstance(observed,list) or len(observed)!=len(eligible):
+                    raise InventoryError('formatting_mismatch','Native batch readback count differs.')
+                session=self.session_plan(state,record,transport,deadline,resume_manual=resume_manual,current=current)
+                reads=[dict(error=value['error'].get('code','formatting_failed')) if isinstance(value,dict) and 'error' in value else dict(result=value) for value in observed]
+            else:
+                session=self.session_plan(state,record,transport,deadline,resume_manual=resume_manual)
+                reads=self.batch(transport,[dict(action='read',window=w['window_id']) for w in eligible],deadline)
+        except Exception as error:return [dict(code=getattr(error,'code','session_formatting_failed'))]
         pending=[]
         new_originals=False
         for window,read in zip(eligible,reads):

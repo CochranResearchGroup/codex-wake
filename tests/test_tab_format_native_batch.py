@@ -35,6 +35,20 @@ class NativeFormattingBatchTests(unittest.TestCase):
         self.assertFalse(after[1]['window-status-style']['explicit'])
         self.assertEqual(after[1]['window-status-style']['effective'],'fg=green,bg=black')
 
+    def test_combined_read_keeps_manual_session_custody_before_window_effects(self):
+        self.assertEqual(self.call('enable')['status'],'applied')
+        before=self.tmux('show-options','-w','-t','@0')
+        self.tmux('set-option','-t','$0','status-interval','1')
+        self.call('configure',preset='graphite')
+        commands=[];original=subprocess.run
+        def counted(*args,**kwargs):commands.append(args[0]);return original(*args,**kwargs)
+        with patch('subprocess.run',side_effect=counted):result=self.call('enable')
+        self.assertEqual(result['status'],'partial')
+        self.assertEqual(result['failures'],[dict(code='manual_override')])
+        self.assertFalse(any('set-option' in command for command in commands))
+        self.assertEqual(self.tmux('show-options','-w','-t','@0'),before)
+        self.assertEqual(self.tmux('show-options','-v','-t','$0','status-interval').strip(),'1')
+
     def test_invalid_later_member_is_rejected_before_first_write(self):
         from codex_wake.managed_inventory import InventoryError
         original=self.tmux('show-options','-w','-t','@0')
