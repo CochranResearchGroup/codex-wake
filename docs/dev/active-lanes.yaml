@@ -1231,7 +1231,7 @@ lanes:
     dependencies: []
     overlaps: [P211, P213, P215]
     updated_at: 2026-11-10
-    disposition: root cache541; native542 and tmux543 in isolated branches; no live effects
+    disposition: native542 tmux543 checks545 closed; remaining541 544 546 547 held on installed active CPU gate; no production effects
 
   - id: P216-544
     owner: ecochran76 / native542
@@ -1262,15 +1262,15 @@ lanes:
     disposition: accepted and integrated into feat/efficient-tab-observer; worktree retained for recovery
 
   - id: P216-546
-    owner: ecochran76 / tmux543
+    owner: primary / delegated serialization546
     objective: P216 ticket 546
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/546]
     plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
-    branch: feat/observer-format-546
+    branch: feat/efficient-tab-observer
     target: feat/efficient-tab-observer
-    plan_state: CLOSED
-    custody_state: INTEGRATION_READY
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: accepted and integrated into feat/efficient-tab-observer; worktree retained for recovery
+    disposition: functional fragment integrated; reopened for installed CPU repair in isolated delegated worktrees

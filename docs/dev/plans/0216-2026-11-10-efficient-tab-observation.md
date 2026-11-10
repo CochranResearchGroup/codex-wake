@@ -8,11 +8,13 @@ Scope: approved specification and seven implementation tickets; user authorized 
 
 ## Current State
 
-Implementation authorized by the operator. Specification #540 and seven tickets
-are published. #542/#543/#545 are accepted and closed. #541/#544/#546 were
-reopened for actual100tab owner qualification repairs; #547 owns installed proof.
-Functional changes pass focused checks, but the frozen1%/5%CPU gate remains open.
-The execution ledger and qualification receipts below separate these boundaries.
+Implementation is on feat/efficient-tab-observer. #542/#543/#545 are closed;
+#541/#544/#546/#547 remain open for resource and installed qualification. The
+exact wheel5 candidate passes the60second idle gate at0.8988% but fails active
+at5.2264% ofonecore. All120events projected, p95 0.9799seconds, cleanup0.
+BothPython tab/reader checks pass. No resource threshold has been widened.
+The next bounded repair reuses a read-only formatting channel to avoid a native
+reader startup on every active frame. Review and post-review TDD counts remain0.
 
 Historical interview context: research completed in notes/0011-2026-11-10-tab-observation-efficiency-research.md.
 Stock tmux/Byobu already supplies metadata notifications; source shows Codex
@@ -22,6 +24,29 @@ cycles and couples trait inventory with exact health and visible-error inspectio
 Original formatting process/fsync overhead has separate deployed fixes. Slate is
 selected on44tabs, automatic monitor stopped. This interview decides efficient
 observation behavior and acceptance; no new runtime mutation or theme change.
+
+## Qualification repair: retained read-only formatting
+
+Owner: primary integration; delegated #546 implementation. Source evidence:
+qualification547/36f42dbe-installed-canonical.json records0.60seconds of child CPU
+in60seconds of ordinary activity. Decoder and redundant-redraw repairs help but
+do not yet satisfy5%. A realtmux prototype shows retained reads avoid repeated
+native reader startups; this is not whole-owner acceptance.
+
+Add one lazy read-only formatting channel per retained workspace, bounded by the
+existing finite command, byte and deadline budgets. Its small interface hides
+framing, exact socket ownership, lifecycle and error handling. Fixed managed
+show-options/display-message requests use unpredictable response markers so
+literal option text resembling control frames stays data. No write, capture,
+input or arbitrary-command interface is added. Existing writers and generic/psmux
+adapters retain their paths. The metadata event feed remains separate. Expose
+bounded channel cost/status and close owned clients on replacement and stop.
+
+Required evidence: actualnative hostile-literal roundtrip, command rejection,
+identity replacement, timeout/capacity failures, attached-client preservation,
+monitor lifecycle cleanup, bothPython checks, then one new exact installed
+100tab60+60second gate. Preserve failed receipts. CPU1%/5%, RSS256MiB andp95<=2s
+remain fixed; source/fixture proof does not substitute for installed or live proof.
 
 ## Settled context
 

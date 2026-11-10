@@ -8914,3 +8914,14 @@ Protocol fixtures prove no provider calls or layout/input effects. Exact install
 resource and existing-host qualification remain #547. One broad review and one
 bounded TDD remediation pass are reserved after ticket closure. Hosted CI skipped
 under operator cost policy; no merge/deploy/live enablement in this task.
+
+## Turn | 2026-11-10 | P216 installed resource repair
+
+Exact wheel5 source36f42dbe passes idle0.8988%onecore/60s but fails active5.2264%.
+All120events projected, p95.9799s, final owned process census0. Earlier canonical
+failures remain in qualification547; one exposed a quiet publisher/sleep deadline
+mismatch, fixed with an actual owner cadence regression. Decoder-only msgspec
+0.22 improves cached reads while strict encoders and digests stay unchanged.
+The next #546 repair is a bounded retained read-only formatting channel, backed
+by native prototype evidence, before another exact installed gate. #541/#544/
+#546/#547 remain open; broad review0 and post-review TDD0. Production unchanged.

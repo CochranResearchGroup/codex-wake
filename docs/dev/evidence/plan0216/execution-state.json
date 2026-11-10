@@ -27,6 +27,6 @@
   "merge_authorized": false,
   "deploy_authorized": false,
   "production_enablement_authorized": false,
-  "validation_hold": "Wheel3 source49435e8e canonicalFAIL idle2.5625%/active5.4582%; quietspinconfirmed579ticks/60s frompublication10s/sleep5s mismatch. Fixedsharedtimer publicrealownertest red30ticks/6s\u2192green<=18 bothPython. Removedredundantbackgroundtmuxrefreshfork publicPTYnativeclients5\u21924,72formatPASSboth. Exactwheel4 canonical60+60 pending; review0/remediation0.",
-  "qualification_source": "fd44a35a37268c8ec4d36f2664f53f93e861c039"
+  "validation_hold": "Exactwheel5 idlePASS0.898787%, activeFAIL5.226410%, all120events/p95.9799s/cleanup0. Retained read-only formatting channel repair in progress to remove reader fork peractiveframe; existing writers/capture/metadata feed unchanged. Review0/remediation0.",
+  "qualification_source": "36f42dbe850bcbdc667b9534608e90d94854247d"
 }

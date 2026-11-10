@@ -1556,6 +1556,8 @@ State: OPEN
 
 Plan: [Efficient tab observation](docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md).
 Specification: [#540](https://github.com/CochranResearchGroup/codex-wake/issues/540).
-Seven tickets #541-#547; cached inventory and passive native/tmux feeds accepted.
-Shared observer, tiered checks, stable projection and installed resource proof
-remain in progress. No production monitoring activation, merge or deployment.
+Seven tickets #541-#547; native/tmux feeds and tiered checks #542/#543/#545 closed.
+Cache, owner, projection and installed proof remain open. Exact wheel5 passes
+idle0.899% but active5.226% exceeds5%; a retained read-only formatting channel is
+the next measured repair. Review/TDD remediation remain reserved after closure.
+No production monitoring activation, merge or deployment.
