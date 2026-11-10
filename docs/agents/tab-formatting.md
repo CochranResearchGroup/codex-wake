@@ -142,3 +142,17 @@ reported as `uncertain` with `reason: invalid_argument`. A successful HTTP/MCP
 exchange or a false MCP transport-error flag alone does not prove the formatting
 operation succeeded. Local CLI returns3 for uncertain work; use the retained
 request result to reconcile rather than blindly resubmitting an effect.
+
+## Compact neutral display
+
+```sh
+codex-wake tabs format configure --session default --policy '{"compact":true,"render_mode":"plain","show_stale":false}'
+codex-wake tabs format resume --session default
+```
+
+Compact display keeps the native number/name, type badge for harnesses, and a
+small `*` running, `?` waiting or `!` attention cue. Shells omit the type badge;
+profile, idle and unknown badges are omitted. Plain rendering uses terminal
+default colors. `show_stale:false` removes repeated STALE text, while backend
+expiry still neutralizes stale decoration and inspection retains freshness.
+Use `compact:false` or `show_stale:true` to restore those individual preferences.

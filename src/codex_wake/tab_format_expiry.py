@@ -5,7 +5,7 @@ CLOCK_OPTION='@wake-format-clock'
 STALE_AFTER=20.0
 
 
-def expiring_options(options, *, observed_at, stale_after=STALE_AFTER, render_mode='full'):
+def expiring_options(options, *, observed_at, stale_after=STALE_AFTER, render_mode='full', show_stale=True):
     """Embed an absolute deadline evaluated by the backend's native clock.
 
     The session clock option is owned/restored with other formatting settings.
@@ -28,5 +28,6 @@ def expiring_options(options, *, observed_at, stale_after=STALE_AFTER, render_mo
         stale_style='#[default,'+stale_colour+(',bold,underscore' if current else '')+']'
         # Keep projected/user text OUTSIDE the conditional branches. This avoids
         # reinterpreting literal commas/braces in profile/model/provider labels.
-        result[name]='#{?'+condition+','+stale_style.replace(',','#,')+' STALE ,'+fresh_style.replace(',','#,')+'}'+options[name]
+        stale_label = ' STALE ' if show_stale else ''
+        result[name]='#{?'+condition+','+stale_style.replace(',','#,')+stale_label+','+fresh_style.replace(',','#,')+'}'+options[name]
     return result

@@ -139,18 +139,25 @@ def project(resource, policy=None, *, now=None):
     pieces = [label]
     if badges['profile']:
         pieces.append(next(iter(badges['profile'])) if len(badges['profile']) == 1 else 'profiles:MIX')
-    pieces.append(marker)
+    if state != 'stale' or policy.get('show_stale', True):
+        pieces.append(marker)
     for key, enabled in (('model', 'show_model'), ('inference_provider', 'show_provider')):
         if policy.get(enabled) and badges[key]:
             pieces.append(next(iter(badges[key])) if len(badges[key]) == 1 else key + ':MIX')
+    if policy.get('compact'):
+        pieces = [] if kind in ('shell', 'unknown') else [label]
+        cue = {'running': '*', 'waiting': '?', 'error': '!', 'health-warning': '!'}.get(state, '')
+        if cue:pieces.append(cue)
     badge = ' '.join(pieces)
+    compact_normal = f' #I:{badge + " " if badge else ""}#W '
+    compact_current = f'#[bold,underscore] [#I:{badge + " " if badge else ""}#W] '
     normal_style,current_style=styles(colour,state,policy.get('render_mode','full'))
     rendering=capabilities(resource.get('target',{}).get('presentation','unknown'),
         identity=resource.get('backend_identity'))
     rendering['requested_mode']=policy.get('render_mode','full')
     return dict(label=label, state=state, colour=colour,
                 details=dict(panes=details,mixed=len(kinds)>1,activity=activity,rendering=rendering),
-                options={'window-status-format': f' #I {badge} #W ',
-                         'window-status-current-format': f'#[bold,underscore] [#I {badge} #W] ',
+                options={'window-status-format': compact_normal if policy.get('compact') else f' #I {badge} #W ',
+                         'window-status-current-format': compact_current if policy.get('compact') else f'#[bold,underscore] [#I {badge} #W] ',
                          'window-status-style': normal_style,
                          'window-status-current-style': current_style})
