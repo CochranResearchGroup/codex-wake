@@ -8902,3 +8902,15 @@ selected#2b3544background/noSTALE/compact andall306installedmembersverified.
 Automaticmonitorremainsstopped; no newloaded-host healthclaim/providerturn.
 Evidenceplan0215/deployment.json,userstate tab-presets-0215-deploy. Memoryforbidden:
 noexplicitmemory-write request. Preexistingrepo.codex/config.tomleditpreserved.
+
+## Turn | 2026-11-10 | P216 approved observer specification and implementation
+
+Published specification #540 and dependency-linked tickets #541-#547. Isolated
+integration branch feat/efficient-tab-observer starts at fa2363c; unrelated
+human-CLI edits in the original worktree preserved. Primary owns cache #541;
+workers own native #542 and tmux #543, then newly ready #544/#545/#546 one each.
+Three initial tickets accepted with both supported Python focused checks.
+Protocol fixtures prove no provider calls or layout/input effects. Exact installed
+resource and existing-host qualification remain #547. One broad review and one
+bounded TDD remediation pass are reserved after ticket closure. Hosted CI skipped
+under operator cost policy; no merge/deploy/live enablement in this task.

@@ -169,11 +169,11 @@ Fixed review base fa2363c24bf921ecf0bd8390739e96041e620e8f.
 | Ticket | Owner | State | Dependencies |
 | --- | --- | --- | --- |
 | #541 cached inventory | primary | locally validated; integrated | none |
-| #542 native feed | /root/native542 | implementing | none |
-| #543 tmux feed | /root/tmux543 | implementing | none |
-| #544 observer lifecycle | pending | blocked | #541 #542 #543 |
-| #545 tiered checks | pending | blocked | #541 |
-| #546 stable projection | pending | blocked | #541 |
+| #542 native feed | /root/native542 | CLOSED; integrated cf1dede | none |
+| #543 tmux feed | /root/tmux543 | CLOSED; integrated7617727 | none |
+| #544 observer lifecycle | /root/native542 | implementing | #541 #542 #543 closed |
+| #545 tiered checks | /root/checks545 | implementing | #541 closed |
+| #546 stable projection | /root/tmux543 | implementing | #541 closed |
 | #547 installed acceptance | pending | blocked | #544 #545 #546 |
 
 No nested delegation; three implementation lanes maximum. Inherited model/effort

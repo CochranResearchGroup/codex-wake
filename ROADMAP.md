@@ -1549,3 +1549,13 @@ Slate/Dusk/Graphite presets shipped via PR539/7010cbe. Slate active fordefault,
 44nativewindowreadbacks verified compact/noSTALE and subduedselection. Named
 presets persist through shared configure and originalrollbackcustody. Automatic
 monitor remains stopped pending separate loaded-host cycle qualification.
+
+## P216 | Efficient tab observation and stable formatting
+
+State: OPEN
+
+Plan: [Efficient tab observation](docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md).
+Specification: [#540](https://github.com/CochranResearchGroup/codex-wake/issues/540).
+Seven tickets #541-#547; cached inventory and passive native/tmux feeds accepted.
+Shared observer, tiered checks, stable projection and installed resource proof
+remain in progress. No production monitoring activation, merge or deployment.
