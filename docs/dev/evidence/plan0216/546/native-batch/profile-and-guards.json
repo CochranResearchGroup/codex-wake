@@ -1,0 +1,47 @@
+{
+  "profile_sha256": "f2b554c51ff9ab4dd7c861e856636fdee86272197d2595f9078e903df7e86a45",
+  "before_profile": [
+    {
+      "file": "tab_lifecycle.py",
+      "function": "inspect",
+      "calls": 10,
+      "self_seconds": 0.0013717690000000001,
+      "cumulative_seconds": 0.14712967300000002
+    },
+    {
+      "file": "tab_format_transport.py",
+      "function": "_command_batch",
+      "calls": 80,
+      "self_seconds": 0.0028579540000000002,
+      "cumulative_seconds": 0.42060824500000005
+    },
+    {
+      "file": "tab_formatting.py",
+      "function": "apply",
+      "calls": 10,
+      "self_seconds": 0.011253377,
+      "cumulative_seconds": 0.635060838
+    },
+    {
+      "file": "process.py",
+      "function": "process_identity",
+      "calls": 1233,
+      "self_seconds": 0.0020361140000000003,
+      "cumulative_seconds": 0.138775064
+    }
+  ],
+  "command_batch_abi_body_unchanged": true,
+  "public_resource_regression": {
+    "before_native_processes": 11,
+    "after_max_native_processes": 6,
+    "unchanged_windows": 2,
+    "dirty_pid_fences": 2
+  },
+  "lifecycle_fixture_race": {
+    "field": "pane_current_command",
+    "before": "ln",
+    "after": "zsh",
+    "same_window_pid_birth_tty_cwd_name": true,
+    "snapshot_evidence_sha256": "0159a68d242d3c6beb0bc2a54c96a94d377484ea1406b8a2a17f6079b6fa457d"
+  }
+}

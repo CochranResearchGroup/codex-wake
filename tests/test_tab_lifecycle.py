@@ -17,6 +17,11 @@ class TabLifecycleTests(unittest.TestCase):
         self.root = Path(self.tmp.name)
         self.socket = str(self.root / 'tmux.sock')
         self.tmux('new-session', '-d', '-s', 'source', 'sleep 120')
+        # Bare-shell CRUD must not race the operator's interactive startup hooks.
+        # This private server uses a plain POSIX shell without login/profile code.
+        self.tmux('set-option','-g','default-shell','/bin/sh')
+        self.tmux('set-option','-g','default-command','exec /bin/sh')
+        self.tmux('set-environment','-g','-u','ENV')
         self.addCleanup(lambda: subprocess.run(['tmux', '-S', self.socket, 'kill-server'],
                                                capture_output=True))
         self.tmux('new-session', '-d', '-s', 'holding', 'sleep 120')

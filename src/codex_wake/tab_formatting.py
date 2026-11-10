@@ -217,30 +217,44 @@ class TabFormatting:
             failures=self.apply(state,record,snapshot,resources,transport,deadline,policy=policy,resume_manual=verb=='resume')
             return dict(status='partial' if failures else 'applied',target=expected,failures=failures)
 
+    def session_plan(self,state,record,transport,deadline,*,resume_manual=False):
+        """Read custody before window effects; prepare a deferred clock renewal."""
+        if 'session_original' not in record:
+            record['session_original']=transport.formatting('read-session',{},deadline)
+            self.save(state)
+        current=transport.formatting('read-session',{},deadline)
+        if not resume_manual and not record.get('session_restored') and record.get('session_last_applied'):
+            if any(current[k]['value']!=v for k,v in record['session_last_applied'].items()):
+                record['paused']=True;record['pause_reason']='manual_session_style';self.save(state)
+                raise InventoryError('manual_override','Managed session style changed.')
+        effective=record['session_original']['status-interval']['effective']
+        interval=float(effective)
+        interval=str(int(interval)) if 0<interval<=5 else '5'
+        clock=current['@wake-format-clock']['value']
+        try:remaining=int(clock)-time.time()
+        except (TypeError,ValueError):remaining=0
+        lease=clock if 15<=remaining<=20 and not record.get('session_restored') else str(int(time.time()+20))
+        values={'status-interval':interval,'@wake-format-clock':lease}
+        updates={k:v for k,v in values.items() if record.get('session_last_applied',{}).get(k)!=v or record.get('session_restored')}
+        return current,values,updates
+
+    @staticmethod
+    def commit_session(record,transport,deadline,plan):
+        current,values,updates=plan
+        actual=transport.formatting('write-session',dict(values=updates),deadline) if updates else current
+        if any(actual[k]['value']!=v for k,v in values.items()):
+            raise InventoryError('formatting_mismatch','Session formatting readback differs from policy.')
+        record['session_last_applied']=values
+        record['session_restored']=False
+
     def renew_session(self,state,record,transport,deadline,*,resume_manual=False):
-        """Check managed session custody and renew its shared clock only."""
+        """Renew an unchanged qualified source after checking session custody."""
         try:
-            if 'session_original' not in record:
-                record['session_original']=transport.formatting('read-session',{},deadline)
-                self.save(state)
-            current=transport.formatting('read-session',{},deadline)
-            if not resume_manual and not record.get('session_restored') and record.get('session_last_applied'):
-                if any(current[k]['value']!=v for k,v in record['session_last_applied'].items()):
-                    record['paused']=True;record['pause_reason']='manual_session_style';self.save(state)
-                    return [dict(code='manual_override')]
-            effective=record['session_original']['status-interval']['effective']
-            interval=float(effective)
-            interval=str(int(interval)) if 0<interval<=5 else '5'
-            session_values={'status-interval':interval,'@wake-format-clock':str(int(time.time()+20))}
-            updates={k:v for k,v in session_values.items() if record.get('session_last_applied',{}).get(k)!=v or record.get('session_restored')}
-            actual=transport.formatting('write-session',dict(values=updates),deadline) if updates else current
-            if any(actual[k]['value']!=v for k,v in session_values.items()):
-                raise InventoryError('formatting_mismatch','Session formatting readback differs from policy.')
-            record['session_last_applied']=session_values
-            record['session_restored']=False
+            self.commit_session(record,transport,deadline,self.session_plan(
+                state,record,transport,deadline,resume_manual=resume_manual))
+            return []
         except Exception as error:
             return [dict(code=getattr(error,'code','session_formatting_failed'))]
-        return []
 
     def apply(self,state,record,snapshot,resources,transport,deadline,*,policy=None,resume_manual=False,trust_unchanged=False,trusted_revisions=False):
         """Apply one snapshot under the owner lock, saving originals first."""
@@ -250,10 +264,10 @@ class TabFormatting:
         failures=[]
         policy=policy or state['policy']
         policy_revision=digest(policy)
-        failures=self.renew_session(state,record,transport,deadline,resume_manual=resume_manual)
-        if failures:return failures
+        try:session=self.session_plan(state,record,transport,deadline,resume_manual=resume_manual)
+        except Exception as error:return [dict(code=getattr(error,'code','session_formatting_failed'))]
         windows=snapshot['windows'][:128]
-        record['current_windows']=[window['window_id'] for window in windows]
+        record['current_windows']=snapshot.get('all_window_ids',[window['window_id'] for window in windows])
         if len(snapshot['windows'])>128:failures.append(dict(code='formatting_window_capacity'))
         eligible=[]
         for window in windows:
@@ -343,6 +357,18 @@ class TabFormatting:
             record['windows'][wid].update(last_applied=options,restored=False,
                 projection_revision=revision,projection_policy=policy_revision,evidence_revision=evidence,
                 projection={k:v for k,v in rendered.items() if k!='options'})
+        # A failed changed window may still display an old dynamic cue. Do not
+        # extend that cue's shared lease unless its new projection was verified.
+        lease_safe=True
+        for failure in failures:
+            wid=failure.get('window')
+            if wid is None:lease_safe=False;break
+            saved=record['windows'].get(wid,{})
+            if saved.get('last_applied') and (wid not in prepared or prepared[wid][1]!=saved['last_applied']):
+                lease_safe=False;break
+        if lease_safe:
+            try:self.commit_session(record,transport,deadline,session)
+            except Exception as error:failures.append(dict(code=getattr(error,'code','session_formatting_failed')))
         self.save(state)
         try:
             if pending:transport.formatting('refresh',{},deadline)
@@ -465,7 +491,37 @@ class TabFormatting:
                 config=self.tabs.workspaces[name];transport=config['transport']
                 try:
                     from .tab_lifecycle import TabLifecycle
-                    physical=TabLifecycle(self.tabs.root,workspaces=self.tabs.workspaces,host=self.tabs.host,environment=self.tabs.environment).inspect(name,deadline=deadline)['snapshot']
+                    from .tab_format_monitor import semantic_revision
+                    lifecycle=TabLifecycle(self.tabs.root,workspaces=self.tabs.workspaces,host=self.tabs.host,environment=self.tabs.environment)
+                    selected=None
+                    if trusted_revisions and record:
+                        policy_revision=digest(policy)
+                        selected=set(record.get('current_windows',[]))-set(rows)
+                        for wid,resource in rows.items():
+                            saved=record['windows'].get(wid,{})
+                            revision=semantic_revision(resource,trusted=not resource.get('monitor_unavailable'))
+                            if (revision is None or saved.get('projection_revision')!=revision
+                                    or saved.get('projection_policy')!=policy_revision or saved.get('restored')
+                                    or saved.get('paused') or not saved.get('last_applied')
+                                    or saved.get('panes')!=resource.get('window',{}).get('panes')
+                                    or time.time()-saved.get('last_audited_at',0)>=60):selected.add(wid)
+                    for attempt in range(2):
+                        physical=lifecycle.inspect(name,deadline=deadline,window_ids=selected)['snapshot']
+                        extra=set()
+                        if selected is not None:
+                            for window in physical['windows']:
+                                wid=window['window_id']
+                                if wid in selected:continue
+                                saved=record['windows'].get(wid,{}).get('panes',[])
+                                panes=window.get('panes',[])
+                                if (len(saved)!=len(panes) or any(
+                                        {k:v for k,v in old.items() if k!='process_generation'}!=pane
+                                        for old,pane in zip(saved,panes))):
+                                    extra.add(wid);continue
+                                for old,pane in zip(saved,panes):pane['process_generation']=old.get('process_generation')
+                        if not extra:break
+                        selected.update(extra)
+                    else:raise InventoryError('stale_target','Physical panes changed during bounded formatting inspection.')
                     identity=self.identity(physical)
                     if record and identity!=record['identity']:
                         raise InventoryError('stale_target','Formatting namespace changed; baseline preserved.')
@@ -492,7 +548,7 @@ class TabFormatting:
                         rows[wid]=dict(window=window,traits=dict(panes=panes),monitor_unavailable=True,target=dict(presentation=config.get('kind')))
                     # Never project onto a newly discovered or replaced window
                     # that was not represented in the trusted bounded sample.
-                    physical=dict(physical,windows=[w for w in physical['windows'] if w['window_id'] in rows
+                    physical=dict(physical,all_window_ids=[w['window_id'] for w in physical['windows']],windows=[w for w in physical['windows'] if w['window_id'] in rows
                         and w['panes']==rows[w['window_id']]['window']['panes']])
                     failures=self.apply(state,record,physical,rows,transport,deadline,policy=policy,trust_unchanged=True,trusted_revisions=trusted_revisions)
                     results.append(dict(workspace=name,status='partial' if failures else 'applied',failures=failures))

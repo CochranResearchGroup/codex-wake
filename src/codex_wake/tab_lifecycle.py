@@ -33,14 +33,25 @@ class TabLifecycle:
         self.host, self.environment = host, environment
         self.records = TabOrganization(root, transport=None)
 
-    def inspect(self, workspace, *, deadline=None):
+    def inspect(self, workspace, *, deadline=None, window_ids=None):
+        """Read the complete roster; optionally fence only selected pane births.
+
+        Lifecycle/input callers keep the default full check. The formatting
+        owner uses the narrow read-only selection for windows it may change.
+        """
         deadline = deadline or time.monotonic() + 10
+        if window_ids is not None:
+            if (not isinstance(window_ids,(list,tuple,set,frozenset)) or len(window_ids)>4096
+                    or any(not isinstance(w,str) or not re.fullmatch(r'@[0-9]+',w) for w in window_ids)):
+                raise InventoryError('invalid_argument','Bounded exact window identities required for read-only inspection.')
+            window_ids=set(window_ids)
         if not isinstance(workspace, str) or workspace not in self.workspaces:
             raise InventoryError('unsupported_target', 'workspace is not host enrolled')
         config = self.workspaces[workspace]
         snapshot = config['transport'].snapshot(deadline)
         if config['kind'] in ('tmux', 'byobu'):
             for window in snapshot['windows']:
+                if window_ids is not None and window['window_id'] not in window_ids:continue
                 for pane in window['panes']:
                     pane['process_generation'] = process_identity(pane['pid'])
         target = dict(host=self.host, environment=self.environment, workspace=workspace,
