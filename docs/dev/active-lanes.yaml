@@ -1254,12 +1254,12 @@ lanes:
     plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
     branch: feat/observer-checks-545
     target: feat/efficient-tab-observer
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: single delegated ticket; integration and acceptance retained by primary
+    disposition: accepted and integrated into feat/efficient-tab-observer; worktree retained for recovery
 
   - id: P216-546
     owner: ecochran76 / tmux543
@@ -1268,9 +1268,9 @@ lanes:
     plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
     branch: feat/observer-format-546
     target: feat/efficient-tab-observer
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: single delegated ticket; integration and acceptance retained by primary
+    disposition: accepted and integrated into feat/efficient-tab-observer; worktree retained for recovery

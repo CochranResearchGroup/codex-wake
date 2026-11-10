@@ -9,7 +9,7 @@ Scope: approved specification and seven implementation tickets; user authorized 
 ## Current State
 
 Implementation authorized by the operator. Specification #540 and seven tickets
-are published; #541/#542/#543/#545 are accepted and closed, #544/#546 implement
+are published; #541/#542/#543/#545/#546 are accepted and closed, #544 implements
 the persistent owner and projection, #547 owns installed qualification. The
 execution ledger below is authoritative for implementation status.
 
@@ -178,7 +178,7 @@ Fixed review base fa2363c24bf921ecf0bd8390739e96041e620e8f.
 | #543 tmux feed | /root/tmux543 | CLOSED; integrated7617727 | none |
 | #544 observer lifecycle | /root/native542 | implementing | #541 #542 #543 closed |
 | #545 tiered checks | /root/checks545 | CLOSED; integrated3f75ef9a | #541 closed |
-| #546 stable projection | /root/tmux543 | implementing | #541 closed |
+| #546 stable projection | /root/tmux543 | CLOSED; integrated433a966b | #541 closed |
 | #547 installed acceptance | pending | blocked | #544 #545 #546 |
 
 No nested delegation; three implementation lanes maximum. Inherited model/effort
