@@ -99,7 +99,7 @@ class TmuxMetadataFeed:
         self.snapshot = None
         self.started_at = self.monotonic()
         self.process = subprocess.Popen(['tmux', '-S', self.socket, '-C',
-            'attach-session', '-f', 'no-output,ignore-size,read-only', '-t', self.session],
+            'attach-session', '-E', '-f', 'no-output,ignore-size,read-only', '-t', self.session],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
             bufsize=0, env={**os.environ, 'TMUX': ''})
         os.set_blocking(self.process.stdout.fileno(), False)

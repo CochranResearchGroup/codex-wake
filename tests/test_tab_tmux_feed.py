@@ -1,5 +1,7 @@
 """Private stock-tmux qualification at the public feed seam."""
 import shutil
+import os
+from unittest.mock import patch
 import subprocess
 import tempfile
 import time
@@ -58,6 +60,17 @@ class TmuxFeedTests(unittest.TestCase):
         self.feed.close()
         self.assertEqual(before, self.tmux('list-panes', '-a', '-F', '#{pane_id} #{pane_pid} #{window_layout} #{window_active}'))
         self.assertEqual(self.feed.status()['state'], 'closed')
+
+    def test_read_only_attach_preserves_session_environment(self):
+        variable='WAKE_METADATA_ENV_FIXTURE'
+        self.tmux('set-option','-t','$0','update-environment',variable)
+        self.tmux('set-environment','-t','$0',variable,'original-session-value')
+        self.feed.close()
+        with patch.dict(os.environ,{variable:'observer-environment-value'}):
+            self.feed=TmuxMetadataFeed(self.socket,'$0')
+            self.events_until('baseline')
+        self.assertEqual(self.tmux('show-environment','-t','$0',variable),
+                         variable+'=original-session-value')
 
     def test_disconnect_then_reconnect_requires_new_baseline(self):
         baseline = self.events_until('baseline')
