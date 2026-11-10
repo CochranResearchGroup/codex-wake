@@ -103,7 +103,9 @@ def main():
                         components['reaped']+=sum(int(fields[i]) for i in (13,14))/os.sysconf('SC_CLK_TCK')
                         cpu+=sum(int(fields[i]) for i in (11,12,13,14))/os.sysconf('SC_CLK_TCK')
                     elif pid!=os.getpid():cpu+=(int(fields[11])+int(fields[12]))/os.sysconf('SC_CLK_TCK')
-                    stack.extend(int(p) for p in Path('/proc',str(pid),'task',str(pid),'children').read_text().split())
+                    for task in Path('/proc',str(pid),'task').iterdir():
+                        try:stack.extend(int(p) for p in (task/'children').read_text().split())
+                        except OSError:pass
                 except (OSError,ValueError):pass
             return cpu,rss
         def activity(value,thread_id):
@@ -119,10 +121,15 @@ def main():
             result=subprocess.run([str(Path(sys.executable).parent/'codex-wake'),'--wake-root',str(root),*parts],env=env,cwd=root,text=True,capture_output=True,timeout=60)
             assert result.returncode==0,(parts,result.returncode,result.stdout,result.stderr)
             return result.stdout
+        def track_controls(status):
+            for row in [*status.get('sources',[]),*status.get('formatting_reads',[])]:
+                if row.get('owned_pid'):control_pids.add(row['owned_pid'])
         def tick(**kwargs):
             if monitor:
-                return monitor.execute('tabs.monitor.status',{}).get('snapshot') or dict(resources=[])
-            return observer.tick(**kwargs)
+                value=monitor.execute('tabs.monitor.status',{}).get('snapshot') or dict(resources=[])
+                track_controls(value.get('observer',{}))
+                return value
+            value=observer.tick(**kwargs);track_controls(observer.status());return value
         def active_count(value):
             return sum(pane['traits']['activity']['value'] in ('running','waiting-for-input')
                        for row in value['resources'] for pane in row['traits']['panes'])
@@ -201,7 +208,7 @@ main(['--serve',sys.argv[-1]])
                 receipt['cold_start_seconds']=time.monotonic()-start
                 receipt['owner_cold_start_seconds']=time.monotonic()-owner_start
                 receipt['native_bound_panes']=bound
-                control_pids.update(s['owned_pid'] for s in (value.get('observer',{}).get('sources',[]) if monitor else observer.status()['sources']) if s.get('owned_pid'))
+                track_controls(value.get('observer',{}) if monitor else observer.status())
                 if monitor_pid:control_pids.add(monitor_pid)
                 if args.diagnostic_profile:
                     if args.diagnostic_profile!='none':
