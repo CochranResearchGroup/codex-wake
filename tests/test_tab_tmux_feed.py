@@ -40,6 +40,9 @@ class TmuxFeedTests(unittest.TestCase):
         baseline = self.events_until('baseline')
         snapshot = baseline['data']['snapshot']
         self.assertEqual(snapshot['session_id'], '$0')
+        from codex_wake.tab_organization import TmuxTransport
+        self.assertEqual(snapshot,TmuxTransport(self.socket,'$0').snapshot(time.monotonic()+2))
+        self.assertEqual(snapshot['windows'][0]['panes'][0]['pane_current_command'],'sleep')
         flags = self.tmux('list-clients', '-F', '#{client_flags}')
         self.assertIn('no-output', flags)
         self.assertIn('ignore-size', flags)

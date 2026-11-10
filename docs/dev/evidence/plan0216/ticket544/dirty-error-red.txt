@@ -1,0 +1,16 @@
+F
+======================================================================
+FAIL: test_native_delta_projects_without_inventory_and_source_loss_removes_authority (test_tab_observer.ObserverTests.test_native_delta_projects_without_inventory_and_source_loss_removes_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-publication-544/tests/test_tab_observer.py", line 146, in test_native_delta_projects_without_inventory_and_source_loss_removes_authority
+    self.assertEqual(error['value'],'present')
+AssertionError: 'absent' != 'present'
+- absent
++ present
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.079s
+
+FAILED (failures=1)

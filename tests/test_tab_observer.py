@@ -4,6 +4,8 @@ import threading
 from websockets.sync.server import unix_serve
 from pathlib import Path
 import shutil
+import shlex
+import sys
 import subprocess
 import tempfile
 import time
@@ -58,7 +60,14 @@ class ObserverTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory); home=root/'home'; home.mkdir()
             tmux=['tmux','-S',str(root/'tmux.sock')]
-            subprocess.run([*tmux,'new-session','-d','-s','fixture','-c',str(root),'sleep 60'],check=True)
+            body=("from pathlib import Path; import time\n"
+                  f"trigger=Path({str(root/'show-error')!r})\n"
+                  "while not trigger.exists(): time.sleep(.01)\n"
+                  "print('\\033[31mError: private_dirty_fixture\\033[0m',flush=True)\n"
+                  f"Path({str(root/'error-written')!r}).touch()\n"
+                  "time.sleep(60)\n")
+            program=shlex.join([sys.executable,'-u','-c',body])
+            subprocess.run([*tmux,'new-session','-d','-s','fixture','-c',str(root),program],check=True)
             subprocess.run([*tmux,'select-pane','-t','%0','-T','native-fixture'],check=True)
             path=root/'controller-tabs.json'
             path.write_text(json.dumps(dict(schema_version=1,workspaces=dict(fixture=dict(
@@ -86,7 +95,7 @@ class ObserverTests(unittest.TestCase):
                 owner=controller_tabs_from_root(root)
                 mono=[0.];wall_offset=[0.]
                 owner.observation_cache=ObservationCache(root,process_probe=process_probe,monotonic=lambda:mono[0])
-                observer=TabObserver(root,owner=owner,settings=dict(health=False,errors=False),
+                observer=TabObserver(root,owner=owner,settings=dict(health=False,errors=True),
                     monotonic=lambda:mono[0],clock=lambda:time.time()+wall_offset[0],native_endpoints=['unix://'+native_path])
                 try:
                     result=observer.tick()
@@ -99,6 +108,10 @@ class ObserverTests(unittest.TestCase):
                     self.assertEqual(quiet['projection_revision'],original_projection)
                     self.assertEqual(quiet['resources'][0]['projection_revision'],original_resource)
                     mono[0]=6.
+                    passes=observer.status()['costs']['inventory_passes']
+                    self.assertEqual(observer.status()['scheduler']['fallback_interval_seconds'],30.)
+                    self.assertEqual(observer.tick()['observer']['costs']['inventory_passes'],passes)
+                    mono[0]=31.
                     refreshed=observer.tick()
                     self.assertEqual(refreshed['projection_revision'],original_projection)
                     self.assertNotEqual(refreshed['evidence_revision'],result['evidence_revision'])
@@ -111,15 +124,36 @@ class ObserverTests(unittest.TestCase):
                         self.assertLess(time.monotonic(),until)
                     self.assertEqual(observer.status()['costs']['inventory_passes'],passes)
                     self.assertTrue(activity['source_available'])
+                    self.assertEqual(observer.status()['scheduler']['fallback_interval_seconds'],5.)
                     self.assertNotEqual(result['projection_revision'],original_projection)
                     running_projection=result['projection_revision']
                     self.assertEqual(observer.tick()['projection_revision'],running_projection)
                     wall_offset[0]=30.
                     self.assertEqual(observer.tick()['projection_revision'],running_projection)
+                    wall_offset[0]=0.
+                    connections[-1].send(json.dumps(dict(method='thread/status/changed',params=dict(threadId='t1',status=dict(type='idle')))))
+                    until=time.monotonic()+2
+                    while observer.tick()['resources'][0]['traits']['traits']['activity']['value']!='idle':
+                        self.assertLess(time.monotonic(),until)
+                    (root/'show-error').touch()
+                    until=time.monotonic()+2
+                    while not (root/'error-written').exists():
+                        self.assertLess(time.monotonic(),until);time.sleep(.01)
+                    mono[0]=37.
+                    dirty=observer.tick()
+                    error=dirty['resources'][0]['traits']['panes'][0]['traits']['error']
+                    self.assertEqual(dirty['resources'][0]['traits']['traits']['activity']['value'],'idle')
+                    self.assertEqual(error['value'],'present')
+                    self.assertEqual(error['message'],'Terminal error (content redacted)')
+                    self.assertNotIn('private_dirty_fixture',json.dumps(dirty))
+                    self.assertEqual(observer.status()['checks']['checks']['health'],0)
+                    self.assertEqual(observer.status()['scheduler']['fallback_interval_seconds'],5.)
+                    running_projection=dirty['projection_revision']
                     connections[-1].close()
                     result=observer.tick()
                     self.assertFalse(result['resources'][0]['traits']['traits']['activity']['source_available'])
                     self.assertNotEqual(result['projection_revision'],running_projection)
+                    self.assertEqual(observer.status()['scheduler']['fallback_interval_seconds'],5.)
                 finally:
                     observer.close();server.shutdown();thread.join(2)
                     subprocess.run([*tmux,'kill-server'],capture_output=True)

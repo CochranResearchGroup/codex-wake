@@ -21,7 +21,7 @@ class TmuxMetadataFeed:
     MAX_PANES = 4096
     FORMAT = '\t'.join('#{' + name + '}' for name in (
         'pid', 'session_id', 'window_id', 'window_index', 'window_name',
-        'window_active', 'pane_id', 'pane_pid', 'pane_title', 'pane_current_path', 'pane_tty'))
+        'window_active', 'pane_id', 'pane_pid', 'pane_title', 'pane_current_path', 'pane_tty', 'pane_current_command'))
     CHANGES = frozenset(('%window-add', '%window-close', '%window-renamed',
         '%unlinked-window-add', '%unlinked-window-close', '%unlinked-window-renamed',
         '%layout-change', '%session-window-changed', '%sessions-changed',
@@ -114,24 +114,24 @@ class TmuxMetadataFeed:
         rows = []
         for line in lines:
             values = line.split('\t')
-            if len(values) != 11:
+            if len(values) != 12:
                 raise ValueError('ambiguous_inventory_metadata')
-            server, session, window, index, name, active, pane, pid, title, path, tty = values
+            server, session, window, index, name, active, pane, pid, title, path, tty, command = values
             if not (server.isdecimal() and re.fullmatch(r'\$\d+', session)
                     and re.fullmatch(r'@\d+', window) and re.fullmatch(r'%\d+', pane)
                     and index.isdecimal() and pid.isdecimal() and active in ('0', '1')):
                 raise ValueError('invalid_inventory_metadata')
-            rows.append((server, session, window, int(index), name, active, pane, int(pid), title, path, tty))
+            rows.append((server, session, window, int(index), name, active, pane, int(pid), title, path, tty, command))
         selected = [row for row in rows if row[1] == self.session]
         if not selected:
             raise ValueError('session_unavailable')
         windows = {}
-        for server, session, window, index, name, active, pane, pid, title, path, tty in selected:
+        for server, session, window, index, name, active, pane, pid, title, path, tty, command in selected:
             item = windows.setdefault(window, dict(window_id=window, index=index,
                 name=name, focused=active == '1',
                 linked=len({r[1] for r in rows if r[2] == window}) > 1, panes=[]))
             item['panes'].append(dict(pane_id=pane, pid=pid, pane_title=title,
-                                      pane_current_path=path, pane_tty=tty))
+                                      pane_current_path=path, pane_tty=tty,pane_current_command=command))
         return dict(server=selected[0][0], session_id=self.session,
                     socket_identity=self.identity,
                     windows=sorted(windows.values(), key=lambda w: w['index']))
@@ -162,7 +162,7 @@ class TmuxMetadataFeed:
                     self._send('subscription', 'refresh-client', '-B',
                                'wake-windows:@*:#{window_id} #{window_index} #{window_name} #{window_active}')
                     self._send('subscription', 'refresh-client', '-B',
-                               'wake-panes:%*:#{pane_id} #{pane_pid} #{pane_title} #{pane_current_path} #{pane_tty}')
+                               'wake-panes:%*:#{pane_id} #{pane_pid} #{pane_title} #{pane_current_path} #{pane_tty} #{pane_current_command}')
                 return [self._event('baseline' if first else 'update', dict(snapshot=snapshot))] if changed else []
         elif line.startswith('%exit'):
             raise ValueError('control_disconnected')
