@@ -54,3 +54,18 @@ Uninstrumented10s/phase diagnostic at actual1s defaulttick still failed idle:
 This excludes profiler overhead and confirms tick interval alone is insufficient.
 Final harness now sends2/s events on an independent producer thread so a1s owner
 cadence does not turn the fixture workload into artificial two-event bursts.
+
+Actual installed TabMonitor owner plus100-tab Slate formatting diagnostic
+(10seconds/phase, uninstrumented, not final60secondgate): idle10.192%onecore,
+active9.385%onecore, RSSmax36,732,928bytes. This includes actual owned descendants
+and reaped child CPU through proc cutime/cstime, excluding fixture/driver costs.
+Coldstart6.5415s;100nativebindings. CPU therefore requires a fix beyond the
+observer-only copy hot path before full acceptance. Default native-UI health and
+screen-ownership limitations above still apply.
+
+At cleanup the installed monitor-stop human renderer raised AttributeError on a
+None operation.result. Monitor itself exited, but harness assertion initially
+prevented its finally block from killing the disposable tmux server. That harness
+cleanup was repaired to remain effective on CLI rendering failure. Only the
+ownedUID1017fixture tmuxserver was terminated; freshOSreadback showed zero testuser
+processes afterward. This is a retained failed attempt, not clean-first-run proof.
