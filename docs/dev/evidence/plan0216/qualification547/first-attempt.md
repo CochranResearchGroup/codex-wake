@@ -107,3 +107,20 @@ cadence and yielded p95send-to-observed2.005s, an upper bound containing up to a
 extra second of consumer sampling latency. Final monitor harness samples public
 status at0.1s while keeping actual daemon default1s, workload2events/s and all
 thresholds unchanged. Driver CPU is excluded from owner resource accounting.
+
+Deterministic cold/steady boundary frozen with primary:100bound panes, all healthy
+metadata sources (tmux vocabulary available; native connected), fixture formatting
+applied/no failures, then a strictly newer qualified snapshot after enable-return.
+CPU is not part of the predicate. Prior short monitor diagnostics did not require
+this barrier, so their windows may contain cold-tail work; their failures remain
+retained and are not silently reclassified as passing steady-state measurements.
+First barrier attempt required the wrong tmux state spelling connected and timed
+out before any resource window; corrected to its actual available vocabulary.
+
+Combined source2ce71612 diagnostic, original cache replaced by30s live-metadata-
+fenced retention plus formatter candidate2 and bounded monitor acknowledgements:
+barrier passed, cold4.833s; idle4.591%, active8.784%, still failed. All20events
+projected, p951.073s with0.1s public-status sampling and default1s daemon cadence.
+Sampled aggregateRSS73.21MB; monitor-stop now returned success and owned control
+cleanup0. This failure survives CPU-independent separation of startup work.
+No immutable candidate rebuilt yet; these explicit source overrides are diagnostics.
