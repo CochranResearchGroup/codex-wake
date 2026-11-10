@@ -1232,3 +1232,45 @@ lanes:
     overlaps: [P211, P213, P215]
     updated_at: 2026-11-10
     disposition: root cache541; native542 and tmux543 in isolated branches; no live effects
+
+  - id: P216-544
+    owner: ecochran76 / native542
+    objective: P216 ticket 544
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/544]
+    plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
+    branch: feat/observer-lifecycle-544
+    target: feat/efficient-tab-observer
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P216]
+    overlaps: [P216]
+    updated_at: 2026-11-10
+    disposition: single delegated ticket; integration and acceptance retained by primary
+
+  - id: P216-545
+    owner: ecochran76 / checks545
+    objective: P216 ticket 545
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/545]
+    plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
+    branch: feat/observer-checks-545
+    target: feat/efficient-tab-observer
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P216]
+    overlaps: [P216]
+    updated_at: 2026-11-10
+    disposition: single delegated ticket; integration and acceptance retained by primary
+
+  - id: P216-546
+    owner: ecochran76 / tmux543
+    objective: P216 ticket 546
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/546]
+    plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
+    branch: feat/observer-format-546
+    target: feat/efficient-tab-observer
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P216]
+    overlaps: [P216]
+    updated_at: 2026-11-10
+    disposition: single delegated ticket; integration and acceptance retained by primary
