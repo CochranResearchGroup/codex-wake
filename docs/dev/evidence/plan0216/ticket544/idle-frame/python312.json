@@ -1,0 +1,19 @@
+{
+  "python": "3.12.13",
+  "tier": "focused",
+  "selection": [
+    "test_tab_observer",
+    "test_tab_monitor_publication",
+    "test_tab_monitor",
+    "test_tab_monitor_controls",
+    "test_tab_monitor_presentation",
+    "test_tab_format_monitor",
+    "test_tab_format_autostart",
+    "test_terminal_routing"
+  ],
+  "tests": 41,
+  "passed": true,
+  "seconds": 26.154720054999416,
+  "failures": 0,
+  "errors": 0
+}

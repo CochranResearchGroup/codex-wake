@@ -245,6 +245,9 @@ class TabObserver:
 
     def _prepare_revisions(self, now):
         """Hash changed producer records once; idle ticks reuse opaque tokens."""
+        if (not self._projection_dirty and not self._all_revisions_dirty and not self._dirty_resources
+                and (self._next_projection_boundary is None or now<self._next_projection_boundary)):
+            return
         active=set()
         for resource in self.resources:
             key=self._resource_key(resource);active.add(key)
@@ -425,7 +428,7 @@ class TabObserver:
                     recent_dirty=self.owner.observation_cache.has_dirty(),
                     overdue=age is not None and age>interval+max(.1,self.settings.get('interval',1.)))
 
-    def tick(self, *, deadline=None):
+    def tick(self, *, deadline=None, materialize=True):
         if self.closed:
             raise ValueError('Observer is closed.')
         started = self.monotonic()
@@ -493,22 +496,37 @@ class TabObserver:
             self._prepare_revisions(now)
             self._resource_json = json.dumps(self.resources, separators=(',', ':'), allow_nan=False)
             self._projection_dirty = False
-        resources = json.loads(self._resource_json)
-        for row in resources:
-            row.update(monitor_observed_at=now)
-            row.setdefault('monitor_unavailable',False)
-            name = row['target']['workspace']
-            if name in self.tmux and not self.owner.workspaces[name]['transport'].available:
-                row['monitor_unavailable'] = True
-        self.costs['last_tick_seconds'] = self.monotonic()-started
-        self.costs['total_seconds'] += self.costs['last_tick_seconds']
-        return dict(schema_version=1, observed_at=now, resources=resources,
+        snapshot=dict(schema_version=1, observed_at=now, resource_count=len(self.resources),
                     projection_revision=self._snapshot_projection_revision,
                     evidence_revision=self._snapshot_evidence_revision,
                     projection_valid_until=self._next_projection_boundary,
                     unavailable=deepcopy(self.unavailable), workspaces=list(self.owner.workspaces)[:64],
-                    status='partial' if self.unavailable else 'complete' if self.owner.workspaces else 'not_found',
-                    observer=self.status())
+                    status='partial' if self.unavailable else 'complete' if self.owner.workspaces else 'not_found')
+        if materialize:
+            snapshot['resources']=self.materialize_resources(now)
+        self.costs['last_tick_seconds'] = self.monotonic()-started
+        self.costs['total_seconds'] += self.costs['last_tick_seconds']
+        snapshot['observer']=self.status()
+        return snapshot
+
+    def materialize_resources(self, observed_at):
+        """Decode independent public rows for the latest observed frame.
+
+        The retained monitor calls this within the same tick before advancing the
+        producer again. Metadata-only frames must never be persisted as inventory.
+        """
+        if self.closed or self._resource_json is None:
+            raise ValueError('No live observed frame is available.')
+        if type(observed_at) not in (int,float) or not math.isfinite(observed_at):
+            raise ValueError('A finite observation timestamp is required.')
+        resources = json.loads(self._resource_json)
+        for row in resources:
+            row.update(monitor_observed_at=observed_at)
+            row.setdefault('monitor_unavailable',False)
+            name = row['target']['workspace']
+            if name in self.tmux and not self.owner.workspaces[name]['transport'].available:
+                row['monitor_unavailable'] = True
+        return resources
 
     def status(self):
         return dict(mode='persistent', sources=[dict(workspace=name, **feed.status()) for name,feed in self.tmux.items()]+
