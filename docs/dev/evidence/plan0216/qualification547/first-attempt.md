@@ -283,3 +283,16 @@ msgspec0.22.0 with module/native member hashes retained. Idle61ticks/2inventory
 passes, active60ticks/11inventory passes, all120eventsprojected/p950.9799s,
 RSS78,278,656bytes, controls0/freshOSUIDcensus0. Activeexceedsstrict5%;
 no rounding, retry, surfaces/liveacceptance or productiondeployment.
+
+Exactwheel6 source66145ef2/version0.22.0.dev3 retained-readchannel
+canonicalgate: idlePASS0.815507%onecore (0.49CPU/60.085s;parent0.45/
+children0.04), activeFAIL5.112315% (3.07CPU/60.051s;parent2.72/
+children0.35).314package membersmatchsource/wheel/installed; wheelSHA
+cf889335daa983c9ee9cd2b02efca950e44a9c21ac7cde8437ae74a164f99e06,
+msgspec0.22.0 resolvedandhashed. Idle61ticks/2inventorypasses, active
+60ticks/11passes;all120eventsprojected/p951.01366s,RSS50,688,000bytes,
+controls0(includingreader)/freshOSUIDcensus0. ExcludeddriverCPUidle3.866
+(main3.833/otherthreads0.0328), active4.184(main4.118/other0.0659).
+PrivatebirthqualifiedtmuxserverCPUidle0.30/active0.64seconds,RSS4.51MB
+before/afterbothwindows; client-specific sharedserverwork cannotbeisolated.
+No roundingactivegate, retry, surfaces/liveacceptance or productiondeployment.
