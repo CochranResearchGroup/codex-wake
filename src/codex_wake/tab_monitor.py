@@ -66,7 +66,7 @@ def _read(path):
 
 
 def _save(path,value):
-    raw=json.dumps(value,sort_keys=True,allow_nan=False,separators=(',',':')).encode()
+    raw=json.dumps(value,allow_nan=False,separators=(',',':')).encode()
     if len(raw)>MAX_STATE:
         raise InventoryError('monitor_capacity','Derived monitor snapshot exceeds1MiB; reduce selected workspaces.')
     fd,name=tempfile.mkstemp(prefix='.monitor-',dir=path.parent)
@@ -382,7 +382,7 @@ class TabMonitor:
         revision=(snapshot.get('projection_revision'),snapshot.get('evidence_revision'))
         qualified=all(isinstance(value,str) and 0<len(value)<=128 for value in revision)
         settings=self._settings()
-        heartbeat=min(5.,settings['stale_after']/2)
+        heartbeat=min(10.,settings['stale_after']/2)
         now=self.monotonic()
         publish=(not qualified or revision!=self._published_revision or now-self._published_at>=heartbeat)
         if publish:

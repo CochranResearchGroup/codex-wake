@@ -120,7 +120,7 @@ class MonitorPublicationTests(unittest.TestCase):
             with self.assertRaises(InventoryError):
                 monitor.publish_observation(frame('missing-loader'),record)
             self.assertEqual(len(monitor.execute('tabs.monitor.status',{})['snapshot']['resources']),1)
-            mono[0]=6.
+            mono[0]=11.
             pulse=frame('changed')
             self.assertTrue(monitor.publish_observation(pulse,record,resources_loader=loader(pulse)))
             self.assertEqual(len(loads),3)
@@ -147,6 +147,8 @@ class MonitorPublicationTests(unittest.TestCase):
             self.assertTrue(monitor.publish_observation(snapshot,record))
             self.assertEqual(monitor.execute('tabs.monitor.status',{})['snapshot']['evidence_revision'],'evidence-two')
             mono[0]=6.
+            self.assertFalse(monitor.publish_observation(snapshot,record))
+            mono[0]=11.
             self.assertTrue(monitor.publish_observation(snapshot,record))
 
 

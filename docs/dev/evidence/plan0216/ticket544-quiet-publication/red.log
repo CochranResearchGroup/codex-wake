@@ -1,0 +1,13 @@
+...F
+======================================================================
+FAIL: test_publisher_writes_changed_evidence_immediately_before_heartbeat (test_tab_monitor_publication.MonitorPublicationTests.test_publisher_writes_changed_evidence_immediately_before_heartbeat)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-observer-0216/tests/test_tab_monitor_publication.py", line 150, in test_publisher_writes_changed_evidence_immediately_before_heartbeat
+    self.assertFalse(monitor.publish_observation(snapshot,record))
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 4 tests in 2.245s
+
+FAILED (failures=1)
