@@ -216,3 +216,16 @@ all20ordinaryevents projected/p951.0164s/controls0; fresh OSUID1017 census0.
 Public inventory delta1 differs from prior candidate delta2, so these short
 windows do not isolate the batch change's effect. Conditional wheel-build
 threshold was not met; no build, full60+60 run, product edit or threshold change.
+
+Root subsequently reported a7.6s CodeGraph sync overlapping the628unprofiled
+probe. This competing-load confound is recorded without changing that failed
+receipt. Authorized same-source steady-only profile used no competing rootwork:
+idle0.799%, active7.184% (profiled parent0.63CPU/child0.09). Confirmed combined
+session/window reads9calls0.063s plus9writebatches0.057: two formatting clients
+per changedframe. Total29native commands0.168 including dueerror and quiet
+session renewal; save9/0.0565, monitor19/0.0884, dumps643/0.138, loads190/
+0.074, deepcopy16,399/0.0224. Tick10/0.373 includes inventory2/0.220 and
+cacheobserve2/0.194; PIDidentity660/0.0506, materialize10/0.040. All20events
+projected/p951.088/controls0/freshOSUIDcensus0. Elapsed profiler numbers include
+waits and cannot be added as CPU. No build or fullgate yet authorized from this
+profile. Retainedtop30self/cumulative JSON and originalfailure.
