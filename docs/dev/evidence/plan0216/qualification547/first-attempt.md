@@ -85,3 +85,17 @@ cost to formatting:23refreshes/11.542s cumulative,22apply calls/9.603s,
 cost1.984s. Observer.tick23calls cost1.661s and deepcopytotal0.264s after the copy
 repair. These are profiler timings, not CPU-gate numbers. The primary and formatter
 worker received the exact profile locator before modifying formatting code.
+
+Next frozen formatter source (base4c15717d plus formatter/transport repair,
+original process cache) diagnostic: idle6.694%, active7.295%onecore; both still
+failed. All20events projected, p951.506s, sampledRSS74.26MB, cleanup0controls and
+fresh test-user census0processes. Exact staged component hashes are retained.
+Publicserve profile confirmed the repair removed streaming JSON cost (save33calls/
+0.226s), leaving apply22/2.346s,404native command batches/1.798s and545subprocess
+runs/2.230s. Further semantic dirty rendering/less native I/O belongs to formatter
+worker. No candidate wheel rebuilt during these explicit source diagnostics.
+
+The100tab monitor-stop uncertainty was traced to the existing262144byte retained
+operation-result limit versus the full monitor snapshot. Native worker reproduced
+it through the public CLI/journal and is fixing bounded control summaries without
+raising the global result cap. Human renderer now reports uncertainty honestly.
