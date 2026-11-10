@@ -1,0 +1,129 @@
+{
+  "source_commit": "c65c4eb9-SOURCE-OVERRIDE",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "package": "/tmp/wake216-c65-source/src/codex_wake/__init__.py",
+  "uid": 1017,
+  "tabs": 100,
+  "initial_idle_active_turns": 0,
+  "active_conversations": 10,
+  "windows_seconds": 10.0,
+  "tiers": {
+    "activity": true,
+    "health": true,
+    "errors": true
+  },
+  "cpu_denominator": "one core",
+  "measurement": "actual installed TabMonitor owner plus all current owned descendants and reaped child CPU via proc cutime/cstime; fixture/driver/workload processes excluded",
+  "fixture_limit": "metadata-only Unix WebSocket fixture; no provider turns or proof of real native broadcasts",
+  "latency_measure": "fixture send to public projection, upper bound on receive-to-projection",
+  "production_effects": false,
+  "tick_interval_seconds": 1.0,
+  "public_status_poll_seconds": 0.1,
+  "source_override": true,
+  "fixture_setup_seconds": 0.8510404369990283,
+  "startup_barrier": {
+    "boundary_at": 1794344090.8053648,
+    "first_qualified_snapshot_at": 1794344093.470875,
+    "subsequent_snapshot_at": 1794344098.4715235,
+    "bound_panes": 100,
+    "active_turns": 0,
+    "formatting_status": "applied",
+    "failures": [],
+    "source_states": [
+      {
+        "kind": "tmux",
+        "state": "available"
+      },
+      {
+        "kind": "native",
+        "state": "connected"
+      }
+    ],
+    "enable_returned_at": 1794344090.8053648
+  },
+  "formatting_enabled": "slate100tabs; configured through installed CLI",
+  "cold_start_seconds": 11.827255824999156,
+  "owner_cold_start_seconds": 10.97427029300161,
+  "native_bound_panes": 100,
+  "mode": "short diagnostic profile, not acceptance",
+  "idle": {
+    "wall_seconds": 10.032529440999497,
+    "cpu_seconds": 0.13000000000000012,
+    "cpu_percent_one_core": 1.2957848842061188,
+    "max_aggregate_rss_bytes": 37773312,
+    "status_changes": 0,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.12,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 0.9114410000000002,
+    "reaped_child_cpu_seconds": 0.010000000000000009,
+    "live_child_cpu_seconds": 0.0
+  },
+  "active_activation": {
+    "events": 10,
+    "burst_send_seconds": 0.0003575139999156818,
+    "total_wall_seconds": 6.188914405000105,
+    "cpu_seconds": 0.3700000000000001,
+    "barrier": {
+      "boundary_at": 1794344108.552282,
+      "first_qualified_snapshot_at": 1794344109.605448,
+      "subsequent_snapshot_at": 1794344114.7016554,
+      "bound_panes": 100,
+      "active_turns": 10,
+      "formatting_status": "applied",
+      "failures": [],
+      "source_states": [
+        {
+          "kind": "tmux",
+          "state": "available"
+        },
+        {
+          "kind": "native",
+          "state": "connected"
+        }
+      ]
+    },
+    "excluded_from_ordinary_window": true
+  },
+  "active": {
+    "wall_seconds": 10.019119808999676,
+    "cpu_seconds": 0.8899999999999997,
+    "cpu_percent_one_core": 8.883015843373357,
+    "max_aggregate_rss_bytes": 43687936,
+    "status_changes": 20,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.61,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 0.7167000000000001,
+    "reaped_child_cpu_seconds": 0.28,
+    "live_child_cpu_seconds": 0.0
+  },
+  "p95_send_to_projection_seconds": 1.0174330980007653,
+  "latency_samples": 20,
+  "checks": {
+    "checks": {
+      "errors": 120,
+      "health": 100
+    },
+    "enabled": {
+      "errors": true,
+      "health": true
+    },
+    "intervals": {
+      "errors": 5.0,
+      "health": 60.0
+    },
+    "retained_checks": 200
+  },
+  "native_methods": {
+    "initialize": 2,
+    "initialized": 2,
+    "thread/loaded/list": 3,
+    "thread/read": 300
+  },
+  "all_ordinary_events_projected": true,
+  "thresholds_pass": false,
+  "owned_control_processes_remaining": 0
+}
