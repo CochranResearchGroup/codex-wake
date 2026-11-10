@@ -78,6 +78,10 @@ def refresh_formatting(root,snapshot,*,tabs=None,deadline=None,resources_loader=
     from .tab_formatting import TabFormatting
     tabs=tabs or controller_tabs_from_root(root)
     now=time.monotonic()
+    if (resources_loader is not None and 'resources' not in snapshot
+            and semantic_revision(snapshot,trusted=snapshot.get('origin')=='daemon') is None):
+        resources_loader()
+        resources_loader=None
     key=(str(root),_projection_key(snapshot),_state_identity(root),_sources_key(tabs))
     cache=getattr(tabs,'_format_projection_cache',None)
     if cache and cache['key']==key and now<cache['renew_at']:
