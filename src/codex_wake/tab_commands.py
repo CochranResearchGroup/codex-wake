@@ -12,6 +12,26 @@ def register_parser(subparsers):
     return parser
 
 
+def render_monitor(value):
+    """Render actual status or retained operation uncertainty without inventing state."""
+    from .tab_observer import render_status
+    if isinstance(value.get('monitor'),dict):
+        return render_status(value)
+    result=value.get('result')
+    retained=result.get('operation') if isinstance(result,dict) else None
+    retained=retained if isinstance(retained,dict) else {}
+    outcome=retained.get('result')
+    if isinstance(outcome,dict) and isinstance(outcome.get('monitor'),dict):
+        return render_status(outcome)
+    outcome_status=outcome.get('status') if isinstance(outcome,dict) else None
+    phase=('uncertain' if retained.get('phase')=='uncertain' else
+           outcome_status if outcome_status in ('partial','uncertain','held') else
+           value.get('status') if value.get('status') in ('partial','uncertain','held') else
+           retained.get('execution') or retained.get('phase') or value.get('status') or 'unknown')
+    return ('Tab monitor operation: '+str(phase)+'\n'
+            'No monitor status was returned. Inspect current state with tabs monitor-status --json.')
+
+
 def command(args, owner=None):
     from .managed_inventory import InventoryError
     from .records import WakeError
@@ -41,8 +61,7 @@ def command(args, owner=None):
         value = owner.execute(operation,arguments) if operation in owner.READS else operator_execute(operation,arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
         readable=render(value) if operation.startswith('tabs.session.') and not getattr(args,'as_json',False) else None
         if operation.startswith('tabs.monitor.') and not getattr(args,'as_json',False):
-            from .tab_observer import render_status
-            readable=render_status(value)
+            readable=render_monitor(value)
         print(readable if readable is not None else json.dumps(value, sort_keys=True))
         from .tab_result import exit_status
         return exit_status(value)
