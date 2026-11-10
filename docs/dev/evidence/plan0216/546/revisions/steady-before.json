@@ -1,0 +1,108 @@
+{
+  "idle": {
+    "profile_sha256": "9e6e32dbc5c7beb85de1747c8ec83823befd919d4d010140feeb16688520b84c",
+    "functions": [
+      {
+        "file": "tab_format_monitor.py",
+        "function": "refresh_formatting",
+        "primitive_calls": 10,
+        "total_calls": 10,
+        "self_seconds": 0.005091386000000001,
+        "cumulative_seconds": 0.109851243
+      },
+      {
+        "file": "tab_format_monitor.py",
+        "function": "_projection_key",
+        "primitive_calls": 10,
+        "total_calls": 10,
+        "self_seconds": 0.027159213,
+        "cumulative_seconds": 0.064959388
+      },
+      {
+        "file": "tab_formatting.py",
+        "function": "refresh",
+        "primitive_calls": 1,
+        "total_calls": 1,
+        "self_seconds": 0.000365942,
+        "cumulative_seconds": 0.038268378000000006
+      },
+      {
+        "file": "tab_formatting.py",
+        "function": "apply",
+        "primitive_calls": 1,
+        "total_calls": 1,
+        "self_seconds": 0.001004064,
+        "cumulative_seconds": 0.023795483000000003
+      },
+      {
+        "file": "tab_format_transport.py",
+        "function": "_command_batch",
+        "primitive_calls": 2,
+        "total_calls": 2,
+        "self_seconds": 3.6956e-05,
+        "cumulative_seconds": 0.008476278
+      },
+      {
+        "file": "tab_format_projection.py",
+        "function": "project",
+        "primitive_calls": 100,
+        "total_calls": 100,
+        "self_seconds": 0.002010219,
+        "cumulative_seconds": 0.007725949
+      }
+    ]
+  },
+  "active": {
+    "profile_sha256": "8b9ab0b8ec67c32c8f285a451d44d86b17d6454659b241379b4aa471bcddb159",
+    "functions": [
+      {
+        "file": "tab_format_monitor.py",
+        "function": "refresh_formatting",
+        "primitive_calls": 10,
+        "total_calls": 10,
+        "self_seconds": 0.012709683000000001,
+        "cumulative_seconds": 1.014142169
+      },
+      {
+        "file": "tab_formatting.py",
+        "function": "refresh",
+        "primitive_calls": 10,
+        "total_calls": 10,
+        "self_seconds": 0.0052544340000000005,
+        "cumulative_seconds": 0.920367887
+      },
+      {
+        "file": "tab_formatting.py",
+        "function": "apply",
+        "primitive_calls": 10,
+        "total_calls": 10,
+        "self_seconds": 0.015027268000000002,
+        "cumulative_seconds": 0.7221978840000001
+      },
+      {
+        "file": "tab_format_transport.py",
+        "function": "_command_batch",
+        "primitive_calls": 80,
+        "total_calls": 80,
+        "self_seconds": 0.0028097440000000003,
+        "cumulative_seconds": 0.400200973
+      },
+      {
+        "file": "tab_format_projection.py",
+        "function": "project",
+        "primitive_calls": 1020,
+        "total_calls": 1020,
+        "self_seconds": 0.022294733,
+        "cumulative_seconds": 0.08786651300000001
+      },
+      {
+        "file": "tab_format_monitor.py",
+        "function": "_projection_key",
+        "primitive_calls": 10,
+        "total_calls": 10,
+        "self_seconds": 0.035315421,
+        "cumulative_seconds": 0.077874806
+      }
+    ]
+  }
+}

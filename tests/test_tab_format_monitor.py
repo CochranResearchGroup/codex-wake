@@ -161,3 +161,66 @@ class FormattingMonitorTests(unittest.TestCase):
         self.assertTrue(commands)
         lease=int(self.tmux('show-options','-v','-t','$0','@wake-format-clock'))
         self.assertGreater(lease,time.time())
+
+    def test_trusted_revision_lease_renewal_avoids_repeated_physical_inventory(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from codex_wake.tab_format_monitor import refresh_formatting
+        observed=dict(self.tabs.execute('tabs.list',{}),origin='daemon',projection_revision='fixture-one')
+        for resource in observed['resources']:
+            resource['projection_revision']='window-one'
+            resource['evidence_revision']='evidence-one'
+        self.assertEqual(refresh_formatting(self.root,observed,tabs=self.tabs)['status'],'completed')
+        now=time.monotonic();commands=[];original=subprocess.run
+        def counted(*args,**kwargs):
+            commands.append(args[0]);return original(*args,**kwargs)
+        with patch('codex_wake.tab_format_monitor.time',SimpleNamespace(monotonic=lambda:now+6,time=time.time)),patch('subprocess.run',side_effect=counted):
+            result=refresh_formatting(self.root,observed,tabs=self.tabs)
+        self.assertEqual(result['status'],'completed')
+        self.assertFalse(any('list-panes' in command for command in commands),commands)
+        self.assertTrue(any('show-options' in command for command in commands))
+        self.assertLessEqual(len(commands),2)
+
+    def test_trusted_revision_keeps_native_manual_custody_audit(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from codex_wake.tab_format_monitor import refresh_formatting
+        observed=dict(self.tabs.execute('tabs.list',{}),origin='daemon',projection_revision='fixture-one')
+        for resource in observed['resources']:
+            resource['projection_revision']='window-one'
+            resource['evidence_revision']='evidence-one'
+        self.assertEqual(refresh_formatting(self.root,observed,tabs=self.tabs)['status'],'completed')
+        self.tmux('set-option','-w','-t','@0','window-status-format','manual style #W')
+        mono=time.monotonic();wall=time.time()
+        monitor_clock=SimpleNamespace(monotonic=lambda:mono+61,time=lambda:wall+61)
+        formatting_clock=SimpleNamespace(monotonic=time.monotonic,time=lambda:wall+61,sleep=time.sleep)
+        with patch('codex_wake.tab_format_monitor.time',monitor_clock),patch('codex_wake.tab_formatting.time',formatting_clock):
+            result=refresh_formatting(self.root,observed,tabs=self.tabs)
+        self.assertEqual(result['status'],'partial')
+        self.assertTrue(any(failure['code']=='manual_override' for row in result['workspaces'] for failure in row.get('failures',[])))
+        self.assertEqual(self.tmux('show-options','-w','-v','-t','@0','window-status-format').strip(),'manual style #W')
+
+    def test_expired_trusted_revision_cannot_retain_intermittent_error(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from codex_wake.tab_format_monitor import refresh_formatting
+        wall=time.time();mono=time.monotonic()
+        observed=dict(self.tabs.execute('tabs.list',{}),origin='daemon',projection_revision='fixture-one',projection_valid_until=wall+20)
+        for resource in observed['resources']:
+            resource.update(projection_revision='window-one',evidence_revision='evidence-one',projection_valid_until=wall+20)
+            resource['traits']=dict(panes=[dict(pane_id=resource['window']['panes'][0]['pane_id'],traits=dict(
+                harness=dict(value='codex',status='observed',observed_at=wall),
+                build=dict(value='stock',status='observed',observed_at=wall),
+                activity=dict(value='idle',status='observed',observed_at=wall,source_available=True),
+                error=dict(value='present',status='observed',observed_at=wall,redacted_message='redacted fixture')))])
+        self.assertEqual(refresh_formatting(self.root,observed,tabs=self.tabs)['status'],'completed')
+        self.assertIn('ERR',self.tmux('show-options','-w','-v','-t','@0','window-status-format'))
+        monitor_clock=SimpleNamespace(monotonic=lambda:mono+21,time=lambda:wall+21)
+        formatting_clock=SimpleNamespace(monotonic=time.monotonic,time=lambda:wall+21,sleep=time.sleep)
+        with patch('codex_wake.tab_format_monitor.time',monitor_clock),patch('codex_wake.tab_formatting.time',formatting_clock):
+            result=refresh_formatting(self.root,observed,tabs=self.tabs)
+        self.assertEqual(result['status'],'completed')
+        self.assertNotIn('ERR',self.tmux('show-options','-w','-v','-t','@0','window-status-format'))
+        inspected=self.tabs.execute('tabs.format.inspect',dict(workspace='work'))['record']['windows']['@0']['projection']
+        self.assertEqual(inspected['state'],'idle')
+        self.assertEqual(inspected['details']['panes'][0]['attention']['error']['value'],'present')
