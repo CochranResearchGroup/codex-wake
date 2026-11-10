@@ -229,3 +229,22 @@ cacheobserve2/0.194; PIDidentity660/0.0506, materialize10/0.040. All20events
 projected/p951.088/controls0/freshOSUIDcensus0. Elapsed profiler numbers include
 waits and cannot be added as CPU. No build or fullgate yet authorized from this
 profile. Retainedtop30self/cumulative JSON and originalfailure.
+
+Root explicitly authorized one exact immutable62877702wheel2/full60+60 gate
+after confirming actual two-client formatting, despite short diagnostic misses.
+Quiet logged build used gitarchive of exact source and SOURCE_DATE_EPOCH;
+312package members match source/wheel/installed, Python/usr/bin/python3.12,
+UID1017 privateprefix. WheelSHA2560c2da26f45337e7711b1fe1e90afb20196c378fdc
+fda47028126d8213dd190d0. Canonical unprofiled actual TabMonitor+Slate100tabs
+with default1s tick and activity/health/errors ON FAILED: idle1.3313%onecore
+(0.80CPU/60.090s;owner0.62/reapedchildren0.18), active5.1597% (3.10CPU/
+60.081s;owner2.42/children0.68). AggregateRSS45,182,976bytes;120ordinary
+events all projected, p951.0493s, controls0/freshtest-userOScensus0. Idle
+inventoryadvanced2 and active12; short10s diagnostic missed longer cadencecost.
+The failed canonical receipt remains immutable. No retry, productioninstall,
+surfaces or live acceptance followed a failed resource gate. Sharedhost/kernel
+limitation remains. Synthetic idle snapshot/formatstate copied privately while
+fixturealive, hashes/headers retained without fullstate inGit; lateactivecopy
+foundfixturealreadycleaned, so no active-stateartifact exists. Initial logopen
+underUIDprivate directory failed beforebuild; a primary-owned log destination
+allowed the one successfulbuild. No package-source or workload change.
