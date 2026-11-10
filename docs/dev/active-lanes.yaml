@@ -1218,3 +1218,17 @@ lanes:
     checkpoint: aaf619cc890828798d2c694d919b4ed02f4cdb4d
     validation_status: focused_installed_native_passed_with_retained_prior_wsl_gap
     disposition: PR499 deployed; controller renamed with legacy alias; account commands and shell launchers remember defaults; stock/native state preserved
+
+  - id: P216
+    owner: primary / ecochran76
+    objective: Efficient tab observation and stable formatting
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/540]
+    plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
+    branch: feat/efficient-tab-observer
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P211, P213, P215]
+    updated_at: 2026-11-10
+    disposition: root cache541; native542 and tmux543 in isolated branches; no live effects

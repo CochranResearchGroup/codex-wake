@@ -462,19 +462,15 @@ class WorkspaceTraitsObserver:
     """Adapt bounded native metadata observations to existing layout ownership."""
     def __init__(self,root,transport,privacy=None):
         self.root,self.transport,self.privacy=root,transport,privacy
+        from .tab_observation import ObservationCache
+        self.cache=ObservationCache(root)
 
     def __call__(self,timeout):
         deadline=time.monotonic()+min(5,max(.001,timeout))
         snapshot=self.transport.snapshot(deadline)
-        traits=TabTraits(self.root)
-        first=[traits.observe_window(w,transport=self.transport,privacy=self.privacy,deadline=deadline)
-               for w in snapshot['windows']]
-        native=any(p.get('platform')!='windows' and p['traits']['harness']['value']=='codex' for w in first for p in w['panes'])
-        if native:
-            rows=session_rows(self.root,socket_path=getattr(self.transport,'socket',None),deadline=deadline)
-            traits=TabTraits(self.root,sessions=rows['sessions'])
-            first=[traits.observe_window(w,transport=self.transport,privacy=self.privacy,deadline=deadline)
-                   for w in snapshot['windows']]
+        observed,_=self.cache.observe('workspace',snapshot,socket_path=getattr(self.transport,'socket',None),
+                                      transport=self.transport,privacy=self.privacy,deadline=deadline)
+        first=list(observed.values())
         result={}
         for window in first:
             for pane in window['panes']:

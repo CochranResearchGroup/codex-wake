@@ -13,10 +13,12 @@ class ControllerTabs:
     READS = frozenset(('tabs.session.list','tabs.session.show','tabs.relocate.status','tabs.route.list','tabs.route.show','tabs.route.status','tabs.format.status','tabs.format.inspect','tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
     MUTATIONS = frozenset(('tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input'))
 
-    def __init__(self, root, *, workspaces, host, environment, host_managed=False):
+    def __init__(self, root, *, workspaces, host, environment, host_managed=False, observation_cache=None):
         self.root, self.workspaces = root, dict(workspaces)
         self.host, self.environment = host, environment
         self.host_managed = host_managed
+        from .tab_observation import ObservationCache
+        self.observation_cache = observation_cache or ObservationCache(root)
 
     def format_target(self, *, scope='workspace', workspace=None):
         from .tab_formatting import TabFormatting
@@ -131,18 +133,9 @@ class ControllerTabs:
                           presentation=config['kind'], generation=digest(snapshot))
             observation = None
             if operation in self.READS:
-                from .tab_traits import TabTraits, session_rows
-                traits = TabTraits(self.root)
-                initial = {w['window_id']:traits.observe_window(w,transport=transport,
-                           privacy=config.get('privacy'),deadline=deadline) for w in snapshot['windows']}
-                needs_native = any(p.get('platform')!='windows' and p['traits']['harness']['value']=='codex'
-                                   for result in initial.values() for p in result['panes'])
-                rows = session_rows(self.root,socket_path=config.get('socket_path'),
-                                    deadline=min(deadline,time.monotonic()+2)) if needs_native else dict(sessions=[],holds=[])
-                if rows['sessions']:
-                    traits = TabTraits(self.root,sessions=rows['sessions'])
-                    initial = {w['window_id']:traits.observe_window(w,transport=transport,
-                               privacy=config.get('privacy'),deadline=deadline) for w in snapshot['windows']}
+                initial, rows = self.observation_cache.observe(
+                    name,snapshot,socket_path=config.get('socket_path'),transport=transport,
+                    privacy=config.get('privacy'),deadline=deadline)
                 if any(w.get('attach_intent') for w in snapshot['windows']):
                     from .tab_reattach_traits import observe_managed
                     managed=self.reattach_owner()

@@ -1,0 +1,112 @@
+"""Bounded host-owned metadata cache shared across inventory and enrichment.
+
+Cached evidence is never input authority. Process births and presentation generations
+fence entries; a short TTL also detects descendants starting below a stable shell.
+No terminal capture or conversation contents are stored here.
+"""
+from copy import deepcopy
+from pathlib import Path
+import time
+
+from .process import process_identity
+
+
+class ObservationCache:
+    def __init__(self, root, *, process_probe=None, identity_probe=process_identity,
+                 monotonic=time.monotonic, ttl=2.0, max_entries=512, session_reader=None):
+        self.root = Path(root)
+        self.session_reader = session_reader
+        self.process_probe = process_probe
+        self.identity_probe = identity_probe
+        self.monotonic = monotonic
+        self.ttl = min(5.0, max(.1, float(ttl)))
+        self.max_entries = min(4096, max(1, int(max_entries)))
+        self._processes = {}
+        self._observations = {}
+        self._generations = {}
+
+    def _birth(self, pid):
+        try:
+            value = self.identity_probe(pid)
+            return (pid, value['boot_id'], str(value['start_time_ticks']))
+        except (OSError, ValueError, KeyError, TypeError, ProcessLookupError):
+            return None
+
+    def _put(self, mapping, key, value):
+        if key not in mapping and len(mapping) >= self.max_entries:
+            mapping.pop(next(iter(mapping)))
+        mapping[key] = value
+
+    def processes(self, pid, deadline):
+        from .tab_traits import _processes
+        birth = self._birth(pid)
+        now = self.monotonic()
+        previous = self._processes.get(pid)
+        if birth is not None and previous and previous[0] == birth and now < previous[1]:
+            # Validate all retained descendants, not just the pane's shell.
+            rows, complete = previous[2]
+            valid = all(self._birth(row['process']['pid']) ==
+                        (row['process']['pid'],row['process']['boot_id'],str(row['process']['start_ticks']))
+                        for row in rows)
+            if valid:
+                return deepcopy((rows, complete))
+        result = (self.process_probe or _processes)(pid, deadline)
+        if birth is not None and result[1]:
+            self._put(self._processes, pid, (birth, now+self.ttl, deepcopy(result)))
+        return result
+
+    def observe(self, workspace, snapshot, *, socket_path=None, transport=None,
+                privacy=None, deadline=None):
+        from .tab_organization import digest
+        from .tab_traits import TabTraits, session_rows
+        generation = digest(snapshot)
+        if self._generations.get(workspace) != generation:
+            self._processes.clear()
+            self._observations.pop(workspace, None)
+            self._put(self._generations,workspace,generation)
+        panes = [p for w in snapshot['windows'] for p in w.get('panes', [])]
+        births = tuple(self._birth(p.get('pid')) for p in panes)
+        now = self.monotonic()
+        prior = self._observations.get(workspace)
+        if prior and prior[0] == (generation,births) and all(b is not None for b in births) and now < prior[1]:
+            # Descendant birth validation prevents retaining a dead agent under a live shell.
+            for p in panes:
+                self.processes(p.get('pid'),deadline)
+            if prior[3] == digest(self._processes):
+                return deepcopy(prior[2])
+        # Discover each pane once, then enrich that evidence with native metadata.
+        needs_native = False
+        investigated = {}
+        native_panes = []
+        for pane in panes:
+            if pane.get('platform') == 'windows':
+                continue
+            rows, _ = self.processes(pane.get('pid'),deadline)
+            investigated[pane.get('pid')] = (rows, _)
+            clients = [row for row in rows if Path(row['executable']).name.lower() == 'codex']
+            needs_native |= bool(clients)
+            client = clients[0]['process'] if len(clients) == 1 else {}
+            native_panes.append(dict(pane, client_pid=client.get('pid'),
+                client_start_time_ticks=client.get('start_ticks'),
+                pane_title=pane.get('pane_title',''),pane_current_path=pane.get('pane_current_path',''),
+                session_id=snapshot.get('session_id'),session_name=snapshot.get('session_id'),
+                window_id=next(w['window_id'] for w in snapshot['windows'] if pane in w.get('panes',[])),
+                socket=socket_path))
+        rows = (self.session_reader or session_rows)(self.root,socket_path=socket_path,panes=native_panes,
+                            deadline=min(deadline,time.monotonic()+2)) if needs_native else dict(sessions=[],holds=[])
+        traits = TabTraits(self.root,sessions=rows['sessions'],process_probe=lambda pid,limit: investigated.get(pid,([],False)))
+        observed = {w['window_id']:traits.observe_window(w,transport=transport,privacy=privacy,deadline=deadline)
+                    for w in snapshot['windows']}
+        result = (observed,rows)
+        self._put(self._observations,workspace,((generation,births),now+self.ttl,deepcopy(result),digest(self._processes)))
+        return result
+
+    def invalidate(self, workspace=None):
+        """Fence retained evidence when a feed disconnects or changes epoch."""
+        self._processes.clear()
+        if workspace is None:
+            self._observations.clear()
+            self._generations.clear()
+        else:
+            self._observations.pop(workspace,None)
+            self._generations.pop(workspace,None)

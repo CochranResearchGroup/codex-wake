@@ -2,9 +2,9 @@
 
 State: OPEN
 Owner: primary / ecochran76
-Work item: LOCAL-P216 design interview
+Work item: https://github.com/CochranResearchGroup/codex-wake/issues/540
 Domain authority: GLOSSARY.md
-Scope: documented interview; implementation not yet authorized by this artifact
+Scope: approved specification and seven implementation tickets; user authorized implementation and closure on 2026-11-10. No merge/deploy authority in this slice.
 
 ## Current State
 
@@ -159,3 +159,28 @@ provider calls, live capture, process restarts, new native service or monitor
 activation during interview. Root policy and operator authorization remain primary.
 Graphiti historical lookup skipped: supplied decisions/current research suffice.
 Memory disposition forbidden: no explicit memory-write request.
+
+## Execution ledger
+
+Authoritative specification: evidence/plan0216/spec.md; parent #540 remains open.
+Integration branch feat/efficient-tab-observer, worktree /tmp/codex-wake-observer-0216.
+Fixed review base fa2363c24bf921ecf0bd8390739e96041e620e8f.
+
+| Ticket | Owner | State | Dependencies |
+| --- | --- | --- | --- |
+| #541 cached inventory | primary | locally validated; integrated | none |
+| #542 native feed | /root/native542 | implementing | none |
+| #543 tmux feed | /root/tmux543 | implementing | none |
+| #544 observer lifecycle | pending | blocked | #541 #542 #543 |
+| #545 tiered checks | pending | blocked | #541 |
+| #546 stable projection | pending | blocked | #541 |
+| #547 installed acceptance | pending | blocked | #544 #545 #546 |
+
+No nested delegation; three implementation lanes maximum. Inherited model/effort
+for bounded implementation workers; deterministic tool checks qualify their work.
+No comparative model-calibration or allocation-savings claim.
+Validation: focused development budget 180 seconds per invocation; Python3.11/3.12;
+blocking affected presubmit once integrated; comprehensive and provider runs excluded
+unless a concrete unresolved risk requires widening. Hosted CI skipped by policy.
+After all seven accepted closures: one broad Standards/Spec review, then one bounded
+TDD remediation pass, followed by focused regression checks and draft PR.
