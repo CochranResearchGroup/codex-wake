@@ -34,7 +34,10 @@ Operator now authorizes PR, merge, deployment and worktree cleanup. Release slic
 is isolated at `/tmp/codex-wake-p217-release`, based on fetched origin/main
 fa2363c. Native binaries/owners will remain unchanged; deploy only the Python CLI
 package and regenerate Zsh completion. Existing native sessions and monitor state
-must be preserved. Working-host rollout and custody cleanup are pending.
+must be preserved. PR549 is published. Six inactive remotely backed checkouts archived and50stale
+registrations pruned with refs retained; active/unpublished lanes preserved.
+Final source and rollback qualification pass; working rollout awaits merge.
+See `docs/dev/evidence/plan0217/release-validation.md`.
 
 Prior implementation qualification:
 
