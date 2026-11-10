@@ -277,12 +277,15 @@ class TabObserver:
     def _source_lost(self, endpoint):
         self._projection_dirty = True
         for resource in self.resources:
+            changed = False
             for pane in resource.get('traits', {}).get('panes', []):
                 if pane.get('native_endpoint') == endpoint:
+                    changed = True
                     self._dirty_resources.add(self._resource_key(resource))
                     pane['traits']['activity'].update(source_available=False, status='unknown',freshness='unknown',
                         source_reason='native_source_unavailable',reason='native_source_unavailable')
-            self._summary(resource)
+            if changed:
+                self._summary(resource)
 
     @staticmethod
     def _activity(status):
@@ -298,10 +301,12 @@ class TabObserver:
             return
         self._projection_dirty = True
         for resource in self.resources:
+            changed = False
             for pane in resource.get('traits', {}).get('panes', []):
                 binding = pane.get('binding') or {}
                 if pane.get('native_endpoint') != endpoint or binding.get('conversation_id') != thread_id:
                     continue
+                changed = True
                 self._dirty_resources.add(self._resource_key(resource))
                 self.owner.observation_cache.mark_dirty(resource['target']['workspace'],[pane['pane_id']])
                 expected = binding.get('process') or {}
@@ -311,7 +316,8 @@ class TabObserver:
                 pane['traits']['activity'].update(value=self._activity(status), status='observed' if valid else 'unknown',
                     freshness='fresh' if valid else 'unknown', source_available=valid,
                     source_epoch=epoch, observed_at=self.clock())
-            self._summary(resource)
+            if changed:
+                self._summary(resource)
 
     @staticmethod
     def _summary(resource):
