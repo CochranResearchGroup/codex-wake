@@ -1,0 +1,32 @@
+{
+  "status": "DEPLOYED_APPLIED",
+  "pr": 539,
+  "source": "7010cbeb6f8870c50360382ebe01248e2a1824ed",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-7010cbe",
+  "previous_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c59b5c8",
+  "wheel_sha256": "1762346515e06d706dfdd16fe96db04acfc7c3f2e5ff30e49e5f7d665f746828",
+  "live": {
+    "status": "PASS",
+    "native_tabs": 44,
+    "palette": "slate",
+    "compact": true,
+    "stale_text": false,
+    "normal_style": "fg=#aeb9ca,bg=#171c24",
+    "selected_style": "fg=#edf2fa,bg=#2b3544,bold",
+    "package_members": 306,
+    "automatic_monitor": "stopped",
+    "other_presets": [
+      "dusk",
+      "graphite"
+    ],
+    "rollback_baseline_preserved": true
+  },
+  "protected_preserved": 10,
+  "native_preserved": 30,
+  "stock_unchanged": true,
+  "automatic_monitor": "stopped by existing operator workflow; live cycle qualification remains separate",
+  "apply": "Existing formatting owner apply with90sbounded deadline and cached provenance; original custody preserved",
+  "rollback_command": "python /home/ecochran76/.local/state/codex-wake/tab-presets-0215-deploy/rollback.py",
+  "provider_calls": 0,
+  "hosted_ci": false
+}

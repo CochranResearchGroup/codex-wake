@@ -1540,3 +1540,12 @@ question/claim/reply remains separate.
 Native process churn and per-tab durable saves reproduced/fixed at source; private
 42tab refresh1.143s. Production rolled back and monitoroff. Installed loaded-host
 qualification plus palette/plain preview required before reactivation.
+
+
+## P215 | Named muted tab palettes
+
+[LOCAL-P215](docs/dev/plans/0215-2026-11-10-tab-color-presets.md) CLOSED.
+Slate/Dusk/Graphite presets shipped via PR539/7010cbe. Slate active fordefault,
+44nativewindowreadbacks verified compact/noSTALE and subduedselection. Named
+presets persist through shared configure and originalrollbackcustody. Automatic
+monitor remains stopped pending separate loaded-host cycle qualification.
