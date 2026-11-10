@@ -50,6 +50,11 @@ Raw screen text is transient and never enters the persisted observation snapshot
 Retained JSON snapshots use a faster decoder with a standard-library fallback
 for legacy values. Stored values, canonical digests and strict finite-number
 serialization stay unchanged.
+The retained owner also lazily keeps one read-only formatting client per tmux
+workspace. Its managed-option reads avoid repeated process launches; writes and
+pane capture keep their existing path. Reader diagnostics appear separately in
+`observer.formatting_reads`, never as activity evidence. Readers preserve session
+environment and close on owner configuration replacement or stop.
 Formatting consumes producer revisions, checks changed windows before writing and
 uses a 20-second shared lease for dynamic cues. Unchanged sources renew every
 10 seconds; failed renewals retry on the next monitor tick. Source changes still
