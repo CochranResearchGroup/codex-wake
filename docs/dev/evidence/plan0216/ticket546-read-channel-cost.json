@@ -1,0 +1,42 @@
+[
+  {
+    "adapter": "subprocess",
+    "requests": 100,
+    "commands_per_request": 40,
+    "wall": 0.5917795029999979,
+    "owner_cpu": 0.083511,
+    "children_cpu": 0.39665199999999995,
+    "live_owned_client_cpu": 0.0,
+    "total_cpu": 0.48016299999999995
+  },
+  {
+    "adapter": "retained",
+    "requests": 100,
+    "commands_per_request": 40,
+    "wall": 0.18385349600066547,
+    "owner_cpu": 0.08382200000000001,
+    "children_cpu": -5.551115123125783e-17,
+    "live_owned_client_cpu": 0.0,
+    "total_cpu": 0.08382199999999995
+  },
+  {
+    "adapter": "retained",
+    "requests": 100,
+    "commands_per_request": 40,
+    "wall": 0.21181256400086568,
+    "owner_cpu": 0.09602999999999998,
+    "children_cpu": -5.551115123125783e-17,
+    "live_owned_client_cpu": 0.0,
+    "total_cpu": 0.09602999999999992
+  },
+  {
+    "adapter": "subprocess",
+    "requests": 100,
+    "commands_per_request": 40,
+    "wall": 0.6300890499987872,
+    "owner_cpu": 0.08992799999999998,
+    "children_cpu": 0.428382,
+    "live_owned_client_cpu": 0.0,
+    "total_cpu": 0.5183099999999999
+  }
+]
