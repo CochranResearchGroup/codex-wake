@@ -1,0 +1,15 @@
+{
+  "python": "3.12.13",
+  "passed": true,
+  "tests": 1,
+  "seconds": 3.3603070700009994,
+  "full_status_bytes": 414476,
+  "retained_result_bound": 262144,
+  "control_result_bytes": {
+    "large-already-stop": 433,
+    "bounded-start": 614,
+    "bounded-start-again": 613,
+    "bounded-stop": 612,
+    "bounded-stop-again": 613
+  }
+}
