@@ -1,0 +1,13 @@
+F...
+======================================================================
+FAIL: test_live_identity_rechecks_each_birth_without_reopening_host_boot_id (test_process.ProcessIdentityTests.test_live_identity_rechecks_each_birth_without_reopening_host_boot_id)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-inventory-541/tests/test_process.py", line 59, in test_live_identity_rechecks_each_birth_without_reopening_host_boot_id
+    self.assertLessEqual(counts['boot_id'], 1)
+AssertionError: 10 not less than or equal to 1
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.111s
+
+FAILED (failures=1)
