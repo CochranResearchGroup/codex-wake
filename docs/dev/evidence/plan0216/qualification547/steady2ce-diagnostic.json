@@ -1,0 +1,99 @@
+{
+  "source_commit": "2ce71612-STEADY-ONLY-PROFILE-SOURCE-OVERRIDE",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "package": "/tmp/wake216-combined-source/src/codex_wake/__init__.py",
+  "uid": 1017,
+  "tabs": 100,
+  "windows_seconds": 10.0,
+  "tiers": {
+    "activity": true,
+    "health": true,
+    "errors": true
+  },
+  "cpu_denominator": "one core",
+  "measurement": "actual installed TabMonitor owner plus all current owned descendants and reaped child CPU via proc cutime/cstime; fixture/driver/workload processes excluded",
+  "fixture_limit": "metadata-only Unix WebSocket fixture; no provider turns or proof of real native broadcasts",
+  "latency_measure": "fixture send to public projection, upper bound on receive-to-projection",
+  "production_effects": false,
+  "tick_interval_seconds": 1.0,
+  "public_status_poll_seconds": 0.1,
+  "source_override": true,
+  "fixture_setup_seconds": 1.0269814000002953,
+  "startup_barrier": {
+    "enable_returned_at": 1794341868.3367708,
+    "first_qualified_snapshot_at": 1794341868.3777716,
+    "subsequent_snapshot_at": 1794341869.3087227,
+    "bound_panes": 100,
+    "formatting_status": "applied",
+    "failures": [],
+    "source_states": [
+      {
+        "kind": "tmux",
+        "state": "available"
+      },
+      {
+        "kind": "native",
+        "state": "connected"
+      }
+    ]
+  },
+  "formatting_enabled": "slate100tabs; configured through installed CLI",
+  "cold_start_seconds": 8.083889855999587,
+  "owner_cold_start_seconds": 7.055233777000467,
+  "native_bound_panes": 100,
+  "mode": "short diagnostic profile, not acceptance",
+  "idle": {
+    "wall_seconds": 10.019278072999441,
+    "cpu_seconds": 0.42000000000000015,
+    "cpu_percent_one_core": 4.19191878835903,
+    "max_aggregate_rss_bytes": 39604224,
+    "status_changes": 0,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.3800000000000001,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 0.6559539999999999,
+    "reaped_child_cpu_seconds": 0.040000000000000036,
+    "live_child_cpu_seconds": 0.0
+  },
+  "active": {
+    "wall_seconds": 10.02179999299915,
+    "cpu_seconds": 1.48,
+    "cpu_percent_one_core": 14.767806192838334,
+    "max_aggregate_rss_bytes": 42807296,
+    "status_changes": 20,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 1.13,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 0.7876700000000001,
+    "reaped_child_cpu_seconds": 0.3500000000000001,
+    "live_child_cpu_seconds": 0.0
+  },
+  "p95_send_to_projection_seconds": 1.2094326529986574,
+  "latency_samples": 20,
+  "checks": {
+    "checks": {
+      "errors": 130,
+      "health": 100
+    },
+    "enabled": {
+      "errors": true,
+      "health": true
+    },
+    "intervals": {
+      "errors": 5.0,
+      "health": 60.0
+    },
+    "retained_checks": 200
+  },
+  "native_methods": {
+    "initialize": 3,
+    "initialized": 3,
+    "thread/loaded/list": 3,
+    "thread/read": 300
+  },
+  "all_ordinary_events_projected": true,
+  "thresholds_pass": false,
+  "owned_control_processes_remaining": 0
+}

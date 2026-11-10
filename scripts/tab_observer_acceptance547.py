@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--monitor',action='store_true')
     parser.add_argument('--diagnostic-source')
     parser.add_argument('--monitor-profile')
+    parser.add_argument('--steady-profile-prefix')
     parser.add_argument('--poll-interval',type=float,default=.1)
     parser.add_argument('--tick-interval',type=float,default=1.0)
     args=parser.parse_args()
@@ -122,13 +123,29 @@ def main():
                     from codex_wake.tab_monitor import TabMonitor
                     monitor=TabMonitor(root)
                     cli('tabs','monitor-start')
-                    if args.monitor_profile:
+                    if args.monitor_profile or args.steady_profile_prefix:
                         assert args.diagnostic_profile,'profiling is diagnostics only'
                         monitor.execute('tabs.monitor.stop',dict(timeout=5))
                         env=dict(os.environ,CODEX_HOME=str(home))
-                        profile_process=subprocess.Popen([sys.executable,'-m','cProfile','-o',args.monitor_profile,
-                            '-m','codex_wake.tab_monitor','--serve',str(root)],env=env,cwd=root,
-                            stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True)
+                        if args.steady_profile_prefix:
+                            wrapper="""import cProfile,signal,sys
+from pathlib import Path
+prefix=sys.argv[1]; phase=[0]; profiler=[None]
+def begin(signum,frame):
+    phase[0]+=1; profiler[0]=cProfile.Profile(); profiler[0].enable()
+    Path(prefix+'.'+('idle' if phase[0]==1 else 'active')+'.started').write_text('started')
+def end(signum,frame):
+    profiler[0].disable()
+    profiler[0].dump_stats(prefix+'.'+('idle' if phase[0]==1 else 'active')+'.prof')
+signal.signal(signal.SIGUSR1,begin);signal.signal(signal.SIGUSR2,end)
+from codex_wake.tab_monitor import main
+main(['--serve',sys.argv[-1]])
+"""
+                            argv=[sys.executable,'-c',wrapper,args.steady_profile_prefix,'codex_wake.tab_monitor','--serve',str(root)]
+                        else:
+                            argv=[sys.executable,'-m','cProfile','-o',args.monitor_profile,'-m','codex_wake.tab_monitor','--serve',str(root)]
+                        profile_process=subprocess.Popen(argv,env=env,cwd=root,stdin=subprocess.DEVNULL,
+                            stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True)
                         until=time.monotonic()+5
                         while monitor.execute('tabs.monitor.status',{})['monitor']['status']!='running':
                             assert time.monotonic()<until;time.sleep(.05)
@@ -179,6 +196,18 @@ def main():
                         profiler=cProfile.Profile();profiler.enable()
                     receipt['mode']='short diagnostic profile, not acceptance'
                 for phase in ('idle','active'):
+                    if args.steady_profile_prefix:
+                        import signal
+                        from codex_wake.process import process_identity
+                        expected=monitor.execute('tabs.monitor.status',{})['monitor']['process']
+                        birth=process_identity(monitor_pid)
+                        assert Path('/proc',str(monitor_pid)).stat().st_uid==os.geteuid()
+                        assert birth and str(birth['start_time_ticks'])==str(expected['start_ticks']) and birth['boot_id']==expected['boot_id']
+                        os.kill(monitor_pid,signal.SIGUSR1)
+                        marker=Path(args.steady_profile_prefix+'.'+phase+'.started')
+                        until=time.monotonic()+2
+                        while not marker.exists():
+                            assert time.monotonic()<until;time.sleep(.01)
                     begin=time.monotonic();cpu0,_=sample();components0=dict(components);self0=resource.getrusage(resource.RUSAGE_SELF);child0=resource.getrusage(resource.RUSAGE_CHILDREN);thread0=time.thread_time();maxrss=0;sequence=[0];pending={}
                     stopping=threading.Event()
                     def produce():
@@ -226,6 +255,14 @@ def main():
                         fixture_driver_cpu_seconds=own_delta if args.monitor else None,
                         reaped_child_cpu_seconds=components1['reaped']-components0['reaped'] if args.monitor else reaped_delta,
                         live_child_cpu_seconds=components1['live']-components0['live'] if args.monitor else (cpu1-cpu0)-own_delta-reaped_delta)
+                    if args.steady_profile_prefix:
+                        birth=process_identity(monitor_pid)
+                        assert birth and str(birth['start_time_ticks'])==str(expected['start_ticks']) and birth['boot_id']==expected['boot_id']
+                        os.kill(monitor_pid,signal.SIGUSR2)
+                        result_path=Path(args.steady_profile_prefix+'.'+phase+'.prof')
+                        until=time.monotonic()+2
+                        while not result_path.exists():
+                            assert time.monotonic()<until;time.sleep(.01)
                     until=time.monotonic()+2
                     while pending and time.monotonic()<until:
                         time.sleep(.05);project_pending(tick())
