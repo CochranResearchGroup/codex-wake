@@ -1,0 +1,30 @@
+{
+  "status": "DEPLOYED_APPLIED",
+  "pr": 538,
+  "source": "c59b5c8646dc831bd745b0caa63527cc967cac80",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-c59b5c8",
+  "wheel_sha256": "649fb27f0131034451853c04b4961a1a872a8cc11c0090983ba84bf80daf3249",
+  "matching_python_files": 303,
+  "private_package_members": 305,
+  "source_checks": "25PASS6.791s",
+  "installed_checks": "3PASS1.551s",
+  "native_verification": {
+    "status": "PASS",
+    "windows": 44,
+    "no_stale_labels": true,
+    "neutral_colors": true,
+    "compact_layout": true,
+    "automatic_monitor": "stopped to avoid loaded-host churn"
+  },
+  "protected_preserved": 10,
+  "native_preserved": 31,
+  "stock_unchanged": true,
+  "policy": {
+    "compact": true,
+    "render_mode": "plain",
+    "show_stale": false
+  },
+  "initial_resume": "partial workspace_timeout retained in user-state; reconciled with owner.apply and90sbounded deadline from original owner baseline",
+  "automatic_monitor": "stopped; live deadline behavior remains unresolved",
+  "provider_calls": 0
+}

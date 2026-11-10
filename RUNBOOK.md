@@ -8867,3 +8867,19 @@ New public live rollback successfully cleared partial prior formatting with
 zerofailures. Formattingoff; palette unchanged. Full live monitorcycle remains
 unqualified. Previousprefix/rollbackscript retained; no paidCI/providerprompts.
 See plan0213/deployment.json. Memoryforbidden:no explicitmemory-write request.
+
+
+## Turn | 2026-11-10 | Compact neutral tabs applied, PR538
+
+Operator rejected colors/bulk/STALE. Added explicit compact/show_stale preferences
+without changing existingfull defaults. Compact stripsprofile/idle/unknown text,
+plainneutralcolors, noSTALEtext; nativeexpiry/inspectionfreshness retained.
+25sourcechecksPASS6.791s/3privateinstalledchecksPASS1.551s; initialinstalledprobe
+racedinstallfailedimports then reranaftercompletionPASS. Exactwheel649fb27f
+mergedPR538c59b5c8/deployed9launchers+HTTP+completion;31nativeprocesses/10protected
+files/stock preserved. Configureddefault compacttrue/plain/show_stalefalse.
+Normalresume partialtimeout; existingowner.apply90sbounded reconciliation using
+cachedprovenance/originalbaseline completed44windows, allnativeoptionsverified.
+Monitorstopped to avoid sluggishloadedhostloop; automaticliveupdate remainsopen.
+No modelwork. Userstatereceipts compact-tabs-0214-deploy; plan0214deployment.json.
+Memoryforbidden:noexplicitmemory-writerequest.
