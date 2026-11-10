@@ -1,5 +1,6 @@
 """Retained public observer behavior over disposable native metadata sources."""
 import json
+import math
 import threading
 from websockets.sync.server import unix_serve
 from pathlib import Path
@@ -42,6 +43,10 @@ class ObserverTests(unittest.TestCase):
                 decoded=observer.materialize_resources(metadata['observed_at'])
                 decoded[0]['window']['panes'][0]['pane_id']='caller-mutated'
                 self.assertEqual(observer.materialize_resources(metadata['observed_at'])[0]['window'],row['window'])
+                self.assertIs(type(observer.materialize_resources(0)[0]['monitor_observed_at']),int)
+                self.assertIs(type(observer.materialize_resources(0.0)[0]['monitor_observed_at']),float)
+                negative=observer.materialize_resources(-0.0)[0]['monitor_observed_at']
+                self.assertEqual(math.copysign(1,negative),-1)
                 owner_pid = observer.status()['sources'][0]['owned_pid']
                 self.assertIsNotNone(owner_pid)
                 second = observer.tick()
@@ -75,6 +80,9 @@ class ObserverTests(unittest.TestCase):
             program=shlex.join([sys.executable,'-u','-c',body])
             subprocess.run([*tmux,'new-session','-d','-s','fixture','-c',str(root),program],check=True)
             subprocess.run([*tmux,'select-pane','-t','%0','-T','native-fixture'],check=True)
+            subprocess.run([*tmux,'new-window','-d','-t','fixture','-c',str(root),'exec sleep 60'],check=True)
+            subprocess.run([*tmux,'select-pane','-t','%1','-T','other-fixture'],check=True)
+            subprocess.run([*tmux,'set-option','-g','-w','automatic-rename','off'],check=True)
             path=root/'controller-tabs.json'
             path.write_text(json.dumps(dict(schema_version=1,workspaces=dict(fixture=dict(
                 kind='tmux',socket_path=str(root/'tmux.sock'),session_id='$0')))));path.chmod(0o600)
@@ -86,8 +94,10 @@ class ObserverTests(unittest.TestCase):
                         value=json.loads(raw);method=value.get('method')
                         if method=='initialized':continue
                         if method=='initialize':result=dict(codexHome=str(home),userAgent='fixture')
-                        elif method=='thread/loaded/list':result=dict(data=['t1'],nextCursor=None)
-                        elif method=='thread/read':result=dict(thread=dict(id='t1',name='native-fixture',cwd=str(root),status=dict(type='idle')))
+                        elif method=='thread/loaded/list':result=dict(data=['t1','t2'],nextCursor=None)
+                        elif method=='thread/read':
+                            tid=value['params']['threadId']
+                            result=dict(thread=dict(id=tid,name='native-fixture' if tid=='t1' else 'other-fixture',cwd=str(root),status=dict(type='idle')))
                         else:raise AssertionError(method)
                         connection.send(json.dumps(dict(id=value['id'],result=result)))
                 except Exception:pass
@@ -122,6 +132,9 @@ class ObserverTests(unittest.TestCase):
                     self.assertEqual(refreshed['projection_revision'],original_projection)
                     self.assertNotEqual(refreshed['evidence_revision'],result['evidence_revision'])
                     passes=observer.status()['costs']['inventory_passes']
+                    serializations=observer.status()['costs']['resource_serializations']
+                    reused=observer.status()['costs']['resource_serialization_reuses']
+                    other=refreshed['resources'][1]['evidence_revision']
                     connections[-1].send(json.dumps(dict(method='thread/status/changed',params=dict(threadId='t1',status=dict(type='active',activeFlags=[])))))
                     until=time.monotonic()+2
                     while True:
@@ -129,6 +142,9 @@ class ObserverTests(unittest.TestCase):
                         if activity['value']=='running':break
                         self.assertLess(time.monotonic(),until)
                     self.assertEqual(observer.status()['costs']['inventory_passes'],passes)
+                    self.assertEqual(observer.status()['costs']['resource_serializations']-serializations,1)
+                    self.assertGreater(observer.status()['costs']['resource_serialization_reuses'],reused)
+                    self.assertEqual(result['resources'][1]['evidence_revision'],other)
                     self.assertTrue(activity['source_available'])
                     self.assertEqual(observer.status()['scheduler']['fallback_interval_seconds'],5.)
                     self.assertNotEqual(result['projection_revision'],original_projection)

@@ -1,0 +1,14 @@
+...E.
+======================================================================
+ERROR: test_native_delta_projects_without_inventory_and_source_loss_removes_authority (test_tab_observer.ObserverTests.test_native_delta_projects_without_inventory_and_source_loss_removes_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-observer-0216/tests/test_tab_observer.py", line 130, in test_native_delta_projects_without_inventory_and_source_loss_removes_authority
+    serializations=observer.status()['costs']['resource_serializations']
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'resource_serializations'
+
+----------------------------------------------------------------------
+Ran 5 tests in 2.827s
+
+FAILED (errors=1)

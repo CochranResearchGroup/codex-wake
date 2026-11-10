@@ -154,6 +154,9 @@ class TabObserver:
         self.metadata_due = set()
         self.resources, self.unavailable = [], []
         self._resource_json = None
+        self._resource_frame_key = None
+        self._encoded_rows = None
+        self._resource_encodings = {}
         self._projection_dirty = True
         self._all_revisions_dirty = True
         self._dirty_resources = set()
@@ -166,7 +169,8 @@ class TabObserver:
         self.epochs, self.sequences = {}, {}
         self.source_errors = {}
         self.costs = dict(ticks=0, inventory_passes=0, native_events=0,
-                          fallback_probes=0, last_tick_seconds=0., total_seconds=0.)
+                          fallback_probes=0, last_tick_seconds=0., total_seconds=0.,
+                          resource_serializations=0, resource_serialization_reuses=0)
         self.configuration = self._configuration()
         self._prepare_owner()
 
@@ -514,12 +518,11 @@ class TabObserver:
         self.costs['ticks'] += 1
         if self._next_projection_boundary is not None and now>=self._next_projection_boundary:
             self._projection_dirty=True
-        # Resources are JSON contract data. Keep the canonical encoding until
-        # evidence changes; C decoding gives each caller fully independent nested
-        # containers without Python deepcopy walking the same idle graph each tick.
-        if self._projection_dirty or self._resource_json is None:
+        # Producer revisions qualify immutable encodings; native changes need
+        # not serialize every unrelated row again.
+        if self._projection_dirty or self._encoded_rows is None:
             self._prepare_revisions(now)
-            self._resource_json = json.dumps(self.resources, separators=(',', ':'), allow_nan=False)
+            self._cache_resource_encodings()
             self._projection_dirty = False
         snapshot=dict(schema_version=1, observed_at=now, resource_count=len(self.resources),
                     projection_revision=self._snapshot_projection_revision,
@@ -534,24 +537,56 @@ class TabObserver:
         snapshot['observer']=self.status()
         return snapshot
 
-    def materialize_resources(self, observed_at):
-        """Decode independent public rows for the latest observed frame.
+    def _cache_resource_encodings(self):
+        retained, rows, size = {}, [], 0
+        for resource in self.resources:
+            key = self._resource_key(resource)
+            token = tuple(resource.get(name) for name in
+                          ('evidence_revision', 'projection_revision', 'projection_valid_until'))
+            previous = self._resource_encodings.get(key)
+            if previous and previous[0] == token:
+                _, body, unavailable = previous
+                self.costs['resource_serialization_reuses'] += 1
+            else:
+                value = {name: item for name, item in resource.items()
+                         if name not in ('monitor_observed_at', 'monitor_unavailable')}
+                body = json.dumps(value, separators=(',', ':'), allow_nan=False)
+                unavailable = json.dumps(resource.get('monitor_unavailable', False), allow_nan=False)
+                self.costs['resource_serializations'] += 1
+            rows.append((resource['target']['workspace'], body, unavailable))
+            # Retain at most the existing observation-cache scale and one MiB.
+            # Larger frames still take the bounded publisher's ordinary error path.
+            if len(retained) < 512 and size + len(body) + len(unavailable) <= 1048576:
+                retained[key] = (token, body, unavailable)
+                size += len(body) + len(unavailable)
+        self._resource_encodings, self._encoded_rows = retained, rows
+        self._resource_json = self._resource_frame_key = None
+
+    def serialize_resources(self, observed_at):
+        """Return strict JSON for the latest frame without exposing mutable rows.
 
         The retained monitor calls this within the same tick before advancing the
-        producer again. Metadata-only frames must never be persisted as inventory.
+        producer again. Only stdlib-encoded fragments enter this internal seam;
+        callers must not supply client JSON as a replacement for this producer.
         """
-        if self.closed or self._resource_json is None:
+        if self.closed or self._encoded_rows is None:
             raise ValueError('No live observed frame is available.')
         if type(observed_at) not in (int,float) or not math.isfinite(observed_at):
             raise ValueError('A finite observation timestamp is required.')
-        resources = decode_json(self._resource_json)
-        for row in resources:
-            row.update(monitor_observed_at=observed_at)
-            row.setdefault('monitor_unavailable',False)
-            name = row['target']['workspace']
-            if name in self.tmux and not self.owner.workspaces[name]['transport'].available:
-                row['monitor_unavailable'] = True
-        return resources
+        availability = {name: self.owner.workspaces[name]['transport'].available for name in self.tmux}
+        stamp = json.dumps(observed_at, allow_nan=False)
+        frame_key = (stamp, tuple(availability.items()))
+        if frame_key != self._resource_frame_key:
+            annotation = ',"monitor_observed_at":' + stamp + ',"monitor_unavailable":'
+            self._resource_json = '[' + ','.join(
+                body[:-1] + annotation + ('true' if availability.get(name) is False else unavailable) + '}'
+                for name, body, unavailable in self._encoded_rows) + ']'
+            self._resource_frame_key = frame_key
+        return self._resource_json
+
+    def materialize_resources(self, observed_at):
+        """Decode independent nested containers from the current producer frame."""
+        return decode_json(self.serialize_resources(observed_at))
 
     def status(self):
         return dict(mode='persistent', sources=[dict(workspace=name, **feed.status()) for name,feed in self.tmux.items()]+
