@@ -21,8 +21,9 @@ script migration and validate through the public CLI, including redirected outpu
 ## Scope and execution
 
 Primary owns output presentation and CLI adapters, focused tests, docs and local
-qualification. One read-only audit worker checks compatibility for accounts and
-controller callers; it owns no files. Serial critical path: public CLI red test,
+qualification. One bounded worker audited and migrated machine-consuming tests
+and scripts; a separate independent reviewer owned no files. Primary reconciled
+all delegated changes and custody evidence. Serial critical path: public CLI red test,
 shared presentation plus accounts, then affected adapters, compatibility checks,
 installed-wheel smoke. No provider actions, account mutations on working host,
 daemon/native binary upgrades, paid CI, or production restart. A private package
