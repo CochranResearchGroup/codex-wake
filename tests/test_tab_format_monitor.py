@@ -224,3 +224,25 @@ class FormattingMonitorTests(unittest.TestCase):
         inspected=self.tabs.execute('tabs.format.inspect',dict(workspace='work'))['record']['windows']['@0']['projection']
         self.assertEqual(inspected['state'],'idle')
         self.assertEqual(inspected['details']['panes'][0]['attention']['error']['value'],'present')
+
+    def test_expired_metadata_frame_loads_resources_before_legacy_key(self):
+        import copy
+        from codex_wake.tab_format_monitor import refresh_formatting
+        observed=self.tabs.execute('tabs.list',{});wall=time.time();loads=[]
+        def frame(state):
+            metadata=dict(origin='daemon',projection_revision='expired',projection_valid_until=wall-1)
+            def load():
+                loads.append(state)
+                metadata['resources']=copy.deepcopy(observed['resources'])
+                for resource in metadata['resources']:
+                    resource['traits']=dict(panes=[dict(pane_id=resource['window']['panes'][0]['pane_id'],traits=dict(
+                        harness=dict(value='codex',status='observed',observed_at=wall),
+                        build=dict(value='stock',status='observed',observed_at=wall),
+                        activity=dict(value=state,status='observed',observed_at=wall,source_available=True)))])
+            return metadata,load
+        first,load=frame('idle')
+        self.assertEqual(refresh_formatting(self.root,first,tabs=self.tabs,resources_loader=load)['status'],'completed')
+        second,load=frame('running')
+        self.assertEqual(refresh_formatting(self.root,second,tabs=self.tabs,resources_loader=load)['status'],'completed')
+        self.assertEqual(loads,['idle','running'])
+        self.assertIn('RUN',self.tmux('display-message','-p','-t','@0','#{E:window-status-format}'))
