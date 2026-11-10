@@ -1,0 +1,26 @@
+======================================================================
+ERROR: test_named_presets_set_compact_defaults_and_validate_names (test_tab_format_presets.PresetPolicyTests.test_named_presets_set_compact_defaults_and_validate_names)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-tab-presets/tests/test_tab_format_presets.py", line 12, in test_named_presets_set_compact_defaults_and_validate_names
+    p=validate_policy({'preset':name})
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-tab-presets/src/codex_wake/tab_format_policy.py", line 17, in validate_policy
+    raise InventoryError('invalid_argument', 'Unknown display policy field.')
+codex_wake.managed_inventory.InventoryError: Unknown display policy field.
+
+======================================================================
+ERROR: test_slate_uses_preview_colors_on_badges_not_entire_tabs (test_tab_format_presets.PresetPolicyTests.test_slate_uses_preview_colors_on_badges_not_entire_tabs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-tab-presets/tests/test_tab_format_presets.py", line 22, in test_slate_uses_preview_colors_on_badges_not_entire_tabs
+    shown=project(r,validate_policy({'preset':'slate'}),now=105)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-tab-presets/src/codex_wake/tab_format_policy.py", line 17, in validate_policy
+    raise InventoryError('invalid_argument', 'Unknown display policy field.')
+codex_wake.managed_inventory.InventoryError: Unknown display policy field.
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+FAILED (errors=2)

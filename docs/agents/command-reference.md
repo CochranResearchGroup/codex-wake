@@ -4804,6 +4804,7 @@ usage: codex-wake tabs format-configure [-h] [--arguments ARGUMENTS] [--json]
                                         [--request-id REQUEST_ID]
                                         [--expected-target EXPECTED_TARGET]
                                         [--policy POLICY]
+                                        [--preset {slate,dusk,graphite,legacy}]
                                         [--scope {workspace,global}]
                                         [--workspace WORKSPACE]
                                         [--session SESSION_SELECTOR]
@@ -4826,6 +4827,9 @@ options:
                         Exact current target object; ordinary local CLI
                         resolves it, remote callers must supply it.
   --policy POLICY       Persistent display policy JSON.
+  --preset {slate,dusk,graphite,legacy}
+                        Named compact color palette; slate, dusk and graphite
+                        omit repeated STALE text.
   --scope {workspace,global}
                         Workspace display control (default) or global display
                         policy; global requires a matching formatting
@@ -4848,6 +4852,7 @@ Examples:
 | `workspace` | no | workspace. |
 | `scope` | no | scope. |
 | `policy` | no | policy. |
+| `preset` | no | preset. |
 | `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
 | `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
 

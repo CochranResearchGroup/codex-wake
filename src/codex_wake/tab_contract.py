@@ -392,7 +392,9 @@ _SPECS['wake_tabs_create'][3]['profile']={'type':'string','description':'Existin
 for _verb in ('status','inspect','enable','pause','resume','rollback','reenable','reset','configure'):
     _read = _verb in ('status','inspect')
     _fields = {'workspace': {'type':'string'}, 'scope': {'type':'string','enum':['workspace','global'],'description':'Workspace display control (default) or global display policy; global requires a matching formatting authority grant.'}}
-    if _verb == 'configure':_fields['policy']={'type':'object','description':'Persistent display policy JSON.'}
+    if _verb == 'configure':
+        _fields['policy']={'type':'object','description':'Persistent display policy JSON.'}
+        _fields['preset']={'type':'string','enum':['slate','dusk','graphite','legacy'],'description':'Named compact color palette; slate, dusk and graphite omit repeated STALE text.'}
     if not _read:_fields.update(expected_target={'type':'object'},_request={'type':'object'})
     _SPECS['wake_tabs_format_'+_verb]=('controller-tabs','tabs.format.'+_verb,
         'Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.',
