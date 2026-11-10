@@ -8,12 +8,12 @@ lanes:
     plan: docs/dev/plans/0217-2026-11-10-human-cli-output.md
     branch: feat/human-cli-output-217
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: []
     updated_at: 2026-11-10
-    disposition: Operator authorized PR/merge/deploy/cleanup; Python CLI only, native owners unchanged
+    disposition: PR549 merged1a651e0; exact0.22.0.dev3 deployed with Zsh completion; six inactive checkouts archived and50stale registrations pruned; native owners unchanged
   - id: P212
     owner: primary
     objective: Fix shared native MCP mailbox actor bootstrap

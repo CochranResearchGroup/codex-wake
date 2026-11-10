@@ -1,6 +1,6 @@
 # LOCAL-P217 | Human-friendly CLI output
 
-State: OPEN
+State: CLOSED
 Ticket: https://github.com/CochranResearchGroup/codex-wake/issues/548
 Owner: primary
 Priority: P1
@@ -21,8 +21,9 @@ script migration and validate through the public CLI, including redirected outpu
 ## Scope and execution
 
 Primary owns output presentation and CLI adapters, focused tests, docs and local
-qualification. One read-only audit worker checks compatibility for accounts and
-controller callers; it owns no files. Serial critical path: public CLI red test,
+qualification. One bounded worker audited and migrated machine-consuming tests
+and scripts; a separate independent reviewer owned no files. Primary reconciled
+all delegated changes and custody evidence. Serial critical path: public CLI red test,
 shared presentation plus accounts, then affected adapters, compatibility checks,
 installed-wheel smoke. No provider actions, account mutations on working host,
 daemon/native binary upgrades, paid CI, or production restart. A private package
@@ -30,37 +31,35 @@ install qualifies console entrypoints; working installation is separate.
 
 ## Current State
 
-Operator now authorizes PR, merge, deployment and worktree cleanup. Release slice
-is isolated at `/tmp/codex-wake-p217-release`, based on fetched origin/main
-fa2363c. Native binaries/owners will remain unchanged; deploy only the Python CLI
-package and regenerate Zsh completion. Existing native sessions and monitor state
-must be preserved. PR549 is published. Six inactive remotely backed checkouts archived and50stale
-registrations pruned with refs retained; active/unpublished lanes preserved.
-Final source and rollback qualification pass; working rollout awaits merge.
-See `docs/dev/evidence/plan0217/release-validation.md`.
+CLOSED. PR549 merged as1a651e073d7a0f5f7a8200d49074af2a22332c07; exact merged
+0.22.0.dev3 wheel deployed at
+`~/.local/share/codex-wake/releases/0.22.0.dev3-1a651e0`.
+All305 Python members match source/wheel/install;29 changed members are CLI
+adapters/presenter, no native owner changes. Nine launchers verified, real account
+list is readable, explicit JSON complete and fresh Zsh completion registered.
+Ten protected files,22 native processes and stock preserved; no native/provider
+calls. Existing HTTP controller stale identity remains unchanged. Prior complete
+package and tested rollback helper retained. See `deployment.json` under plan evidence.
 
-Prior implementation qualification:
+Final release qualification:18 exact merged-package installed checks PASS11.610s;
+37Python3.11 checks PASS15.733s. Full2338-test run retained one environment setup
+error (missing installed launcher); its exact affected check passed in the
+qualified installation. No product/assertion change or full-run retry to erase
+that result. Independent Standards and Spec review has no remaining blocker.
+See `release-validation.md` for commands, limits and earlier evidence.
 
-CLOSED for source implementation and private installed-wheel validation;
-unreleased and not deployed to the working host. Shared presentation covers the
-adapters listed in `docs/agents/cli-output.md`; machine consumers explicitly
-select JSON. All three independent review findings corrected. 327 focused checks,
-69 compatibility checks, five private-installed presentation checks pass. Full
-2338-test discovery recorded deterministic consumer/header failures; all affected
-modules reran after corrections: 64 checks PASS. Full discovery was not repeated.
-Active planning audit, undefined-name lint, compilation and generated-reference
-checks pass. See `docs/dev/evidence/plan0217/validation.md` for complete evidence.
-
-No working-host deployment, commit or push. Receipt:
-`~/.local/state/codex-wake/qualification/plan0217-20261110/receipt.json`.
-Graphiti discovery skipped: current source and supplied example sufficient.
-Memory disposition: forbidden by session developer instruction (no explicit
-memory-update request); non-write receipt retained outside Git. Preexisting
-completion patch and unrelated Plan0216/GLOSSARY/config changes preserved.
+Six inactive remotely backed checkouts archived with branches retained;50missing
+registrations pruned. Active/dirty/unpublished/native/observer/Plan0216 trees
+preserved. Main synchronized after removing only this task's exact verified dirty
+paths; root config/GLOSSARY and Plan0216 work remain untouched. Final release
+checkout will be removed after its clean published closeout is merged.
+Memory disposition: forbidden by session developer instruction; no explicit
+memory-update request. Non-write receipt and full deployment/custody/rollback
+artifacts remain outside Git in the user-scoped qualification directory.
 
 ## Definition of done
 
-Named CLI tests and affected existing checks pass locally; private installed wheel
-shows human accounts output and unchanged explicit JSON; docs describe compatibility
-and commands/results/environment/source are recorded. Broader command coverage is
-reported accurately rather than inferred from shared helper tests.
+Named CLI and affected checks pass locally; exact merged package is deployed with
+readable accounts, complete JSON and fresh Zsh completion. Review, environment
+limitations, retained initial failures, rollback and safe worktree custody are
+recorded. Native sessions, protected state and unrelated work remain preserved.

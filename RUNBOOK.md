@@ -8944,3 +8944,24 @@ independent Standards/Spec review pass. Nine-launcher/completion rollback exerci
 PASS. See plan0217/release-validation.md. Hosted runs zero. Six remotely backed
 inactive checkouts archived with branches retained;50stale registrations pruned.
 Deployment still pending exact merged source; native binaries/owners unchanged.
+
+## 2026-11-10 — P217 merged, deployed and custody cleanup
+
+PR549 squash-merged1a651e073d7a0f5f7a8200d49074af2a22332c07. Exact merged wheel
+1bfef803398161e266281c01578728d51268ee25f1bd27e731c44041a424281f installed at
+~/.local/share/codex-wake/releases/0.22.0.dev3-1a651e0. All305Python members match;
+29changed members are CLI presentation only.18exact installed checks PASS11.610s,
+nine launchers/readable7-account list/JSON/freshZsh completion verified.22native
+processes,10protected files and stock unchanged. No native/server lifecycle calls
+or provider actions. Existing HTTP controller's stale identity preserved.
+
+Pre-cutover status check initially parsed stdout only; error JSON was on stderr.
+No launcher had changed; corrected helper, reconciled allnineoldtargets and
+completed rollout. Previous complete prefix and qualified nine-launcher/completion
+rollback retained. Deployment receipt: docs/dev/evidence/plan0217/deployment.json;
+private artifacts/rollback under ~/.local/state/codex-wake/qualification/plan0217-20261110.
+Root main advanced while preserving unrelated config/GLOSSARY/Plan0216 edits.
+Six inactive clean remotely backed worktrees archived with refs retained;50missing
+registrations pruned. Active, dirty and unpublished trees retained. Release
+checkout removed only after published docs closeout. Memory forbidden by session
+boundary; explicit non-write receipt outside Git. HostedCI zero.
