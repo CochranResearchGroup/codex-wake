@@ -60,15 +60,18 @@ class FormattingProcessBudgetTests(FormattingTests):
         for resource in changed['resources'][:2]:
             resource['projection_revision']=resource['window']['window_id']+'-running'
             resource['traits']['panes'][0]['traits']['activity']=trait('running')
-        commands=[];stat_pids=[];run=subprocess.run;read_text=Path.read_text
+        import os
+        commands=[];stat_pids=[];flushes=[];run=subprocess.run;read_text=Path.read_text;sync=os.fsync
+        def synced(fd):flushes.append(fd);return sync(fd)
         def counted(*args,**kwargs):commands.append(args[0]);return run(*args,**kwargs)
         def read(path,*args,**kwargs):
             if path.parent.parent==Path('/proc') and path.name=='stat':stat_pids.append(int(path.parent.name))
             return read_text(path,*args,**kwargs)
         clock=SimpleNamespace(time=lambda:wall+2,monotonic=time.monotonic,sleep=time.sleep)
-        with patch('subprocess.run',side_effect=counted),patch.object(Path,'read_text',read),patch('codex_wake.tab_formatting.time',clock):
+        with patch('subprocess.run',side_effect=counted),patch.object(Path,'read_text',read),patch('codex_wake.tab_formatting.time',clock),patch('os.fsync',side_effect=synced):
             report=refresh_formatting(self.root,changed,tabs=self.tabs)
         self.assertEqual(report['status'],'completed')
+        self.assertLessEqual(len(flushes),1,'Existing durable originals need only the final checkpoint.')
         self.assertLessEqual(len(commands),6)
         self.assertEqual(set(stat_pids),{r['window']['panes'][0]['pid'] for r in changed['resources'][:2]})
         self.assertEqual(self.tmux('show-options','-v','-t','$0','@wake-format-clock'),lease)

@@ -306,6 +306,7 @@ class TabFormatting:
             eligible=dirty
         reads=self.batch(transport,[dict(action='read',window=w['window_id']) for w in eligible],deadline)
         pending=[]
+        new_originals=False
         for window,read in zip(eligible,reads):
             wid=window['window_id']
             if 'error' in read:
@@ -314,6 +315,7 @@ class TabFormatting:
                 current=read['result']
                 if wid not in record['windows']:
                     record['windows'][wid]=dict(original=current,last_applied=None,restored=False)
+                    new_originals=True
                 saved=record['windows'][wid]
                 saved['last_audited_at']=time.time()
                 saved['panes']=window.get('panes',[])
@@ -346,7 +348,7 @@ class TabFormatting:
             except Exception as error:failures.append(dict(window=wid,code=getattr(error,'code','formatting_failed')))
         # Existing baselines are already durable. Persist new originals before
         # a window effect; settled refreshes need only the final checkpoint.
-        if pending:self.save(state)
+        if pending and new_originals:self.save(state)
         writes=self.batch(transport,[dict(action='write',window=wid,values=options) for wid,options,_,_,_ in pending],deadline)
         for (wid,options,rendered,revision,evidence),write in zip(pending,writes):
             if 'error' in write:
