@@ -208,3 +208,11 @@ parent0.41CPU/reapedchildren0.12; idleparent0.06/children0.01. All20ordinary
 events projected, p951.0166s, aggregateRSS41,103,360bytes, controls0. Fresh
 OS test-user census0. Sourceoverride is diagnostic only; previous failures
 remain unchanged. No new wheel/product edit or relaxed threshold.
+
+Source62877702 session/window-read batch diagnostic remains failed: idle
+0.69865%onecore (0.07CPU/10.019s), active6.2842% (0.63CPU/10.025s).
+Active parent0.50CPU/reapedchildren0.13, aggregateRSS76,128,256bytes,
+all20ordinaryevents projected/p951.0164s/controls0; fresh OSUID1017 census0.
+Public inventory delta1 differs from prior candidate delta2, so these short
+windows do not isolate the batch change's effect. Conditional wheel-build
+threshold was not met; no build, full60+60 run, product edit or threshold change.
