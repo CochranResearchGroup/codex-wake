@@ -37,6 +37,20 @@ native feeds use bounded metadata polling for details; passive availability is
 reported separately. Unsupported terminal backends retain bounded existing probes
 and are not advertised as native event sources.
 
+Fallback inventory normally reconciles every five seconds for active, changed,
+unknown or unavailable panes. A fully bound native idle workspace with connected
+presentation and native sources can reconcile every 30 seconds. Native events
+still update cached activity on the one-second owner tick. Status reports the
+selected interval, inventory age and reason; a slower inventory is not a health
+claim. Every reused process tree is checked for live births and changed children.
+
+Visible-error reads use bounded batches of only due panes. Failed reads remain
+unknown and retain prior redacted positive evidence; they do not clear errors.
+Raw screen text is transient and never enters the persisted observation snapshot.
+Formatting consumes producer revisions, checks changed windows before writing and
+uses a bounded shared lease for dynamic cues. Loss of that lease removes uncertain
+cues while keeping the selected palette and stable labels.
+
 Background health checks run no faster than once per 60 seconds per exact client
 birth/build; errors use their separate minimum five-second cadence when eligible.
 Explicit monitor refresh remains a bounded one-shot operation. Observer sources,
