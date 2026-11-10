@@ -186,3 +186,17 @@ No wheel rebuilt. Active inventory passes advanced2during10s; attribution needs
 a same-source steady-only profile rather than extrapolation fromc65 timings.
 An initial helper-copy command failed on private worktree permissions before
 starting any workload; helper was transferred by stdin without widening access.
+
+Authorized same-source de23 steady-only profiler corroborated native-client and
+PID-fence reductions, but remains diagnostic (idle0.898%, active9.182% with
+profiler; parent0.78CPU, reapedchildren0.14). Active10ticks: formatting refresh
+0.443s/apply0.355; tick0.432/inventory2calls0.243;39subprocesses0.201 and
+30native batches0.168. Formatstate18saves0.124, monitor19saves0.098, JSON
+dumps658calls0.161; loads180/0.064; deepcopy81,390/0.091. PIDidentity670calls/
+0.076 includes600inventory/traits/cachebirth fences; lifecycle only34/0.0063.
+Materialization10calls0.038 from20ensure calls. Formatstate363,637bytes and14
+sampledversions. Top30 cumulative/self timings retained in compact JSON;
+profiles remain private. These elapsed profiler timings include waits/fsync
+and cannot be added as CPU costs. No materialize-cache-hit counter was exposed
+in sampled public costs; none invented. All20events projected, p951.018s,
+ownedcontrols0 and fresh test-user OS census0. No wheel or product edits.
