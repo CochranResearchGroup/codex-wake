@@ -38,7 +38,7 @@ class ControllerTabs:
         payload=dict(arguments) if defaults_resolved else prepare(self,arguments)
         return TabLifecycle(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment).execute('tabs.create',payload)
 
-    def execute(self, operation, arguments):
+    def execute(self, operation, arguments, *, deadline=None):
         if operation=='tabs.create':return self.create_tab(arguments)
         if operation.startswith('tabs.route.'):
             from .terminal_routing import TerminalRouting
@@ -109,7 +109,7 @@ class ControllerTabs:
             raise InventoryError('invalid_argument', 'unsupported attachment arguments')
         names = list(self.workspaces) if operation == 'tabs.list' else [arguments.get('workspace')]
         resources, unavailable = [], []
-        deadline = time.monotonic() + 10
+        deadline = min(time.monotonic() + 10, deadline) if deadline is not None else time.monotonic() + 10
         for name in names:
             if name not in self.workspaces:
                 raise InventoryError('unsupported_target', 'workspace is not host enrolled')

@@ -11,22 +11,43 @@
   ],
   "fixed_review_base": "fa2363c24bf921ecf0bd8390739e96041e620e8f",
   "integration_branch": "feat/efficient-tab-observer",
-  "broad_review_runs": 0,
-  "tdd_remediation_runs": 0,
+  "broad_review_runs": 1,
+  "tdd_remediation_runs": 1,
   "closed": [
+    541,
     542,
     543,
-    545
-  ],
-  "remaining": [
-    541,
     544,
+    545,
     546,
     547
   ],
+  "remaining": [],
   "merge_authorized": false,
   "deploy_authorized": false,
   "production_enablement_authorized": false,
-  "validation_hold": "Exactwheel6 idlePASS0.815507%, activeFAIL5.112315%, all120events/p951.01366s/cleanup0. Revision-qualified resource encodings and trusted single-encode publication integrated;225tabtestsPASSbothPython;20combinedpublictestsPASSboth; componentprototype saves.303CPU/60frames, not wholeowneracceptance. Next exact dev3 installedgate pending; review0/remediation0.",
-  "qualification_source": "7cf0e16a"
+  "validation_hold": null,
+  "qualification_source": "8f5f04296f83ceecbd4f98c22bfa01e627081800",
+  "review": {
+    "status": "completed",
+    "frozen_head": "afd0061fdf247c522a3cc165f05ba88e271b70c9",
+    "base": "fa2363c24bf921ecf0bd8390739e96041e620e8f",
+    "standards_reviewer": "/root/review_standards216",
+    "spec_reviewer": "/root/review_spec216",
+    "accepted_standards": 1,
+    "accepted_spec": 2
+  },
+  "remediation": {
+    "status": "running",
+    "findings": [
+      "S1 inventory deadline propagation P2",
+      "P1 native exact source identity",
+      "P2 skipped reconciliation evidence P1"
+    ],
+    "seams": [
+      "ControllerTabs.execute deadline to adapter",
+      "TabObserver.tick skipped reconciliation and recovery",
+      "TabObserver.tick two native endpoints with equal basename/thread"
+    ]
+  }
 }

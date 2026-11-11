@@ -27,7 +27,9 @@ class ObserverTests(unittest.TestCase):
                 socket_path=str(root/'tmux.sock'), session_id='$0')))
             path = root/'controller-tabs.json'
             path.write_text(json.dumps(config)); path.chmod(0o600)
-            observer = TabObserver(root, settings=dict(health=False, errors=False))
+            monotonic_offset = [0.]
+            observer = TabObserver(root, settings=dict(health=False, errors=False),
+                monotonic=lambda: time.monotonic()+monotonic_offset[0])
             try:
                 until = time.monotonic()+3
                 while True:
@@ -53,6 +55,14 @@ class ObserverTests(unittest.TestCase):
                 self.assertEqual(second['resources'][0]['window'], row['window'])
                 self.assertEqual(observer.status()['sources'][0]['owned_pid'], owner_pid)
                 self.assertEqual(observer.status()['costs']['fallback_probes'], 0)
+                monotonic_offset[0] = 31.
+                skipped = observer.tick(deadline=time.monotonic()+30.)
+                self.assertEqual(skipped['unavailable'][0]['reason'], 'observer_cycle_deadline')
+                self.assertTrue(skipped['resources'][0]['monitor_unavailable'])
+                self.assertFalse(skipped['resources'][0]['traits']['panes'][0]['traits']['activity']['source_available'])
+                recovered = observer.tick(deadline=time.monotonic()+40.)
+                # A skipped cycle stays due until a later reconciliation can run.
+                self.assertFalse(recovered['resources'][0]['monitor_unavailable'])
                 subprocess.run([*command, 'kill-server'], check=True)
                 until = time.monotonic()+2
                 while not observer.tick()['unavailable']:

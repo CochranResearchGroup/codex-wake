@@ -10,6 +10,20 @@ from codex_wake.process import process_identity
 
 
 class ObservationTests(unittest.TestCase):
+    def test_inventory_preserves_callers_remaining_deadline(self):
+        seen = []
+        class Transport:
+            def snapshot(self, deadline):
+                seen.append(deadline)
+                return dict(server='fixture', session_id='$1', windows=[])
+        with tempfile.TemporaryDirectory() as directory:
+            owner = ControllerTabs(directory, workspaces={'fixture':dict(kind='tmux', transport=Transport())},
+                                   host='fixture', environment='fixture')
+            deadline = time.monotonic()+.1
+            result = owner.execute('tabs.list', {}, deadline=deadline)
+            self.assertEqual(result['resources'], [])
+            self.assertEqual(seen, [deadline])
+
     def test_inventory_reuses_investigation_and_invalidates_on_source_generation(self):
         from codex_wake.tab_observation import ObservationCache
         calls = []

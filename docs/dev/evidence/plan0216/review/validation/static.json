@@ -1,0 +1,53 @@
+[
+  {
+    "command": [
+      "/tmp/wake216-py312/bin/python",
+      "-m",
+      "ruff",
+      "check",
+      "--select",
+      "F821,F822,F823",
+      "src",
+      "scripts",
+      "tests",
+      ".codex/hooks"
+    ],
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "/tmp/wake216-py312/bin/python",
+      "scripts/generate_command_reference.py",
+      "--check"
+    ],
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "/tmp/wake216-py312/bin/python",
+      "scripts/check_policy_wiring.py"
+    ],
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "/tmp/wake216-py312/bin/python",
+      "-m",
+      "compileall",
+      "-q",
+      "src",
+      "scripts",
+      "tests",
+      ".codex/hooks"
+    ],
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0
+  }
+]

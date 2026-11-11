@@ -8,13 +8,17 @@ Scope: approved specification and seven implementation tickets; user authorized 
 
 ## Current State
 
-Implementation is on feat/efficient-tab-observer. #542/#543/#545 are closed;
-#541/#544/#546/#547 remain open for resource and installed qualification. The
-exact wheel5 candidate passes the60second idle gate at0.8988% but fails active
-at5.2264% ofonecore. All120events projected, p95 0.9799seconds, cleanup0.
-BothPython tab/reader checks pass. No resource threshold has been widened.
-The next bounded repair reuses a read-only formatting channel to avoid a native
-reader startup on every active frame. Review and post-review TDD counts remain0.
+All seven implementation tickets #541–#547 are CLOSED following exact installed
+qualification at source8f5f0429: idle0.732393%, active3.711613% of one core,
+48,422,912B aggregate RSS,120/120 events, p951.022886s, cleanup0. The four
+installed transports and bounded read-only46-tab existing-host check pass with
+explicit limits: no natural live native transition; shared WSL kernel; lifetime
+ru_maxrss is not phase RSS. Parent#540 stays open.
+The single independent Standards/Spec review is complete (1 Standards P2,
+2 Spec P1 accepted). One bounded TDD remediation pass is running for remaining
+deadline propagation, skipped-evidence invalidation and exact source identity.
+The changed immutable candidate requires new installed qualification. No second
+broad review, merge, deployment or production enablement is authorized.
 
 Historical interview context: research completed in notes/0011-2026-11-10-tab-observation-efficiency-research.md.
 Stock tmux/Byobu already supplies metadata notifications; source shows Codex
