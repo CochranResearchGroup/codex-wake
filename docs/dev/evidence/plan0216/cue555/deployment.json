@@ -1,0 +1,19 @@
+{
+  "source": "18f1e7393eb137c1f48b82971f1043f1fb7b56fe",
+  "version": "0.22.0.dev5",
+  "wheel_sha256": "446a57fb5c74cb73a4aad9dbaa514b352ff4b3c645194a6e56f36f1b0ff306c3",
+  "package_members_equal": 315,
+  "monitor": "running",
+  "snapshot": "fresh",
+  "tabs": 46,
+  "preset": "slate",
+  "formatting_failures": 0,
+  "cue_templates_checked": 10,
+  "no_cue_padding": true,
+  "original_baselines_preserved": true,
+  "protected_files_preserved": 10,
+  "native_preserved": 29,
+  "stock_unchanged": true,
+  "native_owner_changes": 0,
+  "hosted_ci": false
+}

@@ -9048,3 +9048,17 @@ rollbackstate stays ~/.local/state/codex-wake/qualification/plan0216-* outsideGi
 Deploymentreceipt docs/dev/evidence/plan0216/deployment.json. Parent540open;
 originaldirtycheckout andworktrees preserved. HostedCIzero. Memoryforbidden by
 higher-priority explicit-request boundary; non-write receipt only.
+
+
+## Turn | 2026-11-10 | Compact cue spacing #555
+
+PR556 merged18f1e73 and exact0.22.0.dev5 wheel deployed. Compact palette/fallback
+status cues now have no surrounding padding, retaining colors and other spacing.
+37focusedchecks PASSbothPython;14exactinstalledpalette/native/rollbackchecksPASS
+UID1017;315source/wheel/installedmembersmatch. Initial test install was held on
+unreadable build dist directory before effects; samewheel permissions corrected.
+Live46tabs/Slate/freshmonitor/noformattingfailures;10nativecue templates verified
+withoutpadding. Original46baseline values,tenprotectedfiles,29nativeprocesses
+andstock preserved; onlyownedmonitor reloaded. Resourcegate not rerun for this
+small renderer-only edit. Evidenceplan0216/cue555/deployment.json. Memoryforbidden
+under explicit-request boundary, no memorywrite. HostedCIzero.
