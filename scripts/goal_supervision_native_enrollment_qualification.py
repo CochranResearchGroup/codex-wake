@@ -88,6 +88,11 @@ def qualify(base, codex, import_boundary=False, governor=False):
         with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as peer:
             peer.settimeout(2);peer.connect(str(physical));pid,uid,_=struct.unpack('3i',peer.getsockopt(socket.SOL_SOCKET,socket.SO_PEERCRED,12))
         assert pid==native.pid and uid==os.geteuid();endpoint='unix://'+str(physical);result['peer']=dict(pid=pid,uid=uid)
+        # Discovery accepts the peer-qualified physical socket, not an arbitrary alias.
+        config=config.replace(json.dumps('unix://'+str(alias)),json.dumps(endpoint))
+        (home/'config.toml').write_text(config);(home/'config.toml').chmod(0o600)
+        config_hash=hashlib.sha256((home/'config.toml').read_bytes()).hexdigest()
+        result['mcp_endpoint']=endpoint
         def rpc(method,params):return native_request(endpoint,str(codex),method,params,5)
         grant=dict(app_server=endpoint,codex_path=str(codex),codex_home=str(home),max_tokens=1000,max_seconds=120,rpc_timeout=3)
         save('policy.json',dict(version=2,native_caller_binding=True,allocations={},self_enrollment=grant) if governor else dict(version=2,default_allocation='owned-objective',native_caller_binding=True,allocations={'owned-objective':grant}))
