@@ -625,6 +625,23 @@ def qualify(options):
             time.sleep(0.08)
         raise AssertionError(label + " unavailable within bounded observation")
 
+    class ObservedDaemon:
+        def __init__(self, pid, expected_identity=None):
+            self.pid = pid
+            self.identity = expected_identity if expected_identity is not None else process_identity(pid)
+            self.returncode = None
+        def poll(self):
+            if process_identity(self.pid) != self.identity:
+                self.returncode = 0
+            return self.returncode
+        def wait(self, timeout):
+            until = time.monotonic() + timeout
+            while self.poll() is None and time.monotonic() < until:
+                time.sleep(.05)
+            if self.poll() is None:
+                raise subprocess.TimeoutExpired("owned observed daemon", timeout)
+            return self.returncode
+
     try:
         if options.managed_launcher:
             profiles = base / "launcher-profiles.toml"
@@ -655,22 +672,6 @@ def qualify(options):
             require(digest(Path("/proc", str(managed_pid), "exe")) == options.app_server_sha256,
                     "managed bootstrap executable differs")
             require(os.getpgid(managed_pid) == managed_pid, "managed bootstrap must own its process group")
-            class ObservedDaemon:
-                def __init__(self, pid):
-                    self.pid = pid
-                    self.identity = process_identity(pid)
-                    self.returncode = None
-                def poll(self):
-                    if process_identity(self.pid) != self.identity:
-                        self.returncode = 0
-                    return self.returncode
-                def wait(self, timeout):
-                    until = time.monotonic() + timeout
-                    while self.poll() is None and time.monotonic() < until:
-                        time.sleep(.05)
-                    if self.poll() is None:
-                        raise subprocess.TimeoutExpired("owned managed daemon", timeout)
-                    return self.returncode
             native = ObservedDaemon(managed_pid)
             tmux("kill-session", "-t", "ux")
             report["modified_launcher_bootstrap"] = dict(
@@ -1781,6 +1782,31 @@ def qualify(options):
     finally:
         finish.set()
         operator_release.set()
+        if governor_ui_only and watcher is None:
+            # /wake activation starts the real supervisor itself. Adopt only
+            # this root's heartbeat identity; counter producers are separate.
+            from codex_wake import goal_supervision
+            heartbeat = goal_supervision._heartbeat(root / 'goal-supervision')
+            if heartbeat.get('process_alive'):
+                try:
+                    pid = int(heartbeat['pid'])
+                    identity = heartbeat['identity']
+                    proc = Path('/proc', str(pid))
+                    argv = (proc / 'cmdline').read_bytes().split(b'\0')
+                    qualified = (proc.stat().st_uid == os.geteuid()
+                        and process_identity(pid) == identity
+                        and str(root).encode() in argv
+                        and os.getpgid(pid) == pid)
+                    if qualified:
+                        watcher = ObservedDaemon(pid, expected_identity=identity)
+                        report['watcher_adoption'] = dict(pid=pid, identity=identity,
+                            argv_root_verified=True)
+                    else:
+                        report.update(verdict='FAILED_PACKET',
+                            cleanup_error='auto-started watcher identity/root could not be qualified')
+                except (OSError, KeyError, TypeError, ValueError) as error:
+                    report.update(verdict='FAILED_PACKET',
+                        cleanup_error='auto-started watcher cleanup: ' + type(error).__name__)
         groups = (
             [report["watcher_restart"]["old_pid"]]
             if report.get("watcher_restart")
