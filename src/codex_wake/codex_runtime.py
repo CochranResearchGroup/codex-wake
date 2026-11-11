@@ -83,7 +83,11 @@ class CodexRuntimeAdapter:
         if target.get('startup_policy') == 'active_tab':
             from .sessions import observe
             try:
-                snapshot = observe(endpoint=target['endpoint'], timeout=5)
+                endpoint = target['endpoint']
+                if endpoint == 'unix://':
+                    from .shared_app_server import locate_shared_endpoint
+                    endpoint = locate_shared_endpoint(codex_cmd=target['codex_cmd'], timeout=5)
+                snapshot = observe(endpoint=endpoint, timeout=5)
                 matches = [row for row in snapshot['sessions'] if row.get('thread_id') == recipient.session_id]
                 active = (snapshot.get('complete') and len(matches) == 1
                           and matches[0].get('binding_status') == 'metadata_matched'

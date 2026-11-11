@@ -9082,3 +9082,48 @@ Memory disposition forbidden by explicit-request boundary; no Graphiti write.
 PR565 merged c9f220d8,0.22.0.dev6 deployed. Shared stable comparisons remove title/cwd/foreground-command churn from ordering, transfer, undo and populated deletion fences; meaningful identity/placement guards remain. Review found one P2 CLI admission mismatch, corrected with red/green proof.148installed checks, nine WSL public workflows,three dev5-created legacy cases PASS. All316package members equal merged source.100tab idle0.80%/active4.51%onecore,peak84MB,p951.03s,120/120events,cleanup0. Exact receipts: docs/dev/evidence/issue0563/.
 
 Working-host readback44tabs/layout/baseline unchanged,28native processes,10protectedfiles andstock preserved; freshSlate monitor runsnewprefix withoutfailures. Native control server remains ondev3; existing stdio MCP clients need reconnect fornewpackage. Windows native not rerun; saved-group transfer semantics unchanged. HostedCIzero. Originaldirtycheckout preserved. Memoryforbidden under explicit-request boundary; non-write receipt outsideGit.
+
+## Native active-tab service-context diagnosis | 2026-11-11
+
+[Plan0220](docs/dev/plans/0220-2026-11-11-native-active-tab-executable.md) owns the
+bounded lane from installed dev7 source7af9b29. Real read-only probe passes
+interactively and fails under systemd with active_attachment_unavailable, zero
+submissions. Adding only the operator-local executable directory to PATH makes
+it pass. A public native factory→session observer regression fails before the
+source fix; two negative/control cases pass. Fix resolves the existing wake's
+endpoint with its pinned executable before attachment inventory. All3 regressions
+and the original service-context source-candidate probe pass. Working services and
+production wake records are unchanged; broader related tests follow.
+
+Final bounded diagnosis:233 related tests, pinned lint, compilation, policy wiring
+and diff checks pass. The source/packaged wheel recognize the original exact
+attachment under the same service environment where installed code fails, with
+zero submissions. Existing control tests confirm effects-gate cancellation refusal
+and release behavior. No debugging instrumentation remains in product source.
+[Diagnosis note0220](docs/dev/notes/0220-2026-11-11-native-active-tab-path-diagnosis.md)
+records RED/GREEN, minimisation, ranked hypotheses and limits. Plan0220 is CLOSED
+for source diagnosis; one content-bound local wheel is staged outside Git. Source
+is uncommitted; working package/services remain unchanged. Real automatic delivery
+requires separately authorized adoption/acceptance. No hosted CI or remote issue
+mutation was used in this diagnosis. Retain the dedicated checkout for review.
+
+Operator approved runtime adoption and one automatic continuation. Isolated real
+UID1017 candidate/rollback/reselect checks and3 regressions pass. The immutable
+candidate prefix is selected by all9 managed launchers and the shared supervisor;
+14 enabled roots were admission-held only while polls drained, then their exact
+registry bytes were restored. Old supervisor exited; new children use candidate;
+no automatic restarts. Working installed read-only probe passes. One exact-self
+file wake is armed with ready monitor, original key and fixed expiry. Plan0220 is
+OPEN for this explicitly approved acceptance extension; actual automatic delivery
+remains pending. No further Slack test, credential use or shared native restart.
+
+
+Final installed acceptance: the completion marker triggered the exact registered
+wake and resumed this same thread automatically after idle. Native submission
+marker matches the retained record, with exactly1attempt on existing_tab and
+accepted queue evidence. Supervisor remains active on the candidate, zero
+restarts. Independent native acknowledgment/execution fields remain not_observed;
+no synthetic protocol receipt was inserted. Private verification preserves this
+boundary. Plan0220 CLOSED for approved source/installation/one-continuation scope.
+Source remains uncommitted/unpublished; old package, rollback and source checkout
+are retained. No extra wake, Slack message or credential operation occurred.
