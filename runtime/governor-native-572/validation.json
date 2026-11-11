@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "issue": 572,
+  "native_source_commit": "2abbe0fa44b6bfb5ae78c7ad3fda67bc70278c88",
+  "retained_patch_checks": {
+    "sha256": "PASS",
+    "all_file_hashes": "PASS",
+    "apply_against_exact_native_base": "PASS"
+  },
+  "rust_check": {
+    "status": "RUNNING",
+    "job_dir": "/home/ecochran76/.local/state/codex-wake/governor-native-572/check/job-20261111T153921Z-3aa995010241"
+  },
+  "focused_tests": {
+    "status": "NOT_RUN",
+    "selection": [
+      "wake_governor"
+    ]
+  },
+  "immutable_package": {
+    "status": "NOT_BUILT"
+  },
+  "installed_disposable_journey": {
+    "status": "NOT_RUN"
+  },
+  "hosted_ci": "skipped per no-paid-CI policy",
+  "memory_disposition": {
+    "disposition": "forbidden",
+    "reason": "Plan0220 prohibits memory writes without explicit user request"
+  }
+}

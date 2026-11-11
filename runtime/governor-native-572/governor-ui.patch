@@ -1,0 +1,969 @@
+diff --git a/codex-rs/tui/src/app/event_dispatch.rs b/codex-rs/tui/src/app/event_dispatch.rs
+index ba6e3f8af0..3531ece872 100644
+--- a/codex-rs/tui/src/app/event_dispatch.rs
++++ b/codex-rs/tui/src/app/event_dispatch.rs
+@@ -59,7 +59,10 @@ impl App {
+         if self.reconnect.offline
+             && !matches!(
+                 &event,
+-                AppEvent::OpenDaemonMenu
++                AppEvent::WakeResult { .. }
++                    | AppEvent::WakeCommand { .. }
++                    | AppEvent::WakeSelectTarget { .. }
++                    | AppEvent::OpenDaemonMenu
+                     | AppEvent::OpenWarnings
+                     | AppEvent::StatusLineSetup { .. }
+                     | AppEvent::StatusLineSetupCancelled
+@@ -170,6 +173,17 @@ impl App {
+             event => (event, None),
+         };
+         match event {
++            AppEvent::WakeSelectTarget { thread_id, selected } => {
++                if self.chat_widget.thread_id() == Some(thread_id) { self.chat_widget.select_wake_target(selected); }
++            }
++            AppEvent::WakeCommand { thread_id, arguments } => {
++                if self.chat_widget.thread_id() == Some(thread_id) {
++                    self.chat_widget.handle_wake_command(&arguments);
++                }
++            }
++            AppEvent::WakeResult { thread_id, result, operation } => {
++                self.chat_widget.apply_wake_result(thread_id, result, operation);
++            }
+             AppEvent::OpenDaemonMenu => self.open_daemon_menu(),
+             AppEvent::ConfirmDaemonRestart => self.confirm_daemon_restart(),
+             AppEvent::RunDaemonRestart => {
+diff --git a/codex-rs/tui/src/app/reconnect.rs b/codex-rs/tui/src/app/reconnect.rs
+index a998f6c511..8de3c7ed60 100644
+--- a/codex-rs/tui/src/app/reconnect.rs
++++ b/codex-rs/tui/src/app/reconnect.rs
+@@ -325,6 +325,9 @@ impl App {
+                 &self.app_server_target,
+                 app_server.server_version(),
+             );
++        if self.chat_widget.thread_id().is_some() {
++            self.chat_widget.start_wake_governor_poll();
++        }
+         self.workspace_command_runner = Some(Arc::new(AppServerWorkspaceCommandRunner::new(
+             app_server.request_handle(),
+         )));
+diff --git a/codex-rs/tui/src/app_event.rs b/codex-rs/tui/src/app_event.rs
+index 9c848858c6..e50434c164 100644
+--- a/codex-rs/tui/src/app_event.rs
++++ b/codex-rs/tui/src/app_event.rs
+@@ -296,6 +296,19 @@ pub(crate) struct AgentPickerThreadRefresh {
+ #[allow(clippy::large_enum_variant)]
+ #[derive(Debug, IntoStaticStr)]
+ pub(crate) enum AppEvent {
++    WakeSelectTarget {
++        thread_id: ThreadId,
++        selected: ThreadId,
++    },
++    WakeCommand {
++        thread_id: ThreadId,
++        arguments: String,
++    },
++    WakeResult {
++        thread_id: ThreadId,
++        result: Result<serde_json::Value, String>,
++        operation: bool,
++    },
+     AccountEmailLoaded {
+         request_id: uuid::Uuid,
+         email: Option<String>,
+diff --git a/codex-rs/tui/src/chatwidget.rs b/codex-rs/tui/src/chatwidget.rs
+index d2962e8001..e02d4ccfd4 100644
+--- a/codex-rs/tui/src/chatwidget.rs
++++ b/codex-rs/tui/src/chatwidget.rs
+@@ -278,6 +278,7 @@ use self::goal_status::GoalStatusState;
+ #[cfg(test)]
+ use self::goal_status::goal_status_indicator_from_app_goal;
+ mod goal_menu;
++pub(crate) mod wake_governor;
+ mod ide_context;
+ use self::ide_context::IdeContextState;
+ mod input_queue;
+@@ -682,6 +683,7 @@ pub(crate) struct ChatWidget {
+     #[cfg(test)]
+     pet_image_support_override: Option<crate::pets::PetImageSupport>,
+     thread_id: Option<ThreadId>,
++    wake_governor: wake_governor::GovernorUi,
+     thread_name: Option<String>,
+     thread_rename_block_message: Option<String>,
+     active_side_conversation: bool,
+diff --git a/codex-rs/tui/src/chatwidget/constructor.rs b/codex-rs/tui/src/chatwidget/constructor.rs
+index 6e405d201e..50c140cd16 100644
+--- a/codex-rs/tui/src/chatwidget/constructor.rs
++++ b/codex-rs/tui/src/chatwidget/constructor.rs
+@@ -237,6 +237,7 @@ impl ChatWidget {
+             #[cfg(test)]
+             pet_image_support_override: None,
+             thread_id: None,
++            wake_governor: Default::default(),
+             thread_name: None,
+             thread_rename_block_message: None,
+             active_side_conversation: false,
+diff --git a/codex-rs/tui/src/chatwidget/rendering.rs b/codex-rs/tui/src/chatwidget/rendering.rs
+index 8ab45414e5..b37130ab9a 100644
+--- a/codex-rs/tui/src/chatwidget/rendering.rs
++++ b/codex-rs/tui/src/chatwidget/rendering.rs
+@@ -289,7 +289,13 @@ impl ChatWidget {
+             options.textarea_right_reserve = right_reserve;
+             options.separate_status_line = options.command_popup_placement
+                 != crate::bottom_pane::CommandPopupPlacement::AboveComposer;
+-            let bottom_pane = self.bottom_pane.backdrop_with_options(options);
++            let mut governor_column = FlexRenderable::new();
++            governor_column.push(
++                0,
++                RenderableItem::Owned(Box::new(Paragraph::new(self.wake_governor_lines()))),
++            );
++            governor_column.push(0, self.bottom_pane.backdrop_with_options(options));
++            let bottom_pane = RenderableItem::Owned(Box::new(governor_column));
+             let above_composer = if self.quick_dial_menu {
+                 RenderableItem::Owned(Box::new(self.quick_dial_hud()))
+             } else if let Some(pending) = &self.safety_recourse
+diff --git a/codex-rs/tui/src/chatwidget/rendering_tests.rs b/codex-rs/tui/src/chatwidget/rendering_tests.rs
+index 28108e8952..d7e99c8101 100644
+--- a/codex-rs/tui/src/chatwidget/rendering_tests.rs
++++ b/codex-rs/tui/src/chatwidget/rendering_tests.rs
+@@ -644,3 +644,22 @@ async fn provider_error_preserves_draft_and_survives_thread_navigation() {
+     }
+     insta::assert_snapshot!("provider_errors", snapshots.join("\n\n"));
+ }
++
++// #572: real shared composer rendering must keep governor status visible without inference.
++#[tokio::test]
++async fn wake_governor_strip_is_persistent_and_unknown_usage_is_explicit() {
++    let (mut widget, _sender, _events, _operations) = make_chatwidget_manual_with_sender().await;
++    let thread_id = ThreadId::new();
++    widget.thread_id = Some(thread_id);
++    widget.apply_wake_result(thread_id, Ok(serde_json::json!({
++        "schema_version":1,"state":"enforced","scope":{"thread_id":thread_id.to_string(),"kind":"task"},
++        "usage":{"used_tokens":25,"elapsed_seconds":12},"limits":{"token_limit":100},"deadline":"14:30 UTC","watcher":{"fresh":true},"revision":1
++    })), false);
++    let frame = render_frame(&widget, 120);
++    assert!(contains_text(&frame, "Governor · enforced"));
++    assert!(contains_text(&frame, "75 left"));
++    widget.apply_wake_result(thread_id, Err("watcher unavailable".into()), false);
++    let frame = render_frame(&widget, 120);
++    assert!(contains_text(&frame, "disconnected · accounting unknown"));
++    assert!(!contains_text(&frame, "75 left"));
++}
+diff --git a/codex-rs/tui/src/chatwidget/session_flow.rs b/codex-rs/tui/src/chatwidget/session_flow.rs
+index a1ff412d4d..d219d1c64c 100644
+--- a/codex-rs/tui/src/chatwidget/session_flow.rs
++++ b/codex-rs/tui/src/chatwidget/session_flow.rs
+@@ -93,6 +93,7 @@ impl ChatWidget {
+         let connector_scope_changed = previous_thread_id != Some(session.thread_id)
+             || self.config.cwd.as_path() != session.cwd.as_path();
+         self.thread_id = Some(session.thread_id);
++        self.start_wake_governor_poll();
+         self.daybreak_enabled = self.config.features.enabled(Feature::CliDaybreak)
+             && session.daybreak_enabled
+             && !matches!(display, SessionConfiguredDisplay::SideConversation);
+diff --git a/codex-rs/tui/src/chatwidget/slash_dispatch.rs b/codex-rs/tui/src/chatwidget/slash_dispatch.rs
+index 44f3c879e2..a0ee7662b9 100644
+--- a/codex-rs/tui/src/chatwidget/slash_dispatch.rs
++++ b/codex-rs/tui/src/chatwidget/slash_dispatch.rs
+@@ -188,6 +188,7 @@ impl ChatWidget {
+         }
+ 
+         match cmd {
++            SlashCommand::Wake => self.handle_wake_command(""),
+             SlashCommand::Daybreak => {
+                 if !self.config.features.enabled(Feature::CliDaybreak) {
+                     return;
+@@ -800,6 +801,7 @@ impl ChatWidget {
+             return;
+         }
+         match cmd {
++            SlashCommand::Wake => self.handle_wake_command(trimmed),
+             SlashCommand::Model if !trimmed.is_empty() => {
+                 self.handle_model_command_args(trimmed);
+                 self.app_event_tx.send(AppEvent::SettingsSelectionClosed);
+@@ -1335,6 +1337,7 @@ impl ChatWidget {
+             | SlashCommand::Presets
+             | SlashCommand::Plan
+             | SlashCommand::Goal
++            | SlashCommand::Wake
+             | SlashCommand::Side
+             | SlashCommand::Btw
+             | SlashCommand::Keymap
+diff --git a/codex-rs/tui/src/chatwidget/wake_governor.rs b/codex-rs/tui/src/chatwidget/wake_governor.rs
+new file mode 100644
+index 0000000000..6c10a0e1d8
+--- /dev/null
++++ b/codex-rs/tui/src/chatwidget/wake_governor.rs
+@@ -0,0 +1,713 @@
++//! Native presentation only. Wake's Python owner remains the accounting and effect authority.
++use super::*;
++use serde_json::Value;
++
++#[derive(Default)]
++pub(super) struct GovernorUi {
++    snapshot: Option<Value>,
++    inspected: Option<Value>,
++    error: Option<String>,
++    selected: Option<String>,
++    poll: Option<tokio::task::JoinHandle<()>>,
++    notice: Option<String>,
++}
++impl Drop for GovernorUi {
++    fn drop(&mut self) {
++        if let Some(poll) = self.poll.take() {
++            poll.abort();
++        }
++    }
++}
++
++const USAGE: &str = "/wake governor [status|activate|extend|reset|disable|resume|advisory] [--token-limit N --time-limit-seconds N | --add-tokens N --add-seconds N] [--resume]";
++const VERBS: &[&str] = &[
++    "status", "activate", "extend", "reset", "disable", "resume", "advisory",
++];
++
++/// Accept only the published governor grammar. Never invoke a shell or forward model text.
++fn governor_argv(
++    input: &str,
++    selector: &str,
++    endpoint: &str,
++    revision: Option<u64>,
++) -> Result<Vec<String>, String> {
++    let words: Vec<_> = input.split_whitespace().collect();
++    let verb = words.first().copied().unwrap_or("status");
++    if !VERBS.contains(&verb) {
++        return Err(USAGE.into());
++    }
++    let mut argv = vec![
++        "governor".into(),
++        verb.into(),
++        selector.into(),
++        "--json".into(),
++        "--endpoint".into(),
++        endpoint.into(),
++    ];
++    let mut pos = 1;
++    let mut seen = std::collections::HashSet::new();
++    while pos < words.len() {
++        let flag = words[pos];
++        if !seen.insert(flag) {
++            return Err("Duplicate governor argument".into());
++        }
++        if flag == "--resume" && matches!(verb, "extend" | "reset") {
++            argv.push(flag.into());
++            pos += 1;
++            continue;
++        }
++        let permitted = match verb {
++            "activate" | "reset" => matches!(flag, "--token-limit" | "--time-limit-seconds"),
++            "extend" => matches!(flag, "--add-tokens" | "--add-seconds"),
++            _ => false,
++        };
++        if !permitted
++            || pos + 1 >= words.len()
++            || words[pos + 1]
++                .parse::<u64>()
++                .ok()
++                .filter(|v| *v > 0)
++                .is_none()
++        {
++            return Err(USAGE.into());
++        }
++        argv.extend([flag.into(), words[pos + 1].into()]);
++        pos += 2;
++    }
++    if verb != "status" {
++        argv.extend(["--request-id".into(), uuid::Uuid::new_v4().to_string()]);
++        if let Some(revision) = revision {
++            argv.extend(["--expected-revision".into(), revision.to_string()]);
++        }
++    }
++    Ok(argv)
++}
++
++async fn invoke(argv: Vec<String>, thread_id: ThreadId) -> Result<Value, String> {
++    let mut command = tokio::process::Command::new("codex-wake");
++    command
++        .args(argv)
++        .env("CODEX_THREAD_ID", thread_id.to_string())
++        .kill_on_drop(true);
++    let output = tokio::time::timeout(Duration::from_secs(15), command.output())
++        .await
++        .map_err(|_| {
++            "Wake request timed out; reconcile status before retrying an action".to_string()
++        })?
++        .map_err(|error| format!("Wake disconnected: {error}"))?;
++    let value: Value = serde_json::from_slice(&output.stdout)
++        .map_err(|_| "Wake returned no valid JSON; enforcement/accounting unknown".to_string())?;
++    if !output.status.success() {
++        return Err(format!("Wake refused operation: {value}"));
++    }
++    Ok(value)
++}
++
++fn text(value: &Value, key: &str) -> String {
++    value
++        .get(key)
++        .filter(|v| !v.is_null())
++        .map(|v| {
++            v.as_str()
++                .map(str::to_owned)
++                .unwrap_or_else(|| v.to_string())
++        })
++        .unwrap_or_else(|| "unknown".into())
++}
++fn meter(used: Option<u64>, limit: Option<u64>) -> String {
++    match (used, limit) {
++        (Some(used), Some(limit)) if limit > 0 => {
++            let filled = ((used as u128 * 8 / limit as u128).min(8)) as usize;
++            format!(
++                "[{}{}] {used}/{limit} · {} left",
++                "━".repeat(filled),
++                "·".repeat(8 - filled),
++                limit.saturating_sub(used)
++            )
++        }
++        (Some(used), _) => format!("{used} used · limit unknown"),
++        _ => "usage unknown".into(),
++    }
++}
++
++impl ChatWidget {
++    fn wake_selector(&self) -> Option<String> {
++        self.wake_governor
++            .selected
++            .clone()
++            .or_else(|| self.thread_id.map(|id| format!("thread:{id}")))
++    }
++    fn wake_endpoint(&self) -> Result<String, String> {
++        match self.remote_connection.as_ref() {
++            Some(remote) if remote.address.starts_with("unix://") => Ok(remote.address.clone()),
++            Some(_) => {
++                Err("Governor unsupported for this remote transport; isolation unqualified".into())
++            }
++            None => Err("Governor requires a qualified local Unix daemon connection".into()),
++        }
++    }
++    pub(crate) fn start_wake_governor_poll(&mut self) {
++        if let Some(poll) = self.wake_governor.poll.take() {
++            poll.abort();
++        }
++        self.wake_governor.snapshot = None;
++        self.wake_governor.error = None;
++        self.wake_governor.selected = None;
++        let Some(thread_id) = self.thread_id else {
++            return;
++        };
++        let endpoint = match self.wake_endpoint() {
++            Ok(endpoint) => endpoint,
++            Err(error) => {
++                self.wake_governor.error = Some(error);
++                return;
++            }
++        };
++        let tx = self.app_event_tx.clone();
++        self.wake_governor.poll = Some(tokio::spawn(async move {
++            loop {
++                let argv = governor_argv("status", &format!("thread:{thread_id}"), &endpoint, None)
++                    .expect("fixed status grammar");
++                tx.send(AppEvent::WakeResult {
++                    thread_id,
++                    result: invoke(argv, thread_id).await,
++                    operation: false,
++                });
++                tokio::time::sleep(Duration::from_secs(3)).await;
++            }
++        }));
++    }
++    pub(crate) fn handle_wake_command(&mut self, arguments: &str) {
++        let Some(thread_id) = self.thread_id else {
++            self.add_error_message("Wake requires a current thread; no target was inferred".into());
++            return;
++        };
++        let input = arguments.trim();
++        if input.is_empty() || input == "governor" {
++            self.show_wake_menu();
++            return;
++        }
++        if let Some(verb) = input.strip_prefix("form ") {
++            self.show_wake_form(verb);
++            return;
++        }
++        let catalog = match input {
++            "list" => Some(vec!["list", "--json"]),
++            "tabs list" => Some(vec!["tabs", "list", "--json"]),
++            "tabs sessions list" => Some(vec!["tabs", "sessions", "list", "--json"]),
++            "accounts list" => Some(vec!["accounts", "list", "--json"]),
++            _ => None,
++        };
++        if let Some(argv) = catalog {
++            self.run_wake_catalog(argv.into_iter().map(str::to_owned).collect(), thread_id);
++            return;
++        }
++        if input == "targets" {
++            self.run_wake_catalog(
++                vec![
++                    "control".into(),
++                    "list".into(),
++                    "--json".into(),
++                    "--endpoint".into(),
++                    self.wake_endpoint().unwrap_or_else(|_| "unix://".into()),
++                ],
++                thread_id,
++            );
++            return;
++        }
++        if let Some(target) = input.strip_prefix("select ") {
++            // Only picker-generated qualified selectors enter here; direct text cannot select an arbitrary target.
++            self.add_error_message(format!(
++                "Use /wake targets to select a qualified target ({target})"
++            ));
++            return;
++        }
++        let input = input.strip_prefix("governor ").unwrap_or(input);
++        let endpoint = match self.wake_endpoint() {
++            Ok(value) => value,
++            Err(error) => {
++                self.add_error_message(error);
++                return;
++            }
++        };
++        let selector = self.wake_selector().expect("thread exists");
++        let revision = self
++            .wake_governor
++            .inspected
++            .as_ref()
++            .or(self.wake_governor.snapshot.as_ref())
++            .filter(|v| {
++                v.pointer("/scope/thread_id")
++                    .and_then(Value::as_str)
++                    .map(|id| format!("thread:{id}"))
++                    == Some(selector.clone())
++            })
++            .and_then(|v| v.get("revision"))
++            .and_then(Value::as_u64);
++        match governor_argv(input, &selector, &endpoint, revision) {
++            Ok(argv) => {
++                let tx = self.app_event_tx.clone();
++                tokio::spawn(async move {
++                    tx.send(AppEvent::WakeResult {
++                        thread_id,
++                        result: invoke(argv, thread_id).await,
++                        operation: true,
++                    });
++                });
++            }
++            Err(error) => self.add_error_message(error),
++        }
++    }
++    fn run_wake_catalog(&self, argv: Vec<String>, thread_id: ThreadId) {
++        let tx = self.app_event_tx.clone();
++        tokio::spawn(async move {
++            tx.send(AppEvent::WakeResult {
++                thread_id,
++                result: invoke(argv, thread_id).await,
++                operation: true,
++            });
++        });
++    }
++    pub(crate) fn apply_wake_result(
++        &mut self,
++        thread_id: ThreadId,
++        result: Result<Value, String>,
++        operation: bool,
++    ) {
++        if self.thread_id != Some(thread_id) {
++            return;
++        }
++        match result {
++            Ok(value) => {
++                if value.get("sessions").is_some() || value.pointer("/result/sessions").is_some() {
++                    self.show_wake_targets(&value);
++                    return;
++                }
++                if value.get("state").is_none() {
++                    if !operation {
++                        self.wake_governor.error =
++                            Some("Wake status schema unavailable; accounting unknown".into());
++                        self.request_redraw();
++                        return;
++                    }
++                    if operation {
++                        self.add_plain_history_lines(vec![Line::from(format!("Wake: {value}"))]);
++                    }
++                    return;
++                }
++                if !operation
++                    && self
++                        .wake_governor
++                        .snapshot
++                        .as_ref()
++                        .is_some_and(|previous| {
++                            previous.pointer("/scope/allocation_id")
++                                == value.pointer("/scope/allocation_id")
++                                && previous
++                                    .get("revision")
++                                    .and_then(Value::as_u64)
++                                    .zip(value.get("revision").and_then(Value::as_u64))
++                                    .is_some_and(|(old, new)| old > new)
++                        })
++                {
++                    return;
++                }
++                let state = text(&value, "state");
++                let notice = matches!(state.as_str(),"limit_reached"|"disconnected").then(|| format!("Governor {state}: {}. /wake governor offers extend, reset, disable, explicit resume and checkpoint details.",text(&value,"reason")));
++                if notice != self.wake_governor.notice {
++                    if let Some(notice) = &notice {
++                        self.add_info_message(notice.clone(), None);
++                    }
++                    self.wake_governor.notice = notice;
++                }
++                self.wake_governor.error = None;
++                if operation {
++                    self.add_info_message(
++                        format!(
++                            "Wake {state} · scope {} · revision {}",
++                            text(&value, "scope"),
++                            text(&value, "revision")
++                        ),
++                        None,
++                    );
++                }
++                if operation {
++                    self.wake_governor.inspected = Some(value.clone());
++                    self.show_wake_details(&value);
++                }
++                if !operation || self.wake_governor.selected.is_none() {
++                    self.wake_governor.snapshot = Some(value);
++                }
++            }
++            Err(error) => {
++                if operation {
++                    self.add_error_message(error.clone());
++                }
++                if self.wake_governor.error.as_ref() != Some(&error) {
++                    self.add_info_message(format!("Governor disconnected · accounting unknown: {error}. /wake governor to inspect or repair; no advisory fallback."),None);
++                }
++                self.wake_governor.error = Some(error);
++            }
++        }
++        self.request_redraw();
++    }
++    pub(super) fn wake_governor_lines(&self) -> Vec<Line<'static>> {
++        if let Some(error) = &self.wake_governor.error {
++            return vec![Line::from(
++                format!(" Governor · disconnected · accounting unknown · {error} · /wake").dim(),
++            )];
++        }
++        let Some(value) = &self.wake_governor.snapshot else {
++            return vec![Line::from(
++                " Governor · connecting · usage unknown · /wake".dim(),
++            )];
++        };
++        let usage = &value["usage"];
++        let limits = &value["limits"];
++        let scope = &value["scope"];
++        let id = scope
++            .get("thread_id")
++            .and_then(Value::as_str)
++            .unwrap_or("unknown");
++        vec![
++            Line::from(
++                format!(
++                    " Governor · {} · {} {} · /wake governor",
++                    text(value, "state"),
++                    text(scope, "kind"),
++                    id.chars().take(8).collect::<String>()
++                )
++                .dim(),
++            ),
++            Line::from(
++                format!(
++                    " Tokens {} · elapsed {}s · deadline {}",
++                    meter(
++                        usage.get("used_tokens").and_then(Value::as_u64),
++                        limits.get("token_limit").and_then(Value::as_u64)
++                    ),
++                    text(usage, "elapsed_seconds"),
++                    text(value, "deadline")
++                )
++                .dim(),
++            ),
++        ]
++    }
++    fn show_wake_details(&mut self, value: &Value) {
++        self.add_plain_history_lines(vec![
++            Line::from(format!(
++                "Governor {} · scope {}",
++                text(value, "state"),
++                text(value, "scope")
++            )),
++            Line::from(format!(
++                "Tokens {} used · {} remaining · lifetime {} · elapsed {}s · deadline {}",
++                text(&value["usage"], "used_tokens"),
++                text(&value["usage"], "remaining_tokens"),
++                text(&value["usage"], "lifetime_used_tokens"),
++                text(&value["usage"], "elapsed_seconds"),
++                text(value, "deadline")
++            )),
++            Line::from(format!(
++                "Limits {} · accounting {} · watcher {} · reason {}",
++                text(value, "limits"),
++                text(&value["usage"], "accounting"),
++                text(value, "watcher"),
++                text(value, "reason")
++            )),
++            Line::from(format!(
++                "Checkpoint {} · actions {} · /wake governor",
++                text(value, "checkpoint"),
++                text(value, "actions")
++            )),
++        ]);
++    }
++    fn show_wake_menu(&mut self) {
++        let Some(thread_id) = self.thread_id else {
++            return;
++        };
++        let mut items = vec![SelectionItem {
++            name: "Current task".into(),
++            description: Some(format!("thread:{thread_id}")),
++            dismiss_on_select: true,
++            actions: vec![Box::new(move |tx| {
++                tx.send(AppEvent::WakeSelectTarget {
++                    thread_id,
++                    selected: thread_id,
++                })
++            })],
++            ..Default::default()
++        }];
++        for (name, command, description) in [
++            (
++                "Status / details / checkpoint",
++                "governor status",
++                "Read current scope, meters, watcher and retained checkpoint; never activates",
++            ),
++            (
++                "Activate limits",
++                "form activate",
++                "Choose token and time limits",
++            ),
++            (
++                "Extend allowance",
++                "form extend",
++                "Preserve usage; resume only explicitly",
++            ),
++            (
++                "Reset window",
++                "form reset",
++                "New budget generation; lifetime history retained",
++            ),
++            (
++                "Disable enforcement",
++                "governor disable",
++                "Persist disablement; leave stopped work paused",
++            ),
++            (
++                "Resume explicitly",
++                "governor resume",
++                "Continue only after owner validates available allowance",
++            ),
++            (
++                "Choose advisory",
++                "governor advisory",
++                "Explicitly operate without enforcement",
++            ),
++            (
++                "Find qualified target",
++                "targets",
++                "Search owned conversation inventory",
++            ),
++        ] {
++            let command = command.to_string();
++            items.push(SelectionItem {
++                name: name.into(),
++                description: Some(description.into()),
++                dismiss_on_select: true,
++                actions: vec![Box::new(move |tx| {
++                    tx.send(AppEvent::WakeCommand {
++                        thread_id,
++                        arguments: command.clone(),
++                    })
++                })],
++                ..Default::default()
++            });
++        }
++        for (name, argv) in [
++            ("List wakes", vec!["list", "--json"]),
++            ("List tabs", vec!["tabs", "list", "--json"]),
++            (
++                "List tab sessions",
++                vec!["tabs", "sessions", "list", "--json"],
++            ),
++            ("List accounts", vec!["accounts", "list", "--json"]),
++        ] {
++            let tx = self.app_event_tx.clone();
++            let argv: Vec<String> = argv.into_iter().map(str::to_owned).collect();
++            items.push(SelectionItem {
++                name: name.into(),
++                description: Some("Existing qualified read-only Wake operation".into()),
++                dismiss_on_select: true,
++                actions: vec![Box::new(move |_| {
++                    let tx = tx.clone();
++                    let argv = argv.clone();
++                    tokio::spawn(async move {
++                        tx.send(AppEvent::WakeResult {
++                            thread_id,
++                            result: invoke(argv, thread_id).await,
++                            operation: true,
++                        });
++                    });
++                })],
++                ..Default::default()
++            });
++        }
++        items.push(SelectionItem {name:"Messaging".into(),description:Some("Requires a qualified messaging actor binding; current thread UUID is not an actor identity".into()),is_disabled:true,disabled_reason:Some("No qualified messaging actor binding in this native context".into()),..Default::default()});
++        let details = self
++            .wake_governor
++            .inspected
++            .as_ref()
++            .filter(|v| {
++                v.pointer("/scope/thread_id")
++                    .and_then(Value::as_str)
++                    .map(|id| format!("thread:{id}"))
++                    == self.wake_selector()
++            })
++            .or(self.wake_governor.snapshot.as_ref())
++            .map(|v| {
++                format!(
++                    "State {} · usage {} · limits {} · deadline {} · watcher {} · reason {}",
++                    text(v, "state"),
++                    text(v, "usage"),
++                    text(v, "limits"),
++                    text(v, "deadline"),
++                    text(v, "watcher"),
++                    text(v, "reason")
++                )
++            })
++            .unwrap_or_else(|| {
++                self.wake_governor
++                    .error
++                    .clone()
++                    .unwrap_or_else(|| "Status loading; usage unknown".into())
++            });
++        self.show_selection_view(SelectionViewParams {
++            title: Some("Wake · Governor".into()),
++            subtitle: Some(format!(
++                "Selected {} · {details}",
++                self.wake_selector().unwrap_or_default()
++            )),
++            items,
++            is_searchable: true,
++            ..SelectionViewParams::picker()
++        });
++    }
++    fn show_wake_form(&mut self, verb: &str) {
++        if !matches!(verb, "activate" | "extend" | "reset") {
++            return;
++        }
++        let Some(thread_id) = self.thread_id else {
++            return;
++        };
++        let tx = self.app_event_tx.clone();
++        let verb = verb.to_string();
++        let initial = if verb == "extend" {
++            "--add-tokens 10000 --add-seconds 1800"
++        } else {
++            "--token-limit 10000 --time-limit-seconds 1800"
++        };
++        self.bottom_pane.show_text_prompt(CustomPromptView::new(
++            format!("Governor {verb}"),
++            "Edit limits; optional --resume for extend/reset only".into(),
++            initial.into(),
++            self.wake_selector(),
++            Box::new(move |arguments| {
++                tx.send(AppEvent::WakeCommand {
++                    thread_id,
++                    arguments: format!("governor {verb} {arguments}"),
++                });
++            }),
++        ));
++    }
++    pub(crate) fn select_wake_target(&mut self, selected: ThreadId) {
++        self.wake_governor.selected = Some(format!("thread:{selected}"));
++        self.wake_governor.inspected = None;
++        self.handle_wake_command("governor status");
++        self.show_wake_menu();
++    }
++    fn show_wake_targets(&mut self, value: &Value) {
++        let Some(thread_id) = self.thread_id else {
++            return;
++        };
++        let rows = value
++            .get("sessions")
++            .or_else(|| value.pointer("/result/sessions"))
++            .and_then(Value::as_array);
++        let Some(rows) = rows else {
++            self.add_error_message("Wake target inventory unavailable".into());
++            return;
++        };
++        // Inventory owner qualifies these targets. Selection does not dispatch or grant additional authority.
++        let items = rows
++            .iter()
++            .filter_map(|row| {
++                if row.pointer("/target/provider").and_then(Value::as_str) != Some("codex")
++                    || row.get("endpoint").and_then(Value::as_str)
++                        != self.wake_endpoint().ok().as_deref()
++                {
++                    return None;
++                }
++                let id = row.get("thread_id")?.as_str()?;
++                let parsed = id.parse::<ThreadId>().ok()?;
++
++                Some(SelectionItem {
++                    name: format!(
++                        "{} · thread:{parsed}",
++                        row.get("title")
++                            .and_then(Value::as_str)
++                            .unwrap_or("Owned conversation")
++                    ),
++                    description: Some(format!(
++                        "Scope thread:{parsed} · read status before any action"
++                    )),
++                    dismiss_on_select: true,
++                    actions: vec![Box::new(move |tx| {
++                        tx.send(AppEvent::WakeSelectTarget {
++                            thread_id,
++                            selected: parsed,
++                        })
++                    })],
++                    ..Default::default()
++                })
++            })
++            .collect();
++        self.show_selection_view(SelectionViewParams {
++            title: Some("Wake · qualified targets".into()),
++            subtitle: Some(
++                "Select an exact owned conversation; current target remains visible".into(),
++            ),
++            items,
++            is_searchable: true,
++            ..SelectionViewParams::picker()
++        });
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn direct_governor_grammar_never_executes_shell_or_accepts_authority_fields() {
++        let args = governor_argv(
++            "extend --add-tokens 50 --resume",
++            "thread:explicit",
++            "unix:///tmp/daemon.sock",
++            Some(7),
++        )
++        .unwrap();
++        assert_eq!(
++            &args[..6],
++            [
++                "governor",
++                "extend",
++                "thread:explicit",
++                "--json",
++                "--endpoint",
++                "unix:///tmp/daemon.sock"
++            ]
++        );
++        assert!(
++            args.windows(2)
++                .any(|pair| pair == ["--expected-revision", "7"])
++        );
++        for bad in [
++            "disable --operator true",
++            "status ; touch /tmp/pwn",
++            "activate --endpoint unix:///other",
++            "activate --token-limit -1",
++            "disable --resume",
++            "extend --add-tokens 1 --add-tokens 2",
++        ] {
++            assert!(
++                governor_argv(bad, "thread:explicit", "unix://", None).is_err(),
++                "{bad}"
++            );
++        }
++    }
++    #[test]
++    fn unknown_accounting_is_never_zero_and_extension_remains_explicit() {
++        assert_eq!(meter(None, Some(100)), "usage unknown");
++        assert!(meter(Some(25), Some(100)).contains("75 left"));
++        assert!(
++            !governor_argv("extend --add-seconds 60", "thread:x", "unix://", None)
++                .unwrap()
++                .contains(&"--resume".into())
++        );
++        assert!(
++            crate::slash_command::built_in_slash_commands()
++                .iter()
++                .any(|(name, _)| *name == "wake")
++        );
++    }
++}
+diff --git a/codex-rs/tui/src/slash_command.rs b/codex-rs/tui/src/slash_command.rs
+index dfd05384f7..51c3282cb3 100644
+--- a/codex-rs/tui/src/slash_command.rs
++++ b/codex-rs/tui/src/slash_command.rs
+@@ -44,6 +44,7 @@ pub enum SlashCommand {
+     Plan,
+     Voice,
+     Goal,
++    Wake,
+     Agents,
+     Side,
+     Btw,
+@@ -140,6 +141,7 @@ impl SlashCommand {
+             }
+             SlashCommand::Plan => "switch to Plan mode",
+             SlashCommand::Voice => "start or stop voice; use /voice settings to choose a voice",
++            SlashCommand::Wake => "control Wake and task governor without a model turn",
+             SlashCommand::Goal => "set or view the goal for a long-running task",
+             SlashCommand::Agents => "open the agent command center",
+             SlashCommand::MultiAgents => "switch between this session's subagents",
+@@ -172,7 +174,8 @@ impl SlashCommand {
+     pub fn supports_inline_args(self) -> bool {
+         matches!(
+             self,
+-            SlashCommand::Review
++            SlashCommand::Wake
++                | SlashCommand::Review
+                 | SlashCommand::Model
+                 | SlashCommand::Permissions
+                 | SlashCommand::Title
+@@ -203,7 +206,8 @@ impl SlashCommand {
+     pub fn available_in_side_conversation(self) -> bool {
+         matches!(
+             self,
+-            SlashCommand::Copy
++            SlashCommand::Wake
++                | SlashCommand::Copy
+                 | SlashCommand::Agents
+                 | SlashCommand::Export
+                 | SlashCommand::Raw
+@@ -228,7 +232,8 @@ impl SlashCommand {
+     pub(crate) fn available_when_thread_unavailable(self) -> bool {
+         matches!(
+             self,
+-            SlashCommand::New
++            SlashCommand::Wake
++                | SlashCommand::New
+                 | SlashCommand::Clear
+                 | SlashCommand::Resume
+                 | SlashCommand::Agents
+@@ -270,7 +275,8 @@ impl SlashCommand {
+             | SlashCommand::Logout
+             | SlashCommand::MemoryDrop
+             | SlashCommand::MemoryUpdate => false,
+-            SlashCommand::Diff
++            SlashCommand::Wake
++            | SlashCommand::Diff
+             | SlashCommand::Archive
+             | SlashCommand::Resume
+             | SlashCommand::Model
