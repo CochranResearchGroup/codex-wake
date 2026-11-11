@@ -28,8 +28,9 @@ def preset_options(name,kind,label,state):
         parts=[]
         if badge:parts.append(f'#[fg={palette.get(key,foreground)}]{badge}')
         if cue:parts.append(f'#[fg={cue_color}]{cue}')
-        badges=' '.join(parts)
-        content='#I:'+(badges+' ' if badges else '')+f'#[fg={foreground}]#W'
+        badges=''.join(parts)
+        separator=' ' if badge and not cue else ''
+        content='#I:'+badges+separator+f'#[fg={foreground}]#W'
         result[prefix+'style']=style
         result[prefix+'format']=' '+('['+content+']' if selected else content)+' '
     return result

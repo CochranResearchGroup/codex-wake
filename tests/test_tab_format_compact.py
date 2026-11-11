@@ -12,7 +12,7 @@ class CompactFormatTests(unittest.TestCase):
         policy=dict(compact=True,show_stale=False,render_mode='plain')
         self.assertEqual(validate_policy(policy),policy)
         shown=project(resource,policy,now=105)
-        self.assertEqual(shown['options']['window-status-format'],' #I:CX+ * #W ')
+        self.assertEqual(shown['options']['window-status-format'],' #I:CX+*#W ')
         self.assertNotIn('very-long-profile',str(shown['options']))
         self.assertEqual(shown['options']['window-status-style'],'fg=default,bg=default')
         expired=expiring_options(shown['options'],observed_at=100,render_mode='plain',show_stale=False)
