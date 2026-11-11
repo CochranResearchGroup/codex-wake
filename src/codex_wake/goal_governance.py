@@ -19,7 +19,7 @@ def sync(receipt):
         with supervision._lock(path.parent, path.stem):
             supervision._private(path)
             source = json.loads(path.read_text())
-    for key in ("governor_enabled", "governor_revision", "governor_control", "request_accounting"):
+    for key in ("governor_enabled", "governor_revision", "governor_control", "governor_mode", "request_accounting"):
         if key in source:
             receipt[key] = source[key]
     return receipt.get("governor_enabled", True) is False
@@ -69,7 +69,7 @@ def native_operator(root, receipt, native_context, enabled):
 
 
 def change(
-    root, thread, *, enabled, principal=None, native_context=None, allocation_id=None
+    root, thread, *, enabled, principal=None, native_context=None, allocation_id=None, mode=None
 ):
     """Commit one scope switch under the same locks as every controller effect.
 
@@ -77,6 +77,9 @@ def change(
     ledger lock (the existing poll order), so pending polls either precede the
     durable switch or observe it before any effect. No native work is resumed.
     """
+    if mode not in (None, 'advisory') or mode == 'advisory' and enabled:
+        raise ValueError('invalid governor control mode')
+    selected_mode = 'enforced' if enabled else mode or 'disabled'
     if type(enabled) is not bool:
         raise ValueError("boolean governor state required")
     directory = supervision._directory(root)
@@ -139,7 +142,8 @@ def change(
                 authorize(root, "enforcement.disable", Principal(member, "operator"))
             authority = allocation if allocation is not None else first
             revision = authority.get("governor_revision", 0)
-            changed = authority.get("governor_enabled", True) != enabled
+            changed = (authority.get("governor_enabled", True) != enabled or
+                authority.get("governor_mode", "enforced" if authority.get("governor_enabled", True) else "disabled") != selected_mode)
             if changed:
                 revision += 1
                 control.update(
@@ -152,7 +156,7 @@ def change(
             else:
                 control = authority.get("governor_control", control)
             state = dict(
-                governor_enabled=enabled,
+                governor_enabled=enabled, governor_mode=selected_mode,
                 governor_revision=revision,
                 governor_control=control,
             )

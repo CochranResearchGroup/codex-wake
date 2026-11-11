@@ -253,7 +253,7 @@ def _save_request_accounting(path, receipt):
 
 def _allocation_admit(directory,receipt,old,*,commit=True):
     renewal=bool(old and old['allocation_id']!=receipt['allocation_id'])
-    anchor=None
+    anchor=receipt.get('reset_anchor')
     if renewal:
         if receipt['grant'].get('renews_allocation')!=old['allocation_id']:
             raise ValueError('changing allocation requires explicit host renewal of the prior allocation')
@@ -564,7 +564,7 @@ def diagnose(root,policy_path,caller_thread_id,allocation_id=None,*,permission_p
 
 def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
            checkpoint_token_percent=5,checkpoint_seconds=60,token_accounting=None,
-           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None,session_scope=False,prepare_only=False):
+           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None,session_scope=False,prepare_only=False,activation_baseline=False):
     from .permission_enforcement import principal_for,authorize,enrollment_action
     principal=principal_for(root,caller_thread_id,native_context=native_context,principal=permission_principal)
     name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
@@ -662,7 +662,7 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         receipt=dict(old) if same else dict(thread_id=caller_thread_id,generation=uuid4().hex,
             allocation_id=grant['allocation_id'],goal_created_at=created,used_tokens=0,
             started_upper=now,started_boottime=boottime,boot_id=boot_id_value(),
-            time_origin=now if old or created is None or allow_counter else created,effects={},checkpoint=None,
+            time_origin=now if old or created is None or allow_counter or activation_baseline else created,effects={},checkpoint=None,
             prior_allocation=old if old else None)
         receipt.update(time_fields)
         if session_scope and not old:
@@ -721,6 +721,15 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                     receipt['token_accounting']=basis
                 receipt.update(grant=grant,allocation_id=grant['allocation_id'],
                     continuation_source_thread_id=parent)
+        # A new ordinary window excludes qualified pre-activation charges while
+        # retaining lifetime evidence. Existing allocations/continuations keep
+        # their original owner boundary; activation cannot renew shared limits.
+        if activation_baseline and not old and not receipt.get('continuation_source_thread_id') and not allocation_path.exists():
+            if not session_scope or not fresh_usage or fresh_usage.get('state')!='qualified':
+                raise ValueError('activation baseline requires qualified session accounting')
+            receipt.update(reset_anchor=fresh_usage['anchor'],
+                lifetime_tokens_before_window=fresh_usage['used_tokens'],
+                activation_baseline=True)
         if grant.get('host_delegated'):_allocation_admit(directory,receipt,old,commit=not prepare_only)
         retained_allocation=not receipt.get('allocation_path') or Path(receipt['allocation_path']).exists()
         if retained_allocation and sync(receipt):
@@ -729,6 +738,8 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                 _save(path,receipt)
             return _public(receipt)
         observation=fresh_usage if prepare_only and not retained_allocation else _usage(receipt)
+        if prepare_only and receipt.get('activation_baseline') and not old:
+            observation=dict(observation,used_tokens=0,charges={})
         # Enrollment is not admitted until the first complete observation is
         # qualified. A transient setup scan must not publish a stop receipt that
         # only a resource renewal could clear. Existing campaigns still fail
