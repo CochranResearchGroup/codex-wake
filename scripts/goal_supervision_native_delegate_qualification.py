@@ -115,6 +115,9 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
             finally:self.close_connection=True
     server=ThreadingHTTPServer(('127.0.0.1',0),Handler);server.daemon_threads=True;threading.Thread(target=server.serve_forever,daemon=True).start();port=server.server_address[1]
     (home/'config.toml').write_text('model="gpt-5.4-mini"\nmodel_provider="local_fixture"\napproval_policy="never"\nsandbox_mode="danger-full-access"\n[features]\nmulti_agent=true\nmulti_agent_v2=false\ncode_mode=false\n[model_providers.local_fixture]\nname="Local only"\nbase_url="http://127.0.0.1:'+str(port)+'/v1"\nwire_api="responses"\nrequires_openai_auth=false\nrequest_max_retries=0\nstream_max_retries=0\nsupports_websockets=false\n');(home/'config.toml').chmod(0o600)
+    if governor_stop:
+        config=(home/'config.toml').read_text().replace('multi_agent_v2=false','multi_agent_v2=true')
+        (home/'config.toml').write_text(config)
     env=dict(os.environ,CODEX_HOME=str(home),OPENAI_BASE_URL='http://127.0.0.1:'+str(port)+'/v1')
     for key in ('PYTHONPATH','CODEX_THREAD_ID','OPENAI_API_KEY','CHATGPT_ACCESS_TOKEN','CODEX_API_KEY'):env.pop(key,None)
     log=(base/'native.log').open('w');native=None;watcher=None
@@ -133,14 +136,14 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
             remaining=min(3,expiry-time.monotonic())
             if remaining<=0:raise RuntimeError('native delegation packet90second limit')
             return native_request(endpoint,str(codex),method,params,remaining)
-        root=rpc('thread/start',dict(cwd=str(base),historyMode='legacy',experimentalRawEvents=True))['thread']['id'];result['root_thread_id']=root
+        root=rpc('thread/start',dict(cwd=str(base),historyMode='paginated' if governor_stop else 'legacy',experimentalRawEvents=True))['thread']['id'];result['root_thread_id']=root
         goal=None if governor_stop else rpc('thread/goal/set',dict(threadId=root,status='blocked',origin='user',tokenBudget=1000,objective='Bounded local native delegated accounting fixture'))['goal'];result['goal']=goal
         started=rpc('turn/start',dict(threadId=root,input=[dict(type='text',text='Run only the approved local delegated fixture.')]))
         result['root_initial_turn_id']=started['turn']['id']
         if governor_stop:
             if wake_cli is None:raise RuntimeError('--wake-cli is required for governor stop qualification')
             if not provider_started.wait(min(10,max(0,expiry-time.monotonic()))):raise RuntimeError('root local response did not start')
-            peer_thread=rpc('thread/start',dict(cwd=str(base),historyMode='legacy',experimentalRawEvents=True))['thread']['id']
+            peer_thread=rpc('thread/start',dict(cwd=str(base),historyMode='paginated' if governor_stop else 'legacy',experimentalRawEvents=True))['thread']['id']
             peer_identity[0]=peer_thread
             peer_goal=rpc('thread/goal/set',dict(threadId=peer_thread,status='blocked',origin='user',tokenBudget=1000,objective='Unrelated local fixture; must remain active'))['goal']
             peer_turn=rpc('turn/start',dict(threadId=peer_thread,input=[dict(type='text',text='Hold only the unrelated local injected response.')]))['turn']['id']

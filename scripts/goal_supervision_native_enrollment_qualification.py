@@ -94,10 +94,24 @@ def qualify(base, codex, import_boundary=False, governor=False):
         config_hash=hashlib.sha256((home/'config.toml').read_bytes()).hexdigest()
         result['mcp_endpoint']=endpoint
         def rpc(method,params):return native_request(endpoint,str(codex),method,params,5)
+        def read_thread(identity):
+            value=rpc('thread/read',dict(threadId=identity,includeTurns=not governor))['thread']
+            if governor:
+                turns=[];cursor=None;seen=set()
+                while True:
+                    params=dict(threadId=identity,limit=128,sortDirection='asc',itemsView='full')
+                    if cursor is not None:params['cursor']=cursor
+                    page=rpc('thread/turns/list',params);turns.extend(page['data'])
+                    cursor=page.get('nextCursor')
+                    if cursor is None:break
+                    if cursor in seen or len(turns)>256:raise RuntimeError('bounded native turns pagination unavailable')
+                    seen.add(cursor)
+                value['turns']=turns
+            return value
         grant=dict(app_server=endpoint,codex_path=str(codex),codex_home=str(home),max_tokens=1000,max_seconds=120,rpc_timeout=3)
         save('policy.json',dict(version=2,native_caller_binding=True,allocations={},self_enrollment=grant) if governor else dict(version=2,default_allocation='owned-objective',native_caller_binding=True,allocations={'owned-objective':grant}))
         policy_hash=hashlib.sha256(policy.read_bytes()).hexdigest()
-        unrelated=rpc('thread/start',dict(cwd=str(base),historyMode='legacy',experimentalRawEvents=True))['thread']['id']
+        unrelated=rpc('thread/start',dict(cwd=str(base),historyMode='paginated' if governor else 'legacy',experimentalRawEvents=True))['thread']['id']
         unrelated_before=rpc('thread/goal/set',dict(threadId=unrelated,objective='Unrelated owned control; no model work',status='blocked',origin='user',tokenBudget=1000000))['goal']
         result['unrelated_control']=dict(thread_id=unrelated,goal_before=unrelated_before)
         watcher=subprocess.Popen([sys.executable,'-m','codex_wake','--wake-root',str(root),'goal-limits','watch','--interval','.1'],env=env,stdin=subprocess.DEVNULL,stdout=watchlog,stderr=watchlog,start_new_session=True)
@@ -110,13 +124,13 @@ def qualify(base, codex, import_boundary=False, governor=False):
         first_state=None
         for index in range(2):
             ready.clear()
-            thread=rpc('thread/start',dict(cwd=str(base),historyMode='legacy',experimentalRawEvents=True))['thread']['id']
+            thread=rpc('thread/start',dict(cwd=str(base),historyMode='paginated' if governor else 'legacy',experimentalRawEvents=True))['thread']['id']
             goal=rpc('thread/goal/set',dict(threadId=thread,objective='Owned public MCP resource continuation fixture',status='blocked',origin='user',tokenBudget=1000000))['goal']
             participant=dict(thread_id=thread,goal_before=goal);result['participants'].append(participant)
             rpc('turn/start',dict(threadId=thread,input=[dict(type='text',text='Local fixture warmup only.')]))
             end=min(expiry,time.monotonic()+15)
             while True:
-                read=rpc('thread/read',dict(threadId=thread,includeTurns=True))['thread']
+                read=read_thread(thread)
                 if read['turns'] and all(t['status']=='completed' for t in read['turns']):break
                 if time.monotonic()>end:raise RuntimeError('warmup not completed')
                 time.sleep(.1)
@@ -139,7 +153,7 @@ def qualify(base, codex, import_boundary=False, governor=False):
                 result['imported_boundary']=dict(started_at=boundary['started_at'],prior_fresh_tokens=observed['used_tokens'])
             rpc('thread/goal/set',dict(threadId=thread,status='active',origin='user',tokenBudget=1000000))
             if not ready.wait(min(20,max(0,expiry-time.monotonic()))):raise RuntimeError('public tool result not observed')
-            read=rpc('thread/read',dict(threadId=thread,includeTurns=True))['thread'];save('native-tool-readback-'+str(index+1)+'.json',read)
+            read=read_thread(thread);save('native-tool-readback-'+str(index+1)+'.json',read)
             items=[v for t in read['turns'] for v in t['items'] if v['type']=='mcpToolCall' and v.get('tool')==tool_name]
             assert len(items)==1,'expected exactly one native public enrollment'
             participant['native_tool_call']=items[0];assert not items[0].get('error') and items[0].get('status')!='failed',json.dumps(items[0])
