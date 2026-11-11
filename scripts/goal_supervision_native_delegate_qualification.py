@@ -232,9 +232,22 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
                 if root_view['goal'] is None and not any(turn['status']=='inProgress' for turn in root_view['turns']+child_view['turns']):break
                 if time.monotonic()>=until:raise RuntimeError('native lease did not stop exact root and late child')
                 time.sleep(.1)
+            result.update(root_after_stop=root_view,child_after_stop=child_view,unrelated_after_stop=view(peer_thread))
+            result['native_lease_after_stop']=rpc('thread/governorLease/set',dict(threadId=root,leaseId=stop_guard['lease_id'],
+                controllerGeneration=stop_guard['controller_generation'],enrollmentRevision=stop_guard['enrollment_revision'],query=True))
             until=min(expiry,time.monotonic()+3)
             while any(process_identity(value['pid'])==value['identity'] for value in sleepers):
-                if time.monotonic()>=until:raise RuntimeError('native cancellation left exact fixture tools running')
+                if time.monotonic()>=until:
+                    details=[]
+                    for value in sleepers:
+                        observed=dict(value,after_identity=process_identity(value['pid']))
+                        try:
+                            status=(Path('/proc')/str(value['pid'])/'status').read_text()
+                            observed['process_status']={line.split(':',1)[0]:line.split(':',1)[1].strip() for line in status.splitlines() if line.startswith(('State:','PPid:','Name:'))}
+                        except OSError:observed['process_status']=None
+                        details.append(observed)
+                    result['tool_processes_after_stop']=details
+                    raise RuntimeError('native cancellation left exact fixture tools running')
                 time.sleep(.05)
             result['native_cancelled_fixture_tools']=True
             peer_view=view(peer_thread)
