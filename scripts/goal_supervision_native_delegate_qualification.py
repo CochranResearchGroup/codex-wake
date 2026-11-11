@@ -99,7 +99,7 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
                     for tool in tools:
                         if tool.get('type')=='namespace' and any(x.get('name')=='spawn_agent' for x in tool.get('tools',[])):
                             namespace=tool['name']
-                    arguments=dict(message='Complete only this local injected fixture task.',fork_context=True)
+                    arguments=(dict(message='Complete only this local injected fixture task.',task_name='governor_child',fork_turns='all') if governor_stop else dict(message='Complete only this local injected fixture task.',fork_context=True))
                     emit(dict(type='response.output_item.done',item=dict(type='function_call',call_id='local-spawn',namespace=namespace,name=name,arguments=json.dumps(arguments))))
                     total=20
                 else:
