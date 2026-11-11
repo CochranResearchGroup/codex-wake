@@ -1,0 +1,38 @@
+[
+  {
+    "distribution": "codex-wake",
+    "version": "0.22.0.dev3",
+    "files": 330,
+    "installed_files_manifest_sha256": "75ec1495464bfb34803f396cfad861a4e79346c35cfc51cd3e3fbc7b6c6db1b2"
+  },
+  {
+    "distribution": "dbus-next",
+    "version": "0.2.3",
+    "files": 30,
+    "installed_files_manifest_sha256": "d339f8de2367162fe5128341e190da85e8887b2a167b4579a307c4c2d87a9bc3"
+  },
+  {
+    "distribution": "websockets",
+    "version": "17.4",
+    "files": 63,
+    "installed_files_manifest_sha256": "fee10f17b43d91b4e3abe9638c71e40b463f7b30a52bc469b0c5d93fcb4ce6e5"
+  },
+  {
+    "distribution": "jsonschema",
+    "version": "4.26.0",
+    "files": 44,
+    "installed_files_manifest_sha256": "a3f818bff3292aef6266c779b9b99543b47ff94bf308d30067c28d2b6635ee08"
+  },
+  {
+    "distribution": "msgspec",
+    "version": "0.22.0",
+    "files": 23,
+    "installed_files_manifest_sha256": "8aa1ab46db8595a852de9001c9bef690e057579a1c6c57672d98aed1ca28a045"
+  },
+  {
+    "distribution": "mcp",
+    "version": "2.2.0",
+    "files": 130,
+    "installed_files_manifest_sha256": "0df95f0c6e4d32e43cb5b1199b70a0c96d3977f23f22e18b10681e96f52c5e5f"
+  }
+]
