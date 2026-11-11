@@ -22,14 +22,14 @@ class LocalControllerServerTests(unittest.TestCase):
                     message=json.loads(raw)
                     if 'id' not in message:continue
                     if message['method']=='initialize':value={'codexHome':str(home)}
-                    elif message['method']=='thread/loaded/list':value={'data':['owned-one'],'nextCursor':None}
-                    elif message['method'] in ('thread/read','thread/resume'):value={'thread':{'id':'owned-one','name':'owned tab','cwd':str(root),'status':{'type':'idle'},'modelProvider':'openai'}}
+                    elif message['method']=='thread/loaded/list':value={'data':['11111111-1111-4111-8111-111111111111'],'nextCursor':None}
+                    elif message['method'] in ('thread/read','thread/resume'):value={'thread':{'id':'11111111-1111-4111-8111-111111111111','name':'owned tab','cwd':str(root),'status':{'type':'idle'},'modelProvider':'openai'}}
                     elif message['method']=='turn/start':
                         received.append(message['params']['input'][0]['text']);value={'turn':{'id':'native-turn'}}
                     else:raise AssertionError(message['method'])
                     ws.send(json.dumps({'id':message['id'],'result':value}))
                     if message['method']=='turn/start':
-                        for method,params in [('turn/started',{'threadId':'owned-one','turn':{'id':'native-turn','status':'inProgress'}}),('item/agentMessage/delta',{'threadId':'owned-one','turnId':'native-turn','itemId':'answer','delta':answer}),('item/completed',{'threadId':'owned-one','turnId':'native-turn','item':{'id':'answer','type':'agentMessage','phase':'final_answer','text':answer}}),('turn/completed',{'threadId':'owned-one','turn':{'id':'native-turn','status':'completed'}})]:
+                        for method,params in [('turn/started',{'threadId':'11111111-1111-4111-8111-111111111111','turn':{'id':'native-turn','status':'inProgress'}}),('item/agentMessage/delta',{'threadId':'11111111-1111-4111-8111-111111111111','turnId':'native-turn','itemId':'answer','delta':answer}),('item/completed',{'threadId':'11111111-1111-4111-8111-111111111111','turnId':'native-turn','item':{'id':'answer','type':'agentMessage','phase':'final_answer','text':answer}}),('turn/completed',{'threadId':'11111111-1111-4111-8111-111111111111','turn':{'id':'native-turn','status':'completed'}})]:
                             ws.send(json.dumps({'method':method,'params':params}))
             with unix_serve(native,str(root/'native.sock')) as peer:
                 threading.Thread(target=peer.serve_forever,daemon=True).start()
@@ -44,7 +44,16 @@ class LocalControllerServerTests(unittest.TestCase):
                     with self.assertRaises(HTTPError) as unauthorized:call('/operations',{'operation':'local.list','arguments':{}},False)
                     self.assertEqual(unauthorized.exception.code,401)
                     listed=call('/operations',{'operation':'local.list','arguments':{}})
-                    self.assertEqual([r['thread_id'] for r in listed['sessions']],['owned-one'])
+                    self.assertEqual([r['thread_id'] for r in listed['sessions']],['11111111-1111-4111-8111-111111111111'])
+                    status = call('/operations', {'operation': 'local.governor.status',
+                        'arguments': {'selector': 'thread:11111111-1111-4111-8111-111111111111'}})
+                    self.assertEqual(status['state'], 'disconnected')
+                    self.assertEqual(status['reason'], 'not_enrolled')
+                    governor_mcp = call('/mcp', {'jsonrpc': '2.0', 'id': 71, 'method': 'tools/call',
+                        'params': {'name': 'wake_governor_status', 'arguments':
+                                   {'selector': 'thread:11111111-1111-4111-8111-111111111111'}}})
+                    self.assertEqual(governor_mcp['result']['structuredContent']['state'], 'disconnected')
+                    self.assertFalse((root / 'goal-supervision').exists())
                     tools=call('/mcp',{'jsonrpc':'2.0','id':1,'method':'tools/list'})
                     self.assertIn('wake_local_list',[t['name'] for t in tools['result']['tools']])
                     mcp=call('/mcp',{'jsonrpc':'2.0','id':2,'method':'tools/call','params':{'name':'wake_local_list','arguments':{}}})
@@ -63,7 +72,7 @@ class LocalControllerServerTests(unittest.TestCase):
                                     tools=await session.list_tools()
                                     self.assertIn('wake_local_list',[tool.name for tool in tools.tools])
                                     value=await session.call_tool('wake_local_list',{})
-                                    self.assertEqual(value.model_dump(by_alias=True)['structuredContent']['sessions'][0]['thread_id'],'owned-one')
+                                    self.assertEqual(value.model_dump(by_alias=True)['structuredContent']['sessions'][0]['thread_id'],'11111111-1111-4111-8111-111111111111')
                                     failure=await session.call_tool('wake_local_resolve',{'selector':'missing'})
                                     self.assertTrue(failure.model_dump(by_alias=True)['isError'])
                                     self.assertEqual(failure.model_dump(by_alias=True)['structuredContent']['error']['code'],'target_unavailable')
@@ -77,13 +86,13 @@ class LocalControllerServerTests(unittest.TestCase):
                             async with ClientSession(streams[0],streams[1]) as session:
                                 await session.initialize()
                                 result=await session.call_tool('wake_local_list',{})
-                                self.assertEqual(result.model_dump(by_alias=True)['structuredContent']['sessions'][0]['thread_id'],'owned-one')
+                                self.assertEqual(result.model_dump(by_alias=True)['structuredContent']['sessions'][0]['thread_id'],'11111111-1111-4111-8111-111111111111')
                     asyncio.run(stdio_sdk())
                     # The actual remote CLI adapter consumes streamed frames, not server stdout.
                     from codex_wake.local_control_client import cli_frames
                     frames=list(cli_frames(server.owner,['control','resolve','owned tab']))
                     self.assertEqual(frames[-1]['exit_code'],0,frames)
-                    self.assertEqual(json.loads(frames[0]['stdout'])['thread_id'],'owned-one')
+                    self.assertEqual(json.loads(frames[0]['stdout'])['thread_id'],'11111111-1111-4111-8111-111111111111')
                     import os,subprocess,sys,base64
                     powershell=Path('/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe')
                     if powershell.is_file():
@@ -97,18 +106,18 @@ class LocalControllerServerTests(unittest.TestCase):
                         encoded=base64.b64encode(command.encode('utf-16-le')).decode()
                         called=subprocess.run([str(powershell),'-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',encoded],capture_output=True,timeout=30)
                         self.assertEqual(called.returncode,0,called.stderr.decode(errors='replace'))
-                        self.assertEqual(json.loads(called.stdout.decode('utf-8'))['thread_id'],'owned-one')
+                        self.assertEqual(json.loads(called.stdout.decode('utf-8'))['thread_id'],'11111111-1111-4111-8111-111111111111')
                         prompt='Unicode question Δ\nsecond line'
                         def ps(*words):
                             literal=lambda value:"'"+value.replace("'","''")+"'"
                             command='& '+literal(windows)+' '+ ' '.join(literal(w) for w in words)+'; exit $LASTEXITCODE'
                             encoded=base64.b64encode(command.encode('utf-16-le')).decode()
                             return subprocess.run([str(powershell),'-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',encoded],capture_output=True,timeout=30)
-                        sent=ps('control','prompt','thread:owned-one',prompt,'--mode','final','--timeout','10','--idempotency-key=powershell-fixture')
+                        sent=ps('control','prompt','thread:11111111-1111-4111-8111-111111111111',prompt,'--mode','final','--timeout','10','--idempotency-key=powershell-fixture')
                         self.assertEqual(sent.returncode,0,sent.stderr.decode(errors='replace'))
                         self.assertEqual(sent.stdout.decode('utf-8'),answer)
                         self.assertEqual(received,[prompt])
-                        retry=ps('control','prompt','thread:owned-one',prompt,'--mode','final','--timeout','10','--idempotency-key','powershell-fixture')
+                        retry=ps('control','prompt','thread:11111111-1111-4111-8111-111111111111',prompt,'--mode','final','--timeout','10','--idempotency-key','powershell-fixture')
                         self.assertEqual(retry.returncode,0,retry.stderr.decode(errors='replace'))
                         self.assertEqual(received,[prompt])
                         import hashlib

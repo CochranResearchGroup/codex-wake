@@ -23,7 +23,7 @@ class LocalSessionTests(unittest.TestCase):
                     if 'id' not in message:continue
                     method=message['method']
                     if method=='initialize':value={'codexHome':str(home)}
-                    elif method=='thread/loaded/list':value={'data':['one','two'],'nextCursor':None}
+                    elif method=='thread/loaded/list':value={'data':['11111111-1111-4111-8111-111111111111','two'],'nextCursor':None}
                     elif method=='thread/read':value={'thread':{'id':message['params']['threadId'],'name':'same-name','cwd':str(root),'status':{'type':'idle'},'modelProvider':'openai','turns':[{'id':'turn-one','status':'completed','items':[{'type':'agentMessage','text':'known answer'}]}]}}
                     elif method=='thread/resume':value={'thread':{'id':message['params']['threadId']}}
                     elif method=='turn/start':value={'turn':{'id':'turn-one'}}
@@ -31,7 +31,7 @@ class LocalSessionTests(unittest.TestCase):
                     ws.send(json.dumps({'id':message['id'],'result':value}))
                     if method=='turn/start':
                         for method,params in [('item/completed',{'item':{'id':'answer','type':'agentMessage','phase':'final_answer','text':'known answer'}}),('turn/completed',{'turn':{'id':'turn-one','status':'completed'}})]:
-                            ws.send(json.dumps({'method':method,'params':dict(threadId="one",turnId="turn-one",**params)}))
+                            ws.send(json.dumps({'method':method,'params':dict(threadId="11111111-1111-4111-8111-111111111111",turnId="turn-one",**params)}))
                         return
             with unix_serve(handler,str(root/'native.sock')) as server:
                 thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
@@ -39,23 +39,32 @@ class LocalSessionTests(unittest.TestCase):
                     p=subprocess.run([sys.executable,'-m','codex_wake','--wake-root',str(root),'control',*args,'--endpoint',endpoint,'--json'],capture_output=True,text=True)
                     return p,json.loads(p.stdout)
                 p,listing=call('list');self.assertEqual(p.returncode,0,p.stderr)
-                self.assertEqual([x['thread_id'] for x in listing['sessions']],['one','two'])
+                self.assertEqual([x['thread_id'] for x in listing['sessions']],['11111111-1111-4111-8111-111111111111','two'])
                 self.assertEqual(listing['sessions'][0]['target']['uid'],os.getuid())
-                p,chosen=call('resolve','thread:one');self.assertEqual(p.returncode,0,p.stderr)
-                self.assertEqual(chosen['target']['conversation_id'],'one')
+                p,chosen=call('resolve','thread:11111111-1111-4111-8111-111111111111');self.assertEqual(p.returncode,0,p.stderr)
+                self.assertEqual(chosen['target']['conversation_id'],'11111111-1111-4111-8111-111111111111')
+                governor = subprocess.run([sys.executable, '-m', 'codex_wake', '--wake-root', str(root),
+                    'governor', 'status', 'thread:11111111-1111-4111-8111-111111111111', '--endpoint', endpoint, '--json'],
+                    capture_output=True, text=True, timeout=15)
+                self.assertEqual(governor.returncode, 0, governor.stderr + governor.stdout)
+                status = json.loads(governor.stdout)
+                self.assertEqual(status['state'], 'disconnected')
+                self.assertEqual(status['reason'], 'not_enrolled')
+                self.assertIsNone(status['usage']['used_tokens'])
+                self.assertFalse((root / 'goal-supervision').exists())
                 p,ambiguous=call('resolve','same-name');self.assertEqual(p.returncode,2)
                 self.assertEqual(ambiguous['error']['code'],'ambiguous_target')
                 stale=dict(chosen['target'],socket_generation='replaced')
-                p,failure=call('resolve','thread:one','--expected-target',json.dumps(stale));self.assertEqual(p.returncode,2)
+                p,failure=call('resolve','thread:11111111-1111-4111-8111-111111111111','--expected-target',json.dumps(stale));self.assertEqual(p.returncode,2)
                 self.assertEqual(failure['error']['code'],'stale_target')
-                p,submitted=call('prompt','thread:one','known question','--idempotency-key','test-intent')
+                p,submitted=call('prompt','thread:11111111-1111-4111-8111-111111111111','known question','--idempotency-key','test-intent')
                 self.assertEqual(p.returncode,0,p.stderr)
                 operation=submitted['result']['operation']
                 self.assertEqual(operation['result']['turn_id'],'turn-one')
                 p,finished=call('result',operation['operation_id'])
                 self.assertEqual(p.returncode,0,p.stderr)
                 self.assertEqual(finished['result']['operation']['answer']['text'],'known answer')
-                p,repeated=call('prompt','thread:one','known question','--idempotency-key','test-intent')
+                p,repeated=call('prompt','thread:11111111-1111-4111-8111-111111111111','known question','--idempotency-key','test-intent')
                 self.assertEqual(p.returncode,0,p.stderr)
                 self.assertEqual(repeated['result']['operation']['operation_id'],operation['operation_id'])
                 from codex_wake.local_session_events import TurnEvents

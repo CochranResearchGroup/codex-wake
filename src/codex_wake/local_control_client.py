@@ -13,7 +13,7 @@ def _parsed(arguments):
     from .cli import build_parser
     from .command_contract import parser_paths
     arguments=list(arguments)
-    if not arguments or arguments[0] not in ('control','self-limits'):arguments.insert(0,'control')
+    if not arguments or arguments[0] not in ('control','self-limits','governor'):arguments.insert(0,'control')
     parser=build_parser()
     if '--help' in arguments or '-h' in arguments:
         paths=dict(parser_paths(parser));path=[]
@@ -41,6 +41,15 @@ def cli_frames(owner,arguments):
     try:
         args,help_text=_parsed(arguments)
         if help_text is not None:yield {'stdout':help_text};yield {'exit_code':0};return
+        if args.command == 'governor':
+            from .governor_commands import schemas, render
+            schema = schemas()[args.governor_verb]
+            values = {key: value for key, value in vars(args).items()
+                      if key in schema['properties'] and value is not None}
+            value = owner.execute('local.governor.' + args.governor_verb, values)
+            yield {'stdout': (json.dumps(value, sort_keys=True) if args.json else render(value)) + '\n'}
+            yield {'exit_code': 2 if value.get('error') or value.get('status') in ('failed', 'held') else 0}
+            return
         if args.command=='self-limits':
             values={k:v for k,v in vars(args).items() if k in ('selector','endpoint','token_limit','time_limit_seconds') and v is not None}
             value=owner.execute('local.self_limits.'+args.self_limits_verb,values)
@@ -83,7 +92,7 @@ def remote(root,arguments):
     from .local_control_server import connection_info
     info=connection_info(root)
     arguments=list(arguments)
-    command=arguments if arguments[:1]==['control'] else ['control',*arguments]
+    command=arguments if arguments[:1] in (['control'], ['governor']) else ['control',*arguments]
     retry_key=None
     if len(command)>1 and command[0]=='control' and command[1] in ('prompt','create','load'):
         for index,argument in enumerate(arguments):

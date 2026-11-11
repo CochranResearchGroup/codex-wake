@@ -60,3 +60,9 @@ class GovernorCommandTests(unittest.TestCase):
         for verb in ('extend', 'reset', 'disable'):
             with self.subTest(verb=verb), self.assertRaises(InventoryError):
                 owner.execute('local.governor.' + verb, {'command': 'anything', 'principal': 'operator'})
+
+    def test_shared_server_cli_accepts_governor_status_without_control_prefix(self):
+        from codex_wake.local_control_client import _parsed
+        args, _ = _parsed(['governor', 'status', 'thread:current', '--json'])
+        self.assertEqual(args.command, 'governor')
+        self.assertEqual(args.governor_verb, 'status')

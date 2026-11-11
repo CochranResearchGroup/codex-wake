@@ -33,9 +33,9 @@
     {
       "id": 573,
       "owner": "primary",
-      "state": "integrated",
+      "state": "validated",
       "blockers": [],
-      "validation": "7governor/contract tests PASS Python3.11/3.12;10existing local/PowerShell transport regressions PASS42.044s; API/OAuth exact task scope and owner-only loosen route integrated; final behavioral parity acceptance remains574",
+      "validation": "Governor commands/contract7PASS3.11/3.12; existingtransport10PASS; CLI ownedUnixpeerstatusPASS; actualprivateAPI/MCP governorstatusPASS in7tests46.634s includingPowerShell. PlaceholdernonUUIDfixturefailure retained/corrected; no newfixtureframework.",
       "owned_paths": [
         "src/codex_wake/governor_commands.py",
         "src/codex_wake/cli.py",
@@ -43,7 +43,8 @@
         "src/codex_wake/mcp_server.py",
         "src/codex_wake/controller_http.py",
         "src/codex_wake/controller_client.py"
-      ]
+      ],
+      "remaining": "Exact integrated installed qualification574; current native and backendchanges stillrunning."
     },
     {
       "id": 574,
