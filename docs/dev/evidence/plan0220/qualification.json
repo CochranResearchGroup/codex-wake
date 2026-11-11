@@ -1,11 +1,11 @@
 {
-  "status": "IN_PROGRESS_NATIVE_INSTALLED_JOURNEYS_PENDING",
+  "status": "BLOCKED_NATIVE_TOOL_CONTAINMENT_FIX_REQUIRED",
   "ticket": 574,
   "working_deployment": false,
   "hosted_ci": false,
   "python": {
-    "build_source_commit": "7064f62b8505122fd86cff0a004d6f188955febc",
-    "wheel_sha256": "d8a3f0bd0fcd1768b7c1080a85c736520c5a410639f0dbf17f3ea0d070cce48f",
+    "build_source_commit": "fbef8b22fff5994a5a4612cbc63479d81c96ed57",
+    "wheel_sha256": "8f43b09ccc8c4ba442b93ae93c1fd1c4db26b8a13015809b0955a294073df099",
     "package_members": 323,
     "source_wheel_installed_equal": true,
     "prefix": "/tmp/wake-governor-p220-2dac7qs6/venv",
@@ -22,7 +22,8 @@
       "seconds": 1.056,
       "result": "PASS",
       "command": "sudo -n -u codex-daemon-test env PYTHONPATH=/tmp/wake-governor-p220-2dac7qs6/source/tests /tmp/wake-governor-p220-2dac7qs6/venv/bin/python -m unittest test_governor_commands test_command_parity"
-    }
+    },
+    "counter_private_cwd_fix": "Production Windows counter producer starts from /tmp; existing regression RED counter_eof then14 selected PASS3.11/3.12 and14installed PASS6.634s; actual fresh private-cwd QPC preflight PASS without keepalive."
   },
   "backend": {
     "source": "bd8848b05c49b75029f0b83e1a01720bd81e4b6a",
@@ -53,9 +54,48 @@
     },
     "focused_test_receipt": "~/.local/state/codex-wake/governor-native-572/tests/job-20261111T175549Z-52257fc6648e/20261111T175550Z-5387c2ca5edb/receipt.json",
     "later_source_delta": "App-server-only release linearization plus generated protocol artifacts; Core/TUI unchanged. Installed effects not yet qualified.",
-    "final_package_source": "a9a992a6ed",
+    "final_package_source": "a9a992a6ed5661b2211806e1c9137680d083f15e",
     "package_build_job": "~/.local/state/codex-wake/governor-native-572/package-build/job-20261111T183940Z-ad8823c91b46",
-    "package_status": "RUNNING"
+    "package_status": "BUILT_NOT_FULLY_ACCEPTED",
+    "executable_sha256": "9c8390d120afc046b63a8cf95f82922c297fd59745814fa66fbbc9a2ef3f5585",
+    "package_members": 6,
+    "source_copy_members_equal": true,
+    "package_build_seconds": 1250.348
   },
-  "environment_differences": "Local WSL shared kernel under separate real Linux test user UID1017. Runtime Python3.12.3; source matrix uses3.12.13 and3.11. Hosted GitHub CI skipped by operator cost policy. Local Responses fixtures are synthetic accounting evidence, not provider billing."
+  "environment_differences": "Local WSL shared kernel under separate real Linux test user UID1017. Runtime Python3.12.3; source matrix uses3.12.13 and3.11. Hosted GitHub CI skipped by operator cost policy. Local Responses fixtures are synthetic accounting evidence, not provider billing.",
+  "installed_journeys": {
+    "model_activation": {
+      "result": "PASS_NATIVE_MODEL_GOVERNOR_ACTIVATION",
+      "receipt": "/tmp/wake-governor-p220-2dac7qs6/backend-model-06/result.json",
+      "local_posts": 6,
+      "no_uuid_grants": true
+    },
+    "upgrade_rollback": {
+      "result": "passed",
+      "receipt": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p220-01/receipt.json",
+      "exact_candidate_sha256": "9c8390d120afc046b63a8cf95f82922c297fd59745814fa66fbbc9a2ef3f5585",
+      "rollback_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+      "multiple_clients_history_handoffs_limits_preserved": true,
+      "fresh_owned_census": []
+    },
+    "delegated_containment": {
+      "result": "FAIL_REAL_NATIVE_TOOL_LIFETIME",
+      "receipt": "/tmp/wake-governor-p220-2dac7qs6/backend-watcher-loss-05/result.json",
+      "root_and_child_turns_interrupted": true,
+      "unrelated_peer_unchanged": true,
+      "native_reported_stopVerified": true,
+      "exact_tool_processes_still_live_after_3s": "Two sleep processes State S, same identities; not zombies. Native teardown cleaned them, finalcensus0.",
+      "guarded_resume": "NOT_REACHED",
+      "required_fix": "Track and terminate exact causal task-owned unified-exec handles, including pre-enrollment work; include confirmed process exit in native stop proof."
+    },
+    "native_ui": {
+      "result": "PENDING_FIXED_V2_ACCEPTANCE_CONFIG",
+      "receipts": [
+        "/tmp/wake-governor-p220-2dac7qs6/ui-01/receipt.json",
+        "/tmp/p220u2/receipt.json",
+        "/tmp/p220u3/receipt.json"
+      ],
+      "retained_setup_failures": "Canonical profile config, private umask, inline viewport/paste timing and V2 flag corrected; further run held for native fix."
+    }
+  }
 }
