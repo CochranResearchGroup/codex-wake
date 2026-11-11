@@ -76,10 +76,10 @@ entrypoints plus the read-only audit command; existing public seams preferred.
 
 | Ticket | Blockers | Owner | State | Scope |
 | --- | --- | --- | --- | --- |
-| #559 root ownership | none | ownership worker | pending | daemon, ownership module, ownership tests |
-| #560 isolated scheduling | none | primary | pending | supervisor, scheduler, CLI, scheduler tests |
-| audit ticket | none | audit worker | pending | audit module/script/tests |
-| pilot ticket | all above | primary after validation | pending | qualification script, docs, integration |
+| #559 root ownership | none | /root/ownership559 | validated | daemon, ownership module, ownership tests |
+| #560 isolated scheduling | none | primary | validated | supervisor, scheduler, CLI, scheduler tests |
+| #561 audit | none | /root/audit561 | validated | audit module/script/tests |
+| #562 pilot | #559, #560, #561 validated | /root/pilot562 | ready | qualification script, docs, integration |
 
 No overlapping worker write scopes; shared ownership result is a PollResult
 with an observable skip reason. Scheduler accepts existing result serialization.
@@ -137,3 +137,14 @@ current owner/resource readback. No performance improvement is claimed yet.
 
 Memory disposition: forbidden; session instructions require an explicit user
 request before memory updates. No memory write is authorized by this design task.
+
+## Dependency validation checkpoint
+
+#559 integrated as 8f87a6d8 (worker507a6249), #561 as2ee87e63 plus17a73faa
+(worker3eb99d44/413ddd65), #560 as54d3b0e5. On integrated source, declared
+Python3.12 environment installed from .[mcp,dev]: scheduler5 PASS2.941s,
+ownership7 PASS1.219s, CLI66 PASS15.701s, audit2 PASS0.892s; existing supervisor13
+PASS1.027s. Pinned Ruff undefined-name checks pass. Initial CLI/scheduler CLI
+runs in dependency-free interpreter failed missing websockets; those results
+are retained, not product failures erased by retry. Full logs outside Git under
+qualification/plan0218. #562 may now start. Working services remain unchanged.

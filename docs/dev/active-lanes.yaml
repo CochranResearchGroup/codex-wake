@@ -1,6 +1,20 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P218
+    owner: primary / ecochran76
+    objective: Close shared-monitor consolidation tickets with isolated scheduling and safe qualification
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/558]
+    plan: docs/dev/plans/0218-2026-11-10-service-consolidation.md
+    branch: feat/service-consolidation-218
+    worker_branches: [fix/monitor-ownership-559, feat/service-audit-561]
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-10
+    disposition: Primary owns ticket560 scheduler; shallow workers own559 lock and561 audit;562 waits for all dependencies
   - id: P217
     owner: primary / ecochran76
     objective: Ship readable human CLI output and refreshed shell completion
