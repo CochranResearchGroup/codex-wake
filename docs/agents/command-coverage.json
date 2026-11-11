@@ -390,6 +390,7 @@
     "supervisor.enroll",
     "supervisor.install",
     "supervisor.logs",
+    "supervisor.reconcile",
     "supervisor.run",
     "supervisor.start",
     "supervisor.status",

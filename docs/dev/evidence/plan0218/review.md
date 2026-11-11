@@ -41,8 +41,14 @@ One public regression at a time, observed red before changing implementation:
 Use the declared Python3.12 check-env interpreter and PYTHONPATH=src. Exact red,
 green and subsequent focused results are retained outside Git under
 `~/.local/state/codex-wake/qualification/plan0218/remediation-*.log`.
+The comprehensive run exposed a stale generated command-coverage artifact for
+new supervisor.reconcile. Existing contract test was reproduced RED, the generator
+refreshed one coverage entry, and all3 contract tests passed. This is validation
+remediation within the same bounded pass, not a second review axis.
+
 There is no second broad review or unrelated refactoring pass. Final verification
 and installed-package qualification are recorded in the plan acceptance receipt.
 
 Summary: Standards1 accepted P2 and Spec1 accepted P1; both corrected in the one
-bounded pass, with final acceptance dependent on recorded focused verification.
+bounded pass, resolved; final focused61 tests pass on both Python3.12 and3.11, and the
+corrected immutable installed wheel passes9 migration/recovery checks.
