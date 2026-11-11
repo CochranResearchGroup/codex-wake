@@ -1,6 +1,6 @@
 {
   "status": "source_and_transport_validated_installed_journey_pending",
-  "source_commit": "3ac695e9",
+  "source_commit": "0c8ded72",
   "ticket": 573,
   "python": [
     "3.11",
@@ -11,8 +11,8 @@
       "command": "PYTHONPATH=src:tests /tmp/wake216-py312/bin/python -m unittest test_governor_commands test_command_parity",
       "tests": 9,
       "result": "PASS",
-      "seconds": 0.519,
-      "note": "After adding explicit resume options to disable/advisory schemas."
+      "seconds": 0.863,
+      "note": "After explicit continuation options and held normalization for uncertain native lease release."
     },
     {
       "result": "PASS",
@@ -36,6 +36,20 @@
       "tests": 10,
       "seconds": 2.038,
       "evidence": "573-retry-green.log"
+    },
+    {
+      "command": "PYTHONPATH=src:tests /tmp/wake216-py311/bin/python -m unittest test_governor_commands test_command_parity",
+      "tests": 9,
+      "seconds": 2.41,
+      "result": "PASS"
+    },
+    {
+      "command": "/tmp/wake216-py312/bin/python scripts/generate_command_reference.py --check",
+      "result": "PASS"
+    },
+    {
+      "command": "python scripts/check_policy_wiring.py",
+      "result": "PASS"
     }
   ],
   "remaining": [

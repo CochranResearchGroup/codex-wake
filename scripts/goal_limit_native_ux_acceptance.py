@@ -636,7 +636,7 @@ def qualify(options):
             shared.mkdir(mode=0o700)
             write_build = dict(schema_version=1, builds=dict(modded=dict(
                 executable=str(appserver), sha256=options.app_server_sha256,
-                upstream_version="0.165.0", revision="qualified-native",
+                upstream_version="0.167.0" if governor_ui_only else "0.165.0", revision="qualified-native",
                 source="local-qualified", read_schemas=[5], backend="managed")))
             (shared / "builds.json").write_text(json.dumps(write_build))
             env["CODEX_PROFILES_CONFIG"] = str(profiles)
