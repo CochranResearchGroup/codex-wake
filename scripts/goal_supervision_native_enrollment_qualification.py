@@ -192,10 +192,12 @@ def qualify(base, codex, import_boundary=False, governor=False):
         result.update(http_requests=len(requests),elapsed_seconds=120-max(0,expiry-time.monotonic()))
         save('result.json',result)
     print(json.dumps(dict(verdict=result['verdict'],error=result.get('error'),http_requests=len(requests),receipt=str(base/'result.json'))))
+    return result
 
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True);parser.add_argument('--codex',type=Path,required=True)
     parser.add_argument('--import-boundary',action='store_true',help='prove initial host renewal anchor/time import before admission')
     parser.add_argument('--governor',action='store_true',help='model activates governor using native caller identity, without UUID grants; UID1017 only')
-    args=parser.parse_args();qualify(args.output.resolve(),args.codex.absolute(),args.import_boundary,args.governor)
+    args=parser.parse_args();outcome=qualify(args.output.resolve(),args.codex.absolute(),args.import_boundary,args.governor)
+    if args.governor:raise SystemExit(0 if outcome['verdict'].startswith('PASS_') else 1)
