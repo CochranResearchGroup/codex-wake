@@ -1,6 +1,7 @@
 """CLI/MCP adapter for exact operator-configured background command profiles."""
 from __future__ import annotations
 
+from .cli_output import emit
 import json
 from pathlib import Path
 import time
@@ -145,10 +146,10 @@ def execute(args, root, *, principal=None, register_wake=None, observer=None, no
 def jobs_command(args, root, *, principal=None, register_wake=None, observer=None):
     try:
         value = execute(args, root, principal=principal, register_wake=register_wake, observer=observer)
-        print(json.dumps(dict(schema_version=1, success=True, job=value), sort_keys=True))
+        emit(dict(schema_version=1, success=True, job=value), args)
         return 0
     except (WakeError, OSError, ValueError, KeyError, TypeError) as error:
         message = str(error) if isinstance(error, WakeError) else 'Job state or caller evidence unavailable.'
-        print(json.dumps(dict(schema_version=1, success=False,
-            error=dict(code=getattr(error, 'code', 'job_unavailable'), message=message)), sort_keys=True))
+        emit(dict(schema_version=1, success=False,
+            error=dict(code=getattr(error, 'code', 'job_unavailable'), message=message)), args)
         return 5

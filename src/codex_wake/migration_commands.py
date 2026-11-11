@@ -1,5 +1,7 @@
 """Presentation adapters for explicitly scoped migration preview/qualification."""
 import json
+
+from .cli_output import emit
 import os
 from pathlib import Path
 import socket
@@ -74,7 +76,7 @@ def command(args, root, *, writer_probe=None):
     except (ValueError, OSError, InventoryError) as error:
         value = dict(schema_version=1, operation='migration.' + args.migration_verb, status='failed',
                      error=dict(code=getattr(error, 'code', 'migration_unavailable'), message=str(error)))
-    print(json.dumps(value, sort_keys=True))
+    emit(value, args)
     return 0 if value.get('status') == 'completed' else 2
 
 

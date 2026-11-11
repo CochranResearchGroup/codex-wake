@@ -17,6 +17,12 @@ Existing explicit full layout remains compatible. Qualify private installed then
 apply compact/plain/noSTALE to user's default session, preserving rollback baseline.
 No changes to provider/process identity or activity evidence semantics.
 
+## Current State
+
+Delivery below records the shipped compact/plain/noSTALE change and retained
+validation. The automatic loaded-host deadline remains open; this header repair
+adds no runtime qualification or monitor activation.
+
 ## Delivery
 
 PR538mergedc59b5c8 and exact private qualified wheel649fb27f deployed.25sourcechecks

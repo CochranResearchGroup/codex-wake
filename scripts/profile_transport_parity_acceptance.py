@@ -75,9 +75,9 @@ def main():
                     env=child_env, cwd=root if options.installed_prefix else source, capture_output=True, text=True, timeout=15)
                 assert result.returncode == 0, result.stderr + result.stdout
                 return json.loads(result.stdout)
-            cli('accounts', 'init')
-            registered = cli('stores', 'register', 'stock', '--home', str(stock))['result']['store']
-            cli('accounts', 'create', 'alice', '--mode', 'independent', '--source', 'stock')
+            cli('accounts', 'init', '--json')
+            registered = cli('stores', 'register', 'stock', '--home', str(stock), '--json')['result']['store']
+            cli('accounts', 'create', 'alice', '--mode', 'independent', '--source', 'stock', '--json')
             host, environment = socket.gethostname(), os.environ.get('WSL_DISTRO_NAME') or os.name
             accounts = ControllerAccounts(root / 'controller-accounts.toml', host=host, environment=environment)
             target = dict(host=host, environment=environment,
@@ -106,7 +106,7 @@ def main():
                     value = post('/mcp', dict(jsonrpc='2.0', id=1, method='tools/call', params=dict(name=tool, arguments=args)))
                     assert not value['result']['isError'], value
                     return value['result']['structuredContent']
-                local = cli('stores', 'resolve', 'stock')
+                local = cli('stores', 'resolve', 'stock', '--json')
                 payload = dict(operation='stores.resolve', arguments=dict(selector='stock'))
                 rest = post('/operations', payload)
                 oauth = mcp('wake_controller_store_resolve', payload['arguments'])

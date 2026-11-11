@@ -1,6 +1,8 @@
 """Controller Grok ACP contracts, separate from legacy terminal wake commands."""
 import json
 
+from .cli_output import emit
+
 
 def tool_specs():
     text=dict(type='string',minLength=1,maxLength=200)
@@ -28,10 +30,12 @@ def protected_execute(operation,arguments,root):
 def register_verbs(commands):
     """Extend the existing grok resource tree without replacing legacy verbs."""
     for verb in ('capabilities','create','load','prompt','wait','cancel','health','checkpoint','fork'):
-        commands.add_parser(verb).add_argument('--arguments',type=json.loads,required=True)
+        item = commands.add_parser(verb)
+        item.add_argument('--json', dest='as_json', action='store_true')
+        item.add_argument('--arguments',type=json.loads,required=True)
 
 
 def command(args,root):
     result=protected_execute('grok.'+args.grok_command,args.arguments,root)
-    print(json.dumps(result,sort_keys=True))
+    emit(result, args)
     return 0 if result['status']=='completed' else 2

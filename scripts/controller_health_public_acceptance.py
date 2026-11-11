@@ -18,6 +18,8 @@ def qualify(wake_cli, root, target, artifacts, env):
     assert 'site-packages' in str(Path(codex_wake.__file__).resolve()),codex_wake.__file__
     env=dict(env);env.pop('PYTHONPATH',None)
     def cli(*args,expected=0):
+        if args and args[0] == 'health' and '--json' not in args:
+            args = (*args, '--json')
         p=subprocess.run([str(wake_cli),'--wake-root',str(root),*args],env=env,cwd=artifacts,text=True,capture_output=True,timeout=30)
         assert p.returncode==expected,(p.returncode,p.stdout,p.stderr)
         return json.loads(p.stdout)

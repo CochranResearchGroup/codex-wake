@@ -1,6 +1,8 @@
 """Schemas for host-profile session actions used by durable flow compilation."""
 import json
 
+from .cli_output import emit
+
 
 def tool_specs():
     text = {'type': 'string', 'minLength': 1, 'maxLength': 200}
@@ -44,10 +46,11 @@ def register_parser(subparsers):
     verbs = parser.add_subparsers(dest='flow_session_verb',required=True)
     for name,spec in tool_specs().items():
         command = verbs.add_parser(spec[1].split('.')[1])
+        command.add_argument('--json', dest='as_json', action='store_true')
         command.add_argument('--arguments',type=json.loads,required=True)
 
 
 def command(args,root):
     result = protected_execute('sessions.' + args.flow_session_verb,args.arguments,root)
-    print(json.dumps(result,sort_keys=True))
+    emit(result, args)
     return 0 if result['status']=='completed' else 2

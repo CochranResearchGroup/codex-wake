@@ -1,6 +1,8 @@
 """One public controller notice contract for CLI, API and MCP."""
 import json
 
+from .cli_output import emit
+
 from .controller_health import _TARGET_FIELDS
 
 
@@ -38,10 +40,12 @@ def register_parser(subparsers):
     parser = subparsers.add_parser('notices',help='inspect controller intervention and action notices')
     verbs = parser.add_subparsers(dest='notice_verb',required=True)
     for verb in ('list','publish','reconcile'):
-        verbs.add_parser(verb).add_argument('--arguments',type=json.loads,required=True)
+        item = verbs.add_parser(verb)
+        item.add_argument('--json', dest='as_json', action='store_true')
+        item.add_argument('--arguments',type=json.loads,required=True)
 
 
 def command(args,root):
     result = protected_execute('notices.'+args.notice_verb,args.arguments,root)
-    print(json.dumps(result,sort_keys=True))
+    emit(result, args)
     return 0 if result['status']=='completed' else 2

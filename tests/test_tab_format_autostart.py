@@ -30,7 +30,7 @@ class FormattingAutostartTests(unittest.TestCase):
 
     def cli(self,*args):
         result=subprocess.run([sys.executable,'-m','codex_wake.entrypoint','--wake-root',str(self.root),
-                               'tabs','format',*args],capture_output=True,text=True,timeout=15)
+                               'tabs','format',*args,'--json'],capture_output=True,text=True,timeout=15)
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
         value=json.loads(result.stdout)
         return value['result']['operation']['result'] if 'operation' in value.get('result',{}) else value

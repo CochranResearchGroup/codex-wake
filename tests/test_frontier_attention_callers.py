@@ -54,7 +54,7 @@ class FrontierAttentionCallersTests(unittest.TestCase):
         def cli(words, expected=0):
             output = io.StringIO()
             with contextlib.redirect_stdout(output):
-                code = run(['--wake-root', str(self.wake), 'attention'] + words + auth)
+                code = run(['--wake-root', str(self.wake), 'attention'] + words + auth + ['--json'])
             self.assertEqual(code, expected, output.getvalue())
             return json.loads(output.getvalue())
 

@@ -1,4 +1,5 @@
 """Public policy callers; roles are verified from host metadata/capabilities."""
+from .cli_output import emit
 import json
 from pathlib import Path
 from .session_permissions import PermissionStore, Principal, PermissionDenied
@@ -142,7 +143,7 @@ def _command(args,root):
         from .a2a_bus import BusStore
         binding=BusStore(args.bus_root).bind_permissions(store.root,Path(args.operator_capability))
         result['bus_binding']=binding
-    print(json.dumps(result,sort_keys=True))
+    emit(result, args)
     return 0
 
 
@@ -150,8 +151,8 @@ def command(args,root):
     from .records import WakeError
     try:return _command(args,root)
     except (WakeError,OSError,ValueError,TypeError,KeyError) as exc:
-        print(json.dumps({'error':{'code':getattr(exc,'code','permission_unavailable'),
-            'message':str(exc)},'details':getattr(exc,'decision',None)}))
+        emit({'error':{'code':getattr(exc,'code','permission_unavailable'),
+            'message':str(exc)},'details':getattr(exc,'decision',None)}, args)
         return 2
 
 

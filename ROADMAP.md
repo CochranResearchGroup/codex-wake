@@ -1562,3 +1562,13 @@ One Standards/Spec review and one TDD remediation pass complete; all3findings fi
 Four installed transports and read-only46-tab host checks pass with explicit live
 transition/shared-kernel limits. Delivery is a validated branch and draft PR.
 No production monitoring activation, merge, deployment or worktree deletion.
+
+## P217 | Human-friendly CLI output
+
+[LOCAL-P217](docs/dev/plans/0217-2026-11-10-human-cli-output.md) CLOSED.
+PR549 merged1a651e0; exact0.22.0.dev3 Python package deployed, readable accounts
+and explicit JSON verified, fresh Zsh completion registered. Nine launchers,
+305package members,22native processes and10protected files verified. Six inactive
+checkouts archived with refs retained;50stale registrations pruned. Native owners,
+stock and existing monitor/server state preserved; initial full-run setup error
+and passing installed correction remain explicit in qualification evidence.

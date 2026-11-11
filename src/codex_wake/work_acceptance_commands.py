@@ -1,6 +1,7 @@
 """Verified callers for independent acceptance; no model-supplied authority."""
 from __future__ import annotations
 
+from .cli_output import emit
 import json
 from pathlib import Path
 
@@ -102,9 +103,9 @@ def run(args, root):
             claimant = qualified_claimant(root, args.managed_agent_id, principal,
                 observer=RuntimeObserver(endpoint=args.app_server, socket_path=args.tmux_socket))
         value = execute(args.acceptance_command, arguments, root, principal=principal, authority=authority, claimant=claimant)
-        print(json.dumps(value, sort_keys=True))
+        emit(value, args)
         return 0
     except (WakeError, ValueError, KeyError, TypeError, OSError) as error:
-        print(json.dumps(dict(status='held', error=dict(code=getattr(error, 'code', 'acceptance_unavailable'),
-            message=str(error) if isinstance(error, WakeError) else 'Acceptance request or evidence unavailable.')), sort_keys=True))
+        emit(dict(status='held', error=dict(code=getattr(error, 'code', 'acceptance_unavailable'),
+            message=str(error) if isinstance(error, WakeError) else 'Acceptance request or evidence unavailable.')), args)
         return 2

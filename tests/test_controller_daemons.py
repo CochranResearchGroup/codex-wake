@@ -30,7 +30,7 @@ class DaemonCommandsTests(unittest.TestCase):
             def cli(*args):
                 out = io.StringIO()
                 with contextlib.redirect_stdout(out):
-                    code = main(['--wake-root', str(root), 'daemons', *args])
+                    code = main(['--wake-root', str(root), 'daemons', *args, '--json'])
                 return code, json.loads(out.getvalue())
             code, status = cli('status', 'alice')
             self.assertEqual(code, 0)

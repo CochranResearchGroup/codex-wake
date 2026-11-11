@@ -30,7 +30,7 @@ class GlobalPolicyTests(unittest.TestCase):
             config.write_text(json.dumps(dict(schema_version=1,workspaces={})));config.chmod(0o600)
             def command(*args):
                 result=subprocess.run([sys.executable,'-m','codex_wake.entrypoint','--wake-root',directory,
-                    'tabs',*args],capture_output=True,text=True,timeout=10)
+                    'tabs',*args,'--json'],capture_output=True,text=True,timeout=10)
                 self.assertEqual(result.returncode,0,result.stdout+result.stderr)
                 return json.loads(result.stdout)
             command('format-configure','--scope','global','--policy','{"enabled":false}')

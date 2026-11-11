@@ -1,5 +1,7 @@
 """CLI and MCP presentation adapters for Wake-owned account operations."""
 import json
+
+from .cli_output import emit
 import os
 import socket
 from pathlib import Path
@@ -114,5 +116,5 @@ def command(args, root):
         if getattr(args, key, None) is not None:
             arguments[key] = getattr(args, key)
     value = execute(operation, arguments, root)
-    print(json.dumps(value, sort_keys=True))
+    emit(value, args)
     return 0 if value['status'] == 'completed' else 2

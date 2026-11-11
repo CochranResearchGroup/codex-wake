@@ -1,0 +1,16 @@
+E......................
+======================================================================
+ERROR: test_cli_output (unittest.loader._FailedTest.test_cli_output)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_cli_output
+Traceback (most recent call last):
+  File "/home/ecochran76/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'test_cli_output'
+
+
+----------------------------------------------------------------------
+Ran 23 tests in 11.863s
+
+FAILED (errors=1)

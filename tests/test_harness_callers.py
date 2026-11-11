@@ -28,7 +28,7 @@ class HarnessCallerTests(unittest.TestCase):
                                  [dict(pane_id='%1', window_id='@1')], {'inspect': 'supported'})
             output = io.StringIO()
             with patch('codex_wake.managed_inventory_commands.RuntimeObserver.__call__', return_value=sample), contextlib.redirect_stdout(output):
-                code = run(['--wake-root', str(root), 'agents', 'enroll', '--operator', '--conversation-id', THREAD])
+                code = run(['--wake-root', str(root), 'agents', 'enroll', '--operator', '--conversation-id', THREAD, '--json'])
             self.assertEqual(code, 0, output.getvalue())
             enrolled = json.loads(output.getvalue())
             runner = CommandRunner(wake_root=root)
@@ -59,7 +59,7 @@ class HarnessCallerTests(unittest.TestCase):
                 output = io.StringIO()
                 with contextlib.redirect_stdout(output):
                     result = run(['--wake-root', str(wake), 'task-briefs', verb, '--task-id', 'task-315',
-                                  '--bus-root', str(bus.root), '--operator-capability', str(operator), *extra])
+                                  '--bus-root', str(bus.root), '--operator-capability', str(operator), *extra, '--json'])
                 self.assertEqual(result, 0, output.getvalue())
                 return json.loads(output.getvalue())
             cli('propose', '--brief-json', json.dumps(content))

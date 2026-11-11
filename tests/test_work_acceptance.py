@@ -132,7 +132,7 @@ class WorkAcceptanceTests(unittest.TestCase):
         path.write_text(json.dumps(self.checks))
         common = ['--contract-id', 'cli', '--bus-root', str(bus.root), '--operator-capability', str(capability)]
         def call(verb, *extra):
-            args = parser.parse_args(['acceptance', verb, *common, *extra])
+            args = parser.parse_args(['acceptance', verb, *common, *extra, '--json'])
             output = io.StringIO()
             with contextlib.redirect_stdout(output):
                 code = run(args, self.root)

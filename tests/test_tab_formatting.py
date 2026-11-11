@@ -52,7 +52,7 @@ class FormattingTests(unittest.TestCase):
         for verb in ('enable','rollback','reenable'):
             tool='wake_tabs_format_'+verb
             self.assertIn(tool,tool_specs());self.assertIn(tool,TOOLS);self.assertIn(tool,SPECS)
-            result=subprocess.run([sys.executable,'-m','codex_wake.entrypoint','--wake-root',str(self.root),'tabs','format',verb,'--workspace','work'],capture_output=True,text=True,timeout=15)
+            result=subprocess.run([sys.executable,'-m','codex_wake.entrypoint','--wake-root',str(self.root),'tabs','format',verb,'--workspace','work','--json'],capture_output=True,text=True,timeout=15)
             self.assertEqual(result.returncode,0,result.stdout+result.stderr)
             self.assertEqual(json.loads(result.stdout)['result']['operation']['result']['status'],'rolled_back' if verb=='rollback' else 'applied')
 

@@ -1,4 +1,5 @@
 """Public tab organization adapter. Roles and runtime evidence are host supplied."""
+from .cli_output import emit
 import json
 import math
 import subprocess
@@ -206,7 +207,7 @@ def run(args, root, *, observer=None):
             filters={}
             for value in args.filters:
                 if '=' not in value:
-                    print(json.dumps(dict(status='held',error=dict(code='invalid_argument',message='Use --filter trait=value.'))));return 2
+                    emit(dict(status='held',error=dict(code='invalid_argument',message='Use --filter trait=value.')), args);return 2
                 key,value=value.split('=',1);filters[key]=value
             definition=dict(filters=filters,group_by=args.group_by,sort_by=args.sort_by)
             if args.group:definition['group']=args.group
@@ -219,9 +220,9 @@ def run(args, root, *, observer=None):
         names = ('socket_path', 'session_id', 'app_server', 'timeout', 'mode', 'pins', 'plan_id', 'receipt_id')
         arguments = {k: getattr(args, k) for k in names if getattr(args, k, None) is not None}
         result = execute(args.tabs_command, arguments, root, principal=principal, observer=observer)
-        print(json.dumps(result, sort_keys=True))
+        emit(result, args)
         return 0 if result['status'] not in ('uncertain', 'partial') else 3
     except (WakeError, ValueError, TypeError, KeyError, OSError, TimeoutError, subprocess.SubprocessError) as error:
-        print(json.dumps(dict(status='held', error=dict(code=getattr(error, 'code', 'workspace_unavailable'),
-            message=str(error) if isinstance(error, WakeError) else 'Workspace evidence or request unavailable.'))))
+        emit(dict(status='held', error=dict(code=getattr(error, 'code', 'workspace_unavailable'),
+            message=str(error) if isinstance(error, WakeError) else 'Workspace evidence or request unavailable.')), args)
         return 2

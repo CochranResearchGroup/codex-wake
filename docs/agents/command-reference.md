@@ -580,7 +580,8 @@ codex-wake --wake-root ROOT builds list --account work
 ### CLI help
 
 ```text
-usage: codex-wake builds list [-h] [--arguments ARGUMENTS] [--account ACCOUNT]
+usage: codex-wake builds list [-h] [--arguments ARGUMENTS] [--json]
+                              [--account ACCOUNT]
 
 List registered builds and their exact targets.
 
@@ -591,6 +592,7 @@ options:
   --arguments ARGUMENTS
                         Advanced JSON object of operation arguments; preserved
                         for scripts. See generated command reference.
+  --json                Emit structured results for this command.
   --account ACCOUNT     Account name or configured alias.
 
 Examples:
@@ -616,7 +618,7 @@ codex-wake --wake-root ROOT builds launch --account work --channel modded --expe
 ### CLI help
 
 ```text
-usage: codex-wake builds launch [-h] [--arguments ARGUMENTS]
+usage: codex-wake builds launch [-h] [--arguments ARGUMENTS] [--json]
                                 [--account ACCOUNT] [--channel {stock,modded}]
                                 [--expected-target EXPECTED_TARGET]
                                 [--arg NATIVE_ARGS | --args NATIVE_ARGS_JSON]
@@ -630,6 +632,7 @@ options:
   --arguments ARGUMENTS
                         Advanced JSON object of operation arguments; preserved
                         for scripts. See generated command reference.
+  --json                Emit structured results for this command.
   --account ACCOUNT     Account name or configured alias.
   --channel {stock,modded}
                         Registered native build channel (default: modded).
@@ -668,7 +671,8 @@ codex-wake --wake-root ROOT builds stage --arguments '{"recipe":"candidate"}'
 ### CLI help
 
 ```text
-usage: codex-wake builds stage [-h] [--arguments ARGUMENTS] [--recipe RECIPE]
+usage: codex-wake builds stage [-h] [--arguments ARGUMENTS] [--json]
+                               [--recipe RECIPE]
 
 Stage one host-registered immutable build recipe.
 
@@ -679,6 +683,7 @@ options:
   --arguments ARGUMENTS
                         Advanced JSON object of operation arguments; preserved
                         for scripts. See generated command reference.
+  --json                Emit structured results for this command.
   --recipe RECIPE       Host-registered build recipe name, never an arbitrary
                         executable or path.
 
@@ -706,7 +711,7 @@ codex-wake --wake-root ROOT builds select --account work --channel modded --expe
 ### CLI help
 
 ```text
-usage: codex-wake builds select [-h] [--arguments ARGUMENTS]
+usage: codex-wake builds select [-h] [--arguments ARGUMENTS] [--json]
                                 [--account ACCOUNT] [--channel {stock,modded}]
                                 [--expected-target EXPECTED_TARGET]
                                 [--identifier IDENTIFIER]
@@ -720,6 +725,7 @@ options:
   --arguments ARGUMENTS
                         Advanced JSON object of operation arguments; preserved
                         for scripts. See generated command reference.
+  --json                Emit structured results for this command.
   --account ACCOUNT     Account name or configured alias.
   --channel {stock,modded}
                         Registered native build channel (default: modded).
@@ -757,7 +763,7 @@ codex-wake --wake-root ROOT builds rollback --account work --channel modded --ex
 ### CLI help
 
 ```text
-usage: codex-wake builds rollback [-h] [--arguments ARGUMENTS]
+usage: codex-wake builds rollback [-h] [--arguments ARGUMENTS] [--json]
                                   [--account ACCOUNT]
                                   [--channel {stock,modded}]
                                   [--expected-target EXPECTED_TARGET]
@@ -771,6 +777,7 @@ options:
   --arguments ARGUMENTS
                         Advanced JSON object of operation arguments; preserved
                         for scripts. See generated command reference.
+  --json                Emit structured results for this command.
   --account ACCOUNT     Account name or configured alias.
   --channel {stock,modded}
                         Registered native build channel (default: modded).

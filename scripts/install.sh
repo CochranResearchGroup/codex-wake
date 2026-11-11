@@ -18,7 +18,7 @@ while (($#)); do
   esac
 done
 case "$shell_name" in bash|zsh|all) ;; *) printf 'Unsupported shell: %s\n' "$shell_name" >&2; exit 2 ;; esac
-uv tool install --force "$source_spec"
+uv tool install --force --reinstall "$source_spec"
 if "$completion_enabled"; then
   tool_bin="$(uv tool dir --bin)"
   arguments=(completion install --shell "$shell_name")

@@ -1,5 +1,7 @@
 """Local same-user controller CLI and shared operation/output contract."""
 import json
+
+from .cli_output import emit
 import sys
 import time
 
@@ -64,6 +66,7 @@ def register_parser(subparsers):
     verbs=parser.add_subparsers(dest='control_verb',required=True)
     for verb in ('list','resolve','create','load','prompt','result','output','cancel'):
         item=verbs.add_parser(verb,**({'help':'create an owned headless Grok ACP session (select --harness grok)'} if verb=='create' else {'help':'explicitly load a persisted owned Grok conversation'} if verb=='load' else {}))
+        item.add_argument('--json', dest='as_json', action='store_true')
         if verb in ('list','resolve','prompt','create','load'):parser_options(item)
         item.add_argument('--endpoint',default='unix://',help='existing native Unix endpoint; default discovers running local daemons')
         if verb in ('resolve','prompt','load'):
@@ -140,10 +143,15 @@ def command(args,root):
                 else:identifier=args.operation_id
                 return present(LocalSessionRouter(root),identifier,mode=mode,timeout=args.timeout,cursor=args.cursor,limit=args.limit)
             value=execute('local.'+args.control_verb,arguments,root)
-        print(json.dumps(value,sort_keys=True))
+        emit(value, args)
         return operation_exit_code(value)
     except (ValueError,OSError) as error:
-        print(json.dumps({'status':'failed','error':{'code':getattr(error,'code','control_unavailable'),'message':str(error)}}),file=sys.stderr if getattr(args,'mode',None) else sys.stdout);return 2
+        value = {'status':'failed','error':{'code':getattr(error,'code','control_unavailable'),'message':str(error)}}
+        if getattr(args,'mode',None):
+            print(json.dumps(value), file=sys.stderr)
+        else:
+            emit(value, args)
+        return 2
 
 
 def receipt_output(envelope,mode='final',*,cursor=0):

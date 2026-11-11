@@ -58,7 +58,7 @@ class AttentionCommandTests(unittest.TestCase):
         def run(arguments):
             output = StringIO()
             with redirect_stdout(output):
-                code = commands.run(parser.parse_args(['attention'] + arguments + common),
+                code = commands.run(parser.parse_args(['attention'] + arguments + common + ['--json']),
                     self.root / 'wake', now=lambda: 100)
             self.assertEqual(code, 0, output.getvalue())
             return json.loads(output.getvalue())

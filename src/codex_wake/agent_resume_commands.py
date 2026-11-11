@@ -1,4 +1,5 @@
 """CLI/MCP resume callers authenticate before the shared effect owner."""
+from .cli_output import emit
 import json
 from pathlib import Path
 
@@ -55,7 +56,7 @@ def run(args,root, *, runtime=None, now=None):
         value=execute(vars(args),root,args.profiles,principal,runtime=runtime,now=now)
     except (WakeError,ValueError,TypeError,KeyError,OSError) as error:
         value={'status':'held','error':{'code':getattr(error,'code','resume_identity_unverified')}}
-    print(json.dumps(value,sort_keys=True))
+    emit(value, args)
     return 0 if value.get('status')=='resumed' else 2
 
 

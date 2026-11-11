@@ -1,6 +1,7 @@
 """CLI and MCP callers share read-only managed-agent observation semantics."""
 from __future__ import annotations
 
+from .cli_output import emit
 import json
 
 from .agent_observation import AgentObservation, RuntimeStateObserver, STATES
@@ -45,9 +46,9 @@ def run(args, root):
             grok = grok_state_source(args.runtime_root, args.binding_id, args.binding_sha256)
         value = execute(args.agents_command, arguments, root,
                         observer=RuntimeStateObserver(endpoint=args.app_server, grok_source=grok))
-        print(json.dumps(value, sort_keys=True))
+        emit(value, args)
         return 0 if value.get('status') not in ('timeout', 'unknown') else 3
     except (WakeError, ValueError, TypeError, KeyError, OSError) as error:
-        print(json.dumps(dict(status='held', error=dict(code=getattr(error, 'code', 'observation_unavailable'),
-                         message='Semantic observation or request is unavailable.')), sort_keys=True))
+        emit(dict(status='held', error=dict(code=getattr(error, 'code', 'observation_unavailable'),
+                         message='Semantic observation or request is unavailable.')), args)
         return 2

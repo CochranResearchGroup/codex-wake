@@ -63,6 +63,8 @@ def main():
         with (root / 'events.jsonl').open('a') as stream:
             stream.write(json.dumps(events[-1], sort_keys=True) + '\n')
     def call(*command, check=True):
+        if command and command[0] == 'daemons' and '--json' not in command:
+            command = (*command, '--json')
         result = subprocess.run([cli, '--wake-root', str(root), *command], env=env,
             capture_output=True, text=True, timeout=110, cwd=root)
         value = json.loads(result.stdout)
@@ -166,7 +168,7 @@ def main():
     def private_files(home):
         return {str(p.relative_to(home)):hashlib.sha256(p.read_bytes()).hexdigest() for p in home.rglob('*') if p.is_file()}
     try:
-        call('accounts','init')
+        call('accounts','init','--json')
         stock=root/'stock';stock.mkdir(mode=0o700);(stock/'hooks').mkdir(mode=0o700)
         notify=stock/'hooks/notify.py'
         notify.write_text('import json,sys\nfrom pathlib import Path\nwith Path(sys.argv[1]).open("a") as output: output.write(json.dumps({"script":__file__,"event":json.loads(sys.argv[-1])})+"\\n")\n')

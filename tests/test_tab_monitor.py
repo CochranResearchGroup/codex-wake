@@ -25,7 +25,7 @@ class TabMonitorTests(unittest.TestCase):
                 while 'KEEP_DRAFT' not in subprocess.check_output([*tmux,'capture-pane','-p','-t','%0'],text=True):
                     self.assertLess(time.monotonic(),until);time.sleep(.01)
                 before=subprocess.check_output([*tmux,'capture-pane','-p','-t','%0'],text=True)
-                owner=TabMonitor(root)
+                owner=TabMonitor(root,clock=lambda:1000.)
                 result=owner.execute('tabs.monitor.refresh',{})
                 self.assertEqual(result['snapshot']['freshness'],'fresh')
                 self.assertEqual(result['snapshot']['resources'][0]['target']['workspace'],'fixture')

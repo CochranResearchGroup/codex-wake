@@ -34,7 +34,7 @@ class CommandWorkflowsTests(unittest.TestCase):
         out = Terminal() if terminal else io.StringIO()
         err = io.StringIO()
         with patch('sys.stdin', stdin or io.StringIO()), contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-            code = main(['--wake-root',str(self.root),*args])
+            code = main(['--wake-root',str(self.root),*args,'--json'])
         return code, out.getvalue(), err.getvalue()
 
     def test_typed_build_list_matches_legacy_json_arguments(self):
@@ -114,7 +114,7 @@ class CommandWorkflowsTests(unittest.TestCase):
         import time
         master, slave = pty.openpty()
         process = subprocess.Popen([sys.executable,'-m','codex_wake.entrypoint','--wake-root',str(self.root),
-                                    'daemons','update','alice'],stdin=slave,stdout=slave,stderr=slave)
+                                    'daemons','update','alice','--json'],stdin=slave,stdout=slave,stderr=slave)
         os.close(slave)
         content = b''
         answered = False

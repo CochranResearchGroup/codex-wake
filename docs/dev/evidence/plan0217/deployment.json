@@ -1,0 +1,30 @@
+{
+  "source": "1a651e073d7a0f5f7a8200d49074af2a22332c07",
+  "wheel_sha256": "1bfef803398161e266281c01578728d51268ee25f1bd27e731c44041a424281f",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev3-1a651e0",
+  "previous_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev2-7010cbe",
+  "matching_python_members": 305,
+  "launchers_verified": true,
+  "protected_preserved": 10,
+  "native_preserved": 22,
+  "native_exited_independently": [],
+  "stock_unchanged": true,
+  "native_owner_changes": 0,
+  "native_lifecycle_calls": 0,
+  "provider_calls": 0,
+  "completion": "installed",
+  "status": "DEPLOYED",
+  "pr": 549,
+  "version": "0.22.0.dev3",
+  "installed_checks": "18 PASS in 11.610s",
+  "zsh_completion": "verified in fresh interactive shell",
+  "http_controller": "preexisting stale identity; unchanged",
+  "rollback_command": "python3 /home/ecochran76/.local/state/codex-wake/qualification/plan0217-20261110/deploy_cli.py rollback",
+  "cleanup": {
+    "archived_inactive_checkouts": 6,
+    "pruned_missing_registrations": 50,
+    "archived_branches_retained": true,
+    "active_dirty_unpublished_preserved": true
+  },
+  "hosted_ci": false
+}

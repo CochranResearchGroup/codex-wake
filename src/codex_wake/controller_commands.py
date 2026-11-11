@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+
+from .cli_output import emit
 import os
 import socket
 
@@ -45,5 +47,5 @@ def command(args):
     if getattr(args, 'expected_target', None) is not None:
         arguments['expected_target'] = args.expected_target
     value = execute(args.controller_command, arguments, args.wake_root)
-    print(json.dumps(value, sort_keys=True))
+    emit(value, args)
     return 0 if value['status'] == 'completed' else 2

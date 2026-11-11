@@ -1,6 +1,7 @@
 """CLI/MCP caller seam for managed inventory. Native metadata is host supplied."""
 from __future__ import annotations
 
+from .cli_output import emit
 import time
 
 from .goal_supervision import verified_native_caller
@@ -219,11 +220,11 @@ def run(args, root, *, native_context=None, observer=None):
                                        capability=capability, operator=operator)
         value = execute(action, arguments, root, native_context=native_context,
                         observer=observer, operator=operator)
-        print(json.dumps(value, sort_keys=True))
+        emit(value, args)
         return 0
     except (ValueError, KeyError, TypeError, OSError, WakeError) as error:
         value = {'status': 'held', 'error': {'code': getattr(error, 'code', 'inventory_unavailable'),
                  'message': str(error) if isinstance(error, (ValueError, InventoryError))
                  else 'Inventory or qualified runtime evidence is unavailable.'}}
-        print(json.dumps(value, sort_keys=True))
+        emit(value, args)
         return 2
