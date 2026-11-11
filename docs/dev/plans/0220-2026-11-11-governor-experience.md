@@ -16,3 +16,42 @@ Primary seam:installed modded Codex and Wake public controls using existing nati
 
 ## Done
 All scoped tickets integrated and validated with exact source/runtime receipts; one review findings adjudicated and one bounded remediation pass verified. Tracker closure distinct from merge/deploy. Preserve dirty original checkout and unrelated lanes. Memory discovery skipped:full fresh accepted interview and current authoritative sources sufficient. Memory write forbidden absent explicit user request.
+
+## Required native loss-containment extension
+
+Implementation found that graceful watcher exit stops work, but SIGKILL leaves
+no external process to act. The accepted failure behavior therefore requires
+private native `thread/governorLease/set` (arm/renew, read-only query, release),
+with exact thread/lease/controller-generation/enrollment-revision binding.
+Native expiry uses Linux BOOTTIME, clamps to the earliest applicable deadline,
+and persists scoped lease/goal recovery marks. Native cold resume holds automatic
+work from an expired or unqualified lease while preserving operator inspection.
+
+Core causal-root cancellation follows native root-turn provenance through task
+startup and delegation. Cancel before admitting late children; do not use a global
+admission gate or adopt an unrelated operator turn. Goal identity is captured
+internally; goal-less active turns need no synthetic goal. Idle goal-less future
+task isolation is explicitly unsupported until a causal scope exists. The guard
+owns stopping only; Wake's existing allocation ledger remains the accounting owner.
+
+New strict activation requires native guard acknowledgement and watcher
+`governor_protocol=1` plus a fresh first-poll acknowledgement. Legacy watcher-only
+records remain readable, without claiming this stronger failure guarantee. Failed
+setup must not start a task budget window; existing shared ceilings are retained.
+These seams implement the already-approved watcher-loss/isolated-task behavior;
+they do not authorize a new provider, global daemon adoption or working deployment.
+
+## Host binding and presentation
+
+Default native controls/private controller follow the existing locally owned
+Codex MCP goal-root/policy configuration. Verified model callers carry that host
+policy through typed context, never JSON authority fields. Explicit isolated roots
+remain exact. Private CLI/PowerShell bridging has local operator admission;
+API/MCP session operations cannot obtain that role by naming a verb. Mutations
+mint request identity before transmission and retain it for uncertain recovery.
+Native UI status uses one private connection bootstrap then shared-controller
+HTTP, bounded polling, invalidation on governor tool completions and truthful
+unknown states. Human time output distinguishes UTC deadlines from authenticated
+counter-relative bounds. Token enforcement is based on qualified sampled usage
+and native interruption; universal request-level hard-token guarantees remain out
+of scope on hosts without demonstrated admission coverage.
