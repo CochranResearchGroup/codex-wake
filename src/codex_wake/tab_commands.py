@@ -186,7 +186,8 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
             raise InventoryError('recovery_held','Recovery preview contains unresolved bindings; inspect before applying.')
         payload['expected_target']=preview['target']
     elif 'expected_target' not in payload:
-        payload['expected_target']=lifecycle.inspect(workspace)['target']
+        payload['expected_target']=(owner.format_target(workspace=workspace)
+            if operation.startswith('tabs.format.') else lifecycle.inspect(workspace)['target'])
     if 'destination' in payload:
         dest = payload['destination']
         if dest not in owner.workspaces:

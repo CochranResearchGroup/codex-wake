@@ -1,0 +1,12 @@
+{
+  "source_commit": "87e0e0d40e17047ad55aa6ee10844ea8d1cbed61",
+  "build_log_sha256": "dc442d5b199f97a29bf8454360c9b64b08c0efaf823886b7f780fbd2be760dce",
+  "install_log_sha256": "59daeb9a6bcccf8e58fdbe2f85375a8ef896ed1291f28bf5180691a48a7325ec",
+  "exact_test_sha256": "902c1a960f695db498e28be6f94008c57ff337f330eb3b38eae7a057876cb400",
+  "installed_test_folder": "/tmp/wake552-installed-tests",
+  "product_import": "site-packages; PYTHONPATH unset; test copied separately",
+  "formatting_tests_passed": 4,
+  "formatting_seconds": 2.496,
+  "final_test_uid_processes": 0,
+  "production_effects": false
+}

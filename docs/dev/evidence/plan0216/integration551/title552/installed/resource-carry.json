@@ -1,0 +1,35 @@
+{
+  "resource_remeasured": false,
+  "source_resource_receipt": "../../qualification/installed-canonical.json",
+  "resource_source_commit": "f19abaa413f9b0f15ff9df674fbbcb0238e5829d",
+  "new_source_commit": "87e0e0d40e17047ad55aa6ee10844ea8d1cbed61",
+  "changed_runtime_members": [
+    "codex_wake/__init__.py",
+    "codex_wake/tab_commands.py",
+    "codex_wake/tab_formatting.py"
+  ],
+  "unchanged_formatting_methods": [
+    "__init__",
+    "apply",
+    "batch",
+    "commit_session",
+    "configure",
+    "ensure_monitor",
+    "execute",
+    "identity",
+    "locked",
+    "new_record",
+    "read",
+    "refresh",
+    "renew_session",
+    "renew_unchanged",
+    "save",
+    "session_plan"
+  ],
+  "changed_formatting_methods": [
+    "_execute",
+    "presentation_target",
+    "target"
+  ],
+  "boundary": "Only explicit formatting target generation/local operator pin routing and version change; observer hot paths and retained apply/refresh persistence unchanged. Prior resource evidence carried, not a new measurement."
+}

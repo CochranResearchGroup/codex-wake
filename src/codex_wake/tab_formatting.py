@@ -56,6 +56,15 @@ class TabFormatting:
     def identity(self,snapshot):
         return digest({k:snapshot.get(k) for k in ('server','session_id','socket_identity','bridge_generation')})
 
+    @staticmethod
+    def presentation_target(inspected):
+        # Titles are live display metadata, not namespace or process custody.
+        snapshot=inspected['snapshot']
+        stable=dict(snapshot,windows=[dict(window,panes=[
+            {key:value for key,value in pane.items() if key!='pane_title'}
+            for pane in window['panes']]) for window in snapshot['windows']])
+        return dict(inspected['target'],generation=digest(stable))
+
     def target(self,scope='workspace',workspace=None):
         if scope=='global':
             return dict(host=self.tabs.host,environment=self.tabs.environment,
@@ -63,8 +72,9 @@ class TabFormatting:
         if scope!='workspace':raise InventoryError('invalid_argument','scope must be global or workspace.')
         if workspace is None and len(self.tabs.workspaces)==1:workspace=next(iter(self.tabs.workspaces))
         from .tab_lifecycle import TabLifecycle
-        return TabLifecycle(self.tabs.root,workspaces=self.tabs.workspaces,
-            host=self.tabs.host,environment=self.tabs.environment).inspect(workspace)['target']
+        inspected=TabLifecycle(self.tabs.root,workspaces=self.tabs.workspaces,
+            host=self.tabs.host,environment=self.tabs.environment).inspect(workspace)
+        return self.presentation_target(inspected)
 
     def configure(self,state,policy,*,workspace=None):
         values=validate_policy(policy)
@@ -154,7 +164,7 @@ class TabFormatting:
         if not hasattr(transport,'formatting'):raise InventoryError('unsupported_target','Backend formatting is unavailable.')
         from .tab_lifecycle import TabLifecycle
         inspected=TabLifecycle(self.tabs.root,workspaces=self.tabs.workspaces,host=self.tabs.host,environment=self.tabs.environment).inspect(name,deadline=deadline)
-        snapshot=inspected['snapshot'];expected=inspected['target']
+        snapshot=inspected['snapshot'];expected=self.presentation_target(inspected)
         if arguments.get('expected_target') is not None and arguments['expected_target']!=expected:
             raise InventoryError('stale_target','Presentation changed before formatting.')
         with self.locked(deadline):
