@@ -46,8 +46,12 @@ def _normalize(receipt, thread):
     reason = receipt.get('reason')
     exhausted = reason in ('token_limit', 'time_limit', 'token_limit_reached', 'deadline_reached', 'allocation_exhausted', 'continuation_held', 'task_exhausted')
     engagement = receipt.get('engagement', {})
+    from .goal_native_guard import qualified
+    guarded=qualified(receipt) if receipt.get('enrollment_revision') else False
     state = ('advisory' if disabled and receipt.get('governor_mode') == 'advisory' else 'disabled' if disabled else 'limit_reached' if exhausted else
-             'enforced' if engagement.get('engaged') else 'disconnected')
+             'enforced' if engagement.get('engaged') and guarded else 'disconnected')
+    if not disabled and engagement.get('engaged') and not guarded:
+        reason=receipt.get('native_guard',{}).get('reason') or ('native_guard_unqualified' if receipt.get('requires_native_guard') else 'watcher_only_native_guard_unqualified')
     elapsed = receipt.get('elapsed_upper_seconds')
     if elapsed is None and all(type(receipt.get(key)) in (int, float) for key in ('started_upper', 'started_boottime', 'time_origin')):
         elapsed = max(0, receipt['started_upper']-receipt['time_origin']+
@@ -65,7 +69,7 @@ def _normalize(receipt, thread):
             remaining_tokens=max(0, limit-used) if type(used) is int and type(limit) is int else None,
             elapsed_seconds=elapsed, accounting=receipt.get('accounting', {})),
         limits=dict(token_limit=limit, time_limit_seconds=receipt.get('time_limit_seconds'),shared=receipt.get('shared_limits')),
-        deadline=receipt.get('deadline'), watcher=controller,
+        deadline=receipt.get('deadline'), watcher=dict(controller,native_guard=receipt.get('native_guard'),native_guard_qualified=guarded),
         revision=receipt.get('budget_revision', receipt.get('enrollment_revision', 0)),
         actions=['activate'] if reason == 'not_enrolled' else ['activate', 'extend', 'reset', 'resume'] if disabled else ['extend', 'reset', 'disable', 'resume', 'advisory'],
         reason=reason, owner_receipt=receipt)
@@ -144,7 +148,7 @@ def _execute(root, verb, arguments, *, principal=None):
         from .local_self_limits import policy_for
         from .self_limits import local_execute
         policy = retained['policy_path'] if path.exists() else policy_for(root, row, host_policy or arguments.get('policy'))
-        limits = {key: arguments.get(key) for key in ('token_limit', 'time_limit_seconds')}
+        limits = {key: arguments.get(key,receipt.get(key) if operator and path.exists() else None) for key in ('token_limit', 'time_limit_seconds')}
         for value in limits.values():
             if type(value) is not int or value <= 0:
                 raise ValueError('positive token_limit and time_limit_seconds required')

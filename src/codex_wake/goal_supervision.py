@@ -595,7 +595,7 @@ def diagnose(root,policy_path,caller_thread_id,allocation_id=None,*,permission_p
 
 def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
            checkpoint_token_percent=5,checkpoint_seconds=60,token_accounting=None,
-           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None,session_scope=False,prepare_only=False,activation_baseline=False):
+           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None,session_scope=False,prepare_only=False,activation_baseline=False,requires_native_guard=False):
     from .permission_enforcement import principal_for,authorize,enrollment_action
     principal=principal_for(root,caller_thread_id,native_context=native_context,principal=permission_principal)
     name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
@@ -696,6 +696,7 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             time_origin=now if old or created is None or allow_counter or activation_baseline else created,effects={},checkpoint=None,
             prior_allocation=old if old else None)
         receipt.update(time_fields)
+        if requires_native_guard:receipt['requires_native_guard']=True
         if session_scope and not old:
             receipt['session_scope']=True
         receipt.update(caller_binding=binding,grant=grant,policy_path=str(Path(policy_path).absolute()),token_limit=token_limit,
@@ -711,6 +712,9 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             receipt['enrollment_revision']=old.get('enrollment_revision',0)+1 if same else 1
             receipt.pop('poll_ack',None)
         else:receipt.setdefault('enrollment_revision',1)
+        if old and requires_native_guard and old.get('native_guard',{}).get('status') in ('expired','lost','released'):
+            receipt['enrollment_revision']+=1
+            receipt.pop('poll_ack',None)
         if grant.get('auto_enrolled') and grant['allocation_id']=='native-'+caller_thread_id and not old:
             from .goal_usage import observe_usage
             native=_request(grant,'thread/read',dict(threadId=caller_thread_id,includeTurns=False))['thread']
@@ -741,6 +745,7 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                         raise AccountingUnavailable('successor requires qualified original objective lineage',original)
                     receipt.update(usage_thread_id=usage_thread,usage_goal_created_at=usage_created,
                         usage_reset_anchor=usage_anchor)
+                if predecessor.get('requires_native_guard'):receipt['requires_native_guard']=True
                 if predecessor.get('task_window'):
                     receipt.update(task_window=predecessor['task_window'],
                         task_owner_thread_id=predecessor.get('task_owner_thread_id',parent))
@@ -822,7 +827,10 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             receipt['accounting']=observation;hold('accounting_unknown')
         controller=_heartbeat(directory);receipt['controller_generation']=controller.get('generation')
         if not controller['fresh']:receipt.update(state='held',reason='controller_unavailable')
-        if receipt.get('used_tokens',0)>=token_limit or now>=receipt['deadline']:
+        shared=receipt.get('shared_limits')
+        if shared and (shared['used_tokens']>=shared['token_limit'] or now>=shared['deadline']):
+            hold('allocation_exhausted')
+        elif receipt.get('used_tokens',0)>=token_limit or now>=receipt['deadline']:
             hold('task_exhausted' if receipt.get('task_window') else 'allocation_exhausted')
         if receipt.get('stop_latched') or (same and old['state'] in ('stopped','stop_unverified')):
             hold('continuation_held')
@@ -837,6 +845,15 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             hold('native_goal_state_unknown')
         _record_supervision_notice(path,receipt,'activation',controller)
         _save(path,receipt)
+        if receipt.get('requires_native_guard'):
+            from .goal_native_guard import arm
+            exhausted=receipt.get('first_stop',{}).get('reason') in ('allocation_exhausted','task_exhausted','continuation_held')
+            if not receipt.get('stop_latched') or exhausted:
+                guarded=arm(path,receipt,force=True,stop=bool(receipt.get('stop_latched')))
+            else:guarded=False
+            if not guarded:
+                receipt.update(state='held',reason=receipt.get('native_guard',{}).get('reason','native_guard_unavailable'))
+                _save(path,receipt)
         from .goal_readiness import engagement
         from .goal_notices import governor_status
         return dict(_public(receipt),controller=controller,sampled=True,maximum_token_overshoot=None,
@@ -973,6 +990,15 @@ def _stop(path,receipt,reason,goal=None,active=None):
     _stop_episode(path,receipt,reason)
     _first_stop(path,receipt,reason)
     receipt.update(reason=reason,state='stop_unverified',stop_latched=True)
+    if receipt.get('requires_native_guard'):
+        # The native owner retains actual goal identity and automatic-turn
+        # attribution. Never recapture a later operator reply from this session.
+        from .goal_native_guard import expire
+        _allocation_latch(receipt,reason)
+        expire(path,receipt,reason)
+        _record_supervision_notice(path,receipt,'stop')
+        _save(path,receipt)
+        return receipt
     _allocation_latch(receipt,reason)
     try:
         if active is None:goal,active=_native(receipt['grant'],receipt['thread_id'])
@@ -1059,6 +1085,7 @@ def _wind_down(path, receipt, reason, goal, active, upper):
     Qualification loss cannot authorize more product work. The reserve permits
     only winddown, never extends the original deadline, and survives retries.
     """
+    if receipt.get('requires_native_guard'):return _stop(path,receipt,reason,goal,active)
     if 'winddown_deadline' not in receipt:
         _first_stop(path,receipt,reason)
         deadline=min(receipt['deadline'],upper+min(60,receipt['checkpoint_seconds']))
@@ -1110,6 +1137,12 @@ def poll(root):
                 pending=renewal_hold(root,receipt)
                 if pending:
                     results.append(dict(receipt,**pending));continue
+                if receipt.get('requires_native_guard') and receipt.get('native_guard',{}).get('lease_id'):
+                    from .goal_native_guard import qualified, matches, reconcile_expiry
+                    guard=receipt['native_guard']
+                    if matches(receipt) and (guard.get('status') in ('lost','expired') or guard.get('status')=='armed' and not qualified(receipt)):
+                        reconcile_expiry(path,receipt)
+                        results.append(receipt);continue
                 from .permission_enforcement import controller_permission
                 permission=controller_permission(root,receipt)
                 receipt['enforcement_continuation_permission']=permission
@@ -1150,6 +1183,14 @@ def poll(root):
                     receipt.update(state='held',reason='permission_revoked',campaign_continuation='held')
                     _save(path,receipt);results.append(receipt);continue
                 receipt.pop('campaign_continuation',None)
+                if receipt.get('requires_native_guard'):
+                    from .goal_native_guard import arm
+                    if not arm(path,receipt):
+                        receipt.update(state='held',reason=receipt.get('native_guard',{}).get('reason','native_guard_unavailable'))
+                        _save(path,receipt);results.append(receipt);continue
+                if receipt.get('requires_native_guard'):
+                    captured=next((item['turnIds'] for item in receipt.get('native_guard',{}).get('member_turns',[]) if item['threadId']==receipt['thread_id']),[])
+                    active=[turn for turn in active if turn in captured]
                 checkpoint=not task_disabled and (receipt['token_limit']-used<=receipt['token_limit']*receipt['checkpoint_token_percent']/100
                     or receipt['deadline']-upper<=receipt['checkpoint_seconds'])
                 if checkpoint:
@@ -1231,7 +1272,11 @@ def watch(root,interval=1):
                     for path in directory.glob('*.json'):
                         if path.name=='controller.json':continue
                         with _lock(directory,path.stem):
-                            _private(path);receipt=json.loads(path.read_text());_stop(path,receipt,'controller_stopped')
+                            _private(path);receipt=json.loads(path.read_text())
+                            if receipt.get('requires_native_guard'):
+                                from .goal_native_guard import expire
+                                expire(path,receipt)
+                            else:_stop(path,receipt,'controller_stopped')
             _save(directory/'controller.json',dict(heartbeat,active=False,observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
             # Stop control precedes presentation. Drain the newly journaled stop
             # once; stalled native I/O must not hold controller exit indefinitely.
