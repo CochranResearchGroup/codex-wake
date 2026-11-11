@@ -884,7 +884,7 @@ def qualify(options):
             wait(lambda: ((value := governor('status'))['revision'] > stopped['revision']
                           and value['usage']['used_tokens'] == 0), 'new reset window revision')
             ui_command('/wake governor extend --add-tokens 500 --add-seconds 30 --resume')
-            wait(lambda: stream_open.is_set(), 'explicit operator continuation reached native model')
+            wait(lambda: stream_open.is_set(), 'explicit operator continuation reached native model', seconds=20)
             resumed = governor('status')
             require(resumed['limits']['token_limit'] == 1500, 'extension did not preserve allowance')
             ui_command('/wake governor disable')
