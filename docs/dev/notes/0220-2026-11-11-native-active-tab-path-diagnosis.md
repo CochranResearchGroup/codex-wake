@@ -155,3 +155,19 @@ restart or provider operation occurred. Candidate/old prefix, rollback receipts
 and dedicated source worktree remain retained. Source is uncommitted/unpublished;
 no release declaration or cleanup of unrelated lanes is implied. Plan0220's
 operator-approved source/installation/single-continuation scope is complete.
+
+## Authorized PR publication review
+
+The operator requested PR review, merge, deployment and testing. Reconciled
+origin/main3f8a18fa, preserving dev7 installation/consolidation provenance.
+Standards review against repository policy and Spec review against Plan0220
+found no remaining blocker in the bounded fix. The explicit-endpoint and
+unbound-recipient controls preserve attachment authority; no retry/dispatch
+policy or cancellation lock is weakened.
+
+Pinned Ruff0.14.2 undefined-name checks across src/scripts/tests/hooks, compilation
+and policy wiring pass. The earlier233 related checks and one automatic installed
+continuation remain qualified. All317 Python source files match the installed
+candidate byte-for-byte. A broader whole-suite run is in progress and has reported
+failures; its report must be diagnosed before merge. It is not represented as
+passing validation. Hosted CI is skipped under operator cost policy.
