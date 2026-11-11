@@ -178,7 +178,7 @@ def qualify(options):
         provider="owned localhost Responses fixture",
         external_provider_calls=0,
         http_request_cap=3
-        if options.supervision_loss_only or options.observation_recovery_only
+        if options.supervision_loss_only or options.observation_recovery_only or options.governor_ui_only
         else 7,
         native_frontend_acceptance=True,
         history_mode=options.history_mode,
@@ -231,7 +231,9 @@ def qualify(options):
                 number = len(calls) + 1
                 state = fixture_state["phase"]
                 phase = "unexpected"
-                if not operator_reply and state == "warmup":
+                if options.governor_ui_only and state != "warmup":
+                    phase = "work_stream"
+                elif not operator_reply and state == "warmup":
                     phase = "warmup"
                     fixture_state["phase"] = "enrollment"
                 elif not operator_reply and state == "enrollment":
@@ -476,6 +478,11 @@ def qualify(options):
         "XDG_RUNTIME_DIR",
     ):
         Path(env[key]).mkdir(mode=0o700)
+    env["PATH"] = str(prefix / "bin") + os.pathsep + env.get("PATH", "")
+    if options.governor_ui_only:
+        from codex_wake.shortcut_store import write
+        write(Path(env["XDG_CONFIG_HOME"]) / "codex-wake/shortcuts.json",
+              dict(version=1, wake_root=str(root)))
     for key in (
         "CODEX_THREAD_ID",
         "PYTHONPATH",
@@ -517,30 +524,33 @@ def qualify(options):
         )
         return json.loads(value.stdout)
 
-    bus = base / "bus"
-    operator = invoke(["a2a", "configure", "--bus-root", str(bus), "--json"])[
-        "operator_capability_file"
-    ]
-    auth = ["--bus-root", str(bus), "--operator-capability", operator]
-    common = base / "common.json"
-    save(
-        "common.json",
-        {"version": 1, "global": {"actions": {"attention.respond": "allow"}}},
-    )
-    invoke(
-        [
-            "--wake-root",
-            str(root),
-            "permissions",
-            "configure",
-            "--file",
-            str(common),
-            "--expected-revision",
-            "0",
-            *auth,
+    auth = []
+    if not options.governor_ui_only:
+        bus = base / "bus"
+        operator = invoke(["a2a", "configure", "--bus-root", str(bus), "--json"])[
+            "operator_capability_file"
         ]
-    )
+        auth = ["--bus-root", str(bus), "--operator-capability", operator]
+        common = base / "common.json"
+        save(
+            "common.json",
+            {"version": 1, "global": {"actions": {"attention.respond": "allow"}}},
+        )
+        invoke(
+            [
+                "--wake-root",
+                str(root),
+                "permissions",
+                "configure",
+                "--file",
+                str(common),
+                "--expected-revision",
+                "0",
+                *auth,
+            ]
+        )
     native = None
+    local_controller = None
     watcher = None
     ui_started = False
     ui_count = 0
@@ -789,6 +799,12 @@ def qualify(options):
             peer_goal_before=peer_goal,
             peer_before=peer_before,
         )
+        if options.governor_ui_only:
+            local_controller = subprocess.Popen(
+                [str(cli), '--wake-root', str(root), 'control', 'server', 'run',
+                 '--native-endpoint', endpoint], env=env, cwd=workspace,
+                stdin=subprocess.DEVNULL, stdout=wlog, stderr=wlog, start_new_session=True)
+            wait(lambda: (root / 'local-controller/connection.json').exists(), 'private governor controller')
         attach(endpoint, thread)
         wait(
             lambda: "context left" in capture("tui-initial.txt")
@@ -830,6 +846,88 @@ def qualify(options):
             "harness.json",
             dict(version=1, controllers={thread: ["renewal-acceptance"]}),
         )
+
+        if options.governor_ui_only:
+            # Reuse this script's real native server, private TUI, bounded Responses
+            # fixture and cleanup. No second fixture service or private history.
+            def governor(verb, *extra):
+                return invoke(['--wake-root', str(root), 'governor', verb,
+                               'thread:' + thread, '--endpoint', endpoint, '--json', *extra])
+            def ui_command(text):
+                tmux('send-keys', '-t', 'ux:0.0', 'Escape')
+                tmux('send-keys', '-t', 'ux:0.0', '-l', text)
+                tmux('send-keys', '-t', 'ux:0.0', 'Enter')
+            def visible(state, name):
+                return wait(lambda: ('Governor · ' + state) in capture(name),
+                            'native governor strip ' + state, 20)
+            before_ui = model_start_snapshot()
+            ui_command('/wake governor status')
+            visible('disconnected', 'governor-initial.txt')
+            ui_command('/wake governor activate --token-limit 1000 --time-limit-seconds 10')
+            visible('enforced', 'governor-active.txt')
+            activated = governor('status')
+            require(activated['usage']['used_tokens'] == 0, 'new task window charged warmup history')
+            require(activated['usage']['lifetime_used_tokens'] > 0, 'lifetime history lost')
+            visible('limit_reached', 'governor-limit.txt')
+            stopped = governor('status')
+            require(model_start_snapshot()['model_turn_ids'] == before_ui['model_turn_ids'],
+                    'UI activation/status/forced stop started inference')
+            ui_command('/wake governor reset --time-limit-seconds 60')
+            wait(lambda: ((value := governor('status'))['revision'] > stopped['revision']
+                          and value['usage']['used_tokens'] == 0), 'new reset window revision')
+            ui_command('/wake governor extend --add-tokens 500 --add-seconds 30 --resume')
+            wait(lambda: stream_open.is_set(), 'explicit operator continuation reached native model')
+            resumed = governor('status')
+            require(resumed['limits']['token_limit'] == 1500, 'extension did not preserve allowance')
+            ui_command('/wake governor disable')
+            visible('disabled', 'governor-disabled.txt')
+            disabled = governor('status')
+            # Explicit fixture cleanup of that one resumed turn, not a product action.
+            rpc('thread/goal/set', dict(threadId=thread, objective='Owned paused UI probe',
+                status='paused', tokenBudget=1000000))
+            for turn in rpc('thread/read', dict(threadId=thread, includeTurns=True))['thread']['turns']:
+                if turn['status'] in ('inProgress', 'in_progress'):
+                    rpc('turn/interrupt', dict(threadId=thread, turnId=turn['id']))
+            starts_after_resume = model_start_snapshot()
+            require(len(starts_after_resume['model_turn_ids']) == len(before_ui['model_turn_ids']) + 1,
+                    'explicit resume did not submit exactly one native turn')
+            tmux('kill-session', '-t', 'ux')
+            attach(endpoint, thread)
+            visible('disabled', 'governor-reconnect.txt')
+            require(governor('status')['revision'] == disabled['revision'], 'reconnect changed control revision')
+            ui_command('/wake governor activate --token-limit 1500 --time-limit-seconds 60')
+            visible('enforced', 'governor-reactivated.txt')
+            stream_open.clear()
+            ui_command('/wake governor resume')
+            wait(lambda: stream_open.is_set(), 'active native work before abrupt watcher loss')
+            active_before_loss = [turn['id'] for turn in
+                rpc('thread/read', dict(threadId=thread, includeTurns=True))['thread']['turns']
+                if turn['status'] in ('inProgress', 'in_progress')]
+            require(len(active_before_loss) == 1, 'one exact active task turn required for loss probe')
+            starts_before_loss = model_start_snapshot()
+            from codex_wake import goal_supervision
+            controller = goal_supervision._heartbeat(root / 'goal-supervision')
+            watcher_pid = controller['pid']
+            os.kill(watcher_pid, signal.SIGKILL)
+            wait(lambda: process_identity(watcher_pid) is None, 'owned watcher shutdown')
+            visible('disconnected', 'governor-watcher-loss.txt')
+            wait(lambda: not any(turn['id'] in active_before_loss and
+                turn['status'] in ('inProgress', 'in_progress') for turn in
+                rpc('thread/read', dict(threadId=thread, includeTurns=True))['thread']['turns']),
+                'native guard interrupted exact active task after SIGKILL', 20)
+            require(rpc('thread/goal/get', dict(threadId=thread))['goal']['status'] == 'paused',
+                    'abrupt watcher loss did not pause native task')
+            require(model_start_snapshot()['model_turn_ids'] == starts_before_loss['model_turn_ids'],
+                    'reconnect/reactivation/watcher loss started inference')
+            require(rpc('thread/goal/get', dict(threadId=peer))['goal'] == peer_goal,
+                    'governor UI changed unrelated task')
+            require(len(calls) <= 3, 'governor UI localhost request cap exceeded')
+            report.update(verdict='PASS', governor_ui=True, activated=activated, stopped=stopped,
+                resumed=resumed, disabled=disabled, watcher_loss=True, peer_unchanged=True,
+                explicit_resume_native_turns=2, abrupt_watcher_loss_exact_turn_stopped=True,
+                non_resume_ui_commands_started_inference=False,
+                native_strip_and_notices=True, ui_attachments=ui_count)
+            raise _ProbeComplete()
 
         def goal_cli(verb, *extra, expected=0):
             return invoke(
@@ -1646,6 +1744,7 @@ def qualify(options):
         for pid in [
             native.pid if native else None,
             watcher.pid if watcher else None,
+            local_controller.pid if local_controller else None,
             *pane_pids,
             tmux_pid,
         ]:
@@ -1658,7 +1757,7 @@ def qualify(options):
             tmux("kill-server", check=False)
         except Exception:
             pass
-        for name, process in (("watcher", watcher), ("native", native)):
+        for name, process in (("local_controller", local_controller), ("watcher", watcher), ("native", native)):
             if process is not None:
                 if process.poll() is None:
                     os.killpg(process.pid, signal.SIGTERM)
@@ -1768,6 +1867,7 @@ if __name__ == "__main__":
         "--history-mode", choices=("legacy", "paginated"), default="legacy"
     )
     probes = parser.add_mutually_exclusive_group()
+    probes.add_argument("--governor-ui-only", action="store_true", help="Qualify actual /wake controls and persistent governor UI with the existing private native fixture")
     probes.add_argument("--supervision-loss-only", action="store_true")
     probes.add_argument("--observation-recovery-only", action="store_true")
     raise SystemExit(qualify(parser.parse_args()))

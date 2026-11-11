@@ -13,14 +13,14 @@
       "worker": "/root/governor_backend571",
       "branch": "feat/governor-backend-571",
       "integrated_checkpoints": [
-        "503b0659"
+        "503b0659",
+        "c4f8a704"
       ],
       "remaining": [
-        "independent task/shared fences",
-        "exact delegated stop",
-        "ordinary resume and reactivation",
-        "durable mutation identity"
-      ]
+        "native fail-closed lease capability/ack gating",
+        "abrupt watcher loss installed proof"
+      ],
+      "validation": "71affectedbackendtestsPASS64.299sPython3.12;governor10PASS13.135sPython3.11; integration8transport/contractchecksPASS."
     },
     {
       "id": 572,
@@ -28,7 +28,18 @@
       "state": "running",
       "blockers": [],
       "worker": "/root/governor_native572",
-      "branch": "feat/governor-native-572"
+      "branch": "feat/governor-native-572",
+      "integrated_checkpoints": [
+        "a40fc9b4"
+      ],
+      "native_source": "837a0c5ecd (superseded by final transport/notification freeze)",
+      "qualification": "CargoSignal compile in progress; exact final native source not yet qualified",
+      "preview": "https://previews.ecochran.dyndns.org/s/62350ca5d460",
+      "remaining": [
+        "4actualRusttests compiling fromfrozenUI source",
+        "native appserver exact-task lease guard",
+        "one complete native package"
+      ]
     },
     {
       "id": 573,
@@ -54,10 +65,14 @@
         571,
         572,
         573
-      ]
+      ],
+      "prepared": "Existing goal_limit_native_ux_acceptance --governor-ui-only reuses actualnativeappserver/TUI/providerfixture, checks controls, forcedstop, reconnect, SIGKILLduringactivework and no unintendedinference."
     }
   ],
   "contract_revision": 2,
   "operator_admission": "opaque local_operator_principal(); native model Principal(thread) after verified_native_caller; OAuth owner+admin+exact thread grant only for loosen actions",
-  "integration_tip": "9a4d1e8a"
+  "integration_tip": "9a4d1e8a",
+  "package_candidate_version": "0.22.0.dev8",
+  "review_fixed_point_confirmation": "Asked operator via async input per code-review skill; response pending. Does not block implementation.",
+  "native_cache": "Prior release cleanup reclaimed18GB; cachepathretainedbutcompiledobjectsabsent; currentnativecompilecold. Same toolchain/profile/target; keepresultingcache."
 }
