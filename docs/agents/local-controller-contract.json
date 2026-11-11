@@ -841,6 +841,9 @@
           "expected_revision": {
             "type": "integer",
             "minimum": 0
+          },
+          "resume": {
+            "type": "boolean"
           }
         },
         "required": [],
@@ -911,6 +914,9 @@
           "expected_revision": {
             "type": "integer",
             "minimum": 0
+          },
+          "resume": {
+            "type": "boolean"
           }
         },
         "required": [],

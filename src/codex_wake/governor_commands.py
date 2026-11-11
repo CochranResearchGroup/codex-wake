@@ -24,7 +24,7 @@ def schemas():
             required = ['token_limit', 'time_limit_seconds']
         if verb == 'extend':
             properties.update(add_tokens=positive, add_seconds=positive)
-        if verb in ('extend', 'reset'):
+        if verb in ('extend', 'reset', 'disable', 'advisory'):
             properties['resume'] = {'type': 'boolean'}
         result[verb] = dict(type='object', properties=properties, required=required, additionalProperties=False)
     return result

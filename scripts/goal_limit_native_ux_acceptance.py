@@ -858,8 +858,10 @@ def qualify(options):
                 tmux('send-keys', '-t', 'ux:0.0', '-l', text)
                 tmux('send-keys', '-t', 'ux:0.0', 'Enter')
             def visible(state, name):
-                return wait(lambda: ('Governor · ' + state) in capture(name),
-                            'native governor strip ' + state, 20)
+                def current_strip():
+                    footer = '\n'.join(capture(name).splitlines()[-16:]).casefold().replace('_', ' ')
+                    return ('governor · ' + state.replace('_', ' ')) in footer
+                return wait(current_strip, 'native governor strip ' + state, 20)
             before_ui = model_start_snapshot()
             ui_command('/wake governor status')
             visible('disconnected', 'governor-initial.txt')

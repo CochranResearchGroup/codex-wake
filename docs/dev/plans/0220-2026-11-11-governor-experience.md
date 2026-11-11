@@ -55,3 +55,10 @@ unknown states. Human time output distinguishes UTC deadlines from authenticated
 counter-relative bounds. Token enforcement is based on qualified sampled usage
 and native interruption; universal request-level hard-token guarantees remain out
 of scope on hosts without demonstrated admission coverage.
+
+The native lease endpoint also supports explicit operator guarded-start: reserve
+request identity and bind the new causal turn to its lease before inference.
+This completes stopped goal-less task continuation without creating a hidden goal.
+A query with guarded-start metadata is capability-only. Duplicate or uncertain
+requests reconcile the reserved/started turn and never submit another turn.
+Plain idle goal-less activation still cannot claim an unidentified future task.
