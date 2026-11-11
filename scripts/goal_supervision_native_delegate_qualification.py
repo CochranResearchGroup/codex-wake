@@ -38,6 +38,7 @@ def fixture_processes(base):
     return values
 
 def qualify(base,codex,*,wake_cli=None,governor_stop=None):
+    os.umask(0o077)
     base.mkdir(parents=True,mode=0o700,exist_ok=False);home=base/'home';home.mkdir(mode=0o700)
     calls=[];root_identity=[None];peer_identity=[None];child_identity=[None]
     child_done=threading.Event();provider_started=threading.Event();peer_started=threading.Event();child_started=threading.Event()

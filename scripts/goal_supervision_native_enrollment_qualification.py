@@ -25,6 +25,7 @@ def qualify(base, codex, import_boundary=False, governor=False):
     if governor and os.geteuid()!=1017:raise RuntimeError("governor native qualification requires UID1017")
     if governor and import_boundary:raise ValueError("governor and import-boundary modes are separate")
     tool_name="wake_governor_activate" if governor else "wake_goal_limits_set"
+    os.umask(0o077)
     base.mkdir(mode=0o700, parents=True, exist_ok=False)
     home=base/'home';home.mkdir(mode=0o700)
     root=base/'runtime';policy=base/'policy.json'
@@ -136,7 +137,7 @@ def qualify(base, codex, import_boundary=False, governor=False):
             read=rpc('thread/read',dict(threadId=thread,includeTurns=True))['thread'];save('native-tool-readback-'+str(index+1)+'.json',read)
             items=[v for t in read['turns'] for v in t['items'] if v['type']=='mcpToolCall' and v.get('tool')==tool_name]
             assert len(items)==1,'expected exactly one native public enrollment'
-            participant['native_tool_call']=items[0];assert not items[0].get('error'),'public MCP tool failed'
+            participant['native_tool_call']=items[0];assert not items[0].get('error') and items[0].get('status')!='failed',json.dumps(items[0])
             state=show(thread)
             if governor:
                 until=min(expiry,time.monotonic()+8)
