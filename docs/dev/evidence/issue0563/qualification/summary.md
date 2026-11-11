@@ -1,29 +1,7 @@
-# Exact installed stable-identity qualification
+# Final qualification
 
-Source c8d12f7a3f33db667c7f24698f4808c322aae762,0.22.0.dev6.
-316source/wheel/installedmembersmatch before andafter acceptance.
-WheelSHA2564579c7f37d7936ea47d3ef2666009d06f96cad2a00615b5eda132aedba92cd6b.
-Separate LinuxUID1017/Python3.12.3, declared dependencies/MCP unchanged.
+Final runtime source8bab52f701c3daaeeb75bb631593b14ffa155aaa. Exact receipts in final/.148installed tests PASS50.355s,174product modules under installed prefix; nine WSL CLI/stdio/API/OAuth workflows PASS; three dev5-created legacy record checks PASS. All316source/wheel/installed bytes match before and after acceptance; wheelSHA25646cd195cc1879280a9b8d9e9741a007a8d46db8611785f4179f1b338feab4030.
 
-148selectedinstalledchecks PASS57.047s;174loadedproductmodules verified
-site-packages, source shadowing disabled. EightactualCLI/stdioMCP/authenticated
-API/OAuthMCP workflows PASS:CRUD/defaults,transfer/undo,routing,drain/terminate,
-uncertainty/no-replay,help/completion. Windows is explicitly notrun in thispacket;
-psmux contract/sourcechecks passbothPython, not a newnativeWindows claim.
+100tab Slate/alltiers idle0.798828%/active4.514797%onecore;peakRSS84,426,752B;p951.031449s;120/120events;fresh UID1017processcensus0. Shared WSLkernel, metadata-only native fixture and excluded fixture/tmux costs are explicit in resources.json. Python3.12.3 test installation differs from working3.12.13; dependencies pinned. Native Windows not rerun; source psmux checks only. Hosted CI zero.
 
-Actualold0.22.0.dev5 package created rawfingerprint orderplans andfullpane
-transfer/lost-reply records; newinstalleddev6 applied/reconciled/undid them after
-real titlechanges, retainedPIDbirths, no effect replay. Legacyhelper source
-adjacent; allnamespaces fixture-only, cleanup0. No production layouts touched.
-
-Onecanonical100tab owner+Slate/alltiers60+60gate PASS:idle0.733113%,active4.182169%
-onecore;peakaggregateownedRSS84,582,400B,p951.001574s,120/120changes,ownedcontrols0.
-Driver/nativefixture andprivatetmux costs reported separately in resources.json.
-SharedWSLkernel/metadata-onlyprotocolfixture limits retained; no providerturn
-or realnativebroadcast claim. Fresh finalUID1017processcensus0.
-
-Preparatory rootchown wasunavailable; used supported run-as-test-user private
-tempdir. A QAhelper read-permission refusal preceded anyfixture/install;
-corrected its temporaryfile permissions. No product retry or rewritten result.
-Private fullbuild/install/permission-failure logs remain under/tmp/wake563-c8d12f7a.
-HostedCIzero. Working-host deployment follows onlyafter merge/packageequality.
+Precursor c8 receipts remain adjacent and are superseded for final CLI ordering proof. R1 first red and correction retained in review.md/front-red.log.

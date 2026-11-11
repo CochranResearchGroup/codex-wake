@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "old_version": "0.22.0.dev5",
+  "new_version": "0.22.0.dev6",
+  "package": "/tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/__init__.py",
+  "checks": [
+    "old full-pane transfer receipt reconcile/apply/undo",
+    "old full-pane lost receipt reconcile/apply/undo",
+    "old raw-fingerprint order plan apply and undo"
+  ],
+  "production_effects": false
+}

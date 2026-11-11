@@ -29,6 +29,7 @@
   "authorization": "Standing operator instruction to review/merge/deploy; current go authorizes this hardening repair. Live moves/deletes remain excluded.",
   "fixed_base": "b6e93c2dada4eae08a869d569b5036defd2eaf39",
   "source_validation": "117 affected checks eachPython plus30additionalcaller checks eachPython, newguards passed",
-  "qualification": "qualification/summary.md",
-  "review": "review.md"
+  "qualification": "qualification/final/",
+  "review": "review.md",
+  "runtime_source": "8bab52f701c3daaeeb75bb631593b14ffa155aaa"
 }

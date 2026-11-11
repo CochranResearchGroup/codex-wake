@@ -1,6 +1,6 @@
 # Bounded release review — issue563
 
-Base `b6e93c2dada4eae08a869d569b5036defd2eaf39`, frozen runtime source `c8d12f7a3f33db667c7f24698f4808c322aae762`.
+Base `b6e93c2dada4eae08a869d569b5036defd2eaf39`, final runtime source `8bab52f701c3daaeeb75bb631593b14ffa155aaa`.
 Diff command: `git diff b6e93c2dada4eae08a869d569b5036defd2eaf39...c8d12f7a`. Source commit: c8d12f7a.
 Spec authority: issue563 and Plan0211 identity/continuity requirements. Primary
 performed the two axes serially; no independent reviewer claim. Standards:
@@ -35,7 +35,7 @@ normalize old and new records without replaying unknown sends. Session delete
 uses the stable lifecycle pin. Input/capture retain their strict target and
 privacy/custody checks. Process respawn and manual relocation remain refusal cases.
 
-Eight installed public workflow checks and148installed behavioral checks pass;
+Nine installed public workflow checks and148installed behavioral checks pass;
 three actualold-version record cases pass. The unchanged100tab resource thresholds
 pass. Native Windows is explicitly not rerun; psmux contract checks are source
 proof only. Saved groups following tabs across sessions remains a separate
@@ -44,3 +44,5 @@ operator decision, outside the reproduced failure repair; existing semantics sta
 Accepted findings: Standards0; Spec1 (highest P2), resolved. Exact final installed
 qualification follows this front-door repair; the c8d12f7a package receipts remain
 precursor evidence rather than proof of the repaired CLI route.
+
+Final 8bab52f7:148 installed checks PASS50.355s; nine workflows PASS; three legacy cases PASS.100tab idle0.798828%/active4.514797%,peakRSS84,426,752B,p951.031449s,120/120events,cleanup0. All316installedmembers equal wheel after acceptance. Final Ruff/compile/reference/policy/diff checks PASS. Exact receipts:qualification/final/.
