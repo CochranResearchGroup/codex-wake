@@ -171,3 +171,41 @@ continuation remain qualified. All317 Python source files match the installed
 candidate byte-for-byte. A broader whole-suite run is in progress and has reported
 failures; its report must be diagnosed before merge. It is not represented as
 passing validation. Hosted CI is skipped under operator cost policy.
+
+## Final source publication qualification
+
+Operator authorized PR review, merge, deployment and test. Product code on
+74aa5e47 plus the test-only remediatione1a44893 is qualified. Standards and Spec
+reviews against main3f8a18fa/Plan0220 found no remaining blocking finding.
+
+The first whole-suite run omitted CI configuration isolation:2432 tests,23
+failures/1error, all in refresh fixtures reading the working registry. One-variable
+replay: inherited config FAIL, isolated XDG_CONFIG_HOME alone PASS, isolated
+XDG_STATE_HOME alone FAIL. All29 refresh tests pass under CI isolation. No
+registry or safety guard was changed.
+
+Corrected full command uses isolated XDG_CONFIG_HOME/XDG_STATE_HOME, empty
+CODEX_WAKE_STABLE_TIME_CONFIG, PYTHONPATH=src and Python3.12.13 unittest discover
+-v -s tests -p test_*.py. Result:2432 total,2430 PASS,1skip and one Grok retention
+fixture timeout. Public subprocess/socket reproduction intermittently fails the
+terminal assertion after a10s output wait. The multi-megabyte fixture now uses
+the documented bounded30s output wait; all event/byte/truncation/identity assertions
+are unchanged. Two complete focused reruns PASS (20.165s and11.875s). This is broad
+validation plus focused remediation, not a claimed single all-green broad run.
+Aggregate qualification:2431 PASS,1 retained skip, no unresolved test failure.
+No third broad rerun is needed for this test-only wait change; product code did
+not change. Logs/digests and qualification receipt are retained privately.
+
+The three new active-tab regressions also PASS on Python3.11.15; the whole3.11
+suite was not run. Pinned Ruff, compilation and policy wiring PASS. Hosted CI
+was skipped under operator cost policy. Parked OpenClaw plugin work/tests were
+not resumed. No native account-daemon upgrade or Windows acceptance is claimed.
+
+All317 Python source files and9 managed launchers match the installed candidate;
+supervisor active with zero automatic restarts. Previous automatic continuation
+and matching original native submission remain the bounded delivery evidence.
+Independent native acknowledgment/execution fields remain not_observed. Source
+publication binds the existing qualified package; no second wake, Slack resend,
+vault use, approval mutation or provider action is needed. Old package, rollback
+receipts and source history remain retained. Memory disposition forbidden under
+the explicit-request boundary; zero Graphiti writes.

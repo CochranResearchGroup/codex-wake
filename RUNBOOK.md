@@ -9142,3 +9142,14 @@ no synthetic protocol receipt was inserted. Private verification preserves this
 boundary. Plan0220 CLOSED for approved source/installation/one-continuation scope.
 Source remains uncommitted/unpublished; old package, rollback and source checkout
 are retained. No extra wake, Slack message or credential operation occurred.
+
+## Plan0220 publication closeout | 2026-11-11
+
+Operator requested review/merge/deploy/test. Final qualification in note0220
+records the initial CI-isolation omission, corrected2432-test run and one
+retention fixture timeout repaired by the documented30s wait. Remaining2430
+tests PASS/1skip; repaired fixture passes twice, all assertions retained.
+New regressions also3/3 on Python3.11.15. Product files317/317 and9 launchers
+match the already-qualified working candidate; no additional restart/dispatch.
+PR575 owns source integration. Auth PR325/326 and Receipts PR51 are merged;
+Auth owner deployment/control/link/account/state/guard checks PASS.

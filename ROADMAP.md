@@ -1583,3 +1583,8 @@ CLOSED (local source diagnosis): [Plan0220](docs/dev/plans/0220-2026-11-11-nativ
 Current state: deterministic missing-PATH reproduction and source regression/fix
 qualified;233 related tests and staged-wheel service-context probe pass. Operator-approved installation and one actual automatic continuation now pass;
 separate protocol acknowledgment fields remain unobserved.
+
+Plan0220 publication: source reviewed and locally qualified through broad tests
+plus focused retention-fixture remediation (see note0220); PR575 integrates the
+exact installed product code. No remaining scoped source/installation/delivery
+gate; independent protocol acknowledgment fields remain unobserved.
