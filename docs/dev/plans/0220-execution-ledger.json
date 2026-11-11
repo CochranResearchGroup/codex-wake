@@ -8,7 +8,7 @@
     {
       "id": 571,
       "owner": "backend",
-      "state": "running",
+      "state": "accepted",
       "blockers": [],
       "worker": "/root/governor_backend571",
       "branch": "feat/governor-backend-571",
@@ -19,10 +19,9 @@
         "cc64666a",
         "bd8848b0"
       ],
-      "remaining": [
-        "Exact installed native goal-less/delegated stop and resume proof"
-      ],
-      "validation": "Exact bd8848b0: governor16 PASS Python3.11 19.167s and3.12 18.802s; affected3.12 governor/self_limits/goal_renewal/deactivation/supervision77 PASS79.741s. Integrated9fb28fc6; packaged modules unchanged in7064f62b."
+      "remaining": [],
+      "validation": "Exact bd8848b0: governor16 PASS Python3.11 19.167s and3.12 18.802s; affected3.12 governor/self_limits/goal_renewal/deactivation/supervision77 PASS79.741s. Integrated9fb28fc6; packaged modules unchanged in7064f62b.",
+      "installed_acceptance": "model/limit/watcher-loss allPASS on exact80c8ad9f package; actualtoolsstop, peerpreservation, singleexplicitresume/nohiddengoal"
     },
     {
       "id": 572,
@@ -34,18 +33,17 @@
       "integrated_checkpoints": [
         "a40fc9b4"
       ],
-      "native_source": "a9a992a6ed5661b2211806e1c9137680d083f15e",
-      "qualification": "6focusedtestsPASS, exactcompletepackagebuilt; actualmodelandupgrader/rollbackPASS. Delegated hardstop FAIL: live exec tools persist despite stopVerified:true; required nativefix inprogress.",
+      "native_source": "e18bde9a112504665d4503dc658204af65092523",
+      "qualification": "537.227s productionpackagebuildPASS; former live-tool/falseproofredcase nowactualPASS inbudget+watcher-loss. UIcoldbootstrap needs60s initialfixturebound after measured19.076s installationlifecycle.",
       "preview": "https://previews.ecochran.dyndns.org/s/62350ca5d460",
       "remaining": [
-        "Exact task-owned unified-exec termination and confirmed exit proof",
-        "Rebuilt immutable package and final installed journeys"
+        "Installed managed UI/cold resume journey"
       ]
     },
     {
       "id": 573,
       "owner": "primary",
-      "state": "validated",
+      "state": "accepted",
       "blockers": [],
       "validation": "Latest governor/contract selection: 9 PASS (Python3.12). Existing transport10 PASS; ownedUnix native protocol CLIstatusPASS; privateAPI/MCPstatusPASS. Actual Windows PowerShell governorstatus plus four response modes PASS46.185s after retained WSL bootstrap failure and successful preflight.",
       "owned_paths": [
@@ -56,7 +54,7 @@
         "src/codex_wake/controller_http.py",
         "src/codex_wake/controller_client.py"
       ],
-      "remaining": "Exact integrated installed qualification574; current native and backendchanges stillrunning.",
+      "remaining": "Full UI572 and aggregate574 remain independent gates.",
       "root_routing": "DefaultCLI/UI/privatecontroller deriveexisting localMCP --goal-limits-root/policy; typednativecaller honorshostpolicy, explicitisolatedrootsstayexact. ExistingrealUnixpeerCLI poisonnamespacecheckPASS32.850s;8gov/contractPASS3.11/12."
     },
     {
@@ -77,7 +75,7 @@
   "package_candidate_version": "0.22.0.dev8",
   "review_fixed_point_confirmation": "Asked operator via async input per code-review skill; response pending. Does not block implementation.",
   "native_cache": "Prior release cleanup reclaimed18GB; cachepathretainedbutcompiledobjectsabsent; currentnativecompilecold. Same toolchain/profile/target; keepresultingcache.",
-  "blocking_acceptance": "Actual native delegated tool processes remain live after exact turns interrupted; false stopVerified:true must be repaired before closure/review.",
+  "blocking_acceptance": "Managed UI + exact corrected-package upgrade/rollback/failedstart need completed acceptance; cold-bootstrapfixturelimits causallyrepaired. Source review0/remediation0.",
   "qualification_environment": {
     "uid": 1017,
     "root": "/tmp/wake-governor-p220-2dac7qs6",
