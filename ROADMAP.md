@@ -1573,3 +1573,6 @@ and explicit JSON verified, fresh Zsh completion registered. Nine launchers,
 checkouts archived with refs retained;50stale registrations pruned. Native owners,
 stock and existing monitor/server state preserved; initial full-run setup error
 and passing installed correction remain explicit in qualification evidence.
+
+
+Stable tab management repair #563 / Plan0218: CLOSED. PR565 merged c9f220d8;0.22.0.dev6 deployed with freshSlate monitor. Ordering/physical grouping,transfer/undo/reconciliation and populated deletion now ignore display-metadata churn while retaining meaningful guards. Exact qualification and deployment: docs/dev/evidence/issue0563/. Native Windows qualification and saved-group cross-session policy remain separate.

@@ -2,7 +2,7 @@
   "issue": 563,
   "parent": 526,
   "branch": "fix/stable-tab-operation-identities",
-  "status": "qualified",
+  "status": "deployed",
   "scope": [
     "stable metadata-independent reorder comparisons",
     "transfer and lost-reply/undo compatibility",
@@ -31,5 +31,8 @@
   "source_validation": "117 affected checks eachPython plus30additionalcaller checks eachPython, newguards passed",
   "qualification": "qualification/final/",
   "review": "review.md",
-  "runtime_source": "8bab52f701c3daaeeb75bb631593b14ffa155aaa"
+  "runtime_source": "8bab52f701c3daaeeb75bb631593b14ffa155aaa",
+  "merged_source": "c9f220d8312d724eed19923ba57158d18555ca81",
+  "pr": 565,
+  "deployment": "deployment.json"
 }
