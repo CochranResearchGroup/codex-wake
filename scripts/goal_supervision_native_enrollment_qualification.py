@@ -72,6 +72,7 @@ def qualify(base, codex, import_boundary=False, governor=False):
     server=ThreadingHTTPServer(('127.0.0.1',0),Handler);server.daemon_threads=True
     threading.Thread(target=server.serve_forever,daemon=True).start();port=server.server_address[1]
     config='model="gpt-5.4-mini"\nmodel_provider="local_fixture"\napproval_policy="never"\nsandbox_mode="danger-full-access"\n[model_providers.local_fixture]\nname="Local fixture only"\nbase_url="http://127.0.0.1:'+str(port)+'/v1"\nwire_api="responses"\nrequires_openai_auth=false\nrequest_max_retries=0\nstream_max_retries=0\nsupports_websockets=false\n[mcp_servers.wake]\ncommand='+json.dumps(sys.executable)+'\nargs='+json.dumps(['-m','codex_wake.mcp_server','--goal-limits-policy',str(policy),'--goal-limits-root',str(root),'--app-server','unix://'+str(base/'native.sock')])+'\n'
+    if governor:config+='[features]\nmulti_agent=true\nmulti_agent_v2=true\n'
     (home/'config.toml').write_text(config);(home/'config.toml').chmod(0o600)
     config_hash=hashlib.sha256((home/'config.toml').read_bytes()).hexdigest()
     env=dict(os.environ,CODEX_HOME=str(home),OPENAI_BASE_URL='http://127.0.0.1:'+str(port)+'/v1')
