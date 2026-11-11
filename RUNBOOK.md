@@ -9012,3 +9012,39 @@ Six inactive clean remotely backed worktrees archived with refs retained;50missi
 registrations pruned. Active, dirty and unpublished trees retained. Release
 checkout removed only after published docs closeout. Memory forbidden by session
 boundary; explicit non-write receipt outside Git. HostedCI zero.
+
+
+## Turn | 2026-11-10 | P216 reviewed, merged, deployed and activated
+
+Operator explicitly authorized PR review/merge/deploy/activation. Reconciled
+main PR549/550 conflicts by preserving human CLI emit plus monitor renderer and
+bothplanhistories. Combined f19abaa4 exact315memberUID1017 qualification:
+idle0.665791%,active3.811485%onecore,RSS51,445,760B,p951.049495s,120/120events,
+fourtransports andcleanupPASS. PR551 merged6f95f90; exactwheel deployed with
+ninelaunchers/completion,sevenaccounts,tenprotectedfiles,24nativeprocesses preserved.
+First helper staging counted only313Pythonfiles vs315total; rejected before any
+install. Corrected fullmember check. Unsupported serverstatus --json preflight
+failed beforecutover; nineoldlinks reconciled unchanged, helpercorrected.
+
+Historical formattingnamespace mismatch was retained privately, never relabeled.
+Archived oldrecord andcaptured fresh46tab nativebaseline before enablingSlate.
+Monitor1s/alltiers on; live60.189s2.06017%onecore/RSS46,145,536B,fresh,noerrors.
+Configure/rollback CLI heldstale_target; exactadjacent snapshots differedonly
+bylivepane_title. Issue552/PR553 fixed formatting-specific targetgeneration only;
+namespace/socket/session/windowroster/processbirths andgeneralinput/lifecycle
+fences preserved. Redreal-tmux changingtitle reproducer, then4focused and232tab
+tests PASSbothPython. Exactdev4 UID1017 installed4formattingtests/all4transports
+PASS,315membersmatch,cleanup0. Observerhotpaths byte-identical; resourceevidence
+carried explicitly, not a newdev4CPUclaim. PR553 mergedbfc1bbce.
+
+Dev4 deployed at ~/.local/share/codex-wake/releases/0.22.0.dev4-bfc1bbc;
+315members/ninelaunchers/freshZshcompletion/sevenaccounts/tenprotectedfiles/
+27nativeprocesses/stock preserved. Onlyownedtabmonitor restarted for cutover;
+no nativeagent/server/provider lifecycle calls. RealCLI rollback restored all46
+window/session options exactly; reenableSlate PASS. Finalmonitornewprefixrunning,
+freshsnapshot46tabs,connectednative/availabletmux,noformattingfailures. Natural
+native transition remains unobserved; nofakeclaim. Allrawprivatebackup/layout/
+rollbackstate stays ~/.local/state/codex-wake/qualification/plan0216-* outsideGit.
+Deploymentreceipt docs/dev/evidence/plan0216/deployment.json. Parent540open;
+originaldirtycheckout andworktrees preserved. HostedCIzero. Memoryforbidden by
+higher-priority explicit-request boundary; non-write receipt only.

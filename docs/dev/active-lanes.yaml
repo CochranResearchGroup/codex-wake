@@ -1240,11 +1240,11 @@ lanes:
     branch: feat/efficient-tab-observer
     target: origin/main
     plan_state: CLOSED
-    custody_state: INTEGRATION_READY
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: [P211, P213, P215]
     updated_at: 2026-11-10
-    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained
+    disposition: PR551 and operational PR553 merged; dev4 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
 
   - id: P216-544
     owner: ecochran76 / native542
@@ -1254,11 +1254,11 @@ lanes:
     branch: feat/observer-lifecycle-544
     target: feat/efficient-tab-observer
     plan_state: CLOSED
-    custody_state: INTEGRATION_READY
+    custody_state: INTEGRATED
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained
+    disposition: PR551 and operational PR553 merged; dev4 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
 
   - id: P216-545
     owner: ecochran76 / checks545
@@ -1268,11 +1268,11 @@ lanes:
     branch: feat/observer-checks-545
     target: feat/efficient-tab-observer
     plan_state: CLOSED
-    custody_state: INTEGRATION_READY
+    custody_state: INTEGRATED
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained
+    disposition: PR551 and operational PR553 merged; dev4 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
 
   - id: P216-546
     owner: primary / delegated serialization546
@@ -1282,8 +1282,8 @@ lanes:
     branch: feat/efficient-tab-observer
     target: feat/efficient-tab-observer
     plan_state: CLOSED
-    custody_state: INTEGRATION_READY
+    custody_state: INTEGRATED
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained
+    disposition: PR551 and operational PR553 merged; dev4 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained

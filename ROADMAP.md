@@ -1555,13 +1555,14 @@ monitor remains stopped pending separate loaded-host cycle qualification.
 State: CLOSED
 
 Plan: [Efficient tab observation](docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md).
-Specification: [#540](https://github.com/CochranResearchGroup/codex-wake/issues/540) remains open.
-All seven implementation tickets #541–#547 closed. Final exact source f3e1e0d4:
-100 tabs,60s idle0.832%/active3.910% one core,RSS51.7MB,p951.070s,120/120 changes.
-One Standards/Spec review and one TDD remediation pass complete; all3findings fixed.
-Four installed transports and read-only46-tab host checks pass with explicit live
-transition/shared-kernel limits. Delivery is a validated branch and draft PR.
-No production monitoring activation, merge, deployment or worktree deletion.
+Specification [#540](https://github.com/CochranResearchGroup/codex-wake/issues/540) remains open.
+All541–547 closed. PR551 merged/deployed; operational title-pin fix552/PR553
+merged/deployed as0.22.0.dev4 bfc1bbce. Slate and1stick sharedmonitor enabled46tabs,
+freshsnapshot,noformattingfailures. RealCLI rollback/restoration andreenable pass;
+originalcurrentnamespacebaseline preserved, historicalbaseline archived privately.
+315installedmembers/ninelaunchers/completion/accounts/nativeagents verified.
+100tab resourcequalifications and dev4 performancecarry boundaries remain explicit.
+Evidence: docs/dev/evidence/plan0216/deployment.json. No harness/provider effects.
 
 ## P217 | Human-friendly CLI output
 
