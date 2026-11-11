@@ -1,6 +1,6 @@
 # Stable tab-operation identity repair
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/563
 Domain authority: GLOSSARY.md
@@ -9,7 +9,7 @@ Scope: operator approved diagnosing/TDD repair; standing review/merge/deploy aut
 
 ## Current State
 
-Final runtime source `8bab52f701c3daaeeb75bb631593b14ffa155aaa`, version0.22.0.dev6, is qualified under UID1017. All316 package members match.148 installed tests, nine WSL CLI/stdio/API/OAuth workflows and three old-version record cases pass.100tab idle0.798828%/active4.514797%, peakRSS84,426,752B, p951.031449s;120/120updates,cleanup0. Serial review found one P2 front-door mismatch, fixed with red/green proof; no remaining blocker. Merge and read-only deployment verification remain. Evidence: docs/dev/evidence/issue0563/.
+Final runtime source `8bab52f701c3daaeeb75bb631593b14ffa155aaa`, version0.22.0.dev6, is qualified under UID1017. All316 package members match.148 installed tests, nine WSL CLI/stdio/API/OAuth workflows and three old-version record cases pass.100tab idle0.798828%/active4.514797%, peakRSS84,426,752B, p951.031449s;120/120updates,cleanup0. Serial review found one P2 front-door mismatch, fixed with red/green proof; no remaining blocker. PR565 merged c9f220d8; exact package deployed at0.22.0.dev6-c9f220d. Read-only verification:44current tabs/layout/baseline unchanged,28native processes and10protected files preserved,Slate/fresh monitor/noformattingfailures. Native control server preserved; existing stdio clients require reconnect. Deployment receipt: docs/dev/evidence/issue0563/deployment.json. Evidence: docs/dev/evidence/issue0563/.
 
 ## Outcome and boundaries
 
