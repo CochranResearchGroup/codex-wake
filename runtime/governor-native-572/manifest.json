@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "issue": 572,
+  "native_repository": "https://github.com/openai/codex",
+  "upstream_revision": "086ccc833bc9cf01024ad2dd6af7dbd421b6bf9a",
+  "native_retained_base": "d3e311260b46c88fc8eac08b869f276cd0345e8b",
+  "native_source_commit": "2abbe0fa44b6bfb5ae78c7ad3fda67bc70278c88",
+  "native_source_worktree": "/home/ecochran76/workspace.local/codex-wake-native-governor-572",
+  "patch_sha256": "2531c47558cc772065a543fc5271690e6689e4eb5bc4f78870f3ad9ef520b7da",
+  "patched_files_sha256": {
+    "codex-rs/tui/src/app/event_dispatch.rs": "f3f30bafd8ca08805b333017b7fd2092fd386eb877a606f5756cb63af8e84af0",
+    "codex-rs/tui/src/app/reconnect.rs": "90efc3b86732bd288b9dcc4ebdac9d53708644ecbf36e39720f37744d2bc8641",
+    "codex-rs/tui/src/app_event.rs": "7d251165629bd45ca52f944f64f030762f1cb5928fb13073680981115f57cec1",
+    "codex-rs/tui/src/chatwidget.rs": "ee06211dbc9c3374c0c29b8a9fe6d08606bc34d45643c0664db423269a4306ba",
+    "codex-rs/tui/src/chatwidget/constructor.rs": "bbe25f043cec39816c57a0b0f04c1575eca07f662dc1b30e3b162159151b5453",
+    "codex-rs/tui/src/chatwidget/rendering.rs": "f9b1c637d043ab4e3a2a69ec2c38ef094818a4c70dc1074a704aa5e98ad895ce",
+    "codex-rs/tui/src/chatwidget/rendering_tests.rs": "3d7d67852b502c31326bc62ae501218f57fa311ce5f7ec3d90ec4aaf28151d32",
+    "codex-rs/tui/src/chatwidget/session_flow.rs": "4d7767a2fd7ddffda72a83e9e058cd12bdfb76def085317f860418a3e37cc478",
+    "codex-rs/tui/src/chatwidget/slash_dispatch.rs": "17613a26e1f76c2fe93e6263be33b3dabf159d3d791f09548e02a659083344dd",
+    "codex-rs/tui/src/chatwidget/wake_governor.rs": "4a8539250e75a7b20e2dadeaad7776ae0517ddac3be6de906c8ef5f9c1b65820",
+    "codex-rs/tui/src/slash_command.rs": "89851da9c9c63439704c31bdc898a2757cab11d4c0055cdb62841dbf18d7ff10"
+  },
+  "build_target_dir": "/home/ecochran76/.cache/codex-wake-native-0167",
+  "cargo_profile": "dev-small",
+  "cargo_jobs": 2,
+  "toolchain": "1.95.0",
+  "build_evidence": "/home/ecochran76/.local/state/codex-wake/governor-native-572",
+  "qualification": "pending affected Rust checks and immutable package journey",
+  "production_install": false
+}
