@@ -83,3 +83,5 @@ upstream revision in the manifest. Only disposable qualification may run the new
 package; working-account installation and restart are separate gates.
 
 Package-v3 (`bd519d5232aef6f55a4a665cd0c7461ec5b223f9`, entrypoint `1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa`) additionally pauses the exact captured blocked goal. The zero-POST actual RPC probe `/tmp/p220blocked2/receipt.json` passed in 2.502s: captured goal paused, peer preserved, no task started, owned native cleaned up. Full managed UI/cold-resume acceptance remains pending; all prior packages/failures retained.
+
+Managed UI v3 reached reset successfully. `/tmp/p220u7/receipt.json` then captured the 15-second native CLI timeout during explicit extend-and-resume (request `287fd2ba-19eb-42e3-b51c-f87921fa11cb`), after the allowance update but before any continuation inference. This remains an open acceptance failure; one warmup local POST, zero external provider calls, empty owned process census. The native artifact is unchanged.
