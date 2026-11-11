@@ -1,0 +1,1960 @@
+{
+  "source_commit": "f19abaa413f9b0f15ff9df674fbbcb0238e5829d",
+  "wheel_sha256": "c3c101ccd3d488aa7ac6a9df5c009e475ce5cba1d3ddf410000051ffbf13925a",
+  "members": 315,
+  "all_source_equal": true,
+  "all_installed_equal": true,
+  "member_hashes": [
+    {
+      "member": "codex_profiles/LICENSE",
+      "sha256": "e955f0640d9c731b0794ec4a27fe1cbb5f9e6e5f344523ce085000d14eaac640",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_profiles/__init__.py",
+      "sha256": "5c848ae3b3e3003319b67e2b6afdba1e7f3a75b9a50c26e035a8e2fe9a5e09d1",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_profiles/build_channels.py",
+      "sha256": "c09b37fee91def2687fa378bc7c4134506e96ed5f4ede47370c8bf0f6488729f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_profiles/cli.py",
+      "sha256": "060f1ffabbf8c202e0cf4e6cfb5f456cf00f32168eef25fa7e946cec46910da3",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_profiles/compatibility.py",
+      "sha256": "e9b18b5867036a8395125ddf9634908d3722823190cbe28421932a98d5b44124",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_profiles/config.py",
+      "sha256": "c522c3133d174283387d7882c40ec3acbd6129488c28b0023b7c58fb2b7dd288",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_profiles/continuation.py",
+      "sha256": "73df11a29a8f5334a9579a0da6e5bc8024308d9e11af7362de1818745c9af959",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_profiles/history.py",
+      "sha256": "4916b0e30ee3cd2568e59c4197f2e650adc716d62fe31a367dbc993377a108af",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_profiles/layout.py",
+      "sha256": "a6764c40500139d7a9bd049fe625300e4dd3fe68d3115eabded9686a6dfa52c5",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_profiles/upgrades.py",
+      "sha256": "ad8e6463e0efe8c4c0745f1570f52786ce199aed1d5af9c050858d9e4fd0826b",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/__init__.py",
+      "sha256": "535118abf396e0a89d117e413be94abc46fb41b5ee5b02a21d55a6b52d1d0d76",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/__main__.py",
+      "sha256": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_backup.py",
+      "sha256": "0e2572de654dffede49f7fb9c5565f5719523175b59b7349456b526ea9ffe608",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_bus.py",
+      "sha256": "3b8d0a3e4c64107234e57f491b8e652f20f2a7c60e3eced2bd9ec5829fd162f3",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_cli.py",
+      "sha256": "a3bf862a802a5ae1c539bc595dd5ced87c63c956f837008e77207db6c857ab31",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_delivery.py",
+      "sha256": "908c2c1166a20ea319f697c16e15cefb7642635c22ec00da655326e5250e5a99",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_identity.py",
+      "sha256": "a4f44e4e8c68fd6d89b8f935adf25429084911f8c7940bf30b01236538f936ce",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_mailbox.py",
+      "sha256": "4ca87ba0304d36f27c2e46d771692d7c1431e67ed7b8503af716edbaacd55bae",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_notification_prompt.py",
+      "sha256": "d6b38c535294ec0e6247cfc53a1d8ed75bcab46983333d9644165ccec9fd4e23",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_operations.py",
+      "sha256": "9a3a09e6f1a8314b35af19da48ba39e755ef0d2d3ee315fcc26ec0ac12e88441",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_receipt_authority.py",
+      "sha256": "6ea0ebe81c26959df5f6408319db6aae1300d5218a76ae9bd655f2375e40bded",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_receipt_family.py",
+      "sha256": "80453623c9352ef3ab81996adc95169c1013d1f7b288a70d2dab6e3cba7d1795",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_receipt_signals.py",
+      "sha256": "8aa00f0e776065dde9c3dcf5fc4b0a267e0a353c43abd914f990f9e8a6c22be1",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_recovery.py",
+      "sha256": "cb9e8ef215cd2c25cd9e3a539346c571ffd9c6a2584d59de4a2e028e0cfdeb41",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_recovery_disposition.py",
+      "sha256": "6d8416224ee72aaa219ee80f76f8d2ec7bdf01099dfe6a9b1a5d694eee591149",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_reply_wake.py",
+      "sha256": "5f3d7aa9fe491f483f866b4f139989ebcda93a119969b4873c7b75bca1447056",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_saved_delivery.py",
+      "sha256": "6e4c91df0d2bd3419c6244c737f893bd7ec5256bf9320ce24c94d8d4b6acdc25",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_scheduler.py",
+      "sha256": "79e6469f6b83529627c10144a7f852371ef13a7fe70b3427d826f9e58d94729e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_sender_receipts.py",
+      "sha256": "29621c35ab4258d57b8dae31955bffaeccc16d0c0b97f169a9ca8dd1d757815b",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_time.py",
+      "sha256": "88e7fb8c7c1a35bc7c69bfecab0a25cff1af6a3777008d47a35f162c30d14c86",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/a2a_tmux_delivery.py",
+      "sha256": "1db86ebecdbc9a0895c75cd02b77e51c0a2f9f774d2255420466a8cc7e07d5c0",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/account_auth.py",
+      "sha256": "3032a87a2b1d841e918e470a8fb0ee41b4d8f435173342d49eb45947a1156bd6",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/account_commands.py",
+      "sha256": "240cbd88d83a5e9beb35c8b80f78c9c6af3cf828bfdd0a28acabba1e6ae40218",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/account_management.py",
+      "sha256": "33cc8e8261f311335d084ea29f54cd1cd20118c343e4ea4cdd29b4422c8ba75f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/account_observation.py",
+      "sha256": "9a6e435082c9670dd1eadc72bea7c7bbc79ad15e6956e30e47b1b1c0b2ad9934",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/account_readiness.py",
+      "sha256": "c98e7e3186b1e4fc965aecdf90c54000112142086d1fa64121697f06b79a6f73",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/account_shortcuts.py",
+      "sha256": "e7d49a35955db8e0a5db3b6b3a3796bf640580747b65918dcb7521718841033f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/agent_handoff.py",
+      "sha256": "7aff77ce1857123600dea081ba295f7f5493d84fb5fdfee2db00e50af70d33a3",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/agent_lifecycle.py",
+      "sha256": "f88981f5b23a0b33d0aaaad2a270eba2d3e6b9c0e1d149998fa7d61e59134ef1",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/agent_observation.py",
+      "sha256": "e5d60608c67ef6f721a5efcd6a383490c063d827027ab11f867965b87da7edc0",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/agent_observation_commands.py",
+      "sha256": "265793f9a50dbb27146722c0d60368733137e795a593ba880e272ae7df655f5c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/agent_refresh.py",
+      "sha256": "a3c09b594c4f51cf939757915c288b99b17e330c7bc427db3cb75f5fe42d1da4",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/agent_resume.py",
+      "sha256": "ebf84234e1b11da9301e7f2429e4a6fd4ec068bf271f14fb048b727675faacde",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/agent_resume_commands.py",
+      "sha256": "fe57f0dc3e004038baec85deb6d283796ae011248ccc634c261940479a03eef6",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/app_server.py",
+      "sha256": "c468f21754d00b56fba9f653b8ae7c13f42c933c06ac4db34f42bf7b027927d8",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/attention_commands.py",
+      "sha256": "ecab5358c43e7290fbe262a2ea4c92faaa34d399b7542eb23bedbc8432cef6fe",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/attention_queue.py",
+      "sha256": "a2140c0a5bb740b5afabec888f033fe96adbdb188ae6f143bef727431b7fd15c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/background_job_commands.py",
+      "sha256": "cdeb749be63ae0513cc413c944ff8a981c04de7605ee16c0eab2493447507a3e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/background_jobs.py",
+      "sha256": "19fdb781ad3a199a1f07ca0217250ccf73eab91e6f8c2a38b5b9fef05a61d9b9",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/build_commands.py",
+      "sha256": "fba42e91313c3bd8e883369b99753b8612f85c1981fa94123b2979a4e3853f9e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/builtin_signals.py",
+      "sha256": "ba3aa168e168474a3a2086a36cf3ca148e7df755c05991d5ce77fafe0d7f8a5b",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/cli.py",
+      "sha256": "8902e0f043ce2054ac2f1c705ecd01622c460b8a9bccee9791157941a443633d",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/cli_output.py",
+      "sha256": "7ca6f5c60a09eef4af25a3379edeefe358a3b43dbc8acc250c305e261d3f13e7",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/cli_targets.py",
+      "sha256": "50349affa5abaf39eb957dfdb21d8a70da7627c38b7f5303bdebb62eb272fc7d",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/codex_runtime.py",
+      "sha256": "5f6d6ebcdb3eb8b231732fbd72303a24c9bf3901b99ad95c24345f5aa7b4c406",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/command_contract.py",
+      "sha256": "4bf74432fe787a69728365392a777a53180ac9c4f1797d2f6f88071a60500ffe",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/completion.py",
+      "sha256": "53440ed8c91e4c52505a8ce602dcd46e52fb4c5b17a7bf008efd372037a0925e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/configuration_sync.py",
+      "sha256": "fa95cebe04209b2c38e5f798655b662cacd44077726f32aa38ecac1cb140e952",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_accounts.py",
+      "sha256": "d18e8ffea6902728e21bdfdf129db9b6a3932bac2720f4eefb071ed4c671984b",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_auth.py",
+      "sha256": "d5b1188d2d777eeb32be222aec3cdd433b11fd1e9da8790151f68a8b17f238f8",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_build_authorization.py",
+      "sha256": "03fcc74fa6ae770d62d4d9d1c28251dda80290dcf2f237fb16e04566bd94d76f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_builds.py",
+      "sha256": "d25b187d20e1081623856ff45e7721897964c3bca038768fe4f8bbd01e3dac6c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_client.py",
+      "sha256": "ef20db8e05b8d81ee545fae1334ece3d3eea91359262e307a490d0727db9b673",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_client_windows.py",
+      "sha256": "e95063d2d62b1d93627f7700ca1202362d498edd3aa680176f7064da6875eeab",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_commands.py",
+      "sha256": "f33e336067ed8d961237c58b35a73e5e99949165b94bb318ed8477802002192a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_condition_native.py",
+      "sha256": "be5dab5df7eb1c0ec788c0ca46e97d09dbacf9174c15866ddd9bede271c7a1ac",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_conditions.py",
+      "sha256": "c999d9e2f82ae454c1de2715172733bad1916ee1e200176d3e7116675f24241e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_daemons.py",
+      "sha256": "55de331ea0e2539018f8548eabea715cea6e10c4b403a76e5916f617b19bc6c5",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_flow_foreach.py",
+      "sha256": "eae4f72bd5519540789c1aa7ab0e8887d24ff33094a634290a4634e24138f7f4",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_flow_fork.py",
+      "sha256": "e4878ed6e61dc1499f240eea6c600cedee9e4509f07e76a165a5dc650a2ac596",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_flow_retry.py",
+      "sha256": "032959c7ffad801feee075c04ce64329f8f06a5e73233878cda1334ddb45d11a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_flow_sessions.py",
+      "sha256": "c867fdbe60bfcb95846964beb3b71c0ffc1cd2babb06a89954b88312b63f961b",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_flows.py",
+      "sha256": "467261d38774eac59cc08567fdfe4d38c7b85a3164ab1c4dc9fcdc2b7ae90e6d",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_grok.py",
+      "sha256": "06e7b1d9b2094d36ddeb6c7f39ecdb863f46f699c9404d4ca82bb73ef2463078",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_grok_sessions.py",
+      "sha256": "ff78ac647c083129a59c0d99de47bc0eee5653d7a61d697b44a319250801d694",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_health.py",
+      "sha256": "e211ac2a1953ecf4de1810f9ce369d68e73da9a2fa5b1c328527e28bf185006c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_history.py",
+      "sha256": "1943cb4f0c604d0c181c32921656bb0068e965d0fe3b34e50e5a3a6728c7ce9d",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_history_authorization.py",
+      "sha256": "c1c4475a636f48288e209e2cde92378161b4a584c255fd8e1665d7144ae22367",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_history_import.py",
+      "sha256": "083b0651c3d452a34e8c65bc3588588119d30224e68068af1bf471b3adb4f9d2",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_hosts.py",
+      "sha256": "768e23814f69917a8bb83a8cfa653e6b5b183f7a149069a6a889ffaf64893c2c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_http.py",
+      "sha256": "c5dcbdbf26736182be9f823ed16f5f46757160d885369f3c00b787f9348ab3d1",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_job_adapter.py",
+      "sha256": "112de10f737a7627a2e95067eff773934e724b3e2dda4358be852b07429352d0",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_mailbox.py",
+      "sha256": "cf343a8fbfab414a7cd5dd4042a113317835e6aba76d4aad1b8925a5e632d911",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_migration.py",
+      "sha256": "0b4e8fc82514a818a60fd017d59d6b25ed3e24a5437d69d47a14ab3250b575dc",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_migration_authorization.py",
+      "sha256": "5f4bcb07df6db26eb0f11c2446aef49ae892732aac60267dbcf7a1f8a8c213b1",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_notices.py",
+      "sha256": "43ba1540f65d7be5ceed09acfffb629028b9a096e9a3e38ccb862c76cc6ac155",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_operations.py",
+      "sha256": "fd286b65ac68300f6e9998d248c25396255193a679941d27f6e5ff2402869e56",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_recovery.py",
+      "sha256": "09d0c38c2142504d6d10935263496984a46cac307eaaca4d93237bd25f39dcd5",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_registry.py",
+      "sha256": "e9cef5289c03d529270def68c24f38aeb79656d9668fb385f26276074804f22e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_remote_commands.py",
+      "sha256": "7bb50e16156b1a2d39b56a70cbf05e02861e64798b15e2ac821a860d987ba502",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_runtime.py",
+      "sha256": "e1e4b4345b3d937d9b515ebf1509d71f09c5a36e6df37763198778dd157edbff",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_schedule.py",
+      "sha256": "2a90e02256071542ad9c4362364de25383fe5978d1e827bd33a6836423f08582",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_tab_adapters.py",
+      "sha256": "60cc8c731c027434e2c1a06e745d369022705a6fbf99abfc989f01f5aa9a338d",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/controller_tabs.py",
+      "sha256": "32788753f49e636840fe22505ff25e85bdcbe278999308c46b65a9cdba9d8b01",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/daemon.py",
+      "sha256": "4c62ce533121276042cdff53ab744d1162524f952a9c2963ad4dd5eb09ebf8b4",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/daemon_commands.py",
+      "sha256": "d9dd837e06dec00f9dcd40b8155e4e4367666fa2ca8fb7921625b86b7bc77204",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/dispatch_packet.py",
+      "sha256": "35300c5dc475a6160c23c8496981815fccabe580297d8c6f24f744c4c84c052e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/emergency_interrupt.py",
+      "sha256": "acf5b8e93da8425518a6d279ab531d392097575cd8bc6214dc09d8d4855b53b0",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/entrypoint.py",
+      "sha256": "36e77bcfb1d2f1cd4dc85a3a9886091d8bbc418b7cd25759b2e5d4486734047e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/event_wake.py",
+      "sha256": "e7bf8828b7fae0f23d0782191d75263ca08d05c2765651a84dd6e1776f1cbd9f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/executables.py",
+      "sha256": "82c94a3c9f2438f3faaf3f8db3df5a8c0cd6dde6629e12cd98ea26135e2dde7f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/filesystem_signals.py",
+      "sha256": "6c3eda8262299769db1f332aa5b6e6dae441823d21490751e8f929a4bcb18d43",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/flow_commands.py",
+      "sha256": "3237df5d58822a29aa9b982e7908d965b1642e898584c75f451f47eca31e9fcc",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/flow_session_commands.py",
+      "sha256": "334e49ef630ba269a48e1804827ae9cf794368957b014497fa748d1162641ec3",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/frontier_mcp.py",
+      "sha256": "f5a5f2944169818854bef7c57ec85d89b043a119d40c8e5e3d35cd98961d0404",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/github_client.py",
+      "sha256": "06e2c5abb739ce981c2c26dbd45f5abc6aeb860be099d9d921f2eeb95f58c05c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/github_credentials.py",
+      "sha256": "4fa540e58b4eff2012262965a4ac1aafe19a65cb3ba773a574760ac506d8d30f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/github_polling.py",
+      "sha256": "9ca67be22252180677e774798fa89104a99d4206dcb11a14e250708eaed4527d",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/github_source_config.py",
+      "sha256": "f1752787440b58059340e91d2a513a175c3f073218191408d380d56d643980b2",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/github_source_family.py",
+      "sha256": "0a5ed64cd94fb778a88419b54d35e164279cae725de29e1d6af11bbfb15d3a41",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/github_webhook_admin.py",
+      "sha256": "32a4b4443b2aeac6e6defbada979a15296ed20055437d6279dfdd90b43784ae7",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/github_webhook_runtime.py",
+      "sha256": "b26867836c7f6f62ba6547ce6f7193f6e3a869337952d31599a92d44c33933ae",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/github_webhooks.py",
+      "sha256": "a184f33e79dd02d5f42383ad5f5a96e12ec64fe25f4ab47de1bfdf20cf23c851",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_governance.py",
+      "sha256": "cc04f0eea1806ffdfc0c78b7caa3f4e4b999f49d47e0f21338739c815f5c93c4",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_host_preflight.py",
+      "sha256": "0311ca4d3c44c3fb974089cd1b6927c18856f87a5644fa126623b5b4c2c9a398",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_limits_cli.py",
+      "sha256": "7ba002d13911ed5d9a9d41acb98bc70f915faef168ef77c5bc721a9440ed056c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_maintenance.py",
+      "sha256": "aeb4078066469c25c544ef36fbfd636c98f29be10b7a37fbbff827724ef107bf",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_notice_commands.py",
+      "sha256": "6fb08618b04a4e77d1c758f030a478dc0327933a628bc3bc86c5c34c41b61dc2",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_notices.py",
+      "sha256": "96f30bc0922489c8365130af4758d58df11ec0be4b6fc6c67184bb95acd5e600",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_readiness.py",
+      "sha256": "42b47600cf42fbfd436f68e48c03b2a54985df82ade16c5fad433e215707a109",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_recovery.py",
+      "sha256": "8078d0ca0bb011ca7e9c5259f4b9937378bd98417c41754777fd4d463c9839a0",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_renewal.py",
+      "sha256": "a1168e77f46db40538de1bbe738b08cefda91e7817bc58098f34083b69984570",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_renewal_commands.py",
+      "sha256": "011e107cf86bd187345be121cc6f511856ec4172ac8bf554b210d5652410de57",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_supervision.py",
+      "sha256": "bc57fa93408528428584c151c6ae525c4365e0a9b7a4372a45ee45b12262fb0c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_time.py",
+      "sha256": "e58da4979d7259eb3ec237e330e8ae0d8f042031fab98b38694402fa6d1f822c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_usage.py",
+      "sha256": "ed8d20ed46d19f9b5520e4f222182ea5ddd8f07984a8671dca8091ea8c6fa7ef",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/goal_watcher.py",
+      "sha256": "cc7d2b6f7a7d595a76ad7ec0f0e72c6746fc1c92b01a9d074d63c8f11ee46d19",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/grok_acp.py",
+      "sha256": "a4693048a12af56bdfaed748c84d813ce9c2bb93de6d10227fb8bb07f4b12b46",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/grok_commands.py",
+      "sha256": "1278c9a458c9bd4e4ed71c307181128d42258a578a8e871ec8f9305415291d6a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/grok_runtime.py",
+      "sha256": "92aff510c378f244272026a8be88c8b0ba713c5301ea7c26e3c36005aba08659",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/grok_stdio_host.py",
+      "sha256": "983613fa38431ae8b0b8555dd04305b23c5bbda1b7b71f244cef71d079e3400a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/grok_terminal.py",
+      "sha256": "30aa26fe439a30c1584b5cb1ea1da7b0cf60debdd1554e22618f115f7504635f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/guarded_interaction_commands.py",
+      "sha256": "9a1ba49fe2ed11a93d88345ff7ee8f13c4776a8a1942205007c2f790eb5da9dd",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/guarded_interactions.py",
+      "sha256": "5a3e53903005e954001bdca6e05ffef42706646ce98b73d940c48aa2bc58d04e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/harness_mcp.py",
+      "sha256": "77e22b5a351199f35fc3879b4018a8f55bd0fc53f59fe0cb12adc1d31ab29146",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/health_commands.py",
+      "sha256": "9fe3a1fdd4d826e6bc3d162cb6fe2ccd0c9eef4b549a134cddf7950a96522adb",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/history_commands.py",
+      "sha256": "56d5c31165b3d405b8d1b97317ce0e8abf0f76b2f7256dba380b31870c2ea883",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/hook.py",
+      "sha256": "73dbe8681cee1b344baba95fe8af223810825dad3706cf926b73cbb2ef43bd1b",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/hook_config.py",
+      "sha256": "d55df6d1fc266cddd6ab0b66683e48f6e6c1559bffe0bb236cc2af03050de80a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/host_commands.py",
+      "sha256": "0d031f254170a32ae1016a6d7a371bae6a5e0f54cf79af0fdc48c241141cea70",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/host_counter.py",
+      "sha256": "2338d9665c5672a18f6460750b2f4ec3d617b1dbb72e822f4322a26832e36481",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/host_execution.py",
+      "sha256": "30bb0503637df1ddc269990f1c7b18d1b8d48bc38e88f0937ef9c24d6c08b246",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/http_json_signals.py",
+      "sha256": "0310a6593cad03bb9d00656a181f167daf90c8ca4377132f1c72b97a1f51229c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/http_json_source_config.py",
+      "sha256": "af783c3bb5e3f56e8e71eb84257a86c41eae8000da21fa2964863204db344757",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/http_json_source_family.py",
+      "sha256": "2e2c0cbae6a59d408b0abe8356a575c46c10de425f3ad4ef6acd142ffb5c8b8e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/injector.py",
+      "sha256": "41c3189164058fd5ef5ce8b3432076891ab37cd7ed5ba1856b937ec1a43b1b37",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/json_decode.py",
+      "sha256": "bc15414d08533876684e15140c2dc4f63abb8f2f6cd44d8a2fa55c8e9ca0a101",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/lifecycle_budget.py",
+      "sha256": "8c403cfbad1631c56dc39c197f206f8424925d3ccf84c79e4f07d886a6378d35",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/lifecycle_configuration.py",
+      "sha256": "99e09113152186309990dcbd0b8e9bf3499b93848cc6485a12384385bba05b89",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/lifecycle_correction.py",
+      "sha256": "6cc40ab4c1fa645654108b105c55d79b2eb17335701259169d27d62f3c78eb82",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/lifecycle_review.py",
+      "sha256": "02fb1fdb130db758da573eee8e9e8dc61a62812cee23ca5be87f60812c2de568",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/lifecycle_rollback_ui.py",
+      "sha256": "fa06d8e24a9702704afeafb2b951990d995877122152ea6d9247749cf6350c67",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/lifecycle_supervision.py",
+      "sha256": "42cc8d7a0fb576b46c7f9c02363219771b55aa0e2854c28c46c233bed02b70f2",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_control_client.py",
+      "sha256": "d942fc75a548e294b66351f32978762df47fd890ace03a729b735cde5b6d3a8e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_control_commands.py",
+      "sha256": "9e95b3ceaefaa4b6270200c6f14b94026b187f135c455d1d155ff27e87544e2f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_control_lifecycle.py",
+      "sha256": "3af2fd8af68df81247914609d2d7945c03f3d27a9d7cfb8eb3f92fb3f21b17f0",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_control_routing.py",
+      "sha256": "62353510207dc34655239a73aead7de4ffa677d79c7e499b7867c992a29f8772",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_control_server.py",
+      "sha256": "bebf0f3f1aaf87018cdb21041f764749658dc20e05e5aa4f1e17ca17e13a1bf6",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_control_service.py",
+      "sha256": "455995e67eabff2ad14e4c7ecf7f6defca3591c60c1e9a37e312b987c7f8aa45",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_grok_control.py",
+      "sha256": "dfe301421d93c414456c259554800a892d2c0386c2c5d9891d9277516d8c5d2f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_grok_events.py",
+      "sha256": "45a70887f46a4c24011280c541482e5a129851c5bdf7606fb5be90ab324dc45b",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_health.py",
+      "sha256": "bc547723fd1789d1dfd3235381c731067c0582333340d957396b0592071b6a3b",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_self_limits.py",
+      "sha256": "03ecc0dc1f1d02430511d40902821bab42045fb018b31aa091fffca85937f638",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_session_events.py",
+      "sha256": "77ed193b40171dfcdc551cec212f26445bf172ac907eefc5ce5f732bc86c3746",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_session_operations.py",
+      "sha256": "eae8838993e07d735c0a07d1e4c37f59b6dd57adc0e1762d30e97377ed7f1773",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_sessions.py",
+      "sha256": "f7a61de69064fc9fcf17111a8458f0098f372a85740ad51bad199490463a8282",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_slash_cli.py",
+      "sha256": "efb856893f75be71f8bb7b3ed7c621c349d33a1b9aacda66d163242e8dbc380c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_slash_commands.py",
+      "sha256": "76b70a33702708d3b72be392a3a0f38b3bbe6fd7e2787b9f1407351a86330a6b",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/local_source_families.py",
+      "sha256": "4c7ba0d0eba806ce9b8af423d75e94f9034dadd46f3f1fa9a7974d4b0099e2d3",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/managed_inventory.py",
+      "sha256": "3412dc709dd69247100a35427687101f78b31fb181af9a8ed8f39741e61dee77",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/managed_inventory_commands.py",
+      "sha256": "06d1055a97e4ad9b724f5b93fabb20f79c039ada681cd973598c414eaf7a1e25",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/managed_webhook_cleanup.py",
+      "sha256": "c3ac28d4d6e585787ca9a193a87cff6b58d836fe51c759dd4e2b5046455f4934",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/managed_webhook_health.py",
+      "sha256": "c7fc06f011fbdb81344b8b9593d4cae389bb10c52508819d06ff5c72ba81acfa",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/managed_webhook_health_evidence.py",
+      "sha256": "dda2b075873c1a88ac5c5fc194c00680081aa5da4dc3087d894e563ec3457a1f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/managed_webhook_rotation.py",
+      "sha256": "ea9ec3aa5e69eeb42e340f243e88d5dcc03e44b2fb16c97120b2d5859218426d",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/managed_webhook_rotation_preview.py",
+      "sha256": "9fab9e00fbdf2d35fe5242b39d60052d3dcd3202190d18adc39828e849bec6be",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/managed_webhook_runtime.py",
+      "sha256": "ccbf8ab1b090b92656b260e3a73f80113beb91c8fad72cac54f3fc7af4b061f4",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/managed_webhooks.py",
+      "sha256": "0f92da112e5e9fdf05dec86434df578d05e108085156a55c0867028097389648",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/mcp_server.py",
+      "sha256": "b593b51125de6c7a11720f2274414983ee6930b10f7be1d60be4eb5eef82c33b",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/messages_cli.py",
+      "sha256": "1d158237b6f9a118e41aacf7cc1dad20afa41f11bba6e6fcc965231f6b9c72ec",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/migration_commands.py",
+      "sha256": "305a40d998e3e72bb8f8be341aa0becbc7d5ef49bdb3f0fb870c3973fee74ef9",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/monitor.py",
+      "sha256": "36968a89d2a67c1fa3ff29ad176348f99439b43730f1847ab5f866178dd374c2",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/native_clock.py",
+      "sha256": "8c7ac0f022ca810f69091cd8acb58f6e2840f77e435d7cabdb3c00a4c51c6e56",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/native_delivery.py",
+      "sha256": "ec5f7ba78f39737c2f3bed84fe8fc65170262524a54a18575a77767dba398a73",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/native_intents.py",
+      "sha256": "e88660201abed148be76cd56406984f0751798ee329f16f15217f8690f947032",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/native_mailbox_bootstrap.py",
+      "sha256": "c7a0e1c2ef45c431e799cf420e6b0d74e7f586eda082d93585f2e9101c6b9a92",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/native_protocol.py",
+      "sha256": "69ec9ff48986b3f67385ed28968a165240146a9c846f2cfe339917a128ef2712",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/network_wakes.py",
+      "sha256": "da9c543ec6e803126839c06ba084da5cfc6f6bdd6505c211565aa83ef1ecc566",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/notice_commands.py",
+      "sha256": "cabf03b74ec99125abe337df6ca7a36fd3b5c333d79a2160f3b4389886b152a1",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/objective_ledger.py",
+      "sha256": "d1b7de60fcbc166e5188202293ad8bec38aadba47a641ebdfb4ac6ef7dedff07",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/openclaw_gateway.py",
+      "sha256": "1ab99a8f90d576ae306e2603403453e0d357ce90ff08936475a2c6d6b5978b92",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/openclaw_plugin.py",
+      "sha256": "c8f9942613e1b7207eb9b968c3934c211f4556c2d3577937fda215e5c5f2a3e5",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/operation_commands.py",
+      "sha256": "1f78cd9cbd7d0065bf80c9c5e9d959bb75a6a891b105ddab44151e8a85c74939",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/operator_overview.py",
+      "sha256": "73a16a288bd9f2969f4dbed9b47729dd4a6ecb496a6dd5f868ec7aa5a0f09f33",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/operator_overview_commands.py",
+      "sha256": "9bdd81f46c7568cabfb71f11ad8cd5cee80f2b6e87386b7d9f6bdbfd7e100e1f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/permission_a2a.py",
+      "sha256": "24823d774d06bce9bfaf3d35eeda72ba8aacedeab600f1c33c8bfbc4ec2be984",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/permission_commands.py",
+      "sha256": "ed4939725f5c1aaccc981119068ec53c7a306336864b7d770a078224d739a592",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/permission_enforcement.py",
+      "sha256": "65d0d2417142835efcc99113d78814a1fa1365b0bf9ea475df84d6b2784b46fa",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/permission_handoff.py",
+      "sha256": "e3f56e9ad60e95bc5d3113b4453c77f6527d7fce0de2b1cd709997621f171ee0",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/permission_migration.py",
+      "sha256": "0d8fe0fd520e7827525b17fb3cb1f9acc268816128ff6e8ce397b72d2544910a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/permission_refresh.py",
+      "sha256": "740d3978f6bc1fbc2a4e5c853026203216456b07e6d96c696161ce9b68c1dd0b",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/permission_wake.py",
+      "sha256": "071c138f127071c240999c1bb05a6c79efbb09ce490b4abb0117e49b586f48a2",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/powershell_client.py",
+      "sha256": "7fcefc041f435e74111dd2623596929f9d590140b79637db061d4753fd0be246",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/process.py",
+      "sha256": "5fa2f6ecaadfdf1b84b05ead90ca5e287821a585ad7004fde30eee462d697260",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/process_signals.py",
+      "sha256": "f5112c66a247865b6e70960345f2cf25804726bf1fd55b50d64d669e0ef531bc",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/product_readiness.py",
+      "sha256": "022b28b98bb4aa40e10305eefa94680d3600989d8b9bd8c65e9b7f7423fa5063",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/profile_adoption.py",
+      "sha256": "30ae7a55f1a203b22426675893f481734421a4ffbd91899465d548238fe2d99f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/profile_compat.py",
+      "sha256": "a023b35551e878f19a67c3da5e367002f0419d336d1637108fbb3e8b9a85877a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/profile_operations.py",
+      "sha256": "dfb555f658347b0328cfa6d83ba2c584b3abed411b72916407e89e1825069dc0",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/profile_reload.py",
+      "sha256": "3383775a5d4574a7704de6459ec08e193b4e8a530338658b12f3e5740da3216a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/profile_stores.py",
+      "sha256": "541cfdd11091ed2651f1844b4e61e208337dff62893c585a6435117162d3810a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/records.py",
+      "sha256": "553db809b43c4273a685fdfeddade3020d8b1c089e3b68235d5dca5b81e4fc64",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/recovery_commands.py",
+      "sha256": "f11ae0b634f558df4aebf223607ae178d308a32df42408963e22b2bb2daf2ae9",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/refresh_goal.py",
+      "sha256": "5cf1db34320d7be925fd9248e3bbcdd27c5d8ef11502f7ef6c3e2992c86f2db7",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/refresh_resources.py",
+      "sha256": "82c156964eb9b74b0db7b9079705efa3345b2c9ea322a55510273db4d0f79fc2",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/release_build.py",
+      "sha256": "856f3303e62505979c79461a1390d01b0363cf361eea0a207c809c92dada5540",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/release_cleanup.py",
+      "sha256": "4353c4e1477ee878b8d17e7b6625ff9c952df782633c81ccbb42871332fff095",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/release_driver.py",
+      "sha256": "dabae370b4af58d4119f5f9e2164ec506146a562157b9747c8b8625a496b62e1",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/release_qualification.py",
+      "sha256": "76e275d3377e4d0f42fdd499fe5acdf1aecdc97a8987cc943fafe9d081443fe5",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/release_resume.py",
+      "sha256": "a0218dd48ba0794b2b4d656036ae3a4e843f64a2e2d959378b1cfb74294d6bdf",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/release_run.py",
+      "sha256": "5314e8edffdf7a137d9cf82c01dc7fc99f640700177df0f3a6ce25313abd8324",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/release_signal.py",
+      "sha256": "5c4cab5beec231eb02d6559eda60900e25077912a5d91b68adc39ff55267188a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/request_admission.py",
+      "sha256": "a2e1ba5f0c613dd3cdaa249b1da73a4572089dd94fc291fe097f24c5b692d5eb",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/resource_claim_commands.py",
+      "sha256": "1fb28a01c06b95ef75a55fba70c5d16a89539ac8766939bc46c5116ab7dfdbde",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/resource_claims.py",
+      "sha256": "5f59ff60f85e6ed48a805277ad6d7f1821703556374eda046a8b9ee4e7cf8174",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/runtime_a2a.py",
+      "sha256": "836bc4f09fa821972821999d933278759f60af9f29f4c3cdbbbc6d4505910939",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/runtime_delivery.py",
+      "sha256": "1e065d8993fd35de93d5c916baae0c05ca7be1cea39b83eba3314e0e1f6f6be5",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/runtime_policies.py",
+      "sha256": "188740a307ea3366ca464ad08a94c9dd7dc15ff6c87d64c8fe751f5f7ef8fd3d",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/runtime_signal_tracer.py",
+      "sha256": "a02cc8e9c8a18f8cfa29a703c78456aaae67ead2a59f6dc521bef56542f22d94",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/runtime_signals.py",
+      "sha256": "2f6165cd7e649833932ac40c53a95fdfc8231948b6194af6ba51bcc9a4745c00",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/runtime_wakes.py",
+      "sha256": "52f37d98d949a6bed2c4d0ee854cf386f4e5c5b302c0bb10ade26bd4a06e233c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/scoped_refresh.py",
+      "sha256": "2f8b77aa9cc1fd985c6b9352c248eaf677f183224854b050325faf4bd0c751ee",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/self_limits.py",
+      "sha256": "89968483be75d1e19c6e48db16f39cecce34f94bbaaae83931aaaf11c3774187",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/service.py",
+      "sha256": "f81b06bccc002f173e4ff246e52f0eb20b437fa8cd888b5858eba4e29b5b87e8",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/session_lifecycle.py",
+      "sha256": "bdba71a3903e69308afbf12c986eeff27186154472d85959997adeb064187fb3",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/session_permissions.py",
+      "sha256": "191cab2e2f298cb1794954e7f4e07355b47a3b2ae76e00f61ca7e4e27b55066d",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/sessions.py",
+      "sha256": "429cbb60dc9656d341bc3972b3fba2de27376639e9b420844cfe7ed69055aafe",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/sessions_cli.py",
+      "sha256": "cfba3684a9760773e0a3034bb9146b10ac8da1ef5dfa39199f6d54080c1c5dbe",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/shared_app_server.py",
+      "sha256": "217a4297098bc0461af651c9d83e094e85194b1bf109517742d90a82f46ef0f4",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/shared_refresh.py",
+      "sha256": "b12b880168134bd69e180e118151b9ae8591916798dccf50d0298c73d991d517",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/shell_completion.py",
+      "sha256": "7960990dedc552a1455266a7fdb15f53e3e63b9de595269d0b1e0be604aae100",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/shortcut_store.py",
+      "sha256": "f3edef4e1f9f33e13b1469d2171815a09757cccc898cdffccd81b340bfc93854",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/signal_records.py",
+      "sha256": "63c24164d9dcda1eaac95bfaeccf37b828a465c822435f0af2c4c7b87e043d97",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/signal_store.py",
+      "sha256": "ecc5643877a2fe08121b3bd8193da3740dd960e2b31aaa56ef09461137be926c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/signal_support.py",
+      "sha256": "2edd3032116dd3a336eb66e38e7e332e27958f00a3f182f0c709cafb07334ba9",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/signals.py",
+      "sha256": "1a5c3ce9e70c2a4ff60772eb77d86448cffa2591c360cecbd5622a9cd8b8cb6f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/source_registry.py",
+      "sha256": "74ffa2f69226c8dd89e2ed3f57f261370725ad1500d26fe14ddf71e78de343e5",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/stable_time.py",
+      "sha256": "8757cb938436e10c154c182ff2804d6749a73429f8a73a2e62b74cf86ec92dbf",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/strict_executor.py",
+      "sha256": "88ce6ec582a21aa0cc05c64f50c7e7daa83548a06cc74d364294a9f875163eeb",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/strict_final_usage.py",
+      "sha256": "590f81f50d4c6944ea2d0f8e69cc269a21c725196db2077507113968290d0119",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/strict_policy.py",
+      "sha256": "47662423bd2b7efa62659f6630fb6fc40ec557d86ec7a6e7ea133d38dfa3304d",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/strict_runtime.py",
+      "sha256": "322f4d3677386212c559a253a2bc9c2768f49c66c918985d972e205fee0e287f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/supervisor.py",
+      "sha256": "fc8f37246a2d487cf3e5b90d82ef3fd77bab924557d4e73c9bbd2c70b19713c9",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/systemd_signals.py",
+      "sha256": "4ccd233b1377fdc3cfdabb80a4e2e9aedb753ccf52e2aacbfe71dc4474b836b7",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/systemd_source_config.py",
+      "sha256": "26ce977fb546bd6f9a72d43939e2dea3670764588e8edb418b8ff577a347b32f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_commands.py",
+      "sha256": "cf36512e5a8a0589635954ad31c01ef31bf3ca0969e0e5ba3919b9437ad81998",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_contract.py",
+      "sha256": "a67ed2b35e567f05f38c28d8fd8c7c72b0e8296b69434b1f069ed093347d8d4a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_error_capture.py",
+      "sha256": "42d453218a426d84c59ff7f4bae3ef8d68d0198954078b1b45e55dc4e12902b3",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_format_expiry.py",
+      "sha256": "b191632e8eb9f4a5e83acd2c225b83789e4c0c80171f563cad015b4ece29b31e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_format_monitor.py",
+      "sha256": "0c4fd8819cb1e8e5ce97c332aa472209ae2154a53b02cdabb8ceb9f4e2bd32ba",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_format_policy.py",
+      "sha256": "108a52c369940666f76588f62246e96f69ca17c907a413a8cfcb5c6b6af521f5",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_format_presets.py",
+      "sha256": "42bcc5570bf26361aa9519924dd367360c47964e5f643f61cf7367efad026f11",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_format_projection.py",
+      "sha256": "cef5c395417b60249d331af0d86fe5536708faa52586687a419d562f1453bf6a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_format_read_channel.py",
+      "sha256": "de78b7296126598598d4c0f5959e52ebc9d0ddd5c979ad23e68278f36a598c93",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_format_rendering.py",
+      "sha256": "9c945a624a1a0f620fe14215f7ba1cdd28f5cfc4aa3024443b4a4ca4f2a731d5",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_format_transport.py",
+      "sha256": "44341142dbcf5eeecbfee5b239ef63702bc1d17d0ba585ef9da6a02833075431",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_formatting.py",
+      "sha256": "2d237e0d89dbf75a67d40dfc081e0d0a8f41ccc4246e5be0e795f74621080c8f",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_lifecycle.py",
+      "sha256": "96958be1846f3be940a4d0cb928d59aedad3afd797ef5f1db221bbf36a417db8",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_matching.py",
+      "sha256": "02be865c1cc45b7225d52e819ab711eb093ad1f1826c4a6acc6197ad4e18ced1",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_monitor.py",
+      "sha256": "7c109c1499a1c48feb65f6e9258fd812dd482428c93219b22694028939acc5be",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_native_feed.py",
+      "sha256": "46f2b125992f0c12f798d7ad80b9a4720acb0b19e28386874f50a49917a5ffa7",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_observation.py",
+      "sha256": "e9b80670cbba206d3de7686db233fe1741e569995838e3a944365215ddafe8d0",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_observation_checks.py",
+      "sha256": "902ce067387d16abec9d8403c39776925c8bf817d97e495089b5b5b8ab2e36d3",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_observer.py",
+      "sha256": "4a91644dbbc59ced90c763f7f9e73568850c1ecf1ada6520622adcfb20f52c32",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_organization.py",
+      "sha256": "4de2cfe0557d6db5f98cb239ee15335639618510eebb1b2e69591cfa3f4851da",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_organization_commands.py",
+      "sha256": "1e147f2f63779cf913852a0f5ed9fdf502e28fdb824c889ef63e54a6d31f7a92",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_organization_policy.py",
+      "sha256": "271324ed9eb7b5a783d9f1e2ec57ab90ee1befd8cc5c3797decd5e6216562e27",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_profile_create.py",
+      "sha256": "c1dcf8e8284e66b88e9fb0e8e751df0101414465462582082a7a0211b5efcf16",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_psmux_bridge.py",
+      "sha256": "9ca6c21f4666d9f7e96533237a23a51a72179af2968fba9d5e88646263dbc3f7",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_reattach.py",
+      "sha256": "52068085390de5e291bcb0451a801f75862997647af74f883fcbdcc674691905",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_reattach_traits.py",
+      "sha256": "132f303f7feafcb5f5335a14c5db890efd81bbcc2e3617b78c11543c3ddf0487",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_recovery.py",
+      "sha256": "f6491b2e12779ce7943bb098d98b2daa5ef82c1b9b2f8e9b0033564bed1dd985",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_result.py",
+      "sha256": "d4532480a270fbfce6562f582a35a5783d77c11b26b0704a67988e906aa7a233",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_routing.py",
+      "sha256": "1e822c3d21b12d917612e6041ef991412745b4102fec589f2c375e137265c8f4",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_selection.py",
+      "sha256": "aff2e54a5bb206352f0c28d746b767c66c4936195615deb469d0768e23d208b3",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_targets.py",
+      "sha256": "5694da1020533de636dd5ca8b1a69eec2f09e7a0e122be784aaa3d627f5df6ce",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_tmux_feed.py",
+      "sha256": "e4f10f2a7b36f4df947f6b0414b2f5906f37931df62eab77c3fbbed9fb95487a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_traits.py",
+      "sha256": "f668ce6abe965f5e7262a6879b3fb9cbadc8acf6afb75c1f64e2d11e73cb0767",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_views.py",
+      "sha256": "02a86e9ac581ac7e71f19ce00ca675ebc783f3c53a468835a6995a1b53709426",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/tab_workspace_discovery.py",
+      "sha256": "a83332b225cfd01b7721512d344023ffd7ef53242e902910f15bb2d0efbe7973",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/target_lifecycle.py",
+      "sha256": "6cf4a7266db90b7b94424897506fc6bdfb39bba26a2f4ee6c963ee94839d1c85",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/task_brief_commands.py",
+      "sha256": "9d6c7574038c0150fa02f84864a4db9955c593c836f2599f7e3a449258d8d1a2",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/task_briefs.py",
+      "sha256": "f79c9c650dce16ea4af510f8c3ef05fdc353549f7243a192bf28661e6d51be09",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_bot_session.py",
+      "sha256": "19f24b30e0ed4fcefdeb2c186e4a89094c108b4cfd68b9a82de8715028f0c36e",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_launch_defaults.py",
+      "sha256": "279e70f20aa803a6babe57cb170d5225e8b2edaa0fc8f72ba10fa37f94356914",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_relocation.py",
+      "sha256": "0813a62950b05287f64dd384db76323488331c29237a902cf89b0f06a30e2650",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_routing.py",
+      "sha256": "8983c9730d2dcc65fe6cfc93760ec14f02b67837575ea2cf6829e93a103f2b27",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_selection_cli.py",
+      "sha256": "9e4bcd185e71cd7310558df1b235a4e3cd61c38ff05c33318f1b87c75a42ec06",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_session_cli.py",
+      "sha256": "2e9b2cc05f0e1863db0f77ba3e1ecf275c6211c3d7d0407411fa24bec10d43cf",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_session_contract.py",
+      "sha256": "fad60481ad289cd936ac58a779e5869963f39b56a9004a218433925889989a01",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_session_delete.py",
+      "sha256": "695375436589bde7b304a02e6d09faca47b31731ba7167c4f7c859e1f7775ea0",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_session_psmux.py",
+      "sha256": "1630491d5374faf2e9ca29047b02e03d5846b87783c09530e978aa12cc09766c",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_session_summary.py",
+      "sha256": "c02b32e9e96c9b45c7a33d15c220aaaebfe7f47ee7bdff9637fb824592dff776",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_sessions.py",
+      "sha256": "81084df4984e93c78ff3070d446eac8c67c751cac2c317e2ca6ec0c555019c68",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/terminal_tab_holds.py",
+      "sha256": "d1bfab277e496395e07c2624ce1e29d405d29ee8b5d82de3aa2550a7fa44a57a",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/time_collect.ps1",
+      "sha256": "372eea0ebc8aec8d2c817f7912ddd73c9ce36aa641633173e689df43474661bc",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/time_inspection.py",
+      "sha256": "99158fec218141024242a8704e190a3526c0270195a758a3f2b829adf2603b02",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/time_provider.py",
+      "sha256": "2a5ea7ccaecdd3e06f7f8d05b7a61fd4e274f74bfae3e04a7ddf56e724f6fcd0",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/wake_control.py",
+      "sha256": "b9849f659cb70b82878b7ddee9990f1d315d13221620df7b26ea19734cdbbba3",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/wake_policy.py",
+      "sha256": "416f8d4f89764bb4d42486662e20e870da6cb629b947bee2a9e4a7b32175e8d8",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/webhook_http.py",
+      "sha256": "91e9f63ece54e6b7991d1bad052f1e191c1d3d78f7a68bd88476e7305cd2e1ab",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/webhook_lifecycle.py",
+      "sha256": "6848fb33b689567980591da4c6714db88138db04ce8e1ed442f00585f287c3f7",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/webhook_listener.py",
+      "sha256": "f7e013346512d00c85cf0dfa793edbc8cde1d6b566db9d6dc8601955c574b085",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/work_acceptance.py",
+      "sha256": "cc31c2824de5d06c43c2dd0299c4a6fa87a396dd73fba6d5044cf18e7c8defe1",
+      "source_equal": true,
+      "installed_equal": true
+    },
+    {
+      "member": "codex_wake/work_acceptance_commands.py",
+      "sha256": "5165114d17f4f356cb47399935ca752c2b21d6384134392a4506ba7aff097fa6",
+      "source_equal": true,
+      "installed_equal": true
+    }
+  ],
+  "source_date_epoch": 1794355200,
+  "uid": 1017,
+  "shared_kernel_limitation": true,
+  "executable_sha256": "e8d82b72c20af89ffc2e5653262a8759477e67461b4b2ea51a4f2147a7da72d1",
+  "python_executable": "/usr/bin/python3.12",
+  "msgspec": {
+    "version": "0.22.0",
+    "package_version": "0.22.0.dev3",
+    "module": "/tmp/wake216-uid1017/lib/python3.12/site-packages/msgspec/__init__.py",
+    "members": [
+      {
+        "name": "toml.py",
+        "sha256": "7b43760ba6437171b146e812e22559e2936f18ab275bf42a49df4b948527c997"
+      },
+      {
+        "name": "__init__.py",
+        "sha256": "d5330f3406745b0ffde3a1ed17bc20dc5ec47bc5362939520138d710d2202f26"
+      },
+      {
+        "name": "_typing_utils.py",
+        "sha256": "aa6e8036f1f0a5e1e3e853899c660bb3bf84e23723ecce38a2a649e4d724cfb8"
+      },
+      {
+        "name": "json.py",
+        "sha256": "908ce99b6347b339007c06cd71e9b1abf8541cab77ab11f6f72001287d0c9d3b"
+      },
+      {
+        "name": "_version.py",
+        "sha256": "458083f5fa36540ea5be4efe3a9fb6fa3b8a328c85d531aa7e7610c0abdc8da4"
+      },
+      {
+        "name": "inspect.py",
+        "sha256": "3d4a7cc4d904a04b79a267e33ede18c7ef7027ded3c1589f18707f7c36950ad6"
+      },
+      {
+        "name": "_core.cpython-312-x86_64-linux-gnu.so",
+        "sha256": "70c65bcb64ab2aeac86b433147f8cb8572570b0189c2329b028f49fa5cff2c35"
+      },
+      {
+        "name": "_utils.py",
+        "sha256": "0e50dee5699999112139e3752be6491a4f0253142c7f977618bdff677a555aae"
+      },
+      {
+        "name": "yaml.py",
+        "sha256": "23f65ce600d4f7209d6ac435aebfd782e0eee7c2010b2b06961ab7dbaa7cdfca"
+      },
+      {
+        "name": "_json_schema.py",
+        "sha256": "887a97cfc2f43db20438f5092667c73ed2e265563a9564582ed218cbb178a157"
+      },
+      {
+        "name": "msgpack.py",
+        "sha256": "25244b704aa9c82830cbfc03d65a05dea1cdff2b670902dcf115f7dee0136c25"
+      },
+      {
+        "name": "structs.py",
+        "sha256": "b32a4cf9b2dc9c1ec56f71133a3423c6c1f327f133f1792adb35c9d8b7cb3659"
+      }
+    ]
+  },
+  "all_installed_equal_after_acceptance": true
+}
