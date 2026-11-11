@@ -1,0 +1,59 @@
+{
+  "parent": 540,
+  "tickets": [
+    541,
+    542,
+    543,
+    544,
+    545,
+    546,
+    547
+  ],
+  "fixed_review_base": "fa2363c24bf921ecf0bd8390739e96041e620e8f",
+  "integration_branch": "feat/efficient-tab-observer",
+  "broad_review_runs": 1,
+  "tdd_remediation_runs": 1,
+  "closed": [
+    541,
+    542,
+    543,
+    544,
+    545,
+    546,
+    547
+  ],
+  "remaining": [],
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "production_enablement_authorized": false,
+  "validation_hold": null,
+  "qualification_source": "f3e1e0d426f0012224439022c2dd48e8a7a0c4fe",
+  "review": {
+    "status": "completed",
+    "frozen_head": "afd0061fdf247c522a3cc165f05ba88e271b70c9",
+    "base": "fa2363c24bf921ecf0bd8390739e96041e620e8f",
+    "standards_reviewer": "/root/review_standards216",
+    "spec_reviewer": "/root/review_spec216",
+    "accepted_standards": 1,
+    "accepted_spec": 2,
+    "adjudication": "all three accepted findings fixed and requalified"
+  },
+  "remediation": {
+    "status": "completed",
+    "findings": [
+      "S1 inventory deadline propagation P2",
+      "P1 native exact source identity",
+      "P2 skipped reconciliation evidence P1"
+    ],
+    "seams": [
+      "ControllerTabs.execute deadline to adapter",
+      "TabObserver.tick skipped reconciliation and recovery",
+      "TabObserver.tick two native endpoints with equal basename/thread"
+    ]
+  },
+  "status": "complete",
+  "delivery": "validated branch and draft PR; no merge/deploy/activation",
+  "qualification_receipt": "qualification547/accepted-eighth.md",
+  "memory_disposition": "forbidden",
+  "pull_request": "https://github.com/CochranResearchGroup/codex-wake/pull/551"
+}

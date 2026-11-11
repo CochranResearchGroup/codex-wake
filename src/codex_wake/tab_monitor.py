@@ -1,10 +1,10 @@
-"""Bounded derived tab observations; inventory and health remain with their owners.
+"""Bounded derived tab observations owned by one persistent host monitor.
 
-Defaults: interval5s, per-workspace probe1.5s, stale20s, whole-cycle10s;
-concurrency1,64workspaces,1MiB snapshot and32KiB diagnostics. A single owned
-monitor starts at most one isolated read-only probe at a time. Both probe and
-parent enforce deadlines, including after monitor loss. Observation generates no input/model notices or layout effects. A separately
-enabled same-root organization policy may receive journaled ticks from the daemon.
+Default tick1s; exact background health>=60s and eligible visible errors>=5s.
+Retained metadata feeds and the shared cache avoid per-cycle inventory children.
+Unsupported backends and explicit one-shot refresh use bounded isolated probes.
+Observation generates no input/model calls or layout effects; separately enabled
+formatting, organization and routing owners consume the same derived snapshot.
 """
 from __future__ import annotations
 
@@ -23,11 +23,13 @@ import threading
 import time
 from uuid import uuid4
 
+from .json_decode import decode_json
 from .managed_inventory import InventoryError
 from .process import process_identity
 
-DEFAULTS = dict(interval=5.0, probe_timeout=1.5, stale_after=20.0, cycle_timeout=10.0,
-                concurrency=1, max_workspaces=64, max_snapshot_bytes=1048576)
+DEFAULTS = dict(interval=1.0, probe_timeout=1.5, stale_after=20.0, cycle_timeout=10.0,
+                concurrency=1, max_workspaces=64, max_snapshot_bytes=1048576,
+                activity=True, health=True, errors=True, health_interval=60., error_interval=5.)
 OPERATIONS = frozenset('tabs.monitor.'+verb for verb in ('start','status','refresh','stop'))
 MAX_STATE = DEFAULTS['max_snapshot_bytes']
 _OWNED_CHILDREN = {}
@@ -59,13 +61,21 @@ def _read(path):
             raw=stream.read(MAX_STATE+1)
         if len(raw)>MAX_STATE:
             raise InventoryError('monitor_state_unavailable','Monitor state exceeds its bound.')
-        return json.loads(raw)
+        return decode_json(raw)
     finally:
         os.close(fd)
 
 
+def _publication_interval(settings):
+    return min(10.,settings['stale_after']/2)
+
+
 def _save(path,value):
-    raw=json.dumps(value,sort_keys=True,allow_nan=False).encode()
+    raw=json.dumps(value,allow_nan=False,separators=(',',':')).encode()
+    _save_bytes(path,raw)
+
+
+def _save_bytes(path,raw):
     if len(raw)>MAX_STATE:
         raise InventoryError('monitor_capacity','Derived monitor snapshot exceeds1MiB; reduce selected workspaces.')
     fd,name=tempfile.mkstemp(prefix='.monitor-',dir=path.parent)
@@ -93,10 +103,11 @@ def _lock(path):
 
 
 class TabMonitor:
-    ARGUMENTS = {'tabs.monitor.start':{'interval','probe_timeout','stale_after','cycle_timeout'},
+    ARGUMENTS = {'tabs.monitor.start':{'interval','probe_timeout','stale_after','cycle_timeout',
+                    'activity','health','errors','health_interval','error_interval'},
                  'tabs.monitor.refresh':set(),'tabs.monitor.status':set(),'tabs.monitor.stop':{'timeout'}}
 
-    def __init__(self,root,*,clock=time.time):
+    def __init__(self,root,*,clock=time.time,monotonic=time.monotonic):
         self.root=Path(root).resolve()
         self.root.mkdir(parents=True,exist_ok=True,mode=0o700)
         info=self.root.stat()
@@ -108,6 +119,9 @@ class TabMonitor:
         if not stat.S_ISDIR(info.st_mode) or info.st_uid!=os.geteuid() or info.st_mode&0o077:
             raise InventoryError('monitor_state_unavailable','Monitor directory must be private and canonical.')
         self.clock=clock
+        self.monotonic=monotonic
+        self._published_revision=None
+        self._published_at=-float('inf')
 
     def execute(self,operation,arguments):
         if operation not in self.ARGUMENTS:
@@ -130,6 +144,13 @@ class TabMonitor:
             value=result[key]
             if type(value) not in (int,float) or not math.isfinite(value) or not low<=value<=high:
                 raise InventoryError('invalid_argument',key+' is outside the monitor bounds.')
+        for key, low in (('health_interval',60),('error_interval',5)):
+            value=result[key]
+            if type(value) not in (int,float) or not math.isfinite(value) or not low<=value<=3600:
+                raise InventoryError('invalid_argument',key+' is outside the monitor bounds.')
+        for key in ('activity','health','errors'):
+            if type(result[key]) is not bool:
+                raise InventoryError('invalid_argument',key+' must be boolean.')
         if result['stale_after']<result['interval']:
             raise InventoryError('invalid_argument','stale_after must cover at least one monitor interval.')
         return result
@@ -153,18 +174,26 @@ class TabMonitor:
         snapshot=_read(self.directory/'snapshot.json')
         now=self.clock()
         if snapshot:
+            if running and snapshot.get('monitor_generation')==record.get('generation') and record.get('observer'):
+                snapshot['observer']=record['observer']
             age=now-snapshot['observed_at']
             fresh=0<=age<=settings['stale_after'] and (snapshot.get('origin')=='manual' or (running and snapshot.get('monitor_generation')==record.get('generation')))
             snapshot['freshness']='fresh' if fresh else 'stale'
             snapshot['age_seconds']=max(0,age)
+            if not fresh:
+                for key in ('projection_revision','evidence_revision','projection_valid_until'):
+                    snapshot.pop(key,None)
             for row in snapshot.get('resources',[]):
                 row_age=now-row.get('monitor_observed_at',0)
                 row['monitor_freshness']='fresh' if fresh and 0<=row_age<=settings['stale_after'] and not row.get('monitor_unavailable') else 'stale'
                 if row['monitor_freshness']=='stale':
+                    for key in ('projection_revision','evidence_revision','projection_valid_until'):
+                        snapshot.pop(key,None);row.pop(key,None)
                     def mark(value):
                         if isinstance(value,dict):
                             if {'value','status','source','freshness'}<=value.keys() and value.get('status')=='observed':
                                 value.update(status='stale',freshness='stale')
+                                value['source_available']=False
                             if value.get('fresh') is True:value['fresh']=False
                             for item in value.values():mark(item)
                         elif isinstance(value,list):
@@ -178,8 +207,21 @@ class TabMonitor:
                                   last_policy_operation=record.get('last_policy_operation') if record else None,
                                   last_formatting=record.get('last_formatting') if record else None,
                                   last_routing=record.get('last_routing') if record else None,
+                                  observer=snapshot.get('observer') if snapshot else None,
                                   capabilities=record.get('capabilities',[]) if record else []),
                     snapshot=snapshot,application_effects=False)
+
+    def _control_status(self, **flags):
+        """Keep mutation acknowledgements below the retained-operation bound.
+
+        Inventory and potentially large per-workspace diagnostics remain in the
+        separate status/refresh reads, never the journaled start/stop result.
+        """
+        value=self.status()
+        monitor=value['monitor']
+        fields=('status','process','generation','settings','last_error','capabilities')
+        return dict(monitor={key:monitor[key] for key in fields},
+                    application_effects=False,**flags)
 
     def start(self,arguments):
         record,running=self._running()
@@ -187,7 +229,7 @@ class TabMonitor:
         if running:
             if arguments and any(self._settings()[key]!=value for key,value in arguments.items()):
                 raise InventoryError('monitor_running','Stop the current monitor before changing its settings.')
-            return dict(self.status(),already_running=True)
+            return self._control_status(already_running=True)
         _save(self.directory/'settings.json',settings)
         env=dict(os.environ)
         for key in ('CODEX_THREAD_ID','CODEX_TURN_ID','CODEX_SESSION_ID'):
@@ -200,7 +242,7 @@ class TabMonitor:
         while time.monotonic()<until:
             record,running=self._running()
             if running:
-                return dict(self.status(),already_running=False)
+                return self._control_status(already_running=False)
             if child.poll() is not None:
                 raise InventoryError('monitor_start_failed','Monitor exited before publishing a verified owner.')
             time.sleep(.02)
@@ -220,15 +262,15 @@ class TabMonitor:
             if child is not None:
                 try:child.wait(timeout=.5)
                 except subprocess.TimeoutExpired:_OWNED_CHILDREN[str(self.root)]=child
-            return dict(self.status(),already_stopped=True)
+            return self._control_status(already_stopped=True)
         expected=record['process']
         if _identity(expected['pid'])!=expected:
-            return dict(self.status(),already_stopped=True)
+            return self._control_status(already_stopped=True)
         os.kill(expected['pid'],signal.SIGTERM)
         until=time.monotonic()+timeout
         while time.monotonic()<until and _identity(expected['pid'])==expected:
             time.sleep(.02)
-        result=self.status()
+        result=self._control_status()
         if result['monitor']['status']!='running':
             child=_OWNED_CHILDREN.pop(str(self.root),None)
             if child is not None:
@@ -309,7 +351,7 @@ class TabMonitor:
         record['last_policy_operation']=dict(operation_id=operation['operation_id'],execution=operation['execution'],
                                               policy_revision=state['revision'])
 
-    def _routing_tick(self,snapshot,deadline):
+    def _routing_tick(self,snapshot,deadline,*,resources_loader=None):
         # Reuse the service-owned bounded observations; never create another monitor.
         from .terminal_routing import TerminalRouting
         from .controller_tabs import controller_tabs_from_root
@@ -321,7 +363,60 @@ class TabMonitor:
         if time.monotonic()>=deadline:return dict(status='partial',reason='cycle_deadline')
         owner=controller_tabs_from_root(self.root)
         if not owner.host_managed:return dict(status='partial',reason='host_inventory_required')
+        if resources_loader is not None:resources_loader()
+        if not isinstance(snapshot.get('resources'),list):
+            raise InventoryError('observation_unavailable','Routing requires observed resource rows.')
         return TerminalRouting(self.root,tabs=owner).tick(snapshot,deadline=deadline)
+
+    def publish_observation(self, snapshot, record, *, resources_loader=None, resources_serializer=None, settings=None):
+        """Persist changed evidence immediately, or a bounded liveness heartbeat.
+
+        Only trusted producer revisions admit the quiet fast path. Legacy callers
+        without a revision retain unconditional publication. Small diagnostics go
+        to the owner heartbeat so status remains current between large writes.
+
+        resources_serializer is an internal trusted producer seam: it returns a
+        strict stdlib-encoded JSON array of complete retained resource rows. Only
+        the service-owned observer supplies it; portable command input must never
+        supply encoded JSON. Metadata remains strictly encoded here, while rows
+        are neither materialized nor parsed or encoded a second time.
+        """
+        diagnostics=dict(snapshot.get('observer') or {})
+        fields=('source_id','source_kind','workspace','state','reason','epoch','sequence',
+                'owned_pid','backlog','pending_commands','buffered_bytes','startup_seconds')
+        sources=diagnostics.get('sources',[])
+        diagnostics['sources']=[{key:source[key] for key in fields if key in source}
+                                for source in sources[:64]]
+        diagnostics['source_count']=len(sources)
+        diagnostics['sources_truncated']=len(sources)>64
+        diagnostics['unknown_reasons']=diagnostics.get('unknown_reasons',[])[:32]
+        if len(json.dumps(diagnostics,separators=(',',':')).encode())>32768:
+            diagnostics['sources']=[];diagnostics['sources_truncated']=True
+            diagnostics['unknown_reasons']=['observer_diagnostics_capacity']
+        record['observer']=diagnostics
+        revision=(snapshot.get('projection_revision'),snapshot.get('evidence_revision'))
+        qualified=all(isinstance(value,str) and 0<len(value)<=128 for value in revision)
+        settings=self._settings() if settings is None else settings
+        heartbeat=_publication_interval(settings)
+        now=self.monotonic()
+        publish=(not qualified or revision!=self._published_revision or now-self._published_at>=heartbeat)
+        if publish:
+            if resources_serializer is not None:
+                metadata={key:value for key,value in snapshot.items() if key!='resources'}
+                encoded=json.dumps(metadata,allow_nan=False,separators=(',',':'))
+                rows=resources_serializer()
+                separator=',' if metadata else ''
+                _save_bytes(self.directory/'snapshot.json',
+                    (encoded[:-1]+separator+'"resources":'+rows+'}').encode())
+            else:
+                if resources_loader is not None:resources_loader()
+                if not isinstance(snapshot.get('resources'),list):
+                    raise InventoryError('observation_unavailable','Metadata-only frames cannot be persisted as inventory.')
+                _save(self.directory/'snapshot.json',snapshot)
+            self._published_revision=revision if qualified else None
+            self._published_at=now
+        record['last_snapshot_published_at']=self.clock() if publish else record.get('last_snapshot_published_at')
+        return publish
 
     def serve(self):
         stop=threading.Event()
@@ -329,27 +424,43 @@ class TabMonitor:
         signal.signal(signal.SIGINT,lambda signum,frame:stop.set())
         with _lock(self.directory/'owner.lock'):
             record=dict(schema_version=1,state='running',generation=uuid4().hex,process=_identity(os.getpid()),started_at=self.clock(),
-                        capabilities=['tab-formatting-v1','tab-routing-v1'])
+                        capabilities=['tab-formatting-v1','tab-routing-v1','tab-observer-events-v1'])
             _save(self.directory/'owner.json',record)
+            from .tab_observer import TabObserver
+            settings=self._settings()
+            observer=TabObserver(self.root,settings=settings,fallback_probe=self._probe)
             try:
                 while not stop.is_set():
                     started=time.monotonic()
                     try:
-                        cycle_deadline=started+self._settings()['cycle_timeout']
-                        observed=self.refresh(origin='daemon',deadline=started+self._settings()['cycle_timeout']*.65)
+                        settings=self._settings()
+                        cycle_deadline=started+settings['cycle_timeout']
+                        snapshot=observer.tick(deadline=started+settings['cycle_timeout']*.65,materialize=False)
+                        def ensure_resources():
+                            if 'resources' not in snapshot:
+                                snapshot['resources']=observer.materialize_resources(snapshot['observed_at'])
+                            return snapshot['resources']
+                        snapshot.update(origin='daemon',monitor_generation=record['generation'])
+                        self.publish_observation(snapshot,record,resources_loader=ensure_resources,
+                            resources_serializer=lambda:observer.serialize_resources(snapshot['observed_at']),settings=settings)
+                        observed=dict(snapshot=snapshot)
                         from .tab_format_monitor import refresh_formatting
                         record['last_formatting']=refresh_formatting(self.root,observed.get('snapshot') or {},
-                            deadline=cycle_deadline)
+                            tabs=observer.owner,deadline=cycle_deadline,resources_loader=ensure_resources)
                         self._policy_tick(record)
-                        routed=self._routing_tick(observed.get('snapshot') or {},cycle_deadline)
+                        routed=self._routing_tick(observed.get('snapshot') or {},cycle_deadline,resources_loader=ensure_resources)
                         record['last_routing']=dict(status=routed.get('status','completed'),outcomes=len(routed.get('outcomes',[])),pending=len(routed.get('pending',[])))
                         record.pop('last_error',None)
                     except (InventoryError,OSError,ValueError) as error:
                         record['last_error']=getattr(error,'code','observation_unavailable')
                     record['last_cycle_at']=self.clock()
                     _save(self.directory/'owner.json',record)
-                    stop.wait(max(.05,self._settings()['interval']-(time.monotonic()-started)))
+                    delay=settings['interval']-(time.monotonic()-started)
+                    if math.isfinite(self._published_at):
+                        delay=min(delay,self._published_at+_publication_interval(settings)-self.monotonic())
+                    stop.wait(max(.05,delay))
             finally:
+                observer.close()
                 record.update(state='stopped',stopped_at=self.clock())
                 _save(self.directory/'owner.json',record)
 

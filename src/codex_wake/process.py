@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import Any
 
 
+_HOST_BOOT_ID: str | None = None
+
+
 def process_exists(pid: int) -> bool:
     try:
         os.kill(pid, 0)
@@ -45,9 +48,17 @@ def process_start_time_ticks(pid: int, proc_root: Path = Path("/proc")) -> int |
 
 
 def boot_id_value(proc_root: Path = Path("/proc")) -> str | None:
+    global _HOST_BOOT_ID
+    # A Linux process cannot survive a host reboot. Only the real host boot ID
+    # is immutable for this process lifetime; alternate proc roots remain live.
+    host = proc_root == Path("/proc")
+    if host and _HOST_BOOT_ID is not None:
+        return _HOST_BOOT_ID
     boot_id_path = proc_root / "sys" / "kernel" / "random" / "boot_id"
     try:
         value = boot_id_path.read_text(encoding="utf-8").strip()
     except (FileNotFoundError, PermissionError, OSError):
         return None
+    if host and value:
+        _HOST_BOOT_ID = value
     return value or None

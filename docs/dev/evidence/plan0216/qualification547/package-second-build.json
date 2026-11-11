@@ -1,0 +1,42 @@
+{
+  "source_commit": "62877702b7b101fd49468db7a605d74b27de1b1b",
+  "build_log_sha256": "1813d9b116ee75ec09c0a2f1d19a2e0c4ce299aa2f20bfedf48921197e98d07a",
+  "install_log_sha256": "859e48e39ed4b792f9600c5eb9e6d05beb1f2be349fe98926f3d1a8061bea87f",
+  "build": "pip wheel --no-deps with SOURCE_DATE_EPOCH=1794355200 from git archive",
+  "install": "UID1017 pip install --no-deps --force-reinstall exact wheel",
+  "private_synthetic_states": [
+    {
+      "name": "snapshot.json",
+      "bytes": 469346,
+      "sha256": "d6b23aaa820eab5eac9253b2df8a1b1c249016d73f02f23d3db65720bbdbc0ac",
+      "top_level_keys": [
+        "evidence_revision",
+        "monitor_generation",
+        "observed_at",
+        "observer",
+        "origin",
+        "projection_revision",
+        "projection_valid_until",
+        "resource_count",
+        "resources",
+        "schema_version",
+        "status",
+        "unavailable",
+        "workspaces"
+      ],
+      "private_synthetic_only": true
+    },
+    {
+      "name": "format-state.json",
+      "bytes": 360958,
+      "sha256": "d022b1c122c17df491e59b8a2dc71f1673328ec12aa92704a27710be0750625d",
+      "top_level_keys": [
+        "policy",
+        "schema_version",
+        "workspace_policies",
+        "workspaces"
+      ],
+      "private_synthetic_only": true
+    }
+  ]
+}

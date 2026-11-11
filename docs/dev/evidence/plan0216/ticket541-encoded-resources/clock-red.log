@@ -1,0 +1,13 @@
+....F
+======================================================================
+FAIL: test_persistent_inventory_source_loss_and_owned_cleanup (test_tab_observer.ObserverTests.test_persistent_inventory_source_loss_and_owned_cleanup)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-observer-0216/tests/test_tab_observer.py", line 47, in test_persistent_inventory_source_loss_and_owned_cleanup
+    self.assertIs(type(observer.materialize_resources(0.0)[0]['monitor_observed_at']),float)
+AssertionError: <class 'int'> is not <class 'float'>
+
+----------------------------------------------------------------------
+Ran 5 tests in 2.764s
+
+FAILED (failures=1)

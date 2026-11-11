@@ -1,0 +1,38 @@
+[
+  {
+    "python": "311",
+    "command": [
+      "/tmp/wake216-py311/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_tab*.py"
+    ],
+    "exit_code": 0,
+    "seconds": 70.22295538000253,
+    "selection": "test_tab*.py",
+    "budget": 180,
+    "retries": 0
+  },
+  {
+    "python": "312",
+    "command": [
+      "/tmp/wake216-py312/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_tab*.py"
+    ],
+    "exit_code": 0,
+    "seconds": 67.6118125360008,
+    "selection": "test_tab*.py",
+    "budget": 180,
+    "retries": 0
+  }
+]

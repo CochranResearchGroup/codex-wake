@@ -1,0 +1,26 @@
+{
+  "tier": "presubmit",
+  "source_commit": "7cf0e16a",
+  "hosted_ci": false,
+  "retries": 0,
+  "budget_seconds": 180,
+  "full_tab_selection": {
+    "command": "PYTHONPATH=src /tmp/wake216-py{311,312}/bin/python -m unittest discover -s tests -p 'test_tab*.py'",
+    "tests": 225,
+    "python311_seconds": 74.037,
+    "python312_seconds": 70.656,
+    "status": "PASS"
+  },
+  "integration_selection": {
+    "command": "PYTHONPATH=src:tests /tmp/wake216-py{311,312}/bin/python -m unittest test_tab_monitor_publication test_tab_observer test_tab_format_read_channel",
+    "tests": 20,
+    "python311_seconds": 13.01,
+    "python312_seconds": 12.986,
+    "status": "PASS"
+  },
+  "minimal_metadata_edge": "Public publisher with empty metadata and trusted [] serializer persisted valid JSON; PASS after separator fix.",
+  "limits": [
+    "Selected tab and codec surface, not fullrepository regression.",
+    "Exact installed resource and existing-host qualification remain open."
+  ]
+}

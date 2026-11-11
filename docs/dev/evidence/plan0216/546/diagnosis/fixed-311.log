@@ -1,0 +1,6 @@
+test_unqualified_running_monitor_is_partial_exit_without_restarting_it (test_tab_format_cli_status.FormattingCLIStatusTests.test_unqualified_running_monitor_is_partial_exit_without_restarting_it) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.745s
+
+OK

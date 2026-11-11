@@ -1,0 +1,13 @@
+..F.
+======================================================================
+FAIL: test_metadata_frames_are_materialized_only_for_actual_publication (test_tab_monitor_publication.MonitorPublicationTests.test_metadata_frames_are_materialized_only_for_actual_publication)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-observer-0216/tests/test_tab_monitor_publication.py", line 125, in test_metadata_frames_are_materialized_only_for_actual_publication
+    self.assertTrue(monitor.publish_observation(pulse,record,resources_loader=loader(pulse)))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 4 tests in 2.601s
+
+FAILED (failures=1)

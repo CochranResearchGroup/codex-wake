@@ -1,0 +1,8 @@
+{
+  "base": "fa2363c24bf921ecf0bd8390739e96041e620e8f",
+  "head": "afd0061f",
+  "command": "git diff fa2363c24bf921ecf0bd8390739e96041e620e8f...afd0061f",
+  "sha256": "002181b2e71433e0bfe2fcacc4a0a3465a14f744570ac7f5c220c5377a6b06d7",
+  "bytes": 1345303,
+  "storage": "Immutable Git objects retain complete reproducible diff; duplicate source patch removed after reviewers consumed it."
+}

@@ -1,0 +1,18 @@
+....F
+======================================================================
+FAIL: test_read_only_attach_preserves_session_environment (test_tab_tmux_feed.TmuxFeedTests.test_read_only_attach_preserves_session_environment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-observer-0216/tests/test_tab_tmux_feed.py", line 72, in test_read_only_attach_preserves_session_environment
+    self.assertEqual(self.tmux('show-environment','-t','$0',variable),
+AssertionError: 'WAKE_METADATA_ENV_FIXTURE=observer-environment-value' != 'WAKE_METADATA_ENV_FIXTURE=original-session-value'
+- WAKE_METADATA_ENV_FIXTURE=observer-environment-value
+?                            ^  ^^^^^^^^ -  ----
++ WAKE_METADATA_ENV_FIXTURE=original-session-value
+?                            ^^^^^^^^  ^^
+
+
+----------------------------------------------------------------------
+Ran 5 tests in 2.308s
+
+FAILED (failures=1)

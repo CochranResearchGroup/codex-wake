@@ -53,7 +53,7 @@ class TmuxTransport:
 
     def snapshot(self, deadline):
         fields = ('session_id', 'window_id', 'window_index', 'window_name', 'window_active',
-                  'pane_id', 'pane_pid', 'pane_current_path')
+                  'pane_id', 'pane_pid', 'pane_current_path', 'pane_title', 'pane_tty', 'pane_current_command')
         raw = self.command(deadline, 'list-panes', '-a', '-F', '\t'.join('#{' + x + '}' for x in fields))
         lines = raw.splitlines()
         if len(lines) > 4096:
@@ -75,7 +75,8 @@ class TmuxTransport:
             window = windows.setdefault(wid, dict(window_id=wid, index=int(row['window_index']),
                 name=row['window_name'], focused=row['window_active'] == '1',
                 linked=len({r['session_id'] for r in all_rows if r['window_id'] == wid}) > 1, panes=[]))
-            window['panes'].append(dict(pane_id=row['pane_id'], pid=int(row['pane_pid'])))
+            window['panes'].append(dict(pane_id=row['pane_id'], pid=int(row['pane_pid']),
+                pane_title=row['pane_title'],pane_current_path=row['pane_current_path'],pane_tty=row['pane_tty'],pane_current_command=row['pane_current_command']))
         self.focused = next(w['window_id'] for w in windows.values() if w['focused'])
         return dict(server=self.command(deadline, 'display-message', '-p', '#{pid}').strip(),
                     session_id=self.session, socket_identity=self.socket_identity,

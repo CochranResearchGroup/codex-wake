@@ -1,35 +1,39 @@
-"""Backend-native expiry: no shell jobs, runtime probes or Wake redraw hooks."""
+"""Expire only dynamic cues using one shared publisher lease, never the palette."""
 import math
 
-CLOCK_OPTION='@wake-format-clock'
-STALE_AFTER=20.0
+CLOCK_OPTION = '@wake-format-clock'
+STALE_AFTER = 20.0
+LEASE_VALID = '#{&&:#{>:#{@wake-format-clock},#{T:#{l:%s}}},#{<=:#{@wake-format-clock},#{e|+|:#{T:#{l:%s}},30}}}'
 
 
-def expiring_options(options, *, observed_at, stale_after=STALE_AFTER, render_mode='full', show_stale=True):
-    """Embed an absolute deadline evaluated by the backend's native clock.
+def leased_fragment(fragment):
+    """Guard a fixed generated cue; never pass user text through this helper."""
+    return '#{?' + LEASE_VALID + ',' + fragment.replace(',', '#,') + ',}'
 
-    The session clock option is owned/restored with other formatting settings.
-    Native selection is still chosen by current-format, never by Wake focus.
+
+def expiring_options(options, *, observed_at, stale_after=STALE_AFTER,
+                     render_mode='full', show_stale=True, shared_lease=False,
+                     fallback_styles=None):
+    """Keep options byte-stable across samples and restore only type styles on loss.
+
+    observed_at and legacy keyword arguments remain accepted for compatibility.
+    The host updates the existing managed session option with an absolute lease
+    deadline. Native time keeps cues honest even if the publisher stops entirely.
+    No label, native name or type palette is put behind an age deadline.
     """
-    if not isinstance(observed_at,(int,float)) or not math.isfinite(observed_at):
+    if not isinstance(observed_at, (int, float)) or not math.isfinite(observed_at):
         raise ValueError('Formatting observation needs a finite timestamp.')
-    lower=int(observed_at);expiry=int(observed_at+stale_after)
-    clock='#{T:'+CLOCK_OPTION+'}'
-    condition='#{||:#{>=:'+clock+','+str(expiry)+'},#{<:'+clock+','+str(lower)+'}}'
-    result=dict(options)
-    for name in ('window-status-format','window-status-current-format'):
-        current=name=='window-status-current-format'
-        style=options['window-status-current-style' if current else 'window-status-style']
-        # Commas inside a format conditional must be escaped; inline styles
-        # preserve the current-window cue in both current and stale branches.
-        fresh_style='#[default,'+style+']'
-        plain=render_mode=='plain' or style.startswith('fg=default,bg=default')
-        stale_colour='fg=default,bg=default' if plain else 'fg=white,bg=black' if render_mode=='basic' else 'fg=white,bg=colour238'
-        stale_style='#[default,'+stale_colour+(',bold,underscore' if current else '')+']'
-        # Keep projected/user text OUTSIDE the conditional branches. This avoids
-        # reinterpreting literal commas/braces in profile/model/provider labels.
-        if not show_stale:
-            stale_style='#[default,'+style+',dim]'
-        stale_label = ' STALE ' if show_stale else ''
-        result[name]='#{?'+condition+','+stale_style.replace(',','#,')+stale_label+','+fresh_style.replace(',','#,')+'}'+options[name]
+    result = dict(options)
+    if not shared_lease:
+        return result
+    fallback_styles = fallback_styles or options
+    for name in ('window-status-format', 'window-status-current-format'):
+        style_name = name.removesuffix('format') + 'style'
+        current = options[style_name]
+        fallback = fallback_styles[style_name]
+        result[style_name] = fallback
+        if current != fallback:
+            active = ('#[default,' + current + ']').replace(',', '#,')
+            inactive = ('#[default,' + fallback + ']').replace(',', '#,')
+            result[name] = '#{?' + LEASE_VALID + ',' + active + ',' + inactive + '}' + options[name]
     return result

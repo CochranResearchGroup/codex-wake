@@ -8903,6 +8903,53 @@ Automaticmonitorremainsstopped; no newloaded-host healthclaim/providerturn.
 Evidenceplan0215/deployment.json,userstate tab-presets-0215-deploy. Memoryforbidden:
 noexplicitmemory-write request. Preexistingrepo.codex/config.tomleditpreserved.
 
+## Turn | 2026-11-10 | P216 approved observer specification and implementation
+
+Published specification #540 and dependency-linked tickets #541-#547. Isolated
+integration branch feat/efficient-tab-observer starts at fa2363c; unrelated
+human-CLI edits in the original worktree preserved. Primary owns cache #541;
+workers own native #542 and tmux #543, then newly ready #544/#545/#546 one each.
+Three initial tickets accepted with both supported Python focused checks.
+Protocol fixtures prove no provider calls or layout/input effects. Exact installed
+resource and existing-host qualification remain #547. One broad review and one
+bounded TDD remediation pass are reserved after ticket closure. Hosted CI skipped
+under operator cost policy; no merge/deploy/live enablement in this task.
+
+## Turn | 2026-11-10 | P216 installed resource repair
+
+Exact wheel5 source36f42dbe passes idle0.8988%onecore/60s but fails active5.2264%.
+All120events projected, p95.9799s, final owned process census0. Earlier canonical
+failures remain in qualification547; one exposed a quiet publisher/sleep deadline
+mismatch, fixed with an actual owner cadence regression. Decoder-only msgspec
+0.22 improves cached reads while strict encoders and digests stay unchanged.
+The next #546 repair is a bounded retained read-only formatting channel, backed
+by native prototype evidence, before another exact installed gate. #541/#544/
+#546/#547 remain open; broad review0 and post-review TDD0. Production unchanged.
+
+
+## Turn | 2026-11-10 | P216 ticket closure and single review remediation
+
+All seven #541–#547 closed after exact wheel7 qualification. One independent
+Standards/Spec review of fa2363c...afd0061f accepted three findings: remaining
+inventory deadline propagation, skipped-work freshness invalidation and exact
+native source identity. One bounded TDD pass fixed them with public red/green
+regressions. Final source f3e1e0d4 passed227tab tests and10controller/scope tests
+on each Python3.11/3.12, plus Ruff/compile/generatedreferences/policywiring.
+These are affected presubmit checks, not the complete generic hosted suite.
+Planning audit retains the pre-existing Plan0214 missing Current State error.
+
+Exact final dev3 wheel8 under separate Linux UID1017:100tabs withSlate/alltiers,
+60s idle0.831976%/active3.910094% onecore, RSS51,666,944B,120/120 events,
+p951.06956s, fresh owned-process census0. CLI, actualstdioMCP, authenticatedAPI
+andOAuthMCP pass, including complete100row329178-byte stopped-cache responses.
+Read-only existinghost46tabs/19bindings,68births/layouts preserved,ownedcleanup0.
+No natural native transition occurred; real-live broadcast behavior remains
+unverified. Shared WSL kernel and lifetime ru_maxrss limits explicitly retained.
+No production install/monitor activation, merge, deployment or cleanup effects.
+Parent#540 remains open; isolated branch/worktrees retained for draft review.
+Memory disposition forbidden: no explicit memory-write request under higher-priority
+instructions. Canonical evidence docs/dev/evidence/plan0216/qualification547.
+
 ## 2026-11-10 — Completion installation and repeat builds
 
 - Source: `fa2363c24bf921ecf0bd8390739e96041e620e8f` plus this working-tree patch. Preserved unrelated `.codex/config.toml`, `GLOSSARY.md` and Plan0216 work.

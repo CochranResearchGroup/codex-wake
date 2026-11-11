@@ -1,0 +1,10 @@
+{
+  "python": "3.12.13",
+  "tests": 3,
+  "failures": 0,
+  "errors": 0,
+  "passed": true,
+  "seconds": 1.3379189010001937,
+  "burst_events": 100,
+  "burst_p95_seconds": 0.10104906700053107
+}

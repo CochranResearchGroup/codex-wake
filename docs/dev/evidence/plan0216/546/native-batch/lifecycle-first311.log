@@ -1,0 +1,18 @@
+======================================================================
+ERROR: test_shell_create_rename_focus_close_has_exact_identity_and_preserves_history (test_tab_lifecycle.TabLifecycleTests.test_shell_create_rename_focus_close_has_exact_identity_and_preserves_history)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-native-batch-546/tests/test_tab_lifecycle.py", line 48, in test_shell_create_rename_focus_close_has_exact_identity_and_preserves_history
+    focused = owner.execute('tabs.focus', dict(workspace='source', expected_target=owner.inspect('source')['target'], window=wid))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-native-batch-546/src/codex_wake/tab_lifecycle.py", line 139, in execute
+    return self._execute(operation, args, deadline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/codex-wake-native-batch-546/src/codex_wake/tab_lifecycle.py", line 145, in _execute
+    raise InventoryError('stale_target', 'exact current workspace generation required')
+codex_wake.managed_inventory.InventoryError: exact current workspace generation required
+
+----------------------------------------------------------------------
+Ran 8 tests in 1.196s
+
+FAILED (errors=1)

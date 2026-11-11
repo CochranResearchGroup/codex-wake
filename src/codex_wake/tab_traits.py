@@ -217,6 +217,11 @@ def session_rows(root, *, socket_path=None, endpoints=(), deadline=None, reader_
                 holds=holds, observed_at=time.time(), application_effects=False)
 
 
+def error_check_key(namespace, pane_id, identities):
+    return (namespace,pane_id,tuple((row.get('pid'),str(row.get('start_ticks')),row.get('boot_id'))
+                                    for row in identities))
+
+
 class TabTraits:
     """Observe one window at the host-owned public attachment boundary.
 
@@ -226,7 +231,8 @@ class TabTraits:
     pass. All arguments are host-owned, not fields accepted from remote clients.
     """
     def __init__(self, root, *, sessions=(), health_probe=None, process_probe=None,
-                 clock=time.time, freshness=30):
+                 clock=time.time, freshness=30, check_scheduler=None, check_namespace=None,
+                 explicit_checks=False, dirty_panes=()):
         self.root = Path(root)
         self.sessions = list(sessions)[:1000]
         self.health_probe = health_probe
@@ -234,6 +240,10 @@ class TabTraits:
         self.clock = clock
         self.freshness = freshness
         self._builds = None
+        self.check_scheduler=check_scheduler
+        self.check_namespace=check_namespace
+        self.explicit_checks=explicit_checks
+        self.dirty_panes=frozenset(dirty_panes)
 
     def observe_window(self, window, *, evidence=None, transport=None, privacy=None, deadline=None):
         deadline = min(deadline or time.monotonic() + 2, time.monotonic() + 10)
@@ -323,6 +333,8 @@ class TabTraits:
             sample = dict(runtime=target.get('provider'), namespace=target.get('account'),
                           conversation_id=target.get('conversation_id'), account=target.get('account'),
                           root=native.get('cwd'), state=state,
+                          native_source=dict(endpoint=native.get('endpoint'), home=target.get('home'),
+                              process=target.get('process'), epoch=native.get('source_epoch')),
                           process=next((v for v in identities if v['pid'] in [a.get('client_pid') for a in native.get('attachments', [])]), None),
                           observed_at=stamp, fresh=True, source='native_metadata')
         qualified = (isinstance(sample, dict) and sample.get('fresh') is True
@@ -343,28 +355,42 @@ class TabTraits:
                 value = sample.get(key)
                 if value:
                     traits[name] = _trait(value, source=source, observed_at=at, status=status)
-        if native is not None and native.get('target', {}).get('build_sha256') and time.monotonic() < deadline - .05:
-            try:
-                probe = self.health_probe
-                if probe is None:
-                    from .local_health import observe_row
-                    probe = observe_row
-                options=dict(timeout=min(1,max(.05,deadline-time.monotonic())))
-                if self.health_probe is None and isinstance(sample,dict):options['client_process']=sample.get('process')
-                result = probe(self.root,native,**options)
-                observed = result['observation']
-                # Only the existing exact-loop owner can positively establish health.
-                value = observed.get('status', 'unknown')
-                if value == 'responsive' and observed.get('evidence') != 'tui_main_loop_ack':
-                    value = 'unknown'
-                traits['health'] = _trait(value, source=observed.get('evidence', 'none'),
-                                          observed_at=observed.get('observed_at'), status='observed' if value == 'responsive' else value,
-                                          reason=observed.get('reason'))
-            except (ImportError, OSError, ValueError, KeyError, TimeoutError):
-                pass
-        traits['error'] = self._error(pane, transport, privacy, deadline)
+        if native is not None and native.get('target', {}).get('build_sha256'):
+            client=(sample or {}).get('process') or {}
+            target=native['target']
+            key=(target.get('provider'),target.get('account'),target.get('build_sha256'),
+                 client.get('pid'),str(client.get('start_ticks')),client.get('boot_id'))
+            probe=lambda:self._health(native,sample,deadline)
+            traits['health']=(self.check_scheduler.run('health',key,probe,force=self.explicit_checks)
+                              if self.check_scheduler else probe())
+        error=lambda:self._error(pane,transport,privacy,deadline)
+        key=error_check_key(self.check_namespace,pane.get('pane_id'),identities)
+        traits['error']=(self.check_scheduler.run('errors',key,error,force=self.explicit_checks,
+                           eligible=pane.get('pane_id') in self.dirty_panes or
+                                    traits['activity'].get('value') in ('running','waiting-for-input'))
+                         if self.check_scheduler else error())
         return dict(pane_id=pane.get('pane_id'), processes=identities, process_complete=complete, traits=traits,
                     binding=dict(sample) if qualified and traits['activity']['status'] == 'observed' else None)
+
+    def _health(self,native,sample,deadline):
+        if time.monotonic() >= deadline - .05:
+            return _trait(reason='observation_deadline')
+        try:
+            probe=self.health_probe
+            if probe is None:
+                from .local_health import observe_row
+                probe=observe_row
+            options=dict(timeout=min(1,max(.05,deadline-time.monotonic())))
+            if self.health_probe is None and isinstance(sample,dict):
+                options['client_process']=sample.get('process')
+            observed=probe(self.root,native,**options)['observation']
+            value=observed.get('status','unknown')
+            if value=='responsive' and observed.get('evidence')!='tui_main_loop_ack':
+                value='unknown'
+            return _trait(value,source=observed.get('evidence','none'),observed_at=observed.get('observed_at'),
+                          status='observed' if value=='responsive' else value,reason=observed.get('reason'))
+        except (ImportError,OSError,ValueError,KeyError,TimeoutError):
+            return _trait(reason='health_observation_unavailable')
 
     def _windows_pane(self,pane,transport,privacy,deadline):
         import ntpath
@@ -384,7 +410,11 @@ class TabTraits:
             traits['session_presence']=_trait(source='windows_relay',reason='remote_runtime_unverified')
         elif pane.get('windows_processes_complete'):
             traits['session_presence']=_trait('absent',source='windows_process_tree',observed_at=stamp,status='observed')
-        traits['error']=self._error(pane,transport,privacy,deadline)
+        error=lambda:self._error(pane,transport,privacy,deadline)
+        key=(self.check_namespace,pane.get('pane_id'),tuple((r.get('pid'),r.get('creation_filetime')) for r in processes))
+        traits['error']=(self.check_scheduler.run('errors',key,error,force=self.explicit_checks,
+                           eligible=pane.get('pane_id') in self.dirty_panes)
+                         if self.check_scheduler else error())
         return dict(pane_id=pane.get('pane_id'),platform='windows',processes=[dict(pid=r.get('pid'),creation_filetime=r.get('creation_filetime'),platform='windows') for r in processes],
                     process_complete=bool(pane.get('windows_processes_complete')),traits=traits,binding=None)
 
@@ -462,19 +492,15 @@ class WorkspaceTraitsObserver:
     """Adapt bounded native metadata observations to existing layout ownership."""
     def __init__(self,root,transport,privacy=None):
         self.root,self.transport,self.privacy=root,transport,privacy
+        from .tab_observation import ObservationCache
+        self.cache=ObservationCache(root)
 
     def __call__(self,timeout):
         deadline=time.monotonic()+min(5,max(.001,timeout))
         snapshot=self.transport.snapshot(deadline)
-        traits=TabTraits(self.root)
-        first=[traits.observe_window(w,transport=self.transport,privacy=self.privacy,deadline=deadline)
-               for w in snapshot['windows']]
-        native=any(p.get('platform')!='windows' and p['traits']['harness']['value']=='codex' for w in first for p in w['panes'])
-        if native:
-            rows=session_rows(self.root,socket_path=getattr(self.transport,'socket',None),deadline=deadline)
-            traits=TabTraits(self.root,sessions=rows['sessions'])
-            first=[traits.observe_window(w,transport=self.transport,privacy=self.privacy,deadline=deadline)
-                   for w in snapshot['windows']]
+        observed,_=self.cache.observe('workspace',snapshot,socket_path=getattr(self.transport,'socket',None),
+                                      transport=self.transport,privacy=self.privacy,deadline=deadline)
+        first=list(observed.values())
         result={}
         for window in first:
             for pane in window['panes']:

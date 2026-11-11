@@ -1,0 +1,59 @@
+{
+  "package": "/tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/__init__.py",
+  "uid": 1000,
+  "scope": "existing host metadata and passive native status only",
+  "health_requests": false,
+  "screen_captures": false,
+  "provider_requests": false,
+  "live_monitor_activation": false,
+  "production_configuration_changes": false,
+  "qualification_limit": "read-only live tiers differ from default because live health/capture forbidden",
+  "formatting_read_probe": {
+    "workspaces": 1,
+    "windows_attempted": 2,
+    "windows_read": 2,
+    "failures": [],
+    "qualified": true
+  },
+  "aggregate_owned_cpu_seconds": 1.47,
+  "peak_aggregate_owned_rss_bytes": 41963520,
+  "measurement": "owner and recursive owned children across all threads, including reaped child CPU; shared WSL kernel",
+  "wall_seconds": 20.119302110000717,
+  "cpu_seconds": 1.471635333,
+  "observed_tab_count": 46,
+  "min_observed_tab_count": 46,
+  "bound_conversation_count": 19,
+  "native_events_including_baselines": 1,
+  "native_status_transitions": 0,
+  "native_source_count": 1,
+  "peak_owner_rss_bytes": 3300552704,
+  "exact_pane_layout_unchanged": true,
+  "formatting_read_states": [
+    {
+      "state": "connected",
+      "owned_pid": 3325327,
+      "requests": 2,
+      "failures": 0,
+      "read_only": true
+    }
+  ],
+  "owned_control_pids": [
+    3325203,
+    3325327
+  ],
+  "source_states": [
+    {
+      "kind": "tmux",
+      "state": "available",
+      "reason": null
+    },
+    {
+      "kind": "native",
+      "state": "connected",
+      "reason": null
+    }
+  ],
+  "owned_controls_remaining": 0,
+  "observed_process_births_unchanged": 68,
+  "observed_processes_gone": 0
+}

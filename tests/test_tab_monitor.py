@@ -25,7 +25,7 @@ class TabMonitorTests(unittest.TestCase):
                 while 'KEEP_DRAFT' not in subprocess.check_output([*tmux,'capture-pane','-p','-t','%0'],text=True):
                     self.assertLess(time.monotonic(),until);time.sleep(.01)
                 before=subprocess.check_output([*tmux,'capture-pane','-p','-t','%0'],text=True)
-                owner=TabMonitor(root)
+                owner=TabMonitor(root,clock=lambda:1000.)
                 result=owner.execute('tabs.monitor.refresh',{})
                 self.assertEqual(result['snapshot']['freshness'],'fresh')
                 self.assertEqual(result['snapshot']['resources'][0]['target']['workspace'],'fixture')
@@ -115,9 +115,11 @@ class TabMonitorTests(unittest.TestCase):
                 owner_path.write_text(json.dumps(dict(state='running',generation='invalid',process=dict(pid=os.getpid(),start_ticks=birth['start_time_ticks'],boot_id=birth['boot_id']))));owner_path.chmod(0o600)
                 self.assertEqual(owner.execute('tabs.monitor.stop',{})['monitor']['status'],'lost')
                 snapshot=root/'tab-monitor/snapshot.json'
-                snapshot.write_text(json.dumps(dict(observed_at=time.time()-2,origin='manual',resources=[dict(monitor_observed_at=time.time()-2,traits=dict(activity=dict(value='running',status='observed',source='native',observed_at=time.time()-2,freshness='fresh')))])));snapshot.chmod(0o600)
+                snapshot.write_text(json.dumps(dict(observed_at=time.time()-2,origin='manual',projection_revision='old-display',evidence_revision='old-evidence',resources=[dict(projection_revision='old-tab',evidence_revision='old-tab-evidence',monitor_observed_at=time.time()-2,traits=dict(activity=dict(value='running',status='observed',source='native',observed_at=time.time()-2,freshness='fresh')))])));snapshot.chmod(0o600)
                 result=owner.execute('tabs.monitor.status',{})
                 self.assertEqual(result['snapshot']['freshness'],'stale')
+                self.assertNotIn('projection_revision',result['snapshot'])
+                self.assertNotIn('evidence_revision',result['snapshot']['resources'][0])
                 self.assertEqual(result['snapshot']['resources'][0]['traits']['activity']['freshness'],'stale')
             finally:
                 try:os.waitpid(pid,os.WNOHANG)

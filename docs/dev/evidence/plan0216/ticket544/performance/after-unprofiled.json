@@ -1,0 +1,75 @@
+{
+  "source_commit": "9331614d+observer-copyfix",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "package": "/tmp/wake547-copysource/src/codex_wake/__init__.py",
+  "uid": 1017,
+  "tabs": 100,
+  "windows_seconds": 10.0,
+  "tiers": {
+    "activity": true,
+    "health": true,
+    "errors": true
+  },
+  "cpu_denominator": "one core",
+  "measurement": "Python observer plus fixture server and driver (conservative upper bound), live owned children plus reaped child CPU; excludes disposable pane workload and tmux server",
+  "fixture_limit": "metadata-only Unix WebSocket fixture; no provider turns or proof of real native broadcasts",
+  "latency_measure": "fixture send to public projection, upper bound on receive-to-projection",
+  "production_effects": false,
+  "tick_interval_seconds": 1.0,
+  "mode": "short unprofiled diagnostic, not acceptance",
+  "cold_start_seconds": 1.4192007889996603,
+  "native_bound_panes": 100,
+  "idle": {
+    "wall_seconds": 10.001789895999536,
+    "cpu_seconds": 0.17619000000000007,
+    "cpu_percent_one_core": 1.761584694660219,
+    "max_aggregate_rss_bytes": 40402944,
+    "status_changes": 0,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.14428800000000003,
+    "main_thread_cpu_seconds": 0.144289147,
+    "non_main_threads_cpu_seconds": -1.146999999979137e-06,
+    "reaped_child_cpu_seconds": 0.03197700000000003,
+    "live_child_cpu_seconds": -7.499999999999174e-05
+  },
+  "active": {
+    "wall_seconds": 10.001575526000124,
+    "cpu_seconds": 0.32711500000000004,
+    "cpu_percent_one_core": 3.270634702998852,
+    "max_aggregate_rss_bytes": 40861696,
+    "status_changes": 19,
+    "unprojected_events": 2,
+    "owner_cpu_seconds": 0.2736740000000001,
+    "main_thread_cpu_seconds": 0.269662891,
+    "non_main_threads_cpu_seconds": 0.004011109000000068,
+    "reaped_child_cpu_seconds": 0.05372199999999999,
+    "live_child_cpu_seconds": -0.0002810000000000312
+  },
+  "p95_send_to_projection_seconds": 1.0153486459994383,
+  "latency_samples": 17,
+  "checks": {
+    "enabled": {
+      "health": true,
+      "errors": true
+    },
+    "intervals": {
+      "health": 60.0,
+      "errors": 5.0
+    },
+    "retained_checks": 200,
+    "checks": {
+      "health": 100,
+      "errors": 130
+    }
+  },
+  "native_methods": {
+    "initialize": 1,
+    "initialized": 1,
+    "thread/loaded/list": 1,
+    "thread/read": 100
+  },
+  "thresholds_pass": false,
+  "owned_control_processes_remaining": 0,
+  "qualification": "short diagnostic only, not installed acceptance",
+  "source_identity_note": "Explicit source override from bounded UID1017-owned copy of base9331614d src, with observer-only dirty remediation; no production install."
+}

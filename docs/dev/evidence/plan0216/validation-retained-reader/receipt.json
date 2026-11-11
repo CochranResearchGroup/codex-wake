@@ -1,0 +1,33 @@
+{
+  "tier": "presubmit",
+  "runtime_source_commit": "7208b841",
+  "subsequent_measurement_only_commit": "4dca24b7",
+  "selection": "PYTHONPATH=src /tmp/wake216-py{311,312}/bin/python -m unittest discover -s tests -p 'test_tab*.py'",
+  "tests_per_interpreter": 223,
+  "results": {
+    "Python3.11.15": {
+      "status": "PASS",
+      "wall_seconds": 77.611
+    },
+    "Python3.12.13": {
+      "status": "PASS",
+      "wall_seconds": 73.876
+    }
+  },
+  "budget_seconds": 180,
+  "retries": 0,
+  "parallel_processes": 2,
+  "hosted_ci": false,
+  "checks": {
+    "ruff_F821_F822_F823": "PASS",
+    "command_reference_check": "PASS",
+    "policy_wiring": "PASS",
+    "compileall": "PASS",
+    "diff_check": "PASS"
+  },
+  "environment_difference": "Local WSL Linux virtualenvs; hosted GitHub CI intentionally skipped under cost policy. Installed qualification uses separateUID1017/systemPython3.12.3 and remains pending.",
+  "limitations": [
+    "Selected tab surface, not fullrepository suite.",
+    "CPU acceptance remains open afterwheel5 activefailure; read-only retained channel is not yet installed-qualified."
+  ]
+}

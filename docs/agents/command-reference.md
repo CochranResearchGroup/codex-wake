@@ -2724,8 +2724,13 @@ codex-wake --wake-root ROOT tabs monitor-start
 ```text
 usage: codex-wake tabs monitor-start [-h] [--arguments ARGUMENTS] [--json]
                                      [--request-id REQUEST_ID]
+                                     [--activity | --no-activity]
                                      [--cycle-timeout CYCLE_TIMEOUT]
+                                     [--error-interval ERROR_INTERVAL]
+                                     [--errors | --no-errors]
                                      [--expected-target EXPECTED_TARGET]
+                                     [--health | --no-health]
+                                     [--health-interval HEALTH_INTERVAL]
                                      [--interval INTERVAL]
                                      [--probe-timeout PROBE_TIMEOUT]
                                      [--stale-after STALE_AFTER]
@@ -2743,11 +2748,25 @@ options:
   --request-id REQUEST_ID
                         Stable intent ID; reuse only for identical inputs.
                         Retrieve with tabs result.
+  --activity, --no-activity
+                        Enable passive activity observations; --no-activity
+                        disables this tier.
   --cycle-timeout CYCLE_TIMEOUT
                         Cycle timeout.
+  --error-interval ERROR_INTERVAL
+                        Eligible visible-error cadence in seconds, minimum5.
+  --errors, --no-errors
+                        Enable redacted visible-error checks; independent of
+                        activity.
   --expected-target EXPECTED_TARGET
                         Exact current target object; ordinary local CLI
                         resolves it, remote callers must supply it.
+  --health, --no-health
+                        Enable exact responsiveness checks; independent of
+                        activity.
+  --health-interval HEALTH_INTERVAL
+                        Background responsiveness cadence in seconds,
+                        minimum60.
   --interval INTERVAL   Interval.
   --probe-timeout PROBE_TIMEOUT
                         Probe timeout.
@@ -2761,6 +2780,11 @@ Examples:
 | Argument | Required remotely | Meaning |
 |---|---|---|
 | `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+| `activity` | no | activity. |
+| `health` | no | health. |
+| `errors` | no | errors. |
+| `health_interval` | no | health interval. |
+| `error_interval` | no | error interval. |
 | `cycle_timeout` | no | cycle timeout. |
 | `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
 | `interval` | no | interval. |

@@ -1,0 +1,14 @@
+{
+  "frames": 60,
+  "resources": 100,
+  "full_rebaseline_every_frames": 5,
+  "dirty_rows_per_other_frame": 2,
+  "source_artifact_sha256": "d6b23aaa820eab5eac9253b2df8a1b1c249016d73f02f23d3db65720bbdbc0ac",
+  "json_bytes_identical": true,
+  "median_cpu_seconds": {
+    "old": 0.5847813369999999,
+    "cached": 0.28196165350000024
+  },
+  "scope": "component prototype; formatter decode retained in both; not installed CPU acceptance",
+  "saved_cpu_seconds_per60_frames": 0.30281968349999966
+}

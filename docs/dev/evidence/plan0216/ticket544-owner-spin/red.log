@@ -1,0 +1,13 @@
+....F
+======================================================================
+FAIL: test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat (test_tab_monitor_publication.MonitorPublicationTests.test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-observer-0216/tests/test_tab_monitor_publication.py", line 74, in test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat
+    self.assertLessEqual(status['monitor']['observer']['costs']['ticks']-ticks,18,
+AssertionError: 30 not less than or equal to 18 : quiet heartbeat deadline must not create a busy loop
+
+----------------------------------------------------------------------
+Ran 5 tests in 8.347s
+
+FAILED (failures=1)

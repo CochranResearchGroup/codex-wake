@@ -1,0 +1,73 @@
+{
+  "source_commit": "72bda0b7bfa97600755ff650bd4d786db36c5dce",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "package": "/tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/__init__.py",
+  "uid": 1017,
+  "tabs": 100,
+  "windows_seconds": 10.0,
+  "tiers": {
+    "activity": true,
+    "health": true,
+    "errors": true
+  },
+  "cpu_denominator": "one core",
+  "measurement": "Python observer plus fixture server and driver (conservative upper bound), live owned children plus reaped child CPU; excludes disposable pane workload and tmux server",
+  "fixture_limit": "metadata-only Unix WebSocket fixture; no provider turns or proof of real native broadcasts",
+  "latency_measure": "fixture send to public projection, upper bound on receive-to-projection",
+  "production_effects": false,
+  "tick_interval_seconds": 1.0,
+  "cold_start_seconds": 1.0228887659995962,
+  "native_bound_panes": 100,
+  "mode": "short diagnostic profile, not acceptance",
+  "idle": {
+    "wall_seconds": 10.001821364000534,
+    "cpu_seconds": 0.2852079999999999,
+    "cpu_percent_one_core": 2.851560627012861,
+    "max_aggregate_rss_bytes": 37953536,
+    "status_changes": 0,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.2772009999999999,
+    "main_thread_cpu_seconds": 0.27720105899999997,
+    "non_main_threads_cpu_seconds": -5.900000005221173e-08,
+    "reaped_child_cpu_seconds": 0.007985999999999993,
+    "live_child_cpu_seconds": 2.0999999999993246e-05
+  },
+  "active": {
+    "wall_seconds": 10.001569275999827,
+    "cpu_seconds": 0.41255200000000003,
+    "cpu_percent_one_core": 4.124872693627955,
+    "max_aggregate_rss_bytes": 37949440,
+    "status_changes": 19,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.403466,
+    "main_thread_cpu_seconds": 0.400522892,
+    "non_main_threads_cpu_seconds": 0.002943107999999972,
+    "reaped_child_cpu_seconds": 0.009277000000000035,
+    "live_child_cpu_seconds": -0.00019099999999999673
+  },
+  "p95_send_to_projection_seconds": 0.08471984800053178,
+  "latency_samples": 19,
+  "checks": {
+    "enabled": {
+      "health": true,
+      "errors": true
+    },
+    "intervals": {
+      "health": 60.0,
+      "errors": 5.0
+    },
+    "retained_checks": 200,
+    "checks": {
+      "health": 100,
+      "errors": 130
+    }
+  },
+  "native_methods": {
+    "initialize": 1,
+    "initialized": 1,
+    "thread/loaded/list": 1,
+    "thread/read": 100
+  },
+  "thresholds_pass": false,
+  "owned_control_processes_remaining": 0
+}

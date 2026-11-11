@@ -38,7 +38,9 @@ because it lacks agent health telemetry.
 Fresh error overrides health warning, then waiting, then the type/activity base
 colour. The type badge remains visible. Selection uses native current-tab
 formatting with brackets and a bold/underline cue. Twenty-second native expiry
-adds `STALE` and a neutral appearance if observations stop, even when Wake dies.
+removes uncertain activity/attention cues if observations stop, even when Wake dies.
+Names, stable type and the selected palette remain unchanged; no STALE label or
+whole-tab dimming is added.
 Actual visibility also follows the backend's redraw interval, which Wake bounds
 at five seconds while decoration owns it.
 
@@ -154,7 +156,7 @@ Compact display keeps the native number/name, type badge for harnesses, and a
 small `*` running, `?` waiting or `!` attention cue. Shells omit the type badge;
 profile, idle and unknown badges are omitted. Plain rendering uses terminal
 default colors. `show_stale:false` removes repeated STALE text, while backend
-expiry still neutralizes stale decoration and inspection retains freshness.
+expiry still removes uncertain dynamic cues and inspection retains freshness.
 Use `compact:false` or `show_stale:true` to restore those individual preferences.
 
 ## Named color presets
@@ -162,7 +164,7 @@ Use `compact:false` or `show_stale:true` to restore those individual preferences
 Built-in `slate`, `dusk` and `graphite` presets match the compact palette preview.
 They select compact labels, no repeated STALE text and full-color rendering.
 Only short type/attention badges carry accent colors; names remain soft gray and
-the selected tab has a subtle background. Quiet expiry dims the palette without
+the selected tab has a subtle background. Quiet expiry preserves the palette and removes uncertain dynamic cues without
 adding labels or gray blocks. Detailed freshness remains available in inspection.
 
 ```sh

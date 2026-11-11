@@ -1,0 +1,12 @@
+{
+  "package": "/tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/__init__.py",
+  "uid": 1017,
+  "checks": [
+    "installed CLI tier controls and readable status",
+    "actual installed stdio MCP schema and monitor status",
+    "authenticated HTTP independent tier start/status/stop and anonymous refusal",
+    "actual OAuth MCP schema independent tier start/status/stop"
+  ],
+  "production_effects": false,
+  "status": "passed"
+}

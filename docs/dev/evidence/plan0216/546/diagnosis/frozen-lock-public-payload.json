@@ -1,0 +1,6 @@
+{
+  "lock_held_while_stopped": true,
+  "returncode": 3,
+  "stdout": "{\"operation\": \"tabs.format.enable\", \"result\": {\"operation\": {\"acceptance\": \"unknown\", \"binding\": \"local-cli\", \"cancellation\": \"not_requested\", \"correlation_id\": \"025c780b72c849c59f4f3a1db53f137a\", \"created_at\": 1794339523.0945935, \"delivery\": \"uncertain\", \"execution\": \"unknown\", \"operation\": \"tabs.format.enable\", \"operation_id\": \"tab-cli-025c780b72c849c59f4f3a1db53f137a\", \"original_binding\": \"local-cli\", \"payload_sha256\": \"431a4cca60100101ea2fa41bae9ea342ad862acec92e4c8e318ff7ed1ff4a36b\", \"phase\": \"uncertain\", \"reason\": \"formatting_busy\", \"result\": null, \"schema_version\": 1, \"submission\": \"admitted\", \"target\": {\"environment\": \"posix\", \"generation\": \"4409887936c3c5f0b7284893d244e2379a88acdfe1834511cdbe605d913b8752\", \"host\": \"cooper\", \"presentation\": \"tmux\", \"workspace\": \"work\"}}}, \"schema_version\": 1, \"status\": \"completed\"}\n",
+  "stderr": ""
+}

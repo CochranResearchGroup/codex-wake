@@ -1,0 +1,31 @@
+{
+  "tier": "presubmit",
+  "hosted_ci": false,
+  "retries": 0,
+  "budget_seconds": 180,
+  "required_dependency": "msgspec0.22.0 binary wheels on bothdevelopmentinterpreters",
+  "source_description": "f81d2157 plus TabObserver decoder wiring for214tests; finaladds ObservationCache cacheddecode and monitor_read shareddecoder.",
+  "full_tab_selection": {
+    "command": "PYTHONPATH=src /tmp/wake216-py{311,312}/bin/python -m unittest discover -s tests -p 'test_tab*.py'",
+    "tests": 214,
+    "python311_seconds": 63.183,
+    "python312_seconds": 61.593,
+    "status": "PASS"
+  },
+  "final_changed_reader_selection": {
+    "command": "PYTHONPATH=src:tests /tmp/wake216-py{311,312}/bin/python -m unittest test_tab_observation test_tab_observation_checks test_tab_monitor test_tab_monitor_controls test_tab_monitor_policy test_tab_monitor_presentation test_tab_monitor_publication test_json_decode",
+    "tests": 24,
+    "python311_seconds": 13.516,
+    "python312_seconds": 13.317,
+    "status": "PASS"
+  },
+  "other_checks": {
+    "ruff_F821_F822_F823": "PASS",
+    "generated_command_reference": "PASS",
+    "diff_check": "PASS"
+  },
+  "limitations": [
+    "Selected tab andcodec surfaces only, not fullrepositorysuite.",
+    "Exactimmutablepackage CPUacceptance remains open afterwheel4failures; no productioneffects."
+  ]
+}

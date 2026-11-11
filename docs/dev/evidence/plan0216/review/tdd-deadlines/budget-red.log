@@ -1,0 +1,14 @@
+E
+======================================================================
+ERROR: test_inventory_preserves_callers_remaining_deadline (test_tab_observation.ObservationTests.test_inventory_preserves_callers_remaining_deadline)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-observer-0216/tests/test_tab_observation.py", line 23, in test_inventory_preserves_callers_remaining_deadline
+    result = owner.execute('tabs.list', {}, deadline=deadline)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ControllerTabs.execute() got an unexpected keyword argument 'deadline'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.008s
+
+FAILED (errors=1)

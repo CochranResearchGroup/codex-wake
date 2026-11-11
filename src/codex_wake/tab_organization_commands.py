@@ -131,7 +131,11 @@ def register_parser(subparsers):
                 option='--'+aliases.get(field,field.replace('_','-'))
                 settings={'dest':field,'default':None,'help':schema.get('description',field.replace('_',' ')+'.').replace('%','%%')}
                 kind=schema.get('type')
-                if kind=='boolean':settings['action']='store_true'
+                if kind=='boolean':
+                    if operation=='tabs.monitor.start' and field in ('activity','health','errors'):
+                        import argparse
+                        settings['action']=argparse.BooleanOptionalAction
+                    else:settings['action']='store_true'
                 elif kind=='array':settings.update(action='append')
                 elif kind=='object':settings['type']=json.loads
                 elif kind=='integer':settings['type']=int

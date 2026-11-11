@@ -1,0 +1,32 @@
+{
+  "mode": "microbenchmark, NOT installed resource acceptance",
+  "tabs": 100,
+  "frames_per_sample": 60,
+  "samples": [
+    {
+      "label": "baseline",
+      "cpu_seconds": 0.372826734,
+      "wall_seconds": 0.37395513100091193
+    },
+    {
+      "label": "candidate",
+      "cpu_seconds": 0.14613545400000005,
+      "wall_seconds": 0.14650872399943182
+    },
+    {
+      "label": "candidate",
+      "cpu_seconds": 0.12871705,
+      "wall_seconds": 0.12903483000081906
+    },
+    {
+      "label": "baseline",
+      "cpu_seconds": 0.41758198,
+      "wall_seconds": 0.41865436300031433
+    }
+  ],
+  "means": {
+    "baseline": 0.395204357,
+    "candidate": 0.13742625200000003
+  },
+  "candidate_ratio": 0.34773465819861904
+}

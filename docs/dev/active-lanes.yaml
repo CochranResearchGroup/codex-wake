@@ -1231,3 +1231,59 @@ lanes:
     checkpoint: aaf619cc890828798d2c694d919b4ed02f4cdb4d
     validation_status: focused_installed_native_passed_with_retained_prior_wsl_gap
     disposition: PR499 deployed; controller renamed with legacy alias; account commands and shell launchers remember defaults; stock/native state preserved
+
+  - id: P216
+    owner: primary / ecochran76
+    objective: Efficient tab observation and stable formatting
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/540]
+    plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
+    branch: feat/efficient-tab-observer
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
+    dependencies: []
+    overlaps: [P211, P213, P215]
+    updated_at: 2026-11-10
+    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained
+
+  - id: P216-544
+    owner: ecochran76 / native542
+    objective: P216 ticket 544
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/544]
+    plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
+    branch: feat/observer-lifecycle-544
+    target: feat/efficient-tab-observer
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
+    dependencies: [P216]
+    overlaps: [P216]
+    updated_at: 2026-11-10
+    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained
+
+  - id: P216-545
+    owner: ecochran76 / checks545
+    objective: P216 ticket 545
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/545]
+    plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
+    branch: feat/observer-checks-545
+    target: feat/efficient-tab-observer
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
+    dependencies: [P216]
+    overlaps: [P216]
+    updated_at: 2026-11-10
+    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained
+
+  - id: P216-546
+    owner: primary / delegated serialization546
+    objective: P216 ticket 546
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/546]
+    plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
+    branch: feat/efficient-tab-observer
+    target: feat/efficient-tab-observer
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
+    dependencies: [P216]
+    overlaps: [P216]
+    updated_at: 2026-11-10
+    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained

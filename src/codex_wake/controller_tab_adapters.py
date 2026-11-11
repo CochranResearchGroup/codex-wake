@@ -21,6 +21,22 @@ class TmuxAttachmentTransport(TmuxTransport):
         from .tab_format_transport import tmux_formatting
         return tmux_formatting(self,action,arguments,deadline)
 
+    def formatting_batch(self, requests, deadline):
+        from .tab_format_transport import tmux_formatting_batch
+        # Preserve host-specific adapter overrides, including fault-injection and
+        # ownership adapters which deliberately replace the finite single seam.
+        if getattr(self.formatting,'__func__',None) is not TmuxAttachmentTransport.formatting:
+            return [self.formatting(request['action'],{k:v for k,v in request.items() if k!='action'},deadline)
+                    for request in requests]
+        return tmux_formatting_batch(self,requests,deadline)
+
+    def formatting_read_session_windows(self, windows, deadline):
+        if getattr(self.formatting,'__func__',None) is not TmuxAttachmentTransport.formatting:
+            return (self.formatting('read-session',{},deadline),
+                    self.formatting_batch([dict(action='read',window=w) for w in windows],deadline))
+        from .tab_format_transport import tmux_formatting_read_session_windows
+        return tmux_formatting_read_session_windows(self,windows,deadline)
+
     def capture(self, pane, lines, deadline):
         return self.command(deadline, 'capture-pane', '-p', '-t', pane, '-S', '-' + str(lines))
 

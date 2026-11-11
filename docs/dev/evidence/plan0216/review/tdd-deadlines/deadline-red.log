@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_persistent_inventory_source_loss_and_owned_cleanup (test_tab_observer.ObserverTests.test_persistent_inventory_source_loss_and_owned_cleanup)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-observer-0216/tests/test_tab_observer.py", line 61, in test_persistent_inventory_source_loss_and_owned_cleanup
+    self.assertTrue(skipped['resources'][0]['monitor_unavailable'])
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 1 test in 0.036s
+
+FAILED (failures=1)

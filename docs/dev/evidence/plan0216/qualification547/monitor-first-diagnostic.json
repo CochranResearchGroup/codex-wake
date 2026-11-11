@@ -1,0 +1,51 @@
+{
+  "source_commit": "72bda0b7bfa97600755ff650bd4d786db36c5dce",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "package": "/tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/__init__.py",
+  "uid": 1017,
+  "tabs": 100,
+  "windows_seconds": 10.0,
+  "tiers": {
+    "activity": true,
+    "health": true,
+    "errors": true
+  },
+  "cpu_denominator": "one core",
+  "measurement": "actual installed TabMonitor owner plus all current owned descendants and reaped child CPU via proc cutime/cstime; fixture/driver/workload processes excluded",
+  "fixture_limit": "metadata-only Unix WebSocket fixture; no provider turns or proof of real native broadcasts",
+  "latency_measure": "fixture send to public projection, upper bound on receive-to-projection",
+  "production_effects": false,
+  "tick_interval_seconds": 1.0,
+  "formatting_enabled": "slate100tabs; configured through installed CLI",
+  "cold_start_seconds": 6.541464028000519,
+  "native_bound_panes": 100,
+  "mode": "short diagnostic profile, not acceptance",
+  "idle": {
+    "wall_seconds": 10.007856810000703,
+    "cpu_seconds": 1.02,
+    "cpu_percent_one_core": 10.191992345261466,
+    "max_aggregate_rss_bytes": 36552704,
+    "status_changes": 0,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.8800000000000001,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 0.10413899999999995,
+    "reaped_child_cpu_seconds": 0.14000000000000012,
+    "live_child_cpu_seconds": 0.0
+  },
+  "active": {
+    "wall_seconds": 10.015648940000574,
+    "cpu_seconds": 0.94,
+    "cpu_percent_one_core": 9.385312980028893,
+    "max_aggregate_rss_bytes": 36732928,
+    "status_changes": 21,
+    "unprojected_events": 1,
+    "owner_cpu_seconds": 0.7099999999999997,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 0.10056699999999999,
+    "reaped_child_cpu_seconds": 0.22999999999999998,
+    "live_child_cpu_seconds": 0.0
+  }
+}
