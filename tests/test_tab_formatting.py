@@ -56,6 +56,28 @@ class FormattingTests(unittest.TestCase):
             self.assertEqual(result.returncode,0,result.stdout+result.stderr)
             self.assertEqual(json.loads(result.stdout)['result']['operation']['result']['status'],'rolled_back' if verb=='rollback' else 'applied')
 
+    def test_changing_pane_titles_do_not_block_journaled_formatting_but_birth_changes_do(self):
+        from codex_wake.tab_commands import operator_execute
+        from codex_wake.managed_inventory import InventoryError
+        class LiveTitles(TmuxAttachmentTransport):
+            counter = 0
+            def snapshot(self, deadline):
+                self.counter += 1
+                self.command(deadline, 'select-pane', '-t', '%0', '-T', 'turn '+str(self.counter))
+                return super().snapshot(deadline)
+        self.tabs.workspaces['work']['transport'] = LiveTitles(self.socket, '$0')
+        for verb, wanted in [('enable','applied'), ('rollback','rolled_back'), ('reenable','applied')]:
+            value = operator_execute('tabs.format.'+verb, dict(workspace='work'), self.root, owner=self.tabs)
+            operation = value['result']['operation']
+            self.assertEqual(operation['execution'], 'completed', operation)
+            self.assertEqual(operation['result']['status'], wanted)
+        pinned = self.tabs.format_target(workspace='work')
+        self.tmux('respawn-pane', '-k', '-t', '%0', 'sleep 120')
+        with self.assertRaises(InventoryError) as error:
+            self.call('rollback', expected_target=pinned)
+        self.assertEqual(error.exception.code, 'stale_target')
+        self.assertTrue(self.call('status')['record']['enabled'])
+
     def test_missing_baseline_and_failed_restoration_are_not_success(self):
         from codex_wake.managed_inventory import InventoryError
         with self.assertRaises(InventoryError) as error:self.call('rollback')

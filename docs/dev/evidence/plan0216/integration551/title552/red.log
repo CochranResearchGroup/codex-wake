@@ -1,0 +1,16 @@
+F
+======================================================================
+FAIL: test_changing_pane_titles_do_not_block_journaled_formatting_but_birth_changes_do (test_tab_formatting.FormattingTests.test_changing_pane_titles_do_not_block_journaled_formatting_but_birth_changes_do)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-deploy-551/tests/test_tab_formatting.py", line 72, in test_changing_pane_titles_do_not_block_journaled_formatting_but_birth_changes_do
+    self.assertEqual(operation['execution'], 'completed', operation)
+AssertionError: 'unknown' != 'completed'
+- unknown
++ completed
+ : {'schema_version': 1, 'operation_id': 'tab-cli-76bc9384d16a4a36a681720e0bcc57c8', 'operation': 'tabs.format.enable', 'correlation_id': '76bc9384d16a4a36a681720e0bcc57c8', 'binding': 'local-cli', 'original_binding': 'local-cli', 'target': {'host': 'test', 'environment': 'local', 'workspace': 'work', 'presentation': 'tmux', 'generation': '1b190370e115634997a5b5f71cef59297e82fce830413c3c0f2b42e9c88bb0e2'}, 'payload_sha256': 'b8d327784b0198e1fbffe89563f44bbc8bea571add79189c7a966e6bd8cb75b8', 'created_at': 1794362621.919618, 'submission': 'admitted', 'execution': 'unknown', 'delivery': 'uncertain', 'acceptance': 'unknown', 'phase': 'uncertain', 'reason': 'stale_target', 'result': None, 'cancellation': 'not_requested'}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.143s
+
+FAILED (failures=1)
