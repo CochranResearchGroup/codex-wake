@@ -857,10 +857,12 @@ def qualify(options):
                                'thread:' + thread, '--endpoint', endpoint, '--json', *extra])
             def ui_command(text):
                 tmux('send-keys', '-t', 'ux:0.0', '-l', text)
+                # Native unbracketed-paste handling suppresses Enter for 120ms.
+                time.sleep(0.2)
                 tmux('send-keys', '-t', 'ux:0.0', 'Enter')
             def visible(state, name):
                 def current_strip():
-                    footer = '\n'.join(capture(name).splitlines()[-16:]).casefold().replace('_', ' ')
+                    footer = '\n'.join(capture(name).rstrip().splitlines()[-16:]).casefold().replace('_', ' ')
                     return ('governor · ' + state.replace('_', ' ')) in footer
                 return wait(current_strip, 'native governor strip ' + state, 20)
             before_ui = model_start_snapshot()
