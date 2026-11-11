@@ -11,7 +11,16 @@
       "state": "running",
       "blockers": [],
       "worker": "/root/governor_backend571",
-      "branch": "feat/governor-backend-571"
+      "branch": "feat/governor-backend-571",
+      "integrated_checkpoints": [
+        "503b0659"
+      ],
+      "remaining": [
+        "independent task/shared fences",
+        "exact delegated stop",
+        "ordinary resume and reactivation",
+        "durable mutation identity"
+      ]
     },
     {
       "id": 572,
@@ -24,9 +33,9 @@
     {
       "id": 573,
       "owner": "primary",
-      "state": "implemented",
+      "state": "integrated",
       "blockers": [],
-      "validation": "Public command metadata/native authority refusal tests pass; missing-session CLI awaits backend merge. Existing transport regression run in progress.",
+      "validation": "7governor/contract tests PASS Python3.11/3.12;10existing local/PowerShell transport regressions PASS42.044s; API/OAuth exact task scope and owner-only loosen route integrated; final behavioral parity acceptance remains574",
       "owned_paths": [
         "src/codex_wake/governor_commands.py",
         "src/codex_wake/cli.py",
@@ -48,5 +57,6 @@
     }
   ],
   "contract_revision": 2,
-  "operator_admission": "opaque local_operator_principal(); native model Principal(thread) after verified_native_caller; OAuth owner+admin+exact thread grant only for loosen actions"
+  "operator_admission": "opaque local_operator_principal(); native model Principal(thread) after verified_native_caller; OAuth owner+admin+exact thread grant only for loosen actions",
+  "integration_tip": "9a4d1e8a"
 }

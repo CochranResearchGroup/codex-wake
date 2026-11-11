@@ -378,7 +378,7 @@ class CommandRunner:
                 result = execute(verb, arguments, self.goal_limits_root or local_root,
                                  principal=Principal(thread))
                 return result, bool(result.get('error') or result.get('status') in ('failed', 'held'))
-            except (ValueError, OSError) as error:
+            except (WakeError, ValueError, OSError) as error:
                 return {'error': {'code': getattr(error, 'code', 'governor_unavailable'), 'message': str(error)}}, True
         if group == 'self-limits':
             try:

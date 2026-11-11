@@ -32,6 +32,17 @@ def schemas():
 
 def execute(verb, arguments, root, *, principal=None):
     from .governor import execute as governor
+    if principal is None and verb == 'activate':
+        # Same-user private API has no native model metadata. It may engage or
+        # tighten an exactly resolved owned task, never acquire operator powers.
+        import os
+        from .local_sessions import resolve
+        from .session_permissions import Principal
+        selector = arguments.get('selector') or os.environ.get('CODEX_THREAD_ID')
+        if not selector:
+            raise InventoryError('invalid_argument', 'Choose a session selector for governor activation.')
+        row = resolve(root, selector, endpoint=arguments.get('endpoint', 'unix://'))
+        principal = Principal(row['thread_id'])
     return governor(root, verb, dict(arguments), principal=principal)
 
 
