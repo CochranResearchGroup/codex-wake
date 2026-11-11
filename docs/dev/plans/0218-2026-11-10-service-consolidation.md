@@ -1,6 +1,6 @@
 # LOCAL-P218 | Efficient shared wake monitoring
 
-State: OPEN
+State: CLOSED
 Ticket: https://github.com/CochranResearchGroup/codex-wake/issues/558
 Owner: primary / ecochran76
 Priority: P1
@@ -19,8 +19,11 @@ Service count is an outcome to measure, not a quota.
 
 ## Current State
 
-Design approved; implementation packet being established; no service or runtime-record
-mutations. Source baseline: b6e93c2dada4eae08a869d569b5036defd2eaf39.
+Implementation packet CLOSED: children559–562 are tracker-resolved, integrated
+and validated on feat/service-consolidation-218. One broad review and one bounded
+TDD remediation are complete. No working service or runtime-record mutations.
+The requested implement-spec delivery target is the validated branch; working-host
+cutover remains separate and the SoyLei configuration overlap is still present. Source baseline: b6e93c2dada4eae08a869d569b5036defd2eaf39.
 Existing unrelated config, glossary and Plan0216 changes remain untouched.
 
 Read-only evidence lives outside Git at
@@ -79,7 +82,7 @@ entrypoints plus the read-only audit command; existing public seams preferred.
 | #559 root ownership | none | /root/ownership559 | validated | daemon, ownership module, ownership tests |
 | #560 isolated scheduling | none | primary | validated | supervisor, scheduler, CLI, scheduler tests |
 | #561 audit | none | /root/audit561 | validated | audit module/script/tests |
-| #562 pilot | #559, #560, #561 validated | /root/pilot562 | ready | qualification script, docs, integration |
+| #562 pilot | #559, #560, #561 validated | /root/pilot562 | validated | qualification script, docs, integration |
 
 No overlapping worker write scopes; shared ownership result is a PollResult
 with an observable skip reason. Scheduler accepts existing result serialization.
@@ -148,3 +151,48 @@ PASS1.027s. Pinned Ruff undefined-name checks pass. Initial CLI/scheduler CLI
 runs in dependency-free interpreter failed missing websockets; those results
 are retained, not product failures erased by retry. Full logs outside Git under
 qualification/plan0218. #562 may now start. Working services remain unchanged.
+
+## Final source acceptance and limits
+
+Children559,560,561,562 CLOSED with readback receipts; parent558 remains open
+under the to-tickets parent-preservation contract. Integration includes worker
+results507a6249,3eb99d44/413ddd65 and8b0d061c; all primary-owned review corrections
+are8d5a4e0b. Review record: docs/dev/evidence/plan0218/review.md. Exactly one broad
+review: Standards1 accepted P2 custody judgment and Spec1 accepted P1 root-path
+isolation defect, both resolved in one bounded red/green remediation pass.
+
+Final focused command (PYTHONPATH=src:tests):
+`python -m unittest test_supervisor_scheduling test_monitor_ownership test_supervisor test_daemon test_service_audit -q`
+PASS61 on Python3.12 (8.261s) and3.11 (8.755s). Earlier CLI66 PASS15.701s.
+`python -m unittest test_command_contract -q` PASS3 (1.006s) after regenerating
+coverage. Pinned Ruff F821/F822/F823, compileall, policy wiring and CI-scope check
+PASS. Initial dependency-free probe failures are retained outside Git.
+
+Comprehensive diagnostic run:2423 tests/860.451s,1failure/1skip. The failure was
+stale generated command coverage; reproduced red, refreshed one coverage entry,
+then all3 contract checks green. No second comprehensive run or broad review.
+Run began at1c72de30; late review corrections were applied while it was running,
+so this is not a pure final-tip comprehensive acceptance claim. Final changed
+modules are covered by the selected61 checks and corrected-wheel qualification.
+Hosted CI was skipped by operator cost policy. OpenClaw plugin code is unchanged;
+its separate npm lane was not run under the standing project pause.
+
+Exact corrected package source8d5a4e0b, wheel SHA256
+b3bb729891bb01d92ad8b78ff5caa6744eaf887a6d168105668a7106587e6824:
+318package members match source/wheel/isolated installation. Corrected installed
+pilot9checks PASS13.355s; final owned live-process census empty. Baseline package
+is b6e93c2d, not the working service package. Raw qualification, comparisons,
+initial failures and readbacks stay outside Git in qualification/plan0218.
+
+Earlier exact18poll comparison:6old dedicated processes139.0MiB sampled summed
+RSS/.628CPU-seconds; new2workers+coordinator/helpers83.9MiB/.376CPU-seconds.
+Oldserial22.5MiB/.036CPU-seconds remains cheaper; pool wall time was higher.
+These are short synthetic cold-run comparisons, not production steady-state
+savings, exclusive memory/PSS, or proof for native/provider backlogs.
+
+Working-host services were not migrated, disabled or removed. No native build
+upgrade or real Linux test-user deployment gate is claimed. Preserve those gates
+before installation/cutover; docs/dev/service-consolidation.md owns the rollback-
+ready operating procedure. Scope adjustment: this implementation packet delivers
+controls plus disposable qualification; live SoyLei remediation/retirement in the
+original sequence remains an explicit future operational boundary.

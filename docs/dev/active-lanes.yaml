@@ -9,12 +9,12 @@ lanes:
     branch: feat/service-consolidation-218
     worker_branches: [fix/monitor-ownership-559, feat/service-audit-561]
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE
+    plan_state: CLOSED
+    custody_state: PUBLISHED_REVIEW
     dependencies: []
     overlaps: []
     updated_at: 2026-11-10
-    disposition: Primary owns ticket560 scheduler; shallow workers own559 lock and561 audit;562 waits for all dependencies
+    disposition: Children559-562 closed; one review and one TDD remediation complete; final61checks on3.11/3.12 and installed9checks pass; production cutover separate
   - id: P217
     owner: primary / ecochran76
     objective: Ship readable human CLI output and refreshed shell completion
