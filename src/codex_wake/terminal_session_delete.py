@@ -6,6 +6,7 @@ import uuid
 
 from .managed_inventory import InventoryError
 from .shortcut_store import locked, read, write
+from .tab_identity import stable_tab_birth
 
 
 class TerminalSessionDelete:
@@ -114,7 +115,7 @@ class TerminalSessionDelete:
                 effect.update(status='held',reason='placement_or_identity_changed');self._save(plan);continue
             effect['status']='terminating';self._save(plan)
             try:
-                result=self.tabs.execute('tabs.close',dict(workspace=current['workspace'],window=resource['window']['window_id'],expected_target=resource['target'],force=True))
+                result=self.tabs.execute('tabs.close',dict(workspace=current['workspace'],window=resource['window']['window_id'],expected_target=resource.get('lifecycle_target',resource['target']),force=True))
                 effect['receipt_id']=result.get('receipt_id')
                 effect['status']='terminated' if result['status']=='applied' else 'uncertain'
             except Exception as error:
@@ -131,7 +132,7 @@ class TerminalSessionDelete:
         try:source=self.sessions.resolve(plan['source']['id'])
         except InventoryError:return None,None
         if source.get('native_key')!=plan['source'].get('native_key') or source['state']!='running':return None,None
-        matches=[r for r in self._resources() if r['target']['workspace']==source['workspace'] and self._birth(r)==effect['birth']]
+        matches=[r for r in self._resources() if r['target']['workspace']==source['workspace'] and self._birth(r)==stable_tab_birth(effect['birth'])]
         return (matches[0],source) if len(matches)==1 else (None,None)
 
     def _absent(self,plan,effect):

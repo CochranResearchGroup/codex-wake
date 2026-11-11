@@ -9077,3 +9077,8 @@ Working services/native owners unchanged; live SoyLei migration and deployment
 gates remain separate. Clean remotely represented worker checkouts removed, refs
 retained; integration checkout kept. Raw receipts qualification/plan0218 outsideGit.
 Memory disposition forbidden by explicit-request boundary; no Graphiti write.
+## Turn | 2026-11-11 | Stable tab operation identities #563
+
+PR565 merged c9f220d8,0.22.0.dev6 deployed. Shared stable comparisons remove title/cwd/foreground-command churn from ordering, transfer, undo and populated deletion fences; meaningful identity/placement guards remain. Review found one P2 CLI admission mismatch, corrected with red/green proof.148installed checks, nine WSL public workflows,three dev5-created legacy cases PASS. All316package members equal merged source.100tab idle0.80%/active4.51%onecore,peak84MB,p951.03s,120/120events,cleanup0. Exact receipts: docs/dev/evidence/issue0563/.
+
+Working-host readback44tabs/layout/baseline unchanged,28native processes,10protectedfiles andstock preserved; freshSlate monitor runsnewprefix withoutfailures. Native control server remains ondev3; existing stdio MCP clients need reconnect fornewpackage. Windows native not rerun; saved-group transfer semantics unchanged. HostedCIzero. Originaldirtycheckout preserved. Memoryforbidden under explicit-request boundary; non-write receipt outsideGit.

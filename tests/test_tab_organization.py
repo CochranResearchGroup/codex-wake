@@ -2,6 +2,7 @@ import json
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -82,6 +83,30 @@ class TabOrderingTests(unittest.TestCase):
         with self.assertRaises(TabError):
             self.call('undo', receipt_id=applied['receipt']['receipt_id'])
         self.assertEqual(self.layout(), before)
+
+    def test_activity_and_replaced_process_still_invalidate_ordering(self):
+        from codex_wake.tab_organization import TabError, TabOrganization, TmuxTransport
+        changed=[False]
+        def observations(timeout):
+            values=self.evidence(timeout)
+            if changed[0]:
+                for value in values.values():
+                    if value['state']=='ready':value['state']='working'
+            return values
+        owner=TabOrganization(self.root/'wake',transport=TmuxTransport(self.socket,self.session),
+                              observer=observations,authorize=lambda action:None)
+        plan=owner.preview(deadline=time.monotonic()+5)['plan']
+        changed[0]=True
+        with self.assertRaises(TabError) as held:
+            owner.apply(plan['plan_id'],deadline=time.monotonic()+5)
+        self.assertEqual(held.exception.code,'workspace_stale_plan')
+        changed[0]=False
+        plan=owner.preview(deadline=time.monotonic()+5)['plan']
+        self.tmux('respawn-pane','-k','-t','@1','sleep 120')
+        with self.assertRaises(TabError) as held:
+            owner.apply(plan['plan_id'],deadline=time.monotonic()+5)
+        self.assertEqual(held.exception.code,'workspace_stale_plan')
+        self.assertEqual(self.layout(),['focused','ready','working'])
 
     def test_uncertain_swap_is_receipted_and_replay_never_swaps_again(self):
         from codex_wake.tab_organization import TmuxTransport, TabError

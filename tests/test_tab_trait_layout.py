@@ -21,10 +21,12 @@ class TraitLayoutTests(unittest.TestCase):
         before=evidence(5)
         plan=owner.preview(mode='traits',criteria=['build'],deadline=time.monotonic()+5)['plan']
         self.assertEqual([v['name'] for v in plan['target']],['focused','working','ready'])
+        self.tmux('select-pane','-t','@1','-T','turn status changed')
         result=owner.apply(plan['plan_id'],deadline=time.monotonic()+5)
         self.assertEqual(result['status'],'applied')
         self.assertEqual(self.layout(),['focused','working','ready'])
         self.assertEqual(evidence(5),before)
+        self.tmux('select-pane','-t','@2','-T','another title change')
         undone=owner.undo(result['receipt']['receipt_id'],deadline=time.monotonic()+5)
         self.assertEqual(undone['status'],'undone')
         self.assertEqual(self.layout(),['focused','ready','working'])

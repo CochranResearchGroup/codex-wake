@@ -1,0 +1,12 @@
+{
+  "source": "c8d12f7a3f33db667c7f24698f4808c322aae762",
+  "wheel": "/tmp/wake563-c8d12f7a/dist/codex_wake-0.22.0.dev6-py3-none-any.whl",
+  "wheel_sha256": "4579c7f37d7936ea47d3ef2666009d06f96cad2a00615b5eda132aedba92cd6b",
+  "package_members_equal": 316,
+  "old_new_legacy_checks": "PASS",
+  "uid": 1017,
+  "qa_source": "/tmp/wake563-qualified-lwmz030e/source",
+  "results": "/tmp/wake563-qualified-lwmz030e",
+  "base": "/tmp/wake563-c8d12f7a",
+  "preparation_limit": "Root chown unavailable; used supported run-as-test-user private temporary directory. QA helper permission refusal occurred before any fixture/install, then corrected."
+}

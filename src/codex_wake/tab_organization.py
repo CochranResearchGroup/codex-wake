@@ -16,6 +16,7 @@ import time
 import uuid
 
 from .records import WakeError
+from .tab_identity import stable_snapshot
 
 
 class TabError(WakeError):
@@ -262,7 +263,8 @@ class TabOrganization:
         action = 'workspace.undo' if undo else 'workspace.order'
         self.authorize(action)
         current = self.snapshot(plan['pins'], deadline)
-        if digest(current) != plan['fingerprint']:
+        if (digest(plan['before']) != plan['fingerprint'] or
+                digest(stable_snapshot(current)) != digest(stable_snapshot(plan['before']))):
             raise TabError('workspace_stale_plan', 'layout, binding, activity or focus changed; preview again')
         receipt = dict(version=1, receipt_id='receipt_' + uuid.uuid4().hex,
             plan_id=plan['plan_id'], status='pending', action=action, swaps=[], before=current, after=None)
@@ -281,7 +283,7 @@ class TabOrganization:
                 if windows[position]['window_id'] == wanted['window_id']: continue
                 self.authorize(action)
                 observed = self.snapshot(plan['pins'], deadline)
-                if digest(observed) != digest(current):
+                if digest(stable_snapshot(observed)) != digest(stable_snapshot(current)):
                     raise TabError('workspace_changed', 'workspace changed between swaps')
                 other = next(i for i, w in enumerate(windows) if w['window_id'] == wanted['window_id'])
                 first, second = windows[position], windows[other]
@@ -292,7 +294,7 @@ class TabOrganization:
                 expected['windows'][position], expected['windows'][other] = expected['windows'][other], expected['windows'][position]
                 expected['windows'][position]['index'], expected['windows'][other]['index'] = first['index'], second['index']
                 current = self.snapshot(plan['pins'], deadline)
-                if digest(current) != digest(expected):
+                if digest(stable_snapshot(current)) != digest(stable_snapshot(expected)):
                     raise TabError('workspace_changed', 'swap postcondition unavailable or changed')
                 receipt['swaps'][-1]['state'] = 'observed'
                 receipt['after'] = current

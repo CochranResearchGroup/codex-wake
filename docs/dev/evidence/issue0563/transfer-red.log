@@ -1,0 +1,27 @@
+FF
+======================================================================
+FAIL: test_last_tab_moves_all_panes_without_process_restart_and_retains_empty_source (test_terminal_relocation.RelocationTests.test_last_tab_moves_all_panes_without_process_restart_and_retains_empty_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-deploy-551/tests/test_terminal_relocation.py", line 34, in test_last_tab_moves_all_panes_without_process_restart_and_retains_empty_source
+    self.assertEqual(receipt['status'],'completed')
+AssertionError: 'held' != 'completed'
+- held
++ completed
+
+
+======================================================================
+FAIL: test_empty_destination_and_undo_restore_last_tab_with_durable_routing_hold (test_terminal_relocation.RelocationTests.test_empty_destination_and_undo_restore_last_tab_with_durable_routing_hold)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-deploy-551/tests/test_terminal_relocation.py", line 47, in test_empty_destination_and_undo_restore_last_tab_with_durable_routing_hold
+    self.assertEqual(undone['outcomes'][0]['status'],'undone')
+AssertionError: 'skipped' != 'undone'
+- skipped
++ undone
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 1.185s
+
+FAILED (failures=2)
