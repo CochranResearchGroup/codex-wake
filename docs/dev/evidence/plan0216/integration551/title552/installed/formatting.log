@@ -1,0 +1,10 @@
+installed product: /tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/__init__.py
+test_changing_pane_titles_do_not_block_journaled_formatting_but_birth_changes_do (test_tab_formatting.FormattingTests.test_changing_pane_titles_do_not_block_journaled_formatting_but_birth_changes_do) ... ok
+test_missing_baseline_and_failed_restoration_are_not_success (test_tab_formatting.FormattingTests.test_missing_baseline_and_failed_restoration_are_not_success) ... ok
+test_public_cli_and_mcp_contract_share_reversible_operations (test_tab_formatting.FormattingTests.test_public_cli_and_mcp_contract_share_reversible_operations) ... ok
+test_rollback_restores_explicit_and_inherited_originals_and_reenable_keeps_baseline (test_tab_formatting.FormattingTests.test_rollback_restores_explicit_and_inherited_originals_and_reenable_keeps_baseline) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 2.496s
+
+OK
