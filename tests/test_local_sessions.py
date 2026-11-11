@@ -70,4 +70,24 @@ class LocalSessionTests(unittest.TestCase):
                 from codex_wake.local_session_events import TurnEvents
                 state=TurnEvents(root).state(operation['operation_id']);deadline=time.monotonic()+3
                 while Path('/proc',str(state.get('pid'))).exists() and time.monotonic()<deadline:time.sleep(.01)
+                # Ordinary CLI/UI defaults must reach the same configured root as MCP.
+                from codex_wake.shortcut_store import write
+                config_home = root / 'private-config'
+                write(config_home / 'codex-wake/shortcuts.json', dict(version=1, wake_root=str(root)))
+                governed_root = root / 'configured-governor'
+                (home / 'config.toml').write_text('[mcp_servers.codex-wake]\ncommand="codex-wake-mcp"\nargs=' +
+                    json.dumps(['--goal-limits-root', str(governed_root),
+                                '--goal-limits-policy', str(root / 'configured-policy.json')]) + '\n')
+                wrong = root / 'goal-supervision'
+                wrong.mkdir(mode=0o700)
+                from codex_wake.goal_supervision import _name
+                (wrong / (_name('11111111-1111-4111-8111-111111111111') + '.json')).write_text('invalid wrong-namespace record')
+                (wrong / (_name('11111111-1111-4111-8111-111111111111') + '.json')).chmod(0o600)
+                routed = subprocess.run([sys.executable, '-m', 'codex_wake', 'governor', 'status',
+                    'thread:11111111-1111-4111-8111-111111111111', '--endpoint', endpoint, '--json'],
+                    env=dict(os.environ, CODEX_HOME=str(home), XDG_CONFIG_HOME=str(config_home)),
+                    capture_output=True, text=True, timeout=20)
+                self.assertEqual(routed.returncode, 0, routed.stdout + routed.stderr)
+                self.assertEqual(json.loads(routed.stdout)['reason'], 'not_enrolled')
+                self.assertFalse(governed_root.exists())
                 server.shutdown()

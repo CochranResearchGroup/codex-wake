@@ -33,3 +33,15 @@ Machine surfaces use `local.governor.*` on the same-user control server and
 binds model actions to the verified current caller. Remote operations require an
 explicit task selector and its scoped grant; increasing/resetting/disabling also
 requires authenticated owner/admin authority. JSON authority flags are rejected.
+
+Default native controls and the private controller read the locally owned Codex
+MCP configuration's existing `--goal-limits-root` and `--goal-limits-policy`
+binding. They use that governor rather than creating another under the general
+controller root. Explicit isolated roots retain their own state. Model callers
+receive the configured host policy through verified adapter context; it is never
+an argument they can supply to increase authority.
+
+Strict enforcement also requires the matched native guard capability. A watcher
+heartbeat alone cannot prove fail-closed behavior after watcher termination. Old
+native builds must report their limitation and offer an explicit advisory choice;
+they must not advertise strict enforcement from backend tests alone.

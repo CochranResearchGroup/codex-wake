@@ -31,7 +31,18 @@ def schemas():
 
 
 def execute(verb, arguments, root, *, principal=None):
-    from .governor import execute as governor
+    from .governor import execute as governor, local_operator_principal
+    from .governor_context import configured
+    root, host_policy = configured(root)
+    arguments = dict(arguments)
+    if host_policy is not None:
+        if principal is local_operator_principal():
+            arguments['policy'] = str(host_policy)
+        elif principal is not None:
+            from .governor import native_principal
+            from .session_permissions import Principal
+            if isinstance(principal, Principal):
+                principal = native_principal(principal.subject, policy=host_policy, principal=principal)
     if principal is None and verb == 'activate':
         # Same-user private API has no native model metadata. It may engage or
         # tighten an exactly resolved owned task, never acquire operator powers.
@@ -43,6 +54,9 @@ def execute(verb, arguments, root, *, principal=None):
             raise InventoryError('invalid_argument', 'Choose a session selector for governor activation.')
         row = resolve(root, selector, endpoint=arguments.get('endpoint', 'unix://'))
         principal = Principal(row['thread_id'])
+        if host_policy is not None:
+            from .governor import native_principal
+            principal = native_principal(row['thread_id'], policy=host_policy, principal=principal)
     return governor(root, verb, dict(arguments), principal=principal)
 
 

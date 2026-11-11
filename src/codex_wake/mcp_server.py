@@ -367,6 +367,7 @@ class CommandRunner:
             try:
                 from .goal_supervision import verified_native_caller
                 from .session_permissions import Principal
+                from .governor import native_principal
                 from .governor_commands import execute
                 thread = (native_context or {}).get('threadId')
                 verified_native_caller(native_context, thread)
@@ -376,7 +377,8 @@ class CommandRunner:
                 arguments['selector'] = 'thread:' + thread
                 arguments['endpoint'] = self.app_server
                 result = execute(verb, arguments, self.goal_limits_root or local_root,
-                                 principal=Principal(thread))
+                                 principal=native_principal(thread, policy=self.goal_limits_policy,
+                                                            principal=Principal(thread)))
                 return result, bool(result.get('error') or result.get('status') in ('failed', 'held'))
             except (WakeError, ValueError, OSError) as error:
                 return {'error': {'code': getattr(error, 'code', 'governor_unavailable'), 'message': str(error)}}, True

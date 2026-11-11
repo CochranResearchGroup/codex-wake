@@ -14,7 +14,8 @@
       "branch": "feat/governor-backend-571",
       "integrated_checkpoints": [
         "503b0659",
-        "c4f8a704"
+        "c4f8a704",
+        "6068aaa7"
       ],
       "remaining": [
         "native fail-closed lease capability/ack gating",
@@ -55,7 +56,8 @@
         "src/codex_wake/controller_http.py",
         "src/codex_wake/controller_client.py"
       ],
-      "remaining": "Exact integrated installed qualification574; current native and backendchanges stillrunning."
+      "remaining": "Exact integrated installed qualification574; current native and backendchanges stillrunning.",
+      "root_routing": "DefaultCLI/UI/privatecontroller deriveexisting localMCP --goal-limits-root/policy; typednativecaller honorshostpolicy, explicitisolatedrootsstayexact. ExistingrealUnixpeerCLI poisonnamespacecheckPASS32.850s;8gov/contractPASS3.11/12."
     },
     {
       "id": 574,
@@ -69,10 +71,11 @@
       "prepared": "Existing goal_limit_native_ux_acceptance --governor-ui-only reuses actualnativeappserver/TUI/providerfixture, checks controls, forcedstop, reconnect, SIGKILLduringactivework and no unintendedinference."
     }
   ],
-  "contract_revision": 2,
+  "contract_revision": 3,
   "operator_admission": "opaque local_operator_principal(); native model Principal(thread) after verified_native_caller; OAuth owner+admin+exact thread grant only for loosen actions",
   "integration_tip": "9a4d1e8a",
   "package_candidate_version": "0.22.0.dev8",
   "review_fixed_point_confirmation": "Asked operator via async input per code-review skill; response pending. Does not block implementation.",
-  "native_cache": "Prior release cleanup reclaimed18GB; cachepathretainedbutcompiledobjectsabsent; currentnativecompilecold. Same toolchain/profile/target; keepresultingcache."
+  "native_cache": "Prior release cleanup reclaimed18GB; cachepathretainedbutcompiledobjectsabsent; currentnativecompilecold. Same toolchain/profile/target; keepresultingcache.",
+  "blocking_acceptance": "Native appserver fail-closed lease, direct SIGKILL exact-task proof and final immutable installed package. No false watcher-only strict label."
 }
