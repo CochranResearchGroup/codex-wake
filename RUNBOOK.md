@@ -9097,3 +9097,11 @@ memory202→161MiB;4worker footprint was higher and tuned down.28definitions/old
 release prefixes retained; no wake-state rollback/deletion. SeePlan0219, curated
 deployment.json and private qualification/plan0219 receipts/initialfailures.
 Memoryforbidden under explicit-request rule; no write. HostedCIzero.
+
+## 2026-11-11 — Plan0220 retrospective made actionable
+
+Recorded six source-backed findings in docs/dev/evidence/plan0220/retrospective.md
+and verified creation/readback of GitHub #576–581; retro-actions.json retains actor,
+target, markers, timestamps and acceptance. Existing #442 summary tooling and
+preflight are reused rather than replaced. Current #572/#574 remain first in WIP;
+no product fix, final review, deployment or agent-memory write claimed.

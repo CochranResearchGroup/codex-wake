@@ -62,3 +62,10 @@ This completes stopped goal-less task continuation without creating a hidden goa
 A query with guarded-start metadata is capability-only. Duplicate or uncertain
 requests reconcile the reserved/started turn and never submit another turn.
 Plain idle goal-less activation still cannot claim an unidentified future task.
+
+## Retrospective follow-up
+
+[Durable findings and action index](../evidence/plan0220/retrospective.md) track
+#576–581 with observed evidence, acceptance, dependencies and maintenance cost.
+These are follow-up hardening tickets, not completed Plan0220 acceptance. Current
+#572/#574 remain the priority; the actual resume timeout stays under #572.
