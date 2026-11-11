@@ -332,7 +332,7 @@
     "source_clean_before_after": true
   },
   "installed_disposable_journey": {
-    "status": "V3_BLOCKED_GOAL_PASS_FULL_UI_PENDING",
+    "status": "V3_BLOCKED_GOAL_PASS_UI_RESUME_TIMEOUT",
     "owner": "primary/native UI worker and backend runtime worker",
     "native_v1_failure": "State S task-owned sleep processes survived root+child interrupted turns; stopVerified was incorrectly true",
     "native_v1_failure_receipt": "/tmp/wake-governor-p220-2dac7qs6/backend-watcher-loss-05/result.json",
@@ -351,7 +351,33 @@
       "native_task_started": 0,
       "peer_preserved": true,
       "native_identity_after": null
-    }
+    },
+    "ui_v3_failures": [
+      {
+        "receipt": "/tmp/p220u6/receipt.json",
+        "source_commit": "eeb48e759181147a6ad5fe1c74e78a533b76c2eb",
+        "elapsed_seconds": 57.800009416998364,
+        "http_calls": 1,
+        "failure": "fixture12s ended while extend/resume request pending",
+        "cleanup": "native/watcher/controller identity absent; final census empty"
+      },
+      {
+        "receipt": "/tmp/p220u7/receipt.json",
+        "source_commit": "3661d9d6910f8ba0045fc45b424b24b04c7a6537",
+        "elapsed_seconds": 57.714857233993826,
+        "http_calls": 1,
+        "failure": "fixture20s captured native CLI15s timeout request287fd2ba-19eb-42e3-b51c-f87921fa11cb; resources1500 applied, goal remains paused, no continuation model POST",
+        "cleanup": "native/watcher/controller identity absent; final census empty"
+      }
+    ],
+    "v3_passed_ui_stages": [
+      "public managed cold bootstrap",
+      "persistent disconnected/enforced/limit strip",
+      "direct activation",
+      "exact blocked goal paused at deadline",
+      "apply-only budget reset"
+    ],
+    "remaining_gate": "Diagnose backend pending extend/resume and finish UI disable/reconnect/watcher-loss/cold-resume journey; no additional current-artifact retries authorized"
   },
   "hosted_ci": "skipped per no-paid-CI policy",
   "memory_disposition": {
