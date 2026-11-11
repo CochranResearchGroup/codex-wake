@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "issue": 572,
-  "native_source_commit": "e18bde9a112504665d4503dc658204af65092523",
+  "native_source_commit": "bd519d5232aef6f55a4a665cd0c7461ec5b223f9",
   "retained_patch_checks": {
     "sha256": "PASS",
     "all_file_hashes": "PASS",
@@ -285,6 +285,18 @@
         "ignored": 0
       },
       "diagnostics": []
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build-v3/job-20261111T204036Z-81c1cb2b8bf9/20261111T204036Z-1b92366ebdcf/receipt.json",
+      "exit_code": 0,
+      "duration_seconds": 256.1,
+      "test_summary": {
+        "suites": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": []
     }
   ],
   "focused_tests": {
@@ -302,7 +314,7 @@
     },
     "total_command_seconds": 1861.933,
     "app_server_qualification": "compiled; selected zero tests; actual lease RPC acceptance remains required",
-    "post_test_delta": "Core exact-handle execution stop/admission fence plus app-server confirmed-exit integration added after source896bec; no unit rerun by coordinator direction; actual existing live-process regression is required"
+    "post_test_delta": "Core exact-handle execution stop/admission fence plus app-server confirmed-exit integration added after source896bec; no unit rerun by coordinator direction; actual existing live-process regression is required; v3 changes only exact-goal pause predicate Active|Blocked, proved by zero-POST actual RPC probe"
   },
   "protocol_generation": {
     "stable": "PASS",
@@ -311,16 +323,16 @@
   },
   "immutable_package": {
     "status": "PASS",
-    "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build-v2/job-20261111T195841Z-7239e953424a/20261111T195841Z-a75fe9221b10/receipt.json",
-    "total_command_seconds": 537.227,
-    "package": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-v2",
-    "entrypoint_sha256": "80c8ad9fd5b12c4588e51d29722930f51770fcf0dffb8edfca2c773455c1e942",
+    "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build-v3/job-20261111T204036Z-81c1cb2b8bf9/20261111T204036Z-1b92366ebdcf/receipt.json",
+    "total_command_seconds": 256.1,
+    "package": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-v3",
+    "entrypoint_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
     "version": "codex-cli 0.167.0",
     "inventory_files": 6,
     "source_clean_before_after": true
   },
   "installed_disposable_journey": {
-    "status": "BACKEND_V2_PASS_UI_PENDING",
+    "status": "V3_BLOCKED_GOAL_PASS_FULL_UI_PENDING",
     "owner": "primary/native UI worker and backend runtime worker",
     "native_v1_failure": "State S task-owned sleep processes survived root+child interrupted turns; stopVerified was incorrectly true",
     "native_v1_failure_receipt": "/tmp/wake-governor-p220-2dac7qs6/backend-watcher-loss-05/result.json",
@@ -330,7 +342,16 @@
       "/tmp/p220u3 missing explicit V2 feature correctly held legacy scope before allocation"
     ],
     "backend_v2_result": "Coordinator confirmed all three actual cases PASS: model activation6POST/12s, root+latechild deadline5POST/11.6s, watcher SIGKILL5POST/17s; live task tools terminate, unrelated peer preserved, exactly-once guarded goal-less resume/no hidden goal",
-    "ui_v2_failure": "/tmp/p220u4/receipt.json: managed cold bootstrap exceeded25s frontend window before any provider request; independent bounded public-launcher startup diagnostic in progress"
+    "ui_v2_failure": "/tmp/p220u4/receipt.json: managed cold bootstrap exceeded25s frontend window before any provider request; independent bounded public-launcher startup diagnostic in progress",
+    "v3_blocked_goal_probe": {
+      "receipt": "/tmp/p220blocked2/receipt.json",
+      "verdict": "PASS_BLOCKED_GOAL_PAUSED_EXACT_SCOPE",
+      "elapsed_seconds": 2.502250314995763,
+      "model_posts": 0,
+      "native_task_started": 0,
+      "peer_preserved": true,
+      "native_identity_after": null
+    }
   },
   "hosted_ci": "skipped per no-paid-CI policy",
   "memory_disposition": {

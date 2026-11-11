@@ -16822,10 +16822,10 @@ index e338a563fa..048c6b9a12 100644
              wall_clock: GoalWallClockAccounting::new(),
              budget_limit_reported_goal_id: None,
 diff --git a/codex-rs/ext/goal/src/api.rs b/codex-rs/ext/goal/src/api.rs
-index a2bd783dc8..a8dffb8e0e 100644
+index a2bd783dc8..50ed4f18af 100644
 --- a/codex-rs/ext/goal/src/api.rs
 +++ b/codex-rs/ext/goal/src/api.rs
-@@ -90,6 +90,94 @@ pub struct GoalService {
+@@ -90,6 +90,96 @@ pub struct GoalService {
  }
  
  impl GoalService {
@@ -16886,7 +16886,9 @@ index a2bd783dc8..a8dffb8e0e 100644
 +            .await
 +            .map_err(|error| GoalServiceError::Internal(error.to_string()))?;
 +        let outcome = if let Some(current) = current.filter(|goal| {
-+            goal.goal_id == expected_goal_id && goal.status == codex_state::ThreadGoalStatus::Active
++            goal.goal_id == expected_goal_id
++                && (goal.status == codex_state::ThreadGoalStatus::Active
++                    || goal.status == codex_state::ThreadGoalStatus::Blocked)
 +        }) {
 +            let previous_goal = Some(PreviousGoalSnapshot::from(&current));
 +            let goal = state_db

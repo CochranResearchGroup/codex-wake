@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "recorded_at": "2026-11-11T20:09:47.834078+00:00",
-  "package": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-v2",
-  "native_source_commit": "e18bde9a112504665d4503dc658204af65092523",
+  "recorded_at": "2026-11-11T20:58:14.370440+00:00",
+  "package": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-v3",
+  "native_source_commit": "bd519d5232aef6f55a4a665cd0c7461ec5b223f9",
   "native_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "lockfile_sha256": "8ce6e8ba6f35054304773c1decd50c1d960d6eeb911a549fec3e4a22dbcb9863",
-  "entrypoint_sha256": "80c8ad9fd5b12c4588e51d29722930f51770fcf0dffb8edfca2c773455c1e942",
+  "entrypoint_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
   "version": "codex-cli 0.167.0",
   "reused_helpers": {
     "bin/codex-exec-server": {
@@ -32,8 +32,8 @@
   "preserved_baseline_entrypoint_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
   "inventory": {
     "bin/codex": {
-      "sha256": "80c8ad9fd5b12c4588e51d29722930f51770fcf0dffb8edfca2c773455c1e942",
-      "bytes": 447094728
+      "sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
+      "bytes": 447098696
     },
     "bin/codex-code-mode-host": {
       "sha256": "a558a3c99756e075a9de90fdbb8f6cc09af526e16c3b736ee8a340d67041f2f0",
@@ -56,13 +56,13 @@
       "bytes": 434808
     }
   },
-  "build_receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build-v2/job-20261111T195841Z-7239e953424a/20261111T195841Z-a75fe9221b10/receipt.json",
-  "qualification": "production build,canonical assembly,inventory,version,clean source PASS; actual live-process regression and installed UI pending",
+  "build_receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build-v3/job-20261111T204036Z-81c1cb2b8bf9/20261111T204036Z-1b92366ebdcf/receipt.json",
+  "qualification": "production assembly/source clean/hash/version PASS; exact blocked-goal expiry zero-POST PASS; installed full UI pending",
   "production_install": false,
   "previous_package": {
-    "path": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package",
-    "source_commit": "a9a992a6ed5661b2211806e1c9137680d083f15e",
-    "entrypoint_sha256": "9c8390d120afc046b63a8cf95f82922c297fd59745814fa66fbbc9a2ef3f5585",
-    "runtime_status": "unqualified: actual native turn interruption left task-owned sleep processes live while stopVerified was true"
+    "path": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-v2",
+    "source_commit": "e18bde9a112504665d4503dc658204af65092523",
+    "entrypoint_sha256": "80c8ad9fd5b12c4588e51d29722930f51770fcf0dffb8edfca2c773455c1e942",
+    "runtime_status": "three backend V2 actual journeys PASS; managed UI exposed exact blocked-goal pause gap fixed in v3"
   }
 }
