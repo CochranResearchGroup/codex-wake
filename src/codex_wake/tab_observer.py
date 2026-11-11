@@ -365,7 +365,8 @@ class TabObserver:
         for name in names[start:] + names[:start]:
             if self.monotonic() >= deadline:
                 unavailable.append(dict(workspace=name, reason='observer_cycle_deadline'))
-                rows.extend(v for v in self.resources if v['target']['workspace'] == name)
+                # Let the common missing-resource path retain redacted details
+                # while explicitly invalidating dynamic evidence.
                 continue
             config = self.owner.workspaces[name]
             if name not in self.tmux:
@@ -378,7 +379,8 @@ class TabObserver:
             else:
                 scoped = ControllerTabs(self.root, workspaces={name:config}, host=self.owner.host,
                     environment=self.owner.environment, observation_cache=self.owner.observation_cache)
-                value = scoped.execute('tabs.list', {})
+                value = scoped.execute('tabs.list', {},
+                    deadline=time.monotonic()+max(0.,deadline-self.monotonic()))
             rows.extend(value.get('resources', []))
             unavailable.extend(value.get('unavailable', []))
         self.cursor = (start+1) % len(names) if names else 0
@@ -408,9 +410,13 @@ class TabObserver:
                 continue
             for pane in resource.get('traits', {}).get('panes', []):
                 binding = pane.get('binding') or {}
+                source = binding.get('native_source') or {}
                 endpoints = [endpoint for endpoint, state in self.native_state.items()
                     if binding.get('conversation_id') in state['threads'] and
-                    binding.get('namespace') == Path(state['server'].get('codexHome', '/')).name]
+                    source.get('endpoint') == 'unix://' + str(Path(endpoint[7:]).resolve()) and
+                    source.get('home') == state['server'].get('codexHome') and
+                    source.get('process') == state.get('peer') and
+                    source.get('epoch') == state.get('epoch')]
                 endpoint = endpoints[0] if len(endpoints)==1 else None
                 pane['native_endpoint'] = endpoint
                 available = bool(endpoint and self.native[endpoint].status()['state'] == 'connected')
@@ -421,7 +427,8 @@ class TabObserver:
                     pane['traits']['activity'].update(value=self._activity(status), status='observed',
                         freshness='fresh', observed_at=self.clock())
             self._summary(resource)
-        self.last_inventory = self.monotonic()
+        self.last_inventory = (-float('inf') if any(v.get('reason') == 'observer_cycle_deadline'
+            for v in unavailable) else self.monotonic())
         self.costs['inventory_passes'] += 1
 
     def _fallback_schedule(self):

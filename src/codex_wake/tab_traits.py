@@ -333,6 +333,8 @@ class TabTraits:
             sample = dict(runtime=target.get('provider'), namespace=target.get('account'),
                           conversation_id=target.get('conversation_id'), account=target.get('account'),
                           root=native.get('cwd'), state=state,
+                          native_source=dict(endpoint=native.get('endpoint'), home=target.get('home'),
+                              process=target.get('process'), epoch=native.get('source_epoch')),
                           process=next((v for v in identities if v['pid'] in [a.get('client_pid') for a in native.get('attachments', [])]), None),
                           observed_at=stamp, fresh=True, source='native_metadata')
         qualified = (isinstance(sample, dict) and sample.get('fresh') is True
