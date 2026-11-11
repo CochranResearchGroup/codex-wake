@@ -1,0 +1,10 @@
+{
+  "source_commit": "f19abaa413f9b0f15ff9df674fbbcb0238e5829d",
+  "build_log_sha256": "e1ea33866dc349b034609988acb7f93e329fdbfa78ac53e8e38aaf00d45c4d91",
+  "install_log_sha256": "b68735b4f4a67a57d8a44fcc95fc675b633a19f5a55d02d1866312a962f65a3d",
+  "build": "gitarchive exactsource SOURCE_DATE_EPOCH=1794355200 pip wheel --no-deps",
+  "install": "UID1017 pip install --force-reinstall exactwheel with declared dependency resolution",
+  "final_test_uid_processes": 0,
+  "live_phase": "not run; root owns postactivation observation",
+  "production_effects": false
+}
