@@ -15,11 +15,12 @@
       "integrated_checkpoints": [
         "503b0659",
         "c4f8a704",
-        "6068aaa7"
+        "6068aaa7",
+        "cc64666a"
       ],
       "remaining": [
-        "native fail-closed lease capability/ack gating",
-        "abrupt watcher loss installed proof"
+        "Final guarded-start, advisory continuation and expiry reconciliation addon",
+        "Exact installed abrupt watcher-loss and descendant containment proof"
       ],
       "validation": "71affectedbackendtestsPASS64.299sPython3.12;governor10PASS13.135sPython3.11; integration8transport/contractchecksPASS."
     },
@@ -33,13 +34,13 @@
       "integrated_checkpoints": [
         "a40fc9b4"
       ],
-      "native_source": "837a0c5ecd (superseded by final transport/notification freeze)",
-      "qualification": "CargoSignal compile in progress; exact final native source not yet qualified",
+      "native_source": "31688252967a11de459602e08a79192ee5f7faba",
+      "qualification": "Affected Cargo Signal check --tests running: job-20261111T174058Z-02cf0102e2c0; no actual native test or final package pass yet.",
       "preview": "https://previews.ecochran.dyndns.org/s/62350ca5d460",
       "remaining": [
-        "4actualRusttests compiling fromfrozenUI source",
-        "native appserver exact-task lease guard",
-        "one complete native package"
+        "Nonzero targeted Rust test execution",
+        "Complete immutable native package and retained source bundle",
+        "Exact installed UI, guarded resume and watcher-loss proof"
       ]
     },
     {
@@ -47,7 +48,7 @@
       "owner": "primary",
       "state": "validated",
       "blockers": [],
-      "validation": "Governor commands/contract7PASS3.11/3.12; existingtransport10PASS; CLI ownedUnixpeerstatusPASS; actualprivateAPI/MCP governorstatusPASS in7tests46.634s includingPowerShell. PlaceholdernonUUIDfixturefailure retained/corrected; no newfixtureframework.",
+      "validation": "Latest governor/contract selection: 9 PASS (Python3.12). Existing transport10 PASS; ownedUnix native protocol CLIstatusPASS; privateAPI/MCPstatusPASS. Actual Windows PowerShell governorstatus plus four response modes PASS46.185s after retained WSL bootstrap failure and successful preflight.",
       "owned_paths": [
         "src/codex_wake/governor_commands.py",
         "src/codex_wake/cli.py",
@@ -73,9 +74,17 @@
   ],
   "contract_revision": 3,
   "operator_admission": "opaque local_operator_principal(); native model Principal(thread) after verified_native_caller; OAuth owner+admin+exact thread grant only for loosen actions",
-  "integration_tip": "9a4d1e8a",
+  "integration_tip": "3ac695e9",
   "package_candidate_version": "0.22.0.dev8",
   "review_fixed_point_confirmation": "Asked operator via async input per code-review skill; response pending. Does not block implementation.",
   "native_cache": "Prior release cleanup reclaimed18GB; cachepathretainedbutcompiledobjectsabsent; currentnativecompilecold. Same toolchain/profile/target; keepresultingcache.",
-  "blocking_acceptance": "Native appserver fail-closed lease, direct SIGKILL exact-task proof and final immutable installed package. No false watcher-only strict label."
+  "blocking_acceptance": "Native appserver fail-closed lease, direct SIGKILL exact-task proof and final immutable installed package. No false watcher-only strict label.",
+  "qualification_environment": {
+    "uid": 1017,
+    "root": "/tmp/wake-governor-p220-2dac7qs6",
+    "python": "3.12.3",
+    "dependencies": "Pinned to working dev7 constraints; installed successfully",
+    "wheel_installed": false,
+    "working_deployment": false
+  }
 }

@@ -17,8 +17,8 @@ codex-wake governor disable
 Use an explicit `thread:UUID` selector outside the current session. `--json`
 returns the full status. New task windows begin at successful activation; waits
 count against elapsed time. Task and shared allowances both apply. Extension
-preserves usage; reset preserves lifetime history. Extension/reset resume only
-with `--resume`; disable never implicitly resumes. Model callers may activate or
+preserves usage; reset preserves lifetime history. Extension, reset, disable and advisory changes resume only with `--resume`.
+Use `codex-wake governor resume` for a separate explicit continuation. Model callers may activate or
 tighten their own limits, but cannot increase, reset or disable operator ceilings.
 
 The modded harness's `/wake governor` opens the corresponding direct operator
