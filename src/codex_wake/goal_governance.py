@@ -19,9 +19,22 @@ def sync(receipt):
         with supervision._lock(path.parent, path.stem):
             supervision._private(path)
             source = json.loads(path.read_text())
+    shared_enabled=source.get('governor_enabled',True)
+    task=source.get('members',{}).get(receipt.get('task_owner_thread_id',receipt['thread_id']),{}).get('task_window')
+    if task:
+        receipt['task_window']=task
+        for key in ('token_limit','deadline','time_limit_seconds','time_origin','lifetime_tokens_before_window','generation'):
+            if key in task:receipt[key]=task[key]
+        receipt['budget_revision']=task.get('revision',1)
+        if shared_enabled:source=task
     for key in ("governor_enabled", "governor_revision", "governor_control", "governor_mode", "request_accounting"):
         if key in source:
             receipt[key] = source[key]
+        elif task and key=='governor_enabled':receipt[key]=True
+        elif task and key=='governor_mode':receipt[key]='enforced'
+    if task:
+        receipt['task_governor_enabled']=task.get('governor_enabled',True)
+        receipt['governor_enabled']=shared_enabled
     return receipt.get("governor_enabled", True) is False
 
 
@@ -69,7 +82,7 @@ def native_operator(root, receipt, native_context, enabled):
 
 
 def change(
-    root, thread, *, enabled, principal=None, native_context=None, allocation_id=None, mode=None
+    root, thread, *, enabled, principal=None, native_context=None, allocation_id=None, mode=None, task_only=False
 ):
     """Commit one scope switch under the same locks as every controller effect.
 
@@ -108,7 +121,11 @@ def change(
                 or thread not in allocation["members"]
             ):
                 raise ValueError("governor allocation membership changed")
-        members = sorted((allocation or {}).get("members", {thread: {}}))
+        scope_members=sorted((allocation or {}).get("members", {thread: {}}))
+        task_owner=first.get('task_owner_thread_id',thread)
+        members=([member for member in scope_members if member==task_owner or allocation['members'][member].get('task_owner_thread_id')==task_owner]
+            if task_only and allocation and first.get('task_window') else scope_members)
+        if task_only and not first.get('task_window'):raise ValueError('qualified task fence required')
         with ExitStack() as locks:
             for member in members:
                 locks.enter_context(
@@ -119,7 +136,7 @@ def change(
                     supervision._lock(allocation_path.parent, allocation_path.stem)
                 )
                 allocation = json.loads(allocation_path.read_text())
-                if sorted(allocation["members"]) != members:
+                if sorted(allocation["members"]) != scope_members:
                     raise ValueError(
                         "governor scope changed; inspect current allocation"
                     )
@@ -140,7 +157,8 @@ def change(
             permission = authorize(root, "enforcement.disable", principal)
             for member in members:
                 authorize(root, "enforcement.disable", Principal(member, "operator"))
-            authority = allocation if allocation is not None else first
+            authority = (allocation['members'][task_owner]['task_window'] if task_only else
+                allocation if allocation is not None else first)
             revision = authority.get("governor_revision", 0)
             changed = (authority.get("governor_enabled", True) != enabled or
                 authority.get("governor_mode", "enforced" if authority.get("governor_enabled", True) else "disabled") != selected_mode)
@@ -163,7 +181,8 @@ def change(
             # Commit scope authority first. A crash leaves disabled member copies
             # repairable from this record, never an active orphaned member.
             if allocation_path:
-                allocation.update(state)
+                if task_only:allocation['members'][task_owner]['task_window'].update(state)
+                else:allocation.update(state)
                 supervision._save(allocation_path, allocation)
             for member in members:
                 member_path = directory / (supervision._name(member) + ".json")
@@ -174,6 +193,7 @@ def change(
                 if receipt["allocation_id"] != first["allocation_id"]:
                     continue  # historical finalized member, now in another scope
                 receipt.update(state)
+                if task_only:receipt['task_window']=allocation['members'][task_owner]['task_window']
                 kind = "reactivation" if enabled else "deactivation"
                 # Record/reconcile the same revision notice on an idempotent retry.
                 if revision:
@@ -258,6 +278,11 @@ def snapshot(root, thread_id):
             ):
                 raise ValueError("allocation membership changed")
             source = "allocation_ledger"
+            if authority.get('governor_enabled',True):
+                task=authority['members'].get(receipt.get('task_owner_thread_id',thread_id),{}).get('task_window')
+                if task:
+                    authority=dict(task,governor_enabled=True,task_governor_enabled=task.get('governor_enabled',True))
+                    source='allocation_task_member'
         enabled = authority.get("governor_enabled", True)
         if type(enabled) is not bool:
             raise ValueError("invalid governor control state")
