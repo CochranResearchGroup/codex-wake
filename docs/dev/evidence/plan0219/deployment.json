@@ -1,0 +1,63 @@
+{
+  "source": "7af9b29fc20e36ed1e6c878832b74eb6593282d2",
+  "version": "0.22.0.dev7",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev7-7af9b29",
+  "previous_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev6-c9f220d",
+  "wheel_sha256": "0ab02e96cabdee925b8ae187a6a0b746d06c95e22775919b5d626ba02a903379",
+  "package_members_equal": 319,
+  "feature_pr": 564,
+  "release_pr": 567,
+  "uid1017_checks": {
+    "monitor": 9,
+    "native": 11,
+    "transports": 5,
+    "rollback_phases": 4
+  },
+  "working": {
+    "launchers": 9,
+    "zsh_completion": true,
+    "protected_preserved": 10,
+    "native_generations_preserved": 27,
+    "supervisor_pid": 98140,
+    "max_workers": 2,
+    "enabled_shared_roots": 14,
+    "all_shared_roots_ready": true,
+    "active_services_before": 11,
+    "active_services_after": 6,
+    "definitions_retained": 28,
+    "configured_overlap_after": 0,
+    "graphiti_interval_seconds": 60,
+    "dedicated_exceptions": [
+      "auracall",
+      "mail-receipts"
+    ],
+    "exception_reason": "custom CODEX_WAKE_DISPATCH_MODE preserved",
+    "migrated_roots": [
+      "soylei-website",
+      "codex-wake-agent-browser.service",
+      "codex-wake-graphiti.service",
+      "codex-wake-odollo-main-production-install.service",
+      "codex-wake-odollo.service"
+    ]
+  },
+  "samples": {
+    "before": {
+      "active_during_sample": 11,
+      "cpu_complete": true,
+      "cpu_percent_one_core_observed": 57.48922055451466,
+      "memory_bytes_observed": 211705856,
+      "memory_complete": true
+    },
+    "after": {
+      "active_during_sample": 6,
+      "cpu_complete": true,
+      "cpu_percent_one_core_observed": 54.18305037206167,
+      "memory_bytes_observed": 169148416,
+      "memory_complete": true
+    },
+    "limitations": "short nonidentical live windows; not long-term causal acceptance"
+  },
+  "private_evidence": "/home/ecochran76/.local/state/codex-wake/qualification/plan0219",
+  "native_binary_upgrade": false,
+  "hosted_ci": false
+}
