@@ -776,7 +776,7 @@ class GoalSupervisionTests(unittest.TestCase):
             selected=native if params['threadId']==THREAD else native['siblings'][params['threadId']]
             selected['calls'].append((method,params))
             if selected.get('request_hook'):selected['request_hook'](method,params)
-            if method=='thread/goal/get':return {'goal':dict(selected['goal'])}
+            if method=='thread/goal/get':return {'goal':None if selected.get('goal_none') else dict(selected['goal'])}
             if method=='thread/read':
                 items=selected.get('user_items', [dict(type='userMessage',content=[dict(type='text',text=selected['user_text'])])] if 'user_text' in selected else [])
                 return {'thread':dict(id=params['threadId'],parentThreadId=selected.get('parent_thread_id'),turns=[dict(id=t,status='inProgress',items=items) for t in selected['active']])}
@@ -784,6 +784,8 @@ class GoalSupervisionTests(unittest.TestCase):
             if method=='thread/governorLease/set':
                 if 'lease_reply' not in selected:raise NotImplementedError('fixture native runtime has no governor lease capability')
                 selected.setdefault('lease_calls',[]).append(params)
+                if params.get('query') and params['leaseId'].startswith('preflight:'):
+                    return dict(leaseId=params['leaseId'],supported=True,armed=False,expired=False,stopVerified=False)
                 return dict(selected['lease_reply'],leaseId=params['leaseId'])
             if method.startswith('thread/notice/') and 'notices' in selected:
                 notice=selected['notices'].get(params['eventId'])
@@ -825,9 +827,9 @@ class GoalSupervisionTests(unittest.TestCase):
         return root,policy,log,native,request
 
     @contextmanager
-    def controller(self,root):
+    def controller(self,root,interval=5):
         process=subprocess.Popen([sys.executable,'-c',
-            'from codex_wake.goal_supervision import watch; import sys; watch(sys.argv[1],interval=5)',str(root)],
+            'from codex_wake.goal_supervision import watch; import sys; watch(sys.argv[1],interval=float(sys.argv[2]))',str(root),str(interval)],
             stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
         try:
             until=time.monotonic()+3

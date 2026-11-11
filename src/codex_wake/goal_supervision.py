@@ -87,8 +87,8 @@ def _delegated_grant(policy,thread,allocation_id,root):
     if selected in allocations:
         return dict(allocations[selected],allocation_id=selected,host_delegated=True)
     if template is None:raise ValueError('select an existing host objective allocation')
-    fields={'app_server','codex_path','codex_home','max_tokens','max_seconds','rpc_timeout'}
-    if not isinstance(template,dict) or set(template)-fields or not fields-{'rpc_timeout'}<=set(template):
+    fields={'app_server','codex_path','codex_home','max_tokens','max_seconds','rpc_timeout','requires_enforcement'}
+    if not isinstance(template,dict) or set(template)-fields or not fields-{'rpc_timeout','requires_enforcement'}<=set(template):
         raise ValueError('host self-enrollment envelope is invalid')
     own='native-'+thread
     selected=selected or own
@@ -333,7 +333,7 @@ def _allocation_admit(directory,receipt,old,*,commit=True):
         receipt.update(goal_created_at=member['goal_created_at'],time_origin=allocation['time_origin'],
             deadline=allocation['deadline'],token_limit=allocation['token_limit'],
             time_limit_seconds=allocation['time_limit_seconds'],allocation_path=str(path),
-            used_tokens=allocation['used_tokens'])
+            used_tokens=old.get('used_tokens',0) if receipt.get('task_window') and old else 0 if receipt.get('task_window') else allocation['used_tokens'])
         if allocation.get('boot_id')!=boot_id_value():allocation['stop_latched']=True
         if allocation['stop_latched']:
             receipt['stop_latched']=True
@@ -379,6 +379,9 @@ def _allocation_admit(directory,receipt,old,*,commit=True):
 
 
 def _usage(receipt):
+    if receipt.get('advisory_without_window'):
+        from .goal_usage import observe_session_usage
+        return observe_session_usage(receipt['grant']['codex_home'],receipt['thread_id'])
     if receipt.get('request_accounting'):
         from .objective_ledger import ObjectiveLedger
         from .lifecycle_budget import trusted_upper
@@ -595,7 +598,7 @@ def diagnose(root,policy_path,caller_thread_id,allocation_id=None,*,permission_p
 
 def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
            checkpoint_token_percent=5,checkpoint_seconds=60,token_accounting=None,
-           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None,session_scope=False,prepare_only=False,activation_baseline=False,requires_native_guard=False):
+           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None,session_scope=False,prepare_only=False,activation_baseline=False,requires_native_guard=False,replace_advisory=False):
     from .permission_enforcement import principal_for,authorize,enrollment_action
     principal=principal_for(root,caller_thread_id,native_context=native_context,principal=permission_principal)
     name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
@@ -606,13 +609,27 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         raise ValueError('invalid checkpoint token reserve')
     if type(checkpoint_seconds) not in (int,float) or not math.isfinite(checkpoint_seconds) or checkpoint_seconds<0:raise ValueError('invalid checkpoint time reserve')
     directory=_directory(root);path=directory/(name+'.json')
+    if not path.exists() and not replace_advisory:
+        from .goal_governance import control_path,control_snapshot
+        if control_path(root,caller_thread_id).exists():return control_snapshot(root,caller_thread_id)
+        if session_scope:
+            native_control=_request(grant,'thread/read',dict(threadId=caller_thread_id,includeTurns=False))['thread']
+            parent=native_control.get('parentThreadId')
+            if not parent:
+                from .goal_usage import observe_session_usage
+                parent=observe_session_usage(grant['codex_home'],caller_thread_id).get('parent_thread_id')
+            if parent and control_path(root,parent).exists() and not (directory/(_name(parent)+'.json')).exists():
+                inherited=control_snapshot(root,parent)
+                return dict(inherited,thread_id=caller_thread_id,control_inherited_from=parent,
+                    reason='inherited_operator_'+inherited.get('governor_mode','disabled'),used_tokens=None,lifetime_used_tokens=None,
+                    last_verified_usage={},accounting=dict(state='unknown',reason='inherited_inactive_control'))
     # Configured service repair is a distinct common-policy action. Never undo a
     # mask or infer authority from enrollment permission alone.
     from .goal_governance import sync
     if path.exists():
         with _lock(directory,name):
             _private(path);retained=json.loads(path.read_text())
-            if sync(retained):return _public(retained)
+            if sync(retained) and not (replace_advisory and retained.get('advisory_without_window')):return _public(retained)
     watcher_setup=None
     if not session_scope and principal and not _heartbeat(directory).get('fresh'):
         from .session_permissions import PermissionStore
@@ -626,6 +643,8 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         admission_guard(directory)
         old=None
         if path.exists():_private(path);old=json.loads(path.read_text())
+        prior_advisory=old if old and old.get('advisory_without_window') and replace_advisory else None
+        if prior_advisory:old=None
         if old:
             if sync(old):return _public(old)
             from .goal_renewal import renewal_hold
@@ -696,6 +715,7 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             time_origin=now if old or created is None or allow_counter or activation_baseline else created,effects={},checkpoint=None,
             prior_allocation=old if old else None)
         receipt.update(time_fields)
+        if prior_advisory:receipt['prior_advisory_control']=prior_advisory
         if requires_native_guard:receipt['requires_native_guard']=True
         if session_scope and not old:
             receipt['session_scope']=True
@@ -712,7 +732,12 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             receipt['enrollment_revision']=old.get('enrollment_revision',0)+1 if same else 1
             receipt.pop('poll_ack',None)
         else:receipt.setdefault('enrollment_revision',1)
-        if old and requires_native_guard and old.get('native_guard',{}).get('status') in ('expired','lost','released'):
+        prior_guard=(old or {}).get('native_guard',{})
+        guard_stale=(prior_guard.get('status') in ('expired','lost','released') or
+            prior_guard.get('status')=='armed' and
+            (prior_guard.get('controller_generation')!=controller.get('generation') or
+             time.clock_gettime(time.CLOCK_BOOTTIME)-prior_guard.get('ack_boottime',-1e30)>=prior_guard.get('ttl_ms',0)/1000))
+        if old and requires_native_guard and guard_stale:
             receipt['enrollment_revision']+=1
             receipt.pop('poll_ack',None)
         if grant.get('auto_enrolled') and grant['allocation_id']=='native-'+caller_thread_id and not old:
@@ -771,6 +796,7 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                 lifetime_tokens_before_window=fresh_usage['used_tokens'],
                 activation_baseline=True)
         if activation_baseline and grant.get('host_delegated') and not old and not receipt.get('continuation_source_thread_id'):
+            receipt['activation_baseline']=True
             receipt['task_window']=dict(thread_id=caller_thread_id,token_limit=token_limit,time_limit_seconds=time_limit_seconds,
                 time_origin=now,deadline=now+time_limit_seconds,reset_anchor=fresh_usage['anchor'],
                 goal_created_at=fresh_usage['anchor']['goal_created_at'],session_scope=True,
@@ -787,7 +813,7 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                 _record_supervision_notice(path,receipt,'deactivation')
                 _save(path,receipt)
             return _public(receipt)
-        observation=fresh_usage if prepare_only and not retained_allocation else _usage(receipt)
+        observation=fresh_usage if prepare_only and (not retained_allocation or session_scope and not old) else _usage(receipt)
         if prepare_only and receipt.get('activation_baseline') and not old:
             observation=dict(observation,used_tokens=0,charges={})
         # Enrollment is not admitted until the first complete observation is
@@ -823,6 +849,8 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             else:
                 receipt.update(used_tokens=observation['used_tokens'],accounting=observation,state='armed',reason=None,
                     qualified_task_members=observation.get('thread_ids',[caller_thread_id]))
+                receipt['last_verified_usage']=dict(generation=receipt['generation'],used_tokens=receipt['used_tokens'],
+                    lifetime_used_tokens=receipt.get('lifetime_tokens_before_window',0)+receipt['used_tokens'],elapsed_seconds=max(0,now-receipt['time_origin']))
         else:
             receipt['accounting']=observation;hold('accounting_unknown')
         controller=_heartbeat(directory);receipt['controller_generation']=controller.get('generation')
@@ -1132,6 +1160,12 @@ def poll(root):
             try:
                 from .goal_governance import sync
                 if sync(receipt):
+                    if receipt.get('governor_mode')=='advisory':
+                        observation=_usage(receipt);receipt['accounting']=observation
+                        if observation.get('state')=='qualified':
+                            if receipt.get('advisory_without_window'):receipt['lifetime_used_tokens']=observation['used_tokens']
+                            elif not _accounting_decreased(receipt,observation):receipt['used_tokens']=observation['used_tokens']
+                        _save(path,receipt)
                     results.append(dict(receipt,state='inactive'));continue
                 from .goal_renewal import renewal_hold
                 pending=renewal_hold(root,receipt)
@@ -1155,6 +1189,7 @@ def poll(root):
                 try:
                     upper=time_upper(receipt)
                 except GoalTimeUnavailable as error:
+                    receipt['clock_failure']=error.code
                     results.append(_stop(path,receipt,error.code));continue
                 goal,active=_native(grant,receipt['thread_id'])
                 receipt['native_goal_status']=goal.get('status') if goal else None
@@ -1169,6 +1204,8 @@ def poll(root):
                     results.append(_wind_down(path,receipt,'accounting_unknown',goal,active,upper));continue
                 receipt['qualified_task_members']=observation.get('thread_ids',[receipt['thread_id']])
                 receipt['used_tokens']=used;receipt['observed_boottime']=time.clock_gettime(time.CLOCK_BOOTTIME)
+                receipt['last_verified_usage']=dict(generation=receipt['generation'],used_tokens=used,
+                    lifetime_used_tokens=receipt.get('lifetime_tokens_before_window',0)+used,elapsed_seconds=max(0,upper-receipt['time_origin']))
                 shared=receipt.get('shared_limits')
                 if shared and (shared['used_tokens']>=shared['token_limit'] or upper>=shared['deadline']):
                     receipt['limiting_scope']='shared'
@@ -1224,6 +1261,13 @@ def _acknowledge_enrollments(directory,controller,observations):
             if sync(receipt):continue
             if any(receipt.get(key)!=observed.get(key) for key in
                     ('generation','enrollment_revision','token_limit','deadline','used_tokens')):continue
+            if (observed.get('state')=='held' and observed.get('reason')=='idle_session_future_task_isolation_unsupported'
+                    and receipt.get('requires_native_guard') and not receipt.get('stop_latched')
+                    and receipt.get('accounting',{}).get('state')=='qualified'):
+                receipt['prepared_poll_ack']=dict(enrollment_revision=receipt['enrollment_revision'],receipt_generation=receipt['generation'],
+                    controller_generation=controller['generation'],observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME))
+                _save(path,receipt)
+                continue
             if (observed.get('state') not in ('armed','checkpoint_requested') or
                     receipt.get('state') not in ('armed','checkpoint_requested') or receipt.get('stop_latched')
                     or (receipt.get('accounting') or {}).get('state')!='qualified'):
@@ -1249,7 +1293,7 @@ def watch(root,interval=1):
         prior={sig:signal.signal(sig,finish) for sig in (signal.SIGTERM,signal.SIGINT)}
         heartbeat=dict(generation=generation,pid=os.getpid(),identity=process_identity(os.getpid()),
             boot_id=boot_id_value(),interval=interval,time_bases=['qualified_utc','authenticated_host_counter'],
-            session_scope_without_goal=True)
+            session_scope_without_goal=True,governor_protocol=1)
         import threading
         from .goal_notices import run_presenter
         presentation_stop=threading.Event()
