@@ -9,19 +9,32 @@
       "id": 571,
       "owner": "backend",
       "state": "running",
-      "blockers": []
+      "blockers": [],
+      "worker": "/root/governor_backend571",
+      "branch": "feat/governor-backend-571"
     },
     {
       "id": 572,
       "owner": "native",
       "state": "running",
-      "blockers": []
+      "blockers": [],
+      "worker": "/root/governor_native572",
+      "branch": "feat/governor-native-572"
     },
     {
       "id": 573,
       "owner": "primary",
-      "state": "running",
-      "blockers": []
+      "state": "implemented",
+      "blockers": [],
+      "validation": "Public command metadata/native authority refusal tests pass; missing-session CLI awaits backend merge. Existing transport regression run in progress.",
+      "owned_paths": [
+        "src/codex_wake/governor_commands.py",
+        "src/codex_wake/cli.py",
+        "src/codex_wake/local_control_service.py",
+        "src/codex_wake/mcp_server.py",
+        "src/codex_wake/controller_http.py",
+        "src/codex_wake/controller_client.py"
+      ]
     },
     {
       "id": 574,
@@ -33,5 +46,7 @@
         573
       ]
     }
-  ]
+  ],
+  "contract_revision": 2,
+  "operator_admission": "opaque local_operator_principal(); native model Principal(thread) after verified_native_caller; OAuth owner+admin+exact thread grant only for loosen actions"
 }

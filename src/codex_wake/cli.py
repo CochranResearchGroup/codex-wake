@@ -110,6 +110,8 @@ def build_parser() -> argparse.ArgumentParser:
     register_local_lifecycle(_control_verbs)
     from .local_self_limits import register_parser as register_local_self_limits
     register_local_self_limits(subparsers)
+    from .governor_commands import register_parser as register_governor
+    register_governor(subparsers)
     from .wake_control import add_control_parsers
     add_control_parsers(subparsers)
     from .time_inspection import add_time_parser
@@ -2859,6 +2861,10 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     if args.command == "a2a":
         from .a2a_cli import a2a_command
         return a2a_command(args)
+    if args.command == 'governor':
+        from .governor_commands import command
+        from .local_control_lifecycle import root_for
+        return command(args, root_for(args))
     if args.command == 'self-limits':
         from .local_self_limits import command
         from .local_control_lifecycle import root_for

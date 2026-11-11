@@ -1301,3 +1301,45 @@ lanes:
     overlaps: [P216]
     updated_at: 2026-11-10
     disposition: PR551/553/556 merged; dev5 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
+
+  - id: P220-571
+    owner: ecochran76 / backend
+    objective: Usable governor ticket 571
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/571]
+    plan: docs/dev/plans/0220-2026-11-11-governor-experience.md
+    branch: feat/governor-backend-571
+    target: feat/governor-experience
+    plan_state: IN_PROGRESS
+    custody_state: ACTIVE
+    dependencies: []
+    overlaps: [P220]
+    updated_at: 2026-11-11
+    disposition: Disjoint backend/native/transport ownership; primary integrates serially
+
+  - id: P220-572
+    owner: ecochran76 / native
+    objective: Usable governor ticket 572
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/572]
+    plan: docs/dev/plans/0220-2026-11-11-governor-experience.md
+    branch: feat/governor-native-572
+    target: feat/governor-experience
+    plan_state: IN_PROGRESS
+    custody_state: ACTIVE
+    dependencies: []
+    overlaps: [P220]
+    updated_at: 2026-11-11
+    disposition: Disjoint backend/native/transport ownership; primary integrates serially
+
+  - id: P220-573
+    owner: ecochran76 / primary
+    objective: Usable governor ticket 573
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/573]
+    plan: docs/dev/plans/0220-2026-11-11-governor-experience.md
+    branch: feat/governor-experience
+    target: feat/governor-experience
+    plan_state: IN_PROGRESS
+    custody_state: ACTIVE
+    dependencies: []
+    overlaps: [P220]
+    updated_at: 2026-11-11
+    disposition: Disjoint backend/native/transport ownership; primary integrates serially
