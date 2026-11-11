@@ -9083,6 +9083,21 @@ PR565 merged c9f220d8,0.22.0.dev6 deployed. Shared stable comparisons remove tit
 
 Working-host readback44tabs/layout/baseline unchanged,28native processes,10protectedfiles andstock preserved; freshSlate monitor runsnewprefix withoutfailures. Native control server remains ondev3; existing stdio MCP clients need reconnect fornewpackage. Windows native not rerun; saved-group transfer semantics unchanged. HostedCIzero. Originaldirtycheckout preserved. Memoryforbidden under explicit-request boundary; non-write receipt outsideGit.
 
+
+## Turn | 2026-11-11 | Shared monitoring deployment
+
+PR564merged775daf53; PR567release7af9b29f deployeddev7. UID1017 exactwheel
+319members match;9monitor/11realnative/5transport checks and4phase launcher
+rollback pass,13savedhistory files preserved. Nineworkinglaunchers/Zsh refreshed;
+tenprotectedfiles/stock/27nativegenerations preserved. SoyLei overlap removed;
+fourmore eligible roots migrated with individual guards; Graphiti60s preserved.
+Supervisor2workers/14roots ready; services11→6, auracall/mail-receipts custom
+dispatch-mode exceptions retained. Short samples CPU0.575→0.542core and service
+memory202→161MiB;4worker footprint was higher and tuned down.28definitions/old
+release prefixes retained; no wake-state rollback/deletion. SeePlan0219, curated
+deployment.json and private qualification/plan0219 receipts/initialfailures.
+Memoryforbidden under explicit-request rule; no write. HostedCIzero.
+
 ## Native active-tab service-context diagnosis | 2026-11-11
 
 [Plan0220](docs/dev/plans/0220-2026-11-11-native-active-tab-executable.md) owns the
