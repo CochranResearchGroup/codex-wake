@@ -819,7 +819,7 @@
         "disable"
       ],
       "mcp_tool": "wake_governor_disable",
-      "description": "Disable this governor under qualified operator authority; do not resume work.",
+      "description": "Disable this governor under qualified operator authority; resume only with --resume.",
       "input_schema": {
         "type": "object",
         "properties": {

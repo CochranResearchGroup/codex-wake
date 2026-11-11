@@ -60,7 +60,8 @@ def execute(verb, arguments, root, *, principal=None):
     result = governor(root, verb, dict(arguments), principal=principal)
     requested_resume = verb == 'resume' or arguments.get('resume') is True
     held = (verb == 'activate' and result.get('state') != 'enforced' or
-            requested_resume and result.get('operation', {}).get('resumed') is not True)
+            requested_resume and result.get('operation', {}).get('resumed') is not True or
+            verb != 'status' and result.get('reason') == 'native_lease_release_pending')
     result['status'] = 'held' if held else 'completed'
     return result
 
@@ -71,7 +72,7 @@ def definitions():
         'activate': 'Activate or tighten own-task time and token limits without per-session provisioning.',
         'extend': 'Increase an existing allowance under qualified operator authority; retain usage.',
         'reset': 'Start a new authorized budget window, preserving lifetime accounting and stop history.',
-        'disable': 'Disable this governor under qualified operator authority; do not resume work.',
+        'disable': 'Disable this governor under qualified operator authority; resume only with --resume.',
         'resume': 'Resume the exact affected task only when its allowance and enforcement are qualified.',
         'advisory': 'Explicitly select advisory operation under qualified operator authority.',
     }
