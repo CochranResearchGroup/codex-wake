@@ -440,7 +440,9 @@ def qualify(options):
         + '/v1"\nwire_api="responses"\nrequires_openai_auth=false\nrequest_max_retries=0\nstream_max_retries=0\nsupports_websockets=false\n'
     )
     config += (
-        "[features]\ncode_mode=false\n[mcp_servers.wake]\ncommand="
+        "[features]\ncode_mode=false\n"
+        + ("multi_agent_v2=true\n" if governor_ui_only else "")
+        + "[mcp_servers.wake]\ncommand="
         + json.dumps(str(prefix / "bin/codex-wake-mcp"))
         + "\nargs="
         + json.dumps(
@@ -877,7 +879,7 @@ def qualify(options):
             stopped = governor('status')
             require(model_start_snapshot()['model_turn_ids'] == before_ui['model_turn_ids'],
                     'UI activation/status/forced stop started inference')
-            ui_command('/wake governor reset --time-limit-seconds 60')
+            ui_command('/wake governor reset --time-limit-seconds 120')
             wait(lambda: ((value := governor('status'))['revision'] > stopped['revision']
                           and value['usage']['used_tokens'] == 0), 'new reset window revision')
             ui_command('/wake governor extend --add-tokens 500 --add-seconds 30 --resume')
@@ -900,7 +902,7 @@ def qualify(options):
             attach(endpoint, thread)
             visible('disabled', 'governor-reconnect.txt')
             require(governor('status')['revision'] == disabled['revision'], 'reconnect changed control revision')
-            ui_command('/wake governor activate --token-limit 1500 --time-limit-seconds 60')
+            ui_command('/wake governor activate --token-limit 1500 --time-limit-seconds 120')
             visible('enforced', 'governor-reactivated.txt')
             stream_open.clear()
             ui_command('/wake governor resume')
