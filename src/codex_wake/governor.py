@@ -20,6 +20,21 @@ _LOCAL_OPERATOR = _LocalOperator()
 _STATUS_ROWS = {}
 
 
+class _NativePrincipal:
+    def __init__(self, principal, policy):
+        self.principal=principal
+        self.policy=policy
+
+
+def native_principal(thread, *, policy=None, principal=None):
+    """Private verified native adapter binding; never deserialize from JSON."""
+    actor=principal or Principal(thread)
+    if not isinstance(actor,Principal) or actor.subject!=thread or actor.role!='session':
+        raise ValueError('verified exact native session principal required')
+    return _NativePrincipal(actor, str(Path(policy).absolute()) if policy is not None else None)
+
+
+
 def local_operator_principal():
     """Trusted local CLI/native operator adapter only; never expose as an RPC."""
     return _LOCAL_OPERATOR
@@ -57,6 +72,10 @@ def _normalize(receipt, thread):
 
 
 def _execute(root, verb, arguments, *, principal=None):
+    host_policy=None
+    if isinstance(principal,_NativePrincipal):
+        host_policy=principal.policy
+        principal=principal.principal
     if not isinstance(arguments, dict):
         raise ValueError('governor arguments must be an object')
     allowed = {'selector', 'endpoint', 'policy', 'request_id', 'expected_revision'}
@@ -99,6 +118,8 @@ def _execute(root, verb, arguments, *, principal=None):
     else:
         supervision._private(path)
         retained = json.loads(path.read_text())
+        if host_policy is not None and Path(retained['policy_path']).absolute()!=Path(host_policy):
+            raise ValueError('retained governor host policy differs from authenticated native binding; reconcile without renewing')
         receipt = supervision.show(root, retained['policy_path'], thread,
             permission_principal=Principal(thread,'operator') if principal is _LOCAL_OPERATOR else principal)
     if verb == 'status':
@@ -122,7 +143,7 @@ def _execute(root, verb, arguments, *, principal=None):
     if verb == 'activate':
         from .local_self_limits import policy_for
         from .self_limits import local_execute
-        policy = retained['policy_path'] if path.exists() else policy_for(root, row, arguments.get('policy'))
+        policy = retained['policy_path'] if path.exists() else policy_for(root, row, host_policy or arguments.get('policy'))
         limits = {key: arguments.get(key) for key in ('token_limit', 'time_limit_seconds')}
         for value in limits.values():
             if type(value) is not int or value <= 0:
@@ -219,7 +240,8 @@ def execute(root, verb, arguments, *, principal=None):
         raise ValueError('choose a session selector, or run inside a session with CODEX_THREAD_ID')
     row = resolve(root, selector, endpoint=arguments.get('endpoint', 'unix://'))
     thread = row['thread_id']
-    if principal is not _LOCAL_OPERATOR and (not isinstance(principal, Principal) or principal.role != 'session' or principal.subject != thread):
+    actor=principal.principal if isinstance(principal,_NativePrincipal) else principal
+    if actor is not _LOCAL_OPERATOR and (not isinstance(actor, Principal) or actor.role != 'session' or actor.subject != thread):
         raise ValueError('verified exact-session principal required')
     import hashlib
     digest = hashlib.sha256(json.dumps(dict(verb=verb, arguments=arguments), sort_keys=True, default=str).encode()).hexdigest()
