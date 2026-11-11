@@ -5,6 +5,8 @@ connections; fallback is visible and separately selected for each request.
 """
 import time
 
+from .tab_identity import stable_snapshot
+
 from .managed_inventory import InventoryError
 from .tab_organization import TabOrganization, TabError, digest
 
@@ -131,6 +133,7 @@ class ControllerTabs:
                 raise InventoryError('attachment_unavailable', 'host presentation observation failed') from error
             target = dict(host=self.host, environment=self.environment, workspace=name,
                           presentation=config['kind'], generation=digest(snapshot))
+            lifecycle_target=dict(target,generation=digest(stable_snapshot(snapshot)))
             observation = None
             if operation in self.READS:
                 initial, rows = self.observation_cache.observe(
@@ -145,8 +148,10 @@ class ControllerTabs:
                 observation = (initial, rows)
             broker = config.get('broker')
             custody = broker.inspect() if broker else dict(available=False, transport='unowned', generation=None)
-            if operation not in self.READS and arguments.get('expected_target') != target:
-                raise InventoryError('stale_target', 'exact current presentation generation required')
+            if operation not in self.READS:
+                accepted=(target,lifecycle_target) if operation in ('tabs.preview','tabs.apply','tabs.undo') else (target,)
+                if arguments.get('expected_target') not in accepted:
+                    raise InventoryError('stale_target', 'exact current presentation generation required')
             if operation in self.READS:
                 selector = arguments.get('selector')
                 windows = snapshot['windows']
@@ -157,7 +162,8 @@ class ControllerTabs:
                 for w in windows:
                     observed, rows = observation
                     evidence = observed[w['window_id']]
-                    resources.append(dict(target=target,window=w,input_custody=custody,
+                    resources.append(dict(target=target,lifecycle_target=lifecycle_target,
+                                          window=w,input_custody=custody,
                                           traits=evidence,runtime_identity='unverified',fallback='explicit_only',
                                           observation_holds=rows['holds'],workspace_label=config.get('label',name)))
                 continue
@@ -193,10 +199,10 @@ class ControllerTabs:
                                     authorize=lambda action: None)
             try:
                 if operation == 'tabs.preview':
-                    return dict(target=target, **owner.preview(mode=arguments.get('mode','activity'), pins=arguments.get('pins',[]), criteria=arguments.get('criteria',[]), deadline=deadline))
+                    return dict(target=lifecycle_target, **owner.preview(mode=arguments.get('mode','activity'), pins=arguments.get('pins',[]), criteria=arguments.get('criteria',[]), deadline=deadline))
                 if operation == 'tabs.apply':
-                    return dict(target=target, **owner.apply(arguments['plan_id'], deadline=deadline))
-                return dict(target=target, **owner.undo(arguments['receipt_id'], deadline=deadline))
+                    return dict(target=lifecycle_target, **owner.apply(arguments['plan_id'], deadline=deadline))
+                return dict(target=lifecycle_target, **owner.undo(arguments['receipt_id'], deadline=deadline))
             except TabError as error:
                 raise InventoryError(error.code, str(error)) from error
         value = dict(resources=resources)

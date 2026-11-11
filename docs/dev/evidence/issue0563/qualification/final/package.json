@@ -1,0 +1,11 @@
+{
+  "source": "8bab52f701c3daaeeb75bb631593b14ffa155aaa",
+  "wheel": "/tmp/wake563-8bab52f7/dist/codex_wake-0.22.0.dev6-py3-none-any.whl",
+  "wheel_sha256": "46cd195cc1879280a9b8d9e9741a007a8d46db8611785f4179f1b338feab4030",
+  "package_members_equal": 316,
+  "old_new_legacy_checks": "PASS",
+  "uid": 1017,
+  "qa_source": "/tmp/wake563-qualified-hwgfnmgo/source",
+  "results": "/tmp/wake563-qualified-hwgfnmgo",
+  "base": "/tmp/wake563-8bab52f7"
+}

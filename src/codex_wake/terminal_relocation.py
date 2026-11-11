@@ -9,6 +9,7 @@ from .managed_inventory import InventoryError
 from .shortcut_store import read, write, locked
 from .terminal_sessions import TerminalSessions
 from .terminal_tab_holds import TabHolds
+from .tab_identity import stable_panes, stable_tab_birth
 
 
 class TerminalRelocation:
@@ -46,7 +47,7 @@ class TerminalRelocation:
     @staticmethod
     def _birth(resource):
         return dict(identity=TabHolds.identity(resource),window_id=resource['window']['window_id'],
-                    panes=resource['window']['panes'])
+                    panes=stable_panes(resource['window']['panes']))
 
     def _resources(self):
         self.sessions._timeout(10)
@@ -111,7 +112,7 @@ class TerminalRelocation:
         self._save(record);return record
 
     def _locate(self,effect):
-        matches=[r for r in self._resources() if self._birth(r)==effect['birth']]
+        matches=[r for r in self._resources() if self._birth(r)==stable_tab_birth(effect['birth'])]
         if len(matches)!=1 or matches[0]['window'].get('linked'):return None,None
         resource=matches[0]
         session=next((s for s in self.sessions.inventory() if s['workspace']==resource['target']['workspace']),None)

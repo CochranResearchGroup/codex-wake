@@ -54,6 +54,22 @@ class SessionDeleteTests(unittest.TestCase):
         with self.assertRaises(ValueError):routing.execute('tabs.route.enable',dict(rule_id=rule['id']))
         self.assertEqual(self.delete(plan_id=result['plan_id'])['status'],'deleted')
 
+    def test_changing_titles_do_not_prevent_explicit_termination(self):
+        from codex_wake.controller_tab_adapters import TmuxAttachmentTransport
+        class LiveTitles(TmuxAttachmentTransport):
+            sequence = 0
+            def snapshot(self, deadline):
+                self.sequence += 1
+                self.command(deadline, 'select-pane', '-t', '%0', '-T', 'turn '+str(self.sequence))
+                return super().snapshot(deadline)
+        config=self.tabs.workspaces[self.source['workspace']]
+        config['transport']=LiveTitles(self.sock, self.source['snapshot']['session_id'])
+        peer=self.tmux('list-panes','-s','-t','peer','-F','#{pane_id}:#{pane_pid}')
+        result=self.delete(terminate=True)
+        self.assertEqual(result['status'],'deleted',result)
+        self.assertEqual(result['outcomes'][0]['status'],'terminated')
+        self.assertEqual(self.tmux('list-panes','-s','-t','peer','-F','#{pane_id}:#{pane_pid}'),peer)
+
     def test_lost_native_close_reply_reconciles_after_restart_without_replay(self):
         from unittest.mock import patch
         real_run=subprocess.run;sent=[]

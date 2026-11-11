@@ -1,0 +1,16 @@
+F
+======================================================================
+FAIL: test_real_isolated_tmux_capture_preview_apply (test_controller_tabs.ControllerTabsTests.test_real_isolated_tmux_capture_preview_apply)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-deploy-551/tests/test_controller_tabs.py", line 74, in test_real_isolated_tmux_capture_preview_apply
+    self.assertEqual(preview['phase'],'terminal',preview)
+AssertionError: 'uncertain' != 'terminal'
+- uncertain
++ terminal
+ : {'schema_version': 1, 'operation_id': 'tab-cli-a4e1c7e35e5d4d43b46b2b4ca4a365dd', 'operation': 'tabs.preview', 'correlation_id': 'a4e1c7e35e5d4d43b46b2b4ca4a365dd', 'binding': 'local-cli', 'original_binding': 'local-cli', 'target': {'host': 'h', 'environment': 'fixture', 'workspace': 'fixture', 'presentation': 'byobu', 'generation': 'b16fa3e30fde3e65eddcc249d86b33889e34d5f84229eb87dfd5d43dbe0e6fb6'}, 'payload_sha256': '5ea799259e1d92b84381b169a272141c8e4440463d4c3f825615373df7381886', 'created_at': 1794373830.2092085, 'submission': 'admitted', 'execution': 'unknown', 'delivery': 'uncertain', 'acceptance': 'unknown', 'phase': 'uncertain', 'reason': 'stale_target', 'result': None, 'cancellation': 'not_requested'}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.172s
+
+FAILED (failures=1)
