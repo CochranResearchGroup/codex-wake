@@ -48,6 +48,11 @@ causal roots before provider work. Existing tasks receive an exact-turn monitor;
 automatic goal continuations carry the same guard. A fresh operator causal root
 is independent. This closes the child-spawn gap between Python watcher polls.
 Python remains the accounting/allowance owner; the native lease counts no usage.
+Yielded unified-exec commands retain their actual causal root in the existing
+process store. Expiry confirms termination of those exact handles, including
+commands started before enrollment and late child commands. Per-root admission
+fences publication of in-flight starts; abandoned or ambiguous starts keep stop
+verification false. All scoped tool termination shares one five-second window.
 
 Linux `CLOCK_BOOTTIME` includes suspend time. The native timer checks it at an
 awake interval of at most 100ms and rejects expired renewal. This is not a claim

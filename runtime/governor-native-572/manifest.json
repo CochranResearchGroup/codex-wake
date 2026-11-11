@@ -4,9 +4,9 @@
   "native_repository": "https://github.com/openai/codex",
   "upstream_revision": "086ccc833bc9cf01024ad2dd6af7dbd421b6bf9a",
   "native_retained_base": "d3e311260b46c88fc8eac08b869f276cd0345e8b",
-  "native_source_commit": "a9a992a6ed5661b2211806e1c9137680d083f15e",
+  "native_source_commit": "e18bde9a112504665d4503dc658204af65092523",
   "native_source_worktree": "/home/ecochran76/workspace.local/codex-wake-native-governor-572",
-  "patch_sha256": "be068295181d607d2c13c2c44748d6963654fe58f0dd33ca19cd731f3a25252d",
+  "patch_sha256": "389e6a1d34132041f4d5d65739c7d8c5b33564cddd91ce955bdc0555e037c832",
   "patched_files_sha256": {
     "codex-rs/Cargo.lock": "8ce6e8ba6f35054304773c1decd50c1d960d6eeb911a549fec3e4a22dbcb9863",
     "codex-rs/app-server-protocol/schema/json/ClientRequest.json": "e2b80bd4dba9ea2eb75d7b665878e56e57ee974da45d3829dd2b9857a5bb81d3",
@@ -27,14 +27,18 @@
     "codex-rs/app-server-protocol/src/protocol/v2/thread.rs": "4f2294cc34058f5f960cf531fb4a41c06b8313729036a72708faa392ea2fc2c2",
     "codex-rs/app-server/src/message_processor.rs": "2c740c4adb61806dd87a86f58f0b526ebb457ce13f64e64292a7c93ed0bc3276",
     "codex-rs/app-server/src/request_processors/thread_goal_processor.rs": "f27da5f4c59b78efd8927e737e373a937e2bdce62e9166f7367428a95b34b177",
-    "codex-rs/app-server/src/request_processors/thread_governor_lease.rs": "8b8e3aa3df15650230eaf171e00e23dc6a73de136ed57351948c320c7d437759",
+    "codex-rs/app-server/src/request_processors/thread_governor_lease.rs": "3eb88253613be4e806f51e45c73e2b490ae543f93da8922d9a10fb95cfe59c8a",
     "codex-rs/app-server/src/request_processors/thread_processor.rs": "4b24d2fb1dabd5dd450694b8418cf9bf5c703ecb354f9ea8d5195a265916ea37",
-    "codex-rs/core/src/codex_thread.rs": "78281eb71ed71ae1964376587ecfa542108518fb91e357c1ec54b19290957730",
+    "codex-rs/core/src/codex_thread.rs": "4702f5c1435b480be857c4de7bcb733cdf7ae7cb88dc6f9b3c2855a2544b6060",
     "codex-rs/core/src/governor_guard.rs": "94b24e1c3bcc2bdeca9fa5559df21d7863120e17f38b6f23118d8504fd21f04c",
     "codex-rs/core/src/lib.rs": "a8c4abb9d0b2b1711ff646d6069204f7faf72b46435d0d9fb0e90f31fb1b225b",
     "codex-rs/core/src/session/turn_input.rs": "49769fc431a294cef628b79b79ff2010ec6a0d1780faaac92032af50ddd99b30",
     "codex-rs/core/src/tasks/mod.rs": "b136cd1748277bb8d01e11b9b228d3c14370d448b5d56c24774d8609382b8509",
     "codex-rs/core/src/tasks/mod_tests.rs": "4ebf6791376bb6e306211ab9232d6b62fac8b97fc57bea0e8eced24bd4badee0",
+    "codex-rs/core/src/unified_exec/mod.rs": "fe89132355be17d6a40effdb8364709853112783ff9574e7f767f22f5c1aa82c",
+    "codex-rs/core/src/unified_exec/mod_tests.rs": "ece9d778110a67bd89d336b06e98be235785129a4b44a5c1a2638605a7fce341",
+    "codex-rs/core/src/unified_exec/process_manager.rs": "3d6967311461104c8c4721127ed92aa948a72b82bb05759ae965220640ca4a1f",
+    "codex-rs/core/src/unified_exec/process_manager_tests.rs": "06c47e7b3e1720d81f88142a9b36adc84207d1f26b3312450c883f78656910de",
     "codex-rs/ext/goal/src/accounting.rs": "d18eb26990f053a7865334cbf86230f68b8288603fcb083079d9dbda0955563d",
     "codex-rs/ext/goal/src/api.rs": "49f4debfbb8c5459a12562a5fcb0203c1740270ccc03a4417a577bbd95b022f9",
     "codex-rs/ext/goal/src/runtime.rs": "d2259b6455d72d3a4b3ffe69964baa70468032ef35f49bd1c18636af502d4019",
@@ -59,9 +63,9 @@
   "cargo_jobs": 2,
   "toolchain": "1.95.0",
   "build_evidence": "/home/ecochran76/.local/state/codex-wake/governor-native-572",
-  "qualification": "source reconstruction,6 focused tests,protocol generation and complete package PASS; disposable installed behavior acceptance remains owned by primary",
+  "qualification": "production package-v2 and three actual backend cases PASS; installed managed UI/cold-resume acceptance pending",
   "production_install": false,
-  "full_patch_sha256": "52ae1ebf2aafc6eb3905a94832110c8758feb7c4334bf3e7b267af01e3facc5d",
+  "full_patch_sha256": "e440e8c26db32e7a2e487b3f19f53e00a9683a1953b0a29e6cbe54e50e75dbd0",
   "guard_capabilities": {
     "clock": "Linux CLOCK_BOOTTIME;100ms awake check",
     "exact_causal_roots": true,
@@ -74,17 +78,18 @@
       "legacy V1 delegation",
       "nonLinux clock qualification",
       "Windows/SSH qualification"
-    ]
+    ],
+    "task_owned_exec_handles": "causal-root scope, confirmed termination, bounded startup-publication fence"
   },
-  "package_entrypoint_sha256": "9c8390d120afc046b63a8cf95f82922c297fd59745814fa66fbbc9a2ef3f5585",
+  "package_entrypoint_sha256": "80c8ad9fd5b12c4588e51d29722930f51770fcf0dffb8edfca2c773455c1e942",
   "package_version": "codex-cli 0.167.0",
   "related_issues": [
     571,
     572
   ],
   "build_recipe": {
-    "driver": "/home/ecochran76/.local/state/codex-wake/governor-native-572/build-package.sh",
-    "driver_sha256": "a219fa452c10a4075e381fa214e4f313232e53623907ab61503f653c87a7daa7",
+    "driver": "/home/ecochran76/.local/state/codex-wake/governor-native-572/build-package-v2.sh",
+    "driver_sha256": "05420c08bce78d84b4d00d86ce38cecb402f8c7abe8e717ca966a5b8f270d5ed",
     "cargo_argv": [
       "cargo",
       "build",
@@ -104,7 +109,7 @@
       "--cargo-profile",
       "dev-small",
       "--package-dir",
-      "/home/ecochran76/.local/state/codex-wake/governor-native-572/package",
+      "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-v2",
       "--entrypoint-bin",
       "/home/ecochran76/.cache/codex-wake-native-0167/dev-small/codex",
       "--exec-server-bin",
@@ -122,5 +127,6 @@
     },
     "cargo_target_host": "x86_64-unknown-linux-gnu (implicit native host target)",
     "features": "retained entrypoint default features; test package selection and standalone generator unify dependency features differently"
-  }
+  },
+  "scope_stop": "exact causal-root turn guards plus retained execution handles; per-root startup publication fence; unknown abandoned startups cannot verify stop; 5-second overall confirmed-exit window"
 }

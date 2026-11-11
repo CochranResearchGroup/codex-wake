@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "issue": 572,
-  "native_source_commit": "a9a992a6ed5661b2211806e1c9137680d083f15e",
+  "native_source_commit": "e18bde9a112504665d4503dc658204af65092523",
   "retained_patch_checks": {
     "sha256": "PASS",
     "all_file_hashes": "PASS",
@@ -273,6 +273,18 @@
         "ignored": 0
       },
       "diagnostics": []
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build-v2/job-20261111T195841Z-7239e953424a/20261111T195841Z-a75fe9221b10/receipt.json",
+      "exit_code": 0,
+      "duration_seconds": 537.227,
+      "test_summary": {
+        "suites": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": []
     }
   ],
   "focused_tests": {
@@ -290,7 +302,7 @@
     },
     "total_command_seconds": 1861.933,
     "app_server_qualification": "compiled; selected zero tests; actual lease RPC acceptance remains required",
-    "post_test_delta": "Only app-server expiry-drain release fence and protocol/schema/SDK exports; Core and TUI source unchanged."
+    "post_test_delta": "Core exact-handle execution stop/admission fence plus app-server confirmed-exit integration added after source896bec; no unit rerun by coordinator direction; actual existing live-process regression is required"
   },
   "protocol_generation": {
     "stable": "PASS",
@@ -299,19 +311,26 @@
   },
   "immutable_package": {
     "status": "PASS",
-    "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build/job-20261111T183940Z-ad8823c91b46/20261111T183940Z-a36c48ffcd5c/receipt.json",
-    "total_command_seconds": 1250.348,
-    "package": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package",
-    "entrypoint_sha256": "9c8390d120afc046b63a8cf95f82922c297fd59745814fa66fbbc9a2ef3f5585",
+    "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build-v2/job-20261111T195841Z-7239e953424a/20261111T195841Z-a75fe9221b10/receipt.json",
+    "total_command_seconds": 537.227,
+    "package": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-v2",
+    "entrypoint_sha256": "80c8ad9fd5b12c4588e51d29722930f51770fcf0dffb8edfca2c773455c1e942",
     "version": "codex-cli 0.167.0",
     "inventory_files": 6,
-    "four_reused_helpers": "all pins, preserved source files and package copies byte-identical",
-    "baseline_entrypoint_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
     "source_clean_before_after": true
   },
   "installed_disposable_journey": {
-    "status": "PENDING",
-    "owner": "primary coordinator"
+    "status": "BACKEND_V2_PASS_UI_PENDING",
+    "owner": "primary/native UI worker and backend runtime worker",
+    "native_v1_failure": "State S task-owned sleep processes survived root+child interrupted turns; stopVerified was incorrectly true",
+    "native_v1_failure_receipt": "/tmp/wake-governor-p220-2dac7qs6/backend-watcher-loss-05/result.json",
+    "ui_fixture_failures": [
+      "ui-01 explicit account config precedence",
+      "/tmp/p220u2 inline viewport blank rows and native paste timing",
+      "/tmp/p220u3 missing explicit V2 feature correctly held legacy scope before allocation"
+    ],
+    "backend_v2_result": "Coordinator confirmed all three actual cases PASS: model activation6POST/12s, root+latechild deadline5POST/11.6s, watcher SIGKILL5POST/17s; live task tools terminate, unrelated peer preserved, exactly-once guarded goal-less resume/no hidden goal",
+    "ui_v2_failure": "/tmp/p220u4/receipt.json: managed cold bootstrap exceeded25s frontend window before any provider request; independent bounded public-launcher startup diagnostic in progress"
   },
   "hosted_ci": "skipped per no-paid-CI policy",
   "memory_disposition": {

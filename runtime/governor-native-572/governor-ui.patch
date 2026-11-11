@@ -14414,10 +14414,10 @@ index d93e2ce571..c559ac8661 100644
  
 diff --git a/codex-rs/app-server/src/request_processors/thread_governor_lease.rs b/codex-rs/app-server/src/request_processors/thread_governor_lease.rs
 new file mode 100644
-index 0000000000..8e095c1be0
+index 0000000000..e5e9c977e1
 --- /dev/null
 +++ b/codex-rs/app-server/src/request_processors/thread_governor_lease.rs
-@@ -0,0 +1,1424 @@
+@@ -0,0 +1,1452 @@
 +//! App-server-owned task lease. UI closure and watcher SIGKILL cannot cancel its timer.
 +use super::*;
 +use codex_app_server_protocol::{
@@ -15289,10 +15289,37 @@ index 0000000000..8e095c1be0
 +                });
 +            }
 +        }
-+        let outcomes = futures::future::join_all(stopped_members.iter().map(|member| {
++        let mut outcomes = futures::future::join_all(stopped_members.iter().map(|member| {
 +            self.stop_expired_governor_member(member, root, &lease.lease_id, deadline)
 +        }))
 +        .await;
++        // Yielded exec sessions can outlive their originating turn. The Core manager
++        // fences in-flight starts and selects handles by the existing causal guards.
++        let tools_stopped = tokio::time::timeout(Duration::from_secs(5), async {
++            let ids = self.thread_manager.list_thread_ids().await;
++            futures::future::join_all(ids.into_iter().map(|id| {
++                let guard_ids = &guard_ids;
++                async move {
++                    match self.thread_manager.get_thread(id).await {
++                        Ok(thread) => thread.terminate_governor_execs(guard_ids).await,
++                        Err(_) => false,
++                    }
++                }
++            }))
++            .await
++            .into_iter()
++            .all(|stopped| stopped)
++        })
++        .await
++        .unwrap_or(false);
++        if !tools_stopped {
++            for outcome in &mut outcomes {
++                outcome.stop_verified = false;
++                outcome.error.get_or_insert_with(|| {
++                    "Could not verify exact task-owned exec process exit".into()
++                });
++            }
++        }
 +        let mut registry = self.governor_leases.lock().await;
 +        if let Some(current) = registry.entries.get_mut(&root)
 +            && current.lease_id == lease.lease_id
@@ -15301,7 +15328,8 @@ index 0000000000..8e095c1be0
 +            current.expiry_pending = false;
 +            if !current.released {
 +                current.members = stopped_members;
-+                current.stop_verified = outcomes.iter().all(|outcome| outcome.stop_verified);
++                current.stop_verified =
++                    tools_stopped && outcomes.iter().all(|outcome| outcome.stop_verified);
 +                if self.index_guard_members(current).is_err() {
 +                    current.stop_verified = false;
 +                }
@@ -15866,7 +15894,7 @@ index e9efccdcae..79f718f7d0 100644
                  &self.config.codex_home,
                  &resumed.conversation_id.to_string(),
 diff --git a/codex-rs/core/src/codex_thread.rs b/codex-rs/core/src/codex_thread.rs
-index 682be1bb28..27aca51431 100644
+index 682be1bb28..8ab4c56b0b 100644
 --- a/codex-rs/core/src/codex_thread.rs
 +++ b/codex-rs/core/src/codex_thread.rs
 @@ -232,6 +232,10 @@ impl CodexThread {
@@ -15880,7 +15908,7 @@ index 682be1bb28..27aca51431 100644
          Self {
              session,
              io,
-@@ -244,6 +248,127 @@ impl CodexThread {
+@@ -244,6 +248,139 @@ impl CodexThread {
          }
      }
  
@@ -16003,6 +16031,18 @@ index 682be1bb28..27aca51431 100644
 +                codex_protocol::protocol::TurnAbortReason::BudgetLimited,
 +                None,
 +            )
++            .await
++    }
++
++    /// Stop only native execution handles belonging to the expiring causal guards.
++    pub async fn terminate_governor_execs(
++        &self,
++        guard_ids: &std::collections::HashSet<String>,
++    ) -> bool {
++        self.session
++            .services
++            .unified_exec_manager
++            .terminate_governor_execs(self.session.thread_id, guard_ids)
 +            .await
 +    }
      pub async fn submit(&self, op: Op) -> CodexResult<String> {
@@ -16456,6 +16496,272 @@ index fe6b6dd0da..c9a53692a1 100644
 +    .expect("expired governor task must abort promptly");
 +    assert!(!called.load(std::sync::atomic::Ordering::SeqCst));
 +}
+diff --git a/codex-rs/core/src/unified_exec/mod.rs b/codex-rs/core/src/unified_exec/mod.rs
+index 78ec3c5d90..0e21a62f0d 100644
+--- a/codex-rs/core/src/unified_exec/mod.rs
++++ b/codex-rs/core/src/unified_exec/mod.rs
+@@ -157,13 +157,39 @@ impl ProcessStore {
+ 
+ pub(crate) struct UnifiedExecProcessManager {
+     process_store: Mutex<ProcessStore>,
++    governor_exec_gates: std::sync::Mutex<HashMap<String, Arc<GovernorExecGate>>>,
+     max_write_stdin_yield_time_ms: u64,
+ }
+ 
++#[derive(Default)]
++struct GovernorExecGate {
++    admission: tokio::sync::RwLock<()>,
++    uncertain: std::sync::atomic::AtomicBool,
++}
++
++/// Expiry must not report a verified stop if a canceled spawn never published
++/// an owned process handle. Completed starts publish under this root's gate.
++struct GovernorExecAdmission<'a> {
++    gate: &'a GovernorExecGate,
++    _permit: tokio::sync::RwLockReadGuard<'a, ()>,
++    completed: bool,
++}
++
++impl Drop for GovernorExecAdmission<'_> {
++    fn drop(&mut self) {
++        if !self.completed {
++            self.gate
++                .uncertain
++                .store(true, std::sync::atomic::Ordering::Release);
++        }
++    }
++}
++
+ impl UnifiedExecProcessManager {
+     pub(crate) fn new(max_write_stdin_yield_time_ms: u64) -> Self {
+         Self {
+             process_store: Mutex::new(ProcessStore::default()),
++            governor_exec_gates: std::sync::Mutex::new(HashMap::new()),
+             max_write_stdin_yield_time_ms: max_write_stdin_yield_time_ms
+                 .max(MIN_EMPTY_YIELD_TIME_MS),
+         }
+@@ -178,6 +204,7 @@ impl Default for UnifiedExecProcessManager {
+ 
+ struct ProcessEntry {
+     process: Arc<UnifiedExecProcess>,
++    causal_root_turn_id: String,
+     plugin_metrics_sidecar: Option<SharedPluginMetricsSidecar>,
+     call_id: String,
+     process_id: i32,
+diff --git a/codex-rs/core/src/unified_exec/mod_tests.rs b/codex-rs/core/src/unified_exec/mod_tests.rs
+index 5dbbf83b70..bd5a0fba9e 100644
+--- a/codex-rs/core/src/unified_exec/mod_tests.rs
++++ b/codex-rs/core/src/unified_exec/mod_tests.rs
+@@ -137,6 +137,7 @@ async fn exec_command_with_tty(
+     let process_started_alive = !process.has_exited() && process.exit_code().is_none();
+     if process_started_alive {
+         let entry = ProcessEntry {
++            causal_root_turn_id: turn.root_turn_id(),
+             process: Arc::clone(&process),
+             plugin_metrics_sidecar: None,
+             call_id: context.call_id.clone(),
+@@ -609,6 +610,7 @@ async fn terminating_initial_exec_command_rechecks_initial_response_state() -> a
+     manager.process_store.lock().await.processes.insert(
+         process_id,
+         ProcessEntry {
++            causal_root_turn_id: turn.root_turn_id(),
+             process,
+             plugin_metrics_sidecar: None,
+             call_id: "call".to_string(),
+@@ -699,6 +701,7 @@ async fn terminating_during_stdin_poll_returns_exited_response(
+     manager.process_store.lock().await.processes.insert(
+         process_id,
+         ProcessEntry {
++            causal_root_turn_id: turn.root_turn_id(),
+             process: Arc::clone(&process),
+             plugin_metrics_sidecar: None,
+             call_id: "call".to_string(),
+diff --git a/codex-rs/core/src/unified_exec/process_manager.rs b/codex-rs/core/src/unified_exec/process_manager.rs
+index 9715d1b1a8..09bf876205 100644
+--- a/codex-rs/core/src/unified_exec/process_manager.rs
++++ b/codex-rs/core/src/unified_exec/process_manager.rs
+@@ -540,6 +540,29 @@ impl UnifiedExecProcessManager {
+         context: &UnifiedExecContext,
+         mut completion: Option<&mut Completion<'_>>,
+     ) -> Result<ExecCommandToolOutput, UnifiedExecError> {
++        let governor_root = context.step_context.turn.root_turn_id();
++        let governor_gate = match self.governor_exec_gate(&governor_root) {
++            Ok(gate) => gate,
++            Err(error) => {
++                self.release_process_id(request.process_id).await;
++                return Err(error);
++            }
++        };
++        let mut governor_admission = super::GovernorExecAdmission {
++            gate: &governor_gate,
++            _permit: governor_gate.admission.read().await,
++            completed: false,
++        };
++        if crate::governor_guard::guards_for_root(context.session.thread_id, &governor_root)
++            .iter()
++            .any(|guard| guard.token.is_cancelled())
++        {
++            governor_admission.completed = true;
++            self.release_process_id(request.process_id).await;
++            return Err(UnifiedExecError::process_failed(
++                "Native governor task scope expired before command startup".into(),
++            ));
++        }
+         let prepared = &request.prepared;
+         let command = &prepared.resolved.command;
+         let cwd = prepared.cwd.clone();
+@@ -548,6 +571,10 @@ impl UnifiedExecProcessManager {
+         let (attempt, mut deferred_network_approval) = match process {
+             Ok((attempt, deferred_network_approval)) => (attempt, deferred_network_approval),
+             Err(err) => {
++                governor_admission.completed = !matches!(
++                    &err,
++                    UnifiedExecError::CreateProcess { .. } | UnifiedExecError::ProcessFailed { .. }
++                );
+                 self.release_process_id(request.process_id).await;
+                 return Err(err);
+             }
+@@ -644,10 +671,14 @@ impl UnifiedExecProcessManager {
+                 initial_exec_command_guard.metrics_sidecar.take(),
+                 Arc::clone(&output_buffer),
+                 Arc::clone(&initial_exec_command_active),
++                &mut governor_admission,
+             )
+             .await;
+         }
+ 
++        governor_admission.completed = true;
++        drop(governor_admission);
++
+         let yield_time_ms = clamp_yield_time(prepared.yield_time_ms);
+         // For the initial exec_command call, we both stream output to events
+         // (via start_streaming_output above) and collect a snapshot here for
+@@ -1263,11 +1294,13 @@ impl UnifiedExecProcessManager {
+         metrics_sidecar: Option<PluginMetricsSidecar>,
+         output_buffer: Arc<tokio::sync::Mutex<OutputBuffers>>,
+         initial_exec_command_active: Arc<AtomicBool>,
++        governor_admission: &mut super::GovernorExecAdmission<'_>,
+     ) {
+         let plugin_metrics_sidecar =
+             metrics_sidecar.map(|sidecar| Arc::new(std::sync::Mutex::new(Some(sidecar))));
+         let entry = ProcessEntry {
+             process: Arc::clone(&process),
++            causal_root_turn_id: context.step_context.turn.root_turn_id(),
+             plugin_metrics_sidecar: plugin_metrics_sidecar.clone(),
+             call_id: context.call_id.clone(),
+             process_id,
+@@ -1285,6 +1318,7 @@ impl UnifiedExecProcessManager {
+             let mut store = self.process_store.lock().await;
+             let pruned_entry = Self::prune_processes_if_needed(&mut store);
+             store.processes.insert(process_id, entry);
++            governor_admission.completed = true;
+             pruned_entry
+         };
+         spawn_exit_watcher(
+@@ -1800,6 +1834,91 @@ impl UnifiedExecProcessManager {
+             .map(|(process_id, _, _)| process_id)
+     }
+ 
++    fn governor_exec_gate(
++        &self,
++        root: &str,
++    ) -> Result<Arc<super::GovernorExecGate>, UnifiedExecError> {
++        let mut gates = self
++            .governor_exec_gates
++            .lock()
++            .unwrap_or_else(std::sync::PoisonError::into_inner);
++        gates.retain(|_, gate| {
++            Arc::strong_count(gate) > 1 || gate.uncertain.load(std::sync::atomic::Ordering::Acquire)
++        });
++        if let Some(gate) = gates.get(root) {
++            return Ok(Arc::clone(gate));
++        }
++        if gates.len() >= 8192 {
++            return Err(UnifiedExecError::process_failed(
++                "Native governor execution admission capacity reached".into(),
++            ));
++        }
++        let gate = Arc::new(super::GovernorExecGate::default());
++        gates.insert(root.to_owned(), Arc::clone(&gate));
++        Ok(gate)
++    }
++
++    pub(crate) async fn terminate_governor_execs(
++        &self,
++        thread_id: codex_protocol::ThreadId,
++        guard_ids: &std::collections::HashSet<String>,
++    ) -> bool {
++        let mut roots: std::collections::HashSet<String> = {
++            let store = self.process_store.lock().await;
++            store
++                .processes
++                .values()
++                .map(|entry| entry.causal_root_turn_id.clone())
++                .collect()
++        };
++        roots.extend(
++            self.governor_exec_gates
++                .lock()
++                .unwrap_or_else(std::sync::PoisonError::into_inner)
++                .keys()
++                .cloned(),
++        );
++        roots.retain(|root| {
++            crate::governor_guard::guards_for_root(thread_id, root)
++                .iter()
++                .any(|guard| guard_ids.contains(&guard.id))
++        });
++        let stops = roots.into_iter().map(|root| async move {
++            let Ok(gate) = self.governor_exec_gate(&root) else {
++                return false;
++            };
++            // A start admitted before cancellation must publish its handle (or
++            // latch uncertainty) before this exact root can be verified stopped.
++            let _admission = gate.admission.write().await;
++            let processes = {
++                let store = self.process_store.lock().await;
++                store
++                    .processes
++                    .values()
++                    .filter(|entry| entry.causal_root_turn_id == root)
++                    .map(|entry| (entry.process_id, Arc::clone(&entry.process)))
++                    .collect::<Vec<_>>()
++            };
++            let verified = futures::future::join_all(processes.into_iter().map(
++                |(process_id, process)| async move {
++                    if process.terminate_confirmed().await.is_err() {
++                        return false;
++                    }
++                    self.release_process(process_id, Some(&process)).await;
++                    true
++                },
++            ))
++            .await
++            .into_iter()
++            .all(|verified| verified);
++            verified && !gate.uncertain.load(std::sync::atomic::Ordering::Acquire)
++        });
++        futures::future::join_all(stops)
++            .await
++            .into_iter()
++            .all(|verified| verified)
++    }
++
+     pub(crate) async fn terminate_all_processes(&self) {
+         let entries: Vec<ProcessEntry> = {
+             let mut processes = self.process_store.lock().await;
+diff --git a/codex-rs/core/src/unified_exec/process_manager_tests.rs b/codex-rs/core/src/unified_exec/process_manager_tests.rs
+index f17801b2fa..cb0e980fb3 100644
+--- a/codex-rs/core/src/unified_exec/process_manager_tests.rs
++++ b/codex-rs/core/src/unified_exec/process_manager_tests.rs
+@@ -629,6 +629,7 @@ async fn pruning_does_not_evict_live_process_while_exited_process_is_finalizing(
+         store.processes.insert(
+             process_id,
+             ProcessEntry {
++                causal_root_turn_id: format!("test-root-{process_id}"),
+                 process: if is_exited {
+                     Arc::clone(&exited_process)
+                 } else {
 diff --git a/codex-rs/ext/goal/src/accounting.rs b/codex-rs/ext/goal/src/accounting.rs
 index e338a563fa..048c6b9a12 100644
 --- a/codex-rs/ext/goal/src/accounting.rs
