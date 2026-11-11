@@ -81,3 +81,5 @@ Both patches are retained: `governor-ui.patch` applies to the preserved native16
 base; `full-native-0167.patch` reconstructs the complete native source from the
 upstream revision in the manifest. Only disposable qualification may run the new
 package; working-account installation and restart are separate gates.
+
+Package-v3 (`bd519d5232aef6f55a4a665cd0c7461ec5b223f9`, entrypoint `1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa`) additionally pauses the exact captured blocked goal. The zero-POST actual RPC probe `/tmp/p220blocked2/receipt.json` passed in 2.502s: captured goal paused, peer preserved, no task started, owned native cleaned up. Full managed UI/cold-resume acceptance remains pending; all prior packages/failures retained.

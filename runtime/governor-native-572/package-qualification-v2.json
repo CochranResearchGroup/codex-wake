@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-11T20:09:47.834078+00:00",
+  "package": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-v2",
+  "native_source_commit": "e18bde9a112504665d4503dc658204af65092523",
+  "native_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "lockfile_sha256": "8ce6e8ba6f35054304773c1decd50c1d960d6eeb911a549fec3e4a22dbcb9863",
+  "entrypoint_sha256": "80c8ad9fd5b12c4588e51d29722930f51770fcf0dffb8edfca2c773455c1e942",
+  "version": "codex-cli 0.167.0",
+  "reused_helpers": {
+    "bin/codex-exec-server": {
+      "sha256": "9abfcd38bde7eb2d4003ee70940bc706cb760dab9d17b85e593fdeeb2baf81e4",
+      "source": "/home/ecochran76/.local/state/codex-wake/native-modern-0167/package/bin/codex-exec-server",
+      "source_and_package_match": true
+    },
+    "bin/codex-code-mode-host": {
+      "sha256": "a558a3c99756e075a9de90fdbb8f6cc09af526e16c3b736ee8a340d67041f2f0",
+      "source": "/home/ecochran76/.local/state/codex-wake/native-modern-0167/package/bin/codex-code-mode-host",
+      "source_and_package_match": true
+    },
+    "codex-resources/bwrap": {
+      "sha256": "251e9e9ad727583d379a252d36ecd1c55c4c1e5375d876a64324b45ca2bcc64f",
+      "source": "/home/ecochran76/.local/state/codex-wake/native-modern-0167/package/codex-resources/bwrap",
+      "source_and_package_match": true
+    },
+    "codex-path/rg": {
+      "sha256": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+      "source": "/home/ecochran76/.local/state/codex-wake/native-modern-0167/package/codex-path/rg",
+      "source_and_package_match": true
+    }
+  },
+  "preserved_baseline_entrypoint_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+  "inventory": {
+    "bin/codex": {
+      "sha256": "80c8ad9fd5b12c4588e51d29722930f51770fcf0dffb8edfca2c773455c1e942",
+      "bytes": 447094728
+    },
+    "bin/codex-code-mode-host": {
+      "sha256": "a558a3c99756e075a9de90fdbb8f6cc09af526e16c3b736ee8a340d67041f2f0",
+      "bytes": 108217320
+    },
+    "bin/codex-exec-server": {
+      "sha256": "9abfcd38bde7eb2d4003ee70940bc706cb760dab9d17b85e593fdeeb2baf81e4",
+      "bytes": 166089104
+    },
+    "codex-package.json": {
+      "sha256": "64a6c8f7bc146a94e9af84915c6a08d5457d58b5936f825894bbb8e6b1be8133",
+      "bytes": 245
+    },
+    "codex-path/rg": {
+      "sha256": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+      "bytes": 5408904
+    },
+    "codex-resources/bwrap": {
+      "sha256": "251e9e9ad727583d379a252d36ecd1c55c4c1e5375d876a64324b45ca2bcc64f",
+      "bytes": 434808
+    }
+  },
+  "build_receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build-v2/job-20261111T195841Z-7239e953424a/20261111T195841Z-a75fe9221b10/receipt.json",
+  "qualification": "production build,canonical assembly,inventory,version,clean source PASS; actual live-process regression and installed UI pending",
+  "production_install": false,
+  "previous_package": {
+    "path": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package",
+    "source_commit": "a9a992a6ed5661b2211806e1c9137680d083f15e",
+    "entrypoint_sha256": "9c8390d120afc046b63a8cf95f82922c297fd59745814fa66fbbc9a2ef3f5585",
+    "runtime_status": "unqualified: actual native turn interruption left task-owned sleep processes live while stopVerified was true"
+  }
+}
