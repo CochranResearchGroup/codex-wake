@@ -1,0 +1,26 @@
+{
+  "package": "/tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/__init__.py",
+  "uid": 1017,
+  "checks": [
+    "installed CLI tier controls and readable status",
+    "actual installed stdio MCP schema and monitor status",
+    "authenticated HTTP independent tier start/status/stop and anonymous refusal",
+    "actual OAuth MCP schema independent tier start/status/stop",
+    "stopped synthetic cached100-row payload exceeds256KiB with complete four-surface reads; not live tab acceptance"
+  ],
+  "production_effects": false,
+  "synthetic_cached_transport_size": {
+    "rows": 100,
+    "bytes": 329179,
+    "live_tabs": false,
+    "stale": true,
+    "surfaces": [
+      "CLI",
+      "stdio MCP",
+      "authenticated API",
+      "OAuth MCP"
+    ],
+    "complete_markers": true
+  },
+  "status": "passed"
+}
