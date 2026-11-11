@@ -1,0 +1,61 @@
+{
+  "status": "IN_PROGRESS_NATIVE_INSTALLED_JOURNEYS_PENDING",
+  "ticket": 574,
+  "working_deployment": false,
+  "hosted_ci": false,
+  "python": {
+    "build_source_commit": "7064f62b8505122fd86cff0a004d6f188955febc",
+    "wheel_sha256": "d8a3f0bd0fcd1768b7c1080a85c736520c5a410639f0dbf17f3ea0d070cce48f",
+    "package_members": 323,
+    "source_wheel_installed_equal": true,
+    "prefix": "/tmp/wake-governor-p220-2dac7qs6/venv",
+    "version": "0.22.0.dev8",
+    "runtime_python": "3.12.3",
+    "builder": "uv0.11.1 / setuptools84.2.1",
+    "build_environment": {
+      "SOURCE_DATE_EPOCH": "1794420935",
+      "PYTHONHASHSEED": "0"
+    },
+    "dependency_versions_equal_working": 31,
+    "installed_surface_tests": {
+      "count": 9,
+      "seconds": 1.056,
+      "result": "PASS",
+      "command": "sudo -n -u codex-daemon-test env PYTHONPATH=/tmp/wake-governor-p220-2dac7qs6/source/tests /tmp/wake-governor-p220-2dac7qs6/venv/bin/python -m unittest test_governor_commands test_command_parity"
+    }
+  },
+  "backend": {
+    "source": "bd8848b05c49b75029f0b83e1a01720bd81e4b6a",
+    "governor_tests": {
+      "python3.11": {
+        "passed": 16,
+        "seconds": 19.167
+      },
+      "python3.12": {
+        "passed": 16,
+        "seconds": 18.802
+      }
+    },
+    "affected_tests": {
+      "passed": 77,
+      "seconds": 79.741,
+      "command": "PYTHONPATH=src:tests /tmp/wake216-py312/bin/python -m unittest test_governor test_self_limits test_goal_renewal test_governor_deactivation test_goal_supervision -q"
+    }
+  },
+  "native": {
+    "focused_test_source": "896bec2571175a9b166a4581c4be84a74861820c",
+    "focused_tests": {
+      "passed": 6,
+      "core": 2,
+      "tui": 4,
+      "app_server": 0,
+      "build_and_run_seconds": 1861.933
+    },
+    "focused_test_receipt": "~/.local/state/codex-wake/governor-native-572/tests/job-20261111T175549Z-52257fc6648e/20261111T175550Z-5387c2ca5edb/receipt.json",
+    "later_source_delta": "App-server-only release linearization plus generated protocol artifacts; Core/TUI unchanged. Installed effects not yet qualified.",
+    "final_package_source": "a9a992a6ed",
+    "package_build_job": "~/.local/state/codex-wake/governor-native-572/package-build/job-20261111T183940Z-ad8823c91b46",
+    "package_status": "RUNNING"
+  },
+  "environment_differences": "Local WSL shared kernel under separate real Linux test user UID1017. Runtime Python3.12.3; source matrix uses3.12.13 and3.11. Hosted GitHub CI skipped by operator cost policy. Local Responses fixtures are synthetic accounting evidence, not provider billing."
+}
