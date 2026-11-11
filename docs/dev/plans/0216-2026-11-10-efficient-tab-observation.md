@@ -11,7 +11,7 @@ Scope: approved specification and seven implementation tickets; initial delivery
 PR551 merged6f95f90 after main CLI reconciliation and exact315member installed
 qualification. During authorized activation, live title changes exposed formatting
 CLI pin races; issue552/PR553 fixed only title-sensitive formatting pins with real
-red/green process-birth-fenced regressions. Final0.22.0.dev4 sourcebfc1bbce is
+red/green process-birth-fenced regressions. Latest spacing tweak #555/PR556 deploys0.22.0.dev5 source18f1e73, which is
 deployed,315installed members match qualified wheel; nine launchers/completion,
 sevenaccounts,tenprotectedfiles and27nativeprocesses preserved.
 

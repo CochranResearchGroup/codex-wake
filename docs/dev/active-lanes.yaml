@@ -1244,7 +1244,7 @@ lanes:
     dependencies: []
     overlaps: [P211, P213, P215]
     updated_at: 2026-11-10
-    disposition: PR551 and operational PR553 merged; dev4 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
+    disposition: PR551/553/556 merged; dev5 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
 
   - id: P216-544
     owner: ecochran76 / native542
@@ -1258,7 +1258,7 @@ lanes:
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: PR551 and operational PR553 merged; dev4 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
+    disposition: PR551/553/556 merged; dev5 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
 
   - id: P216-545
     owner: ecochran76 / checks545
@@ -1272,7 +1272,7 @@ lanes:
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: PR551 and operational PR553 merged; dev4 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
+    disposition: PR551/553/556 merged; dev5 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
 
   - id: P216-546
     owner: primary / delegated serialization546
@@ -1286,4 +1286,4 @@ lanes:
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: PR551 and operational PR553 merged; dev4 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
+    disposition: PR551/553/556 merged; dev5 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained

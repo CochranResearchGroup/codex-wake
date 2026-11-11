@@ -56,13 +56,18 @@
   "qualification_receipt": "qualification547/accepted-eighth.md",
   "memory_disposition": "forbidden",
   "pull_request": "https://github.com/CochranResearchGroup/codex-wake/pull/551",
-  "deployed_source": "bfc1bbce76728b787a716d021fd3d9ac7f0674a4",
-  "deployed_version": "0.22.0.dev4",
+  "deployed_source": "18f1e7393eb137c1f48b82971f1043f1fb7b56fe",
+  "deployed_version": "0.22.0.dev5",
   "activation": "enabled",
   "deployment_receipt": "deployment.json",
   "operational_followup": {
     "issue": 552,
     "pr": 553,
+    "status": "closed and deployed"
+  },
+  "compact_cue_followup": {
+    "issue": 555,
+    "pr": 556,
     "status": "closed and deployed"
   }
 }
