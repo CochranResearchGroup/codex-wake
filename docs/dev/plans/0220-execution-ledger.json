@@ -16,13 +16,13 @@
         "503b0659",
         "c4f8a704",
         "6068aaa7",
-        "cc64666a"
+        "cc64666a",
+        "bd8848b0"
       ],
       "remaining": [
-        "Final guarded-start, advisory continuation and expiry reconciliation addon",
-        "Exact installed abrupt watcher-loss and descendant containment proof"
+        "Exact installed native goal-less/delegated stop and resume proof"
       ],
-      "validation": "71affectedbackendtestsPASS64.299sPython3.12;governor10PASS13.135sPython3.11; integration8transport/contractchecksPASS."
+      "validation": "Exact bd8848b0: governor16 PASS Python3.11 19.167s and3.12 18.802s; affected3.12 governor/self_limits/goal_renewal/deactivation/supervision77 PASS79.741s. Integrated9fb28fc6; packaged modules unchanged in7064f62b."
     },
     {
       "id": 572,
@@ -74,7 +74,7 @@
   ],
   "contract_revision": 3,
   "operator_admission": "opaque local_operator_principal(); native model Principal(thread) after verified_native_caller; OAuth owner+admin+exact thread grant only for loosen actions",
-  "integration_tip": "3ac695e9",
+  "integration_tip": "09508486",
   "package_candidate_version": "0.22.0.dev8",
   "review_fixed_point_confirmation": "Asked operator via async input per code-review skill; response pending. Does not block implementation.",
   "native_cache": "Prior release cleanup reclaimed18GB; cachepathretainedbutcompiledobjectsabsent; currentnativecompilecold. Same toolchain/profile/target; keepresultingcache.",
@@ -84,7 +84,12 @@
     "root": "/tmp/wake-governor-p220-2dac7qs6",
     "python": "3.12.3",
     "dependencies": "Pinned to working dev7 constraints; installed successfully",
-    "wheel_installed": false,
-    "working_deployment": false
+    "wheel_installed": true,
+    "working_deployment": false,
+    "wheel_source_commit": "7064f62b8505122fd86cff0a004d6f188955febc",
+    "wheel_sha256": "d8a3f0bd0fcd1768b7c1080a85c736520c5a410639f0dbf17f3ea0d070cce48f",
+    "source_wheel_installed_members_equal": 323,
+    "dependency_versions_equal_working": 31,
+    "installed_surface_tests": "9PASS1.056s"
   }
 }

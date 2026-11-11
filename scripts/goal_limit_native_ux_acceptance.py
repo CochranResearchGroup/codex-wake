@@ -921,6 +921,44 @@ def qualify(options):
                     'abrupt watcher loss did not pause native task')
             require(model_start_snapshot()['model_turn_ids'] == starts_before_loss['model_turn_ids'],
                     'reconnect/reactivation/watcher loss started inference')
+            if options.managed_launcher:
+                guard = governor('status')['watcher']['native_guard']
+                old_native_pid = native.pid
+                tmux('kill-session', '-t', 'ux')
+                os.killpg(old_native_pid, signal.SIGKILL)
+                native.wait(timeout=5)
+                native = None
+                attach('', thread)
+                def replacement_peer():
+                    try:
+                        physical = alias.resolve(strict=True)
+                        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+                            connection.settimeout(1)
+                            connection.connect(str(physical))
+                            pid, uid, _ = struct.unpack('3i', connection.getsockopt(
+                                socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
+                        if pid != old_native_pid and uid == os.geteuid():
+                            return pid, 'unix://' + str(physical)
+                    except (OSError, RuntimeError):
+                        return None
+                replacement_pid, endpoint = wait(replacement_peer, 'managed native restart', 25)
+                require(digest(Path('/proc', str(replacement_pid), 'exe')) == options.app_server_sha256,
+                        'restarted native executable differs')
+                native = ObservedDaemon(replacement_pid)
+                rpc('thread/resume', dict(threadId=thread, approvalPolicy='never', sandbox='read-only'))
+                recovered = rpc('thread/governorLease/set', dict(threadId=thread,
+                    leaseId=guard['lease_id'], controllerGeneration=guard['controller_generation'],
+                    enrollmentRevision=guard['enrollment_revision'], query=True))
+                require(all(recovered.get(key) is value for key, value in dict(
+                    supported=True, armed=False, expired=True, stopVerified=False,
+                    releaseVerified=False).items()), 'recovered lease claimed fresh enforcement or stop proof')
+                require(rpc('thread/goal/get', dict(threadId=thread))['goal']['status'] == 'paused',
+                        'cold resume unpaused the guarded task')
+                require(model_start_snapshot()['model_turn_ids'] == starts_before_loss['model_turn_ids'],
+                        'native restart admitted automatic model work')
+                report['native_cold_resume'] = dict(old_pid=old_native_pid,
+                    replacement_pid=replacement_pid, recovered_lease=recovered,
+                    paused=True, no_automatic_model_turn=True)
             require(rpc('thread/goal/get', dict(threadId=peer))['goal'] == peer_goal,
                     'governor UI changed unrelated task')
             require(len(calls) <= 3, 'governor UI localhost request cap exceeded')
