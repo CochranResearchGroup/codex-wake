@@ -26,3 +26,11 @@ regression/surfaces remain pending. New version
 0.22.0.dev4 distinguishes this operational fix. The prior resource gate is carried
 only for unchanged observer hot paths, not a newly measured dev4 CPU claim.
 No additional broad review or original-plan TDD counter reset is performed.
+
+Primary bounded fix review: presentation_target copies snapshot containers without
+mutating adapter state and excludes only pane_title. Both target-read and
+formatting-dispatch paths use it; local journal admission now resolves that same
+format target. All general lifecycle/input pins and exact process birth checks
+remain unchanged. The real respawn regression proves refusal before restoration.
+No additional source finding remains. Format clients must refresh status/inspect
+targets after upgrade. Compileall and diffcheck also pass.
