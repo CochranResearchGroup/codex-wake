@@ -1,0 +1,32 @@
+{
+  "issue": 563,
+  "parent": 526,
+  "branch": "fix/stable-tab-operation-identities",
+  "status": "qualifying",
+  "scope": [
+    "stable metadata-independent reorder comparisons",
+    "transfer and lost-reply/undo compatibility",
+    "populated delete and dedicated stable lifecycle target",
+    "strict input/capture target unchanged"
+  ],
+  "seams": [
+    "TabOrganization preview/apply/undo over real tmux",
+    "TerminalRelocation preview/apply/status/undo over real tmux",
+    "ControllerTabs session deletion",
+    "TabLifecycle/ControllerTabs strict and lifecycle target comparison"
+  ],
+  "constraints": [
+    "no production layout/session changes",
+    "preserve legacy retained records",
+    "no blind replay",
+    "Python3.11/3.12 local checks",
+    "no hosted CI"
+  ],
+  "pending_question": "whether saved groups follow tabs across session moves",
+  "merge_authorized": true,
+  "deploy_authorized": true,
+  "live_layout_mutations_authorized": false,
+  "authorization": "Standing operator instruction to review/merge/deploy; current go authorizes this hardening repair. Live moves/deletes remain excluded.",
+  "fixed_base": "b6e93c2dada4eae08a869d569b5036defd2eaf39",
+  "source_validation": "117 affected checks eachPython plus30additionalcaller checks eachPython, newguards passed"
+}

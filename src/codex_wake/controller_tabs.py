@@ -5,6 +5,8 @@ connections; fallback is visible and separately selected for each request.
 """
 import time
 
+from .tab_identity import stable_snapshot
+
 from .managed_inventory import InventoryError
 from .tab_organization import TabOrganization, TabError, digest
 
@@ -131,6 +133,7 @@ class ControllerTabs:
                 raise InventoryError('attachment_unavailable', 'host presentation observation failed') from error
             target = dict(host=self.host, environment=self.environment, workspace=name,
                           presentation=config['kind'], generation=digest(snapshot))
+            lifecycle_target=dict(target,generation=digest(stable_snapshot(snapshot)))
             observation = None
             if operation in self.READS:
                 initial, rows = self.observation_cache.observe(
@@ -157,7 +160,8 @@ class ControllerTabs:
                 for w in windows:
                     observed, rows = observation
                     evidence = observed[w['window_id']]
-                    resources.append(dict(target=target,window=w,input_custody=custody,
+                    resources.append(dict(target=target,lifecycle_target=lifecycle_target,
+                                          window=w,input_custody=custody,
                                           traits=evidence,runtime_identity='unverified',fallback='explicit_only',
                                           observation_holds=rows['holds'],workspace_label=config.get('label',name)))
                 continue

@@ -83,6 +83,20 @@ operation retains the session and its outcomes. Confirmed deletion disables rule
 targeting that saved identity; name reuse does not reactivate them. Retain the
 plan ID to reconcile uncertain deletion.
 
+## Stable tab identities
+
+Reorder plans and transfer receipts retain original observations, but changing a
+pane title, foreground-command hint or current directory alone does not replace a
+tab. Namespace, window/pane roster and process births remain fenced. Ordering
+also checks focus, pins, bindings, repository and the chosen activity/trait facts;
+a relevant change still requires a new preview. Undo preserves later manual moves.
+
+For direct tab lifecycle API/MCP mutations, use the resource's `lifecycle_target`
+from `tabs.list`/`tabs.show`. It remains valid across those incidental pane metadata
+updates. The ordinary `target` stays strict for input/capture. Local CLI resolves
+the appropriate pin automatically. Fresh legacy lifecycle targets remain accepted;
+retained version-one plans and receipts are read without rewriting their history.
+
 ## Transport and qualification boundaries
 
 WSL-hosted tmux/Byobu supports same-server whole-tab relocation. Native psmux

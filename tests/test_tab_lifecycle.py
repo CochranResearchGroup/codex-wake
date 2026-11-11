@@ -60,6 +60,23 @@ class TabLifecycleTests(unittest.TestCase):
         self.assertEqual(history.read_text(), 'existing synthetic conversation')
         self.assertEqual(history.stat().st_ino, inode)
 
+    def test_lifecycle_pins_ignore_titles_but_input_pins_and_birth_guards_stay_exact(self):
+        from codex_wake.controller_tabs import ControllerTabs
+        tabs=ControllerTabs(self.root,workspaces=self.workspaces,host='test',environment='posix')
+        first=next(r for r in tabs.execute('tabs.list',{})['resources'] if r['target']['workspace']=='source')
+        self.tmux('select-pane','-t','@0','-T','live turn updated')
+        second=next(r for r in tabs.execute('tabs.list',{})['resources'] if r['target']['workspace']=='source')
+        self.assertNotEqual(first['target'],second['target'])
+        self.assertEqual(first['lifecycle_target'],second['lifecycle_target'])
+        owner=self.owner()
+        result=owner.execute('tabs.rename',dict(workspace='source',window='@0',name='same process',expected_target=first['lifecycle_target']))
+        self.assertEqual(result['status'],'applied')
+        pinned=owner.inspect('source')['target']
+        self.tmux('respawn-pane','-k','-t','@0','sleep 120')
+        with self.assertRaises(InventoryError) as held:
+            owner.execute('tabs.close',dict(workspace='source',window='@0',expected_target=pinned,force=True))
+        self.assertEqual(held.exception.code,'stale_target')
+
     def test_stale_create_and_collision_refuse_before_new_windows(self):
         owner = self.owner()
         stale = owner.inspect('source')['target']

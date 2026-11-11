@@ -13,6 +13,7 @@ import uuid
 from .managed_inventory import InventoryError
 from .process import process_identity
 from .tab_organization import TabOrganization, digest
+from .tab_identity import stable_snapshot, stable_panes
 
 
 class TabLifecycle:
@@ -55,7 +56,7 @@ class TabLifecycle:
                 for pane in window['panes']:
                     pane['process_generation'] = process_identity(pane['pid'])
         target = dict(host=self.host, environment=self.environment, workspace=workspace,
-                      presentation=config['kind'], generation=digest(snapshot))
+                      presentation=config['kind'], generation=digest(stable_snapshot(snapshot)))
         return dict(target=target, snapshot=snapshot)
 
     @staticmethod
@@ -141,7 +142,8 @@ class TabLifecycle:
     def _execute(self, operation, args, deadline):
         workspace = args.get('workspace')
         before = self.inspect(workspace, deadline=deadline)
-        if args.get('expected_target') != before['target']:
+        legacy_target=dict(before['target'],generation=digest(before['snapshot']))
+        if args.get('expected_target') not in (before['target'],legacy_target):
             raise InventoryError('stale_target', 'exact current workspace generation required')
         config = self.workspaces[workspace]
         transport = config['transport']
@@ -192,7 +194,7 @@ class TabLifecycle:
                         or original.get('window', {}).get('window_id') != window['window_id']):
                     raise InventoryError('stale_target', 'parking receipt does not identify this exact source and original destination')
                 original_panes = original['window']['panes']
-                if original_panes != window['panes']:
+                if stable_panes(original_panes) != stable_panes(window['panes']):
                     raise InventoryError('stale_target', 'parked native pane/process generation changed')
                 index = original['window']['index']
             self._collision(after_destination['snapshot'], name, index=index)
@@ -274,7 +276,7 @@ class TabLifecycle:
             observed = None if operation == 'tabs.close' else self._window(after['snapshot'], wid)
             if operation == 'tabs.close' and any(w['window_id'] == wid for w in after['snapshot']['windows']):
                 raise InventoryError('effect_uncertain', 'closed tab remains present')
-            if window and observed and observed['panes'] != window['panes']:
+            if window and observed and stable_panes(observed['panes']) != stable_panes(window['panes']):
                 raise InventoryError('effect_uncertain', 'native pane/process identity changed')
             if operation == 'tabs.rename' and observed['name'] != name:
                 raise InventoryError('effect_uncertain', 'renamed tab was not observed')

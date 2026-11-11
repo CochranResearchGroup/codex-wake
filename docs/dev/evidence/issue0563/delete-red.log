@@ -1,0 +1,16 @@
+F
+======================================================================
+FAIL: test_changing_titles_do_not_prevent_explicit_termination (test_terminal_session_delete.SessionDeleteTests.test_changing_titles_do_not_prevent_explicit_termination)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/codex-wake-deploy-551/tests/test_terminal_session_delete.py", line 69, in test_changing_titles_do_not_prevent_explicit_termination
+    self.assertEqual(result['status'],'deleted',result)
+AssertionError: 'partial' != 'deleted'
+- partial
++ deleted
+ : {'version': 1, 'plan_id': 'delete_99dd0927983d4be7bc27a43cbf17ba59', 'source': {'id': 'session-4903e790ea394f62bf0259d2521c6039', 'name': 'source', 'backend': 'tmux', 'server': '/tmp/wake-delete-zll4px3l/terminal-sessions/tmux.sock', 'labels': [], 'defaults': {}, 'description': '', 'created_at': 1794371848.0225794, 'native_session_id': '$0', 'native_key': '5bea4a4d52556a2e16c6fd5f45093357ff0e55f63d91afe3c2a6bae65f902146', 'health_summary': {'counts': {'unknown': 1}, 'tab_count': 1, 'freshness': 'unknown', 'stale_tabs': 0}, 'activity_summary': {'counts': {'unknown': 1}, 'tab_count': 1, 'freshness': 'unknown', 'stale_tabs': 0}, 'error_summary': {'counts': {'unknown': 1}, 'tab_count': 1, 'freshness': 'unknown', 'stale_tabs': 0}, 'deletion_plan': 'delete_99dd0927983d4be7bc27a43cbf17ba59'}, 'mode': 'terminate', 'destination': None, 'status': 'partial', 'outcomes': [{'birth': {'identity': 'fb630ba3524200074dfb5e61eb4c44250fa6048861e1bf554afbfefe639921b7', 'window_id': '@0', 'panes': [{'pane_id': '%0', 'pid': 1166651, 'pane_tty': '/dev/pts/10', 'process_generation': {'start_time_ticks': 3922966, 'boot_id': '1f76a1cb-7485-46a3-a887-bd40786479ee'}}]}, 'status': 'uncertain', 'reason': 'stale_target'}], 'created_at': 1794371848.3336697, 'server_birth': {'pid': 1166649, 'process': {'start_time_ticks': 3922965, 'boot_id': '1f76a1cb-7485-46a3-a887-bd40786479ee'}}, 'session': {'id': 'session-4903e790ea394f62bf0259d2521c6039', 'name': 'source', 'backend': 'tmux', 'server': '/tmp/wake-delete-zll4px3l/terminal-sessions/tmux.sock', 'labels': [], 'defaults': {}, 'description': '', 'created_at': 1794371848.0225794, 'native_session_id': '$0', 'native_key': '5bea4a4d52556a2e16c6fd5f45093357ff0e55f63d91afe3c2a6bae65f902146', 'health_summary': {'counts': {'unknown': 1}, 'tab_count': 1, 'freshness': 'unknown', 'stale_tabs': 0}, 'activity_summary': {'counts': {'unknown': 1}, 'tab_count': 1, 'freshness': 'unknown', 'stale_tabs': 0}, 'error_summary': {'counts': {'unknown': 1}, 'tab_count': 1, 'freshness': 'unknown', 'stale_tabs': 0}, 'deletion_plan': 'delete_99dd0927983d4be7bc27a43cbf17ba59', 'workspace': 'session-4903e790ea394f62bf0259d2521c6039', 'state': 'running', 'tab_count': 1, 'managed': True}}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.684s
+
+FAILED (failures=1)

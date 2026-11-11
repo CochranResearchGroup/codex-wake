@@ -31,7 +31,10 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--wheel', type=Path, required=True)
-    parser.add_argument('--windows-python', required=True)
+    platform=parser.add_mutually_exclusive_group(required=True)
+    platform.add_argument('--windows-python')
+    platform.add_argument('--wsl-only', action='store_true',
+        help='Qualify WSL CLI/stdio/API/OAuth only; record Windows as not run.')
     args=parser.parse_args();os.umask(0o077);started=time.monotonic()
     import codex_wake
     prefix=Path(sys.prefix).resolve();package=Path(codex_wake.__file__).resolve().parent
@@ -206,8 +209,11 @@ def main():
                 assert call('tabs.session.delete',dict(session=name,terminate=True))['status']=='deleted'
             for transport in ('api','mcp'):workflow(lambda op,a:remote(transport,op,a),transport)
             checks.append('authenticated-api-oauth-mcp-session-crud-relocation-routing-parity')
-            windows=windows_client(args.windows_python,args.wheel,endpoint,token,request,workflow)
-            checks.append('native-powershell-portable-installed-api-mcp-session-crud-relocation-routing-parity')
+            if args.windows_python:
+                windows=windows_client(args.windows_python,args.wheel,endpoint,token,request,workflow)
+                checks.append('native-powershell-portable-installed-api-mcp-session-crud-relocation-routing-parity')
+            else:
+                windows=dict(status='not_run',reason='explicit WSL-only qualification')
             assert births('peer')==peer,'unrelated peer pane/PID changed'
             loaded={name:str(Path(module.__file__).resolve()) for name,module in sys.modules.items() if name.startswith('codex_wake') and getattr(module,'__file__',None)}
             assert all(Path(path).is_relative_to(prefix) for path in loaded.values()),loaded

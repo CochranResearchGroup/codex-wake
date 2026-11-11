@@ -1,6 +1,7 @@
 """Bulk relocation at the public owner seam in disposable private tmux."""
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from codex_wake.controller_tabs import ControllerTabs
@@ -27,8 +28,18 @@ class RelocationTests(unittest.TestCase):
         return self.execute('preview',session='source',destination='destination')
     def test_last_tab_moves_all_panes_without_process_restart_and_retains_empty_source(self):
         self.tmux('split-window','-d','-t','source')
+        self.tmux('respawn-pane','-k','-t','source:0.0','/bin/sh')
         before=self.tmux('list-panes','-s','-t','source','-F','#{pane_id}:#{pane_pid}')
         plan=self.preview()
+        self.tmux('select-pane','-t',plan['outcomes'][0]['birth']['window_id'],'-T','busy turn title')
+        pane=plan['outcomes'][0]['birth']['panes'][0]['pane_id']
+        cwd=self.root/'new-cwd';cwd.mkdir()
+        self.tmux('send-keys','-t',pane,'-l','cd '+str(cwd)+' && sleep 60')
+        self.tmux('send-keys','-t',pane,'Enter')
+        until=time.monotonic()+2
+        while self.tmux('display-message','-p','-t',pane,'#{pane_current_path}:#{pane_current_command}')!=str(cwd)+':sleep':
+            self.assertLess(time.monotonic(),until)
+            time.sleep(.01)
         receipt=self.execute('apply',plan_id=plan['plan_id'])
         self.assertEqual(receipt['status'],'completed')
         self.assertEqual(receipt['outcomes'][0]['status'],'moved')
@@ -41,6 +52,7 @@ class RelocationTests(unittest.TestCase):
         receipt=self.execute('apply',plan_id=plan['plan_id'])
         self.assertEqual(receipt['outcomes'][0]['status'],'moved')
         self.assertEqual(self.tmux('list-windows','-t','destination','-F','#{window_id}').count('\n'),0)
+        self.tmux('select-pane','-t',receipt['outcomes'][0]['birth']['window_id'],'-T','new status before undo')
         undone=self.execute('undo',receipt_id=receipt['receipt_id'])
         self.assertEqual(undone['outcomes'][0]['status'],'undone')
         from codex_wake.terminal_tab_holds import TabHolds
@@ -60,6 +72,7 @@ class RelocationTests(unittest.TestCase):
             return result
         transport.command=lose_reply
         with self.assertRaises(KeyboardInterrupt):self.execute('apply',plan_id=plan['plan_id'])
+        self.tmux('select-pane','-t',plan['outcomes'][0]['birth']['window_id'],'-T','updated after lost reply')
         self.owner=TerminalRelocation(self.root,tabs=self.tabs)
         receipt=self.execute('status',plan_id=plan['plan_id'])
         self.assertEqual(receipt['outcomes'][0]['status'],'moved')
