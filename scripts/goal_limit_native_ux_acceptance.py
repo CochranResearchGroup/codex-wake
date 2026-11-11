@@ -640,6 +640,7 @@ def qualify(options):
                 source="local-qualified", read_schemas=[5], backend="managed")))
             (shared / "builds.json").write_text(json.dumps(write_build))
             env["CODEX_PROFILES_CONFIG"] = str(profiles)
+            env["CODEX_WAKE_ACCOUNTS_CONFIG"] = str(profiles)
             env["CODEX_BUILD_UPDATE_CHECK"] = "0"
             attach("", None)
             wait(lambda: "mock-model" in capture("tui-managed-bootstrap.txt"), "modified launcher usable frontend", 25)
