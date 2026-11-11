@@ -1098,6 +1098,9 @@ def resume_existing(root, policy, thread, *, principal, operation_id):
         if (allocation or receipt).get('governor_enabled', True) is False:
             _fail('renewal_resume_held', 'reactivate the governor before resuming; no resources were renewed')
         authorize(root, 'resume.self', principal)
+        if receipt.get('requires_native_guard'):
+            from .goal_native_guard import qualified
+            if not qualified(receipt):return dict(resumed=False,resume_state='awaiting_first_poll',renewed_resources=False,next_action='Qualify the native task loss guard and fresh watcher before continuing; advisory requires a separate explicit choice.')
         snapshot = _snapshot(root, receipts, allocation)
         task=receipt.get('task_window')
         task_disabled=bool(task and task.get('governor_enabled') is False)

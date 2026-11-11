@@ -193,6 +193,13 @@ def change(
                 if receipt["allocation_id"] != first["allocation_id"]:
                     continue  # historical finalized member, now in another scope
                 receipt.update(state)
+                if receipt.get('requires_native_guard'):
+                    if enabled and changed:
+                        receipt['enrollment_revision']=receipt.get('enrollment_revision',1)+1
+                        receipt.pop('poll_ack',None)
+                    elif not enabled and not task_only:
+                        from .goal_native_guard import release
+                        release(member_path,receipt)
                 if task_only:receipt['task_window']=allocation['members'][task_owner]['task_window']
                 kind = "reactivation" if enabled else "deactivation"
                 # Record/reconcile the same revision notice on an idempotent retry.

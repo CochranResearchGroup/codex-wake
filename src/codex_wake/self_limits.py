@@ -105,7 +105,7 @@ def execute(root, policy, verb, arguments, *, native_context, activation_baselin
     # Enrollment owns lifetime accounting and rejects increases, scope changes,
     # successor renewal and stop clearing under its maintenance/allocation locks.
     prepared = supervision.enroll(root, policy, thread, tokens, seconds,
-        native_context=native_context, session_scope=True, prepare_only=True, activation_baseline=activation_baseline)
+        native_context=native_context, session_scope=True, prepare_only=True, activation_baseline=activation_baseline,requires_native_guard=activation_baseline)
     if prepared.get('state') != 'prepared':
         return prepared
     try:
@@ -118,7 +118,7 @@ def execute(root, policy, verb, arguments, *, native_context, activation_baselin
         return dict(prepared,state='held',reason=setup.get('reason'),watcher_setup=setup,
             engagement=engagement(prepared,supervision._heartbeat(supervision._directory(root))))
     result = supervision.enroll(root, policy, thread, tokens, seconds,
-        native_context=native_context, session_scope=True, activation_baseline=activation_baseline)
+        native_context=native_context, session_scope=True, activation_baseline=activation_baseline,requires_native_guard=activation_baseline)
     end = time.monotonic() + 3
     while True:
         result = supervision.show(root, policy, thread, native_context=native_context)

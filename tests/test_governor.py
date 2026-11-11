@@ -276,6 +276,8 @@ class GovernorTests(unittest.TestCase):
                 self.assertEqual(result['usage']['used_tokens'],0)
                 self.assertEqual(result['usage']['lifetime_used_tokens'],40)
                 self.assertEqual(result['limits']['token_limit'],100)
+                self.assertEqual(result['state'],'disconnected')
+                self.assertEqual(result['reason'],'native_guard_capability_unavailable')
                 response=json.loads(log.read_text().splitlines()[-1])
                 response['payload'].update(response_id='new-response',usage=dict(input_tokens=18,cached_input_tokens=0,output_tokens=2,total_tokens=20))
                 with log.open('a') as stream:stream.write(json.dumps(response)+'\n')
@@ -284,3 +286,64 @@ class GovernorTests(unittest.TestCase):
                 self.assertEqual(current['usage']['lifetime_used_tokens'],60)
                 with patch('codex_wake.local_sessions.resolve',side_effect=AssertionError('enrolled status must use retained exact scope')):
                     self.assertEqual(execute(root,'status',dict(selector=fixtures.THREAD))['usage']['used_tokens'],20)
+
+    def test_native_guard_ack_and_trusted_host_policy_bound_activation(self):
+        import json
+        import time
+        import test_goal_supervision as fixtures
+        from codex_wake.governor import execute, native_principal
+        harness=fixtures.GoalSupervisionTests()
+        self.addCleanup(harness.doCleanups)
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,log,native,request=harness.fixture(directory)
+            log.chmod(0o600)
+            grant=json.loads(policy.read_text())['callers'][fixtures.THREAD]
+            row=dict(thread_id=fixtures.THREAD,endpoint=grant['app_server'],target=dict(home=grant['codex_home'],executable=grant['codex_path']))
+            native['lease_reply']=dict(armed=True,expired=False,stopVerified=False,ttlMs=10000)
+            def native_call(endpoint, executable, method, params, timeout):
+                if method=='thread/goal/get' and native.get('goal_missing'):return {'goal':None}
+                result=request(endpoint,executable,method,params,timeout)
+                if method=='thread/read':result['thread']['path']=str(log)
+                return result
+            actor=native_principal(fixtures.THREAD,policy=policy)
+            with harness.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=fixtures.NOW),patch('codex_wake.local_sessions.resolve',return_value=row),patch('codex_wake.goal_supervision.native_request',side_effect=native_call):
+                with self.assertRaisesRegex(ValueError,'inherited host ceilings'):
+                    execute(root,'activate',dict(selector=fixtures.THREAD,token_limit=1001,time_limit_seconds=120),principal=actor)
+                with self.assertRaisesRegex(ValueError,'local operator'):
+                    execute(root,'activate',dict(selector=fixtures.THREAD,token_limit=100,time_limit_seconds=120,policy='/arbitrary'),principal=actor)
+                result=execute(root,'activate',dict(selector=fixtures.THREAD,token_limit=100,time_limit_seconds=120),principal=actor)
+                until=time.monotonic()+7
+                while result['state']!='enforced':
+                    self.assertLess(time.monotonic(),until,result)
+                    time.sleep(.05)
+                    result=execute(root,'status',dict(selector=fixtures.THREAD),principal=actor)
+                self.assertTrue(result['watcher']['native_guard_qualified'])
+                self.assertEqual(result['limits']['token_limit'],100)
+                self.assertTrue(native['lease_calls'])
+                from codex_wake.goal_supervision import poll
+                response=json.loads(log.read_text().splitlines()[-1])
+                response['payload'].update(response_id='guard-stop-work',usage=dict(input_tokens=118,cached_input_tokens=0,output_tokens=2,total_tokens=120))
+                with log.open('a') as stream:stream.write(json.dumps(response)+'\n')
+                stopping=poll(root)[0]
+                self.assertEqual(stopping['state'],'stop_unverified')
+                self.assertEqual(native['lease_calls'][-1]['ttlMs'],1)
+                native['goal']['status']='paused'
+                native['active']=[]
+                native['lease_reply']=dict(armed=False,expired=True,stopVerified=True,ttlMs=10000)
+                held=poll(root)[0]
+                self.assertEqual(held['state'],'stopped')
+                self.assertTrue(held['stop_proof'])
+                self.assertEqual(held['native_guard']['status'],'expired')
+                native['active']=['operator-reply']
+                poll(root)
+                self.assertEqual(native['active'],['operator-reply'])
+                self.assertEqual(execute(root,'status',dict(selector=fixtures.THREAD),principal=actor)['state'],'limit_reached')
+                native['goal_missing']=True
+                native['active']=[]
+                from codex_wake.governor import local_operator_principal
+                execute(root,'reset',dict(selector=fixtures.THREAD),principal=local_operator_principal())
+                poll(root)
+                idle=execute(root,'status',dict(selector=fixtures.THREAD),principal=actor)
+                self.assertEqual(idle['state'],'disconnected')
+                self.assertEqual(idle['reason'],'idle_session_future_task_isolation_unsupported')
+                self.assertFalse(any(method in ('thread/goal/set','turn/start') for method,_ in native['calls']))

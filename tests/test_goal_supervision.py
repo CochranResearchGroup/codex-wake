@@ -781,6 +781,10 @@ class GoalSupervisionTests(unittest.TestCase):
                 items=selected.get('user_items', [dict(type='userMessage',content=[dict(type='text',text=selected['user_text'])])] if 'user_text' in selected else [])
                 return {'thread':dict(id=params['threadId'],parentThreadId=selected.get('parent_thread_id'),turns=[dict(id=t,status='inProgress',items=items) for t in selected['active']])}
             if method=='thread/turns/list':return dict(data=[dict(id=t,status='inProgress') for t in selected['active']],nextCursor=None)
+            if method=='thread/governorLease/set':
+                if 'lease_reply' not in selected:raise NotImplementedError('fixture native runtime has no governor lease capability')
+                selected.setdefault('lease_calls',[]).append(params)
+                return dict(selected['lease_reply'],leaseId=params['leaseId'])
             if method.startswith('thread/notice/') and 'notices' in selected:
                 notice=selected['notices'].get(params['eventId'])
                 if method=='thread/notice/append':
