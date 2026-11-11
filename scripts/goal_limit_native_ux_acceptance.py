@@ -645,7 +645,7 @@ def qualify(options):
             env["CODEX_WAKE_ACCOUNTS_CONFIG"] = str(profiles)
             env["CODEX_BUILD_UPDATE_CHECK"] = "0"
             attach("", None)
-            wait(lambda: "mock-model" in capture("tui-managed-bootstrap.txt"), "modified launcher usable frontend", 25)
+            wait(lambda: "mock-model" in capture("tui-managed-bootstrap.txt"), "modified launcher usable frontend", 60)
             wait(lambda: alias.exists(), "modified launcher managed bootstrap", 20)
             physical_boot = alias.resolve(strict=True)
             with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:

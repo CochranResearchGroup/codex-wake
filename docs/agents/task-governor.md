@@ -41,7 +41,9 @@ controller root. Explicit isolated roots retain their own state. Model callers
 receive the configured host policy through verified adapter context; it is never
 an argument they can supply to increase authority.
 
-Strict enforcement also requires the matched native guard capability. A watcher
+Strict enforcement requires paginated native history, V2 task isolation and the
+matched native guard capability. Legacy task isolation remains held with an
+explicit unsupported reason. A watcher
 heartbeat alone cannot prove fail-closed behavior after watcher termination. Old
 native builds must report their limitation and offer an explicit advisory choice;
 they must not advertise strict enforcement from backend tests alone.
@@ -53,3 +55,7 @@ on disconnect retain that key to reconcile instead of submitting another intent.
 Unavailable activation or incomplete requested continuation returns a held result
 and nonzero CLI status. Observation can succeed while truthfully reporting that
 no governor is enrolled.
+
+Allowance admission uses the existing qualified host clock.
+`codex-wake time inspect` reports its readiness. Failed clock or native capability
+setup does not begin a task budget window.
