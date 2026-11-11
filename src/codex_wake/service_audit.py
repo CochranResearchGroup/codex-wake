@@ -160,9 +160,27 @@ def inventory(registry_dir: Path) -> dict[str, Any]:
             if not isinstance(entry, dict) or not isinstance(entry.get('wake_root'), str) or not entry['wake_root']:
                 raise ValueError('invalid registration')
             entries.append({'root_id': entry.get('root_id', path.stem), 'wake_root': _canonical(entry['wake_root']),
-                            'enabled': entry.get('enabled') is True, 'interval': entry.get('interval')})
+                            'enabled': entry.get('enabled') is True, 'poll_interval': entry.get('poll_interval'),
+                            '_has_poll_interval': 'poll_interval' in entry})
         except (OSError, ValueError):
             warnings.append(f'Unreadable or malformed registration: {path.name}')
+    matching_supervisors = [service for service in services
+                            if service['active'] == 'active' and service['role'] == 'supervisor'
+                            and service['registry_dir'] == registry]
+    for entry in entries:
+        explicit = entry.pop('_has_poll_interval')
+        values = [entry['poll_interval']] if explicit else [service['interval'] for service in matching_supervisors]
+        intervals = []
+        for value in values:
+            try:
+                interval = float(value) if not isinstance(value, bool) else math.nan
+            except (TypeError, ValueError):
+                interval = math.nan
+            if math.isfinite(interval) and interval > 0:
+                intervals.append(interval)
+        known = bool(values) and len(intervals) == len(values) and len(set(intervals)) == 1
+        entry['interval'] = intervals[0] if known else None
+        entry['interval_source'] = ('registration' if explicit else 'supervisor') if known else 'unknown'
     owners: dict[str, list[str]] = {}
     for service in services:
         if service['active'] != 'active':
@@ -242,6 +260,11 @@ def _render(result: dict[str, Any]) -> str:
              'UNIT  STATE  ROLE  NOTES']
     for row in result['services']:
         lines.append(f"{row['unit']}  {row['active']}  {row['role']}  {', '.join(row['classification']) or '—'}")
+    if result['roots']:
+        lines.append('Registered root cadences:')
+        for row in result['roots']:
+            cadence = 'unknown' if row['interval'] is None else f"{row['interval']:g}s"
+            lines.append(f"  {row['root_id']}: {cadence} ({row['interval_source']})")
     overlaps = result['configured_overlap']
     lines.append(f'Configured polling overlap: {len(overlaps)} root(s). This does not prove duplicate delivery.')
     for row in overlaps:

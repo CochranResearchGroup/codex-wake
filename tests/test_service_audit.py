@@ -49,7 +49,7 @@ if 'list-unit-files' in args:
 elif 'list-units' in args:
  pass
 elif 'show' in args:
- print('Id=codex-wake-supervisor.service\\nActiveState=active\\nUnitFileState=enabled\\nMainPID=100\\nExecStart={ argv[]=codex-wake supervisor run --registry-dir '+%r+' ; ignore_errors=no ; }\\n')
+ print('Id=codex-wake-supervisor.service\\nActiveState=active\\nUnitFileState=enabled\\nMainPID=100\\nExecStart={ argv[]=codex-wake supervisor run --interval 7 --registry-dir '+%r+' ; ignore_errors=no ; }\\n')
  print('Id=codex-wake-repo.service\\nActiveState=active\\nUnitFileState=enabled\\nMainPID=101\\nWorkingDirectory='+%r+'\\nExecStart={ argv[]=codex-waked --wake-root '+%r+' --interval 60 ; ignore_errors=no ; }\\n')
  print('Id=codex-wake-old.service\\nActiveState=inactive\\nUnitFileState=masked\\nMainPID=0\\nWorkingDirectory='+%r+'\\nConditionResult=no\\nExecStart={ argv[]=codex-waked --wake-root '+%r+' ; ignore_errors=no ; }\\n')
 else:
@@ -62,6 +62,8 @@ else:
             result = subprocess.run([*command, '--json'], text=True, capture_output=True, env=env, timeout=10)
             self.assertEqual(result.returncode, 0, result.stderr)
             data = json.loads(result.stdout)
+            self.assertEqual(data['roots'][0]['interval'], 7.0)
+            self.assertEqual(data['roots'][0]['interval_source'], 'supervisor')
             self.assertEqual(data['summary']['definitions'], 3)
             self.assertEqual(data['summary']['active'], 2)
             self.assertEqual(len(data['configured_overlap']), 1)
@@ -87,6 +89,27 @@ else:
             self.assertIn('Configured polling overlap', human.stdout)
             self.assertNotIn('duplicate delivery occurred', human.stdout)
             self.assertEqual(before, sorted(str(p.relative_to(base)) for p in base.rglob('*')))
+            entry_path = registry / 'repo.json'
+            entry = json.loads(entry_path.read_text())
+            entry['poll_interval'] = 60
+            entry['interval'] = 999  # unrelated historical data is not the scheduler contract
+            entry_path.write_text(json.dumps(entry))
+            explicit = subprocess.run([*command, '--json'], text=True, capture_output=True, env=env, timeout=10)
+            self.assertEqual(explicit.returncode, 0, explicit.stderr)
+            explicit_root = json.loads(explicit.stdout)['roots'][0]
+            self.assertEqual(explicit_root['interval'], 60.0)
+            self.assertEqual(explicit_root['poll_interval'], 60)
+            self.assertEqual(explicit_root['interval_source'], 'registration')
+            entry.pop('poll_interval')
+            entry_path.write_text(json.dumps(entry))
+            # A selected registry with no corresponding service cannot establish cadence.
+            unmatched = base / 'unmatched'; unmatched.mkdir()
+            (unmatched / 'repo.json').write_text(json.dumps(entry))
+            unknown = subprocess.run([sys.executable, '-m', 'codex_wake.service_audit', '--registry-dir', str(unmatched), '--json'], text=True, capture_output=True, env=env, timeout=10)
+            self.assertEqual(unknown.returncode, 0, unknown.stderr)
+            unknown_root = json.loads(unknown.stdout)['roots'][0]
+            self.assertIsNone(unknown_root['interval'])
+            self.assertEqual(unknown_root['interval_source'], 'unknown')
 
 
 if __name__ == '__main__':
