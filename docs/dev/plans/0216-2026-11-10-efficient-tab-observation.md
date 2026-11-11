@@ -4,23 +4,30 @@ State: CLOSED
 Owner: primary / ecochran76
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/540
 Domain authority: GLOSSARY.md
-Scope: approved specification and seven implementation tickets; user authorized implementation and closure on 2026-11-10. No merge/deploy authority in this slice.
+Scope: approved specification and seven implementation tickets; initial delivery complete. Subsequent operator instruction explicitly authorizes PR review, merge, deployment and activation.
 
 ## Current State
 
-All seven implementation tickets #541–#547 are CLOSED. Final post-review source
-f3e1e0d4 passed the exact installed 100-tab owner + Slate gate: idle0.831976%,
-active3.910094% of one core, RSS51,666,944B,120/120 changes,p951.06956s.
-All four installed transports and bounded read-only46-tab host checks pass;
-68processbirths/layouts preserved and owned cleanup0. Native live transitions
-were not observed, so real broadcast transition behavior remains unverified.
-Shared WSL kernel and process-lifetime ru_maxrss measurement limits remain named.
-One independent Standards/Spec review and one bounded TDD remediation pass are
-complete; all three accepted findings have red/green evidence and final installed
-qualification. 227tab tests and10controller/scope tests pass on each Python3.11/3.12.
-See evidence/plan0216/review/report.md and qualification547 acceptance receipts.
-Delivery is the validated integration branch and draft PR. Parent#540 stays OPEN.
-No merge, deployment, production monitor activation or worktree deletion occurred.
+PR551 merged6f95f90 after main CLI reconciliation and exact315member installed
+qualification. During authorized activation, live title changes exposed formatting
+CLI pin races; issue552/PR553 fixed only title-sensitive formatting pins with real
+red/green process-birth-fenced regressions. Final0.22.0.dev4 sourcebfc1bbce is
+deployed,315installed members match qualified wheel; nine launchers/completion,
+sevenaccounts,tenprotectedfiles and27nativeprocesses preserved.
+
+Slate and the shared1stick monitor are ENABLED on46tabs with activity/health/errors
+on, connectednative/availabletmux sources,freshsnapshot,noformattingfailures.
+Historical namespace baseline is archived privately; currentnamespace captures its
+own original settings. RealCLI rollback restored46windows andsessionoptions
+exactly; reenable appliedSlate. Dev3 live60s measured2.06017%onecore/46.1MBownedRSS;
+dev4 carries performance evidence only for unchanged observer hotpaths. Its exact
+separateUID installed formatting regression/fourtransports pass. Source232tabtests
+passbothPython. Natural live native transitions remain unobserved, not claimed.
+
+Parent540 remains OPEN. Original single broadreview/singleTDD counters remain1;
+issue552 is a bounded deployment blocker repair, not a repeated broad discovery.
+Canonical deployment evidence: evidence/plan0216/deployment.json and
+integration551/title552/. Original dirty checkout and recovery worktrees retained.
 
 Historical interview context: research completed in notes/0011-2026-11-10-tab-observation-efficiency-research.md.
 Stock tmux/Byobu already supplies metadata notifications; source shows Codex

@@ -1,0 +1,81 @@
+{
+  "pr": 551,
+  "followup_pr": 553,
+  "issue": 552,
+  "source": "bfc1bbce76728b787a716d021fd3d9ac7f0674a4",
+  "version": "0.22.0.dev4",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev4-bfc1bbc",
+  "previous_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev3-6f95f90",
+  "wheel_sha256": "fef242902c0e2cd930e5543ac6c67f11ae7eb595b6e4d6032572b6cb6cd000e8",
+  "package_members_equal": 315,
+  "launchers_verified": true,
+  "completion": "fresh Zsh registered",
+  "accounts_preserved": 7,
+  "protected_preserved": 10,
+  "native_preserved": 27,
+  "native_exited_independently": [],
+  "stock_unchanged": true,
+  "monitor_status": "running",
+  "monitor_process": {
+    "boot_id": "1f76a1cb-7485-46a3-a887-bd40786479ee",
+    "pid": 3911577,
+    "start_ticks": 3037122
+  },
+  "monitor_python_from_installed_prefix": true,
+  "monitor_owner_rss_bytes": 35401728,
+  "snapshot_freshness": "fresh",
+  "tabs": 46,
+  "preset": "slate",
+  "settings": {
+    "activity": true,
+    "concurrency": 1,
+    "cycle_timeout": 10.0,
+    "error_interval": 5.0,
+    "errors": true,
+    "health": true,
+    "health_interval": 60.0,
+    "interval": 1.0,
+    "max_snapshot_bytes": 1048576,
+    "max_workspaces": 64,
+    "probe_timeout": 1.5,
+    "stale_after": 20.0
+  },
+  "formatting_failures": 0,
+  "source_states": [
+    {
+      "kind": "tmux",
+      "state": "available",
+      "reason": null
+    },
+    {
+      "kind": "native",
+      "state": "connected",
+      "reason": null
+    }
+  ],
+  "historical_baseline_archived": true,
+  "current_namespace_original_baseline_verified": true,
+  "real_cli_rollback": {
+    "original_current_namespace_baseline_verified": true,
+    "historical_baseline_archived": true,
+    "rollback_windows": 46,
+    "native_options_restored_exactly": true,
+    "session_options_restored_exactly": true,
+    "reenable_applied": true,
+    "preset": "slate"
+  },
+  "initial_live_measurement": {
+    "seconds": 60.189179952,
+    "cpu_percent_one_core": 2.0601709493,
+    "peak_owned_rss_bytes": 46145536,
+    "source": "6f95f901",
+    "limit": "Dev3 combined package; carried to dev4 only for unchanged observer hot paths"
+  },
+  "natural_live_native_transition_observed": false,
+  "activation": "ENABLED",
+  "native_lifecycle_calls": 0,
+  "provider_calls": 0,
+  "hosted_ci": false,
+  "formatting_rollback_command": "codex-wake tabs format rollback --session default",
+  "formatting_reenable_command": "codex-wake tabs format reenable --session default"
+}
