@@ -1,0 +1,12 @@
+{
+  "source": "15224248b66eed2d7afa829ae99db906c4407fa6",
+  "wheel": "/tmp/wake555-15224248/dist/codex_wake-0.22.0.dev5-py3-none-any.whl",
+  "wheel_sha256": "446a57fb5c74cb73a4aad9dbaa514b352ff4b3c645194a6e56f36f1b0ff306c3",
+  "package_members_equal": 315,
+  "uid": 1017,
+  "installed_checks": "palette/compact/native rollback PASS",
+  "product_import": "installed site-packages; PYTHONPATH unset",
+  "full_resource_gate": "unchanged observer evidence carried; no new measurement",
+  "initial_install": "held on unreadable build dist directory before installation; archive permission corrected, same wheel",
+  "base": "/tmp/wake555-15224248"
+}
