@@ -1,27 +1,317 @@
 {
   "schema_version": 1,
   "issue": 572,
-  "native_source_commit": "2abbe0fa44b6bfb5ae78c7ad3fda67bc70278c88",
+  "native_source_commit": "a9a992a6ed5661b2211806e1c9137680d083f15e",
   "retained_patch_checks": {
     "sha256": "PASS",
     "all_file_hashes": "PASS",
-    "apply_against_exact_native_base": "PASS"
+    "supplemental_apply_against_exact_retained_base": "PASS",
+    "full_apply_against_exact_upstream": "PASS"
   },
-  "rust_check": {
-    "status": "RUNNING",
-    "job_dir": "/home/ecochran76/.local/state/codex-wake/governor-native-572/check/job-20261111T153921Z-3aa995010241"
-  },
+  "attempts": [
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/check/job-20261111T153837Z-e70da06cfd4b/20261111T153837Z-b90ba5d54350/receipt.json",
+      "exit_code": 127,
+      "duration_seconds": 0.005,
+      "test_summary": {
+        "suites": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": []
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/check/job-20261111T153921Z-3aa995010241/20261111T153921Z-1f05c1354241/receipt.json",
+      "exit_code": 101,
+      "duration_seconds": 1045.637,
+      "test_summary": {
+        "suites": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": [
+        {
+          "code": "E0609",
+          "message": "no field `item` on type `AgentMessageDeltaNotification`",
+          "file": "tui/src/chatwidget/protocol.rs",
+          "line": 132
+        },
+        {
+          "code": "E0433",
+          "message": "cannot find module or crate `reqwest` in this scope",
+          "file": "tui/src/chatwidget/wake_governor.rs",
+          "line": 147
+        },
+        {
+          "code": "E0433",
+          "message": "cannot find module or crate `reqwest` in this scope",
+          "file": "tui/src/chatwidget/wake_governor.rs",
+          "line": 245
+        },
+        {
+          "code": "E0433",
+          "message": "cannot find module or crate `reqwest` in this scope",
+          "file": "tui/src/chatwidget/wake_governor.rs",
+          "line": 247
+        },
+        {
+          "code": "E0277",
+          "message": "the trait bound `codex_protocol::ThreadId: FromStr` is not satisfied",
+          "file": "tui/src/chatwidget/wake_governor.rs",
+          "line": 751
+        }
+      ]
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/check-tests/job-20261111T165349Z-bff5b3c525d0/20261111T165349Z-d59ed12fae1e/receipt.json",
+      "exit_code": 101,
+      "duration_seconds": 462.367,
+      "test_summary": {
+        "suites": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": [
+        {
+          "code": "E0433",
+          "message": "cannot find `error` in `crate`",
+          "file": "core/src/tasks/mod.rs",
+          "line": 409
+        }
+      ]
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/check-tests/job-20261111T170306Z-288ed774f778/20261111T170307Z-f9800b9c5018/receipt.json",
+      "exit_code": 101,
+      "duration_seconds": 243.829,
+      "test_summary": {
+        "suites": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": [
+        {
+          "code": "E0425",
+          "message": "cannot find type `ThreadGovernorLeaseMemberOutcome` in this scope",
+          "file": "app-server/src/request_processors/thread_governor_lease.rs",
+          "line": 58
+        },
+        {
+          "code": "E0425",
+          "message": "cannot find type `ThreadGovernorLeaseSetResponse` in this scope",
+          "file": "app-server/src/request_processors/thread_governor_lease.rs",
+          "line": 63
+        },
+        {
+          "code": "E0422",
+          "message": "cannot find struct, variant or union type `ThreadGovernorLeaseSetResponse` in this scope",
+          "file": "app-server/src/request_processors/thread_governor_lease.rs",
+          "line": 64
+        },
+        {
+          "code": "E0308",
+          "message": "mismatched types",
+          "file": "app-server/src/request_processors/thread_governor_lease.rs",
+          "line": 98
+        },
+        {
+          "code": "E0425",
+          "message": "cannot find type `ThreadGovernorLeaseMember` in this scope",
+          "file": "app-server/src/request_processors/thread_governor_lease.rs",
+          "line": 253
+        },
+        {
+          "code": "E0425",
+          "message": "cannot find type `ThreadGovernorLeaseSetParams` in this scope",
+          "file": "app-server/src/request_processors/thread_governor_lease.rs",
+          "line": 314
+        },
+        {
+          "code": "E0308",
+          "message": "mismatched types",
+          "file": "app-server/src/request_processors/thread_governor_lease.rs",
+          "line": 355
+        },
+        {
+          "code": "E0422",
+          "message": "cannot find struct, variant or union type `ThreadGovernorLeaseSetResponse` in this scope",
+          "file": "app-server/src/request_processors/thread_governor_lease.rs",
+          "line": 368
+        }
+      ]
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/check-tests/job-20261111T171150Z-183da43c15ab/20261111T171150Z-0e5c7fac5892/receipt.json",
+      "exit_code": 101,
+      "duration_seconds": 284.788,
+      "test_summary": {
+        "suites": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": [
+        {
+          "code": "E0433",
+          "message": "cannot find type `Span` in this scope",
+          "file": "tui/src/chatwidget/wake_governor.rs",
+          "line": 621
+        },
+        {
+          "code": "E0433",
+          "message": "cannot find type `Span` in this scope",
+          "file": "tui/src/chatwidget/wake_governor.rs",
+          "line": 630
+        }
+      ]
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/check-tests/job-20261111T174058Z-02cf0102e2c0/20261111T174058Z-1e214addc7da/receipt.json",
+      "exit_code": 101,
+      "duration_seconds": 423.817,
+      "test_summary": {
+        "suites": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": [
+        {
+          "code": "E0559",
+          "message": "variant `codex_extension_api::ResponseItem::Message` has no field named `end_turn`",
+          "file": "app-server/src/request_processors/thread_governor_lease.rs",
+          "line": 1146
+        }
+      ]
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/check-tests/job-20261111T174855Z-348aa071d4e1/20261111T174855Z-1285d15daf15/receipt.json",
+      "exit_code": 101,
+      "duration_seconds": 384.902,
+      "test_summary": {
+        "suites": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": [
+        {
+          "code": "E0063",
+          "message": "missing fields `encrypted_content`, `internal_chat_message_metadata_passthrough` and `status` in initializer of `codex_extension_api::ResponseItem`",
+          "file": "app-server/src/request_processors/thread_governor_lease.rs",
+          "line": 1140
+        }
+      ]
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/schema/job-20261111T182814Z-7a789bfbf5c0/20261111T182814Z-86565beea3b6/receipt.json",
+      "exit_code": 0,
+      "duration_seconds": 610.918,
+      "test_summary": {
+        "suites": 1,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": []
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/schema/job-20261111T183838Z-20ef28300b21/20261111T183838Z-969be2783f11/receipt.json",
+      "exit_code": 0,
+      "duration_seconds": 24.948,
+      "test_summary": {
+        "suites": 1,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": []
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/tests/job-20261111T155728Z-5d2977557130/20261111T155728Z-bf3761f4ae36/receipt.json",
+      "exit_code": 101,
+      "duration_seconds": 1534.236,
+      "test_summary": {
+        "suites": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": [
+        {
+          "code": "E0277",
+          "message": "the trait bound `codex_protocol::ThreadId: FromStr` is not satisfied",
+          "file": "tui/src/chatwidget/wake_governor.rs",
+          "line": 751
+        }
+      ]
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/tests/job-20261111T175549Z-52257fc6648e/20261111T175550Z-5387c2ca5edb/receipt.json",
+      "exit_code": 0,
+      "duration_seconds": 1861.933,
+      "test_summary": {
+        "suites": 3,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": []
+    },
+    {
+      "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build/job-20261111T183940Z-ad8823c91b46/20261111T183940Z-a36c48ffcd5c/receipt.json",
+      "exit_code": 0,
+      "duration_seconds": 1250.348,
+      "test_summary": {
+        "suites": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "diagnostics": []
+    }
+  ],
   "focused_tests": {
-    "status": "NOT_RUN",
-    "selection": [
-      "wake_governor"
-    ]
+    "status": "PASS",
+    "source_commit": "896bec2571175a9b166a4581c4be84a74861820c",
+    "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/tests/job-20261111T175549Z-52257fc6648e/20261111T175550Z-5387c2ca5edb/receipt.json",
+    "counts": {
+      "codex_core": 2,
+      "codex_tui": 4,
+      "codex_app_server": 0
+    },
+    "execution_seconds": {
+      "codex_core": 0.53,
+      "codex_tui": 0.14
+    },
+    "total_command_seconds": 1861.933,
+    "app_server_qualification": "compiled; selected zero tests; actual lease RPC acceptance remains required",
+    "post_test_delta": "Only app-server expiry-drain release fence and protocol/schema/SDK exports; Core and TUI source unchanged."
+  },
+  "protocol_generation": {
+    "stable": "PASS",
+    "experimental": "PASS using same generator binary without Cargo rebuild",
+    "sdk": "PASS; offline pinned27packages; existing uint-format generator warnings fall back to integer"
   },
   "immutable_package": {
-    "status": "NOT_BUILT"
+    "status": "PASS",
+    "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build/job-20261111T183940Z-ad8823c91b46/20261111T183940Z-a36c48ffcd5c/receipt.json",
+    "total_command_seconds": 1250.348,
+    "package": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package",
+    "entrypoint_sha256": "9c8390d120afc046b63a8cf95f82922c297fd59745814fa66fbbc9a2ef3f5585",
+    "version": "codex-cli 0.167.0",
+    "inventory_files": 6,
+    "four_reused_helpers": "all pins, preserved source files and package copies byte-identical",
+    "baseline_entrypoint_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+    "source_clean_before_after": true
   },
   "installed_disposable_journey": {
-    "status": "NOT_RUN"
+    "status": "PENDING",
+    "owner": "primary coordinator"
   },
   "hosted_ci": "skipped per no-paid-CI policy",
   "memory_disposition": {
