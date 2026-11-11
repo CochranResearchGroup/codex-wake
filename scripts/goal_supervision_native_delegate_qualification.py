@@ -174,7 +174,7 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
                 except ValueError:raise RuntimeError('governor returned non-JSON: '+completed.stderr[-1000:])
                 save('governor-'+str(operation_number[0])+'.json',dict(argv=argv,exit_code=completed.returncode,result=body,stderr=completed.stderr[-1000:]))
                 return body
-            activated=governor('activate',token_limit=1000,time_limit_seconds=60)
+            activated=governor('activate',token_limit=1000,time_limit_seconds=120)
             until=min(expiry,time.monotonic()+8)
             while activated.get('state')!='enforced':
                 if time.monotonic()>=until:raise RuntimeError('new governor was not actually enforced: '+str(activated.get('reason')))
@@ -220,7 +220,7 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
                     if time.monotonic()>=until:raise RuntimeError('watcher never qualified actual child history')
                     time.sleep(.1)
                 result['before_tighten']=observed
-                result['tighten']=governor('activate',token_limit=1,time_limit_seconds=60)
+                result['tighten']=governor('activate',token_limit=1,time_limit_seconds=120)
                 stop_guard=result['tighten']['owner_receipt']['native_guard']
             def view(thread):
                 turns=rpc('thread/turns/list',dict(threadId=thread,limit=128,sortDirection='desc',itemsView='notLoaded'))['data']
