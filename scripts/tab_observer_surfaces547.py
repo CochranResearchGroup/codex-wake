@@ -18,6 +18,7 @@ from urllib.request import Request,urlopen
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--receipt',required=True);args=parser.parse_args()
+    assert not Path(args.receipt).exists(),'use a unique receipt path'
     import codex_wake
     from codex_wake.controller_tabs import controller_tabs_from_root
     assert 'site-packages' in codex_wake.__file__
@@ -28,7 +29,7 @@ def main():
         root=Path(directory);account=root/'controller-accounts.toml';account.write_text('[profiles]\nstate_root='+json.dumps(str(root/'profiles'))+'\nsource_root='+json.dumps(str(root/'source'))+'\n');account.chmod(0o600);p=root/'controller-tabs.json';p.write_text(json.dumps(dict(schema_version=1,workspaces={})));p.chmod(0o600)
         def cli(*parts):
             value=subprocess.run([executable,'--wake-root',str(root),*parts],cwd=root,env=env,text=True,capture_output=True,timeout=20)
-            assert value.returncode==0,(parts,value.returncode,value.stdout,value.stderr)
+            assert value.returncode==0,(parts,value.returncode)
             return value.stdout
         def controller(*parts):return json.loads(cli('controller',*parts))
         helptext=cli('tabs','monitor-start','--help')
@@ -36,7 +37,17 @@ def main():
         cli('tabs','monitor-start','--no-activity','--no-errors','--health-interval','90')
         text=cli('tabs','monitor-status');assert 'Tiers:' in text and 'activity=off' in text,text
         cli('tabs','monitor-stop');report['checks'].append('installed CLI tier controls and readable status')
-        async def stdio():
+        def assert_large_snapshot(value):
+            for _ in range(4):
+                if isinstance(value,dict) and isinstance(value.get('snapshot'),dict):break
+                value=value.get('result') if isinstance(value,dict) else None
+            assert isinstance(value,dict) and isinstance(value.get('snapshot'),dict),'missing cached snapshot'
+            snapshot=value['snapshot'];rows=snapshot.get('resources',[])
+            assert len(rows)==100,'cached synthetic row count mismatch'
+            assert [row.get('fixture_marker') for row in rows]==['synthetic-cached-'+str(i) for i in range(100)],'cached synthetic markers truncated or reordered'
+            assert all(row.get('fixture_padding')=='x'*3000 for row in rows),'cached synthetic payload truncated'
+            assert snapshot['freshness']=='stale','stopped synthetic cache must remain stale'
+        async def stdio(large=False):
             from mcp import ClientSession,StdioServerParameters
             from mcp.client.stdio import stdio_client
             params=StdioServerParameters(command=str(Path(sys.executable).parent/'codex-wake-mcp'),args=['--wake-root',str(root)],env=env)
@@ -48,6 +59,10 @@ def main():
                     assert {'activity','health','errors','health_interval','error_interval'}<=schema.keys()
                     value=await session.call_tool('wake_tabs_monitor_status',{})
                     assert not value.is_error
+                    if large:
+                        payload=getattr(value,'structured_content',None) or getattr(value,'structuredContent',None)
+                        if payload is None:payload=json.loads(next(item.text for item in value.content if getattr(item,'type',None)=='text'))
+                        assert_large_snapshot(payload)
         asyncio.run(stdio());report['checks'].append('actual installed stdio MCP schema and monitor status')
         sock=socket.socket();sock.bind(('127.0.0.1',0));port=sock.getsockname()[1];sock.close()
         endpoint='http://127.0.0.1:'+str(port);resource=endpoint+'/controller'
@@ -78,7 +93,7 @@ def main():
             token=tokens['access_token']
             def api(operation,arguments):
                 status,value=http('/operations',dict(operation=operation,arguments=arguments),token)
-                assert status==200,(status,value)
+                assert status==200,(operation,status)
                 return value
             assert api('tabs.monitor.status',{})['status']=='completed'
             def mutation_args(identifier,**options):
@@ -95,13 +110,38 @@ def main():
             assert {'activity','health','errors','health_interval','error_interval'}<=schema.keys()
             def mcp(name,arguments):
                 status,value=http('/mcp',dict(jsonrpc='2.0',id=3,method='tools/call',params=dict(name=name,arguments=arguments)),token)
-                assert status==200 and not value['result']['isError'],value
+                assert status==200 and not value['result']['isError'],(name,status)
                 return value['result']['structuredContent']
             result=mcp('wake_tabs_monitor_start',mutation_args('mcp-start',activity=True,health=False,errors=True))
             assert result['result']['operation']['execution']=='completed',result
             assert mcp('wake_tabs_monitor_status',{})['status']=='completed'
             result=mcp('wake_tabs_monitor_stop',mutation_args('mcp-stop'));assert result['result']['operation']['execution']=='completed',result
             report['checks'].append('actual OAuth MCP schema independent tier start/status/stop')
+            # Stopped-cache transport capacity proof, never 100 live transport tabs.
+            snapshot_path=root/'tab-monitor/snapshot.json'
+            original=snapshot_path.read_bytes() if snapshot_path.exists() else None
+            try:
+                from codex_wake.tab_monitor import TabMonitor
+                assert TabMonitor(root).status()['monitor']['status']=='stopped','private monitor must be stopped'
+                namespace=owner.monitor_target()
+                cached=json.loads(original) if original else {}
+                cached.update(observed_at=time.time()-3600,origin='synthetic-transport-fixture',resources=[
+                    dict(target=namespace,window=dict(window_id='@'+str(i)),traits={},
+                        fixture_marker='synthetic-cached-'+str(i),fixture_padding='x'*3000) for i in range(100)])
+                encoded=json.dumps(cached,separators=(',',':')).encode()
+                assert 256*1024<len(encoded)<1024*1024,'synthetic cache must cross old reply bound'
+                snapshot_path.write_bytes(encoded);snapshot_path.chmod(0o600)
+                assert_large_snapshot(json.loads(cli('tabs','monitor-status','--json')))
+                asyncio.run(stdio(large=True))
+                assert_large_snapshot(api('tabs.monitor.status',{}))
+                assert_large_snapshot(mcp('wake_tabs_monitor_status',{}))
+                report['synthetic_cached_transport_size']=dict(rows=100,bytes=len(encoded),live_tabs=False,
+                    stale=True,surfaces=['CLI','stdio MCP','authenticated API','OAuth MCP'],complete_markers=True)
+                report['checks'].append('stopped synthetic cached100-row payload exceeds256KiB with complete four-surface reads; not live tab acceptance')
+            finally:
+                if original is None:snapshot_path.unlink(missing_ok=True)
+                else:snapshot_path.write_bytes(original);snapshot_path.chmod(0o600)
+
         finally:
             try:cli('tabs','monitor-stop')
             finally:process.terminate();process.wait(timeout=5)
