@@ -1557,7 +1557,7 @@ State: CLOSED
 Plan: [Efficient tab observation](docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md).
 Specification [#540](https://github.com/CochranResearchGroup/codex-wake/issues/540) remains open.
 All541–547 closed. PR551 merged/deployed; operational title-pin fix552/PR553
-merged/deployed as0.22.0.dev4 bfc1bbce. Slate and1stick sharedmonitor enabled46tabs,
+merged/deployed; compactcue tweak555/PR556 now0.22.0.dev5 18f1e73. Slate and1stick sharedmonitor enabled46tabs,
 freshsnapshot,noformattingfailures. RealCLI rollback/restoration andreenable pass;
 originalcurrentnamespacebaseline preserved, historicalbaseline archived privately.
 315installedmembers/ninelaunchers/completion/accounts/nativeagents verified.

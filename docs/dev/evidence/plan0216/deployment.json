@@ -18,11 +18,11 @@
   "monitor_status": "running",
   "monitor_process": {
     "boot_id": "1f76a1cb-7485-46a3-a887-bd40786479ee",
-    "pid": 3911577,
-    "start_ticks": 3037122
+    "pid": 662577,
+    "start_ticks": 3623858
   },
   "monitor_python_from_installed_prefix": true,
-  "monitor_owner_rss_bytes": 35401728,
+  "monitor_owner_rss_bytes": 36593664,
   "snapshot_freshness": "fresh",
   "tabs": 46,
   "preset": "slate",
