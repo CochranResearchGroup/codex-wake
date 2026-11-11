@@ -151,7 +151,9 @@ class StdioHostTests(unittest.TestCase):
                 self.assertEqual(local.output(future_id,mode='stream')['text'],'owned-stdio-answer')
                 overflow=local.prompt('grok:existing','overflow',key='bounded-metadata')
                 overflow_id=overflow['result']['operation']['operation_id']
-                bounded=local.output(overflow_id,mode='final',timeout=10)
+                # Allow the documented completion wait for this multi-megabyte
+                # fixture; retention and truncation assertions remain below.
+                bounded=local.output(overflow_id,mode='final',timeout=30)
                 self.assertTrue(bounded['terminal'])
                 self.assertEqual(bounded['text'],'owned-stdio-answer')
                 self.assertFalse(bounded['retention']['history_complete'])

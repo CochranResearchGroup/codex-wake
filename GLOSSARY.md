@@ -148,6 +148,9 @@ Wake-owned. It is separate from pausing future deliveries and cancelling wakes.
 **Recipient binding**:
 The verified relationship between one conversation and the live client that
 currently owns its input. A tab label or working directory alone is not a binding.
+Attachment observation must retain the selected runtime and executable context.
+Failed executable discovery is unavailable evidence, not proof that a recipient
+has no attachment.
 
 **Observed delivery**:
 Inspection evidence that a wake prompt was accepted in the bound recipient's
