@@ -5,7 +5,7 @@ import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from functools import cache
+from functools import cache, wraps
 from pathlib import Path
 from typing import Callable, Literal, Mapping
 
@@ -38,6 +38,7 @@ from .signals import (
     SourceReconcileResult, UnavailableSourceRunner,
 )
 from .monitor import write_monitor_health
+from .monitor_ownership import MonitorOwnership, ownership_held, reconciliation_required
 from .source_registry import BuiltinSourceRegistry, ReconstructionContext, builtin_source_registry
 
 
@@ -51,9 +52,12 @@ class PollResult:
     requeued: int = 0
     submitted: int = 0
     signal_sources: tuple[dict[str, object], ...] = ()
+    skip_reason: str | None = None
 
 
 def format_poll_result(result: PollResult) -> str:
+    if getattr(result, "skip_reason", None):
+        return f"skipped={result.skip_reason}"
     return (
         f"checked={result.checked} fired={result.fired} "
         f"failed={result.failed} pending={result.pending} "
@@ -70,12 +74,13 @@ def poll_result_has_activity(result: PollResult) -> bool:
             result.dispatched,
             result.submitted,
             result.requeued,
+            getattr(result, "skip_reason", None),
         )
     )
 
 
 def poll_result_dict(result: PollResult) -> dict[str, object]:
-    return {
+    payload: dict[str, object] = {
         "checked": result.checked,
         "fired": result.fired,
         "failed": result.failed,
@@ -85,6 +90,9 @@ def poll_result_dict(result: PollResult) -> dict[str, object]:
         "requeued": result.requeued,
         "signal_sources": list(getattr(result, "signal_sources", ())),
     }
+    if getattr(result, "skip_reason", None):
+        payload["skip_reason"] = result.skip_reason
+    return payload
 
 
 def default_signal_runners(
@@ -291,6 +299,25 @@ def predicate_is_ready(record: dict, now: datetime) -> tuple[bool, str]:
     return result.ready, result.message
 
 
+def _exclusive_poll(function):
+    @wraps(function)
+    def owned(root: Path, *args, **kwargs):
+        # Use the same resolved path for custody and every operation in the pass.
+        root = Path(root).resolve()
+        if ownership_held(root):
+            if reconciliation_required(root):
+                return PollResult(skip_reason="reconciliation_required")
+            return function(root, *args, **kwargs)
+        with MonitorOwnership(root) as owner:
+            if not owner.acquired:
+                return PollResult(skip_reason="monitor_owned")
+            if reconciliation_required(root):
+                return PollResult(skip_reason="reconciliation_required")
+            return function(root, *args, **kwargs)
+    return owned
+
+
+@_exclusive_poll
 def poll_once(
     root: Path,
     now: datetime | None = None,
@@ -607,49 +634,64 @@ def run(argv: list[str] | None = None) -> int:
     if args.once:
         result = poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout,
                            receipt_authority_path=args.a2a_receipt_authority)
-        write_monitor_health(
-            wake_root=root,
-            repo_root=Path.cwd(),
-            source="codex-waked",
-            mode="once",
-            poll_result=poll_result_dict(result),
-        )
-        print(format_poll_result(result))
-        return 0
-    if args.interval <= 0:
-        raise WakeError("--interval must be greater than zero")
-    signal_reconcile_reason: Literal["startup", "periodic"] = "startup"
-    try:
-        while True:
-            if args.interval<=5:
-                from .lifecycle_supervision import publish_supervision
-                publish_supervision(root,args.interval)
-            result = poll_once(
-                root,
-                dispatch=not args.no_dispatch,
-                ack_timeout_override=args.ack_timeout,
-                signal_reconcile_reason=signal_reconcile_reason,
-                receipt_authority_path=args.a2a_receipt_authority,
-                lifecycle_supervision={'interval':args.interval} if args.no_dispatch else None,
-            )
-            signal_reconcile_reason = "periodic"
+        if not getattr(result, "skip_reason", None):
             write_monitor_health(
                 wake_root=root,
                 repo_root=Path.cwd(),
                 source="codex-waked",
-                mode="loop",
+                mode="once",
                 poll_result=poll_result_dict(result),
             )
-            if poll_result_has_activity(result):
-                print(format_poll_result(result), flush=True)
-            time.sleep(args.interval)
-    finally:
-        if args.interval<=5:
-            from .lifecycle_supervision import publish_supervision,poll_spawns
-            publish_supervision(root,args.interval,active=False)
-            poll_spawns(root,stop_reason='monitor_stopped')
-        from .agent_handoff import poll_handoffs
-        poll_handoffs(root,stop_reason="monitor_stopped")
+        print(format_poll_result(result))
+        return 0
+    if args.interval <= 0:
+        raise WakeError("--interval must be greater than zero")
+    with MonitorOwnership(root) as owner:
+        if not owner.acquired:
+            print("skipped=monitor_owned", flush=True)
+            return 2
+        if reconciliation_required(root):
+            print("skipped=reconciliation_required", flush=True)
+            return 2
+        signal_reconcile_reason: Literal["startup", "periodic"] = "startup"
+        try:
+            while True:
+                if reconciliation_required(root):
+                    print("skipped=reconciliation_required", flush=True)
+                    return 2
+                if args.interval<=5:
+                    from .lifecycle_supervision import publish_supervision
+                    publish_supervision(root,args.interval)
+                result = poll_once(
+                    root,
+                    dispatch=not args.no_dispatch,
+                    ack_timeout_override=args.ack_timeout,
+                    signal_reconcile_reason=signal_reconcile_reason,
+                    receipt_authority_path=args.a2a_receipt_authority,
+                    lifecycle_supervision={'interval':args.interval} if args.no_dispatch else None,
+                )
+                if getattr(result, "skip_reason", None):
+                    print(format_poll_result(result), flush=True)
+                    return 2
+                signal_reconcile_reason = "periodic"
+                write_monitor_health(
+                    wake_root=root,
+                    repo_root=Path.cwd(),
+                    source="codex-waked",
+                    mode="loop",
+                    poll_result=poll_result_dict(result),
+                )
+                if poll_result_has_activity(result):
+                    print(format_poll_result(result), flush=True)
+                time.sleep(args.interval)
+        finally:
+            if not reconciliation_required(root):
+                if args.interval<=5:
+                    from .lifecycle_supervision import publish_supervision,poll_spawns
+                    publish_supervision(root,args.interval,active=False)
+                    poll_spawns(root,stop_reason='monitor_stopped')
+                from .agent_handoff import poll_handoffs
+                poll_handoffs(root,stop_reason="monitor_stopped")
 
 
 def main(argv: list[str] | None = None) -> int:
