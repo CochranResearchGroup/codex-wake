@@ -106,3 +106,24 @@ class SchedulingTests(unittest.TestCase):
                                       text=True, capture_output=True, timeout=10)
             self.assertEqual(rejected.returncode, 2)
             self.assertEqual(json.loads((base / 'registry/public.json').read_text())['poll_interval'], 60)
+
+    def test_invalid_root_path_reports_failure_without_blocking_healthy_root(self):
+        from codex_wake.supervisor_scheduler import SupervisorScheduler
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = build_supervisor_config(registry_dir=base / 'registry',
+                state_dir=base / 'state/supervisor', validate_executable=False)
+            bad = base / 'bad'; bad.mkdir()
+            enroll_root(wake_root=bad, registry_dir=config.registry_dir, root_id='bad')
+            enroll_root(wake_root=base / 'healthy', registry_dir=config.registry_dir, root_id='healthy')
+            bad.rmdir(); bad.symlink_to(bad)
+            results = []
+            with SupervisorScheduler(config, dispatch=False) as scheduler:
+                end = time.monotonic() + 8
+                while time.monotonic() < end:
+                    results.extend(scheduler.tick())
+                    if any(r['root_id'] == 'healthy' and r['ok'] for r in results):
+                        break
+                    time.sleep(0.01)
+            self.assertTrue(any(r['root_id'] == 'bad' and not r['ok'] for r in results))
+            self.assertTrue(any(r['root_id'] == 'healthy' and r['ok'] for r in results))

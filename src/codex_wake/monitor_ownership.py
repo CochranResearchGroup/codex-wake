@@ -11,6 +11,7 @@ import fcntl
 import json
 import os
 import stat
+import threading
 from pathlib import Path
 
 from .records import WakeError
@@ -40,6 +41,7 @@ os.register_at_fork(after_in_child=_after_fork)
 def ownership_held(root: Path) -> bool:
     owner = _current.get()
     return bool(owner is not None and owner.acquired and owner.pid == os.getpid()
+                and owner.thread_id == threading.get_ident()
                 and owner.root == Path(root).resolve())
 
 
@@ -67,9 +69,11 @@ class MonitorOwnership:
         self.fd: int | None = None
         self.acquired = False
         self.pid = os.getpid()
+        self.thread_id = threading.get_ident()
         self._token = None
 
     def __enter__(self) -> "MonitorOwnership":
+        self.thread_id = threading.get_ident()
         directory = self.path.parent
         directory.mkdir(mode=0o700, parents=True, exist_ok=True)
         if directory.is_symlink():

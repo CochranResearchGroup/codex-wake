@@ -202,5 +202,18 @@ child.communicate(input=b'done\n', timeout=5)
         owner.communicate(input="finish\n", timeout=5)
         self.assertEqual(owner.returncode, 0)
 
+class CopiedContextOwnershipTests(unittest.TestCase):
+    def test_async_thread_cannot_reuse_another_threads_polling_lease(self):
+        import asyncio
+
+        async def contend(root):
+            with MonitorOwnership(root):
+                return await asyncio.to_thread(poll_once, root, dispatch=False)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            result = asyncio.run(contend(Path(tmp) / 'wake'))
+            self.assertEqual(result.skip_reason, 'monitor_owned')
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -222,8 +222,19 @@ class SupervisorScheduler:
         for entry in self._entries:
             if not entry.get('enabled') or not entry.get('wake_root'):
                 continue
-            root = str(Path(entry['wake_root']).expanduser().resolve())
-            key = _key(root)
+            try:
+                root = str(Path(entry['wake_root']).expanduser().resolve())
+                key = _key(root)
+            except (OSError, RuntimeError, TypeError, ValueError) as exc:
+                # A malformed/changed enrollment cannot abort admission for all
+                # other roots. Rate-limit its failure to the configured cadence.
+                error_key = 'invalid:' + str(entry.get('_path', entry.get('root_id')))
+                if now >= self.next_due.get(error_key, 0):
+                    completed.append({'root_id': entry.get('root_id', ''),
+                                      'ok': False, 'activity': True,
+                                      'error': f'root path unavailable: {exc}'})
+                    self.next_due[error_key] = now + self.config.interval
+                continue
             if key in busy or key in due or now < self.next_due.get(key, 0):
                 continue
             from .monitor_ownership import reconciliation_required
