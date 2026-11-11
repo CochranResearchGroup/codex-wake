@@ -113,6 +113,9 @@ class LocalControllerServerTests(unittest.TestCase):
                             command='& '+literal(windows)+' '+ ' '.join(literal(w) for w in words)+'; exit $LASTEXITCODE'
                             encoded=base64.b64encode(command.encode('utf-16-le')).decode()
                             return subprocess.run([str(powershell),'-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',encoded],capture_output=True,timeout=30)
+                        governor=ps('governor','status','thread:11111111-1111-4111-8111-111111111111','--json')
+                        self.assertEqual(governor.returncode,0,governor.stderr.decode(errors='replace'))
+                        self.assertEqual(json.loads(governor.stdout.decode('utf-8'))['reason'],'not_enrolled')
                         sent=ps('control','prompt','thread:11111111-1111-4111-8111-111111111111',prompt,'--mode','final','--timeout','10','--idempotency-key=powershell-fixture')
                         self.assertEqual(sent.returncode,0,sent.stderr.decode(errors='replace'))
                         self.assertEqual(sent.stdout.decode('utf-8'),answer)

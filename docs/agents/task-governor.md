@@ -45,3 +45,11 @@ Strict enforcement also requires the matched native guard capability. A watcher
 heartbeat alone cannot prove fail-closed behavior after watcher termination. Old
 native builds must report their limitation and offer an explicit advisory choice;
 they must not advertise strict enforcement from backend tests alone.
+
+The same-user private CLI bridge, including its PowerShell client, is an operator
+entrypoint. Generic API/MCP calls retain their session/scoped authority. A
+mutating remote CLI request receives its `--request-id` before transmission;
+on disconnect retain that key to reconcile instead of submitting another intent.
+Unavailable activation or incomplete requested continuation returns a held result
+and nonzero CLI status. Observation can succeed while truthfully reporting that
+no governor is enrolled.

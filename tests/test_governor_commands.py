@@ -66,3 +66,16 @@ class GovernorCommandTests(unittest.TestCase):
         args, _ = _parsed(['governor', 'status', 'thread:current', '--json'])
         self.assertEqual(args.command, 'governor')
         self.assertEqual(args.governor_verb, 'status')
+
+    def test_human_status_explains_remaining_allowance_without_dumping_json(self):
+        from codex_wake.governor_commands import render
+        value = dict(state='enforced', scope=dict(kind='task', thread_id='thread-one'),
+            usage=dict(used_tokens=120, remaining_tokens=880, elapsed_seconds=15),
+            limits=dict(token_limit=1000, time_limit_seconds=120), deadline=120,
+            owner_receipt=dict(time_basis='authenticated_host_counter'), watcher=dict(fresh=True),
+            actions=['extend', 'disable'])
+        text = render(value)
+        self.assertIn('880 tokens remaining', text)
+        self.assertIn('1m 45s remaining', text)
+        self.assertNotIn('1970', text)
+        self.assertNotIn('"remaining_tokens"', text)

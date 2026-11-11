@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_human_status_explains_remaining_allowance_without_dumping_json (test_governor_commands.GovernorCommandTests.test_human_status_explains_remaining_allowance_without_dumping_json)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/.worktrees/codex-wake/governor-experience/tests/test_governor_commands.py", line 78, in test_human_status_explains_remaining_allowance_without_dumping_json
+    self.assertIn('880 tokens remaining', text)
+AssertionError: '880 tokens remaining' not found in 'Governor: enforced\nScope: {"kind": "task", "thread_id": "thread-one"}\nUsage: {"elapsed_seconds": 15, "remaining_tokens": 880, "used_tokens": 120}\nLimits: {"time_limit_seconds": 120, "token_limit": 1000}\nDeadline: 120\nWatcher: {"fresh": true}\nActions: extend, disable'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.060s
+
+FAILED (failures=1)

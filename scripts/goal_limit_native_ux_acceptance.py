@@ -119,6 +119,7 @@ def owned_model_start_snapshot(public_thread, home, thread_id):
 
 
 def qualify(options):
+    governor_ui_only = getattr(options, "governor_ui_only", False)
     base = options.output.resolve()
     base.mkdir(mode=0o700, parents=True, exist_ok=False)
     prefix = options.prefix.resolve()
@@ -178,7 +179,7 @@ def qualify(options):
         provider="owned localhost Responses fixture",
         external_provider_calls=0,
         http_request_cap=3
-        if options.supervision_loss_only or options.observation_recovery_only or options.governor_ui_only
+        if options.supervision_loss_only or options.observation_recovery_only or governor_ui_only
         else 7,
         native_frontend_acceptance=True,
         history_mode=options.history_mode,
@@ -231,7 +232,7 @@ def qualify(options):
                 number = len(calls) + 1
                 state = fixture_state["phase"]
                 phase = "unexpected"
-                if options.governor_ui_only and state != "warmup":
+                if governor_ui_only and state != "warmup":
                     phase = "work_stream"
                 elif not operator_reply and state == "warmup":
                     phase = "warmup"
@@ -479,7 +480,7 @@ def qualify(options):
     ):
         Path(env[key]).mkdir(mode=0o700)
     env["PATH"] = str(prefix / "bin") + os.pathsep + env.get("PATH", "")
-    if options.governor_ui_only:
+    if governor_ui_only:
         from codex_wake.shortcut_store import write
         write(Path(env["XDG_CONFIG_HOME"]) / "codex-wake/shortcuts.json",
               dict(version=1, wake_root=str(root)))
@@ -525,7 +526,7 @@ def qualify(options):
         return json.loads(value.stdout)
 
     auth = []
-    if not options.governor_ui_only:
+    if not governor_ui_only:
         bus = base / "bus"
         operator = invoke(["a2a", "configure", "--bus-root", str(bus), "--json"])[
             "operator_capability_file"
@@ -799,7 +800,7 @@ def qualify(options):
             peer_goal_before=peer_goal,
             peer_before=peer_before,
         )
-        if options.governor_ui_only:
+        if governor_ui_only:
             local_controller = subprocess.Popen(
                 [str(cli), '--wake-root', str(root), 'control', 'server', 'run',
                  '--native-endpoint', endpoint], env=env, cwd=workspace,
@@ -847,14 +848,13 @@ def qualify(options):
             dict(version=1, controllers={thread: ["renewal-acceptance"]}),
         )
 
-        if options.governor_ui_only:
+        if governor_ui_only:
             # Reuse this script's real native server, private TUI, bounded Responses
             # fixture and cleanup. No second fixture service or private history.
             def governor(verb, *extra):
                 return invoke(['--wake-root', str(root), 'governor', verb,
                                'thread:' + thread, '--endpoint', endpoint, '--json', *extra])
             def ui_command(text):
-                tmux('send-keys', '-t', 'ux:0.0', 'Escape')
                 tmux('send-keys', '-t', 'ux:0.0', '-l', text)
                 tmux('send-keys', '-t', 'ux:0.0', 'Enter')
             def visible(state, name):

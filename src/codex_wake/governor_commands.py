@@ -57,7 +57,12 @@ def execute(verb, arguments, root, *, principal=None):
         if host_policy is not None:
             from .governor import native_principal
             principal = native_principal(row['thread_id'], policy=host_policy, principal=principal)
-    return governor(root, verb, dict(arguments), principal=principal)
+    result = governor(root, verb, dict(arguments), principal=principal)
+    requested_resume = verb == 'resume' or arguments.get('resume') is True
+    held = (verb == 'activate' and result.get('state') != 'enforced' or
+            requested_resume and result.get('operation', {}).get('resumed') is not True)
+    result['status'] = 'held' if held else 'completed'
+    return result
 
 
 def definitions():
@@ -115,16 +120,51 @@ def command(args, root):
 
 
 def render(value):
-    """Readable operator view; machine clients always retain the complete result."""
-    lines = ['Governor: ' + str(value.get('state', 'unknown'))]
-    for key in ('scope', 'usage', 'limits', 'deadline', 'watcher', 'reason'):
-        item = value.get(key)
-        if item is not None:
-            lines.append(key.replace('_', ' ').capitalize() + ': ' +
-                         (json.dumps(item, sort_keys=True) if isinstance(item, (dict, list)) else str(item)))
+    """Readable operator view; machine clients retain the complete structured result."""
+    import math
+    from datetime import datetime
+    def number(item):
+        return str(item) if type(item) in (int, float) and math.isfinite(item) else 'unknown'
+    def duration(item):
+        if type(item) not in (int, float) or not math.isfinite(item):
+            return 'unknown'
+        seconds = max(0, int(item))
+        hours, seconds = divmod(seconds, 3600)
+        minutes, seconds = divmod(seconds, 60)
+        return ' '.join(([str(hours) + 'h'] if hours else []) +
+                        ([str(minutes) + 'm'] if minutes else []) + [str(seconds) + 's'])
+    scope, usage, limits = (value.get(key) or {} for key in ('scope', 'usage', 'limits'))
+    lines = ['Governor: ' + str(value.get('state', 'unknown')),
+             'Task: ' + str(scope.get('thread_id', 'unknown'))]
+    lines.append('Tokens: ' + number(usage.get('used_tokens')) + ' of ' + number(limits.get('token_limit')) +
+                 ' used; ' + number(usage.get('remaining_tokens')) + ' tokens remaining')
+    elapsed = usage.get('elapsed_seconds')
+    remaining = usage.get('remaining_seconds')
+    if remaining is None and type(elapsed) in (int, float) and type(limits.get('time_limit_seconds')) in (int, float):
+        remaining = max(0, limits['time_limit_seconds'] - elapsed)
+    lines.append('Time: ' + duration(elapsed) + ' elapsed; ' + duration(remaining) + ' remaining')
+    basis = value.get('owner_receipt', {}).get('time_basis')
+    deadline = value.get('deadline')
+    if basis == 'authenticated_host_counter':
+        lines.append('Deadline: host elapsed counter; wall-clock deadline unavailable')
+    elif type(deadline) in (int, float) and math.isfinite(deadline):
+        try:
+            lines.append('Deadline: ' + datetime.fromtimestamp(deadline).astimezone().strftime('%Y-%m-%d %H:%M:%S %Z'))
+        except (ValueError, OSError, OverflowError):
+            lines.append('Deadline: unavailable')
+    shared = limits.get('shared')
+    if isinstance(shared, dict):
+        lines.append('Shared allowance: ' + number(shared.get('used_tokens')) + ' of ' +
+                     number(shared.get('token_limit')) + ' tokens used; also applies to this task')
+    if scope.get('limiting_scope'):
+        lines.append('Limiting scope: ' + str(scope['limiting_scope']))
+    watcher = value.get('watcher') or {}
+    lines.append('Watcher: ' + ('fresh' if watcher.get('fresh') else 'unavailable or unverified'))
+    if value.get('reason'):
+        lines.append('Reason: ' + str(value['reason']).replace('_', ' '))
     actions = value.get('actions')
-    if actions:
-        lines.append('Actions: ' + (', '.join(actions) if isinstance(actions, list) else json.dumps(actions)))
+    if isinstance(actions, list) and actions:
+        lines.append('Actions: ' + ', '.join(str(action) for action in actions))
     return '\n'.join(lines)
 
 
