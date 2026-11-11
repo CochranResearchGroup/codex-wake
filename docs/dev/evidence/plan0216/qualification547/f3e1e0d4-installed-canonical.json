@@ -1,0 +1,215 @@
+{
+  "source_commit": "f3e1e0d426f0012224439022c2dd48e8a7a0c4fe",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "package": "/tmp/wake216-uid1017/lib/python3.12/site-packages/codex_wake/__init__.py",
+  "uid": 1017,
+  "tabs": 100,
+  "initial_idle_active_turns": 0,
+  "active_conversations": 10,
+  "windows_seconds": 60.0,
+  "tiers": {
+    "activity": true,
+    "health": true,
+    "errors": true
+  },
+  "cpu_denominator": "one core",
+  "measurement": "actual installed TabMonitor owner plus all current owned descendants and reaped child CPU via proc cutime/cstime; fixture/driver/workload processes excluded",
+  "fixture_limit": "metadata-only Unix WebSocket fixture; no provider turns or proof of real native broadcasts",
+  "latency_measure": "fixture send to public projection, upper bound on receive-to-projection",
+  "production_effects": false,
+  "tick_interval_seconds": 1.0,
+  "public_status_poll_seconds": 0.1,
+  "source_override": false,
+  "fixture_tmux_identity": {
+    "pid": 3308878,
+    "start_ticks": 2552030,
+    "boot_id": "1f76a1cb-7485-46a3-a887-bd40786479ee"
+  },
+  "fixture_setup_seconds": 1.2484359180016327,
+  "startup_barrier": {
+    "boundary_at": 1794358157.824017,
+    "first_qualified_snapshot_at": 1794358166.6493707,
+    "subsequent_snapshot_at": 1794358176.619481,
+    "bound_panes": 100,
+    "active_turns": 0,
+    "formatting_status": "applied",
+    "failures": [],
+    "source_states": [
+      {
+        "kind": "tmux",
+        "state": "available"
+      },
+      {
+        "kind": "native",
+        "state": "connected"
+      }
+    ],
+    "enable_returned_at": 1794358157.824017
+  },
+  "formatting_enabled": "slate100tabs; configured through installed CLI",
+  "cold_start_seconds": 21.87535069000296,
+  "owner_cold_start_seconds": 20.62529990999974,
+  "native_bound_panes": 100,
+  "idle": {
+    "wall_seconds": 60.09791395999855,
+    "cpu_seconds": 0.49999999999999994,
+    "cpu_percent_one_core": 0.8319756328527513,
+    "max_aggregate_rss_bytes": 46444544,
+    "status_changes": 0,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 0.45,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 4.277318,
+    "fixture_driver_main_thread_cpu_seconds": 4.244501361,
+    "fixture_native_and_driver_other_threads_cpu_seconds": 0.03281663899999998,
+    "fixture_cpu_attribution_limit": "native protocol server and producer share driver process; other-thread CPU cannot isolate server from workload producer",
+    "fixture_tmux_server": {
+      "before": {
+        "status": "qualified",
+        "cpu_seconds": 0.81,
+        "rss_bytes": 4935680
+      },
+      "after": {
+        "status": "qualified",
+        "cpu_seconds": 1.11,
+        "rss_bytes": 4935680
+      },
+      "cpu_seconds": 0.30000000000000004,
+      "excluded_from_observer_gate": true,
+      "attribution": "private tmux server own CPU; workload panes excluded; formatting/shared terminal service work not separable by client"
+    },
+    "reaped_child_cpu_seconds": 0.04999999999999999,
+    "live_child_cpu_seconds": 0.0,
+    "format_state_max_bytes": 361025,
+    "format_state_versions_observed": 7,
+    "observer_costs_start": {
+      "ticks": 22,
+      "inventory_passes": 1,
+      "native_events": 1,
+      "fallback_probes": 0,
+      "last_tick_seconds": 0.0007204069988802075,
+      "total_seconds": 0.22791538800447597,
+      "resource_serializations": 100,
+      "resource_serialization_reuses": 0
+    },
+    "observer_costs_end": {
+      "ticks": 83,
+      "inventory_passes": 3,
+      "native_events": 3,
+      "fallback_probes": 0,
+      "last_tick_seconds": 0.0006878820022393484,
+      "total_seconds": 0.5330401069950312,
+      "resource_serializations": 300,
+      "resource_serialization_reuses": 0
+    },
+    "counter_limit": "observer counters are last published values; state inode sampling is a lower bound on writes"
+  },
+  "active_activation": {
+    "events": 10,
+    "burst_send_seconds": 0.0004868579999310896,
+    "total_wall_seconds": 6.181799832000252,
+    "cpu_seconds": 0.16000000000000014,
+    "barrier": {
+      "boundary_at": 1794358236.7174528,
+      "first_qualified_snapshot_at": 1794358236.8646858,
+      "subsequent_snapshot_at": 1794358242.865818,
+      "bound_panes": 100,
+      "active_turns": 10,
+      "formatting_status": "applied",
+      "failures": [],
+      "source_states": [
+        {
+          "kind": "tmux",
+          "state": "available"
+        },
+        {
+          "kind": "native",
+          "state": "connected"
+        }
+      ]
+    },
+    "excluded_from_ordinary_window": true
+  },
+  "active": {
+    "wall_seconds": 60.10085043000072,
+    "cpu_seconds": 2.35,
+    "cpu_percent_one_core": 3.9100944216039637,
+    "max_aggregate_rss_bytes": 51666944,
+    "status_changes": 120,
+    "unprojected_events": 0,
+    "owner_cpu_seconds": 2.04,
+    "main_thread_cpu_seconds": null,
+    "non_main_threads_cpu_seconds": null,
+    "fixture_driver_cpu_seconds": 3.9877369999999988,
+    "fixture_driver_main_thread_cpu_seconds": 3.9280599470000004,
+    "fixture_native_and_driver_other_threads_cpu_seconds": 0.05967705299999837,
+    "fixture_cpu_attribution_limit": "native protocol server and producer share driver process; other-thread CPU cannot isolate server from workload producer",
+    "fixture_tmux_server": {
+      "before": {
+        "status": "qualified",
+        "cpu_seconds": 1.15,
+        "rss_bytes": 4935680
+      },
+      "after": {
+        "status": "qualified",
+        "cpu_seconds": 1.74,
+        "rss_bytes": 4935680
+      },
+      "cpu_seconds": 0.5900000000000001,
+      "excluded_from_observer_gate": true,
+      "attribution": "private tmux server own CPU; workload panes excluded; formatting/shared terminal service work not separable by client"
+    },
+    "reaped_child_cpu_seconds": 0.30999999999999994,
+    "live_child_cpu_seconds": 0.0,
+    "format_state_max_bytes": 363657,
+    "format_state_versions_observed": 61,
+    "observer_costs_start": {
+      "ticks": 90,
+      "inventory_passes": 5,
+      "native_events": 13,
+      "fallback_probes": 0,
+      "last_tick_seconds": 0.058660564998717746,
+      "total_seconds": 0.6519488689955324,
+      "resource_serializations": 500,
+      "resource_serialization_reuses": 0
+    },
+    "observer_costs_end": {
+      "ticks": 150,
+      "inventory_passes": 16,
+      "native_events": 135,
+      "fallback_probes": 0,
+      "last_tick_seconds": 0.0013885480002500117,
+      "total_seconds": 1.6845575170009397,
+      "resource_serializations": 1697,
+      "resource_serialization_reuses": 4803
+    },
+    "counter_limit": "observer counters are last published values; state inode sampling is a lower bound on writes"
+  },
+  "p95_send_to_projection_seconds": 1.0695603920030408,
+  "latency_samples": 120,
+  "checks": {
+    "enabled": {
+      "health": true,
+      "errors": true
+    },
+    "intervals": {
+      "health": 60.0,
+      "errors": 5.0
+    },
+    "retained_checks": 200,
+    "checks": {
+      "health": 300,
+      "errors": 400
+    }
+  },
+  "native_methods": {
+    "initialize": 2,
+    "initialized": 2,
+    "thread/loaded/list": 6,
+    "thread/read": 600
+  },
+  "all_ordinary_events_projected": true,
+  "thresholds_pass": true,
+  "owned_control_processes_remaining": 0
+}
