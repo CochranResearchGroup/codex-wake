@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
+import signal
 import sys
 import tempfile
 import time
@@ -36,6 +38,8 @@ class SupervisorConfig:
     log_path: Path
     registry_dir: Path
     state_dir: Path
+    max_workers: int = 4
+    poll_timeout: float = 300.0
 
 
 def user_config_dir(env: dict[str, str] | None = None) -> Path:
@@ -86,14 +90,20 @@ def build_supervisor_config(
     registry_dir: Path | None = None,
     state_dir: Path | None = None,
     validate_executable: bool = True,
+    max_workers: int = 4,
+    poll_timeout: float = 300.0,
 ) -> SupervisorConfig:
     resolved_name = name or DEFAULT_SUPERVISOR_SERVICE
     if not resolved_name.endswith(".service"):
         resolved_name = f"{resolved_name}.service"
     if "/" in resolved_name:
         raise WakeError("supervisor service name must not contain '/'")
-    if interval <= 0:
+    if not math.isfinite(interval) or interval <= 0:
         raise WakeError("--interval must be greater than zero")
+    if type(max_workers) is not int or not 2 <= max_workers <= 32:
+        raise WakeError("--max-workers must be between 2 and 32")
+    if not math.isfinite(poll_timeout) or poll_timeout <= 0:
+        raise WakeError("--poll-timeout must be finite and greater than zero")
     resolved_state = (state_dir or default_supervisor_state_dir()).expanduser()
     resolved_registry = (registry_dir or default_registry_dir()).expanduser()
     resolved_log = (log_path or (user_state_dir() / "codex-wake-supervisor.log")).expanduser()
@@ -105,6 +115,8 @@ def build_supervisor_config(
         log_path=resolved_log,
         registry_dir=resolved_registry,
         state_dir=resolved_state,
+        max_workers=max_workers,
+        poll_timeout=poll_timeout,
     )
 
 
@@ -121,10 +133,12 @@ def render_supervisor_unit(config: SupervisorConfig) -> str:
         "Type=simple\n"
         f"ExecStart={systemd_quote(config.codex_wake_path)} supervisor run "
         f"--interval {config.interval:g} "
+        f"--max-workers {config.max_workers} --poll-timeout {config.poll_timeout:g} "
         f"--registry-dir {systemd_quote(config.registry_dir)} "
         f"--state-dir {systemd_quote(config.state_dir)}\n"
         "Restart=on-failure\n"
         "RestartSec=5\n"
+        "KillMode=process\n"
         f"StandardOutput=append:{config.log_path}\n"
         f"StandardError=append:{config.log_path}\n"
         "\n"
@@ -208,12 +222,16 @@ def enroll_root(
     registry_dir: Path | None = None,
     root_id: str | None = None,
     enabled: bool = True,
+    poll_interval: float | None = None,
     owner_kind: str = "repo",
     owner_name: str | None = None,
     codex_cmd: str | None = None,
     openclaw_cmd: str | None = None,
     now=None,
 ) -> Path:
+    if poll_interval is not None and (type(poll_interval) not in (int, float) or
+                                      not math.isfinite(poll_interval) or poll_interval <= 0):
+        raise WakeError("--poll-interval must be finite and greater than zero")
     resolved_root = wake_root.expanduser().resolve()
     resolved_repo = (repo_root or resolved_root.parent.parent).expanduser().resolve()
     resolved_registry = (registry_dir or default_registry_dir()).expanduser()
@@ -235,6 +253,8 @@ def enroll_root(
         },
         "dispatch": {},
     }
+    if poll_interval is not None:
+        entry["poll_interval"] = poll_interval
     if codex_cmd:
         entry["dispatch"]["codex_cmd"] = resolve_stable_executable(
             codex_cmd,
@@ -361,6 +381,11 @@ def entry_status(entry: dict[str, Any], *, state_dir: Path | None = None) -> dic
             "start the supervisor and run `codex-wake supervisor run --once`, "
             f"or unenroll obsolete root with `codex-wake supervisor unenroll --root-id {entry.get('root_id', '')}`"
         )
+    hold_path = wake_root / "monitor-reconciliation.json"
+    held = hold_path.exists() or hold_path.is_symlink()
+    if held:
+        health_status = "reconciliation_required"
+        remediation = "inspect uncertain poll effects and use supervisor reconcile with the exact hold token"
     if not enabled:
         remediation = f"enable this root registration or remove it with `codex-wake supervisor unenroll --root-id {entry.get('root_id', '')}`"
     return {
@@ -368,6 +393,9 @@ def entry_status(entry: dict[str, Any], *, state_dir: Path | None = None) -> dic
         "wake_root": str(wake_root.resolve()) if str(wake_root) else "",
         "repo_root": entry.get("repo_root", ""),
         "enabled": enabled,
+        "poll_interval": entry.get("poll_interval"),
+        "reconciliation_required": held,
+        "reconciliation_path": str(hold_path) if held else "",
         "registry_path": entry.get("_path", ""),
         "health_path": str(monitor_health_path(wake_root, monitor_dir)),
         "health_recent": recent,
@@ -400,87 +428,62 @@ def supervisor_status(config: SupervisorConfig, runner: CommandRunner | None = N
     }
 
 
-def supervisor_poll_once(
-    config: SupervisorConfig,
-    *,
-    mode: str = "once",
+def poll_registered_root(
+    config: SupervisorConfig, entry: dict[str, Any], *, mode: str = "once",
     dispatch: bool = True,
     signal_reconcile_reason: Literal["startup", "periodic"] = "startup",
-) -> list[dict[str, Any]]:
-    results: list[dict[str, Any]] = []
+) -> dict[str, Any]:
+    """Poll one explicitly enrolled root and report setup and evaluation failures."""
     monitor_dir = config.state_dir.parent / "monitors"
-    for entry in iter_registry_entries(config.registry_dir):
-        if not entry.get("enabled", False):
-            continue
-        wake_root_text = entry.get("wake_root")
-        if not isinstance(wake_root_text, str) or not wake_root_text:
-            continue
-        wake_root = Path(wake_root_text).expanduser().resolve()
-        repo_root_text = entry.get("repo_root")
-        repo_root = Path(repo_root_text).expanduser().resolve() if isinstance(repo_root_text, str) and repo_root_text else None
-        dispatch_config = entry.get("dispatch")
-        codex_cmd = (
-            dispatch_config.get("codex_cmd")
-            if isinstance(dispatch_config, dict)
-            and isinstance(dispatch_config.get("codex_cmd"), str)
-            else None
-        )
+    wake_root = Path(str(entry["wake_root"])).expanduser().resolve()
+    repo_text = entry.get("repo_root")
+    repo_root = Path(repo_text).expanduser().resolve() if repo_text else None
+    transports: dict[str, Any] = {}
+    try:
         transports = {"app_server": supervisor_app_server_readiness(entry)}
+        dispatch_config = entry.get("dispatch") or {}
+        result = poll_once(
+            wake_root, dispatch=dispatch,
+            app_server_codex_cmd=dispatch_config.get("codex_cmd"),
+            signal_reconcile_reason=signal_reconcile_reason,
+        )
+        summary = poll_result_dict(result)
+        if summary.get("skip_reason"):
+            return {"root_id": entry.get("root_id", ""), "wake_root": str(wake_root),
+                    "ok": True, "activity": False, "result": summary,
+                    "summary": format_poll_result(result), "skipped": summary["skip_reason"]}
+        health_path = write_monitor_health(
+            wake_root=wake_root, repo_root=repo_root, source="supervisor", mode=mode,
+            poll_result=summary, state_dir=monitor_dir,
+            extra={"root_id": entry.get("root_id", ""), "transports": transports},
+        )
+        return {"root_id": entry.get("root_id", ""), "wake_root": str(wake_root),
+                "ok": True, "activity": poll_result_has_activity(result),
+                "result": summary, "summary": format_poll_result(result),
+                "health_path": str(health_path)}
+    except Exception as exc:
+        error = str(exc)
         try:
-            result = poll_once(
-                wake_root,
-                dispatch=dispatch,
-                app_server_codex_cmd=codex_cmd,
-                signal_reconcile_reason=signal_reconcile_reason,
-            )
-            poll_summary = poll_result_dict(result)
-            health_path = write_monitor_health(
-                wake_root=wake_root,
-                repo_root=repo_root,
-                source="supervisor",
-                mode=mode,
-                poll_result=poll_summary,
-                state_dir=monitor_dir,
-                extra={
-                    "root_id": entry.get("root_id", ""),
-                    "transports": transports,
-                },
-            )
-            results.append(
-                {
-                    "root_id": entry.get("root_id", ""),
-                    "wake_root": str(wake_root),
-                    "ok": True,
-                    "activity": poll_result_has_activity(result),
-                    "result": poll_summary,
-                    "summary": format_poll_result(result),
-                    "health_path": str(health_path),
-                }
-            )
-        except Exception as exc:
             write_monitor_health(
-                wake_root=wake_root,
-                repo_root=repo_root,
-                source="supervisor",
-                mode=mode,
-                poll_result={},
-                state_dir=monitor_dir,
-                extra={
-                    "root_id": entry.get("root_id", ""),
-                    "transports": transports,
-                    "last_error": str(exc),
-                },
+                wake_root=wake_root, repo_root=repo_root, source="supervisor", mode=mode,
+                poll_result={}, state_dir=monitor_dir,
+                extra={"root_id": entry.get("root_id", ""), "transports": transports,
+                       "last_error": error},
             )
-            results.append(
-                {
-                    "root_id": entry.get("root_id", ""),
-                    "wake_root": str(wake_root),
-                    "ok": False,
-                    "activity": True,
-                    "error": str(exc),
-                }
-            )
-    return results
+        except OSError:
+            pass
+        return {"root_id": entry.get("root_id", ""), "wake_root": str(wake_root),
+                "ok": False, "activity": True, "error": error}
+
+
+def supervisor_poll_once(
+    config: SupervisorConfig, *, mode: str = "once", dispatch: bool = True,
+    signal_reconcile_reason: Literal["startup", "periodic"] = "startup",
+) -> list[dict[str, Any]]:
+    return [poll_registered_root(config, entry, mode=mode, dispatch=dispatch,
+                                signal_reconcile_reason=signal_reconcile_reason)
+            for entry in iter_registry_entries(config.registry_dir)
+            if entry.get("enabled", False) and entry.get("wake_root")]
 
 
 def supervisor_run_loop(config: SupervisorConfig, *, once: bool = False, dispatch: bool = True) -> int:
@@ -492,19 +495,23 @@ def supervisor_run_loop(config: SupervisorConfig, *, once: bool = False, dispatc
             else:
                 print(f"{item['root_id']} failed error={item.get('error', '')}")
         return 0
-    signal_reconcile_reason: Literal["startup", "periodic"] = "startup"
-    while True:
-        results = supervisor_poll_once(
-            config,
-            mode="loop",
-            dispatch=dispatch,
-            signal_reconcile_reason=signal_reconcile_reason,
-        )
-        signal_reconcile_reason = "periodic"
-        for item in results:
-            if item.get("activity"):
-                if item.get("ok"):
-                    print(f"{item['root_id']} {item['summary']}", flush=True)
-                else:
-                    print(f"{item['root_id']} failed error={item.get('error', '')}", flush=True)
-        time.sleep(config.interval)
+    from .supervisor_scheduler import SupervisorScheduler
+
+    stopping = False
+
+    def stop(_signum, _frame):
+        nonlocal stopping
+        stopping = True
+
+    previous = signal.signal(signal.SIGTERM, stop)
+    try:
+        with SupervisorScheduler(config, dispatch=dispatch) as scheduler:
+            while not stopping:
+                for item in scheduler.tick():
+                    if item.get("activity"):
+                        text = item.get("summary") if item.get("ok") else f"failed error={item.get('error', '')}"
+                        print(f"{item['root_id']} {text}", flush=True)
+                time.sleep(scheduler.wait_seconds())
+    finally:
+        signal.signal(signal.SIGTERM, previous)
+    return 0

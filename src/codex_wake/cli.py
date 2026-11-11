@@ -709,12 +709,20 @@ def build_parser() -> argparse.ArgumentParser:
     supervisor_enroll.add_argument("--owner-name")
     supervisor_enroll.add_argument("--codex-path", help="stable Codex executable path to record for this root")
     supervisor_enroll.add_argument("--openclaw-path", help="stable OpenClaw executable path to record for this root")
+    supervisor_enroll.add_argument("--poll-interval", type=float, default=None, help="per-root polling seconds; defaults to supervisor interval")
     supervisor_enroll.add_argument("--disabled", action="store_true", help="register the root disabled")
 
     supervisor_unenroll = supervisor_subparsers.add_parser("unenroll", help="remove a wake root from supervisor monitoring")
     add_supervisor_options(supervisor_unenroll)
     supervisor_unenroll.add_argument("--wake-root", dest="unenroll_wake_root", type=Path, default=None)
     supervisor_unenroll.add_argument("--root-id")
+
+    supervisor_reconcile = supervisor_subparsers.add_parser(
+        "reconcile", help="release an exact held poll after inspecting uncertain effects")
+    add_supervisor_options(supervisor_reconcile)
+    supervisor_reconcile.add_argument("--root-id", required=True)
+    supervisor_reconcile.add_argument("--expected-token", required=True)
+    supervisor_reconcile.add_argument("--acknowledge-uncertain-effects", action="store_true", required=True)
 
     supervisor_run = supervisor_subparsers.add_parser("run", help="run supervisor polling")
     add_supervisor_options(supervisor_run)
@@ -870,6 +878,8 @@ def add_service_options(parser: argparse.ArgumentParser) -> None:
 def add_supervisor_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--name", help="systemd user unit name; defaults to codex-wake-supervisor.service")
     parser.add_argument("--interval", type=float, default=1.0, help="supervisor poll interval in seconds")
+    parser.add_argument("--max-workers", type=int, default=4, help="maximum isolated poll workers (2-32)")
+    parser.add_argument("--poll-timeout", type=float, default=300.0, help="hold roots whose polling exceeds this many seconds")
     parser.add_argument("--codex-wake-path", help="stable codex-wake executable path; defaults to PATH resolution")
     parser.add_argument("--registry-dir", type=Path, default=None, help="root registry directory; defaults to ~/.config/codex-wake/roots.d")
     parser.add_argument("--state-dir", type=Path, default=None, help="supervisor state directory; defaults to ~/.local/state/codex-wake/supervisor")
@@ -2413,6 +2423,8 @@ def supervisor_config_for_args(args: argparse.Namespace, *, validate_executable:
     return build_supervisor_config(
         name=args.name,
         interval=args.interval,
+        max_workers=args.max_workers,
+        poll_timeout=args.poll_timeout,
         codex_wake_path=args.codex_wake_path,
         registry_dir=args.registry_dir,
         state_dir=args.state_dir,
@@ -2489,6 +2501,7 @@ def supervisor_command(args: argparse.Namespace, root: Path) -> int:
             registry_dir=config.registry_dir,
             root_id=args.root_id,
             enabled=not args.disabled,
+            poll_interval=args.poll_interval,
             owner_kind=args.owner_kind,
             owner_name=args.owner_name,
             codex_cmd=args.codex_path,
@@ -2506,6 +2519,11 @@ def supervisor_command(args: argparse.Namespace, root: Path) -> int:
         )
         print(f"unenrolled {path.stem}")
         print(f"removed={path}")
+        return 0
+    if command == "reconcile":
+        from .supervisor_scheduler import reconcile_root
+        reconcile_root(config, args.root_id, expected_token=args.expected_token)
+        print(f"reconciled {args.root_id}; future polling may resume under existing authority")
         return 0
     if command == "run":
         if args.once and args.as_json:
