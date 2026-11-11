@@ -40,3 +40,14 @@ changes, broad code review or post-review TDD pass. Parent owns producer
 Memory disposition: not_durable — bounded worker implementation evidence is
 retained here and reconciled into the parent issue/plan rather than independent
 memory capture.
+
+## Integrated producer qualification
+
+The producer was integrated at2e41e942 and publication at0c457db4;7cf0e16a
+handles minimal metadata correctly. The combined public monitor/observer/read
+channel selection passes20tests onbothPython3.11/3.12 (13.010/12.986s).
+The complete affected tab selection passes225tests perinterpreter (74.037/
+70.656s). This includes the actual daemon full-row and enabled-routing cases.
+Logs and selection boundaries: ../plan0216/validation-encoded-publication.
+These checks resolve the initial agent checkpoint's producer dependency;
+installed CPU and live-read-only acceptance remain separate pending gates.

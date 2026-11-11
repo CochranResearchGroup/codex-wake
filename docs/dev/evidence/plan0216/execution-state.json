@@ -27,6 +27,6 @@
   "merge_authorized": false,
   "deploy_authorized": false,
   "production_enablement_authorized": false,
-  "validation_hold": "Exactwheel5 idlePASS0.898787%, activeFAIL5.226410%, all120events/p95.9799s/cleanup0. Retained read-only formatting channel repair in progress to remove reader fork peractiveframe; existing writers/capture/metadata feed unchanged. Review0/remediation0.",
-  "qualification_source": "36f42dbe850bcbdc667b9534608e90d94854247d"
+  "validation_hold": "Exactwheel6 idlePASS0.815507%, activeFAIL5.112315%, all120events/p951.01366s/cleanup0. Revision-qualified resource encodings and trusted single-encode publication integrated;225tabtestsPASSbothPython;20combinedpublictestsPASSboth; componentprototype saves.303CPU/60frames, not wholeowneracceptance. Next exact dev3 installedgate pending; review0/remediation0.",
+  "qualification_source": "7cf0e16a"
 }
