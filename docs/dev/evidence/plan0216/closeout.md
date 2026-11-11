@@ -34,3 +34,5 @@ Delivery is feat/efficient-tab-observer and draft PR only. No merge, production
 installation, monitor enablement or worktree/artifact cleanup. Original main
 checkout unrelated dirty work is preserved. Memory disposition forbidden because
 higher-priority instructions require an explicit user memory-write request.
+
+Draft PR: https://github.com/CochranResearchGroup/codex-wake/pull/551 (OPEN/draft, base main).

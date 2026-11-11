@@ -54,5 +54,6 @@
   "status": "complete",
   "delivery": "validated branch and draft PR; no merge/deploy/activation",
   "qualification_receipt": "qualification547/accepted-eighth.md",
-  "memory_disposition": "forbidden"
+  "memory_disposition": "forbidden",
+  "pull_request": "https://github.com/CochranResearchGroup/codex-wake/pull/551"
 }
