@@ -2,7 +2,7 @@
   "issue": 563,
   "parent": 526,
   "branch": "fix/stable-tab-operation-identities",
-  "status": "qualifying",
+  "status": "qualified",
   "scope": [
     "stable metadata-independent reorder comparisons",
     "transfer and lost-reply/undo compatibility",
@@ -28,5 +28,7 @@
   "live_layout_mutations_authorized": false,
   "authorization": "Standing operator instruction to review/merge/deploy; current go authorizes this hardening repair. Live moves/deletes remain excluded.",
   "fixed_base": "b6e93c2dada4eae08a869d569b5036defd2eaf39",
-  "source_validation": "117 affected checks eachPython plus30additionalcaller checks eachPython, newguards passed"
+  "source_validation": "117 affected checks eachPython plus30additionalcaller checks eachPython, newguards passed",
+  "qualification": "qualification/summary.md",
+  "review": "review.md"
 }
