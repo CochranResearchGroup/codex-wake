@@ -19,7 +19,7 @@ import threading
 import time
 
 from codex_wake.native_protocol import native_request
-from codex_wake.goal_usage import observe_usage
+from codex_wake.goal_usage import observe_usage, observe_session_usage
 from codex_wake.process import process_identity
 
 
@@ -70,6 +70,11 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
                     if number==1:
                         provider_started.set()
                         if not lease_ready.wait(max(0,min(20,expiry-time.monotonic()))):return
+                    elif number==5:
+                        emit(dict(type='response.output_item.done',item=dict(type='message',role='assistant',id='resumed',content=[dict(type='output_text',text='LOCAL GUARDED RESUME DONE')])))
+                        emit(dict(type='response.completed',response=dict(id=response_id,usage=dict(input_tokens=2,input_tokens_details=dict(cached_tokens=0),output_tokens=0,total_tokens=2))))
+                        calls[number-1].update(response_id=response_id,injected_total_tokens=2,guarded_resume=True)
+                        return
                     else:
                         if peer:
                             calls[number-1].update(response_id=response_id,injected_total_tokens=None,pending_at_stop=True)
@@ -128,7 +133,7 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
             if remaining<=0:raise RuntimeError('native delegation packet90second limit')
             return native_request(endpoint,str(codex),method,params,remaining)
         root=rpc('thread/start',dict(cwd=str(base),historyMode='legacy',experimentalRawEvents=True))['thread']['id'];result['root_thread_id']=root
-        goal=rpc('thread/goal/set',dict(threadId=root,status='blocked',origin='user',tokenBudget=1000,objective='Bounded local native delegated accounting fixture'))['goal'];result['goal']=goal
+        goal=None if governor_stop else rpc('thread/goal/set',dict(threadId=root,status='blocked',origin='user',tokenBudget=1000,objective='Bounded local native delegated accounting fixture'))['goal'];result['goal']=goal
         started=rpc('turn/start',dict(threadId=root,input=[dict(type='text',text='Run only the approved local delegated fixture.')]))
         result['root_initial_turn_id']=started['turn']['id']
         if governor_stop:
@@ -154,7 +159,9 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
             operation_number=[0]
             def governor(verb,**options):
                 argv=[str(wake_cli),'--wake-root',str(wake_root),'governor',verb,root,'--endpoint',endpoint,'--json']
-                for key,value in options.items():argv.extend(['--'+key.replace('_','-'),str(value)])
+                for key,value in options.items():
+                    if value is True:argv.append('--'+key.replace('_','-'))
+                    else:argv.extend(['--'+key.replace('_','-'),str(value)])
                 remaining=min(15,expiry-time.monotonic())
                 if remaining<=0:raise RuntimeError('governor packet wall clock exhausted')
                 completed=subprocess.run(argv,env=env,cwd=base,capture_output=True,text=True,timeout=remaining)
@@ -185,7 +192,7 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
             assert result['initial_lease_excludes_child'],'fixture did not create a late child'
             until=min(expiry,time.monotonic()+2)
             while True:
-                accounting=observe_usage(home,root,goal['createdAt'])
+                accounting=observe_session_usage(home,root)
                 if accounting.get('state')=='qualified' and accounting.get('used_tokens')==45 and child in accounting.get('thread_ids',[]):break
                 if time.monotonic()>=until:raise RuntimeError('original native history did not qualify the live child before stop')
                 time.sleep(.05)
@@ -218,7 +225,7 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
             until=min(expiry,time.monotonic()+20)
             while True:
                 root_view=view(root);child_view=view(child)
-                if root_view['goal'] and root_view['goal']['status']=='paused' and not any(turn['status']=='inProgress' for turn in root_view['turns']+child_view['turns']):break
+                if root_view['goal'] is None and not any(turn['status']=='inProgress' for turn in root_view['turns']+child_view['turns']):break
                 if time.monotonic()>=until:raise RuntimeError('native lease did not stop exact root and late child')
                 time.sleep(.1)
             until=min(expiry,time.monotonic()+3)
@@ -242,8 +249,33 @@ def qualify(base,codex,*,wake_cli=None,governor_stop=None):
                     item=header['payload'];metadata.append({key:item.get(key) for key in ('id','parent_thread_id','source','session_id')})
             result['metadata']=metadata
             result.update(root_after_stop=root_view,child_after_stop=child_view,unrelated_after_stop=peer_view,native_lease_after_stop=lease,
-                verdict='PASS_NATIVE_GOVERNOR_'+governor_stop.upper().replace('-','_'),accounting=observe_usage(home,root,goal['createdAt']),
+                verdict='PASS_NATIVE_GOVERNOR_'+governor_stop.upper().replace('-','_'),accounting=observe_session_usage(home,root),
                 expected_tokens=45,completed_response_tokens_only=True)
+            if governor_stop=='watcher-loss':
+                watcher_log=(base/'watcher-repaired.log').open('w')
+                try:watcher=subprocess.Popen([sys.executable,'-m','codex_wake.self_limits','watch',str(wake_root)],env=env,cwd=base,stdin=subprocess.DEVNULL,stdout=watcher_log,stderr=watcher_log,start_new_session=True)
+                finally:watcher_log.close()
+                result['repaired_watcher_identity']=process_identity(watcher.pid)
+                from codex_wake.goal_supervision import _heartbeat, _directory
+                until=min(expiry,time.monotonic()+5)
+                while not _heartbeat(_directory(wake_root)).get('fresh'):
+                    if time.monotonic()>=until:raise RuntimeError('repaired watcher did not become fresh')
+                    time.sleep(.1)
+            resumed=governor('extend',add_tokens=1000,add_seconds=60,resume=True)
+            result['guarded_resume']=resumed
+            assert resumed.get('operation',{}).get('resumed') is True,resumed
+            until=min(expiry,time.monotonic()+8)
+            while len(calls)<5:
+                if time.monotonic()>=until:raise RuntimeError('guarded resume did not make exactly one local request')
+                time.sleep(.05)
+            assert len(calls)==5 and calls[-1].get('guarded_resume'),calls
+            after=view(root);result['root_after_guarded_resume']=after
+            assert after['goal'] is None,'guarded resume created hidden goal'
+            old_ids={turn['id'] for turn in root_view['turns']}
+            new_ids={turn['id'] for turn in after['turns']}-old_ids
+            assert len(new_ids)==1,new_ids
+            assert resumed['operation'].get('started_turn_id')==next(iter(new_ids)),resumed
+            result['guarded_started_turn_id']=next(iter(new_ids))
             assert len(calls)<=5
             return result
         while time.monotonic()<expiry:
