@@ -962,7 +962,7 @@ def qualify(options):
             require(rpc('thread/goal/get', dict(threadId=peer))['goal'] == peer_goal,
                     'governor UI changed unrelated task')
             require(len(calls) <= 3, 'governor UI localhost request cap exceeded')
-            report.update(verdict='PASS', governor_ui=True, activated=activated, stopped=stopped,
+            report.update(verdict='PASS_REAL_NATIVE_GOVERNOR_UI', governor_ui=True, activated=activated, stopped=stopped,
                 resumed=resumed, disabled=disabled, watcher_loss=True, peer_unchanged=True,
                 explicit_resume_native_turns=2, abrupt_watcher_loss_exact_turn_stopped=True,
                 non_resume_ui_commands_started_inference=False,
@@ -1883,6 +1883,7 @@ def qualify(options):
         if report["verdict"]
         in (
             "PASS_REAL_NATIVE_INSTALLED_TUI_JOURNEY",
+            "PASS_REAL_NATIVE_GOVERNOR_UI",
             "PASS_REAL_NATIVE_SUPERVISION_LOSS",
             "PASS_REAL_NATIVE_OBSERVATION_RECOVERY",
         )
