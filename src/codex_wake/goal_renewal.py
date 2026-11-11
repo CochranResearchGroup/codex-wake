@@ -1098,9 +1098,6 @@ def resume_existing(root, policy, thread, *, principal, operation_id):
         if (allocation or receipt).get('governor_enabled', True) is False:
             _fail('renewal_resume_held', 'reactivate the governor before resuming; no resources were renewed')
         authorize(root, 'resume.self', principal)
-        if receipt.get('requires_native_guard'):
-            from .goal_native_guard import qualified
-            if not qualified(receipt):return dict(resumed=False,resume_state='awaiting_first_poll',renewed_resources=False,next_action='Qualify the native task loss guard and fresh watcher before continuing; advisory requires a separate explicit choice.')
         snapshot = _snapshot(root, receipts, allocation)
         task=receipt.get('task_window')
         task_disabled=bool(task and task.get('governor_enabled') is False)
@@ -1115,7 +1112,8 @@ def resume_existing(root, policy, thread, *, principal, operation_id):
         deadline=allocation['deadline'] if task_disabled else receipt['deadline']
         if used >= cap or upper(receipt) >= deadline:
             _fail('renewal_resume_held', 'existing allowance is exhausted; extend or reset explicitly')
-        ack = receipt.get('poll_ack', {})
+        no_goal=snapshot['goals'][thread]['status']=='session'
+        ack = receipt.get('prepared_poll_ack' if no_goal and receipt.get('requires_native_guard') else 'poll_ack',{})
         controller = snapshot['controller']
         age = time.clock_gettime(time.CLOCK_BOOTTIME)-ack.get('observed_boottime', -1e30)
         if (ack.get('enrollment_revision') != receipt.get('enrollment_revision')
@@ -1125,6 +1123,11 @@ def resume_existing(root, policy, thread, *, principal, operation_id):
             return dict(resumed=False, resume_state='awaiting_first_poll', renewed_resources=False)
         goal, active = supervision._native(receipt['grant'], thread)
         path = directory / (supervision._name(thread)+'.json')
+        if receipt.get('requires_native_guard'):
+            from .goal_native_guard import qualified,guarded_start
+            if goal is None:
+                return guarded_start(path,receipt,operation_id,controller)
+            if not qualified(receipt):return dict(resumed=False,resume_state='awaiting_first_poll',renewed_resources=False)
         key = 'operator-resume:'+_id(thread, operation_id)
         effect = receipt.get('effects', {}).get(key)
         if goal:
@@ -1264,3 +1267,60 @@ def renew_task_window(root, policy, thread, *, principal, operation_id, mode,
             supervision._save(path,journal)
             _commit_targets(directory,path,journal,allocation_path)
             return deepcopy(result)
+
+
+def resume_unenforced(root,receipt,*,principal,operation_id):
+    """Explicit same-task continuation after its own enforcement was disabled.
+
+    Unknown usage remains unknown. Independent funded scopes are never waived.
+    """
+    from .goal_governance import control_path,independent_constraint
+    thread=receipt['thread_id'];_principal(principal,thread)
+    if principal.role!='operator':_fail('renewal_operator_required','authenticated operator continuation required')
+    directory=supervision._directory(root)
+    path=control_path(root,thread) if receipt.get('advisory_without_window') else directory/(supervision._name(thread)+'.json')
+    with supervision._lock(directory,'maintenance'),supervision._lock(directory,supervision._name(thread)):
+        receipt=_read(path)
+        if receipt.get('governor_enabled',True) is not False:
+            _fail('advisory_scope_changed','inspect the current scope before continuing')
+        restriction=independent_constraint(directory,receipt)
+        if restriction:_fail(restriction,'an independent shared or hard host scope remains; repair its accounting/enforcement before continuation')
+        authorize(root,'resume.self',principal)
+        if receipt.get('native_guard',{}).get('controller_generation') and receipt['native_guard'].get('status')!='unsupported':
+            from .goal_native_guard import release
+            release(path,receipt)
+            if receipt.get('native_guard',{}).get('release_verified') is not True:
+                return dict(resumed=False,resume_state='native_lease_release_pending',release_verified=False,renewed_resources=False)
+        goal,active=supervision._native(receipt['grant'],thread)
+        expected=receipt.get('control_goal_created_at')
+        if (goal.get('createdAt') if goal else None)!=expected:
+            _fail('advisory_native_scope_changed','native task identity changed; inspect and explicitly select the current scope')
+        key='operator-advisory-resume:'+_id(thread,operation_id)
+        effect=receipt.setdefault('effects',{}).get(key)
+        if effect:
+            return dict(resumed=effect['state']=='acknowledged',resume_state='submitted' if effect['state']=='acknowledged' else 'uncertain',
+                renewed_resources=False,started_turn_id=effect.get('started_turn_id'),release_verified=True)
+        if active:
+            if (not goal or goal.get('status')!='paused') and set(active)<=set(receipt.get('control_active_turn_ids',[])):
+                return dict(resumed=False,resume_state='already_running',renewed_resources=False,release_verified=True)
+            _fail('advisory_operator_reply_active','finish the current operator turn before continuing the stopped task')
+        if goal and goal.get('status') not in ('paused','blocked'):
+            _fail('advisory_native_goal_limit','independent native goal state requires its own qualified control')
+        effect=dict(state='intended',method='thread/goal/set' if goal else 'turn/start')
+        receipt['effects'][key]=effect;supervision._save(path,receipt)
+        try:
+            if goal:
+                supervision._request(receipt['grant'],'thread/goal/set',dict(threadId=thread,status='active',origin='user'))
+                after,_=supervision._native(receipt['grant'],thread)
+                verified=bool(after and after.get('createdAt')==expected and after.get('status')=='active')
+            else:
+                response=supervision._request(receipt['grant'],'turn/start',dict(threadId=thread,clientUserMessageId=key,
+                    input=[dict(type='text',text='Continue the interrupted task in the explicitly selected non-enforcing mode.')]))
+                turn=response.get('turn',{}).get('id')
+                verified=isinstance(turn,str) and bool(turn)
+                if verified:effect['started_turn_id']=turn
+            effect['state']='acknowledged' if verified else 'uncertain'
+        except Exception as error:effect.update(state='uncertain',error=type(error).__name__)
+        supervision._save(path,receipt)
+        return dict(resumed=effect['state']=='acknowledged',resume_state='submitted' if effect['state']=='acknowledged' else 'uncertain',
+            renewed_resources=False,started_turn_id=effect.get('started_turn_id'),release_verified=True)

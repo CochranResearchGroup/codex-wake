@@ -78,7 +78,7 @@ def ensure_watcher(root, thread):
             pid=child.pid, next_action='Inspect private goal-supervision/self-watcher.log and controller readiness; do not assume enforcement.')
 
 
-def execute(root, policy, verb, arguments, *, native_context, activation_baseline=False):
+def execute(root, policy, verb, arguments, *, native_context, activation_baseline=False,replace_advisory=False):
     """Private native hook. The caller cannot choose a thread, scope or policy."""
     if not isinstance(arguments, dict):
         raise ValueError('self limit arguments must be an object')
@@ -105,7 +105,7 @@ def execute(root, policy, verb, arguments, *, native_context, activation_baselin
     # Enrollment owns lifetime accounting and rejects increases, scope changes,
     # successor renewal and stop clearing under its maintenance/allocation locks.
     prepared = supervision.enroll(root, policy, thread, tokens, seconds,
-        native_context=native_context, session_scope=True, prepare_only=True, activation_baseline=activation_baseline,requires_native_guard=activation_baseline)
+        native_context=native_context, session_scope=True, prepare_only=True, activation_baseline=activation_baseline,requires_native_guard=activation_baseline,replace_advisory=replace_advisory)
     if prepared.get('state') != 'prepared':
         return prepared
     try:
@@ -117,8 +117,19 @@ def execute(root, policy, verb, arguments, *, native_context, activation_baselin
         from .goal_readiness import engagement
         return dict(prepared,state='held',reason=setup.get('reason'),watcher_setup=setup,
             engagement=engagement(prepared,supervision._heartbeat(supervision._directory(root))))
+    path=Path(root)/'goal-supervision'/(supervision._name(thread)+'.json')
+    if activation_baseline and (not path.exists() or replace_advisory):
+        from .goal_native_guard import preflight
+        readiness=preflight(root,grant,thread)
+        if not readiness['ready']:
+            from .goal_readiness import engagement
+            return dict(prepared,state='held',reason=readiness['reason'],admitted=False,
+                deadline=None,time_origin=None,started_upper=None,used_tokens=None,enrollment_revision=0,generation=None,
+                activation_preflight=readiness,controller=supervision._heartbeat(supervision._directory(root)),
+                engagement=engagement(dict(prepared,state='held',reason=readiness['reason']),
+                    supervision._heartbeat(supervision._directory(root))))
     result = supervision.enroll(root, policy, thread, tokens, seconds,
-        native_context=native_context, session_scope=True, activation_baseline=activation_baseline,requires_native_guard=activation_baseline)
+        native_context=native_context, session_scope=True, activation_baseline=activation_baseline,requires_native_guard=activation_baseline,replace_advisory=replace_advisory)
     end = time.monotonic() + 3
     while True:
         result = supervision.show(root, policy, thread, native_context=native_context)
@@ -129,7 +140,7 @@ def execute(root, policy, verb, arguments, *, native_context, activation_baselin
     return dict(result, watcher_setup=setup)
 
 
-def local_execute(root, policy, verb, arguments, *, thread_id, activation_baseline=False):
+def local_execute(root, policy, verb, arguments, *, thread_id, activation_baseline=False,replace_advisory=False):
     """Same-UID human CLI adapter; exact owned native endpoint/history qualifies target.
 
     This is host authority, like the existing local CLI, not native model caller
@@ -155,7 +166,7 @@ def local_execute(root, policy, verb, arguments, *, thread_id, activation_baseli
     context = dict(threadId=thread_id, sessionId=session, callId='local-'+uuid4().hex,
         **{'x-codex-turn-metadata':dict(thread_id=thread_id, session_id=session,
             turn_id=active[0] if active else 'local-operator')})
-    return execute(root, policy, verb, arguments, native_context=context, activation_baseline=activation_baseline)
+    return execute(root, policy, verb, arguments, native_context=context, activation_baseline=activation_baseline,replace_advisory=replace_advisory)
 
 
 def tool_specs():
