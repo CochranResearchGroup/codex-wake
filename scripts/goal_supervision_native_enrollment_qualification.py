@@ -119,7 +119,7 @@ def qualify(base, codex, import_boundary=False, governor=False):
                 if time.monotonic()>end:raise RuntimeError('watcher not fresh')
                 time.sleep(.1)
             from codex_wake.lifecycle_budget import trusted_upper
-            while trusted_upper()<goal['createdAt']:
+            while not governor and trusted_upper()<goal['createdAt']:
                 if time.monotonic()>end:raise RuntimeError('qualified clock unavailable')
                 time.sleep(.1)
             if import_boundary and index==0:
