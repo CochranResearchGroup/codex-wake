@@ -21,6 +21,13 @@ contain no unrelated original-checkout edits.
 
 ## Spec
 
+R1 (P2, blocking, resolved): the first candidate made CLI ordering resolve a
+stable lifecycle pin while ControllerTabs ordering admission still required its
+strict target. A real controller/CLI-adapter/OAuth-facade regression went red
+with uncertain/stale_target. Ordering admission and its returned target now use
+the stable pin too; capture/input still accept only strict target. Existing
+physical swap/undo test now changes titles through the complete front door.
+The installed workflow also checks actual CLI protected-no-op preview/apply/undo.
 No remaining accepted defect in the bounded metadata-identity repair. Reorder
 checks still preserve meaningful activity/repository/binding/focus/pin/layout
 changes and verify the original stored fingerprint. Relocation/undo/reconciliation
@@ -34,4 +41,6 @@ pass. Native Windows is explicitly not rerun; psmux contract checks are source
 proof only. Saved groups following tabs across sessions remains a separate
 operator decision, outside the reproduced failure repair; existing semantics stay.
 
-Accepted findings: Standards0; Spec0. No unresolved blocking source finding.
+Accepted findings: Standards0; Spec1 (highest P2), resolved. Exact final installed
+qualification follows this front-door repair; the c8d12f7a package receipts remain
+precursor evidence rather than proof of the repaired CLI route.

@@ -88,6 +88,18 @@ def main():
             assert made['status']=='applied',made
             assert directory in tmux('list-panes','-s','-t','workers','-F','#{pane_current_path}')
             checks.append('installed-cli-empty-open-rename-defaults-new-tab-existing-process-preserved')
+            # The same public CLI pin is usable while pane status titles change.
+            # These inert shells are protected/unqualified, so this is an explicit
+            # diagnosed no-op; eligible physical swaps are proved by native tests.
+            ordering=unwrap(command('tabs','preview','--session',sock+'::workers','--mode','activity'))
+            assert ordering['status']=='preview',ordering
+            tmux('select-pane','-t','workers','-T','owned title update')
+            arranged=unwrap(command('tabs','apply','--session',sock+'::workers','--plan-id',ordering['plan']['plan_id']))
+            assert arranged['status']=='applied' and not arranged['receipt']['swaps'],arranged
+            tmux('select-pane','-t','workers','-T','owned title before undo')
+            restored=unwrap(command('tabs','undo','--session',sock+'::workers','--receipt-id',arranged['receipt']['receipt_id']))
+            assert restored['status']=='undone',restored
+            checks.append('installed-cli-ordering-pins-metadata-updates-diagnosed-protected-noop-undo')
             destination=local('tabs.session.create',dict(name='destination',server=sock))['session']
             before=births('workers')
             from codex_wake.tab_views import TabViews

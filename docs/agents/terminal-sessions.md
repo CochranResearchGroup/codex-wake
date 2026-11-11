@@ -91,7 +91,7 @@ tab. Namespace, window/pane roster and process births remain fenced. Ordering
 also checks focus, pins, bindings, repository and the chosen activity/trait facts;
 a relevant change still requires a new preview. Undo preserves later manual moves.
 
-For direct tab lifecycle API/MCP mutations, use the resource's `lifecycle_target`
+For direct tab lifecycle and ordering API/MCP mutations, use the resource's `lifecycle_target`
 from `tabs.list`/`tabs.show`. It remains valid across those incidental pane metadata
 updates. The ordinary `target` stays strict for input/capture. Local CLI resolves
 the appropriate pin automatically. Fresh legacy lifecycle targets remain accepted;

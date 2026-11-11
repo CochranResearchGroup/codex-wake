@@ -65,7 +65,15 @@ class ControllerTabsTests(unittest.TestCase):
                 base = dict(workspace='fixture', expected_target=row['target'])
                 capture = owner.execute('tabs.capture', dict(base,pane=row['window']['panes'][0]['pane_id'], lines=5))
                 self.assertTrue(capture['fallback'])
-                plan = owner.execute('tabs.preview', base)['plan']
+                subprocess.run(['tmux','-S',socket,'select-pane','-t','%0','-T','changed status'],check=True)
+                with self.assertRaises(InventoryError) as strict:
+                    owner.execute('tabs.capture',dict(base,pane=row['window']['panes'][0]['pane_id'],lines=5))
+                self.assertEqual(strict.exception.code,'stale_target')
+                from codex_wake.tab_commands import operator_execute
+                preview=operator_execute('tabs.preview',dict(workspace='fixture'),directory,owner=owner)['result']['operation']
+                self.assertEqual(preview['phase'],'terminal',preview)
+                plan=preview['result']['plan']
+                base=dict(workspace='fixture',expected_target=row['lifecycle_target'])
                 from codex_wake.controller_auth import OAuthAuthority
                 from codex_wake.controller_runtime import ControllerRuntime
                 from codex_wake.controller_tabs import AuthorizedTabs
@@ -83,16 +91,18 @@ class ControllerTabsTests(unittest.TestCase):
                 def mutate(operation,payload,key):
                     request = dict(operation_id=key,idempotency_key=key,correlation_id=key,binding='fixture-cli',target=payload['expected_target'])
                     return facade.execute(token,operation,dict(payload,_request=request))['result']['operation']
+                subprocess.run(['tmux','-S',socket,'select-pane','-t','%0','-T','status before apply'],check=True)
                 applied = mutate('tabs.apply',dict(base,plan_id=plan['plan_id']),'apply')
                 self.assertEqual(applied['phase'],'terminal')
                 result = applied['result']
                 self.assertEqual(result['receipt']['status'], 'applied')
                 self.assertTrue(result['receipt']['swaps'])
-                current = owner.execute('tabs.list', {})['resources'][0]['target']
-                self.assertNotEqual(current,row['target'])
+                current = owner.execute('tabs.list', {})['resources'][0]['lifecycle_target']
+                self.assertNotEqual(current,row['lifecycle_target'])
                 stale = mutate('tabs.undo',dict(base,receipt_id=result['receipt']['receipt_id']),'stale')
                 self.assertEqual(stale['reason'],'stale_target')
-                self.assertEqual(owner.execute('tabs.list',{})['resources'][0]['target'],current)
+                self.assertEqual(owner.execute('tabs.list',{})['resources'][0]['lifecycle_target'],current)
+                subprocess.run(['tmux','-S',socket,'select-pane','-t','%0','-T','status before undo'],check=True)
                 undone_operation = mutate('tabs.undo',dict(workspace='fixture',expected_target=current,receipt_id=result['receipt']['receipt_id']),'undo')
                 self.assertEqual(undone_operation['phase'],'terminal')
                 undone = undone_operation['result']

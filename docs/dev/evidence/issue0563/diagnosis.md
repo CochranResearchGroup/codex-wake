@@ -39,3 +39,11 @@ pending. Each focused command has180second budget, no retries. HostedCIzero.
 No broad redesign of input authority or terminal backends. Saved-group placement
 semantics are a pending independent operator choice, not needed to repair these
 reproduced failures. Source and installed acceptance remain separate boundaries.
+
+Final review caught R1: the stable lifecycle pin was not yet accepted by the
+ControllerTabs ordering front door. New public controller/CLI-adapter/real OAuth
+facade red trace retained in front-red.log. Minimal ordering-only guard/response
+fix passes test_controller_tabs on both interpreters, with strict capture refusal
+and actual eligible swaps/undo under changing titles. Actual CLI acceptance
+adds a separately labelled protected no-op case. All earlier qualification
+receipts remain source-bound to c8d12f7a; new immutable final candidate is required.
