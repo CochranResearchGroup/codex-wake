@@ -1552,12 +1552,13 @@ monitor remains stopped pending separate loaded-host cycle qualification.
 
 ## P216 | Efficient tab observation and stable formatting
 
-State: OPEN
+State: CLOSED
 
 Plan: [Efficient tab observation](docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md).
-Specification: [#540](https://github.com/CochranResearchGroup/codex-wake/issues/540).
-Seven tickets #541-#547; native/tmux feeds and tiered checks #542/#543/#545 closed.
-Cache, owner, projection and installed proof remain open. Exact wheel5 passes
-idle0.899% but active5.226% exceeds5%; a retained read-only formatting channel is
-the next measured repair. Review/TDD remediation remain reserved after closure.
-No production monitoring activation, merge or deployment.
+Specification: [#540](https://github.com/CochranResearchGroup/codex-wake/issues/540) remains open.
+All seven implementation tickets #541–#547 closed. Final exact source f3e1e0d4:
+100 tabs,60s idle0.832%/active3.910% one core,RSS51.7MB,p951.070s,120/120 changes.
+One Standards/Spec review and one TDD remediation pass complete; all3findings fixed.
+Four installed transports and read-only46-tab host checks pass with explicit live
+transition/shared-kernel limits. Delivery is a validated branch and draft PR.
+No production monitoring activation, merge, deployment or worktree deletion.

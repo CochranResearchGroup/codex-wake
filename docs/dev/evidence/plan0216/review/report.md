@@ -2,7 +2,7 @@
 
 Frozen source afd0061f, base fa2363c24bf921ecf0bd8390739e96041e620e8f.
 Independent reviewers /root/review_standards216 and /root/review_spec216.
-Diff and commit list are adjacent. No second broad review is authorized.
+Diff command/hash and commit list are adjacent; full diff is reproducible from immutable Git. No second broad review is authorized.
 
 ## Standards
 

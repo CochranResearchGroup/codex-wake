@@ -12,3 +12,5 @@ findings. P216 itself introduces no reported audit problem.
 Commands: Python3.12 scripts/check_policy_wiring.py; Python3.12
 .codex/skills/repo-policy-selector/scripts/audit_planning_contract.py --repo-root .
 --active-only --json. Full ephemeral audit /tmp/wake216-planning-audit.json.
+
+Final active audit repeated after P216 closure: same pre-existing Plan0214 error; no new P216 defect. Private result /tmp/wake216-final-planning-audit.json.

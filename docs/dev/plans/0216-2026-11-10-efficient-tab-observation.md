@@ -1,6 +1,6 @@
 # LOCAL-P216 | Efficient tab observation and stable formatting
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/540
 Domain authority: GLOSSARY.md
@@ -8,17 +8,19 @@ Scope: approved specification and seven implementation tickets; user authorized 
 
 ## Current State
 
-All seven implementation tickets #541–#547 are CLOSED following exact installed
-qualification at source8f5f0429: idle0.732393%, active3.711613% of one core,
-48,422,912B aggregate RSS,120/120 events, p951.022886s, cleanup0. The four
-installed transports and bounded read-only46-tab existing-host check pass with
-explicit limits: no natural live native transition; shared WSL kernel; lifetime
-ru_maxrss is not phase RSS. Parent#540 stays open.
-The single independent Standards/Spec review is complete (1 Standards P2,
-2 Spec P1 accepted). One bounded TDD remediation pass is running for remaining
-deadline propagation, skipped-evidence invalidation and exact source identity.
-The changed immutable candidate requires new installed qualification. No second
-broad review, merge, deployment or production enablement is authorized.
+All seven implementation tickets #541–#547 are CLOSED. Final post-review source
+f3e1e0d4 passed the exact installed 100-tab owner + Slate gate: idle0.831976%,
+active3.910094% of one core, RSS51,666,944B,120/120 changes,p951.06956s.
+All four installed transports and bounded read-only46-tab host checks pass;
+68processbirths/layouts preserved and owned cleanup0. Native live transitions
+were not observed, so real broadcast transition behavior remains unverified.
+Shared WSL kernel and process-lifetime ru_maxrss measurement limits remain named.
+One independent Standards/Spec review and one bounded TDD remediation pass are
+complete; all three accepted findings have red/green evidence and final installed
+qualification. 227tab tests and10controller/scope tests pass on each Python3.11/3.12.
+See evidence/plan0216/review/report.md and qualification547 acceptance receipts.
+Delivery is the validated integration branch and draft PR. Parent#540 stays OPEN.
+No merge, deployment, production monitor activation or worktree deletion occurred.
 
 Historical interview context: research completed in notes/0011-2026-11-10-tab-observation-efficiency-research.md.
 Stock tmux/Byobu already supplies metadata notifications; source shows Codex
@@ -142,7 +144,7 @@ lifecycle/reconnect; independent observer and palette controls; bounded fair
 coalescing/backoff with explicituncertainty; private100tab plus existinglive-tab
 qualification before defaultcontinuousactivation are settled.
 
-## Consolidated shared understanding (confirmation pending)
+## Consolidated shared understanding (confirmed)
 
 Wake will replace repeated whole-workspace investigation with a shared persistent
 observation cache and qualified passive tmux/Codex event adapters. StockByobu and
@@ -203,13 +205,13 @@ Fixed review base fa2363c24bf921ecf0bd8390739e96041e620e8f.
 
 | Ticket | Owner | State | Dependencies |
 | --- | --- | --- | --- |
-| #541 cached inventory | primary | locally validated; integrated | none |
-| #542 native feed | /root/native542 | CLOSED; integrated cf1dede | none |
-| #543 tmux feed | /root/tmux543 | CLOSED; integrated7617727 | none |
-| #544 observer lifecycle | /root/native542 | CLOSED; integrated72bda0b7 | #541 #542 #543 closed |
-| #545 tiered checks | /root/checks545 | CLOSED; integrated3f75ef9a | #541 closed |
-| #546 stable projection | /root/tmux543 | REOPENED; test freeze barrier diagnosis | #541 closed |
-| #547 installed acceptance | /root/checks545 | provisional measurements; wait546 fixture | #544 #545 closed; #546 pending |
+| #541 cached inventory | primary | CLOSED; integrated and qualified | none |
+| #542 native feed | /root/native542 | CLOSED; integrated and qualified | none |
+| #543 tmux feed | /root/tmux543 | CLOSED; integrated and qualified | none |
+| #544 observer lifecycle | /root/native542 | CLOSED; integrated and qualified | #541 #542 #543 closed |
+| #545 tiered checks | /root/checks545 | CLOSED; integrated and qualified | #541 closed |
+| #546 stable projection | /root/tmux543 and serialization546 | CLOSED; integrated and qualified | #541 closed |
+| #547 installed acceptance | /root/accept547_resume | CLOSED; final post-TDD qualification | #544 #545 #546 closed |
 
 No nested delegation; three implementation lanes maximum. Inherited model/effort
 for bounded implementation workers; deterministic tool checks qualify their work.

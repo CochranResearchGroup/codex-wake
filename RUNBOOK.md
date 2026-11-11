@@ -8925,3 +8925,27 @@ mismatch, fixed with an actual owner cadence regression. Decoder-only msgspec
 The next #546 repair is a bounded retained read-only formatting channel, backed
 by native prototype evidence, before another exact installed gate. #541/#544/
 #546/#547 remain open; broad review0 and post-review TDD0. Production unchanged.
+
+
+## Turn | 2026-11-10 | P216 ticket closure and single review remediation
+
+All seven #541–#547 closed after exact wheel7 qualification. One independent
+Standards/Spec review of fa2363c...afd0061f accepted three findings: remaining
+inventory deadline propagation, skipped-work freshness invalidation and exact
+native source identity. One bounded TDD pass fixed them with public red/green
+regressions. Final source f3e1e0d4 passed227tab tests and10controller/scope tests
+on each Python3.11/3.12, plus Ruff/compile/generatedreferences/policywiring.
+These are affected presubmit checks, not the complete generic hosted suite.
+Planning audit retains the pre-existing Plan0214 missing Current State error.
+
+Exact final dev3 wheel8 under separate Linux UID1017:100tabs withSlate/alltiers,
+60s idle0.831976%/active3.910094% onecore, RSS51,666,944B,120/120 events,
+p951.06956s, fresh owned-process census0. CLI, actualstdioMCP, authenticatedAPI
+andOAuthMCP pass, including complete100row329178-byte stopped-cache responses.
+Read-only existinghost46tabs/19bindings,68births/layouts preserved,ownedcleanup0.
+No natural native transition occurred; real-live broadcast behavior remains
+unverified. Shared WSL kernel and lifetime ru_maxrss limits explicitly retained.
+No production install/monitor activation, merge, deployment or cleanup effects.
+Parent#540 remains open; isolated branch/worktrees retained for draft review.
+Memory disposition forbidden: no explicit memory-write request under higher-priority
+instructions. Canonical evidence docs/dev/evidence/plan0216/qualification547.

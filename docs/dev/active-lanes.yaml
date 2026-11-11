@@ -1226,12 +1226,12 @@ lanes:
     plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
     branch: feat/efficient-tab-observer
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
     dependencies: []
     overlaps: [P211, P213, P215]
     updated_at: 2026-11-10
-    disposition: native542 tmux543 checks545 closed; remaining541 544 546 547 held on installed active CPU gate; no production effects
+    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained
 
   - id: P216-544
     owner: ecochran76 / native542
@@ -1240,12 +1240,12 @@ lanes:
     plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
     branch: feat/observer-lifecycle-544
     target: feat/efficient-tab-observer
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: single delegated ticket; integration and acceptance retained by primary
+    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained
 
   - id: P216-545
     owner: ecochran76 / checks545
@@ -1259,7 +1259,7 @@ lanes:
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: accepted and integrated into feat/efficient-tab-observer; worktree retained for recovery
+    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained
 
   - id: P216-546
     owner: primary / delegated serialization546
@@ -1268,9 +1268,9 @@ lanes:
     plan: docs/dev/plans/0216-2026-11-10-efficient-tab-observation.md
     branch: feat/efficient-tab-observer
     target: feat/efficient-tab-observer
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
     dependencies: [P216]
     overlaps: [P216]
     updated_at: 2026-11-10
-    disposition: functional fragment integrated; reopened for installed CPU repair in isolated delegated worktrees
+    disposition: integrated and qualified; all7tickets closed; review1 and remediation1 complete; draft delivery only; worktrees retained
