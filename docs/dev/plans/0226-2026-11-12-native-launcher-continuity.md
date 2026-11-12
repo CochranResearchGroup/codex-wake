@@ -65,3 +65,11 @@ Operator2026-11-12 “yes approved” authorizes reviewed source merge, CLI-only
 dev13installation and attributed successors for seven stale Sentinel reviews,
 preserving each original due/TTL and campaign end. No daemon binary upgrade,
 provider policy change or arbitrary other wake recovery is included.
+
+## Installation/recovery checkpoint
+
+PR592 merged; dev13 CLI installed;97installed tests pass. Seven attributed
+successors armed at preserved due/TTL. Runtime recovery is qualified only for
+current0.167.2; resident MCPdev11 prevents stable-path registration until reconnect.
+Plan remains IN_PROGRESS for that gate and overdue review delivery readback.
+See note0226-native-launcher-installation; no shared refresh or daemon changes.
