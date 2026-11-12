@@ -24,6 +24,10 @@ an automatic fast-forward unsafe. Delivery checkout can be removed after the
 closeout PR establishes custody; retain branch refs. No native replacement,
 service restart, formatting reactivation, budget renewal or provider input.
 
+## Earlier source-only closeout
+
+The following snapshot predates the operator's subsequent delivery request.
+
 DONE for the bounded source fix at `f4167c0e76d2ab398cb4fc5ea8538ad7e44eed10`.
 Workspace enable/reenable restores its preference; global opt-out explains its
 block and recovery. Tab outcomes lead human output, unsuccessful effects and
