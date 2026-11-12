@@ -1,6 +1,6 @@
 # LOCAL-P224 | Governor PR integration and working deployment
 
-State: OPEN. Owner: primary/ecochran76. Work item: LOCAL-P224; follows#570.
+State: CLOSED. Owner: primary/ecochran76. Work item: LOCAL-P224; follows#570.
 Branch: feat/governor-experience. Target: origin/main.
 Qualified predecessor:95f6c631; integrated main base92c00a0d.
 
@@ -15,15 +15,20 @@ history copying, real-provider experiment, paid CI or unrelated cleanup.
 
 ## Current State
 
-Exact dev11 source965c6efe/wheel244180 and nativef986f6ed/package4712 pass
-source, installed and all five UID1017 runtime cases. All324 installed members
-and six native package members remain unchanged afterward. Public modded launch
-under outer002 yields daemon/TUI077 and new history600. Clock restored and owned
-Linux processes empty; preexisting Windows/working counter owners preserved.
-The initial3.11 timeout remains a known reliability gap with owner/review577;
-no clean-unflaky claim. Canonical mainab56445a is integrated. PR586 final review,
-merge, exact-main build and guarded working deployment remain. Working effects0.
-Detailed current evidence: docs/dev/evidence/plan0224/integration.json.
+CLOSED: PR586 reviewed and merged32eb90fb; exact dev11 installed at
+~/.local/share/codex-wake/releases/0.22.0.dev11-32eb90f. Merged wheelc29e4777 has
+all329 unpacked members identical to qualified244180. All324 installed production
+members and six native4712 members verified. Six future modded selections updated;
+two existing idle native packages updated through supported future_start without
+starting a daemon. Controller2287442 and supervisor2274820 use the new prefix;
+13 fresh worker-health roots, existing reconciliation hold retained,14 temporary
+pauses restored. Captured10 protected files and stock launcher unchanged;26
+pre-service native identities preserved. Tab startup/formatting remain disabled.
+Actual controller exposes seven governor tools and rejects anonymous access.
+No enrollment, renewal, credential/history migration or provider experiment.
+Known3.11 timeout remains under577 with owner/review date; no unflaky claim.
+Canonical qualification: integration.json; working receipt: deployment.json in
+ docs/dev/evidence/plan0224/. Rollback packages and exact private intents retained.
 
 ## Execution and acceptance
 
@@ -116,3 +121,5 @@ retain the original privacy refusal and causal private-umask pass separately.
 INT224-4 correction integrated237b8928 (worker aad1b0b3): three modded native subprocess boundaries use077; stock inheritance unchanged. Public launcher/admin RED observed002, GREEN26 onPython3.11/3.12 plus lint/compile/diff checks pass. Exact installed combined package proof remains required.
 
 Final source965c6efe/wheel244180:145PASS3.12;3.11firstTIMEOUT180 retained, verbose145PASS104.865 unchangedbound. Owner ec / review2026-11-19 / reliabilityfollow-up577; no clean-unflaky claim. Installed84PASS; actualpubliccodex-modded/outer002 UI71.480PASS withdaemon077/newrollouts600. Normalexact4712upgrade+rollbackPASS85.840s. Failed-start/delegates remain pending. Historicalcanonicalv4/cfa6 receipts did use publiccodex-modded; only newexplicitnative-directdiagnostics lacked that boundary.
+
+Closeout uses documentation branch docs/governor-deployment-224. Adjacent catalog P221 list indentation is normalized without changing its state; this lane ID is corrected from collided P223 to P224. Memory disposition: forbidden under the explicit-request boundary.
