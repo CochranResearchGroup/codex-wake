@@ -130,6 +130,17 @@
       "STD220-2"
     ],
     "verification_mode": "closed_world",
-    "remaining_gate": "Native rendering red/green, complete package-v4, exact-new-package installed qualification."
+    "remaining_gate": "Native rendering red/green, complete package-v4, exact-new-package installed qualification.",
+    "focused_progress": {
+      "SPEC220-1": {
+        "red": "CargoSignal remediation-spec1-red/job-20261112T020927Z-bb0493643545: failed exact rendering assertion,0compilererrors,605.549s",
+        "green": "CargoSignal remediation-spec1-green/job-20261112T021928Z-32930ccc72be:5PASS,0diagnostics,282.540s",
+        "remaining": "Exact rebuilt native package and installed qualification"
+      },
+      "SPEC220-2": {
+        "state": "red test running",
+        "job": "remediation-spec2-red/job-20261112T022447Z-1f95ce3fd121"
+      }
+    }
   }
 }
