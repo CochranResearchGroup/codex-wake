@@ -171,7 +171,9 @@ class TabObserver:
         self.costs = dict(ticks=0, inventory_passes=0, native_events=0,
                           fallback_probes=0, last_tick_seconds=0., total_seconds=0.,
                           resource_serializations=0, resource_serialization_reuses=0)
-        self.configuration = self._configuration()
+        # Requalify host-owned transports on the first tick. A socket may appear
+        # after owner construction, before its configuration baseline is captured.
+        self.configuration = self._configuration() if self.external_owner else None
         self._prepare_owner()
 
     def _configuration(self):
@@ -497,7 +499,7 @@ class TabObserver:
             self._close_feeds()
             self.owner = self.owner_factory(self.root)
             self._prepare_owner()
-            self.configuration = self._configuration()
+            self.configuration = configuration
             self.last_inventory = -float('inf')
         dirty = False
         tmux_items=list(self.tmux.items())
