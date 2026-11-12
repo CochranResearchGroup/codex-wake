@@ -95,3 +95,19 @@ two seconds. Apply that same event-readiness bound to source-loss assertion;
 retain projection-revision checks and actual disconnect. No production module or
 wheel byte changes. Source119 tests pass on both3.11/3.12 before this test-only
 correction; focused observer selection and installed58 rerun qualify correction.
+
+## INT224-4 | Private modded child creation
+
+Exact v5UI now resolves the owned session, exposing an independent privacy gate:
+UID1017 outer umask002 created an owned rollout0664; enrollment correctly refused
+it. A fresh fixture under077 passes the entire native journey (3localhostPOST,
+0external, empty owned census). No existing history permissions are changed.
+Public launcher regression independently reproduces inherited002 for both managed
+lifecycle and UI children. Bound correction to modded child creation in existing
+profile and administrative daemon launchers; stock inheritance remains unchanged.
+Working observation is shell0077, supervisor0002, stock daemons0077 and sampled
+stock history600: no working history leak is claimed. Rebuild exact combined
+Python wheel, qualify new installed bytes with unchanged native4712 package, and
+retain the original privacy refusal and causal private-umask pass separately.
+
+INT224-4 correction integrated237b8928 (worker aad1b0b3): three modded native subprocess boundaries use077; stock inheritance unchanged. Public launcher/admin RED observed002, GREEN26 onPython3.11/3.12 plus lint/compile/diff checks pass. Exact installed combined package proof remains required.
