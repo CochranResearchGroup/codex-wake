@@ -9214,3 +9214,19 @@ receipt: docs/dev/evidence/plan0222/deployment.json. Prior prefix and private
 rollback.py retained. Synthetic fixtures and task checkout cleanup follow durable
 publication. Original dirty main and unrelated worktrees preserved. Memory
 forbidden under explicit-request boundary; no memory write.
+
+## Turn | 2026-11-11 | P223 tmux server-crash incident
+
+Operator reported two whole-Byobu crashes. Kernel native SIGSEGV offsets map via
+exact-build symbols to tmux3.4 control.c:924 subscription timer with NULL session.
+A disposable stalled-client/session-removal reproducer kills an unrelated survivor
+at the same source line; no-subscription and no-stall controls survive. Actual
+metadata-feed regression red before fix, green after removing native wildcard
+subscriptions and using periodic queries on the same read-only connection.
+Contained production first: saved evidence, checked cgroups, global formatting
+opt-out, startup disable/stop, supported rollback of43tabs with zero failures.
+Current Byobu server retained. Broader264checks retained3timing failures; explicit
+fixture readiness corrections pass21checks. Corrected installed UID1017 regression
+and transport/rollback qualification pass. See evidence/plan0223/validation.md.
+Native tmux not upgraded, no agent relaunched or host reboot. Production
+reactivation withheld; fixed CLI publication/install preserves the quarantine.

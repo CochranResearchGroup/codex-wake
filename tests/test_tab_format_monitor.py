@@ -21,6 +21,11 @@ class FormattingMonitorTests(unittest.TestCase):
         self.addCleanup(lambda:self.tmux('kill-server',check=False))
         self.transport=TmuxAttachmentTransport(self.socket,'$0')
         self.tabs=ControllerTabs(self.root,workspaces={'work':dict(kind='tmux',transport=self.transport)},host='test',environment='local')
+        # Quiet-lease checks require the fixture shell's exec transition to finish.
+        deadline=time.monotonic()+3
+        while self.tmux('display-message','-p','-t','%0','#{pane_current_command}').strip()!='sleep':
+            self.assertLess(time.monotonic(),deadline,'fixture process never became ready')
+            time.sleep(.01)
 
     def tmux(self,*args,check=True):
         return subprocess.run(['tmux','-S',self.socket,*args],text=True,capture_output=True,check=check,timeout=5).stdout
@@ -54,8 +59,12 @@ class FormattingMonitorTests(unittest.TestCase):
         monitor.execute('tabs.monitor.start',dict(interval=.2,probe_timeout=.8,cycle_timeout=2,stale_after=20))
         self.addCleanup(lambda:monitor.execute('tabs.monitor.stop',{}))
         until=time.monotonic()+5
-        while not self.tmux('show-options','-w','-v','-t','@0','window-status-format'):
-            self.assertLess(time.monotonic(),until,'automatic decoration never appeared');time.sleep(.02)
+        while True:
+            report=monitor.execute('tabs.monitor.status',{})
+            rows=(report['monitor'].get('last_formatting') or {}).get('workspaces',[])
+            if any(row.get('workspace')=='work' and row.get('status')=='applied' for row in rows):break
+            self.assertLess(time.monotonic(),until,'automatic decoration cycle never completed');time.sleep(.02)
+        self.assertTrue(self.tmux('show-options','-w','-v','-t','@0','window-status-format'))
         self.assertEqual(self.tmux('show-options','-v','-t','$0','status-interval').strip(),'5')
         self.tabs.execute('tabs.format.rollback',dict(workspace='work'))
         deadline=time.monotonic()+5

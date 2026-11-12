@@ -10,6 +10,13 @@ Base: a337f510c27bef600fc95a375682c2fadbf5f59d
 
 ## Current State
 
+Operational hold: incident [LOCAL-P223](0223-2026-11-11-tmux-subscription-crash.md)
+confirmed a monitor-triggered tmux3.4 server crash. Startup and formatting were
+stopped/disabled and originals restored. The activation facts below describe the
+earlier qualification, which missed stalled-client session teardown. P223 owns
+the corrective source/runtime acceptance; do not infer current activation here.
+
+
 DONE. PR584 merged6dbeeeef; exact0.22.0.dev9 installed after package and real-unit
 qualification. Startup is enabled/active for the private user controller and
 recover_namespace is enabled for its selected workspace. All43 current tabs

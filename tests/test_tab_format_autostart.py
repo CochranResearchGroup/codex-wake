@@ -66,7 +66,10 @@ class FormattingAutostartTests(unittest.TestCase):
         config.chmod(0o600)
         self.monitor.execute('tabs.monitor.start',dict(interval=.2))
         self.tmux('new-session','-d','-s','late','-n','later terminal','sleep 60')
-        deadline=time.monotonic()+6
+        # Discovery plus projection may span two configured whole cycles.
+        # This is a readiness assertion, not a latency benchmark.
+        budget=self.monitor.execute('tabs.monitor.status',{})['monitor']['settings']['cycle_timeout']
+        deadline=time.monotonic()+2*budget
         while True:
             shown=self.tmux('show-options','-w','-v','-t','@0','window-status-format')
             if 'SH' in shown:break
