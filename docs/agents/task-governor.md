@@ -1,8 +1,9 @@
 # Task governor controls
 
-The new governor journey is under implementation in #570 (Plan0220). Commands
-below describe the integration branch; this document is not an installed-runtime
-qualification receipt.
+The governor journey is qualified on the Plan0220 integration branch in an
+isolated Linux test user. Commands below require the matched native package.
+See `docs/dev/evidence/plan0220/qualification.json` for exact source and installed
+acceptance; working-account deployment remains separate.
 
 Inside a qualified existing Codex session:
 

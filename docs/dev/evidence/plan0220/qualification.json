@@ -1,49 +1,21 @@
 {
-  "status": "BACKEND_ACCEPTED_UI_AND_FINAL_PACKAGE_JOURNEYS_PENDING",
+  "status": "ISOLATED_INSTALLED_ACCEPTED_REVIEW_PENDING",
   "ticket": 574,
+  "spec": 570,
   "working_deployment": false,
   "hosted_ci": false,
   "python": {
-    "build_source_commit": "fbef8b22fff5994a5a4612cbc63479d81c96ed57",
-    "wheel_sha256": "8f43b09ccc8c4ba442b93ae93c1fd1c4db26b8a13015809b0955a294073df099",
-    "package_members": 323,
-    "source_wheel_installed_equal": true,
-    "prefix": "/tmp/wake-governor-p220-2dac7qs6/venv",
-    "version": "0.22.0.dev8",
-    "runtime_python": "3.12.3",
-    "builder": "uv0.11.1 / setuptools84.2.1",
-    "build_environment": {
-      "SOURCE_DATE_EPOCH": "1794420935",
-      "PYTHONHASHSEED": "0"
-    },
-    "dependency_versions_equal_working": 31,
-    "installed_surface_tests": {
-      "count": 9,
-      "seconds": 1.056,
-      "result": "PASS",
-      "command": "sudo -n -u codex-daemon-test env PYTHONPATH=/tmp/wake-governor-p220-2dac7qs6/source/tests /tmp/wake-governor-p220-2dac7qs6/venv/bin/python -m unittest test_governor_commands test_command_parity"
-    },
-    "counter_private_cwd_fix": "Production Windows counter producer starts from /tmp; existing regression RED counter_eof then14 selected PASS3.11/3.12 and14installed PASS6.634s; actual fresh private-cwd QPC preflight PASS without keepalive."
-  },
-  "backend": {
-    "source": "bd8848b05c49b75029f0b83e1a01720bd81e4b6a",
-    "governor_tests": {
-      "python3.11": {
-        "passed": 16,
-        "seconds": 19.167
-      },
-      "python3.12": {
-        "passed": 16,
-        "seconds": 18.802
-      }
-    },
-    "affected_tests": {
-      "passed": 77,
-      "seconds": 79.741,
-      "command": "PYTHONPATH=src:tests /tmp/wake216-py312/bin/python -m unittest test_governor test_self_limits test_goal_renewal test_governor_deactivation test_goal_supervision -q"
-    }
+    "installed_members_equal": 323,
+    "python": "3.12.3",
+    "source_commit": "3a8659fcf73ede2e5e46554d5b2147a19176b58c",
+    "wheel_sha256": "7a5c5e6ce0f427cedd6f18794279729b19c538ba96fff5ffddac3cc704830919",
+    "current_source_members_equal": 323
   },
   "native": {
+    "final_package_source": "bd519d5232aef6f55a4a665cd0c7461ec5b223f9",
+    "executable_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
+    "package_members": 6,
+    "source_copy_members_equal": true,
     "focused_test_source": "896bec2571175a9b166a4581c4be84a74861820c",
     "focused_tests": {
       "passed": 6,
@@ -53,82 +25,168 @@
       "build_and_run_seconds": 1861.933
     },
     "focused_test_receipt": "~/.local/state/codex-wake/governor-native-572/tests/job-20261111T175549Z-52257fc6648e/20261111T175550Z-5387c2ca5edb/receipt.json",
-    "later_source_delta": "Exact causal-root exec ownership, in-flight admission fence, confirmed handle termination and truthful stop proof. Actual former RED cases now PASS. Wire/SDK unchanged.",
-    "final_package_source": "e18bde9a112504665d4503dc658204af65092523",
-    "package_build_job": "~/.local/state/codex-wake/governor-native-572/package-build/job-20261111T183940Z-ad8823c91b46",
-    "package_status": "BUILT_BACKEND_ACCEPTED_UI_PENDING",
-    "executable_sha256": "80c8ad9fd5b12c4588e51d29722930f51770fcf0dffb8edfca2c773455c1e942",
-    "package_members": 6,
-    "source_copy_members_equal": true,
-    "package_build_seconds": 537.227
+    "carried_provenance": "Six native focused tests ran on the recorded older source; not an exact-final Rust test claim. Exact final package is proven by the current actual installed UI/delegate/upgrade/rollback journeys."
   },
-  "environment_differences": "Local WSL shared kernel under separate real Linux test user UID1017. Runtime Python3.12.3; source matrix uses3.12.13 and3.11. Hosted GitHub CI skipped by operator cost policy. Local Responses fixtures are synthetic accounting evidence, not provider billing.",
-  "installed_journeys": {
-    "upgrade_rollback": {
-      "result": "passed",
-      "receipt": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p220-01/receipt.json",
-      "exact_candidate_sha256": "9c8390d120afc046b63a8cf95f82922c297fd59745814fa66fbbc9a2ef3f5585",
-      "rollback_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
-      "multiple_clients_history_handoffs_limits_preserved": true,
-      "fresh_owned_census": []
-    },
-    "native_ui": {
-      "result": "PENDING_OBSERVED_COLD_BOOTSTRAP_WINDOW",
-      "receipts": [
-        "/tmp/wake-governor-p220-2dac7qs6/ui-01/receipt.json",
-        "/tmp/p220u2/receipt.json",
-        "/tmp/p220u3/receipt.json"
-      ],
-      "retained_setup_failures": "Canonical profile config, private umask, inline viewport/paste timing and V2 flag corrected; further run held for native fix."
-    },
-    "delegated_containment_v1": {
-      "result": "FAIL_REAL_NATIVE_TOOL_LIFETIME",
-      "receipt": "/tmp/wake-governor-p220-2dac7qs6/backend-watcher-loss-05/result.json",
-      "root_and_child_turns_interrupted": true,
-      "unrelated_peer_unchanged": true,
-      "native_reported_stopVerified": true,
-      "exact_tool_processes_still_live_after_3s": "Two sleep processes State S, same identities; not zombies. Native teardown cleaned them, finalcensus0.",
-      "guarded_resume": "NOT_REACHED",
-      "required_fix": "Track and terminate exact causal task-owned unified-exec handles, including pre-enrollment work; include confirmed process exit in native stop proof."
-    },
-    "model_activation_v1": {
-      "result": "PASS_NATIVE_MODEL_GOVERNOR_ACTIVATION",
-      "receipt": "/tmp/wake-governor-p220-2dac7qs6/backend-model-06/result.json",
-      "local_posts": 6,
-      "no_uuid_grants": true
-    },
-    "model_activation": {
-      "result": "PASS_NATIVE_MODEL_GOVERNOR_ACTIVATION",
-      "receipt": "/tmp/wake-governor-p220-2dac7qs6/backend-model-v2-01/result.json",
-      "local_posts": 6,
-      "seconds": 12.066,
-      "no_uuid_grants": true
-    },
-    "delegated_containment": {
-      "result": "PASS_BOTH_NATIVE_BUDGET_AND_WATCHER_LOSS",
-      "aggregate": "/tmp/wake-governor-p220-2dac7qs6/backend-qualification-v2.json",
-      "aggregate_sha256": "a5876c9fcf22c8fd6fbf6dae6b8cec90e67faf20d42a879b797cd740b033f06d",
-      "limit": {
-        "local_posts": 5,
-        "seconds": 11.621
+  "source_validation": {
+    "source_commit": "30b7a89a3c41e575a85f4b093808a6403ee64bd4",
+    "tier": "focused",
+    "python": "3.12.13",
+    "commands": [
+      {
+        "command": "python -m ruff check --select F821,F822,F823 src scripts tests .codex/hooks",
+        "result": "PASS"
       },
-      "watcher_loss": {
-        "local_posts": 5,
-        "seconds": 17.034
+      {
+        "command": "python scripts/check_policy_wiring.py",
+        "result": "PASS"
       },
-      "root_late_child_and_live_tools_stopped": true,
-      "peer_preserved": true,
-      "usage45_preserved_through_extension": true,
-      "single_guarded_resume_no_goal": true,
-      "all_final_owned_censuses": []
+      {
+        "command": "PYTHONPATH=src:tests python -m unittest test_governor_commands test_command_parity test_host_counter -q",
+        "result": "PASS",
+        "tests": 14,
+        "seconds": 6.443
+      }
+    ],
+    "native_candidate_six_members_match": true,
+    "rollback_baseline_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+    "environment": "Local WSL shared kernel; fresh source-test venv; separate UID1017 installed runtime remains independently pending; hosted CI skipped.",
+    "additional_matrix": {
+      "python": "3.11.15",
+      "command": "PYTHONPATH=src:tests python -m unittest test_governor_commands test_command_parity test_host_counter -q",
+      "result": "PASS",
+      "tests": 14,
+      "seconds": 7.683
     },
-    "upgrade_rollback_v2": {
-      "result": "PENDING_REPAIRED_COLD_BOOTSTRAP_WINDOW",
-      "earlier_cases": [
-        "p220-v2-01",
-        "p220-v2-fail01"
-      ],
-      "retained_failure": "Managed bootstrap did not reach modelheader within original30s; public launcher diagnostic confirms cold install/update/start19.076s before TUI init; only initial bound increased60s."
+    "supervision_regressions": {
+      "source_commit": "3a8659fcf73ede2e5e46554d5b2147a19176b58c",
+      "command": "PYTHONPATH=src:tests python -m unittest test_goal_supervision test_self_limits -q",
+      "python3.12.13": {
+        "tests": 44,
+        "seconds": 31.251,
+        "result": "PASS"
+      },
+      "python3.11.15": {
+        "tests": 44,
+        "seconds": 19.127,
+        "result": "PASS"
+      }
     }
-  }
+  },
+  "native_ui": "runtime/governor-native-572/ui-acceptance-20261112.json",
+  "installed_journeys": {
+    "p220-v3-01": {
+      "receipt": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p220-v3-01/receipt.json",
+      "receipt_sha256": "a204bf410451c345d54e8ec288aea7f302dd1be8cc305d80c00c7e75857a5aad",
+      "state": "passed",
+      "mode": "success",
+      "target_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
+      "baseline_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+      "rollback_expected_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+      "all_tabs_notified": true,
+      "durable_handoffs_before_replacement": true,
+      "counters_and_limits_preserved": true,
+      "rollback_preserves_handoffs": true,
+      "duplicate_recovery_reconciled": true,
+      "failed_start_no_work_before_repair": null,
+      "localhost_posts": 10,
+      "external_provider_calls": 0,
+      "upgrade_client_count": 5,
+      "rollback_client_count": 6
+    },
+    "p220-v3-fail01": {
+      "receipt": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p220-v3-fail01/receipt.json",
+      "receipt_sha256": "c7821284c7e516f6ff919bf047a02a226c770bb132fceabe8d6a3e5d8160bfce",
+      "state": "passed",
+      "mode": "startup-fail",
+      "target_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
+      "baseline_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+      "rollback_expected_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+      "all_tabs_notified": true,
+      "durable_handoffs_before_replacement": true,
+      "counters_and_limits_preserved": true,
+      "rollback_preserves_handoffs": true,
+      "duplicate_recovery_reconciled": true,
+      "failed_start_no_work_before_repair": true,
+      "localhost_posts": 10,
+      "external_provider_calls": 0,
+      "upgrade_client_count": 5,
+      "rollback_client_count": 6
+    },
+    "delegate-limit-final": {
+      "receipt": "/home/codex-daemon-test/governor-p220-continue/delegate-limit-final/result.json",
+      "receipt_sha256": "1d5ae4ccffd83bd3a8a1eb9a1174f6b651cc8d6586a36aac085a4f49285e5100",
+      "raw_verdict": "PASS_NATIVE_GOVERNOR_LIMIT",
+      "elapsed_seconds": 13.447469614999818,
+      "local_posts": 5,
+      "external_provider_calls": 0,
+      "exact_tools_stopped": true,
+      "final_owned_processes": []
+    },
+    "delegate-watcher-loss-final": {
+      "receipt": "/home/codex-daemon-test/governor-p220-continue/delegate-watcher-loss-final/result.json",
+      "receipt_sha256": "bce1fe6b0544559f72a8adb5ed9bc47b58efedaeb9ee2882b1d130f7e1c631cf",
+      "raw_verdict": "FAILED_PACKET",
+      "elapsed_seconds": 16.711228596999945,
+      "local_posts": 5,
+      "external_provider_calls": 0,
+      "exact_tools_stopped": true,
+      "final_owned_processes": []
+    }
+  },
+  "watcher_loss_adjudication": {
+    "verdict": "ACCEPTED_OFFLINE_NOTICE_DISAMBIGUATION",
+    "raw_verdict": "FAILED_PACKET",
+    "raw_result_sha256": "bce1fe6b0544559f72a8adb5ed9bc47b58efedaeb9ee2882b1d130f7e1c631cf",
+    "raw_receipt": "/home/codex-daemon-test/governor-p220-continue/delegate-watcher-loss-final/result.json",
+    "explanation": "The extra native history ID is the exact owner-recorded engagement notice, not another model work turn. Raw FAILED_PACKET retained unchanged.",
+    "new_history_ids": [
+      "01a1cd51-3af3-7db2-a5fa-e2dadd61d538",
+      "notice_b89d023866576ea974252e78799b6dff95e2971e5409397ebc7c0272349baedc"
+    ],
+    "owner_notice_ids": [
+      "notice_b89d023866576ea974252e78799b6dff95e2971e5409397ebc7c0272349baedc"
+    ],
+    "operation_started_turn_id": "01a1cd51-3af3-7db2-a5fa-e2dadd61d538",
+    "task_started_ids": [
+      "01a1cd50-ff3e-7291-8aa2-87130991773a",
+      "01a1cd51-3af3-7db2-a5fa-e2dadd61d538"
+    ],
+    "resumed_turn_completed": true,
+    "provider_posts": 5,
+    "external_provider_calls": 0,
+    "used_tokens_before_resume": 45,
+    "native_cancelled_exact_tools": true,
+    "no_hidden_goal": true,
+    "peer_goal_unchanged": true,
+    "final_owned_processes": []
+  },
+  "clock_cleanup": {
+    "at": "2026-11-12T01:14:53.470817+00:00",
+    "action": "hash_guarded_original_clock_restore",
+    "original_sha256": "46d044572649bd8de7a26d7252cf0a9852026c75a13c2467bc6accd9ada9dece",
+    "temporary_sha256": "0fe8322deb8217c9d09acbed10e98fb5f0260196ae7466b709892ddf27dbb558",
+    "restored_sha256": "46d044572649bd8de7a26d7252cf0a9852026c75a13c2467bc6accd9ada9dece",
+    "mode": "0o600",
+    "restored_original_is_not_readiness": true
+  },
+  "final_linux_census": {
+    "at": "2026-11-12T01:15:15.547538+00:00",
+    "uid": 1017,
+    "processes": [],
+    "owned_runtime_remaining": []
+  },
+  "final_windows_census": {
+    "at": "2026-11-12T01:15:16.657742+00:00",
+    "exit_code": 0,
+    "selected_process_count": 117,
+    "receipt": "/home/ecochran76/.local/state/codex-wake/qualification/governor-p220/final-windows-census.json",
+    "scope": "Fresh Windows process/resource observation; no global absence or baseline preservation inferred."
+  },
+  "environment_differences": "Local WSL shared kernel, separate real UID1017, runtime Python3.12.3, source checks Python3.11.15/3.12.13, injected localhost Responses accounting not provider billing; no hosted CI or working deployment.",
+  "history": "Pre-continuation qualification.json remains in Git at866edc9a; old v1/v2 passes are historical and do not qualify current final bytes. Temporary old QA/raw captures disappeared; current raw artifacts retained in durable UID1017 root. Initial self-lock red, matrix watcher-readiness flake and reconnect-modal reds retained in runtime/governor-native-572/resume-timeout-diagnosis.json.",
+  "summary_tool": "Existing scripts/summarize_receipt.py was attempted for these native receipt shapes and returned unsupported input. Bounded selected-field extraction retained; no replacement summary framework introduced.",
+  "remaining": [
+    "One broad Standards/Spec review",
+    "One bounded TDD findings remediation pass"
+  ]
 }

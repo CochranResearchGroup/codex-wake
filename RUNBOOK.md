@@ -9116,3 +9116,21 @@ Original checkout dirty files preserved. Temporary QA root/u7 raw captures absen
 retained Git summaries remain historical evidence. Durable package/procedure
 will rebuild isolated qualification; no deployment or paid CI. Review0/remediation0.
 Checkpoint: blocker_reduction; next actual extend/resume timeout diagnosis.
+
+## Turn 413 | 2026-11-11 | Plan0220 installed qualification complete
+
+Worker/root/native572 diagnosed nested allocation flock in actual installed CLI
+stacks; public real-lock regression RED then GREEN; fix integrated3a8659fc.
+Corrected wheel7a5c5e6c has323source/wheel/installed members equal. Nativebd519/
+1171unchanged. UI passed65.462s/3localhostPOSTs after real Leave paused modal
+handling; earlier fixture failures preserved.572closed/readbackverified.
+Primary574 exact1171 normal and startup-fail upgrade/rollback pass,5upgrade/
+6rollback clients, duplicate recovery reconciled, limits/history/handoffs retained.
+Final corrected-wheel delegated limit PASS13.447s; watcher-loss rawFAIL16.711s
+retained with independent exact owner-notice/task-start/provider disambiguation
+ACCEPTED offline, one guarded continuation, exact tools stopped, peer preserved.
+Clock original46d restored0600 by exact hash; proxy exited; fresh UID1017 census[]
+and Windows117selected processes/resource observation (no global absence claim).
+Python source checks and initial watcher-readiness flake recorded in qualification
+and runtime evidence. No hostedCI, real providers, production install or restart.
+One broad review and one bounded remediation remain; not merge/release approval.
