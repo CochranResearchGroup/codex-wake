@@ -1598,6 +1598,6 @@ and working45-tab acceptance PASS; native services unchanged.
 
 ## P222 | Automatic tab formatting startup recovery
 
-OPEN: [LOCAL-P222](docs/dev/plans/0222-2026-11-11-tab-startup-recovery.md).
+CLOSED (PR584 merged; dev9 installed and startup enabled): [LOCAL-P222](docs/dev/plans/0222-2026-11-11-tab-startup-recovery.md).
 Owned user-service startup plus explicit opt-in namespace recovery; preserve
 originals and disabled/paused custody. No host reboot or agent launch.

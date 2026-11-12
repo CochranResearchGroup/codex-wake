@@ -9199,3 +9199,18 @@ keeps settings/panes and rollback across service restarts, and safely disables.
 No host reboot or provider calls. UID1017 has no manager bus; package qualification
 and real unit acceptance are separate receipts. Working account remains dev8
 until exact merged-package qualification and supported cutover complete.
+
+## Turn | 2026-11-11 | P222 startup activated
+
+PR584 merged6dbeeeef. Exact dev9 wheel qualified as UID1017 (16public regressions,
+CLI/stdio/OAuth API and package rollback/reselection) plus5actual systemd fixture
+checks.320members match source and installed package;9launchers/completion select
+new immutable prefix. Startup unit enabled/active, recovery enabled only for the
+selected current workspace;43tabs verified, monitor fresh and settings preserved.
+10protected files preserved;29of30sampled native generations remain, one absent
+with exit reason unobserved. No native lifecycle calls or provider requests.
+Supervisor retained through activation. No actual host reboot/login claim. Exact
+receipt: docs/dev/evidence/plan0222/deployment.json. Prior prefix and private
+rollback.py retained. Synthetic fixtures and task checkout cleanup follow durable
+publication. Original dirty main and unrelated worktrees preserved. Memory
+forbidden under explicit-request boundary; no memory write.

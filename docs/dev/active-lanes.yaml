@@ -1323,9 +1323,9 @@ lanes:
     plan: docs/dev/plans/0222-2026-11-11-tab-startup-recovery.md
     branch: feat/tab-format-startup
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: INTEGRATED
     dependencies: [P221]
     overlaps: [P210, P216]
     updated_at: 2026-11-11
-    disposition: Public controller regression then owned startup service qualification
+    disposition: PR584 merged6dbeeeef; dev9 installed; startup active and recovery opted in;43tabs verified; task checkout cleanup at closeout
