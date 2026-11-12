@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "status": "DEPLOYED_VERIFIED",
+  "plan": "LOCAL-P224",
+  "authorization": "Operator explicitly requested pr review merge deploy",
+  "actor": "ecochran76 / primary",
+  "pr": "https://github.com/CochranResearchGroup/codex-wake/pull/586",
+  "review": "https://github.com/CochranResearchGroup/codex-wake/pull/586#issuecomment-6815022190",
+  "source_commit": "32eb90fb1d8cc47b6f3e3aa499556ba334a2de67",
+  "version": "0.22.0.dev11",
+  "installed_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev11-32eb90f",
+  "wheel_sha256": "c29e47777da32e2b65fbff6fc396226ae227ba7acdb2d65ebc7e741177bfdbdd",
+  "qualification_equivalence": {
+    "source": "32eb90fb1d8cc47b6f3e3aa499556ba334a2de67",
+    "wheel_sha256": "c29e47777da32e2b65fbff6fc396226ae227ba7acdb2d65ebc7e741177bfdbdd",
+    "qualified_wheel_sha256": "244180ed2a9bd00572d33c4bf744983cb78fd4459d85cea14c031597b09683bb",
+    "complete_unzipped_wheel_member_count": 329,
+    "all_member_contents_equal": true,
+    "native_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa",
+    "qualification_reuse": "Archive timestamps/packing differ; every package/metadata member content is identical to exact installed UID1017-qualified wheel. Native complete package unchanged."
+  },
+  "native_source_commit": "f986f6ed53d6b324aedbd7e32991e0185eacae14",
+  "native_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa",
+  "native_members": 6,
+  "native_selection": "Six named configured modded accounts; global stock and modded registrations unchanged",
+  "accounts": [
+    {
+      "account": "codex-dillan",
+      "state": "unavailable",
+      "selected_package": false,
+      "registered_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa"
+    },
+    {
+      "account": "codex-pcg",
+      "state": "unavailable",
+      "selected_package": false,
+      "registered_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa"
+    },
+    {
+      "account": "codex-ericresearchgroup",
+      "state": "unavailable",
+      "selected_package": false,
+      "registered_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa"
+    },
+    {
+      "account": "codex-ecochran76",
+      "state": "unavailable",
+      "selected_package": true,
+      "registered_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa"
+    },
+    {
+      "account": "codex-soylei",
+      "state": "unavailable",
+      "selected_package": true,
+      "registered_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa"
+    },
+    {
+      "account": "codex-ewc",
+      "state": "unavailable",
+      "selected_package": false,
+      "registered_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa"
+    }
+  ],
+  "idle_native_updates": 2,
+  "idle_update_activation": "future_start; no daemon was started",
+  "launchers_verified": 9,
+  "production_module_members_verified": 324,
+  "captured_protected_files_unchanged": 10,
+  "stock_launcher_unchanged": true,
+  "native_process_preservation": {
+    "python_launcher_cutover": 27,
+    "service_preparation_and_cutover": 26,
+    "difference": "One process present at initial CLI check was already absent before service preparation; all26 pre-service identities remain. Existing stock daemons preserved."
+  },
+  "services": {
+    "supervisor_pid": 2274820,
+    "controller_pid": 2287442,
+    "installed_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev11-32eb90f",
+    "controller_url": "http://127.0.0.1:37185",
+    "kill_mode": "process",
+    "supervisor_interval": 1,
+    "max_workers": 2,
+    "poll_timeout": 300,
+    "old_pool_exited": true,
+    "fresh_health_roots": 13,
+    "registered_roots": 17,
+    "preexisting_hold_preserved": [
+      "im-receipts-f5c8ba53"
+    ],
+    "temporary_pauses_restored": 14,
+    "tabs_startup": {
+      "active": false,
+      "configured": true,
+      "enabled": false,
+      "root": "/home/ecochran76/.local/state/codex-wake/controller",
+      "service_state": "inactive",
+      "status": "inspection",
+      "unit": "codex-wake-tabs-6da35833587f.service",
+      "unit_path": "/home/ecochran76/.config/systemd/user/codex-wake-tabs-6da35833587f.service"
+    },
+    "tabs_caveat": "Disabled/inactive startup preserved. Public API has no rebind-only command; existing future-start unit retains prior prefix. Explicit later startup enable would rewrite it using that invoking installed prefix."
+  },
+  "controller_readback": {
+    "status": "PASS",
+    "url": "http://127.0.0.1:37185",
+    "pid": 2287442,
+    "authenticated_status": "ready",
+    "governor_tools": [
+      "wake_governor_activate",
+      "wake_governor_advisory",
+      "wake_governor_disable",
+      "wake_governor_extend",
+      "wake_governor_reset",
+      "wake_governor_resume",
+      "wake_governor_status"
+    ],
+    "anonymous_status": 401,
+    "model_calls": 0
+  },
+  "windows_qpc_census": {
+    "recorded_at": "2026-11-12T05:09:06.150966+00:00",
+    "scope": "Read-only exact known Windows QPC producer OS census after working deployment",
+    "processes": [
+      {
+        "ProcessId": 53412,
+        "ParentProcessId": 19436,
+        "CreationDate": "/Date(1794446572587)/",
+        "WorkingSetSize": 102481920
+      }
+    ],
+    "preexisting_producer_pid": 53412,
+    "preexisting_preserved": true,
+    "new_producer_pids": [],
+    "runtime_or_clock_changes": false
+  },
+  "operational_effects": {
+    "governor_enrollments": 0,
+    "budget_renewals": 0,
+    "real_provider_experiments": 0,
+    "credentials_migrated": false,
+    "private_history_copied_or_chmod": false,
+    "intentional_interruption": "Only supervisor pool and local HTTP controller replaced; queued delivery briefly paused and exact pause generations restored. Existing native clients not restarted."
+  },
+  "local_validation": "See integration.json: source145 on both versions, observer58 on both, installed84, seven native tests and five exact-package runtime cases. Initial3.11 timeout retained under577; no full-suite/unflaky claim. Hosted CI skipped by operator policy.",
+  "rollback": {
+    "python_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev10-e16bc4d",
+    "native_manifest_backup": "/home/ecochran76/.local/state/codex-wake/qualification/governor-release-p223/native-builds-before.json",
+    "native_baseline_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c"
+  },
+  "receipts": [
+    {
+      "name": "working-deployment-verification.json",
+      "sha256": "50f43cf20e40c681b03edb0b055d7281bba579f079a9c425e036de7a71946a19"
+    },
+    {
+      "name": "deployment-intent.json",
+      "sha256": "8f295c9bb11852310a728bb724d77d2a62bd9a801e012ac51189cbb0b6647fd6"
+    },
+    {
+      "name": "native-registration-intent.json",
+      "sha256": "6c6a4a45fa31785c26df7648ed0d239d99e3e15f5381db66668186ec3df106f8"
+    },
+    {
+      "name": "native-idle-update-intent.json",
+      "sha256": "8fc70264340fc136d6b785769545e16856a8bf76c33a0ddafceb4d8723f2da97"
+    },
+    {
+      "name": "service-activation-intent.json",
+      "sha256": "14ab6c4bc6cd4725c660ae1119a9eb835f0b52442b6143d7949c0bfa49a9f9f5"
+    },
+    {
+      "name": "controller-feature-readback.json",
+      "sha256": "f04bbee77c03a93541fddd4979d5e3bcc899c7d9e28912095d9295b5f6fd5d87"
+    },
+    {
+      "name": "windows-counter-census-after.json",
+      "sha256": "c17f26ecb73c0809f594b9c916612232dc2ab69e9d2ddf7b57ee8ae4a7ef71b9"
+    }
+  ],
+  "recorded_at": "2026-11-12T05:10:36.507535+00:00",
+  "memory_disposition": "forbidden: developer explicit-request boundary; no memory write requested"
+}

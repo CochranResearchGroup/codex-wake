@@ -1330,21 +1330,21 @@ lanes:
     updated_at: 2026-11-11
     disposition: Delivered and qualified on integration branch; one review/one bounded remediation complete; retained worktree, no production deployment
 
-  - id: P223
+  - id: P224
     owner: ecochran76 / primary
     objective: Governor PR integration and authorized working deployment
     work_items: [LOCAL-P224, https://github.com/CochranResearchGroup/codex-wake/issues/570]
     plan: docs/dev/plans/0224-2026-11-11-governor-release.md
     branch: feat/governor-experience
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE
+    plan_state: CLOSED
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: [P220]
     updated_at: 2026-11-11
-    disposition: User authorized PR review merge deploy; preserve dev9 startup repairs and stock clients; qualify dev10 then deploy exact merged main
+    disposition: PR586 merged32eb90fb; exact dev11 and native4712 deployed; six future modded selections, two idle updates, controller/supervisor refreshed; stock and disabled automation preserved; rollback retained
 
-- id: P221
+  - id: P221
     owner: primary / ecochran76
     objective: Explicit formatting enable after terminal server replacement
     work_items: [LOCAL-P221]

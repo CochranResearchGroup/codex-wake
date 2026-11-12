@@ -1620,8 +1620,8 @@ wildcard subscriptions after reproducing whole-server loss on tmux3.4.
 
 ## P224 | Governor release and working deployment
 
-OPEN: LOCAL-P224 follows completed#570. Operator requested PR review/merge/deploy.
-Integrate currentmain92c00a0d, preserve dev9tab/startup repairs, release dev11,
-qualify combined source, publish/mergePR then deploy exact merged Python/native
-bytes through supported selection. Existing stock processes stay independent.
-Plan0224 owns current execution and receipts.
+CLOSED: PR586 merged32eb90fb; dev11 installed and exact native4712 selected for
+six configured future modded launches. Two idle package selections updated;
+controller/supervisor refreshed,13 fresh roots and existing hold preserved.
+All14 temporary pauses restored; existing stock clients and disabled automation
+preserved. Plan0224 and docs/dev/evidence/plan0224/deployment.json own evidence.
