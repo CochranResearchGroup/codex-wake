@@ -41,6 +41,8 @@ def select_workspace(owner, selector=None, *, server=None, interactive=False):
 
 def render(value):
     """Render successful session records, including journal-wrapped mutation results."""
+    from .tab_result import exit_status
+    if exit_status(value):return None
     current = value
     for _ in range(5):
         if not isinstance(current, dict): return None

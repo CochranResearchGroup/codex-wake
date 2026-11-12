@@ -29,6 +29,17 @@ seconds under load. An isolated forty-tab tmux acceptance run completed successi
 cycles in roughly seven seconds. Unavailable/over-budget observations report
 partial results and do not extend freshness.
 
+`enable` and `reenable` turn a disabled workspace preference back on. The global
+opt-out still takes precedence: the command reports `disabled`, explains the
+global block, supplies the scoped configure command and exits `3`. Changing that
+policy saves preferences; run enable again afterward to apply formatting. If you
+provided `--request-id`, use a new ID; the old ID retrieves its original outcome.
+This does not remove the incident containment described below automatically.
+
+`status` reports effective policy, workspace activation, preset and tab count in
+a short summary. `inspect` retains native per-window settings and baseline details;
+`status --json` also retains the complete structured inspection.
+
 Labels show harness/build, profile when known, activity and your existing name.
 `CX` is stock Codex, `CX+` is modded Codex, `GK` is Grok, `SSH` is a remote shell,
 and `MIX` marks mixed panes. Inspect returns pane observations and the last

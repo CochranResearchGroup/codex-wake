@@ -17,6 +17,8 @@ def register_parser(subparsers):
 
 def render_monitor(value):
     """Render actual status or retained operation uncertainty without inventing state."""
+    from .tab_result import exit_status
+    if exit_status(value):return None
     from .tab_observer import render_status
     payload=value if isinstance(value.get('monitor'),dict) else None
     result=value.get('result')
@@ -42,6 +44,34 @@ def render_monitor(value):
             'No monitor status was returned. Inspect current state with tabs monitor-status --json.')
 
 
+def render_format_status(value,args):
+    """Keep routine status bounded; inspect and JSON retain native option detail."""
+    if value.get('status') not in ('inspection','stale_target'):return None
+    import shlex
+    from .cli_output import _text
+    policy=value['policy'];record=value.get('record') or {}
+    state=('disabled' if not policy['enabled'] else 'paused' if record.get('paused') else
+           'enabled' if record.get('enabled') else 'not enabled')
+    if value.get('namespace_matches') is False:state='stale namespace'
+    global_scope=value.get('scope')=='global'
+    if global_scope:state='enabled' if policy['enabled'] else 'disabled'
+    lines=['Tab formatting: '+state]
+    workspace=value.get('target',{}).get('workspace')
+    lines.append('Scope: global' if global_scope else 'Workspace: '+_text(workspace))
+    lines+=['Policy: '+('enabled' if policy['enabled'] else 'disabled'),
+            'Preset: '+_text(policy.get('preset'))]
+    if not global_scope:
+        lines.append('Tabs: '+str(len(value.get('windows',[]))))
+        paused=sum(bool(window.get('paused')) for window in record.get('windows',{}).values())
+        if paused:lines.append('Tabs held after manual changes: '+str(paused))
+    command=['codex-wake']
+    if getattr(args,'wake_root',None):command+=['--wake-root',str(args.wake_root)]
+    command+=['tabs','format','inspect']
+    command+=['--scope','global'] if global_scope else ['--workspace',workspace]
+    lines.append('Details: '+_text(shlex.join(command)))
+    return '\n'.join(lines)
+
+
 def command(args, owner=None):
     from .managed_inventory import InventoryError
     from .records import WakeError
@@ -50,8 +80,9 @@ def command(args, owner=None):
         args.wake_root = default_root(args.wake_root)
         if args.tab_command=='result':
             from .controller_runtime import ControllerRuntime
+            from .tab_result import exit_status
             value=ControllerRuntime(args.wake_root).local_tab_result('tab-cli-'+args.request_id)
-            emit(value, args);return 0
+            emit(value, args);return exit_status(value)
         if owner is None:
             from .controller_tabs import controller_tabs_from_root
             owner = controller_tabs_from_root(args.wake_root)
@@ -72,6 +103,8 @@ def command(args, owner=None):
         readable=render(value) if operation.startswith('tabs.session.') and not getattr(args,'as_json',False) else None
         if operation.startswith('tabs.monitor.') and not getattr(args,'as_json',False):
             readable=render_monitor(value)
+        if operation=='tabs.format.status' and not getattr(args,'as_json',False):
+            readable=render_format_status(value,args)
         if readable is not None:
             print(readable)
         else:

@@ -81,6 +81,19 @@ class WorkspacePolicyTests(unittest.TestCase):
     tmux=formatting_fixture.FormattingTests.tmux
     call=formatting_fixture.FormattingTests.call
 
+    def test_explicit_enable_restores_workspace_preference_and_keeps_rollback(self):
+        before=self.tmux('show-options','-w','-t','@0')
+        self.call('configure',policy={'enabled':False,'show_model':True})
+        self.assertEqual(self.call('enable')['status'],'applied')
+        status=self.call('status')
+        self.assertTrue(status['policy']['enabled'])
+        self.assertTrue(status['policy']['show_model'])
+        self.assertTrue(status['record']['enabled'])
+        self.assertEqual(self.call('rollback')['status'],'rolled_back')
+        self.assertEqual(self.tmux('show-options','-w','-t','@0'),before)
+        self.call('configure',policy={'enabled':False})
+        self.assertEqual(self.call('reenable')['status'],'applied')
+
     def test_manual_style_hold_survives_reenable_and_restart_until_explicit_resume(self):
         self.call('enable')
         self.tmux('set-option','-w','-t','@0','window-status-style','bg=green,fg=black')
@@ -122,7 +135,11 @@ class WorkspacePolicyTests(unittest.TestCase):
     def test_global_optout_dominates_workspace_override_and_inspection_keeps_details(self):
         self.call('configure',policy={'enabled':True})
         self.tabs.execute('tabs.format.configure',dict(scope='global',policy={'enabled':False}))
-        self.assertEqual(self.call('enable')['status'],'disabled')
+        blocked=self.call('enable')
+        self.assertEqual(blocked['status'],'disabled')
+        self.assertEqual(blocked['reason'],'global_policy_disabled')
+        self.assertIn('not applied',blocked['message'])
+        self.assertIn('configure --scope global',blocked['next_action'])
         self.assertFalse(self.call('status')['policy']['enabled'])
         self.tabs.execute('tabs.format.configure',dict(scope='global',policy={'enabled':True}))
         self.assertEqual(self.call('enable')['status'],'applied')

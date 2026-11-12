@@ -1,5 +1,16 @@
 # Codex Wake Roadmap
 
+## P225 | Actionable CLI outcomes
+
+State: OPEN
+
+Current State: LOCAL-P225 corrects workspace format enable and outcome-first tab
+CLI presentation, retained-result exit codes and bounded formatting status. Source
+validation is in progress on `fix/actionable-cli-output`; production formatting
+containment and installed packages are unchanged.
+
+Plan: [Actionable CLI outcomes](docs/dev/plans/0225-2026-11-12-actionable-cli-output.md)
+
 ## P01 | Wake Spooler Architecture
 
 State: CLOSED
