@@ -9154,4 +9154,6 @@ ecochran76/review2026-11-19; not an unflaky-lane claim. Source323+native6members
 still match. Originalclock46d restored0600; proxyexpired/exited; freshUID1017
 census[] and Windows70selected processes/resources observed. Originalcheckout
 dirty4paths preserved. Review1/remediation1, no broader rerun or hostedCI.
-Parent570 readyclose; merge/release/deploy and576–581 remain separate.
+Parent570 CLOSED03:06:26Z; children571–574 closed/readbackverified.
+Merge/release/deploy and576–581 remain separate. Memory dispositionforbidden
+under explicit-write-request boundary; machine non-write receipt retained outsideGit.

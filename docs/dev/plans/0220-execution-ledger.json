@@ -83,7 +83,7 @@
   ],
   "contract_revision": 3,
   "operator_admission": "opaque local_operator_principal(); native model Principal(thread) after verified_native_caller; OAuth owner+admin+exact thread grant only for loosen actions",
-  "integration_tip": "4640ca37",
+  "integration_tip": "61447101",
   "package_candidate_version": "0.22.0.dev8",
   "review_fixed_point_confirmation": "Parent #570 explicitly freezes 3f8a18fa196037fa9efe00bf2ad36b05c61f2a3c; native review base d3e311260b46c88fc8eac08b869f276cd0345e8b.",
   "native_cache": "Prior release cleanup reclaimed18GB; cachepathretainedbutcompiledobjectsabsent; currentnativecompilecold. Same toolchain/profile/target; keepresultingcache.",
@@ -106,10 +106,10 @@
     "date": "2026-11-11",
     "authority": "Operator explicitly resumed implement-spec: close #572/#574, one broad review and one bounded findings remediation; #576-581 follow-up out of this packet.",
     "concurrency": "Primary owns #574 preparation/integration, /root/native572 owns #572 and exclusive UID1017 runtime/clock; no nested delegation.",
-    "state_transition": "remediation1 source green -> exactv4 installed accepted",
+    "state_transition": "exactv4accepted -> parent570closed -> complete",
     "progress_classification": "outcome_progress",
-    "evidence": "Qualification currentv4 UI, normal/fail upgrade+rollback, delegatedlimit+watcher-loss allPASS. Fresh Linuxownedcensus[], Windows70selectedreadback, originalclock46d restored0600/proxygone. Originalcheckout4dirtypaths unchanged.",
-    "next": "Closeparent570 from exact acceptance; publish final clean integration branch.",
+    "evidence": "Live GitHub570\u2013574 CLOSED. Review1/remediation1; both Spec blockers resolved. Final v4 qualification current and source/native bytes verified. Setup flakes577 and two Standards backlog findings explicitly retained.",
+    "next": "No required task work remains; merge/release/deployment and576\u2013581 have separate scope/authority.",
     "memory_discovery": "skip: supplied detailed handoff and current canonical sources sufficient; lightweight registry search had no relevant Plan0220 result."
   },
   "review": {
@@ -158,5 +158,7 @@
     "package_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
     "aggregate_acceptance": "docs/dev/evidence/plan0220/qualification.json"
   },
-  "parent_tracker_state": "READY_TO_CLOSE"
+  "parent_tracker_state": "CLOSED",
+  "integration_tip_kind": "Qualified code/evidence checkpoint before final tracker-only bookkeeping; resolve branch tip from Git.",
+  "parent_tracker_readback": "2026-11-12T03:06:26Z"
 }

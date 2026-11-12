@@ -1315,6 +1315,7 @@ lanes:
     overlaps: [P220]
     updated_at: 2026-11-11
     disposition: Delivered and qualified on integration branch; one review/one bounded remediation complete; retained worktree, no production deployment
+
   - id: P220-572
     owner: ecochran76 / native
     objective: Usable governor ticket 572
@@ -1328,6 +1329,7 @@ lanes:
     overlaps: [P220]
     updated_at: 2026-11-11
     disposition: Delivered and qualified on integration branch; one review/one bounded remediation complete; retained worktree, no production deployment
+
   - id: P220-573
     owner: ecochran76 / primary
     objective: Governor integration and installed qualification574; transport573 accepted

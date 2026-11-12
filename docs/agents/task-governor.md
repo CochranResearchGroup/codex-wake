@@ -24,9 +24,10 @@ tighten their own limits, but cannot increase, reset or disable operator ceiling
 
 The modded harness's `/wake governor` opens the corresponding direct operator
 controls. Its persistent strip separates enforced/advisory/disconnected/disabled/
-limit-reached states with text and subdued meters. The remaining-token readout reflects the tighter effective allowance. Details
-identify the limiting task/shared scope and applicable shared ceilings. Missing
-accounting is unknown, not zero. Lost enforcement pauses affected work and offers repair or explicit
+limit-reached states with text and subdued meters. The remaining-token readout
+reflects the tighter effective allowance. Details identify the limiting task/shared
+scope and applicable shared ceilings. Missing accounting is unknown, not zero.
+Lost enforcement pauses affected work and offers repair or explicit
 advisory operation. Native UI support requires the qualified modded build; stock
 Codex is unchanged.
 

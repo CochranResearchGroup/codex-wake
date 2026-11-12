@@ -1579,7 +1579,7 @@ Stable tab management repair #563 / Plan0218: CLOSED. PR565 merged c9f220d8;0.22
 
 
 ## P220 | Usable governor and native /wake
-QUALIFIED:#570 parent tracker reconciliation pending; tickets571–574 CLOSED. Plan0220 exact nativev4/Wake accepted in UID1017; one review and one bounded TDD pass complete. No merge/deployment.
+CLOSED:#570 and tickets571–574. Plan0220 exact nativev4/Wake accepted in UID1017; one review and one bounded TDD pass complete. No merge/deployment.
 
 ### Plan0220 retrospective follow-ups
 
