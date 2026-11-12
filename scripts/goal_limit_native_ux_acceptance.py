@@ -871,6 +871,25 @@ def qualify(options):
             before_ui = model_start_snapshot()
             ui_command('/wake governor status')
             visible('disconnected', 'governor-initial.txt')
+            # A native goal timestamp is guest-derived. Keep the real admission
+            # guard: wait within the existing setup bound for qualified UTC to
+            # cover that exact captured goal, before starting any budget window.
+            from codex_wake.native_clock import snapshot as clock_snapshot
+            first_clock = None
+            def qualified_goal_clock():
+                nonlocal first_clock
+                clock = clock_snapshot()
+                if first_clock is None:
+                    first_clock = clock
+                upper = (clock.get('utc') or {}).get('upper')
+                gap = goal['createdAt'] - upper if upper is not None else None
+                ready = gap is not None and gap <= 0
+                save('governor-activation-clock.json', dict(initial=first_clock,
+                    current=clock, native_goal_created_at=goal['createdAt'],
+                    future_gap_seconds=gap, ready=ready))
+                require(gap is None or gap <= 12, 'native goal is beyond the bounded qualified-clock setup window')
+                return ready
+            wait(qualified_goal_clock, 'qualified clock covers captured native goal')
             ui_command('/wake governor activate --token-limit 1000 --time-limit-seconds 10')
             visible('enforced', 'governor-active.txt')
             activated = governor('status')
