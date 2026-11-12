@@ -70,3 +70,16 @@ Focused feedback target <=60s per loop; presubmit selection <=180s. Broaden only
 for evidence of cross-cutting risk; preserve first failures. Use Python3.12 and
 the available Python3.11 for changed seams, static checks, policy/planning audits
 and an installed-wheel smoke. No OpenClaw work or paid hosted runs.
+
+## Authorized delivery | 2026-11-12
+
+Operator explicitly requested "pr review merge deploy" after source closeout.
+This supersedes the earlier no-publication/no-installation boundary for this
+bounded patch. Publish the PR, review the exact diff, squash merge and install
+the exact merged0.22.0.dev12 package using the existing immutable-release and
+launcher layout. Preserve the dev11 rollback prefix, global formatting opt-out,
+disabled startup, native owners, services and unrelated root-checkout edits.
+No live formatting reactivation, native build replacement or monitor restart.
+Independent review handle: `/root/delivery_review`, frozen base34194dbf and
+implementationf4167c0e/head d09b75e0. Version metadata is the only added code
+surface for delivery; revalidate final candidate and exact installed artifact.
