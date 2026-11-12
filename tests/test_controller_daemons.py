@@ -2,6 +2,8 @@
 import contextlib
 import io
 import json
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -16,7 +18,7 @@ class DaemonCommandsTests(unittest.TestCase):
             home = root / 'accounts/codex-alice'
             home.mkdir(parents=True)
             executable = root / 'native'
-            executable.write_text('#!/bin/sh\ntouch "EFFECT"\nmkdir -p "$CODEX_HOME/packages/app-server-daemon/current/bin"\ncp "$0" "$CODEX_HOME/packages/app-server-daemon/current/bin/codex"\nprintf \'{"status":"updated"}\\n\'\n'.replace("EFFECT", str(root / "effect")))
+            executable.write_text('#!/bin/sh\numask > "MASK"\ntouch "EFFECT"\nmkdir -p "$CODEX_HOME/packages/app-server-daemon/current/bin"\ncp "$0" "$CODEX_HOME/packages/app-server-daemon/current/bin/codex"\nprintf \'{"status":"updated"}\\n\'\n'.replace("EFFECT", str(root / "effect")).replace("MASK", str(root / "umask")))
             executable.chmod(0o700)
             import hashlib
             manifest = root / 'builds.json'
@@ -42,6 +44,14 @@ class DaemonCommandsTests(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertEqual(held['error']['code'], 'stale_target')
             self.assertFalse((root / 'effect').exists())
-            code, selected = cli('update', 'alice', '--expected-target', json.dumps(daemon['target']), '--idempotency-key', 'cold-update', '--yes')
+            # Isolate the permissive parent mask from the concurrent test runner.
+            process = subprocess.run([sys.executable, '-c',
+                'from codex_wake.cli import main; raise SystemExit(main())',
+                '--wake-root', str(root), 'daemons', 'update', 'alice', '--expected-target',
+                json.dumps(daemon['target']), '--idempotency-key', 'cold-update', '--yes', '--json'],
+                capture_output=True, text=True, timeout=20, umask=0o002)
+            code, selected = process.returncode, json.loads(process.stdout)
             self.assertEqual(code, 0, selected)
             self.assertEqual(selected['result']['operation']['result']['activation'], 'future_start')
+            self.assertEqual(int((root / 'umask').read_text(), 8), 0o077)
+            self.assertEqual((root / 'effect').stat().st_mode & 0o777, 0o600)

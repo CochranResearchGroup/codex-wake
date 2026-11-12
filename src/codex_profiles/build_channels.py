@@ -276,7 +276,8 @@ def _managed_endpoint(build: Build, home: Path, executable: int, env: dict) -> s
         try:
             result = subprocess.run([f'/proc/self/fd/{executable}', 'app-server', 'daemon', verb, *args],
                                     env=env, pass_fds=(executable,), capture_output=True,
-                                    text=True, timeout=100, check=False)
+                                    text=True, timeout=100, check=False,
+                                    umask=0o077 if build.channel == 'modded' else -1)
         except subprocess.TimeoutExpired as exc:
             raise BuildError(f'account daemon {verb} timed out; outcome is unknown; '
                              'inspect daemon status and package selection, then reconcile '
@@ -426,7 +427,8 @@ def run_build(build: Build, account_home: Path, profile: str, args: list[str], *
             # attach after setup; embedded private writers still retain the lock.
             fcntl.flock(lock, fcntl.LOCK_UN)
             descriptors = (executable,)
-        return subprocess.run(command, env=env, pass_fds=descriptors, check=False).returncode
+        return subprocess.run(command, env=env, pass_fds=descriptors, check=False,
+                              umask=0o077 if build.channel == 'modded' else -1).returncode
 
 
 def main(argv: list[str] | None = None) -> int:
