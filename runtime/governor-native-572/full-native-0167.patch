@@ -29124,10 +29124,10 @@ index 8ab45414e5..b37130ab9a 100644
                  RenderableItem::Owned(Box::new(self.quick_dial_hud()))
              } else if let Some(pending) = &self.safety_recourse
 diff --git a/codex-rs/tui/src/chatwidget/rendering_tests.rs b/codex-rs/tui/src/chatwidget/rendering_tests.rs
-index 28108e8952..7daaff02e7 100644
+index 28108e8952..33f6b60653 100644
 --- a/codex-rs/tui/src/chatwidget/rendering_tests.rs
 +++ b/codex-rs/tui/src/chatwidget/rendering_tests.rs
-@@ -644,3 +644,22 @@ async fn provider_error_preserves_draft_and_survives_thread_navigation() {
+@@ -644,3 +644,89 @@ async fn provider_error_preserves_draft_and_survives_thread_navigation() {
      }
      insta::assert_snapshot!("provider_errors", snapshots.join("\n\n"));
  }
@@ -29140,7 +29140,7 @@ index 28108e8952..7daaff02e7 100644
 +    widget.thread_id = Some(thread_id);
 +    widget.apply_wake_result(thread_id, Ok(serde_json::json!({
 +        "schema_version":1,"state":"enforced","scope":{"thread_id":thread_id.to_string(),"kind":"task"},
-+        "usage":{"used_tokens":25,"elapsed_seconds":12},"limits":{"token_limit":100},"deadline":"14:30 UTC","watcher":{"fresh":true},"revision":1
++        "usage":{"used_tokens":25,"remaining_tokens":75,"elapsed_seconds":12},"limits":{"token_limit":100},"deadline":"14:30 UTC","watcher":{"fresh":true},"revision":1
 +    })), false);
 +    let frame = render_frame(&widget, 120);
 +    assert!(contains_text(&frame, "Governor · ENFORCED"));
@@ -29149,6 +29149,73 @@ index 28108e8952..7daaff02e7 100644
 +    let frame = render_frame(&widget, 120);
 +    assert!(contains_text(&frame, "DISCONNECTED · accounting unknown"));
 +    assert!(!contains_text(&frame, "75 left"));
++}
++
++// SPEC220-1: the strip must use the owner-selected effective allowance.
++#[tokio::test]
++async fn wake_governor_strip_uses_effective_remaining_tokens() {
++    let (mut widget, _sender, _events, _operations) = make_chatwidget_manual_with_sender().await;
++    let thread_id = ThreadId::new();
++    widget.thread_id = Some(thread_id);
++    let mut status = serde_json::json!({
++        "schema_version": 1, "state": "limit_reached",
++        "scope": {"thread_id": thread_id.to_string(), "kind": "task",
++                  "limiting_scope": "shared", "shared": {"used_tokens": 500, "token_limit": 500}},
++        "usage": {"used_tokens": 100, "remaining_tokens": 0},
++        "limits": {"token_limit": 1000}, "revision": 1
++    });
++    widget.apply_wake_result(thread_id, Ok(status.clone()), false);
++    let frame = render_frame(&widget, 160);
++    assert!(contains_text(&frame, "100/1000 · 0 left"));
++    assert!(!contains_text(&frame, "900 left"));
++
++    status["usage"]["remaining_tokens"] = serde_json::Value::Null;
++    status["revision"] = serde_json::json!(2);
++    widget.apply_wake_result(thread_id, Ok(status), false);
++    let frame = render_frame(&widget, 160);
++    assert!(contains_text(&frame, "100/1000 · unknown left"));
++    assert!(!contains_text(&frame, "900 left"));
++}
++
++// SPEC220-2: identify the owner-selected limiting scope and its shared ceilings.
++#[tokio::test]
++async fn wake_governor_identifies_limiting_scope_and_shared_allowance() {
++    let (mut widget, _sender, mut events, _operations) = make_chatwidget_manual_with_sender().await;
++    let thread_id = ThreadId::new();
++    widget.thread_id = Some(thread_id);
++    widget.apply_wake_result(
++        thread_id,
++        Ok(serde_json::json!({
++            "schema_version": 1, "state": "limit_reached", "reason": "allocation_exhausted",
++            "scope": {"thread_id": thread_id.to_string(), "kind": "task",
++                      "allocation_id": "shared-main", "limiting_scope": "shared",
++                      "shared": {"used_tokens": 500, "token_limit": 500,
++                                 "time_limit_seconds": 120, "deadline": 1893456120,
++                                 "deadline_basis": "qualified_utc"}},
++            "usage": {"used_tokens": 100, "remaining_tokens": 0},
++            "limits": {"token_limit": 1000}, "revision": 1
++        })),
++        true,
++    );
++    assert!(contains_text(
++        &render_frame(&widget, 160),
++        "limiting shared"
++    ));
++    let mut details = Vec::new();
++    while let Ok(event) = events.try_recv() {
++        if let crate::app_event::AppEvent::InsertHistoryCell(cell) = event {
++            details.extend(
++                cell.display_lines(160)
++                    .into_iter()
++                    .map(|line| line.to_string()),
++            );
++        }
++    }
++    let details = details.join("\n");
++    assert!(details.contains("limiting shared"));
++    assert!(details.contains("Shared allowance: shared-main"));
++    assert!(details.contains("Shared tokens: 500 used / 500 limit"));
++    assert!(details.contains("Shared time: 2m 00s limit"));
 +}
 diff --git a/codex-rs/tui/src/chatwidget/session_flow.rs b/codex-rs/tui/src/chatwidget/session_flow.rs
 index a1ff412d4d..d219d1c64c 100644
@@ -29192,10 +29259,10 @@ index 44f3c879e2..a0ee7662b9 100644
              | SlashCommand::Keymap
 diff --git a/codex-rs/tui/src/chatwidget/wake_governor.rs b/codex-rs/tui/src/chatwidget/wake_governor.rs
 new file mode 100644
-index 0000000000..b39ebbe9b5
+index 0000000000..2b1aa8aec6
 --- /dev/null
 +++ b/codex-rs/tui/src/chatwidget/wake_governor.rs
-@@ -0,0 +1,1065 @@
+@@ -0,0 +1,1093 @@
 +//! Native presentation only. Wake's Python owner remains the accounting and effect authority.
 +use super::*;
 +use ratatui::text::Span;
@@ -29494,14 +29561,18 @@ index 0000000000..b39ebbe9b5
 +        .and_then(Value::as_str)
 +        .unwrap_or("unknown");
 +    let members = scope.get("members").and_then(Value::as_array).map(Vec::len);
-+    format!(
++    let mut label = format!(
 +        "{} {}{}",
 +        text(scope, "kind"),
 +        id.chars().take(8).collect::<String>(),
 +        members
 +            .map(|count| format!(" · {count} member{}", if count == 1 { "" } else { "s" }))
 +            .unwrap_or_default()
-+    )
++    );
++    if let Some(limiting) = scope.get("limiting_scope").and_then(Value::as_str) {
++        label.push_str(&format!(" · limiting {limiting}"));
++    }
++    label
 +}
 +fn watcher_label(value: &Value) -> &'static str {
 +    match value.pointer("/watcher/fresh").and_then(Value::as_bool) {
@@ -29510,7 +29581,7 @@ index 0000000000..b39ebbe9b5
 +        None => "Unknown",
 +    }
 +}
-+fn meter(used: Option<u64>, limit: Option<u64>) -> String {
++fn meter(used: Option<u64>, limit: Option<u64>, remaining: Option<u64>) -> String {
 +    match (used, limit) {
 +        (Some(used), Some(limit)) if limit > 0 => {
 +            let filled = ((used as u128 * 8 / limit as u128).min(8)) as usize;
@@ -29518,7 +29589,9 @@ index 0000000000..b39ebbe9b5
 +                "[{}{}] {used}/{limit} · {} left",
 +                "━".repeat(filled),
 +                "·".repeat(8 - filled),
-+                limit.saturating_sub(used)
++                remaining
++                    .map(|tokens| tokens.to_string())
++                    .unwrap_or_else(|| "unknown".into())
 +            )
 +        }
 +        (Some(used), _) => format!("{used} used · limit unknown"),
@@ -29867,7 +29940,10 @@ index 0000000000..b39ebbe9b5
 +                    " Tokens {} · time {} used / {} left",
 +                    meter(
 +                        value.pointer("/usage/used_tokens").and_then(Value::as_u64),
-+                        value.pointer("/limits/token_limit").and_then(Value::as_u64)
++                        value.pointer("/limits/token_limit").and_then(Value::as_u64),
++                        value
++                            .pointer("/usage/remaining_tokens")
++                            .and_then(Value::as_u64)
 +                    ),
 +                    duration(numeric(&value["usage"], "elapsed_seconds")),
 +                    duration(remaining_seconds(value))
@@ -29916,6 +29992,25 @@ index 0000000000..b39ebbe9b5
 +            )),
 +            Line::from(format!("Reason: {}", reason_label(value))),
 +        ];
++        if let Some(shared) = value
++            .pointer("/scope/shared")
++            .filter(|shared| shared.is_object())
++        {
++            lines.push(Line::from(format!(
++                "Shared allowance: {}",
++                text(&value["scope"], "allocation_id")
++            )));
++            lines.push(Line::from(format!(
++                "Shared tokens: {} used / {} limit",
++                text(shared, "used_tokens"),
++                text(shared, "token_limit")
++            )));
++            lines.push(Line::from(format!(
++                "Shared time: {} limit · deadline {}",
++                duration(numeric(shared, "time_limit_seconds")),
++                deadline(shared)
++            )));
++        }
 +        if let Some(operation) = value.get("operation") {
 +            lines.push(Line::from(format!(
 +                "Continuation: {} · {}",
@@ -30247,8 +30342,8 @@ index 0000000000..b39ebbe9b5
 +    fn unknown_accounting_is_never_zero_and_extension_remains_explicit() {
 +        assert_eq!(duration(Some(1780.9)), "29m 40s");
 +        assert!(deadline(&serde_json::json!({"deadline":1780,"owner_receipt":{"time_basis":"authenticated_host_counter"}})).contains("Wall deadline unavailable"));
-+        assert_eq!(meter(None, Some(100)), "usage unknown");
-+        assert!(meter(Some(25), Some(100)).contains("75 left"));
++        assert_eq!(meter(None, Some(100), None), "usage unknown");
++        assert!(meter(Some(25), Some(100), Some(75)).contains("75 left"));
 +        assert!(
 +            !governor_argv("extend --add-seconds 60", "thread:x", "unix://", None)
 +                .unwrap()

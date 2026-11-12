@@ -4,9 +4,9 @@
   "native_repository": "https://github.com/openai/codex",
   "upstream_revision": "086ccc833bc9cf01024ad2dd6af7dbd421b6bf9a",
   "native_retained_base": "d3e311260b46c88fc8eac08b869f276cd0345e8b",
-  "native_source_commit": "bd519d5232aef6f55a4a665cd0c7461ec5b223f9",
+  "native_source_commit": "15626ed7031a0246543b1703be69dbbc22e917d2",
   "native_source_worktree": "/home/ecochran76/workspace.local/codex-wake-native-governor-572",
-  "patch_sha256": "f31399a4a11cd8c91c0a5363321df79d1d47875c739ee1ed93262be29ff81cc0",
+  "patch_sha256": "d25ba4cedbc19a67f75173c83ed0df519408a82aa0cdc2f086d0c6b06aae2381",
   "patched_files_sha256": {
     "codex-rs/Cargo.lock": "8ce6e8ba6f35054304773c1decd50c1d960d6eeb911a549fec3e4a22dbcb9863",
     "codex-rs/app-server-protocol/schema/json/ClientRequest.json": "e2b80bd4dba9ea2eb75d7b665878e56e57ee974da45d3829dd2b9857a5bb81d3",
@@ -51,10 +51,10 @@
     "codex-rs/tui/src/chatwidget/constructor.rs": "bbe25f043cec39816c57a0b0f04c1575eca07f662dc1b30e3b162159151b5453",
     "codex-rs/tui/src/chatwidget/protocol.rs": "e579fcd98c6c33fb7a57c0b6b0ec0e0baf5a187a1c23b58d85cc49dc1e9bb1ba",
     "codex-rs/tui/src/chatwidget/rendering.rs": "f9b1c637d043ab4e3a2a69ec2c38ef094818a4c70dc1074a704aa5e98ad895ce",
-    "codex-rs/tui/src/chatwidget/rendering_tests.rs": "d4045b47f90bc2e1c89f36080893506c85a387e2c08572de847d17edb2b2a0c1",
+    "codex-rs/tui/src/chatwidget/rendering_tests.rs": "e9e75300206cd5879c4313934cd4bf478a2d9c37f3fd5afad0e447a902551d96",
     "codex-rs/tui/src/chatwidget/session_flow.rs": "4d7767a2fd7ddffda72a83e9e058cd12bdfb76def085317f860418a3e37cc478",
     "codex-rs/tui/src/chatwidget/slash_dispatch.rs": "17613a26e1f76c2fe93e6263be33b3dabf159d3d791f09548e02a659083344dd",
-    "codex-rs/tui/src/chatwidget/wake_governor.rs": "7ce13a255dd0a9ffe98ae50278aad8c4a1bdd87decafe024dd5fb20767f6b49f",
+    "codex-rs/tui/src/chatwidget/wake_governor.rs": "8ea90ab4ecfccd6141fe0476671c8f87e326656fc745f5e1ad1af2fe4f8f52a7",
     "codex-rs/tui/src/slash_command.rs": "89851da9c9c63439704c31bdc898a2757cab11d4c0055cdb62841dbf18d7ff10",
     "sdk/python/src/openai_codex/generated/v2_all.py": "2492fb1d70efa1aee254f585d34d341d647d30a500fbf172f685cc8b1cc01fee"
   },
@@ -63,9 +63,9 @@
   "cargo_jobs": 2,
   "toolchain": "1.95.0",
   "build_evidence": "/home/ecochran76/.local/state/codex-wake/governor-native-572",
-  "qualification": "package-v3 production build and zero-POST exact blocked-goal expiry PASS; full managed UI/cold-resume pending",
+  "qualification": "Source6focusedgovernor testsPASS afteroneboundedTDDpass; immutablepackage-v4buildrunning, exactinstalledacceptancepending",
   "production_install": false,
-  "full_patch_sha256": "31821fa5286d70ed1913a028bd6a894d8d8f5e1bda6397d2044da6a9989d7585",
+  "full_patch_sha256": "ae11f4cf74a1cfa2ff10006bf1d44c3f9dc1e33c9203f23191c4088a94059e1a",
   "guard_capabilities": {
     "clock": "Linux CLOCK_BOOTTIME;100ms awake check",
     "exact_causal_roots": true,
@@ -81,15 +81,15 @@
     ],
     "task_owned_exec_handles": "causal-root scope, confirmed termination, bounded startup-publication fence"
   },
-  "package_entrypoint_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
+  "package_entrypoint_sha256": null,
   "package_version": "codex-cli 0.167.0",
   "related_issues": [
     571,
     572
   ],
   "build_recipe": {
-    "driver": "/home/ecochran76/.local/state/codex-wake/governor-native-572/build-package-v3.sh",
-    "driver_sha256": "fa51c9d5e00f88c52ec2e8985a26027dc4bb922f6addb7ee1853de76bcdc6213",
+    "driver": "/home/ecochran76/.local/state/codex-wake/governor-native-572/build-package-v4.sh",
+    "driver_sha256": "c902ea94c78f78eb155bbdb1a9297cb2fdda7a39a8df7bbec0743f211f2c9197",
     "cargo_argv": [
       "cargo",
       "build",
@@ -109,7 +109,7 @@
       "--cargo-profile",
       "dev-small",
       "--package-dir",
-      "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-v3",
+      "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-v4",
       "--entrypoint-bin",
       "/home/ecochran76/.cache/codex-wake-native-0167/dev-small/codex",
       "--exec-server-bin",
