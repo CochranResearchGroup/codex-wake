@@ -1,6 +1,6 @@
 # Actionable CLI outcomes
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Work item: LOCAL-P225
 Priority: P1
@@ -10,12 +10,30 @@ Base: 34194dbf7cc2fe54c44f9c6e8c7997ef22c52797
 
 ## Current State
 
-IN_PROGRESS. User requests correction of confusing format enable and other
-unhelpful CLI output. Open issue/PR searches found no matching output work item;
+DONE for the bounded source fix at `f4167c0e76d2ab398cb4fc5ea8538ad7e44eed10`.
+Workspace enable/reenable restores its preference; global opt-out explains its
+block and recovery. Tab outcomes lead human output, unsuccessful effects and
+retained lookups return nonzero, partial summaries keep failure details, and
+formatting status is concise. See [validation and review](../evidence/plan0225/validation.md).
+67 focused checks pass on each Python3.11/3.12;10 private installed checks pass.
+Expanded269-tab selection has one independently reproduced installed-baseline
+cadence failure; two inherited planning header findings remain. No full-suite or
+clean-planning-audit claim. All313wheel Python members match source and a fresh
+process census finds0qualification-Python survivors. No working installation.
+
+User requested correction of confusing format enable and other unhelpful CLI
+output. Open issue/PR searches found no matching output work item;
 use this local ticket because external posting is not authorized in this turn.
 Root checkout has unrelated dirty work and stays untouched. Isolated lane checkout
-is owned by primary for implementation/validation; retain until reviewed delivery
-has durable custody, then remove through the normal worktree lifecycle.
+is owned by primary and retained for review/integration of the locally committed
+checkpoint. No remote custody, merge or installation was requested. Next review
+point is delivery authorization; publish/verify custody and remove the checkout
+when integration or a durable handoff makes it unnecessary. Other checkouts were
+not removed or repurposed.
+
+Memory disposition: forbidden. Session developer requires explicit memory-update
+requests; no such request occurred. A machine-readable non-write receipt is
+retained outside Git;0Graphiti writes attempted.
 
 ## Scope and acceptance
 

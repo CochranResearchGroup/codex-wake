@@ -2,12 +2,15 @@
 
 ## P225 | Actionable CLI outcomes
 
-State: OPEN
+State: CLOSED
 
 Current State: LOCAL-P225 corrects workspace format enable and outcome-first tab
-CLI presentation, retained-result exit codes and bounded formatting status. Source
-validation is in progress on `fix/actionable-cli-output`; production formatting
-containment and installed packages are unchanged.
+CLI presentation, retained-result exit codes and bounded formatting status at
+`f4167c0e`.67focused checks pass on each Python3.11/3.12 and10private installed
+checks pass. Expanded tab validation retains one installed-baseline cadence
+failure; existing P220/P224 planning-header findings are separate. Source fix is
+complete on `fix/actionable-cli-output`; working installation and formatting
+reactivation remain separate.
 
 Plan: [Actionable CLI outcomes](docs/dev/plans/0225-2026-11-12-actionable-cli-output.md)
 

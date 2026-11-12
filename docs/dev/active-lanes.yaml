@@ -8,12 +8,12 @@ lanes:
     plan: docs/dev/plans/0225-2026-11-12-actionable-cli-output.md
     branch: fix/actionable-cli-output
     target: origin/main
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: ACTIVE_WORKTREE
     dependencies: []
     overlaps: [P216, P223]
     updated_at: 2026-11-12
-    disposition: Isolated local implementation; no production activation or external posting
+    disposition: Source f4167c0e validated locally; retained for review/integration without remote custody; installation and reactivation separate
   - id: P218
     owner: primary / ecochran76
     objective: Close shared-monitor consolidation tickets with isolated scheduling and safe qualification
