@@ -1,6 +1,6 @@
 # Stop monitor-triggered tmux server crashes
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Work item: LOCAL-P223
 Priority: incident
@@ -10,12 +10,13 @@ Base: 92c00a0d8495f2d7d386cd7d85cd4f610e8f6ded
 
 ## Current State
 
-IN_PROGRESS. Kernel confirms production tmux server SIGSEGV at21:43:27 and21:50:18
-on Ubuntu tmux3.4-1ubuntu0.2. Both PC offsets4ce75 map through exact-build symbols
-to control.c:924, control_check_subs_all_panes, inlined in subscription timer.
-Saved kernel/service/formatting evidence privately before containment. Global
-formatting disabled, startup unit disabled/stopped, original43-tab formatting
-restored through supported rollback with no failures. Live Byobu server retained.
+CLOSED for containment, source repair and safe installation. PR587 merged e16bc4d2;
+exact0.22.0.dev10 installed with320matching package members and9launchers.
+Formatting remains globally disabled, startup stopped/disabled, original styles
+restored. Disabled unit now pins the fixed package without being started. The
+same live Byobu server and all43initial pane process identities are retained.
+Production reactivation is deliberately outside this closeout; require explicit
+operator direction. See [deployment](../evidence/plan0223/deployment.json).
 
 ## Reproduction and ranked causes
 
@@ -75,3 +76,28 @@ No native wildcard subscriptions remain in source. Ordinary events plus bounded
 bounds. Prepare source publication and fixed CLI installation; retain global
 formatting opt-out and startup disabled. Pin the disabled managed unit to the
 fixed prefix without starting it; preserve original unit/manifest before change.
+
+## Installation and custody
+
+Source e16bc4d2a9c17ea42ad99d8e59daac8265ff2558; exact wheel
+3133816f537ff43cbfb7b6d9babc9c733e0e7adb3b6ba41241fb0a1222e6ff92.
+All320members match merged source, UID1017 install and selected immutable prefix.
+Initial installed late-socket fixture failure retained; corrected22tests PASS
+19.647s plus actual installed CLI/stdio/OAuth API controls and package rollback.
+The raw native reproduction still demonstrates the tmux bug; product removes its
+trigger instead of upgrading/restarting the native server.
+
+Fresh OS readback: same live Byobu server PID,43of43initial pane IDs/PIDs retained,
+no Byobu restart.10protected files unchanged;26of28sampled native generations
+remain,2absent with exit reason unobserved; no native lifecycle call occurred.
+No claim that every unrelated transient native process stayed alive. Monitor
+stopped, startup disabled/inactive and pinned to fixed code, global opt-out true.
+
+Private incident and qualification/plan0223 retain original state, kernel/symbol
+proofs, failed reproductions, old unit/manifest, immutable wheel, exact launcher
+rollback links and audit receipts. Keep containment if selecting an older package;
+old versions still contain unsafe subscription code. No runtime transcript/core
+content enters Git. QA fixtures and this checkout removed only after receipt
+publication/remote readback.118registered before task checkout removal;117expected
+after, other lanes untouched. Memory disposition forbidden under explicit memory
+update boundary; no Graphiti write.

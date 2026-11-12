@@ -4,8 +4,7 @@ Base92c00a0d8495f2d7d386cd7d85cd4f610e8f6ded. Ubuntu tmux3.4-1ubuntu0.2,
 buildid9acf9f6bda37b86ea0353d7286f05bfa47610d05. Both production crashes at
 21:43:27 and21:50:18 were SIGSEGV at binary offset4ce75. Exact-build debug symbols
 map it to control.c:924, an inlined pane-subscription timer helper dereferencing
-c->session after it becomes NULL. Current kernel evidence distinguishes this
-from the operator's earlier unrelated OOM incident; no associated OOM kill.
+c->session after it becomes NULL. Current kernel evidence identifies native SIGSEGV; no associated OOM kill.
 
 ## Tight native loop and correct regression seam
 

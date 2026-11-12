@@ -1604,6 +1604,6 @@ originals and disabled/paused custody. No host reboot or agent launch.
 
 ## P223 | Native tmux subscription crash containment
 
-OPEN: [LOCAL-P223](docs/dev/plans/0223-2026-11-11-tmux-subscription-crash.md).
+CLOSED (PR587 merged; dev10 installed; automation remains off): [LOCAL-P223](docs/dev/plans/0223-2026-11-11-tmux-subscription-crash.md).
 Formatting/startup disabled and originals restored; remove the monitor's native
 wildcard subscriptions after reproducing whole-server loss on tmux3.4.
