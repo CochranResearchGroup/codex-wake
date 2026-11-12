@@ -115,7 +115,8 @@ class ControllerDaemons:
                         try:
                             p = subprocess.run([f'/proc/self/fd/{executable}', *overrides, 'app-server', 'daemon', verb, *args],
                                 env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True,
-                                pass_fds=(executable,), timeout=100)
+                                pass_fds=(executable,), timeout=100,
+                                umask=0o077 if build.channel == 'modded' else -1)
                         except subprocess.TimeoutExpired:
                             raise InventoryError('effect_uncertain', 'native lifecycle timed out; reconcile retained intent before retry') from None
                         if p.returncode:
