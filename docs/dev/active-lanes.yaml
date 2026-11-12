@@ -1333,8 +1333,8 @@ lanes:
   - id: P223
     owner: ecochran76 / primary
     objective: Governor PR integration and authorized working deployment
-    work_items: [LOCAL-P223, https://github.com/CochranResearchGroup/codex-wake/issues/570]
-    plan: docs/dev/plans/0223-2026-11-11-governor-release.md
+    work_items: [LOCAL-P224, https://github.com/CochranResearchGroup/codex-wake/issues/570]
+    plan: docs/dev/plans/0224-2026-11-11-governor-release.md
     branch: feat/governor-experience
     target: origin/main
     plan_state: OPEN
