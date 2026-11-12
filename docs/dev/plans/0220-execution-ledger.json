@@ -2,8 +2,8 @@
   "spec": 570,
   "base": "3f8a18fa196037fa9efe00bf2ad36b05c61f2a3c",
   "branch": "feat/governor-experience",
-  "review_passes": 0,
-  "remediation_passes": 0,
+  "review_passes": 1,
+  "remediation_passes": 1,
   "tickets": [
     {
       "id": 571,
@@ -70,7 +70,9 @@
       "prepared": "Existing goal_limit_native_ux_acceptance --governor-ui-only reuses actualnativeappserver/TUI/providerfixture, checks controls, forcedstop, reconnect, SIGKILLduringactivework and no unintendedinference.",
       "worker": "/root",
       "remaining": [],
-      "validation": "Exact final native1171 normal p220-v3-01 and startup-fail p220-v3-fail01 PASS;5upgrade/6rollback client identities, counters/handoffs preserved, duplicate recovery reconciled. Final corrected-wheel delegate limit PASS; watcher-loss rawFAIL exact owner-notice disambiguation ACCEPTED offline. UID1017 final census[]; clock46d restored0600; proxy absent."
+      "validation": "Exact final native1171 normal p220-v3-01 and startup-fail p220-v3-fail01 PASS;5upgrade/6rollback client identities, counters/handoffs preserved, duplicate recovery reconciled. Final corrected-wheel delegate limit PASS; watcher-loss rawFAIL exact owner-notice disambiguation ACCEPTED offline. UID1017 final census[]; clock46d restored0600; proxy absent.",
+      "tracker_state": "CLOSED",
+      "tracker_readback": "2026-11-12T01:17:55Z"
     }
   ],
   "contract_revision": 3,
@@ -98,10 +100,36 @@
     "date": "2026-11-11",
     "authority": "Operator explicitly resumed implement-spec: close #572/#574, one broad review and one bounded findings remediation; #576-581 follow-up out of this packet.",
     "concurrency": "Primary owns #574 preparation/integration, /root/native572 owns #572 and exclusive UID1017 runtime/clock; no nested delegation.",
-    "state_transition": "574 executing -> installed validated",
-    "progress_classification": "outcome_progress",
-    "evidence": "qualification.json now identifies final wheel/native and current exact acceptance; clock restored and owned runtime empty.",
-    "next": "Close574 from verified acceptance; freeze complete integration diff, run one Standards/Spec review and one bounded findings TDD pass.",
+    "state_transition": "implementation tickets closed -> review1 -> remediation1",
+    "progress_classification": "blocker_reduction",
+    "evidence": "Review frozen23b87803/bd519d5. Primary accepted2Spec presentation blockers and2Standards backlog smells.",
+    "next": "One bounded native presentation TDD pass; qualify resulting package, no broad rereview.",
     "memory_discovery": "skip: supplied detailed handoff and current canonical sources sufficient; lightweight registry search had no relevant Plan0220 result."
+  },
+  "review": {
+    "mode": "drift_discovery",
+    "status": "completed_adjudicated",
+    "wake_base": "3f8a18fa196037fa9efe00bf2ad36b05c61f2a3c",
+    "wake_tip": "23b87803c7a5a83429253180be03089414e02764",
+    "native_base": "d3e311260b46c88fc8eac08b869f276cd0345e8b",
+    "native_tip": "bd519d5232aef6f55a4a665cd0c7461ec5b223f9",
+    "standards_worker": "/root/review_standards220",
+    "spec_worker": "/root/review_spec220",
+    "remediation_bound": "One consolidated accepted finding set, one bounded TDD remediation pass; closed-world verification only.",
+    "findings": "docs/dev/evidence/plan0220/review.json"
+  },
+  "remediation": {
+    "status": "running",
+    "worker": "/root/native572",
+    "accepted_blockers": [
+      "SPEC220-1",
+      "SPEC220-2"
+    ],
+    "nonblocking_backlog": [
+      "STD220-1",
+      "STD220-2"
+    ],
+    "verification_mode": "closed_world",
+    "remaining_gate": "Native rendering red/green, complete package-v4, exact-new-package installed qualification."
   }
 }
