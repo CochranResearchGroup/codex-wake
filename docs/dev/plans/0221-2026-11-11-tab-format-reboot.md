@@ -77,3 +77,18 @@ until review/integration; next review point is the integration decision. No remo
 source publication or merge authority was inferred from the diagnosis request.
 
 Exact commands, source commit, wheel identity and limitations: [validation](../evidence/plan0221/validation.md).
+
+## Publication and installation authorization
+
+Operator requested PR, review, merge and install on2026-11-11. This supersedes
+this plan's earlier source-only boundary for the bounded P221 fix. Publish and
+self-review against base95bbebb3; local validation replaces hosted CI. Release
+0.22.0.dev8 from the exact merged commit, qualify that package as UID1017, retain
+the prior prefix and rollback links, then select the new CLI and formatting
+monitor. No native Codex binary/account-daemon upgrade or prompt dispatch.
+Existing supervisor and native services retain their identities.
+
+Standards review: no blocking documented-standard or baseline-smell finding.
+Spec review: no blocking finding; explicit intent, namespace originals, alias
+custody and old-intent/refresh fences satisfy LOCAL-P221. Schema change is additive
+and documented. Serial primary review is proportionate for this26-line owner fix.
