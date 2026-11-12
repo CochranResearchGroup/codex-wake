@@ -904,6 +904,16 @@ def qualify(options):
                     'explicit resume did not submit exactly one native turn')
             tmux('kill-session', '-t', 'ux')
             attach(endpoint, thread)
+            # Native reconnect asks whether to resume the paused goal. Its first
+            # choice resumes work; select the visible Leave paused choice before
+            # typing a slash command into the ordinary composer.
+            wait(lambda: 'Resume paused goal?' in capture('governor-reconnect-goal-prompt.txt')
+                 and 'Leave paused' in capture('governor-reconnect-goal-prompt.txt'),
+                 'native reconnect paused-goal choice')
+            tmux('send-keys', '-t', 'ux:0.0', 'Down', 'Enter')
+            wait(lambda: 'Ask Codex to do anything' in '\n'.join(
+                capture('governor-reconnect-idle.txt').rstrip().splitlines()[-16:]),
+                'native reconnect composer after Leave paused')
             visible('disabled', 'governor-reconnect.txt')
             require(rpc('thread/goal/get', dict(threadId=thread))['goal']['status'] == 'paused',
                     'reconnect unpaused explicit fixture user pause')
