@@ -10,6 +10,16 @@ WIP limit: one primary implementation slice
 
 ## Current State
 
+Reconciled 2026-11-12: PR461 integrated Plan0197; PR462 integrated Plan0198 at
+`76ac7d918f414becc97e23b7212c3ac2422d114c`. The exact merged package was deployed
+with all 238 Python members matched, installed completion and real-account
+read-only recents. Existing daemon targets and stock binary were preserved.
+See [deployment receipt](../evidence/plan0198/deployment.json) and RUNBOOK's
+2026-11-02 command-contract/shortcuts deployment entry. This is recorded delivery
+evidence, not a fresh installed-runtime readback or broader live-account acceptance.
+
+## Historical source qualification
+
 Five local tickets are implemented, integrated and validated on
 feat/command-contract-0197. Product source24e4cc1; all local tracker states DONE.
 Shared help/reference/coverage, first22operation schemas, sanitized status,
@@ -115,7 +125,7 @@ owns the outcome until deliberate tracker publication avoids duplication.
 - Final artifacts distinguish source completion, integration and installation.
   No ordinary operator sessions or unrelated services are interrupted.
 
-## Terminal state
+## Historical source-only terminal state
 
 All five local tickets DONE; no unresolved accepted findings. Review1 and
 remediation1 are consumed. Keep worker worktrees clean and recoverable. A later

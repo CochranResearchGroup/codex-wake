@@ -1,5 +1,22 @@
 # Codex Wake Roadmap
 
+## Evidence reconciliation | 2026-11-12
+
+This bounded documentation reconciliation uses delivery base `1a276d0f` and
+canonical issue/receipt evidence; it is not a fresh installed-runtime readback.
+P197/P198 are integrated and have recorded package deployment. P209's bounded
+implementation/qualification is complete. P213/P214 retain OPEN plan labels for
+explicit disposition, but P216's later monitor qualification is already delivered.
+The local OBS draft chain was superseded; canonical #541–#547 remain CLOSED and
+parent #540 remains OPEN. Current automation history belongs to later P223, which
+records disabled automation; older enabled/stopped statements below describe
+their own milestone dates.
+
+See [canonical P216 findings](docs/dev/notes/0216-2026-11-12-canonical-acceptance-reconciliation.md),
+[P198 deployment](docs/dev/evidence/plan0198/deployment.json),
+and [documentation work item](docs/dev/plans/0227-2026-11-12-roadmap-evidence-reconciliation.md).
+No historical receipt establishes current installation or grants runtime effects.
+
 ## P225 | Actionable CLI outcomes
 
 State: CLOSED
@@ -1335,6 +1352,13 @@ Plan: [Plan0171](docs/dev/plans/0171-2026-10-20-native-counter-handoff.md).
 
 State: OPEN
 
+Recorded delivery boundary: the historical milestones below record MR-01–MR-06
+candidate acceptance, PR306 integration and PR309 release preparation. Their
+earlier intermediate "integration pending" statements are historical. This edit
+adds no new release, production or wider native-control acceptance.
+
+### Historical milestone evidence
+
 Owner: ecochran76. Local intake CW-MR-172; no GitHub issue posted.
 Plan: [Plan0172](docs/dev/plans/0172-2026-10-22-multi-runtime-wake.md).
 The user-approved direction adds exact open-Grok TUI wakes and bidirectional
@@ -1436,13 +1460,14 @@ OpenAI confirmation and working-account activation retain their own gates.
 
 Command discoverability and CLI/API/MCP consistency: operator-confirmed design in
 [Plan0197](docs/dev/plans/0197-2026-11-02-command-contract.md), LOCAL-0197.
-State PLANNED; accounts/daemons/history first, with generated help/reference,
+Historical design state: PLANNED; accounts/daemons/history first, with generated help/reference,
 automatically installed Bash/Zsh completion and explicit transport exceptions.
 
 Plan0197 complete on local integration branch feat/command-contract-0197: five
 local tickets DONE, review1/TDD1 complete, exact final installed fixture passed.
 Accounts/configuration/builds/daemons/history are the first22operation contract;
-remaining command families are explicitly deferred. Merge/release remain separate.
+remaining command families are explicitly deferred. Subsequent delivery: PR461
+integrated this contract; PR462 package deployment is recorded below.
 
 [Plan0198](docs/dev/plans/0198-2026-11-02-account-shortcuts.md) / LOCAL-0198 owns
 open/resume, recent-history viewing and source-preserving recent batch copying.
@@ -1450,7 +1475,10 @@ Stacked on validated Plan0197; no working launcher or plain codex replacement.
 
 Plan0198 / LOCAL-0198 DONE locally: open/resume shortcuts and recent copies
 qualified with actual native UID1017 clients/daemons; sourcebdb2114. Plain codex
-stays stock. Stacked feature branch remains unmerged and not deployed.
+stays stock. Subsequent PR462 integrated `76ac7d9`; the exact238-member package,
+completion/default root and real-account read-only recents were deployed.
+[Deployment receipt](docs/dev/evidence/plan0198/deployment.json). No live copy/model
+turn or blanket account/native acceptance is implied.
 
 ## P200 | WSL Session Control For codex-bots
 
@@ -1554,8 +1582,10 @@ question/claim/reply remains separate.
 
 [LOCAL-P213](docs/dev/plans/0213-2026-11-09-tab-formatting-throughput.md) OPEN.
 Native process churn and per-tab durable saves reproduced/fixed at source; private
-42tab refresh1.143s. Production rolled back and monitoroff. Installed loaded-host
-qualification plus palette/plain preview required before reactivation.
+42tab refresh1.143s. Original production rollback/monitor stop preceded PR537 deployment and the
+later P214/P215 display evidence. P216 subsequently records monitor qualification;
+P223 later records disabled automation. The plan remains OPEN pending explicit
+remaining-scope disposition, not a new duplicate implementation chain.
 
 
 ## P215 | Named muted tab palettes
@@ -1579,6 +1609,16 @@ originalcurrentnamespacebaseline preserved, historicalbaseline archived privatel
 315installedmembers/ninelaunchers/completion/accounts/nativeagents verified.
 100tab resourcequalifications and dev4 performancecarry boundaries remain explicit.
 Evidence: docs/dev/evidence/plan0216/deployment.json. No harness/provider effects.
+
+Canonical reconciliation: #541–#547 were re-read CLOSED and parent #540 OPEN.
+The later local OBS aliases are superseded; they do not reopen canonical child
+acceptance. The original46-tab receipt remains valid historical evidence; a
+supplemental43-tab run with3natural native transitions neither replaces it nor
+proves stock/modded parity or current100-tab performance. See
+[canonical mapping](docs/dev/notes/0216-2026-11-12-canonical-acceptance-reconciliation.md).
+The enabled46-tab narrative above describes the dev5 milestone; later P223
+records automation disabled and is not reversed by this patch.
+
 
 ## P217 | Human-friendly CLI output
 

@@ -19,9 +19,15 @@ No changes to provider/process identity or activity evidence semantics.
 
 ## Current State
 
-Delivery below records the shipped compact/plain/noSTALE change and retained
-validation. The automatic loaded-host deadline remains open; this header repair
-adds no runtime qualification or monitor activation.
+PR538 delivered compact/plain/no-STALE presentation; the original failed
+loaded-host deadline and manual reconciliation remain in the delivery record.
+Subsequent P216 installed100-tab/46-tab qualification is recorded separately in
+[accepted receipt](../evidence/plan0216/qualification547/accepted-eighth.md).
+That later delivery is not pending implementation. This plan's OPEN label is
+retained for explicit remaining-scope disposition rather than closing it by
+association. Later [P223](0223-2026-11-11-tmux-subscription-crash.md) owns the
+recorded disabled automation state. No new runtime qualification or activation
+is claimed here.
 
 ## Delivery
 

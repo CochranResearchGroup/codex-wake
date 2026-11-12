@@ -5,11 +5,21 @@ Owner: primary / ecochran76
 Ticket: LOCAL-0198 (this file)
 Branch: feat/account-shortcuts-0198
 Base: 6a290eef7dbf7b18fa3cdcd03f48f3d6286d98d1
-Dependency: validated Plan0197 source (stacked local branch; origin/main remains6fb4fe7)
+Dependency: Plan0197 integrated through PR461; historical stacked base retained above
 Priority: next operator usability slice
 WIP limit: one primary slice
 
 ## Current State
+
+Reconciled 2026-11-12: PR461 integrated Plan0197; PR462 integrated Plan0198 at
+`76ac7d918f414becc97e23b7212c3ac2422d114c`. The exact merged package was deployed
+with all 238 Python members matched, installed completion and real-account
+read-only recents. Existing daemon targets and stock binary were preserved.
+See [deployment receipt](../evidence/plan0198/deployment.json) and RUNBOOK's
+2026-11-02 command-contract/shortcuts deployment entry. This is recorded delivery
+evidence, not a fresh installed-runtime readback or broader live-account acceptance.
+
+## Historical source qualification
 
 LOCAL-0198 DONE on feat/account-shortcuts-0198. Sourcebdb2114 implements
 open/resume, explicit shortcut default root, read-only recents and frozen recent
@@ -60,7 +70,7 @@ on3.11/3.12, installed provider-free command qualification and applicable local
 presubmit. No paid hosted CI, working installation, real histories/credentials,
 provider model turns, old-job resume, merge, deployment or memory write.
 
-## Terminal state
+## Historical source-only terminal state
 
 Implementation and source/disposable-installed acceptance complete. Local ticket
 DONE. Keep the stacked dependency on validated Plan0197 visible until integration;

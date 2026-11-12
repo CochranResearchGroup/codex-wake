@@ -31,7 +31,22 @@ onewindow0.374/0.158s. Native process budget assertion red at1728launches. Ranke
 predictions: native per-option spawn cost dominates; repeated statewrites contribute;
 20second TTL expires under cycle delays. Change only native batching first.
 
-## Current state
+## Current State
+
+Reconciled 2026-11-12: PR537 integrated the throughput fix and its exact wheel
+was deployed; live public rollback passed. P214/P215 subsequently record compact
+presentation and approved palette readbacks. P216 later records installed100-tab
+and46-tab acceptance, so its delivered monitor work must not be treated as a new
+implementation prerequisite here. This older plan remains OPEN pending explicit
+remaining-scope disposition; this edit does not silently close its acceptance.
+
+Current automation state belongs to later [P223](0223-2026-11-11-tmux-subscription-crash.md),
+which records disabled automation after native crash containment. Historical
+activation below is not current runtime authority. No fresh installed readback
+was performed for this documentation patch.
+[Original deployment receipt](../evidence/plan0213/deployment.json).
+
+## Historical source qualification and deployment
 
 Source throughput fix validated:1728→275 nativeprocesses;42window formattingbudget
 red3.859s→green1.143s after consolidating durable saves with original baselines
