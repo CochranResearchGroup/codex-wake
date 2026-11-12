@@ -1,12 +1,12 @@
 {
-  "status": "NATIVE_ALIAS_BLOCKER_REMEDIATION",
-  "source_commit": "6465aa6a4aac1d605a4db1f7f4a81002b4018305",
-  "main_base": "92c00a0d8495f2d7d386cd7d85cd4f610e8f6ded",
-  "version": "0.22.0.dev10",
-  "wheel_sha256": "7395e366d929fd1d4b93ae6298ec302591add62f3741bfa7656b0d107665f09a",
+  "status": "NATIVE_V5_RUNTIME_PENDING",
+  "source_commit": "4b865807ed1e485d923c2aff1d9524c64a96c592",
+  "main_base": "e16bc4d2a9c17ea42ad99d8e59daac8265ff2558",
+  "version": "0.22.0.dev11",
+  "wheel_sha256": "e1352bc56a1e4f60dc3145b4f08ce9bbac9aacf6648fc9c926c4a731ae7d1852",
   "package_members": 324,
-  "native_source": "15626ed7031a0246543b1703be69dbbc22e917d2",
-  "native_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+  "native_source": "f986f6ed53d6b324aedbd7e32991e0185eacae14",
+  "native_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa",
   "source_bound_receipt": "/home/ecochran76/.local/state/codex-wake/qualification/governor-release-p223/integration-source-bound-fixed.json",
   "source_bound_receipt_sha256": "22137868337b14c987bb35de1e5eae6cfc2203b159ca9bf48b4c13d240bb27cb",
   "checks": [
@@ -118,13 +118,35 @@
   "installed_startup": "41 PASS 19.538s exact wheel7395 UID1017",
   "native_alias_blocker": {
     "id": "INT223-2",
-    "status": "implementing",
+    "status": "fixed_focused_verified_runtime_pending",
     "actual_endpoint": "owned account app-server-control/app-server-control.sock alias",
     "actual_selector": "exact fixture thread present on same daemon",
     "alias_discovery": "PARTIAL, sessions=[], source_unavailable",
     "physical_discovery": "COMPLETE, holds=[], three sessions including exact selector",
     "proof": "Synchronous actual native child command wrapper, before execution and cleanup",
     "correction": "Canonicalize native Unix remote address before invoking Wake; preserve Python explicit no-symlink and same-user ownership contracts",
-    "new_native_qualification": "required before merge/deployment"
+    "new_native_qualification": "required before merge/deployment",
+    "source": "f986f6ed53d6b324aedbd7e32991e0185eacae14",
+    "red_seconds": 458.468,
+    "green_seven_tests_seconds": 384.751,
+    "complete_build_seconds": 166.963
+  },
+  "combined_source_checks": {
+    "source": "4b865807ed1e485d923c2aff1d9524c64a96c592",
+    "selection": "119 governor/startup/formatting/tmux-feed/monitor tests",
+    "py312": "PASS76.895s",
+    "py311": "PASS92.566s",
+    "receipt_sha256": "0ad63089a688399c8daf8468a455da2eba8c06db00961ce251d073d1ee7bf8b6"
+  },
+  "observer_readiness": {
+    "source": "5f6760a7",
+    "production_members": "all324 unchanged from e135 wheel",
+    "selection": "58 observer/startup/feed/monitor tests",
+    "py312": "PASS22.542s",
+    "py311": "PASS27.091s",
+    "installed_uid1017": "PASS21.870s",
+    "retained_failure": "Original58 FAIL1 in31.377s; close handshake followed by immediate nonblocking public tick raced receive-queue close observation",
+    "correction": "Wait on actual public source-loss evidence within existing two-second event bound; no production edit",
+    "receipt_sha256": "9d1972d8a12435a6f1e23c1ad71ba30a09ce316adb89794c7b02e6627c34a9ea"
   }
 }

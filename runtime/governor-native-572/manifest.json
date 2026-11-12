@@ -4,9 +4,9 @@
   "native_repository": "https://github.com/openai/codex",
   "upstream_revision": "086ccc833bc9cf01024ad2dd6af7dbd421b6bf9a",
   "native_retained_base": "d3e311260b46c88fc8eac08b869f276cd0345e8b",
-  "native_source_commit": "15626ed7031a0246543b1703be69dbbc22e917d2",
+  "native_source_commit": "f986f6ed53d6b324aedbd7e32991e0185eacae14",
   "native_source_worktree": "/home/ecochran76/workspace.local/codex-wake-native-governor-572",
-  "patch_sha256": "d25ba4cedbc19a67f75173c83ed0df519408a82aa0cdc2f086d0c6b06aae2381",
+  "patch_sha256": "e1ddca7c3f385760729afc0ebf8b7e4392290dd802b625165df2c7f64b6912dd",
   "patched_files_sha256": {
     "codex-rs/Cargo.lock": "8ce6e8ba6f35054304773c1decd50c1d960d6eeb911a549fec3e4a22dbcb9863",
     "codex-rs/app-server-protocol/schema/json/ClientRequest.json": "e2b80bd4dba9ea2eb75d7b665878e56e57ee974da45d3829dd2b9857a5bb81d3",
@@ -54,7 +54,7 @@
     "codex-rs/tui/src/chatwidget/rendering_tests.rs": "e9e75300206cd5879c4313934cd4bf478a2d9c37f3fd5afad0e447a902551d96",
     "codex-rs/tui/src/chatwidget/session_flow.rs": "4d7767a2fd7ddffda72a83e9e058cd12bdfb76def085317f860418a3e37cc478",
     "codex-rs/tui/src/chatwidget/slash_dispatch.rs": "17613a26e1f76c2fe93e6263be33b3dabf159d3d791f09548e02a659083344dd",
-    "codex-rs/tui/src/chatwidget/wake_governor.rs": "8ea90ab4ecfccd6141fe0476671c8f87e326656fc745f5e1ad1af2fe4f8f52a7",
+    "codex-rs/tui/src/chatwidget/wake_governor.rs": "509c71755f385013c92be09a75a5be3589acce5d81995a88a23ed3aedefa8af8",
     "codex-rs/tui/src/slash_command.rs": "89851da9c9c63439704c31bdc898a2757cab11d4c0055cdb62841dbf18d7ff10",
     "sdk/python/src/openai_codex/generated/v2_all.py": "2492fb1d70efa1aee254f585d34d341d647d30a500fbf172f685cc8b1cc01fee"
   },
@@ -63,9 +63,9 @@
   "cargo_jobs": 2,
   "toolchain": "1.95.0",
   "build_evidence": "/home/ecochran76/.local/state/codex-wake/governor-native-572",
-  "qualification": "Package-v4 production build and six focused TUI tests passed; exact UID1017 managed UI, watcher-loss and cold-resume passed in64.475s. Aggregate upgrade/failure/delegated qualification remains separate.",
+  "qualification": "Package-v5 production build PASS166.963s and seven focused TUI tests PASS384.751s; exact UID1017 installed runtime qualification pending. Prior v4 acceptance remains historical.",
   "production_install": false,
-  "full_patch_sha256": "ae11f4cf74a1cfa2ff10006bf1d44c3f9dc1e33c9203f23191c4088a94059e1a",
+  "full_patch_sha256": "dc95e6a0286521c8a810f35230f9a4df9874e02edeb83337daa1829e422206c5",
   "guard_capabilities": {
     "clock": "Linux CLOCK_BOOTTIME;100ms awake check",
     "exact_causal_roots": true,
@@ -81,13 +81,19 @@
     ],
     "task_owned_exec_handles": "causal-root scope, confirmed termination, bounded startup-publication fence"
   },
-  "package_entrypoint_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+  "package_entrypoint_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa",
   "package_version": "codex-cli 0.167.0",
   "related_issues": [
     571,
     572
   ],
-  "build_recipe": {
+  "scope_stop": "exact causal-root turn guards plus retained execution handles; per-root startup publication fence; unknown abandoned startups cannot verify stop; 5-second overall confirmed-exit window",
+  "predecessor_v4": {
+    "source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+    "entrypoint_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+    "evidence": "ui-v4-acceptance.json"
+  },
+  "build_recipe_v4": {
     "driver": "/home/ecochran76/.local/state/codex-wake/governor-native-572/build-package-v4.sh",
     "driver_sha256": "c902ea94c78f78eb155bbdb1a9297cb2fdda7a39a8df7bbec0743f211f2c9197",
     "cargo_argv": [
@@ -128,5 +134,13 @@
     "cargo_target_host": "x86_64-unknown-linux-gnu (implicit native host target)",
     "features": "retained entrypoint default features; test package selection and standalone generator unify dependency features differently"
   },
-  "scope_stop": "exact causal-root turn guards plus retained execution handles; per-root startup publication fence; unknown abandoned startups cannot verify stop; 5-second overall confirmed-exit window"
+  "build_recipe": {
+    "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-qualification-v5.json",
+    "target": "x86_64-unknown-linux-gnu",
+    "profile": "dev-small",
+    "features": "default",
+    "jobs": 2,
+    "toolchain": "1.95.0",
+    "five_companions": "unchanged verified v4 bytes"
+  }
 }

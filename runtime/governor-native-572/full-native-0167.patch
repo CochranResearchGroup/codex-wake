@@ -29259,10 +29259,10 @@ index 44f3c879e2..a0ee7662b9 100644
              | SlashCommand::Keymap
 diff --git a/codex-rs/tui/src/chatwidget/wake_governor.rs b/codex-rs/tui/src/chatwidget/wake_governor.rs
 new file mode 100644
-index 0000000000..2b1aa8aec6
+index 0000000000..50ed3c5db3
 --- /dev/null
 +++ b/codex-rs/tui/src/chatwidget/wake_governor.rs
-@@ -0,0 +1,1093 @@
+@@ -0,0 +1,1173 @@
 +//! Native presentation only. Wake's Python owner remains the accounting and effect authority.
 +use super::*;
 +use ratatui::text::Span;
@@ -29607,16 +29607,22 @@ index 0000000000..2b1aa8aec6
 +            .or_else(|| self.thread_id.map(|id| format!("thread:{id}")))
 +    }
 +    fn wake_endpoint(&self) -> Result<String, String> {
-+        if let Some(endpoint) = &self.wake_governor.selected_endpoint {
-+            return Ok(endpoint.clone());
-+        }
-+        match self.remote_connection.as_ref() {
-+            Some(remote) if remote.address.starts_with("unix://") => Ok(remote.address.clone()),
-+            Some(_) => {
-+                Err("Governor unsupported for this remote transport; isolation unqualified".into())
-+            }
-+            None => Err("Governor requires a qualified local Unix daemon connection".into()),
-+        }
++        let endpoint = if let Some(endpoint) = &self.wake_governor.selected_endpoint {
++            endpoint.as_str()
++        } else {
++            self.remote_connection
++                .as_ref()
++                .map(|remote| remote.address.as_str())
++                .ok_or("Governor requires a qualified local Unix daemon connection")?
++        };
++        let path = endpoint
++            .strip_prefix("unix://")
++            .ok_or("Governor unsupported for this remote transport; isolation unqualified")?;
++        // The account control address may be a symlink. Wake requires the
++        // physical socket and still validates its owner, peer and generation.
++        let path = std::fs::canonicalize(path)
++            .map_err(|_| "Governor local Unix daemon endpoint unavailable")?;
++        Ok(format!("unix://{}", path.display()))
 +    }
 +    pub(crate) fn start_wake_governor_poll(&mut self) {
 +        if let Some(poll) = self.wake_governor.poll.take() {
@@ -30301,6 +30307,80 @@ index 0000000000..2b1aa8aec6
 +        assert!(widget.bottom_pane.has_active_view());
 +        assert!(operations.try_recv().is_err());
 +    }
++    #[cfg(unix)]
++    #[tokio::test]
++    async fn wake_governor_command_resolves_owned_control_alias() {
++        use std::os::unix::fs::PermissionsExt;
++        use std::os::unix::net::UnixListener;
++        const FIXTURE: &str = "WAKE_GOVERNOR_ALIAS_FIXTURE";
++        if let Some(directory) = std::env::var_os(FIXTURE) {
++            let directory = std::path::PathBuf::from(directory);
++            let alias = directory.join("control.sock");
++            let endpoint = format!("unix://{}", alias.display());
++            let (mut widget, _sender, mut events, mut operations) =
++                crate::chatwidget::tests::make_chatwidget_manual_with_sender().await;
++            widget.thread_id = Some(ThreadId::new());
++            widget.remote_connection =
++                crate::status::remote_connection::remote_connection_status_value(
++                    &crate::AppServerTarget::Remote {
++                        endpoint: crate::resolve_remote_addr(&endpoint).unwrap(),
++                    },
++                    None,
++                );
++            while operations.try_recv().is_ok() {}
++            widget.handle_wake_command("governor status");
++            tokio::time::timeout(Duration::from_secs(5), async {
++                while let Some(event) = events.recv().await {
++                    if matches!(event, AppEvent::WakeResult { .. }) {
++                        break;
++                    }
++                }
++            })
++            .await
++            .expect("public Wake command completed");
++            let arguments = std::fs::read_to_string(directory.join("arguments")).unwrap();
++            let arguments: Vec<_> = arguments.lines().collect();
++            let endpoint_index = arguments
++                .iter()
++                .position(|arg| *arg == "--endpoint")
++                .unwrap();
++            assert_eq!(
++                arguments[endpoint_index + 1],
++                format!("unix://{}", directory.join("native.sock").display())
++            );
++            assert!(
++                operations.try_recv().is_err(),
++                "governor status must not start model work"
++            );
++            return;
++        }
++        // Keep PATH changes in an isolated test process; the executable records
++        // the actual public command boundary, without supplying owner behavior.
++        let directory = tempfile::tempdir().unwrap();
++        let _listener = UnixListener::bind(directory.path().join("native.sock")).unwrap();
++        std::os::unix::fs::symlink("native.sock", directory.path().join("control.sock")).unwrap();
++        let executable = directory.path().join("codex-wake");
++        std::fs::write(&executable, "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$WAKE_ALIAS_CAPTURE\"\nprintf '{\"state\":\"disabled\"}\\n'\n").unwrap();
++        std::fs::set_permissions(&executable, std::fs::Permissions::from_mode(0o700)).unwrap();
++        let path = std::env::join_paths(std::iter::once(directory.path().to_path_buf()).chain(
++            std::env::split_paths(&std::env::var_os("PATH").unwrap_or_default()),
++        ))
++        .unwrap();
++        let output = std::process::Command::new(std::env::current_exe().unwrap())
++            .args(["--exact", "chatwidget::wake_governor::tests::wake_governor_command_resolves_owned_control_alias", "--nocapture"])
++            .env(FIXTURE, directory.path()).env("WAKE_ALIAS_CAPTURE", directory.path().join("arguments"))
++            .env("PATH", path).output().unwrap();
++        assert!(
++            output.status.success(),
++            "{}",
++            format!(
++                "{}{}",
++                String::from_utf8_lossy(&output.stdout),
++                String::from_utf8_lossy(&output.stderr)
++            )
++        );
++    }
++
 +    #[test]
 +    fn direct_governor_grammar_never_executes_shell_or_accepts_authority_fields() {
 +        let args = governor_argv(
