@@ -9134,3 +9134,24 @@ and Windows117selected processes/resource observation (no global absence claim).
 Python source checks and initial watcher-readiness flake recorded in qualification
 and runtime evidence. No hostedCI, real providers, production install or restart.
 One broad review and one bounded remediation remain; not merge/release approval.
+
+## Turn 414 | 2026-11-11 | Plan0220 review and exact v4 acceptance complete
+
+One broad Standards/Spec review frozen23b87803/bd519d5; twoStandards duplication
+smells backlogged, twoP2Spec presentation blockers accepted. One bounded TDD
+pass fixed authoritative remainingtokens and shared-limit/scope presentation in
+native15626ed7. Genuine renderingRED/GREEN retained; final6governortestsPASS
+369.102s. Private-helper compilefailure and exact-owned cancelled attempt retained.
+Complete packageca29 productionbuildPASS163.681s, all6membersverified.
+Actual v4UI PASS64.475s/3localhostPOST/0external; Sharedfields+limitingtask visible.
+Primary exactv4 normal and failed-start upgrade/rollback PASS,5upgrade/6rollback
+clients, counters/history/handoffs preserved, duplicate recovery reconciled.
+Exactv4 delegated limitPASS13.094s and watcher-loss rawPASS19.510s, exacttools
+stopped, peerpreserved, no hidden goal, ownedcensuses[]. No offline override forv4.
+Earlier v4setup clockgate42.146s and opaqueRPC35.261s remainUNKNOWN; bounded
+readiness/phase instrumentation retained. Setup flakiness tracked577, owner
+ecochran76/review2026-11-19; not an unflaky-lane claim. Source323+native6members
+still match. Originalclock46d restored0600; proxyexpired/exited; freshUID1017
+census[] and Windows70selected processes/resources observed. Originalcheckout
+dirty4paths preserved. Review1/remediation1, no broader rerun or hostedCI.
+Parent570 readyclose; merge/release/deploy and576–581 remain separate.

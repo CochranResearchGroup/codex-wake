@@ -31,3 +31,11 @@ presentation gaps, not evidence of failed underlying containment. One bounded
 TDD pass owns these two findings; focused verification cannot restart discovery.
 
 Accepted findings: Standards2 backlog, highestP3; Spec2 blocking, highestP2.
+
+Remediation complete: native `15626ed7`, immutable executable `ca29d5cf...`.
+Both Spec blockers have public rendering red/green proof; six focused governor
+tests pass. Exact installed UI passes64.475s with Shared allowance/tokens/time
+and limiting-task readback,3localhostPOST/0external. Normal/failed-start
+upgrade+rollback and both delegated containment cases pass on those exact bytes.
+Earlier setup failures are retained and tracked in#577; no clean-unflaky-lane
+claim. Primary verification stayed closed-world; no second broad review ran.

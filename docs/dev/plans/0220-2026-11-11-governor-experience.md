@@ -1,7 +1,14 @@
 # LOCAL-P220 | Usable governor and native /wake
 
-State: IN_PROGRESS. Owner: primary/ecochran76. Spec:#570. Tickets:#571–574.
+State: CLOSED. Owner: primary/ecochran76. Spec:#570. Tickets:#571–574.
 Branch:feat/governor-experience. Frozen base/review point:3f8a18fa196037fa9efe00bf2ad36b05c61f2a3c.
+
+## Current State
+
+Tickets571–574 are integrated and closed. Exact native15626ed7/packageca29 and
+Wake wheel7a5 are qualified in UID1017; one broad review and one bounded TDD
+pass resolved both Spec blockers. See qualification.json and review.json. Parent
+570 tracker reconciliation is the final bookkeeping action. No merge/deployment.
 
 ## Authority and scope
 Operator approved all interview decisions, public/native journey seams, immediate publication/implementation and delegation. Existing parents343–346/350 remain untouched; #570 owns this bounded successor. Three implementation lanes maximum; one ticket per worker; no nested delegation. Primary owns573, backend worker571, native worker572.574 starts after571–573validated. One broad review then one bounded TDD remediation pass. No working native restart, stock changes, paid CI or provider-heavy experiments.

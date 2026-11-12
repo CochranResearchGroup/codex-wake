@@ -1579,10 +1579,10 @@ Stable tab management repair #563 / Plan0218: CLOSED. PR565 merged c9f220d8;0.22
 
 
 ## P220 | Usable governor and native /wake
-IN_PROGRESS:#570, tickets571–574. Plan0220 and execution ledger own current implementation/acceptance. Three bounded lanes; no production effects.
+QUALIFIED:#570 parent tracker reconciliation pending; tickets571–574 CLOSED. Plan0220 exact nativev4/Wake accepted in UID1017; one review and one bounded TDD pass complete. No merge/deployment.
 
 ### Plan0220 retrospective follow-ups
 
 READY backlog: #576–581. [Findings and action index](docs/dev/evidence/plan0220/retrospective.md).
-Keep current #572/#574 ahead of these environment-hardening slices; reuse existing
-preflight/summary tooling and preserve the no-paid-CI boundary.
+Plan0220 implementation is complete; these remain separate follow-up hardening.
+Reuse existing preflight/summary tooling and preserve the no-paid-CI boundary.

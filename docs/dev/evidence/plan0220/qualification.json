@@ -1,31 +1,36 @@
 {
-  "status": "ISOLATED_INSTALLED_ACCEPTED_REVIEW_PENDING",
-  "ticket": 574,
+  "status": "ISOLATED_INSTALLED_ACCEPTED_REVIEW_REMEDIATION_COMPLETE",
   "spec": 570,
+  "ticket": 574,
   "working_deployment": false,
   "hosted_ci": false,
   "python": {
     "installed_members_equal": 323,
+    "native_members_equal": 6,
     "python": "3.12.3",
     "source_commit": "3a8659fcf73ede2e5e46554d5b2147a19176b58c",
     "wheel_sha256": "7a5c5e6ce0f427cedd6f18794279729b19c538ba96fff5ffddac3cc704830919",
-    "current_source_members_equal": 323
+    "current_source_members_equal": 323,
+    "native_source": "15626ed7031a0246543b1703be69dbbc22e917d2"
   },
   "native": {
-    "final_package_source": "bd519d5232aef6f55a4a665cd0c7461ec5b223f9",
-    "executable_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
+    "final_package_source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+    "executable_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
     "package_members": 6,
     "source_copy_members_equal": true,
-    "focused_test_source": "896bec2571175a9b166a4581c4be84a74861820c",
+    "build_seconds": 163.681,
+    "build_receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build-v4/job-20261112T024103Z-656884cdbc3e/20261112T024103Z-3ecae7422a91/receipt.json",
+    "profile": "dev-small",
+    "jobs": 2,
+    "toolchain": "1.95.0",
     "focused_tests": {
+      "selection": "codex-tui governor",
       "passed": 6,
-      "core": 2,
-      "tui": 4,
-      "app_server": 0,
-      "build_and_run_seconds": 1861.933
+      "seconds": 369.102,
+      "source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+      "receipt": "runtime/governor-native-572/remediation.json"
     },
-    "focused_test_receipt": "~/.local/state/codex-wake/governor-native-572/tests/job-20261111T175549Z-52257fc6648e/20261111T175550Z-5387c2ca5edb/receipt.json",
-    "carried_provenance": "Six native focused tests ran on the recorded older source; not an exact-final Rust test claim. Exact final package is proven by the current actual installed UI/delegate/upgrade/rollback journeys."
+    "historical_core_checks": "Older core2/TUI4 checks retain source896bec provenance in historical qualification; not reported as current exact-source core tests."
   },
   "source_validation": {
     "source_commit": "30b7a89a3c41e575a85f4b093808a6403ee64bd4",
@@ -72,14 +77,14 @@
       }
     }
   },
-  "native_ui": "runtime/governor-native-572/ui-acceptance-20261112.json",
+  "native_ui": "runtime/governor-native-572/ui-v4-acceptance.json",
   "installed_journeys": {
-    "p220-v3-01": {
-      "receipt": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p220-v3-01/receipt.json",
-      "receipt_sha256": "a204bf410451c345d54e8ec288aea7f302dd1be8cc305d80c00c7e75857a5aad",
+    "p220-v4-01": {
+      "receipt": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p220-v4-01/receipt.json",
+      "receipt_sha256": "99d8361116e3a55e95b5e45790f934828e13d5558e2babfdeef34d2662ecfa2a",
       "state": "passed",
       "mode": "success",
-      "target_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
+      "target_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
       "baseline_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
       "rollback_expected_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
       "all_tabs_notified": true,
@@ -93,12 +98,12 @@
       "upgrade_client_count": 5,
       "rollback_client_count": 6
     },
-    "p220-v3-fail01": {
-      "receipt": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p220-v3-fail01/receipt.json",
-      "receipt_sha256": "c7821284c7e516f6ff919bf047a02a226c770bb132fceabe8d6a3e5d8160bfce",
+    "p220-v4-fail01": {
+      "receipt": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p220-v4-fail01/receipt.json",
+      "receipt_sha256": "2f909012805bdf834ad4308114f65dec0fed3004dfa379cbebf0a658c0978c7d",
       "state": "passed",
       "mode": "startup-fail",
-      "target_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
+      "target_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
       "baseline_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
       "rollback_expected_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
       "all_tabs_notified": true,
@@ -112,81 +117,78 @@
       "upgrade_client_count": 5,
       "rollback_client_count": 6
     },
-    "delegate-limit-final": {
-      "receipt": "/home/codex-daemon-test/governor-p220-continue/delegate-limit-final/result.json",
-      "receipt_sha256": "1d5ae4ccffd83bd3a8a1eb9a1174f6b651cc8d6586a36aac085a4f49285e5100",
+    "delegate-v4-limit": {
+      "receipt": "/home/codex-daemon-test/governor-p220-continue/delegate-v4-limit/result.json",
+      "receipt_sha256": "39e553863a637ae3333d603e061c6f88ad4ca7b9ecf6cf5cc2c813974da07474",
       "raw_verdict": "PASS_NATIVE_GOVERNOR_LIMIT",
-      "elapsed_seconds": 13.447469614999818,
+      "elapsed_seconds": 13.093734668999787,
       "local_posts": 5,
       "external_provider_calls": 0,
       "exact_tools_stopped": true,
       "final_owned_processes": []
     },
-    "delegate-watcher-loss-final": {
-      "receipt": "/home/codex-daemon-test/governor-p220-continue/delegate-watcher-loss-final/result.json",
-      "receipt_sha256": "bce1fe6b0544559f72a8adb5ed9bc47b58efedaeb9ee2882b1d130f7e1c631cf",
-      "raw_verdict": "FAILED_PACKET",
-      "elapsed_seconds": 16.711228596999945,
+    "delegate-v4-watcher-loss": {
+      "receipt": "/home/codex-daemon-test/governor-p220-continue/delegate-v4-watcher-loss/result.json",
+      "receipt_sha256": "f3c3ea82e070916a19aada522f1796b0a9e07c0b7cc2ee2ef0175d4191b19bb8",
+      "raw_verdict": "PASS_NATIVE_GOVERNOR_WATCHER_LOSS",
+      "elapsed_seconds": 19.509754360999978,
       "local_posts": 5,
       "external_provider_calls": 0,
       "exact_tools_stopped": true,
       "final_owned_processes": []
     }
   },
-  "watcher_loss_adjudication": {
-    "verdict": "ACCEPTED_OFFLINE_NOTICE_DISAMBIGUATION",
-    "raw_verdict": "FAILED_PACKET",
-    "raw_result_sha256": "bce1fe6b0544559f72a8adb5ed9bc47b58efedaeb9ee2882b1d130f7e1c631cf",
-    "raw_receipt": "/home/codex-daemon-test/governor-p220-continue/delegate-watcher-loss-final/result.json",
-    "explanation": "The extra native history ID is the exact owner-recorded engagement notice, not another model work turn. Raw FAILED_PACKET retained unchanged.",
-    "new_history_ids": [
-      "01a1cd51-3af3-7db2-a5fa-e2dadd61d538",
-      "notice_b89d023866576ea974252e78799b6dff95e2971e5409397ebc7c0272349baedc"
+  "review": {
+    "broad_passes": 1,
+    "remediation_passes": 1,
+    "report": "docs/dev/evidence/plan0220/review.json",
+    "blocking_findings_resolved": [
+      "SPEC220-1",
+      "SPEC220-2"
     ],
-    "owner_notice_ids": [
-      "notice_b89d023866576ea974252e78799b6dff95e2971e5409397ebc7c0272349baedc"
-    ],
-    "operation_started_turn_id": "01a1cd51-3af3-7db2-a5fa-e2dadd61d538",
-    "task_started_ids": [
-      "01a1cd50-ff3e-7291-8aa2-87130991773a",
-      "01a1cd51-3af3-7db2-a5fa-e2dadd61d538"
-    ],
-    "resumed_turn_completed": true,
-    "provider_posts": 5,
-    "external_provider_calls": 0,
-    "used_tokens_before_resume": 45,
-    "native_cancelled_exact_tools": true,
-    "no_hidden_goal": true,
-    "peer_goal_unchanged": true,
-    "final_owned_processes": []
+    "nonblocking_backlog": [
+      "STD220-1",
+      "STD220-2"
+    ]
   },
   "clock_cleanup": {
-    "at": "2026-11-12T01:14:53.470817+00:00",
+    "at": "2026-11-12T02:59:46.206251+00:00",
     "action": "hash_guarded_original_clock_restore",
     "original_sha256": "46d044572649bd8de7a26d7252cf0a9852026c75a13c2467bc6accd9ada9dece",
-    "temporary_sha256": "0fe8322deb8217c9d09acbed10e98fb5f0260196ae7466b709892ddf27dbb558",
+    "temporary_sha256": "a2693882fb655a1aae395c23918fd697916ac158650557af887ce3675f7ffaa9",
     "restored_sha256": "46d044572649bd8de7a26d7252cf0a9852026c75a13c2467bc6accd9ada9dece",
     "mode": "0o600",
     "restored_original_is_not_readiness": true
   },
   "final_linux_census": {
-    "at": "2026-11-12T01:15:15.547538+00:00",
+    "at": "2026-11-12T03:00:31.523692+00:00",
     "uid": 1017,
     "processes": [],
-    "owned_runtime_remaining": []
+    "owned_runtime_remaining": [],
+    "proxy_671356_absent": true
   },
   "final_windows_census": {
-    "at": "2026-11-12T01:15:16.657742+00:00",
+    "at": "2026-11-12T03:00:32.231889+00:00",
     "exit_code": 0,
-    "selected_process_count": 117,
-    "receipt": "/home/ecochran76/.local/state/codex-wake/qualification/governor-p220/final-windows-census.json",
-    "scope": "Fresh Windows process/resource observation; no global absence or baseline preservation inferred."
+    "selected_process_count": 70,
+    "receipt": "/home/ecochran76/.local/state/codex-wake/qualification/governor-p220/final-v4-windows-census.json",
+    "scope": "Fresh Windows resource observation, not global absence or baseline-preservation proof."
   },
   "environment_differences": "Local WSL shared kernel, separate real UID1017, runtime Python3.12.3, source checks Python3.11.15/3.12.13, injected localhost Responses accounting not provider billing; no hosted CI or working deployment.",
-  "history": "Pre-continuation qualification.json remains in Git at866edc9a; old v1/v2 passes are historical and do not qualify current final bytes. Temporary old QA/raw captures disappeared; current raw artifacts retained in durable UID1017 root. Initial self-lock red, matrix watcher-readiness flake and reconnect-modal reds retained in runtime/governor-native-572/resume-timeout-diagnosis.json.",
+  "setup_flakes": {
+    "lane_claim": "Current exact-byte samples accepted; no clean-unflaky-lane claim.",
+    "owner": "ecochran76",
+    "work_item": "https://github.com/CochranResearchGroup/codex-wake/issues/577#issuecomment-6813095946",
+    "review_by": "2026-11-19",
+    "quarantined": false,
+    "retained": [
+      "ui-v4-red-01:42.146s/1POST, native-goal qualified-time admission, failed-instant cause UNKNOWN",
+      "ui-v4-red-02:35.261s/0POST, opaque native RPC3s timeout, method/cause UNKNOWN"
+    ],
+    "causal_reframe": "Existing harness now records bounded qualified-clock readiness and RPC method/elapsed/error phase. Instrumented original journey PASS64.475s/3POST; initial clock ready with gap-1.541s, no wait. Native bytes unchanged across these attempts; no timeout/guard relaxation."
+  },
+  "history": "Qualification at23b87803 and earlier v1/v2/v3 results remain historical Git evidence. V3 watcher-loss rawFAIL and offline notice adjudication are retained; current v4 watcher-loss rawPASS needs no offline override. Initial self-lock red, watcher-readiness test flake, private-helper compile error and exact-owned cancelled build remain in runtime evidence. No first failure erased.",
   "summary_tool": "Existing scripts/summarize_receipt.py was attempted for these native receipt shapes and returned unsupported input. Bounded selected-field extraction retained; no replacement summary framework introduced.",
-  "remaining": [
-    "One broad Standards/Spec review",
-    "One bounded TDD findings remediation pass"
-  ]
+  "remaining_gates": [],
+  "separate_authority": "Branch qualification is not merge, release, working-host installation or production restart approval."
 }
