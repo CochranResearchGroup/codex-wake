@@ -32,3 +32,12 @@ The workflow scope selector is deliberately conservative: only evidence-only
 Markdown/JSON changes can choose its docs lane. This patch also touches ROADMAP
 and plan metadata, so it may select full. Applicable local documentation checks
 are recorded above; no full release-suite or package/runtime claim is made.
+
+
+Frozen patch732d9568 scope classification:
+`python scripts/check_ci_scope.py --event pull_request --base 1a276d0f --head 732d9568`
+returned `scope:full`, `reason:path_requires_full`. The single documentation review
+returned Standards0/Spec0; [report](review.md). This records a bounded local docs
+qualification, not an unexecuted full-suite pass. Final metadata/link checks are
+repeated only for the added closeout artifacts; no behavioral change invalidates
+prior lint/classifier/policy evidence.
