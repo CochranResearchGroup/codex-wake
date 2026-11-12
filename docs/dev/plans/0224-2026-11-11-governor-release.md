@@ -71,3 +71,16 @@ serialized UID1017 acceptance. Primary owns integration, review and deployment.
 Working effects remain zero. Deployment helper review also corrected controller
 lifecycle to use the existing systemd owner instead of racing Restart=always.
 Current disabled/inactive tab startup state is preserved.
+
+## Integration revision | Concurrent main release
+
+Main e16bc4d2 / PR587 delivered tmux3.4 subscription-crash containment and dev10.
+Its Plan0223 allocation is preserved; this release moves to LOCAL-P224 / Plan0224
+and dev11. Existing INT223-1/2 and private governor-release-p223 locators remain
+stable historical IDs. Preserve the newly disabled formatting/startup state.
+Combined Python source retains the observer startup correction and main's removal
+of crashing subscriptions. Rebuild wheel, check changed seams, and qualify exact
+new installed package with new native bytes. Prior7395 results remain historical.
+Two idle named accounts retain56a10selected; four have no selected daemon package.
+Use exact-target public idle daemon updates after native registration for the two
+retained homes, leaving all six stopped and current stock sessions independent.
