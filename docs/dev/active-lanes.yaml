@@ -1315,3 +1315,17 @@ lanes:
     overlaps: [P210, P216]
     updated_at: 2026-11-11
     disposition: PR582 merged4dfd8b08; exact dev8 deployed after UID1017 qualification;45tabs verified; task checkout cleanup at documentation closeout
+
+  - id: P222
+    owner: primary / ecochran76
+    objective: Automatic tab monitor startup and opted-in namespace recovery
+    work_items: [LOCAL-P222]
+    plan: docs/dev/plans/0222-2026-11-11-tab-startup-recovery.md
+    branch: feat/tab-format-startup
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P221]
+    overlaps: [P210, P216]
+    updated_at: 2026-11-11
+    disposition: Public controller regression then owned startup service qualification

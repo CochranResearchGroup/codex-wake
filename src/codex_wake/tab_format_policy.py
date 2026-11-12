@@ -4,7 +4,7 @@ import re
 from .managed_inventory import InventoryError
 
 DEFAULT_POLICY = dict(enabled=True, show_model=False, show_provider=False,
-                      ascii=True, render_mode='full', style_rules=[], compact=False, show_stale=True, preset="legacy")
+                      recover_namespace=False, ascii=True, render_mode='full', style_rules=[], compact=False, show_stale=True, preset="legacy")
 _DIMENSIONS = frozenset(('harness', 'build', 'profile', 'model', 'inference_provider',
                          'execution_host', 'activity'))
 _COLOURS = frozenset(('black', 'red', 'green', 'yellow', 'blue', 'magenta',
@@ -22,7 +22,7 @@ def validate_policy(policy):
     result = dict(compact=True, show_stale=False, render_mode='full',
                   show_model=False,show_provider=False,style_rules=[]) if preset in PALETTES else {}
     for key, value in policy.items():
-        if key in ('enabled', 'show_model', 'show_provider', 'ascii', 'compact', 'show_stale'):
+        if key in ('enabled', 'show_model', 'show_provider', 'ascii', 'compact', 'show_stale', 'recover_namespace'):
             if type(value) is not bool:
                 raise InventoryError('invalid_argument', key + ' must be boolean.')
         elif key == 'preset':

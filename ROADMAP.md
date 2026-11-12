@@ -1595,3 +1595,9 @@ CLOSED (PR582 merged; 0.22.0.dev8 installed): [LOCAL-P221](docs/dev/plans/0221-2
 Explicit enable establishes namespace-specific originals while retaining earlier
 baselines; automatic refresh and rollback remain fenced. UID1017 qualification
 and working45-tab acceptance PASS; native services unchanged.
+
+## P222 | Automatic tab formatting startup recovery
+
+OPEN: [LOCAL-P222](docs/dev/plans/0222-2026-11-11-tab-startup-recovery.md).
+Owned user-service startup plus explicit opt-in namespace recovery; preserve
+originals and disabled/paused custody. No host reboot or agent launch.

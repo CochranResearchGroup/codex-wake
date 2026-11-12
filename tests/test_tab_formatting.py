@@ -59,6 +59,46 @@ class FormattingTests(unittest.TestCase):
         self.assertEqual(self.tmux('show-options','-w','-t','@0'),before)
         self.assertEqual(self.tmux('list-panes','-F','#{pane_id}:#{pane_pid}'),panes)
 
+    def test_opted_in_refresh_recovers_replacement_and_rollback_stays_disabled(self):
+        from codex_wake.tab_format_monitor import refresh_formatting
+        self.call('configure',policy={'recover_namespace':True})
+        self.call('enable')
+        original=self.call('status')['record']
+        self.tmux('new-session','-d','-s','replacement','sleep 120')
+        self.tabs.workspaces['work']['transport']=TmuxAttachmentTransport(self.socket,'$1')
+        before=self.tmux('show-options','-w','-t','@1')
+        observed=self.tabs.execute('tabs.list',{})
+        unavailable=dict(observed,resources=[dict(row,monitor_unavailable=True) for row in observed['resources']])
+        held=refresh_formatting(self.root,unavailable,tabs=self.tabs)
+        self.assertEqual(held['workspaces'][0]['code'],'stale_target')
+        self.assertEqual(self.call('status')['record'],original)
+        result=refresh_formatting(self.root,observed,tabs=self.tabs)
+        self.assertEqual(result['workspaces'][0]['status'],'applied',result)
+        state=json.loads((self.root/'tab-formatting'/'state.json').read_text())
+        self.assertEqual(state['retired_workspaces']['work'][original['identity']],original)
+        self.assertEqual(self.call('rollback')['status'],'rolled_back')
+        self.assertEqual(self.tmux('show-options','-w','-t','@1'),before)
+        self.tmux('new-session','-d','-s','next','sleep 120')
+        self.tabs.workspaces['work']['transport']=TmuxAttachmentTransport(self.socket,'$2')
+        result=refresh_formatting(self.root,self.tabs.execute('tabs.list',{}),tabs=self.tabs)
+        self.assertEqual(result['workspaces'][0]['status'],'disabled')
+        self.assertEqual(self.tmux('show-options','-w','-v','-t','@2','window-status-format'),'')
+
+    def test_automatic_recovery_does_not_reenable_a_retired_rollback_hold(self):
+        from codex_wake.tab_format_monitor import refresh_formatting
+        self.call('configure',policy={'recover_namespace':True})
+        self.call('enable');self.call('rollback')
+        old_transport=self.transport
+        before=self.tmux('show-options','-w','-t','@0')
+        self.tmux('new-session','-d','-s','replacement','sleep 120')
+        self.tabs.workspaces['work']['transport']=TmuxAttachmentTransport(self.socket,'$1')
+        self.call('enable')
+        self.tabs.workspaces['work']['transport']=old_transport
+        outcome=refresh_formatting(self.root,self.tabs.execute('tabs.list',{}),tabs=self.tabs)
+        self.assertEqual(outcome['workspaces'][0]['status'],'disabled')
+        self.assertEqual(self.tmux('show-options','-w','-t','@0'),before)
+        self.assertFalse(self.call('status')['record']['enabled'])
+
     def test_changed_namespace_is_inspectable_but_refresh_and_old_intent_are_fenced(self):
         from codex_wake.managed_inventory import InventoryError
         from codex_wake.tab_format_monitor import refresh_formatting

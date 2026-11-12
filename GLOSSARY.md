@@ -413,4 +413,10 @@ separate project root.
 The original managed terminal settings captured before decoration for one
 terminal server/session identity. Explicit enable on a replacement namespace
 retains the earlier baseline and captures new originals; returning namespaces
-reuse their originals. Automatic refresh and rollback cannot cross this boundary.
+reuse their originals. Automatic refresh crosses this boundary only with an
+explicit recover_namespace preference; rollback never crosses it.
+
+**Tab startup service**:
+An explicitly enabled, root-specific systemd user unit running the existing tab
+monitor at login. It follows saved formatting policy and holds; it neither creates
+terminal sessions nor grants authority to submit prompts.
