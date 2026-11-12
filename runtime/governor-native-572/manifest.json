@@ -63,7 +63,7 @@
   "cargo_jobs": 2,
   "toolchain": "1.95.0",
   "build_evidence": "/home/ecochran76/.local/state/codex-wake/governor-native-572",
-  "qualification": "Source6focusedgovernor testsPASS afteroneboundedTDDpass; immutablepackage-v4buildrunning, exactinstalledacceptancepending",
+  "qualification": "Package-v4 production build and six focused TUI tests passed; exact UID1017 managed UI, watcher-loss and cold-resume passed in64.475s. Aggregate upgrade/failure/delegated qualification remains separate.",
   "production_install": false,
   "full_patch_sha256": "ae11f4cf74a1cfa2ff10006bf1d44c3f9dc1e33c9203f23191c4088a94059e1a",
   "guard_capabilities": {
@@ -81,7 +81,7 @@
     ],
     "task_owned_exec_handles": "causal-root scope, confirmed termination, bounded startup-publication fence"
   },
-  "package_entrypoint_sha256": null,
+  "package_entrypoint_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
   "package_version": "codex-cli 0.167.0",
   "related_issues": [
     571,
