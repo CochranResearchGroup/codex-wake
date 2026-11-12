@@ -9167,3 +9167,20 @@ namespace and alias custody tests also pass. Working installation is unchanged.
 P221 source checkpoint008e949f:100 formatting+34 related tests PASS, packaged CLI
 restart/enable/rollback PASS. See docs/dev/evidence/plan0221/validation.md for exact
 commands and exclusions. Local commit only; source-review checkout retained.
+
+## Turn | 2026-11-11 | P221 reviewed, merged and installed
+
+Operator requested PR/review/merge/install. Standards and Spec primary reviews
+found no blockers; release revision passed100formatting+34related local tests,
+pinned lint, compile and policy wiring. Hosted CI skipped by cost policy. PR582
+merged4dfd8b08. Exact0.22.0.dev8 wheel qualified as real UID1017, including7public
+regressions, CLI/stdio/OAuth API controls and prior/candidate rollback/reselection.
+All319package members match merged source and installations. Working9launchers
+and completion select dev8; tab monitor replaced through supported controls with
+settings preserved. Fresh acceptance:45tabs, zero native-option mismatches,
+29native generations and10protected files unchanged; supervisor43260 retained,
+zero restarts. See docs/dev/evidence/plan0221/deployment.json. Previous prefix and
+private rollback helper retained. No native binary upgrade or provider calls.
+Task-only checkout removal follows verified closeout publication; main dirty work
+and all unrelated registered worktrees remain untouched. Memory forbidden by
+explicit-request boundary, zero memory writes.

@@ -1591,6 +1591,7 @@ gate; independent protocol acknowledgment fields remain unobserved.
 
 ## P221 | Formatting after terminal server replacement
 
-CLOSED (validated source; unintegrated): [LOCAL-P221](docs/dev/plans/0221-2026-11-11-tab-format-reboot.md).
+CLOSED (PR582 merged; 0.22.0.dev8 installed): [LOCAL-P221](docs/dev/plans/0221-2026-11-11-tab-format-reboot.md).
 Explicit enable establishes namespace-specific originals while retaining earlier
-baselines; automatic refresh and rollback remain fenced. Source-only repair.
+baselines; automatic refresh and rollback remain fenced. UID1017 qualification
+and working45-tab acceptance PASS; native services unchanged.
