@@ -1,0 +1,53 @@
+{
+  "issue": 572,
+  "source_fix": "a3dcde291b59c450609c59b703b4063a2941e1b5",
+  "native_source_unchanged": "bd519d5232aef6f55a4a665cd0c7461ec5b223f9",
+  "native_entrypoint_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
+  "original_reproductions": [
+    {
+      "receipt": "/home/codex-daemon-test/governor-p220-continue/ui-red-01/receipt.json",
+      "elapsed_seconds": 59.033449946,
+      "verdict": "FAILED_PACKET",
+      "localhost_posts": 1,
+      "owned_final_processes": []
+    },
+    {
+      "receipt": "/home/codex-daemon-test/governor-p220-continue/ui-red-02/receipt.json",
+      "elapsed_seconds": 49.903211485,
+      "verdict": "FAILED_PACKET",
+      "localhost_posts": 1,
+      "owned_final_processes": [],
+      "stack": "diagnostic/cli-106710.stack"
+    }
+  ],
+  "cause": "resume_existing holds the campaign allocation lock; _effect calls governance.sync which opens and flocks the same allocation again on a second file descriptor. The native15s timeout kills the waiting CLI before continuation.",
+  "observed_stack": [
+    "goal_supervision._lock:58",
+    "goal_governance.sync:19",
+    "goal_supervision._effect:893",
+    "goal_renewal.resume_existing:1140",
+    "governor._await_continuation:438"
+  ],
+  "fix": "Reuse the authoritative allocation snapshot while its campaign lock remains held across effect admission; other callers keep their fresh read and allocation lock. No authority or timeout change.",
+  "regression": {
+    "seam": "governor.execute extend/resume, ordinary session task window with shared allocation, real file locks and existing native protocol fixture",
+    "command": "PYTHONPATH=src:tests <python> -m unittest test_governor.GovernorTests.test_shared_task_extension_resumes_paused_goal_once_without_locking_itself",
+    "red_seconds": 6.39,
+    "red_result": "TimeoutError at actual nested flock",
+    "green_seconds": 0.823,
+    "green_result": "PASS; extended150, usage0, goalactive, replay exactlyonce",
+    "logs": "/home/ecochran76/.local/state/codex-wake/governor-native-572/continue-clock/lock-regression-{red,green}.log"
+  },
+  "remaining": [
+    "focused3.11/3.12 selection",
+    "exact rebuilt installed wheel original native UI journey"
+  ],
+  "ephemeral_history": "Prior handoff raw /tmp/p220u6,u7 and QA prefix are absent; Git summaries retained; historical receipts were not reconstructed.",
+  "cleanup": {
+    "original_clock_sha256": "46d044572649bd8de7a26d7252cf0a9852026c75a13c2467bc6accd9ada9dece",
+    "hash_guarded_restoration": true,
+    "diagnostic_loader_removed": true,
+    "proxy_exited": true,
+    "uid1017_fresh_process_census": []
+  }
+}
