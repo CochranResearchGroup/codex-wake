@@ -153,6 +153,54 @@ class GovernorTests(unittest.TestCase):
                 self.assertEqual(execute(root, 'resume', args, principal=local_operator_principal())['operation'], resumed['operation'])
                 self.assertEqual(sum(method=='turn/start' for method, _ in native['calls']), 1)
 
+    def test_shared_task_extension_resumes_paused_goal_once_without_locking_itself(self):
+        import json
+        import signal
+        import test_goal_supervision as fixtures
+        from codex_wake.governor import execute, local_operator_principal
+        from codex_wake.goal_supervision import poll
+        harness = fixtures.GoalSupervisionTests()
+        self.addCleanup(harness.doCleanups)
+        with tempfile.TemporaryDirectory() as directory:
+            root, policy, log, native, request = harness.fixture(directory)
+            log.chmod(0o600)
+            grant = json.loads(policy.read_text())['callers'][fixtures.THREAD]
+            row = dict(thread_id=fixtures.THREAD, endpoint=grant['app_server'],
+                       target=dict(home=grant['codex_home'], executable=grant['codex_path']))
+            native['lease_reply'] = dict(armed=True, expired=False, stopVerified=False, ttlMs=10000)
+            def native_call(endpoint, executable, method, params, timeout):
+                result = request(endpoint, executable, method, params, timeout)
+                if method == 'thread/read':
+                    result['thread']['path'] = str(log)
+                if method == 'thread/goal/set' and params.get('status') == 'active':
+                    native['goal']['status'] = 'active'
+                return result
+            def expired(signum, frame):
+                raise TimeoutError('operator continuation blocked on its own allocation lock')
+            with harness.controller(root, interval=.2), patch('codex_wake.lifecycle_budget.trusted_upper', return_value=fixtures.NOW), patch('codex_wake.native_clock.snapshot', return_value=dict(utc=dict(status='network', sources=['a', 'b'], lower=fixtures.NOW, upper=fixtures.NOW), counter=None, reason='bounded_utc')), patch('codex_wake.local_sessions.resolve', return_value=row), patch('codex_wake.goal_supervision.native_request', side_effect=native_call):
+                execute(root, 'activate', dict(selector=fixtures.THREAD,
+                        token_limit=100, time_limit_seconds=120), principal=local_operator_principal())
+                native['goal']['status'] = 'paused'
+                native['active'] = []
+                poll(root)
+                arguments = dict(selector=fixtures.THREAD, add_tokens=50, add_seconds=30,
+                                 resume=True, request_id='extend-paused-shared-task')
+                prior_handler = signal.signal(signal.SIGALRM, expired)
+                signal.setitimer(signal.ITIMER_REAL, 5)
+                try:
+                    result = execute(root, 'extend', arguments, principal=local_operator_principal())
+                finally:
+                    signal.setitimer(signal.ITIMER_REAL, 0)
+                    signal.signal(signal.SIGALRM, prior_handler)
+                self.assertTrue(result['operation']['resumed'])
+                self.assertEqual(result['limits']['token_limit'], 150)
+                self.assertEqual(result['usage']['used_tokens'], 0)
+                self.assertEqual(native['goal']['status'], 'active')
+                replay = execute(root, 'extend', arguments, principal=local_operator_principal())
+                self.assertTrue(replay['operation']['resumed'])
+                self.assertEqual(sum(method == 'thread/goal/set' and params.get('status') == 'active'
+                                     for method, params in native['calls']), 1)
+
     def test_exhaustion_stops_qualified_children_and_preserves_unrelated_task(self):
         import json
         import test_goal_supervision as fixtures
