@@ -1,0 +1,118 @@
+{
+  "status": "SOURCE_ACCEPTED_FINAL_INSTALLED_CHECK_PENDING",
+  "source_commit": "6465aa6a4aac1d605a4db1f7f4a81002b4018305",
+  "main_base": "92c00a0d8495f2d7d386cd7d85cd4f610e8f6ded",
+  "version": "0.22.0.dev10",
+  "wheel_sha256": "7395e366d929fd1d4b93ae6298ec302591add62f3741bfa7656b0d107665f09a",
+  "package_members": 324,
+  "native_source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+  "native_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+  "source_bound_receipt": "/home/ecochran76/.local/state/codex-wake/qualification/governor-release-p223/integration-source-bound-fixed.json",
+  "source_bound_receipt_sha256": "22137868337b14c987bb35de1e5eae6cfc2203b159ca9bf48b4c13d240bb27cb",
+  "checks": [
+    {
+      "name": "undefined names",
+      "status": "PASS",
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/qualification/governor-p220/continuation-checks-py312/bin/python",
+        "-m",
+        "ruff",
+        "check",
+        "--select",
+        "F821,F822,F823",
+        "src",
+        "scripts",
+        "tests",
+        ".codex/hooks"
+      ]
+    },
+    {
+      "name": "policy wiring",
+      "status": "PASS",
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/qualification/governor-p220/continuation-checks-py312/bin/python",
+        "scripts/check_policy_wiring.py"
+      ]
+    },
+    {
+      "name": "integration Python312",
+      "status": "PASS",
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/qualification/governor-p220/continuation-checks-py312/bin/python",
+        "-m",
+        "unittest",
+        "test_governor",
+        "test_governor_commands",
+        "test_goal_renewal",
+        "test_goal_supervision",
+        "test_self_limits",
+        "test_active_tab_executable",
+        "test_tab_startup",
+        "test_tab_format_autostart",
+        "test_tab_formatting",
+        "test_command_parity",
+        "-q"
+      ]
+    },
+    {
+      "name": "integration Python311",
+      "status": "PASS",
+      "argv": [
+        "/home/ecochran76/.local/state/codex-wake/qualification/governor-p220/continuation-checks-py311/bin/python",
+        "-m",
+        "unittest",
+        "test_governor",
+        "test_governor_commands",
+        "test_goal_renewal",
+        "test_goal_supervision",
+        "test_self_limits",
+        "test_active_tab_executable",
+        "test_tab_startup",
+        "test_tab_format_autostart",
+        "test_tab_formatting",
+        "test_command_parity",
+        "-q"
+      ]
+    }
+  ],
+  "integration_fix": {
+    "ticket": "INT223-1",
+    "base": "54a85339f80a3a48edcff9108e64402d483eab93",
+    "commit": "bc390fcca676fd9abfc61c4a9fa75eb599a6ef51",
+    "cause": "Real owner acquired unavailable adapter before socket creation; post-factory configuration baseline hid socket generation transition. Metadata could subsequently succeed independently while public formatting remained unavailable.",
+    "red": {
+      "original": "isolated original late-socket test failed at 12s before fix",
+      "metadata_probe": "PASS 0.083s; insufficient oracle, not a RED",
+      "format_probe": "FAIL 0.113s; actual tmux window-status-format lacked SH",
+      "log": "int223-race-format-red.log"
+    },
+    "green": {
+      "deterministic": "PASS 0.287s",
+      "modules": [
+        "test_tab_observer",
+        "test_tab_observer_identity",
+        "test_tab_startup",
+        "test_tab_format_autostart",
+        "test_tab_format_read_channel",
+        "test_tab_format_policy",
+        "test_tab_formatting"
+      ],
+      "command": "PYTHONPATH=src:tests continuation-checks-py{version}/bin/python -m unittest <modules> -v",
+      "py312": "41 PASS 18.617s",
+      "py311": "41 PASS 20.883s",
+      "original_bound_seconds": 6,
+      "diff_check": "PASS"
+    },
+    "scope": [
+      "src/codex_wake/tab_observer.py",
+      "tests/test_tab_format_autostart.py"
+    ],
+    "runtime": "No remaining construction.sock/late.sock fixture processes observed. Existing installed dev9 tab monitor PID730152 preserved.",
+    "memory_disposition": "forbidden: no explicit user memory-write request",
+    "remaining": "Primary integration/source-bound checks and exact rebuilt installed package qualification"
+  },
+  "initial_failure": "Source-bound101 selection failed late-socket6s/12s despite timingmargin; originalFAILretained. Realformatting race identified and fixed; original6sbound restored. Current102 selection passesbothversions.",
+  "review": "One completed broadStandards/Spec review + one bounded remediation retained; this review isclosed-worldintegrationanddeployment-readiness, notsecondbroaddiscovery.",
+  "hosted_ci": "Skipped by operator cost policy; localchecks authoritative.",
+  "deployment_authority": "Operator explicitly requested PR review merge deploy. Working artifacts/service activation waits for exactmerged-main and applicableisolatedproof."
+}

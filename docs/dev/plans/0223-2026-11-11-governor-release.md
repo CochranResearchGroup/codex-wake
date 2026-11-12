@@ -39,3 +39,15 @@ its accepted findings plus main-integration/deployment risks.
 One coordinator; shared/runtime effects serialize. Two meaningful attempts per
 unit then evidence-based reframe; no second broad review or unbounded repair loop.
 No production mutation before exact-main identity and applicable isolated proof.
+
+## INT223-1 | Integrated startup race
+
+Owner: native572 worker / primary integration. PriorityP1. State: validatedsource.
+Initial timing-margin hypothesis disproved by preserved source-bound12sFAIL.
+Real socket creation between owner qualification and baseline capture yielded
+metadata but no SHformatting. Public real-tmux regression RED0.113s/GREEN0.287s.
+Host-owned baseline remains unqualified until firsttick; capture-before-factory
+preserves later generation changes; injected owners unchanged. Original6s test
+bound restored. Focused41PASS on3.11/3.12; source-bound102PASS onboth versions.
+Finalcandidatewheel7395 differs fromfirstdev10onlytab_observer.py; finalinstalled
+qualification isrunning. No second broadreview or workingeffect yet.
