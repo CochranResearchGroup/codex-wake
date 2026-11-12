@@ -182,8 +182,15 @@ class ObserverTests(unittest.TestCase):
                     self.assertEqual(observer.status()['scheduler']['fallback_interval_seconds'],5.)
                     running_projection=dirty['projection_revision']
                     connections[-1].close()
-                    result=observer.tick()
-                    self.assertFalse(result['resources'][0]['traits']['traits']['activity']['source_available'])
+                    # Close-handshake completion doesn't synchronize the reader's
+                    # nonblocking receive queue. Observe loss through public ticks,
+                    # using the same two-second event bound as status updates.
+                    until=time.monotonic()+2
+                    while True:
+                        result=observer.tick()
+                        if not result['resources'][0]['traits']['traits']['activity']['source_available']:
+                            break
+                        self.assertLess(time.monotonic(),until)
                     self.assertNotEqual(result['projection_revision'],running_projection)
                     self.assertEqual(observer.status()['scheduler']['fallback_interval_seconds'],5.)
                 finally:

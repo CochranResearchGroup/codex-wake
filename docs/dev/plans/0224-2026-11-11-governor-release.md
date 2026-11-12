@@ -84,3 +84,14 @@ new installed package with new native bytes. Prior7395 results remain historical
 Two idle named accounts retain56a10selected; four have no selected daemon package.
 Use exact-target public idle daemon updates after native registration for the two
 retained homes, leaving all six stopped and current stock sessions independent.
+
+## INT224-3 | Source-loss test readiness
+
+Installed dev11's58 affected tests retained one failure: immediate public tick
+following WebSocket close still observed source available. Production feed polls
+its receive queue nonblocking; remote close handshake does not synchronize that
+queue. Existing status-delta assertions already wait for public evidence within
+two seconds. Apply that same event-readiness bound to source-loss assertion;
+retain projection-revision checks and actual disconnect. No production module or
+wheel byte changes. Source119 tests pass on both3.11/3.12 before this test-only
+correction; focused observer selection and installed58 rerun qualify correction.
