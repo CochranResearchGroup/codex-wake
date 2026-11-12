@@ -1330,19 +1330,19 @@ lanes:
     updated_at: 2026-11-11
     disposition: Delivered and qualified on integration branch; one review/one bounded remediation complete; retained worktree, no production deployment
 
-  - id: P220-573
+  - id: P223
     owner: ecochran76 / primary
-    objective: Governor integration and installed qualification574; transport573 accepted
-    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/573, https://github.com/CochranResearchGroup/codex-wake/issues/574]
-    plan: docs/dev/plans/0220-2026-11-11-governor-experience.md
+    objective: Governor PR integration and authorized working deployment
+    work_items: [LOCAL-P223, https://github.com/CochranResearchGroup/codex-wake/issues/570]
+    plan: docs/dev/plans/0223-2026-11-11-governor-release.md
     branch: feat/governor-experience
-    target: feat/governor-experience
-    plan_state: CLOSED
+    target: origin/main
+    plan_state: OPEN
     custody_state: ACTIVE
     dependencies: []
     overlaps: [P220]
     updated_at: 2026-11-11
-    disposition: Delivered and qualified on integration branch; one review/one bounded remediation complete; retained worktree, no production deployment
+    disposition: User authorized PR review merge deploy; preserve dev9 startup repairs and stock clients; qualify dev10 then deploy exact merged main
 
 - id: P221
     owner: primary / ecochran76
@@ -1351,7 +1351,7 @@ lanes:
     plan: docs/dev/plans/0221-2026-11-11-tab-format-reboot.md
     branch: fix/tab-format-reboot
     target: origin/main
-    plan_state: CLOSED
+    plan_state: OPEN
     custody_state: INTEGRATED
     dependencies: []
     overlaps: [P210, P216]

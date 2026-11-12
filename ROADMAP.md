@@ -1611,3 +1611,11 @@ and working45-tab acceptance PASS; native services unchanged.
 CLOSED (PR584 merged; dev9 installed and startup enabled): [LOCAL-P222](docs/dev/plans/0222-2026-11-11-tab-startup-recovery.md).
 Owned user-service startup plus explicit opt-in namespace recovery; preserve
 originals and disabled/paused custody. No host reboot or agent launch.
+
+## P223 | Governor release and working deployment
+
+OPEN: LOCAL-P223 follows completed#570. Operator requested PR review/merge/deploy.
+Integrate currentmain92c00a0d, preserve dev9tab/startup repairs, release dev10,
+qualify combined source, publish/mergePR then deploy exact merged Python/native
+bytes through supported selection. Existing stock processes stay independent.
+Plan0223 owns current execution and receipts.

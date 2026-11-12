@@ -66,7 +66,9 @@ class FormattingAutostartTests(unittest.TestCase):
         config.chmod(0o600)
         self.monitor.execute('tabs.monitor.start',dict(interval=.2))
         self.tmux('new-session','-d','-s','late','-n','later terminal','sleep 60')
-        deadline=time.monotonic()+6
+        # The existing observer may wait5s for fallback and2s for feed attach.
+        # Match the12s bounded autostart fixture budget above, including scheduling.
+        deadline=time.monotonic()+12
         while True:
             shown=self.tmux('show-options','-w','-v','-t','@0','window-status-format')
             if 'SH' in shown:break
