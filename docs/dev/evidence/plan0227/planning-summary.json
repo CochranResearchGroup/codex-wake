@@ -1,0 +1,11 @@
+{
+  "base": "1a276d0ff8469e5fbd3deac1e61a7854351fc100",
+  "audit_ok": false,
+  "inherited_problems": [
+    "plan missing deterministic state: 0220-2026-11-11-governor-experience.md",
+    "plan missing deterministic state: 0224-2026-11-11-governor-release.md",
+    "plan missing deterministic state: 0226-2026-11-12-native-launcher-continuity.md"
+  ],
+  "new_problems": [],
+  "baseline_changed": false
+}

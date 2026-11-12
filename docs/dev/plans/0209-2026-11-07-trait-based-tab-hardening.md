@@ -1,15 +1,24 @@
 # Trait-based tab and session hardening specification
 
-State: OPEN
-Workflow: IN_PROGRESS; dependency-aware implementation
+State: CLOSED
+Workflow: DONE; bounded implementation/qualification
 Owner: ecochran76 / primary coordinator
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/503
 Priority: P1
 Branch: docs/hardening-readiness-0208
-WIP limit: one specification publication; implementation not started
+WIP limit: closed; no active implementation lane
 Source: confirmed interview and Plan0208 reconciliation
 
 ## Current State
+
+Reconciled 2026-11-12: all 13 scoped tickets and the bounded implementation/
+qualification outcome are complete. One broad review and one TDD remediation
+pass are consumed. See [execution ledger](0209-execution-ledger.json) and
+[evidence](../evidence/plan0209/). This closes that outcome only; broader governor,
+activation and handoff acceptance remain separate. No new deployment or live
+qualification is claimed by this header repair.
+
+## Historical publication snapshot
 
 Operator confirmed installed acceptance seams on 2026-11-08. Canonical product
 acceptance is GitHub issue503, OPEN with enhancement and ready-for-agent labels.
