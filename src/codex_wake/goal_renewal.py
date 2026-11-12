@@ -173,7 +173,13 @@ def _attested_operator_reply(receipt, active, caller, goal):
 
 
 def _snapshot(root, receipts, allocation, *, caller=None):
-    now = _now()
+    from .goal_time import relative, upper
+    relative_members=[item for item in receipts.values() if relative(item)]
+    if relative_members:
+        if len(relative_members)!=len(receipts) or any(item.get('clock_anchor')!=relative_members[0].get('clock_anchor') for item in relative_members):
+            _fail('renewal_clock_unqualified','one retained authenticated clock domain required')
+        now=max(upper(dict(item)) for item in relative_members)
+    else:now = _now()
     directory = supervision._directory(root)
     from .goal_maintenance import admission_guard
 
@@ -223,7 +229,7 @@ def _snapshot(root, receipts, allocation, *, caller=None):
             and receipt.get("reason")
             not in (
                 "allocation_exhausted",
-                "continuation_held",
+                "continuation_held", "task_exhausted",
             )
             and not replaced_exhaustion
         ):
@@ -233,7 +239,7 @@ def _snapshot(root, receipts, allocation, *, caller=None):
             )
         if receipt.get("stop_latched") and receipt.get("first_stop", {}).get(
             "reason", receipt.get("reason")
-        ) not in ("allocation_exhausted", "continuation_held"):
+        ) not in ("allocation_exhausted", "continuation_held", "task_exhausted"):
             _fail(
                 "renewal_fault_held",
                 "resource renewal cannot clear an unrelated supervision fault",
@@ -244,18 +250,20 @@ def _snapshot(root, receipts, allocation, *, caller=None):
         if elapsed < 0 or now < receipt["started_upper"]:
             _fail("renewal_clock_unqualified", "nondecreasing qualified clock required")
         goal, active = supervision._native(receipt["grant"], thread)
+        live_session = receipt.get("session_scope") and not receipt.get("stop_latched")
+        session_without_goal = receipt.get("session_scope") and goal is None
         if (
-            not goal
-            or goal.get("threadId") != thread
-            or goal.get("status") != "paused"
-            or (active and not _attested_operator_reply(receipt, active, caller, goal))
+            (not goal and not session_without_goal)
+            or (goal and (goal.get("threadId") != thread or goal.get("status") not in
+                (("paused", "active") if live_session else ("paused",))))
+            or (active and not live_session and not _attested_operator_reply(receipt, active, caller, goal or {}))
         ):
             _fail(
                 "renewal_native_not_paused",
                 "pause the exact goal and finish its captured work before renewal",
             )
         goals[thread] = dict(
-            thread_id=thread, created_at=goal["createdAt"], status=goal["status"]
+            thread_id=thread, created_at=goal["createdAt"] if goal else None, status=goal["status"] if goal else "session"
         )
         member = allocation["members"][thread] if allocation else receipt
         observation = observe_usage(
@@ -264,6 +272,7 @@ def _snapshot(root, receipts, allocation, *, caller=None):
             member["goal_created_at"],
             reset_anchor=member.get("reset_anchor"),
             token_accounting=receipt.get("token_accounting", "cache_inclusive"),
+            session_scope=member.get("session_scope", receipt.get("session_scope", False)),
         )
         if observation.get("state") != "qualified" or not observation.get("anchor"):
             _fail(
@@ -946,6 +955,13 @@ def _resume(root, policy, thread, path, journal, principal, *, caller=None):
     result = deepcopy(journal["result"])
     if result.get("resumed"):
         return result
+    if journal.get('sources') and all(item.get('session_scope') for item in journal['sources'].values()):
+        outcome = resume_existing(root, policy, thread, principal=principal,
+            operation_id=journal['proposal']['operation_id']+':resume')
+        result.update(outcome)
+        journal['result'] = result
+        supervision._save(path, journal)
+        return result
     with _campaign(root, policy, thread) as (_, receipts, allocation_path, allocation):
         if (allocation or next(iter(receipts.values()))).get('governor_enabled',True) is False:
             result['resume_state'] = 'governor_inactive'
@@ -1066,3 +1082,247 @@ def _resume(root, policy, thread, path, journal, principal, *, caller=None):
         journal["result"] = result
         supervision._save(path, journal)
         return deepcopy(result)
+
+
+def resume_existing(root, policy, thread, *, principal, operation_id):
+    """Explicit operator continuation with existing allowance, never renewal.
+
+    The existing receipt effect journal fences uncertain native actions. Repeating
+    the same operation reconciles readback and cannot submit a second turn.
+    """
+    _principal(principal, thread)
+    if principal.role != 'operator':
+        _fail('renewal_operator_required', 'authenticated operator continuation required')
+    with _campaign(root, policy, thread) as (directory, receipts, allocation_path, allocation):
+        receipt = receipts[thread]
+        if (allocation or receipt).get('governor_enabled', True) is False:
+            _fail('renewal_resume_held', 'reactivate the governor before resuming; no resources were renewed')
+        authorize(root, 'resume.self', principal)
+        snapshot = _snapshot(root, receipts, allocation)
+        task=receipt.get('task_window')
+        task_disabled=bool(task and task.get('governor_enabled') is False)
+        if task and not task_disabled:
+            observation=observe_usage(receipt['grant']['codex_home'],task.get('thread_id',thread),task['goal_created_at'],
+                reset_anchor=task['reset_anchor'],token_accounting=receipt['token_accounting'],session_scope=True)
+            if observation.get('state')!='qualified':_fail('renewal_accounting_unavailable','qualified task accounting required')
+            used=observation['used_tokens']
+        else:used=snapshot['used_tokens']
+        from .goal_time import upper
+        cap=allocation['token_limit'] if task_disabled else receipt['token_limit']
+        deadline=allocation['deadline'] if task_disabled else receipt['deadline']
+        if used >= cap or upper(receipt) >= deadline:
+            _fail('renewal_resume_held', 'existing allowance is exhausted; extend or reset explicitly')
+        no_goal=snapshot['goals'][thread]['status']=='session'
+        ack = receipt.get('prepared_poll_ack' if no_goal and receipt.get('requires_native_guard') else 'poll_ack',{})
+        controller = snapshot['controller']
+        age = time.clock_gettime(time.CLOCK_BOOTTIME)-ack.get('observed_boottime', -1e30)
+        if (ack.get('enrollment_revision') != receipt.get('enrollment_revision')
+                or ack.get('receipt_generation') != receipt['generation']
+                or ack.get('controller_generation') != controller.get('generation')
+                or not 0 <= age <= max(3, 3*controller.get('interval', 1))):
+            return dict(resumed=False, resume_state='awaiting_first_poll', renewed_resources=False)
+        goal, active = supervision._native(receipt['grant'], thread)
+        path = directory / (supervision._name(thread)+'.json')
+        if receipt.get('requires_native_guard'):
+            from .goal_native_guard import qualified,guarded_start
+            if goal is None:
+                return guarded_start(path,receipt,operation_id,controller)
+            if not qualified(receipt):return dict(resumed=False,resume_state='awaiting_first_poll',renewed_resources=False)
+        key = 'operator-resume:'+_id(thread, operation_id)
+        effect = receipt.get('effects', {}).get(key)
+        if goal:
+            if effect and goal.get('status') == 'active':
+                return dict(resumed=True, resume_state='verified', renewed_resources=False)
+            if active:
+                _fail('renewal_resume_held', 'finish the current operator turn before continuing the paused task')
+            if goal.get('status') != 'paused':
+                _fail('renewal_resume_held', 'the selected native task is not paused')
+            supervision._effect(path, receipt, key, 'thread/goal/set', dict(threadId=thread, status='active', origin='user'),
+                locked_allocation=allocation)
+            observed, _ = supervision._native(receipt['grant'], thread)
+            verified = bool(observed and observed.get('createdAt') == goal.get('createdAt') and observed.get('status') == 'active')
+        else:
+            if effect:
+                return dict(resumed=effect['state']=='acknowledged', resume_state='submitted' if effect['state']=='acknowledged' else 'uncertain', renewed_resources=False)
+            if active:
+                _fail('renewal_resume_held', 'finish the current operator turn before continuing the interrupted task')
+            verified = supervision._effect(path, receipt, key, 'turn/start', dict(threadId=thread,
+                clientUserMessageId=key, input=[dict(type='text', text='Continue the interrupted task within its existing governor allowance.')]),
+                locked_allocation=allocation)
+        if verified and task_disabled and receipt.get('first_stop',{}).get('reason')=='task_exhausted':
+            receipt.update(stop_latched=False,state='armed',reason=None,task_stop_bypassed_by_operator=operation_id)
+            supervision._save(path,receipt)
+        return dict(resumed=verified, resume_state='verified' if verified else 'uncertain', renewed_resources=False)
+
+
+def renew_task_window(root, policy, thread, *, principal, operation_id, mode,
+                      token_limit=None, time_limit_seconds=None, add_tokens=0,
+                      add_seconds=0, resume=False):
+    """Renew one member fence while retaining every shared ceiling and charge.
+
+    These are ordinary-session projections in the existing allocation owner,
+    using the existing renewal journal/transaction, not another usage ledger.
+    """
+    _principal(principal, thread)
+    if principal.role != 'operator':
+        _fail('renewal_operator_required', 'authenticated exact task allowance required')
+    if mode not in ('extend', 'reset') or type(resume) is not bool:
+        _fail('renewal_invalid', 'exact task renewal mode and continuation choice required')
+    intent = dict(mode=mode,token_limit=token_limit,time_limit_seconds=time_limit_seconds,
+        add_tokens=add_tokens,add_seconds=add_seconds,resume=resume)
+    directory=supervision._directory(root)
+    path=_journal_path(directory,_id(thread,operation_id))
+    with supervision._lock(directory,'renewal-applications'):
+        with _campaign(root,policy,thread) as (_,receipts,allocation_path,allocation):
+            if path.exists():
+                journal=_read(path)
+                if journal.get('task_intent') != intent:
+                    _fail('renewal_operation_conflict','operation already names a different task allowance')
+                if journal['status']=='applied':return deepcopy(journal['result'])
+                for member,item in receipts.items():
+                    if item not in (journal['sources'][member],
+                            dict(journal['sources'][member],renewal_pending=journal['proposal_id']),
+                            journal['targets'][member]):
+                        _fail('renewal_reconciliation_conflict','task renewal owner changed; preserve it for reconciliation')
+                if allocation not in (journal['allocation_source'],
+                        dict(journal['allocation_source'],renewal_pending=journal['proposal_id']),
+                        journal['allocation_target']):
+                    _fail('renewal_reconciliation_conflict','shared owner changed during task renewal')
+                _commit_targets(directory,path,journal,allocation_path)
+                return deepcopy(journal['result'])
+            receipt=receipts[thread]
+            task_owner=receipt.get('task_owner_thread_id',thread)
+            task=deepcopy(allocation['members'].get(task_owner,{}).get('task_window')) if allocation else None
+            task_members=[member for member,item in receipts.items() if member==task_owner or item.get('task_owner_thread_id')==task_owner]
+            if not task or not allocation:
+                _fail('renewal_task_unavailable','qualified retained task fence required')
+            decision=authorize(root,'enforcement.increase',principal,operation_id=operation_id)
+            snapshot=_snapshot(root,receipts,allocation)
+            observation=observe_usage(receipt['grant']['codex_home'],task.get('thread_id',thread),task['goal_created_at'],
+                reset_anchor=task['reset_anchor'],token_accounting=receipt['token_accounting'],session_scope=True)
+            if observation.get('state')!='qualified':
+                _fail('renewal_accounting_unavailable','qualified task response boundary required')
+            from .goal_time import upper
+            now=upper(receipt)
+            if mode=='extend':
+                if any(type(value) is not int or value<0 for value in (add_tokens,add_seconds)) or not (add_tokens or add_seconds):
+                    _fail('renewal_invalid','positive added tokens or seconds required')
+                tokens=task['token_limit']+add_tokens
+                deadline=task['deadline']+add_seconds
+                used=observation['used_tokens']
+            else:
+                tokens=task['token_limit'] if token_limit is None else token_limit
+                seconds=task['time_limit_seconds'] if time_limit_seconds is None else time_limit_seconds
+                _number(seconds,'task seconds',integer=True)
+                deadline=now+seconds
+                used=0
+            _number(tokens,'task tokens',integer=True)
+            origin=task['time_origin'] if mode=='extend' else now
+            if tokens>receipt['grant']['max_tokens'] or deadline-origin>receipt['grant']['max_seconds']:
+                _fail('renewal_host_ceiling','task allowance exceeds inherited host ceilings')
+            if tokens<=used or deadline<=now:
+                _fail('renewal_invalid','task renewal must retain positive remaining allowance')
+            previous=deepcopy(task)
+            task.update(token_limit=tokens,deadline=deadline,time_limit_seconds=deadline-origin,
+                revision=task.get('revision',1)+1)
+            target=deepcopy(receipt)
+            if mode=='reset':
+                task.update(time_origin=now,reset_anchor=observation['anchor'],generation=uuid4().hex,
+                    lifetime_tokens_before_window=task.get('lifetime_tokens_before_window',0)+observation['used_tokens'])
+            target.setdefault('budget_history',[]).append(dict(operation=path.stem,
+                previous={key:value for key,value in supervision._public(receipt).items() if key!='budget_history'},
+                approved_by=dict(source='authenticated_operator',operation_id=operation_id)))
+            target.update(task_window=task,generation=task['generation'],budget_revision=task['revision'],
+                token_limit=tokens,deadline=deadline,time_limit_seconds=task['time_limit_seconds'],
+                time_origin=task['time_origin'],used_tokens=used,
+                lifetime_tokens_before_window=task['lifetime_tokens_before_window'],
+                state='armed',reason=None,stop_latched=False,checkpoint=None,
+                enrollment_revision=receipt.get('enrollment_revision',1)+1,renewal_permission=decision)
+            target['accounting']=dict(observation,used_tokens=used,charges={} if mode=='reset' else observation['charges'])
+            for key in ('first_stop','stop_turns','stop_proof','pause_observed','pause_epoch','winddown_deadline',
+                        'winddown_reason','poll_ack','descendant_stops','descendant_stop_errors','descendant_stop_verified'):
+                target.pop(key,None)
+            target['effects']={}
+            targets=deepcopy(receipts);targets[thread]=target
+            for member in task_members:
+                if member==thread:continue
+                current=deepcopy(receipts[member])
+                for key in ('task_window','generation','budget_revision','token_limit','deadline','time_limit_seconds','time_origin','used_tokens','lifetime_tokens_before_window','state','reason','stop_latched','checkpoint'):
+                    current[key]=deepcopy(target[key])
+                current['enrollment_revision']=receipts[member].get('enrollment_revision',1)+1
+                for key in ('first_stop','stop_turns','stop_proof','pause_observed','pause_epoch','winddown_deadline','winddown_reason','poll_ack','descendant_stops','descendant_stop_errors','descendant_stop_verified'):
+                    current.pop(key,None)
+                current['effects']={}
+                targets[member]=current
+            allocation_target=deepcopy(allocation)
+            allocation_target['members'][task_owner]['task_window']=task
+            # Preserve the shared window/generation/ceiling and all spent charges.
+            allocation_target.update(charges=snapshot['charges'],used_tokens=snapshot['used_tokens'])
+            result=dict(status='applied',mode=mode,resumed=False,scope='task',members=task_members,
+                old=previous,new=dict(task,used_tokens=used,remaining_tokens=tokens-used),
+                shared_limits=dict(token_limit=allocation['token_limit'],deadline=allocation['deadline'],
+                    used_tokens=snapshot['used_tokens']),renewed_shared_resources=False)
+            if resume:result['resume_state']='awaiting_first_poll'
+            journal=dict(version=1,proposal_id=path.stem,status='applying',task_intent=intent,
+                sources=deepcopy(receipts),targets=targets,allocation_source=deepcopy(allocation),
+                allocation_target=allocation_target,result=result)
+            supervision._save(path,journal)
+            _commit_targets(directory,path,journal,allocation_path)
+            return deepcopy(result)
+
+
+def resume_unenforced(root,receipt,*,principal,operation_id):
+    """Explicit same-task continuation after its own enforcement was disabled.
+
+    Unknown usage remains unknown. Independent funded scopes are never waived.
+    """
+    from .goal_governance import control_path,independent_constraint
+    thread=receipt['thread_id'];_principal(principal,thread)
+    if principal.role!='operator':_fail('renewal_operator_required','authenticated operator continuation required')
+    directory=supervision._directory(root)
+    path=control_path(root,thread) if receipt.get('advisory_without_window') else directory/(supervision._name(thread)+'.json')
+    with supervision._lock(directory,'maintenance'),supervision._lock(directory,supervision._name(thread)):
+        receipt=_read(path)
+        if receipt.get('governor_enabled',True) is not False:
+            _fail('advisory_scope_changed','inspect the current scope before continuing')
+        restriction=independent_constraint(directory,receipt)
+        if restriction:_fail(restriction,'an independent shared or hard host scope remains; repair its accounting/enforcement before continuation')
+        authorize(root,'resume.self',principal)
+        if receipt.get('native_guard',{}).get('controller_generation') and receipt['native_guard'].get('status')!='unsupported':
+            from .goal_native_guard import release
+            release(path,receipt)
+            if receipt.get('native_guard',{}).get('release_verified') is not True:
+                return dict(resumed=False,resume_state='native_lease_release_pending',release_verified=False,renewed_resources=False)
+        goal,active=supervision._native(receipt['grant'],thread)
+        expected=receipt.get('control_goal_created_at')
+        if (goal.get('createdAt') if goal else None)!=expected:
+            _fail('advisory_native_scope_changed','native task identity changed; inspect and explicitly select the current scope')
+        key='operator-advisory-resume:'+_id(thread,operation_id)
+        effect=receipt.setdefault('effects',{}).get(key)
+        if effect:
+            return dict(resumed=effect['state']=='acknowledged',resume_state='submitted' if effect['state']=='acknowledged' else 'uncertain',
+                renewed_resources=False,started_turn_id=effect.get('started_turn_id'),release_verified=True)
+        if active:
+            if (not goal or goal.get('status')!='paused') and set(active)<=set(receipt.get('control_active_turn_ids',[])):
+                return dict(resumed=False,resume_state='already_running',renewed_resources=False,release_verified=True)
+            _fail('advisory_operator_reply_active','finish the current operator turn before continuing the stopped task')
+        if goal and goal.get('status') not in ('paused','blocked'):
+            _fail('advisory_native_goal_limit','independent native goal state requires its own qualified control')
+        effect=dict(state='intended',method='thread/goal/set' if goal else 'turn/start')
+        receipt['effects'][key]=effect;supervision._save(path,receipt)
+        try:
+            if goal:
+                supervision._request(receipt['grant'],'thread/goal/set',dict(threadId=thread,status='active',origin='user'))
+                after,_=supervision._native(receipt['grant'],thread)
+                verified=bool(after and after.get('createdAt')==expected and after.get('status')=='active')
+            else:
+                response=supervision._request(receipt['grant'],'turn/start',dict(threadId=thread,clientUserMessageId=key,
+                    input=[dict(type='text',text='Continue the interrupted task in the explicitly selected non-enforcing mode.')]))
+                turn=response.get('turn',{}).get('id')
+                verified=isinstance(turn,str) and bool(turn)
+                if verified:effect['started_turn_id']=turn
+            effect['state']='acknowledged' if verified else 'uncertain'
+        except Exception as error:effect.update(state='uncertain',error=type(error).__name__)
+        supervision._save(path,receipt)
+        return dict(resumed=effect['state']=='acknowledged',resume_state='submitted' if effect['state']=='acknowledged' else 'uncertain',
+            renewed_resources=False,started_turn_id=effect.get('started_turn_id'),release_verified=True)

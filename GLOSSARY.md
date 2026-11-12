@@ -409,6 +409,19 @@ explicit root, optional host override or saved default. First use defaults to
 `XDG_STATE_HOME/codex-wake/controller`; project-local wake records keep their
 separate project root.
 
+**Task governor**:
+The control that observes and bounds one task's cumulative resource use across
+its qualified delegated work, retries and continuations. Unrelated work remains
+outside that task's scope.
+
+**Advisory limit**:
+A declared allowance whose observance is not externally enforced. Selecting it
+is explicit; loss of enforcement does not silently make a limit advisory.
+
+**Budget window**:
+The resource allowance measured from a qualified activation or authorized reset
+boundary. Starting a new window preserves previous charges and lifetime history.
+
 **Formatting namespace baseline**:
 The original managed terminal settings captured before decoration for one
 terminal server/session identity. Explicit enable on a replacement namespace

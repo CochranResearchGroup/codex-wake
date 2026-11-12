@@ -1,0 +1,424 @@
+{
+  "schema_version": 1,
+  "plan": "LOCAL-P224",
+  "status": "QUALIFIED_FOR_PR_MERGE_AND_EXACT_MAIN_DEPLOYMENT",
+  "version": "0.22.0.dev11",
+  "base": "ab56445ad78250f2cb41f73e9de38f39721e9748",
+  "python_source": "965c6efeb2cb14d43201c3fa20c5ae0b8ef34a56",
+  "wheel_sha256": "244180ed2a9bd00572d33c4bf744983cb78fd4459d85cea14c031597b09683bb",
+  "production_members": 324,
+  "native_source": "f986f6ed53d6b324aedbd7e32991e0185eacae14",
+  "native_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa",
+  "native_members": {
+    "codex-package.json": "64a6c8f7bc146a94e9af84915c6a08d5457d58b5936f825894bbb8e6b1be8133",
+    "codex-path/rg": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+    "codex-resources/bwrap": "251e9e9ad727583d379a252d36ecd1c55c4c1e5375d876a64324b45ca2bcc64f",
+    "bin/codex-code-mode-host": "a558a3c99756e075a9de90fdbb8f6cc09af526e16c3b736ee8a340d67041f2f0",
+    "bin/codex-exec-server": "9abfcd38bde7eb2d4003ee70940bc706cb760dab9d17b85e593fdeeb2baf81e4",
+    "bin/codex": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa"
+  },
+  "source_checks": {
+    "source": "965c6efeb2cb14d43201c3fa20c5ae0b8ef34a56",
+    "py312": "145PASS118.707s pluslintandpolicyPASS",
+    "py311_first": "TIMEOUT180s; rawfailedreceipt retained, no partialoutputcaptured",
+    "py311_diagnostic": "145PASS104.865s verbose, unchanged source/timeout",
+    "disposition": "Retainasflakyqualificationtiming; causeunresolved, no clean-unflaky claim. Ownerecochran76,review2026-11-19,follow-up#577; focused26bothversions and installed84/publicnativeUI retain blockingbehaviorcoverage",
+    "receipts": [
+      {
+        "file": "integration-private.json",
+        "sha256": "499cae76fbe738759dd8ae396099cded55da4abe3cec727b1af183200c314cc8"
+      },
+      {
+        "file": "integration-private311-diagnostic.json",
+        "sha256": "031218b6b322852622152ee3549c8df7b06feb01e319fa07fa050bd10a158062"
+      },
+      {
+        "file": "observer-readiness.json",
+        "sha256": "9d1972d8a12435a6f1e23c1ad71ba30a09ce316adb89794c7b02e6627c34a9ea"
+      }
+    ]
+  },
+  "observer_readiness": {
+    "source": "5f6760a7",
+    "production_members": "all324 unchanged from e135 wheel",
+    "selection": "58 observer/startup/feed/monitor tests",
+    "py312": "PASS22.542s",
+    "py311": "PASS27.091s",
+    "installed_uid1017": "PASS21.870s",
+    "retained_failure": "Original58 FAIL1 in31.377s; close handshake followed by immediate nonblocking public tick raced receive-queue close observation",
+    "correction": "Wait on actual public source-loss evidence within existing two-second event bound; no production edit",
+    "receipt_sha256": "9d1972d8a12435a6f1e23c1ad71ba30a09ce316adb89794c7b02e6627c34a9ea"
+  },
+  "private_launch_fix": {
+    "primary_commit": "237b89282273492fbc61d245f0b9aecc1243bbb6",
+    "worker_commit": "aad1b0b3c4e3349d3d91eb63871eb887200516f5",
+    "scope": "Three modded native child launch boundaries; stock inheritance unchanged",
+    "red": "Actualmoddedchild0002 atlauncherandadmin seams",
+    "green": "26PASS on3.11/3.12; actualnewfile0600 underouter002",
+    "existing_histories": "No chmod/copy/migration; eight workingtargethistorymetadata samples already0600"
+  },
+  "installed_tests": {
+    "count": 84,
+    "result": "PASS",
+    "seconds": 36.939,
+    "python": "3.12.3",
+    "cwd": "/tmp",
+    "PYTHONPATH": "/home/codex-daemon-test/governor-release-p223-final/source-965c6efe/tests",
+    "log": "/home/codex-daemon-test/governor-release-p223-final/installed-final-tests.log",
+    "log_sha256": "a443993af2b1412a7a749c7127d532fc0ce45e0ed43d4f8d9a57e102affd0a76",
+    "modules": [
+      "test_tab_observer",
+      "test_tab_observer_identity",
+      "test_tab_startup",
+      "test_tab_format_autostart",
+      "test_tab_format_read_channel",
+      "test_tab_format_policy",
+      "test_tab_formatting",
+      "test_tab_tmux_feed",
+      "test_tab_format_monitor",
+      "test_managed_channel_launcher",
+      "test_controller_daemons",
+      "test_profile_launcher_forwarding",
+      "test_controller_builds",
+      "test_controller_build_authorization",
+      "test_absorbed_profiles_concurrency"
+    ]
+  },
+  "source_wheel_installed_and_post_runtime_equal": true,
+  "native_runs": {
+    "ui": {
+      "path": "/home/codex-daemon-test/governor-release-p223-final/ui-final-public-pass-02/receipt.json",
+      "sha256": "86fcad47047a57e15c46c18193a5f935ca439409e811156ad239a4e2ff60f0de",
+      "verdict": "PASS_REAL_NATIVE_GOVERNOR_UI",
+      "error": null,
+      "seconds": 71.48046376599996,
+      "external_provider_calls": 0,
+      "localhost_posts": 3,
+      "final_owned_processes": []
+    },
+    "upgrade": {
+      "path": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p223-v5-01/receipt.json",
+      "sha256": "0e3fee210983a521a21cc07a76d67e53009bf0173d0bac860676c78aa52bdd1f",
+      "verdict": "passed",
+      "error": null,
+      "seconds": 85.83999486600078,
+      "external_provider_calls": 0,
+      "localhost_posts": null,
+      "final_owned_processes": null
+    },
+    "failed_start": {
+      "path": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p223-v5-fail01/receipt.json",
+      "sha256": "7cd8e30f377b9cf9fea4b68371934f1604240d55675c51518c42e78aafc3775c",
+      "verdict": "passed",
+      "error": null,
+      "seconds": 75.76625131100081,
+      "external_provider_calls": 0,
+      "localhost_posts": null,
+      "final_owned_processes": null
+    },
+    "delegate_limit": {
+      "path": "/home/codex-daemon-test/governor-release-p223-final/delegate-final-limit/result.json",
+      "sha256": "513862e901160f90da6a9997cb84430d7438bb1af24ada97bb5d74a96b98890a",
+      "verdict": "PASS_NATIVE_GOVERNOR_LIMIT",
+      "error": null,
+      "seconds": 14.165776617001029,
+      "external_provider_calls": 0,
+      "localhost_posts": 5,
+      "final_owned_processes": [],
+      "fresh_tokens": 45,
+      "cache_inclusive_tokens": 90
+    },
+    "delegate_watcher_loss": {
+      "path": "/home/codex-daemon-test/governor-release-p223-final/delegate-final-watcher-loss/result.json",
+      "sha256": "e3fc7e0c6fafc64378543aecbd33c05d011fcf9787a33a63ae795b4d7a9f0e40",
+      "verdict": "PASS_NATIVE_GOVERNOR_WATCHER_LOSS",
+      "error": null,
+      "seconds": 17.167343384999185,
+      "external_provider_calls": 0,
+      "localhost_posts": 5,
+      "final_owned_processes": [],
+      "fresh_tokens": 45,
+      "cache_inclusive_tokens": 90
+    }
+  },
+  "privacy": {
+    "actual_tui": "/home/codex-daemon-test/governor-release-p223-final/venv-final/bin/codex-modded",
+    "registered_channel": "modded",
+    "outer_runner_umask": "0002",
+    "actual_daemon_pid": 2019968,
+    "actual_daemon_umask": "0077",
+    "all_new_rollouts_mode": "0o600",
+    "all_new_rollouts_uid": 1017,
+    "live_receipt": "/home/codex-daemon-test/governor-release-p223-final/final-live-privacy-02.json",
+    "live_receipt_sha256": "e62fa158da7f18f99e5da1f3ae33b6f07a38cb6510e2a61a1d3170fed5acaa51",
+    "evidence": {
+      "processes": [
+        {
+          "pid": 2016102,
+          "exe": "/usr/bin/python3.12",
+          "home": null,
+          "umask": "0002",
+          "kind": "fixture_runner",
+          "start_ticks": "1312294",
+          "parent_pid": 2016101,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2016442,
+          "exe": "/home/codex-daemon-test/governor-release-p223-final/native-candidate-v5/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_daemon",
+          "start_ticks": "1312476",
+          "parent_pid": 2016311,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2017891,
+          "exe": "/tmp/p224finalu2/profiles-state/codex-test/packages/app-server-daemon/releases/0.167.0-x86_64-unknown-linux-gnu/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_daemon",
+          "start_ticks": "1313150",
+          "parent_pid": 645,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2018181,
+          "exe": "/tmp/p224finalu2/profiles-state/codex-test/packages/app-server-daemon/releases/0.167.0-x86_64-unknown-linux-gnu/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_daemon",
+          "start_ticks": "1313221",
+          "parent_pid": 645,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2018271,
+          "exe": "/home/codex-daemon-test/governor-release-p223-final/native-candidate-v5/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_daemon",
+          "start_ticks": "1313241",
+          "parent_pid": 2016311,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2019968,
+          "exe": "/tmp/p224finalu2/profiles-state/codex-test/packages/app-server-daemon/releases/local-acd7faa488e4fa2cfdd5fa4db911e54eeb396ef5f8c1c445aecd5163a864a41e-x86_64-unknown-linux-gnu/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_daemon",
+          "start_ticks": "1314027",
+          "parent_pid": 645,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2020155,
+          "exe": "/home/codex-daemon-test/governor-release-p223-final/native-candidate-v5/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_daemon",
+          "start_ticks": "1314074",
+          "parent_pid": 2016311,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2020193,
+          "exe": "/tmp/p224finalu2/profiles-state/codex-test/packages/app-server-daemon/releases/local-acd7faa488e4fa2cfdd5fa4db911e54eeb396ef5f8c1c445aecd5163a864a41e-x86_64-unknown-linux-gnu/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_client",
+          "start_ticks": "1314082",
+          "parent_pid": 2020155,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2020313,
+          "exe": "/home/codex-daemon-test/governor-release-p223-final/native-candidate-v5/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_client",
+          "start_ticks": "1314130",
+          "parent_pid": 2016311,
+          "remote_endpoint": "unix:///tmp/codex-daemon-1017/541f6f28b996a5c1430c7f0599c90f0068e9516554e72b662302f5ebc909a9ea"
+        },
+        {
+          "pid": 2021465,
+          "exe": "/home/codex-daemon-test/governor-release-p223-final/native-candidate-v5/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_daemon",
+          "start_ticks": "1314552",
+          "parent_pid": 2021147,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2021504,
+          "exe": "/tmp/p224finalu2/profiles-state/codex-test/packages/app-server-daemon/releases/local-acd7faa488e4fa2cfdd5fa4db911e54eeb396ef5f8c1c445aecd5163a864a41e-x86_64-unknown-linux-gnu/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_client",
+          "start_ticks": "1314558",
+          "parent_pid": 2021465,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2021554,
+          "exe": "/home/codex-daemon-test/governor-release-p223-final/native-candidate-v5/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_client",
+          "start_ticks": "1314593",
+          "parent_pid": 2021147,
+          "remote_endpoint": "unix:///tmp/codex-daemon-1017/541f6f28b996a5c1430c7f0599c90f0068e9516554e72b662302f5ebc909a9ea"
+        },
+        {
+          "pid": 2026274,
+          "exe": "/home/codex-daemon-test/governor-release-p223-final/native-candidate-v5/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_daemon",
+          "start_ticks": "1317206",
+          "parent_pid": 2026162,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2026425,
+          "exe": "/home/codex-daemon-test/governor-release-p223-final/native-candidate-v5/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_client",
+          "start_ticks": "1317260",
+          "parent_pid": 2026162,
+          "remote_endpoint": "unix:///tmp/codex-daemon-1017/541f6f28b996a5c1430c7f0599c90f0068e9516554e72b662302f5ebc909a9ea"
+        },
+        {
+          "pid": 2029971,
+          "exe": "/home/codex-daemon-test/governor-release-p223-final/native-candidate-v5/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_daemon",
+          "start_ticks": "1319226",
+          "parent_pid": 2029583,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2030100,
+          "exe": "/tmp/p224finalu2/profiles-state/codex-test/packages/app-server-daemon/releases/local-acd7faa488e4fa2cfdd5fa4db911e54eeb396ef5f8c1c445aecd5163a864a41e-x86_64-unknown-linux-gnu/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_daemon",
+          "start_ticks": "1319262",
+          "parent_pid": 645,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2030264,
+          "exe": "/home/codex-daemon-test/governor-release-p223-final/native-candidate-v5/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_daemon",
+          "start_ticks": "1319294",
+          "parent_pid": 2029583,
+          "remote_endpoint": null
+        },
+        {
+          "pid": 2030380,
+          "exe": "/home/codex-daemon-test/governor-release-p223-final/native-candidate-v5/bin/codex",
+          "home": "/tmp/p224finalu2/profiles-state/codex-test",
+          "umask": "0077",
+          "kind": "native_client",
+          "start_ticks": "1319344",
+          "parent_pid": 2029583,
+          "remote_endpoint": "unix:///tmp/codex-daemon-1017/541f6f28b996a5c1430c7f0599c90f0068e9516554e72b662302f5ebc909a9ea"
+        }
+      ],
+      "new_rollouts": {
+        "/tmp/p224finalu2/profiles-state/codex-test/sessions/2026/11/11/rollout-2026-11-11T22-45-18-01a1ce13-1165-7c40-bdf1-95cb12f22838.jsonl": {
+          "uid": 1017,
+          "mode": "0o600",
+          "symlink": false
+        },
+        "/tmp/p224finalu2/profiles-state/codex-test/sessions/2026/11/11/rollout-2026-11-11T22-45-18-01a1ce13-110f-72f1-9b43-ad0c57f4dc17.jsonl": {
+          "uid": 1017,
+          "mode": "0o600",
+          "symlink": false
+        }
+      }
+    }
+  },
+  "clock_cleanup": {
+    "hash_guarded_restore": true,
+    "restored_sha256": "46d044572649bd8de7a26d7252cf0a9852026c75a13c2467bc6accd9ada9dece",
+    "mode": "0o600",
+    "recorded_at": "2026-11-12T04:53:06.940907+00:00"
+  },
+  "runtime_cleanup": {
+    "recorded_at": "2026-11-12T04:53:40.921429+00:00",
+    "boot_id": "285b6476-f401-4d2d-b4c0-ec2d9352cf5a",
+    "uid1017_os_processes": [],
+    "owned_proxies": [
+      {
+        "pid": 2085632,
+        "start_ticks": "1346796",
+        "exited": true
+      }
+    ],
+    "preexisting_working_counter": {
+      "pid": 13010,
+      "uid": 1000,
+      "preserved": true,
+      "start_ticks": "7254"
+    },
+    "windows_exact_qpc_producers": [
+      {
+        "ProcessId": 53412,
+        "ParentProcessId": 19436,
+        "CreationDate": "/Date(1794446572587)/"
+      }
+    ],
+    "shared_kernel": true
+  },
+  "aggregate_receipt_sha256": "3a7ab98c6070f25a61ee33cfde77c66aca25c99e8dc5d74ebe696958c42675b1",
+  "watcher_loss_offline_reconciliation_required": false,
+  "native_focused": {
+    "tests": 7,
+    "red_seconds": 458.468,
+    "green_seconds": 384.751,
+    "complete_build_seconds": 166.963,
+    "target": "x86_64-unknown-linux-gnu",
+    "profile": "dev-small",
+    "features": "default",
+    "toolchain": "1.95.0",
+    "jobs": 2
+  },
+  "review": {
+    "broad_review_count": 1,
+    "bounded_original_remediation_count": 1,
+    "accepted_spec_findings": "Both fixed; evidence plan0220/review.json",
+    "standards_findings": "Two nonblocking duplication findings remain backlog",
+    "pr_review": "Closed-world published integration, three evidenced runtime/privacy corrections, exact deployment readiness"
+  },
+  "limitations": [
+    "Selected local checks, not full suite; hosted Actions skipped by operator cost policy",
+    "WSL/shared kernel; localhost scripted provider only; zero external model calls",
+    "Initial Python3.11 180s timeout retained with unresolved cause; later145PASS104.865s does not erase it; follow-up577 owner ecochran76 review2026-11-19",
+    "Prior failed alias/privacy/fixture-route/readiness samples retained under private qualification root, not relabeled as passes"
+  ],
+  "working_deployment": "NOT_STARTED; requires merged-main identity and guarded cutover",
+  "historical_evidence": [
+    "docs/dev/evidence/plan0220/qualification.json",
+    "docs/dev/evidence/plan0220/review.json",
+    "runtime/governor-native-572/ui-v4-acceptance.json"
+  ],
+  "commands": {
+    "source": "PYTHONPATH=src:tests python scripts/validate_candidate.py --repo . --runtime <declared-python> --manifest <selected-manifest> --receipt <new-receipt> --timeout180",
+    "installed": "PYTHONPATH=<qualified-tests-only> <installed-python> -m unittest <15 affected modules> -v (cwd /tmp)",
+    "runtime_scripts": [
+      "scripts/goal_limit_native_ux_acceptance.py --governor-ui-only --managed-launcher --tui <installed>/bin/codex-modded",
+      "scripts/native_daemon_upgrade_resume_acceptance.py (success and failed-start modes)",
+      "scripts/goal_supervision_native_delegate_qualification.py (limit and watcher-loss)"
+    ]
+  }
+}

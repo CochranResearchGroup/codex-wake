@@ -1,0 +1,241 @@
+{
+  "recorded_at": "2026-11-11T15:41:31.806343+00:00",
+  "worktree": "/home/ecochran76/workspace.local/codex-wake-native-governor-572",
+  "native_base": "d3e311260b46c88fc8eac08b869f276cd0345e8b",
+  "upstream": "086ccc833bc9cf01024ad2dd6af7dbd421b6bf9a",
+  "source_commit": "15626ed7031a0246543b1703be69dbbc22e917d2",
+  "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "lockfile_sha256": "8ce6e8ba6f35054304773c1decd50c1d960d6eeb911a549fec3e4a22dbcb9863",
+  "toolchain": "1.95.0",
+  "target": "x86_64-unknown-linux-gnu",
+  "profile": "dev-small",
+  "jobs": 2,
+  "target_dir": "/home/ecochran76/.cache/codex-wake-native-0167",
+  "incremental": false,
+  "stage_dependencies": [
+    "affected codex-tui check",
+    "focused native command/render tests",
+    "native codex executable build",
+    "canonical package assembly",
+    "UID1017 no-provider native /wake journey"
+  ],
+  "qualified_package": false,
+  "production_install": false,
+  "notes": [
+    "Check metadata differs from prior cargo build artifacts, dependency check compilation expected",
+    "Other independent agent-browser and remote-view Cargo jobs observed; this lane bounded at2 jobs",
+    "No production service/binary/session mutated"
+  ],
+  "frozen_at": "2026-11-11T20:40:36.516012+00:00",
+  "untracked_generated": [
+    ".codegraph/"
+  ],
+  "diagnostic_check": {
+    "exit_code": 101,
+    "duration_seconds": 1045.637,
+    "reason": "Inputs changed mid-stage; reqwest dependency graph stale. Misplaced notification hook found and fixed before frozen tests.",
+    "receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/check/job-20261111T153921Z-3aa995010241/20261111T153921Z-1f05c1354241/receipt.json"
+  },
+  "current_stage": {
+    "name": "single incremental production CLI and package-v3 assembly",
+    "driver": "/home/ecochran76/.local/state/codex-wake/governor-native-572/build-package-v3.sh"
+  },
+  "focused_test_source": "896bec2571175a9b166a4581c4be84a74861820c",
+  "post_test_delta": "Only exact captured goal Active||Blocked pause predicate; both actual goal-id barriers unchanged; no wire/SDK/Coremanager change",
+  "package": {
+    "native_source_commit": "15626ed7031a0246543b1703be69dbbc22e917d2",
+    "package": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-v4",
+    "entrypoint_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+    "inventory": {
+      "codex-package.json": {
+        "sha256": "64a6c8f7bc146a94e9af84915c6a08d5457d58b5936f825894bbb8e6b1be8133",
+        "bytes": 245,
+        "mode": "0o600"
+      },
+      "codex-path/rg": {
+        "sha256": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+        "bytes": 5408904,
+        "mode": "0o711"
+      },
+      "codex-resources/bwrap": {
+        "sha256": "251e9e9ad727583d379a252d36ecd1c55c4c1e5375d876a64324b45ca2bcc64f",
+        "bytes": 434808,
+        "mode": "0o711"
+      },
+      "bin/codex-code-mode-host": {
+        "sha256": "a558a3c99756e075a9de90fdbb8f6cc09af526e16c3b736ee8a340d67041f2f0",
+        "bytes": 108217320,
+        "mode": "0o711"
+      },
+      "bin/codex-exec-server": {
+        "sha256": "9abfcd38bde7eb2d4003ee70940bc706cb760dab9d17b85e593fdeeb2baf81e4",
+        "bytes": 166089104,
+        "mode": "0o711"
+      },
+      "bin/codex": {
+        "sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+        "bytes": 447101640,
+        "mode": "0o711"
+      }
+    },
+    "version": "codex-cli 0.167.0",
+    "build_receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build-v4/job-20261112T024103Z-656884cdbc3e/20261112T024103Z-3ecae7422a91/receipt.json",
+    "build_seconds": 163.681,
+    "working_install": false
+  },
+  "stage": "exact nativepackage-v4assembly",
+  "test_selection": "cargo test --locked --offline --profile dev-small -p codex-tui --lib wake_governor_strip_uses_effective_remaining_tokens --message-format=json",
+  "acceptance": "real render_frame shows authoritative0left under shared exhaustion, unknown staysunknown",
+  "build_environment": {},
+  "package_driver": "/home/ecochran76/.local/state/codex-wake/governor-native-572/build-package-v4.sh",
+  "package_driver_sha256": "c902ea94c78f78eb155bbdb1a9297cb2fdda7a39a8df7bbec0743f211f2c9197",
+  "required_package_inventory": [
+    "bin/codex",
+    "bin/codex-exec-server",
+    "bin/codex-code-mode-host",
+    "codex-path/rg",
+    "codex-resources/bwrap",
+    "codex-package.json"
+  ],
+  "selection_difference": "Focused red/green selects onlycodex-tui --lib rather than older6test selection ofcore+appserver+tui; transitive featureunification may differ; packagebuild retains exact productiondriver selection and env.",
+  "retained_cache": true,
+  "stages": [
+    {
+      "name": "SPEC220-1 red",
+      "job_dir": "/home/ecochran76/.local/state/codex-wake/governor-native-572/remediation-spec1-red/job-20261112T020927Z-bb0493643545",
+      "result": "failed_expected_test",
+      "seconds": 605.549,
+      "compiler_errors": 0
+    },
+    {
+      "name": "SPEC220-1 green",
+      "job_dir": "/home/ecochran76/.local/state/codex-wake/governor-native-572/remediation-spec1-green/job-20261112T021928Z-32930ccc72be",
+      "result": "PASS",
+      "diff_sha256": "24a07368bcbd27aca5d2f820d89030a83e9e9a379e619dba3519cab369bf8401",
+      "seconds": 282.54,
+      "tests_passed": 5
+    },
+    {
+      "name": "SPEC220-2 red",
+      "job_dir": "/home/ecochran76/.local/state/codex-wake/governor-native-572/remediation-spec2-red/job-20261112T022447Z-1f95ce3fd121",
+      "result": "fixture_compile_failure_private_import",
+      "diff_sha256": "978ee74ad57f324b35def80a15876cf6b11562e6a916a1ae7f5c737727ba7376",
+      "seconds": 163.837
+    },
+    {
+      "name": "SPEC220-2 correctedred",
+      "job_dir": "/home/ecochran76/.local/state/codex-wake/governor-native-572/remediation-spec2-red-corrected/job-20261112T022806Z-e23f008e0128",
+      "result": "failed_expected_test",
+      "seconds": 325.248,
+      "compiler_errors": 0
+    },
+    {
+      "name": "SPEC220-2 initialgreen",
+      "job_dir": "/home/ecochran76/.local/state/codex-wake/governor-native-572/remediation-spec2-green/job-20261112T023339Z-7125218e5ea1",
+      "result": "cancelled_exact_owned_group511584_after_known_testliteral_mismatch",
+      "exit_code": -15,
+      "seconds": 66.588
+    },
+    {
+      "name": "SPEC220-2 finalgreen",
+      "job_dir": "/home/ecochran76/.local/state/codex-wake/governor-native-572/remediation-spec2-green-corrected/job-20261112T023503Z-6b2ca9acd9c8",
+      "result": "PASS",
+      "diff_sha256": "a06980f5ec32ee3dcbc4e2220d0fca20af3b4f23286d1094d3296c825cded26c",
+      "seconds": 369.102,
+      "tests_passed": 6
+    }
+  ],
+  "review_passes": 1,
+  "remediation_passes": 1,
+  "accepted_findings": [
+    "SPEC220-1",
+    "SPEC220-2"
+  ],
+  "retained_patch_apply_checks": "PASS supplementalagainstexactd3e311 andfullagainstexact086ccc",
+  "remaining": [
+    "Primary exact v4 upgrade/failure/delegated qualification and final clock/process/resource cleanup"
+  ],
+  "installed_ui": {
+    "verdict": "PASS_REAL_NATIVE_GOVERNOR_UI",
+    "started_at": "2026-11-12T02:53:55.535376+00:00",
+    "elapsed_seconds": 64.47524262399929,
+    "source_commit": "8d0c3d2f6ae67b30e729aea53accb4114336f7fe",
+    "acceptance_script_sha256": "59a8c3015b144dbc497a766091e9f2e9936a1ddcc9b16c8345ea04e8d079ba48",
+    "wake_prefix": "/home/codex-daemon-test/governor-p220-continue/venv",
+    "wake_version": "0.22.0.dev8",
+    "app_server_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+    "native_cold_resume": {
+      "no_automatic_model_turn": true,
+      "old_pid": 714512,
+      "paused": true,
+      "recovered_lease": {
+        "armed": false,
+        "expired": true,
+        "guardRequestId": null,
+        "leaseId": "01a1cdad-4295-7572-b39e-9475c4a3c441:fb765b65e95d401bad68ad23b476a860:4",
+        "memberOutcomes": [
+          {
+            "error": null,
+            "goalPaused": true,
+            "goalPreserved": false,
+            "interruptedTurnIds": [],
+            "stopVerified": true,
+            "threadId": "01a1cdad-4295-7572-b39e-9475c4a3c441"
+          }
+        ],
+        "reason": null,
+        "releaseVerified": false,
+        "startState": null,
+        "startedTurnId": null,
+        "stopVerified": false,
+        "supported": true,
+        "ttlMs": 10000
+      },
+      "replacement_pid": 726720
+    },
+    "explicit_resume_native_turns": 2,
+    "abrupt_watcher_loss_exact_turn_stopped": true,
+    "non_resume_ui_commands_started_inference": false,
+    "native_strip_and_notices": true,
+    "peer_unchanged": true,
+    "final_owned_process_census": [],
+    "receipt": "/home/codex-daemon-test/governor-p220-continue/ui-v4-pass-03/receipt.json",
+    "receipt_sha256": "4bc31e0782b9640e6841d1254c5b7db885daf8650231093df2a7b446becceb01",
+    "localhost_posts": 3,
+    "external_provider_calls": 0,
+    "native_source_commit": "15626ed7031a0246543b1703be69dbbc22e917d2",
+    "wheel_sha256": "7a5c5e6ce0f427cedd6f18794279729b19c538ba96fff5ffddac3cc704830919",
+    "clock_readiness": {
+      "ready": true,
+      "native_goal_created_at": 1794452050,
+      "future_gap_seconds": -1.5410676002502441,
+      "ready_on_first_check": true
+    },
+    "new_presentation": {
+      "shared_allowance_visible": true,
+      "shared_tokens_visible": true,
+      "shared_time_visible": true,
+      "limiting_task_visible": true
+    },
+    "source_wheel_installed_members_equal": 323
+  },
+  "runtime_attempts": [
+    {
+      "receipt": "/home/codex-daemon-test/governor-p220-continue/ui-v4-red-01/receipt.json",
+      "verdict": "FAILED_PACKET",
+      "elapsed_seconds": 42.145538696,
+      "localhost_posts": 1,
+      "cause": "Unknown transient clock admission refusal: native goal start after qualified current time; no enrollment; no persistent skew in subsequent probes.",
+      "final_owned_process_census": []
+    },
+    {
+      "receipt": "/home/codex-daemon-test/governor-p220-continue/ui-v4-red-02/receipt.json",
+      "verdict": "FAILED_PACKET",
+      "elapsed_seconds": 35.26059213,
+      "localhost_posts": 0,
+      "cause": "Unknown native bootstrap RPC timeout at3s; exact phase not retained; original wrapper now annotates failure phase.",
+      "final_owned_process_census": []
+    }
+  ],
+  "clock_custody": "Handed to primary after UI PASS: proxy671356/startticks564518; exact temporary config a2693882...; original46d04457...; no worker runtime mutations after handback."
+}

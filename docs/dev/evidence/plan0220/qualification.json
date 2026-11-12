@@ -1,0 +1,194 @@
+{
+  "status": "ISOLATED_INSTALLED_ACCEPTED_REVIEW_REMEDIATION_COMPLETE",
+  "spec": 570,
+  "ticket": 574,
+  "working_deployment": false,
+  "hosted_ci": false,
+  "python": {
+    "installed_members_equal": 323,
+    "native_members_equal": 6,
+    "python": "3.12.3",
+    "source_commit": "3a8659fcf73ede2e5e46554d5b2147a19176b58c",
+    "wheel_sha256": "7a5c5e6ce0f427cedd6f18794279729b19c538ba96fff5ffddac3cc704830919",
+    "current_source_members_equal": 323,
+    "native_source": "15626ed7031a0246543b1703be69dbbc22e917d2"
+  },
+  "native": {
+    "final_package_source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+    "executable_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+    "package_members": 6,
+    "source_copy_members_equal": true,
+    "build_seconds": 163.681,
+    "build_receipt": "/home/ecochran76/.local/state/codex-wake/governor-native-572/package-build-v4/job-20261112T024103Z-656884cdbc3e/20261112T024103Z-3ecae7422a91/receipt.json",
+    "profile": "dev-small",
+    "jobs": 2,
+    "toolchain": "1.95.0",
+    "focused_tests": {
+      "selection": "codex-tui governor",
+      "passed": 6,
+      "seconds": 369.102,
+      "source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+      "receipt": "runtime/governor-native-572/remediation.json"
+    },
+    "historical_core_checks": "Older core2/TUI4 checks retain source896bec provenance in historical qualification; not reported as current exact-source core tests."
+  },
+  "source_validation": {
+    "source_commit": "30b7a89a3c41e575a85f4b093808a6403ee64bd4",
+    "tier": "focused",
+    "python": "3.12.13",
+    "commands": [
+      {
+        "command": "python -m ruff check --select F821,F822,F823 src scripts tests .codex/hooks",
+        "result": "PASS"
+      },
+      {
+        "command": "python scripts/check_policy_wiring.py",
+        "result": "PASS"
+      },
+      {
+        "command": "PYTHONPATH=src:tests python -m unittest test_governor_commands test_command_parity test_host_counter -q",
+        "result": "PASS",
+        "tests": 14,
+        "seconds": 6.443
+      }
+    ],
+    "native_candidate_six_members_match": true,
+    "rollback_baseline_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+    "environment": "Local WSL shared kernel; fresh source-test venv; separate UID1017 installed runtime remains independently pending; hosted CI skipped.",
+    "additional_matrix": {
+      "python": "3.11.15",
+      "command": "PYTHONPATH=src:tests python -m unittest test_governor_commands test_command_parity test_host_counter -q",
+      "result": "PASS",
+      "tests": 14,
+      "seconds": 7.683
+    },
+    "supervision_regressions": {
+      "source_commit": "3a8659fcf73ede2e5e46554d5b2147a19176b58c",
+      "command": "PYTHONPATH=src:tests python -m unittest test_goal_supervision test_self_limits -q",
+      "python3.12.13": {
+        "tests": 44,
+        "seconds": 31.251,
+        "result": "PASS"
+      },
+      "python3.11.15": {
+        "tests": 44,
+        "seconds": 19.127,
+        "result": "PASS"
+      }
+    }
+  },
+  "native_ui": "runtime/governor-native-572/ui-v4-acceptance.json",
+  "installed_journeys": {
+    "p220-v4-01": {
+      "receipt": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p220-v4-01/receipt.json",
+      "receipt_sha256": "99d8361116e3a55e95b5e45790f934828e13d5558e2babfdeef34d2662ecfa2a",
+      "state": "passed",
+      "mode": "success",
+      "target_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+      "baseline_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+      "rollback_expected_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+      "all_tabs_notified": true,
+      "durable_handoffs_before_replacement": true,
+      "counters_and_limits_preserved": true,
+      "rollback_preserves_handoffs": true,
+      "duplicate_recovery_reconciled": true,
+      "failed_start_no_work_before_repair": null,
+      "localhost_posts": 10,
+      "external_provider_calls": 0,
+      "upgrade_client_count": 5,
+      "rollback_client_count": 6
+    },
+    "p220-v4-fail01": {
+      "receipt": "/home/codex-daemon-test/daemon-qualification-0165/resume-journey-p220-v4-fail01/receipt.json",
+      "receipt_sha256": "2f909012805bdf834ad4308114f65dec0fed3004dfa379cbebf0a658c0978c7d",
+      "state": "passed",
+      "mode": "startup-fail",
+      "target_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+      "baseline_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+      "rollback_expected_sha256": "56a10d48e6ab8a40e5a623456b3b041387ef02af0a863cd2707ca70b6d15b92c",
+      "all_tabs_notified": true,
+      "durable_handoffs_before_replacement": true,
+      "counters_and_limits_preserved": true,
+      "rollback_preserves_handoffs": true,
+      "duplicate_recovery_reconciled": true,
+      "failed_start_no_work_before_repair": true,
+      "localhost_posts": 10,
+      "external_provider_calls": 0,
+      "upgrade_client_count": 5,
+      "rollback_client_count": 6
+    },
+    "delegate-v4-limit": {
+      "receipt": "/home/codex-daemon-test/governor-p220-continue/delegate-v4-limit/result.json",
+      "receipt_sha256": "39e553863a637ae3333d603e061c6f88ad4ca7b9ecf6cf5cc2c813974da07474",
+      "raw_verdict": "PASS_NATIVE_GOVERNOR_LIMIT",
+      "elapsed_seconds": 13.093734668999787,
+      "local_posts": 5,
+      "external_provider_calls": 0,
+      "exact_tools_stopped": true,
+      "final_owned_processes": []
+    },
+    "delegate-v4-watcher-loss": {
+      "receipt": "/home/codex-daemon-test/governor-p220-continue/delegate-v4-watcher-loss/result.json",
+      "receipt_sha256": "f3c3ea82e070916a19aada522f1796b0a9e07c0b7cc2ee2ef0175d4191b19bb8",
+      "raw_verdict": "PASS_NATIVE_GOVERNOR_WATCHER_LOSS",
+      "elapsed_seconds": 19.509754360999978,
+      "local_posts": 5,
+      "external_provider_calls": 0,
+      "exact_tools_stopped": true,
+      "final_owned_processes": []
+    }
+  },
+  "review": {
+    "broad_passes": 1,
+    "remediation_passes": 1,
+    "report": "docs/dev/evidence/plan0220/review.json",
+    "blocking_findings_resolved": [
+      "SPEC220-1",
+      "SPEC220-2"
+    ],
+    "nonblocking_backlog": [
+      "STD220-1",
+      "STD220-2"
+    ]
+  },
+  "clock_cleanup": {
+    "at": "2026-11-12T02:59:46.206251+00:00",
+    "action": "hash_guarded_original_clock_restore",
+    "original_sha256": "46d044572649bd8de7a26d7252cf0a9852026c75a13c2467bc6accd9ada9dece",
+    "temporary_sha256": "a2693882fb655a1aae395c23918fd697916ac158650557af887ce3675f7ffaa9",
+    "restored_sha256": "46d044572649bd8de7a26d7252cf0a9852026c75a13c2467bc6accd9ada9dece",
+    "mode": "0o600",
+    "restored_original_is_not_readiness": true
+  },
+  "final_linux_census": {
+    "at": "2026-11-12T03:00:31.523692+00:00",
+    "uid": 1017,
+    "processes": [],
+    "owned_runtime_remaining": [],
+    "proxy_671356_absent": true
+  },
+  "final_windows_census": {
+    "at": "2026-11-12T03:00:32.231889+00:00",
+    "exit_code": 0,
+    "selected_process_count": 70,
+    "receipt": "/home/ecochran76/.local/state/codex-wake/qualification/governor-p220/final-v4-windows-census.json",
+    "scope": "Fresh Windows resource observation, not global absence or baseline-preservation proof."
+  },
+  "environment_differences": "Local WSL shared kernel, separate real UID1017, runtime Python3.12.3, source checks Python3.11.15/3.12.13, injected localhost Responses accounting not provider billing; no hosted CI or working deployment.",
+  "setup_flakes": {
+    "lane_claim": "Current exact-byte samples accepted; no clean-unflaky-lane claim.",
+    "owner": "ecochran76",
+    "work_item": "https://github.com/CochranResearchGroup/codex-wake/issues/577#issuecomment-6813095946",
+    "review_by": "2026-11-19",
+    "quarantined": false,
+    "retained": [
+      "ui-v4-red-01:42.146s/1POST, native-goal qualified-time admission, failed-instant cause UNKNOWN",
+      "ui-v4-red-02:35.261s/0POST, opaque native RPC3s timeout, method/cause UNKNOWN"
+    ],
+    "causal_reframe": "Existing harness now records bounded qualified-clock readiness and RPC method/elapsed/error phase. Instrumented original journey PASS64.475s/3POST; initial clock ready with gap-1.541s, no wait. Native bytes unchanged across these attempts; no timeout/guard relaxation."
+  },
+  "history": "Qualification at23b87803 and earlier v1/v2/v3 results remain historical Git evidence. V3 watcher-loss rawFAIL and offline notice adjudication are retained; current v4 watcher-loss rawPASS needs no offline override. Initial self-lock red, watcher-readiness test flake, private-helper compile error and exact-owned cancelled build remain in runtime evidence. No first failure erased.",
+  "summary_tool": "Existing scripts/summarize_receipt.py was attempted for these native receipt shapes and returned unsupported input. Bounded selected-field extraction retained; no replacement summary framework introduced.",
+  "remaining_gates": [],
+  "separate_authority": "Branch qualification is not merge, release, working-host installation or production restart approval."
+}

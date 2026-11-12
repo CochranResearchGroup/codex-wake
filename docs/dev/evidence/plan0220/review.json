@@ -1,0 +1,82 @@
+{
+  "mode": "drift_discovery",
+  "review_number": 1,
+  "wake_base": "3f8a18fa196037fa9efe00bf2ad36b05c61f2a3c",
+  "wake_tip": "23b87803c7a5a83429253180be03089414e02764",
+  "native_base": "d3e311260b46c88fc8eac08b869f276cd0345e8b",
+  "native_tip": "bd519d5232aef6f55a4a665cd0c7461ec5b223f9",
+  "reviewers": {
+    "Standards": "/root/review_standards220",
+    "Spec": "/root/review_spec220"
+  },
+  "primary_adjudication": "All four candidates verified against frozen sources; only two Spec presentation findings block final acceptance.",
+  "coverage_limit": "Standards reviewer noted truncated oversized combined outputs; native lease processor subsequently inspected in complete bounded diff segments. This is one bounded review, not a claim that every generated/history hunk was individually inspected.",
+  "findings": [
+    {
+      "id": "STD220-1",
+      "axis": "Standards",
+      "disposition": "nonblocking_backlog",
+      "severity": "P3",
+      "criterion": "Duplicated Code heuristic; policy0014 module ownership",
+      "evidence": "goal_native_guard.py arm lines51-53 and guarded_start208-210 duplicate effective task/shared deadline selection. Primary verified frozen source.",
+      "consequence": "Future deadline fixes could drift; no current semantic divergence demonstrated.",
+      "scope": "Keep out of bounded presentation remediation; project backlog finding retained here.",
+      "owner": "ecochran76",
+      "state": "TRIAGE"
+    },
+    {
+      "id": "STD220-2",
+      "axis": "Standards",
+      "disposition": "nonblocking_backlog",
+      "severity": "P3",
+      "criterion": "Duplicated Code heuristic; policy0014 module ownership",
+      "evidence": "Native thread_governor_lease.rs549 and1373 duplicate128-entry capacity/eviction logic. Primary verified frozen source.",
+      "consequence": "Future admission changes could drift; current predicates match.",
+      "scope": "Keep out of bounded presentation remediation; project backlog finding retained here.",
+      "owner": "ecochran76",
+      "state": "TRIAGE"
+    },
+    {
+      "id": "SPEC220-1",
+      "axis": "Spec",
+      "disposition": "blocking",
+      "severity": "P2",
+      "criterion": "Spec570 stories3 and19: used/remaining tokens, task/shared limits together.",
+      "evidence": "Native wake_governor.rs670-672 passes task usage/limit to meter; line323 computes tasklimit-used while Wake governor.py85-88 already emits authoritative effective remaining_tokens.",
+      "reproducer": "Task used100/limit1000 and shared used500/limit500 produces normalized remaining0, persistent strip900left.",
+      "required_fix": "Render authoritative effective remaining tokens at the persistent native rendering seam; preserve unknown semantics.",
+      "resolution": "resolved by15626ed7; public rendering red/green6PASS, exact v4 actual UI64.475s, current aggregate qualificationPASS"
+    },
+    {
+      "id": "SPEC220-2",
+      "axis": "Spec",
+      "disposition": "blocking",
+      "severity": "P2",
+      "criterion": "Spec570 story19: identify limiting scope.",
+      "evidence": "Native scope_label292-307 and show_wake_details691-719 omit scope.limiting_scope and scope.shared that Wake governor.py97-101 supplies.",
+      "reproducer": "Otherwise identical task/shared-limited snapshots render identical scope descriptions.",
+      "required_fix": "Expose limiting scope and applicable shared allowance in native details/stop presentation.",
+      "resolution": "resolved by15626ed7; public rendering red/green6PASS, exact v4 actual UI64.475s, current aggregate qualificationPASS"
+    }
+  ],
+  "remediation": {
+    "pass": 1,
+    "status": "complete_verified",
+    "owner": "/root/native572",
+    "scope": [
+      "SPEC220-1",
+      "SPEC220-2"
+    ],
+    "verification": "closed_world",
+    "native_source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+    "focused_tests": {
+      "passed": 6,
+      "seconds": 369.102,
+      "receipt": "remediation-spec2-green-corrected/job-20261112T023503Z-6b2ca9acd9c8/20261112T023503Z-c3a2c62274c3/receipt.json"
+    },
+    "primary_verification": "Closed-world two-file diff confirms authoritative remaining_tokens with unknown preservation, limiting_scope, and real normalized shared identity/ceilings. No second broad review.",
+    "installed_ui": "runtime/governor-native-572/ui-v4-acceptance.json",
+    "exact_package_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+    "aggregate_acceptance": "docs/dev/evidence/plan0220/qualification.json"
+  }
+}

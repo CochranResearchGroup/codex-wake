@@ -6317,3 +6317,10 @@ See [workflow](local-session-control.md) and generated [transport contract](loca
 | `control slash cancel` | `local.slash.cancel` | `wake_control_slash_cancel` |
 | `self-limits show` | `local.self_limits.show` | `wake_self_limits_show` |
 | `self-limits set` | `local.self_limits.set` | `wake_self_limits_set` |
+| `governor status` | `local.governor.status` | `wake_governor_status` |
+| `governor activate` | `local.governor.activate` | `wake_governor_activate` |
+| `governor extend` | `local.governor.extend` | `wake_governor_extend` |
+| `governor reset` | `local.governor.reset` | `wake_governor_reset` |
+| `governor disable` | `local.governor.disable` | `wake_governor_disable` |
+| `governor resume` | `local.governor.resume` | `wake_governor_resume` |
+| `governor advisory` | `local.governor.advisory` | `wake_governor_advisory` |

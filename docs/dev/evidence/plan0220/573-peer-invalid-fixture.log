@@ -1,0 +1,14 @@
+F
+======================================================================
+FAIL: test_discovery_and_exact_resolution_need_no_profile_and_reject_stale_generation (test_local_sessions.LocalSessionTests.test_discovery_and_exact_resolution_need_no_profile_and_reject_stale_generation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/.worktrees/codex-wake/governor-experience/tests/test_local_sessions.py", line 49, in test_discovery_and_exact_resolution_need_no_profile_and_reject_stale_generation
+    self.assertEqual(governor.returncode, 0, governor.stderr + governor.stdout)
+AssertionError: 2 != 0 : {"status": "failed", "error": {"code": "governor_unavailable", "message": "badly formed hexadecimal UUID string"}}
+
+
+----------------------------------------------------------------------
+Ran 1 test in 11.788s
+
+FAILED (failures=1)

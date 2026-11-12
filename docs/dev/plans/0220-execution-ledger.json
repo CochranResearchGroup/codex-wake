@@ -1,0 +1,164 @@
+{
+  "spec": 570,
+  "base": "3f8a18fa196037fa9efe00bf2ad36b05c61f2a3c",
+  "branch": "feat/governor-experience",
+  "review_passes": 1,
+  "remediation_passes": 1,
+  "tickets": [
+    {
+      "id": 571,
+      "owner": "backend",
+      "state": "validated",
+      "blockers": [],
+      "worker": "/root/governor_backend571",
+      "branch": "feat/governor-backend-571",
+      "integrated_checkpoints": [
+        "503b0659",
+        "c4f8a704",
+        "6068aaa7",
+        "cc64666a",
+        "bd8848b0"
+      ],
+      "remaining": [],
+      "validation": "Exact bd8848b0: governor16 PASS Python3.11 19.167s and3.12 18.802s; affected3.12 governor/self_limits/goal_renewal/deactivation/supervision77 PASS79.741s. Integrated9fb28fc6; packaged modules unchanged in7064f62b.",
+      "installed_acceptance": "model/limit/watcher-loss allPASS on exact80c8ad9f package; actualtoolsstop, peerpreservation, singleexplicitresume/nohiddengoal",
+      "tracker_state": "CLOSED"
+    },
+    {
+      "id": 572,
+      "owner": "native",
+      "state": "validated",
+      "blockers": [],
+      "worker": "/root/native572",
+      "branch": "feat/governor-native-572",
+      "integrated_checkpoints": [
+        "a40fc9b4"
+      ],
+      "native_source": "bd519d5232aef6f55a4a665cd0c7461ec5b223f9",
+      "qualification": "537.227s productionpackagebuildPASS; former live-tool/falseproofredcase nowactualPASS inbudget+watcher-loss. UIcoldbootstrap needs60s initialfixturebound after measured19.076s installationlifecycle.",
+      "preview": "https://previews.ecochran.dyndns.org/s/62350ca5d460",
+      "remaining": [],
+      "installed_acceptance": "UI PASS65.462s source9e0cc33c/fixedwheel7a5c5e6c/native1171;3localhostPOST/0external; final owned census[]. Actual modal Leave paused, exact continuation once, reset/disable/reconnect/watcherloss/coldhold/peer preservation.",
+      "tracker_state": "CLOSED",
+      "tracker_readback": "2026-11-12T01:11:37Z",
+      "final_native_source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+      "final_native_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402"
+    },
+    {
+      "id": 573,
+      "owner": "primary",
+      "state": "validated",
+      "blockers": [],
+      "validation": "Latest governor/contract selection: 9 PASS (Python3.12). Existing transport10 PASS; ownedUnix native protocol CLIstatusPASS; privateAPI/MCPstatusPASS. Actual Windows PowerShell governorstatus plus four response modes PASS46.185s after retained WSL bootstrap failure and successful preflight.",
+      "owned_paths": [
+        "src/codex_wake/governor_commands.py",
+        "src/codex_wake/cli.py",
+        "src/codex_wake/local_control_service.py",
+        "src/codex_wake/mcp_server.py",
+        "src/codex_wake/controller_http.py",
+        "src/codex_wake/controller_client.py"
+      ],
+      "remaining": "Full UI572 and aggregate574 remain independent gates.",
+      "root_routing": "DefaultCLI/UI/privatecontroller deriveexisting localMCP --goal-limits-root/policy; typednativecaller honorshostpolicy, explicitisolatedrootsstayexact. ExistingrealUnixpeerCLI poisonnamespacecheckPASS32.850s;8gov/contractPASS3.11/12.",
+      "tracker_state": "CLOSED"
+    },
+    {
+      "id": 574,
+      "owner": "primary",
+      "state": "validated",
+      "blockers": [
+        571,
+        572,
+        573
+      ],
+      "prepared": "Existing goal_limit_native_ux_acceptance --governor-ui-only reuses actualnativeappserver/TUI/providerfixture, checks controls, forcedstop, reconnect, SIGKILLduringactivework and no unintendedinference.",
+      "worker": "/root",
+      "remaining": [],
+      "validation": "Exact final native1171 normal p220-v3-01 and startup-fail p220-v3-fail01 PASS;5upgrade/6rollback client identities, counters/handoffs preserved, duplicate recovery reconciled. Final corrected-wheel delegate limit PASS; watcher-loss rawFAIL exact owner-notice disambiguation ACCEPTED offline. UID1017 final census[]; clock46d restored0600; proxy absent.",
+      "tracker_state": "CLOSED",
+      "tracker_readback": "2026-11-12T01:17:55Z",
+      "final_native_source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+      "final_native_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402"
+    }
+  ],
+  "contract_revision": 3,
+  "operator_admission": "opaque local_operator_principal(); native model Principal(thread) after verified_native_caller; OAuth owner+admin+exact thread grant only for loosen actions",
+  "integration_tip": "61447101",
+  "package_candidate_version": "0.22.0.dev8",
+  "review_fixed_point_confirmation": "Parent #570 explicitly freezes 3f8a18fa196037fa9efe00bf2ad36b05c61f2a3c; native review base d3e311260b46c88fc8eac08b869f276cd0345e8b.",
+  "native_cache": "Prior release cleanup reclaimed18GB; cachepathretainedbutcompiledobjectsabsent; currentnativecompilecold. Same toolchain/profile/target; keepresultingcache.",
+  "blocking_acceptance": null,
+  "qualification_environment": {
+    "uid": 1017,
+    "root": "/home/codex-daemon-test/governor-p220-continue",
+    "python": "3.12.3",
+    "dependencies": "Pinned to working dev7 constraints; installed successfully",
+    "wheel_installed": true,
+    "working_deployment": false,
+    "wheel_source_commit": "3a8659fcf73ede2e5e46554d5b2147a19176b58c",
+    "wheel_sha256": "7a5c5e6ce0f427cedd6f18794279729b19c538ba96fff5ffddac3cc704830919",
+    "source_wheel_installed_members_equal": 323,
+    "dependency_versions_equal_working": 31,
+    "installed_surface_tests": "14PASS6.634s",
+    "current_status": "Finalv4 exact nativeca29 and unchanged wheel7a5 accepted;323source/wheel/installed+6native members equal; original clock restored0600; owned runtime empty."
+  },
+  "continuation_checkpoint": {
+    "date": "2026-11-11",
+    "authority": "Operator explicitly resumed implement-spec: close #572/#574, one broad review and one bounded findings remediation; #576-581 follow-up out of this packet.",
+    "concurrency": "Primary owns #574 preparation/integration, /root/native572 owns #572 and exclusive UID1017 runtime/clock; no nested delegation.",
+    "state_transition": "exactv4accepted -> parent570closed -> complete",
+    "progress_classification": "outcome_progress",
+    "evidence": "Live GitHub570\u2013574 CLOSED. Review1/remediation1; both Spec blockers resolved. Final v4 qualification current and source/native bytes verified. Setup flakes577 and two Standards backlog findings explicitly retained.",
+    "next": "No required task work remains; merge/release/deployment and576\u2013581 have separate scope/authority.",
+    "memory_discovery": "skip: supplied detailed handoff and current canonical sources sufficient; lightweight registry search had no relevant Plan0220 result."
+  },
+  "review": {
+    "mode": "drift_discovery",
+    "status": "completed_adjudicated",
+    "wake_base": "3f8a18fa196037fa9efe00bf2ad36b05c61f2a3c",
+    "wake_tip": "23b87803c7a5a83429253180be03089414e02764",
+    "native_base": "d3e311260b46c88fc8eac08b869f276cd0345e8b",
+    "native_tip": "bd519d5232aef6f55a4a665cd0c7461ec5b223f9",
+    "standards_worker": "/root/review_standards220",
+    "spec_worker": "/root/review_spec220",
+    "remediation_bound": "One consolidated accepted finding set, one bounded TDD remediation pass; closed-world verification only.",
+    "findings": "docs/dev/evidence/plan0220/review.json"
+  },
+  "remediation": {
+    "status": "complete_verified",
+    "worker": "/root/native572",
+    "accepted_blockers": [
+      "SPEC220-1",
+      "SPEC220-2"
+    ],
+    "nonblocking_backlog": [
+      "STD220-1",
+      "STD220-2"
+    ],
+    "verification_mode": "closed_world",
+    "remaining_gate": "Native rendering red/green, complete package-v4, exact-new-package installed qualification.",
+    "focused_progress": {
+      "SPEC220-1": {
+        "red": "CargoSignal remediation-spec1-red/job-20261112T020927Z-bb0493643545: failed exact rendering assertion,0compilererrors,605.549s",
+        "green": "CargoSignal remediation-spec1-green/job-20261112T021928Z-32930ccc72be:5PASS,0diagnostics,282.540s",
+        "remaining": "Exact rebuilt native package and installed qualification"
+      },
+      "SPEC220-2": {
+        "red": "Corrected public rendering test failed missing scope assertion;0compilererrors,325.248s",
+        "green": "Six focused governor rendering testsPASS,0diagnostics,369.102s",
+        "retained_attempts": [
+          "Private sibling helper compileE0603, not behavioral red",
+          "Initial green exact-owned group cancelled-15 at66.588s before correcting literal2m 00s"
+        ],
+        "remaining": "Complete immutable package-v4 and exact installed qualification"
+      }
+    },
+    "native_source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+    "package_build": "CargoSignal package-build-v4/job-20261112T024103Z-656884cdbc3e",
+    "package_sha256": "ca29d5cf77402cdc0a6fd71ddaf3b7365fb44250da96b42ffa58d94de83f7402",
+    "aggregate_acceptance": "docs/dev/evidence/plan0220/qualification.json"
+  },
+  "parent_tracker_state": "CLOSED",
+  "integration_tip_kind": "Qualified code/evidence checkpoint before final tracker-only bookkeeping; resolve branch tip from Git.",
+  "parent_tracker_readback": "2026-11-12T03:06:26Z"
+}

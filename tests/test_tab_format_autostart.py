@@ -77,6 +77,35 @@ class FormattingAutostartTests(unittest.TestCase):
             time.sleep(.05)
         self.assertEqual(self.tmux('display-message','-p','-t','@0','#{window_name}').strip(),'later terminal')
 
+    def test_socket_appearing_during_observer_construction_is_discovered(self):
+        from unittest.mock import patch
+        from codex_wake.controller_tabs import controller_tabs_from_root
+        from codex_wake.tab_observer import TabObserver
+        self.tmux('kill-server')
+        self.socket=str(self.root/'construction.sock')
+        config=self.root/'controller-tabs.json'
+        config.write_text(json.dumps(dict(schema_version=1,workspaces=dict(work=dict(
+            kind='tmux',socket_path=self.socket,session_id='$0')))))
+        config.chmod(0o600)
+        def terminal_starts_after_qualification(*args,**kwargs):
+            # Delegate every qualification decision to the real owner. Only the
+            # external terminal-start event is scheduled at this startup boundary.
+            owner=controller_tabs_from_root(*args,**kwargs)
+            if not Path(self.socket).exists():
+                self.tmux('new-session','-d','-s','late','-n','later terminal','sleep 60')
+            return owner
+        with patch('codex_wake.controller_tabs.controller_tabs_from_root',
+                   side_effect=terminal_starts_after_qualification):
+            observer=TabObserver(self.root)
+        self.addCleanup(observer.close)
+        snapshot=observer.tick(deadline=time.monotonic()+2)
+        from codex_wake.tab_format_monitor import refresh_formatting
+        refresh_formatting(self.root,snapshot,tabs=observer.owner,deadline=time.monotonic()+2)
+        self.assertIn('SH',self.tmux('show-options','-w','-v','-t','@0','window-status-format'))
+        self.assertEqual(snapshot['resource_count'],1,snapshot['unavailable'])
+        self.assertEqual(snapshot['resources'][0]['target']['workspace'],'work')
+        self.assertEqual(self.tmux('display-message','-p','-t','@0','#{window_name}').strip(),'later terminal')
+
     def test_injected_owner_and_global_optout_do_not_start_background_discovery(self):
         from codex_wake.controller_tabs import controller_tabs_from_root, ControllerTabs
         factory=controller_tabs_from_root(self.root)

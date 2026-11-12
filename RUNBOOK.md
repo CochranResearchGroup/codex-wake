@@ -9098,6 +9098,66 @@ release prefixes retained; no wake-state rollback/deletion. SeePlan0219, curated
 deployment.json and private qualification/plan0219 receipts/initialfailures.
 Memoryforbidden under explicit-request rule; no write. HostedCIzero.
 
+## 2026-11-11 — Plan0220 retrospective made actionable
+
+Recorded six source-backed findings in docs/dev/evidence/plan0220/retrospective.md
+and verified creation/readback of GitHub #576–581; retro-actions.json retains actor,
+target, markers, timestamps and acceptance. Existing #442 summary tooling and
+preflight are reused rather than replaced. Current #572/#574 remain first in WIP;
+no product fix, final review, deployment or agent-memory write claimed.
+
+## Turn 412 | 2026-11-11 | Plan0220 continuation reanchored
+
+Operator resumed implement-spec for #572/#574, followed by exactly one broad
+Standards/Spec review and one bounded TDD findings pass. Integration866edc9a,
+nativebd519d5 and live tracker dependencies verified. Primary owns574;
+/root/native572 owns572 and exclusive isolated UID1017 runtime/clock custody.
+Original checkout dirty files preserved. Temporary QA root/u7 raw captures absent;
+retained Git summaries remain historical evidence. Durable package/procedure
+will rebuild isolated qualification; no deployment or paid CI. Review0/remediation0.
+Checkpoint: blocker_reduction; next actual extend/resume timeout diagnosis.
+
+## Turn 413 | 2026-11-11 | Plan0220 installed qualification complete
+
+Worker/root/native572 diagnosed nested allocation flock in actual installed CLI
+stacks; public real-lock regression RED then GREEN; fix integrated3a8659fc.
+Corrected wheel7a5c5e6c has323source/wheel/installed members equal. Nativebd519/
+1171unchanged. UI passed65.462s/3localhostPOSTs after real Leave paused modal
+handling; earlier fixture failures preserved.572closed/readbackverified.
+Primary574 exact1171 normal and startup-fail upgrade/rollback pass,5upgrade/
+6rollback clients, duplicate recovery reconciled, limits/history/handoffs retained.
+Final corrected-wheel delegated limit PASS13.447s; watcher-loss rawFAIL16.711s
+retained with independent exact owner-notice/task-start/provider disambiguation
+ACCEPTED offline, one guarded continuation, exact tools stopped, peer preserved.
+Clock original46d restored0600 by exact hash; proxy exited; fresh UID1017 census[]
+and Windows117selected processes/resource observation (no global absence claim).
+Python source checks and initial watcher-readiness flake recorded in qualification
+and runtime evidence. No hostedCI, real providers, production install or restart.
+One broad review and one bounded remediation remain; not merge/release approval.
+
+## Turn 414 | 2026-11-11 | Plan0220 review and exact v4 acceptance complete
+
+One broad Standards/Spec review frozen23b87803/bd519d5; twoStandards duplication
+smells backlogged, twoP2Spec presentation blockers accepted. One bounded TDD
+pass fixed authoritative remainingtokens and shared-limit/scope presentation in
+native15626ed7. Genuine renderingRED/GREEN retained; final6governortestsPASS
+369.102s. Private-helper compilefailure and exact-owned cancelled attempt retained.
+Complete packageca29 productionbuildPASS163.681s, all6membersverified.
+Actual v4UI PASS64.475s/3localhostPOST/0external; Sharedfields+limitingtask visible.
+Primary exactv4 normal and failed-start upgrade/rollback PASS,5upgrade/6rollback
+clients, counters/history/handoffs preserved, duplicate recovery reconciled.
+Exactv4 delegated limitPASS13.094s and watcher-loss rawPASS19.510s, exacttools
+stopped, peerpreserved, no hidden goal, ownedcensuses[]. No offline override forv4.
+Earlier v4setup clockgate42.146s and opaqueRPC35.261s remainUNKNOWN; bounded
+readiness/phase instrumentation retained. Setup flakiness tracked577, owner
+ecochran76/review2026-11-19; not an unflaky-lane claim. Source323+native6members
+still match. Originalclock46d restored0600; proxyexpired/exited; freshUID1017
+census[] and Windows70selected processes/resources observed. Originalcheckout
+dirty4paths preserved. Review1/remediation1, no broader rerun or hostedCI.
+Parent570 CLOSED03:06:26Z; children571–574 closed/readbackverified.
+Merge/release/deploy and576–581 remain separate. Memory dispositionforbidden
+under explicit-write-request boundary; machine non-write receipt retained outsideGit.
+
 ## Native active-tab service-context diagnosis | 2026-11-11
 
 [Plan0220](docs/dev/plans/0220-2026-11-11-native-active-tab-executable.md) owns the
@@ -9215,6 +9275,22 @@ rollback.py retained. Synthetic fixtures and task checkout cleanup follow durabl
 publication. Original dirty main and unrelated worktrees preserved. Memory
 forbidden under explicit-request boundary; no memory write.
 
+## Turn 415 | 2026-11-11 | Governor PR/deployment authorized
+
+Operator requested PR review merge deploy. Main advanced10commits to92c00a0d;
+integrated into governor branchcb84fd49 with both append-only document intents
+preserved, versiondev10. Existingstock0.167.1/2processes observed; no live modded
+daemon found in named-account registry. Stock stale-home observation preserved,
+not adopted or repaired. Freshcandidatewheelcfa6 has324source/wheel members.
+First101-test selection retained one late-socket6s timing failure; isolated
+diagnosticPASS0.456s. Fixture wait now matches existing12s autostart budget
+covering5sfallback+2sfeed attach; no product timer changed. Corrected101PASS
+Python3.12 53.780s and3.11 56.007s. Nativeca29 unchanged. UID1017 dev10UI
+PASS57.908s3localhost/0external; delegated acceptance pendingworker. Native
+manager/updater/codex_profiles bytes unchanged, qualified ca29upgrade/rollback
+receipts retained. No working mutation yet. Closed-world PR integration review
+reuses the completed broadreview1/remediation1 rather than restarting discovery.
+
 ## Turn | 2026-11-11 | P223 tmux server-crash incident
 
 Operator reported two whole-Byobu crashes. Kernel native SIGSEGV offsets map via
@@ -9247,3 +9323,7 @@ provider request or host reboot. See evidence/plan0223/deployment.json. Exact ol
 unit/manifest, package/launcher rollback and raw crash proofs remain private.
 Task-only QA/checkout cleanup follows verified publication. Memory forbidden by
 explicit-request boundary; no memory write.
+
+## Turn 416 | 2026-11-11 | Governor dev11 ready for authorized release
+
+Plan0224 preserves concurrent tmux incident Plan0223 and mainab56445a. Source965c6efe/wheel244180 plus nativef986f6ed/package4712 qualify on UID1017: installed84PASS; real public codex-modded UI71.480s under outer002 creates private077/600 children/history; upgrade/rollback85.840s; failed-start recovery/rollback75.766s; delegated limit14.166s and watcher loss17.167s rawPASS. Clock restored, ownedLinux empty, preexisting QPC/working counter preserved. Earlier alias/privacy/fixture-route and source-loss-readiness failures remain retained. Source145PASS both versions after retained initial3.11 TIMEOUT180; unresolved reliability risk belongs577/ec/review2026-11-19, no unflaky claim. Native endpoint canonicalization and three modded child umask boundaries preserve ownership guards, stock inheritance and existing files. Final review/merge/deployment follows operator direction; no working effects yet. Evidence: plan0224/integration.json.

@@ -24,14 +24,15 @@ class RetryTests(unittest.TestCase):
                 threading.Thread(target=server.serve_forever,daemon=True).start()
                 private_directory(root/'local-controller')
                 write(root/'local-controller'/'connection.json',dict(version=1,url='http://127.0.0.1:'+str(server.server_port),token='x'*43,uid=os.getuid(),pid=os.getpid(),process=process_identity(os.getpid())))
-                for command in (['prompt','owned','hello'],['create','--harness','grok','--profile','owned'],['load','grok:fixture','--harness','grok','--profile','owned']):
-                    for supplied in (['--idempotency-key=explicit-equals'],['--idempotency-key','explicit-space'],[]):
+                for command in (['prompt','owned','hello'],['create','--harness','grok','--profile','owned'],['load','grok:fixture','--harness','grok','--profile','owned'], ['governor','extend','thread:owned','--add-tokens','50']):
+                    flag = '--request-id' if command[0] == 'governor' else '--idempotency-key'
+                    for supplied in ([flag+'=explicit-equals'],[flag,'explicit-space'],[]):
                         with self.subTest(supplied=supplied):
                             with self.assertRaises(ValueError) as failed:
                                 remote(root,[*command,*supplied])
                             arguments=received[-1]['arguments']
-                            keys=[value.split('=',1)[1] for value in arguments if value.startswith('--idempotency-key=')]
-                            keys += [arguments[index+1] for index,value in enumerate(arguments) if value=='--idempotency-key']
+                            keys=[value.split('=',1)[1] for value in arguments if value.startswith(flag+'=')]
+                            keys += [arguments[index+1] for index,value in enumerate(arguments) if value==flag]
                             self.assertEqual(len(keys),1,arguments)
                             self.assertIn(keys[0],str(failed.exception))
                 server.shutdown()

@@ -1210,6 +1210,281 @@
           "additionalProperties": false
         },
         "readonly": false
+      },
+      "local.governor.status": {
+        "cli": [
+          "governor",
+          "status"
+        ],
+        "mcp_tool": "wake_governor_status",
+        "description": "Show task limits, consumption and actual enforcement readiness without activating work.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "local.governor.activate": {
+        "cli": [
+          "governor",
+          "activate"
+        ],
+        "mcp_tool": "wake_governor_activate",
+        "description": "Activate or tighten own-task time and token limits without per-session provisioning.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "token_limit": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "time_limit_seconds": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "token_limit",
+            "time_limit_seconds"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.governor.extend": {
+        "cli": [
+          "governor",
+          "extend"
+        ],
+        "mcp_tool": "wake_governor_extend",
+        "description": "Increase an existing allowance under qualified operator authority; retain usage.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "add_tokens": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "add_seconds": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "resume": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.governor.reset": {
+        "cli": [
+          "governor",
+          "reset"
+        ],
+        "mcp_tool": "wake_governor_reset",
+        "description": "Start a new authorized budget window, preserving lifetime accounting and stop history.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "token_limit": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "time_limit_seconds": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "resume": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.governor.disable": {
+        "cli": [
+          "governor",
+          "disable"
+        ],
+        "mcp_tool": "wake_governor_disable",
+        "description": "Disable this governor under qualified operator authority; resume only with --resume.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "resume": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.governor.resume": {
+        "cli": [
+          "governor",
+          "resume"
+        ],
+        "mcp_tool": "wake_governor_resume",
+        "description": "Resume the exact affected task only when its allowance and enforcement are qualified.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "local.governor.advisory": {
+        "cli": [
+          "governor",
+          "advisory"
+        ],
+        "mcp_tool": "wake_governor_advisory",
+        "description": "Explicitly select advisory operation under qualified operator authority.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "resume": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
       }
     },
     "local_only": [

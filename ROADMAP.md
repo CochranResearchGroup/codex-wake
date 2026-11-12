@@ -1577,6 +1577,16 @@ and passing installed correction remain explicit in qualification evidence.
 
 Stable tab management repair #563 / Plan0218: CLOSED. PR565 merged c9f220d8;0.22.0.dev6 deployed with freshSlate monitor. Ordering/physical grouping,transfer/undo/reconciliation and populated deletion now ignore display-metadata churn while retaining meaningful guards. Exact qualification and deployment: docs/dev/evidence/issue0563/. Native Windows qualification and saved-group cross-session policy remain separate.
 
+
+## P220 | Usable governor and native /wake
+CLOSED:#570 and tickets571–574. Plan0220 exact nativev4/Wake accepted in UID1017; one review and one bounded TDD pass complete. No merge/deployment.
+
+### Plan0220 retrospective follow-ups
+
+READY backlog: #576–581. [Findings and action index](docs/dev/evidence/plan0220/retrospective.md).
+Plan0220 implementation is complete; these remain separate follow-up hardening.
+Reuse existing preflight/summary tooling and preserve the no-paid-CI boundary.
+
 ## Native active-tab service-context repair
 
 CLOSED (local source diagnosis): [Plan0220](docs/dev/plans/0220-2026-11-11-native-active-tab-executable.md).
@@ -1607,3 +1617,11 @@ originals and disabled/paused custody. No host reboot or agent launch.
 CLOSED (PR587 merged; dev10 installed; automation remains off): [LOCAL-P223](docs/dev/plans/0223-2026-11-11-tmux-subscription-crash.md).
 Formatting/startup disabled and originals restored; remove the monitor's native
 wildcard subscriptions after reproducing whole-server loss on tmux3.4.
+
+## P224 | Governor release and working deployment
+
+OPEN: LOCAL-P224 follows completed#570. Operator requested PR review/merge/deploy.
+Integrate currentmain92c00a0d, preserve dev9tab/startup repairs, release dev11,
+qualify combined source, publish/mergePR then deploy exact merged Python/native
+bytes through supported selection. Existing stock processes stay independent.
+Plan0224 owns current execution and receipts.

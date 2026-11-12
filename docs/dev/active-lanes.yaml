@@ -1302,14 +1302,56 @@ lanes:
     updated_at: 2026-11-10
     disposition: PR551/553/556 merged; dev5 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
 
-  - id: P221
+  - id: P220-571
+    owner: ecochran76 / backend
+    objective: Usable governor ticket 571
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/571]
+    plan: docs/dev/plans/0220-2026-11-11-governor-experience.md
+    branch: feat/governor-backend-571
+    target: feat/governor-experience
+    plan_state: CLOSED
+    custody_state: ACTIVE
+    dependencies: []
+    overlaps: [P220]
+    updated_at: 2026-11-11
+    disposition: Delivered and qualified on integration branch; one review/one bounded remediation complete; retained worktree, no production deployment
+
+  - id: P220-572
+    owner: ecochran76 / native
+    objective: Usable governor ticket 572
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/572]
+    plan: docs/dev/plans/0220-2026-11-11-governor-experience.md
+    branch: feat/governor-native-572
+    target: feat/governor-experience
+    plan_state: CLOSED
+    custody_state: ACTIVE
+    dependencies: []
+    overlaps: [P220]
+    updated_at: 2026-11-11
+    disposition: Delivered and qualified on integration branch; one review/one bounded remediation complete; retained worktree, no production deployment
+
+  - id: P223
+    owner: ecochran76 / primary
+    objective: Governor PR integration and authorized working deployment
+    work_items: [LOCAL-P224, https://github.com/CochranResearchGroup/codex-wake/issues/570]
+    plan: docs/dev/plans/0224-2026-11-11-governor-release.md
+    branch: feat/governor-experience
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE
+    dependencies: []
+    overlaps: [P220]
+    updated_at: 2026-11-11
+    disposition: User authorized PR review merge deploy; preserve dev9 startup repairs and stock clients; qualify dev10 then deploy exact merged main
+
+- id: P221
     owner: primary / ecochran76
     objective: Explicit formatting enable after terminal server replacement
     work_items: [LOCAL-P221]
     plan: docs/dev/plans/0221-2026-11-11-tab-format-reboot.md
     branch: fix/tab-format-reboot
     target: origin/main
-    plan_state: CLOSED
+    plan_state: OPEN
     custody_state: INTEGRATED
     dependencies: []
     overlaps: [P210, P216]

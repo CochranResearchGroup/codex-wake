@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "state": "TRACKED_NOT_IMPLEMENTED",
+  "reviewed_interval": "Visible governor implementation/qualification exchange and retained artifacts; no full earlier session export reviewed",
+  "findings": [
+    {
+      "finding": 1,
+      "priority": "P1",
+      "number": 576,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/576",
+      "title": "Observe terminal governor results before acceptance cleanup",
+      "observed": "UIu6 waited12s while native CLI allowed15s; u7 waited20s and exposed an actual terminal timeout. Source: scripts/goal_limit_native_ux_acceptance.py:887, /tmp/p220u7/receipt.json.",
+      "scope": "Use one explicit deadline contract in the existing acceptance runner; preserve terminal CLI result and operation phase before cleanup. Keep diagnosis of the actual resume timeout under #572.",
+      "acceptance": [
+        "A deterministic check rejects observation deadlines shorter than command timeout plus a declared margin.",
+        "Existing runner proves a stalled operation yields a retained terminal timeout before cleanup; no automatic retry or duplicate continuation.",
+        "Local check records exact command/source; original u6/u7 failures remain unchanged."
+      ],
+      "dependencies": "None; coordinate edits with #572.",
+      "maintenance": "Low; small deadline contract and one existing-runner regression.",
+      "state": "OPEN",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "repository": "CochranResearchGroup/codex-wake",
+      "action": "create",
+      "idempotency_marker": "p220-retro-20261111-f1",
+      "readback_verified": true,
+      "timestamp": "2026-11-11T22:44:48.282965+00:00"
+    },
+    {
+      "finding": 2,
+      "priority": "P1",
+      "number": 577,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/577",
+      "title": "Preflight native governor qualification before starting a journey",
+      "observed": "Plan0220 UI setup required canonical account config, private umask, short sockets, paginated/V2 capabilities and authenticated clock corrections. Source: docs/dev/evidence/plan0220/qualification.json retained_setup_failures and UI01/u2/u3 receipts.",
+      "scope": "Extend existing qualification entry points and reuse scripts/validation_preflight.py where applicable. Verify effective prerequisites under the exact test UID and private cwd; do not build another framework or duplicate closed #353 host enforcement preflight.",
+      "acceptance": [
+        "Missing V2, stale clock configuration and overlong socket path each produce a precise prerequisite failure with zero model requests.",
+        "Preflight records exact package/source identities, effective config locators, permissions and capability results without credentials.",
+        "Valid preflight proceeds into the existing installed journey; cleanup remains scoped to owned resources."
+      ],
+      "dependencies": "None; serialize shared script edits with #572/#574.",
+      "maintenance": "Medium; native capability/config contracts evolve.",
+      "state": "OPEN",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "repository": "CochranResearchGroup/codex-wake",
+      "action": "create",
+      "idempotency_marker": "p220-retro-20261111-f2",
+      "readback_verified": true,
+      "timestamp": "2026-11-11T22:44:50.040586+00:00"
+    },
+    {
+      "finding": 3,
+      "priority": "P1",
+      "number": 578,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/578",
+      "title": "Require live process containment evidence for native cancellation changes",
+      "observed": "backend-watcher-loss-05 interrupted root/child turns but left two exact sleep processes live despite stopVerified=true. Fixed in native v2; raw red retained. Source: Plan0220 qualification.json delegated_containment_v1.",
+      "scope": "Wire the existing delegated native limit/watcher-loss acceptance into the applicable local changed-surface validation guidance/profile. Reuse current process identity assertions; do not create a parallel fixture framework.",
+      "acceptance": [
+        "Cancellation/process-admission changes select or explicitly require existing live-tool qualification; unrelated docs changes do not launch native work.",
+        "Existing root/late-child case proves exact live processes stop and an unrelated peer remains unchanged.",
+        "A retained pre-fix run or bounded regression demonstrates a false stop acknowledgement fails; final artifact/source and fresh census are recorded."
+      ],
+      "dependencies": "Final #574 exact-package evidence must be reconciled before declaring adoption complete.",
+      "maintenance": "Medium; real native gate is costly, so select it by affected surface.",
+      "state": "OPEN",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "repository": "CochranResearchGroup/codex-wake",
+      "action": "create",
+      "idempotency_marker": "p220-retro-20261111-f3",
+      "readback_verified": true,
+      "timestamp": "2026-11-11T22:44:52.934280+00:00"
+    },
+    {
+      "finding": 4,
+      "priority": "P1",
+      "number": 579,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/579",
+      "title": "Detect stale source and package identities in qualification summaries",
+      "observed": "Plan0220 qualification.json still names e18b/80c8 and pending v2 fields while final u7 receipt names1171 and a resume failure. Source: docs/dev/evidence/plan0220/qualification.json and /tmp/p220u7/receipt.json.",
+      "scope": "Derive or validate one compact current qualification index from immutable receipts. Keep old runs as history; ticket outcomes and run verdicts retain separate authority.",
+      "acceptance": [
+        "Current index identifies exact Python/native source and hashes, latest verdict, ticket gate and cleanup state.",
+        "A v2 summary linked to the retained v3 receipt fails identity consistency with a precise diagnostic.",
+        "Failure/unknown and offline adjudication remain explicit; incomplete evidence cannot produce PASS.",
+        "Current Plan0220 index is reconciled without rewriting raw receipts."
+      ],
+      "dependencies": "None; coordinate artifact ownership with #574.",
+      "maintenance": "Low to medium; explicit receipt schemas and cross-reference validation.",
+      "state": "OPEN",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "repository": "CochranResearchGroup/codex-wake",
+      "action": "create",
+      "idempotency_marker": "p220-retro-20261111-f4",
+      "readback_verified": true,
+      "timestamp": "2026-11-11T22:44:55.627842+00:00"
+    },
+    {
+      "finding": 5,
+      "priority": "P2",
+      "number": 580,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/580",
+      "title": "Count resumed work turns independently of owner notices",
+      "observed": "FinalV3 watcher-loss raw len(new_ids)==1 check included one genuine work turn and one exact owner-recorded engagement notice. Offline owner-record reconciliation qualified one continuation while preserving raw FAILED_PACKET. Source: backend-watcher-loss-v3-01/retained-notice-disambiguation.json.",
+      "scope": "Correct the existing public continuation acceptance assertion using operation started_turn_id and provider metadata; subtract notices only through exact authoritative owner records, never prefix heuristics.",
+      "acceptance": [
+        "Replay retained notice plus one real work turn: pass with exact operation/provider identity.",
+        "Add a second real work turn: fail; unknown transcript entries remain explicit rather than silently excluded.",
+        "Original raw failure and separate adjudication remain preserved and linked."
+      ],
+      "dependencies": "None; serialize backend acceptance script edits with existing lane.",
+      "maintenance": "Low; typed distinction at existing assertion seam.",
+      "state": "OPEN",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "repository": "CochranResearchGroup/codex-wake",
+      "action": "create",
+      "idempotency_marker": "p220-retro-20261111-f5",
+      "readback_verified": true,
+      "timestamp": "2026-11-11T22:44:58.479399+00:00"
+    },
+    {
+      "finding": 6,
+      "priority": "P2",
+      "number": 581,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/581",
+      "title": "Use bounded receipt summaries for native qualification evidence",
+      "observed": "This retrospective printed the complete u7 receipt, including hundreds of source hashes, and truncated useful output. Existing scripts/summarize_receipt.py from closed #442 already handles validation/cleanup schemas, but not the native journey receipt.",
+      "scope": "Adopt the existing summary command and add the smallest explicitly typed native-qualification adapter needed. Update existing developer navigation; no second summary CLI and no global AGENTS expansion.",
+      "acceptance": [
+        "Native summary shows verdict, exact source/package identities, elapsed time, failed stage and cleanup census with raw locator.",
+        "Default output remains <=8192 UTF-8 bytes and reports omissions; malformed/unsupported input fails explicitly.",
+        "Existing validation/cleanup adapters remain compatible; original receipt bytes remain unchanged.",
+        "A large u7-shaped receipt retains decisive failure fields without captured logs, private transcript or environment dumps."
+      ],
+      "dependencies": "None; related #439/#442 remain unchanged.",
+      "maintenance": "Low; reuse existing bounded summary and focused public tests.",
+      "state": "OPEN",
+      "actor": "ecochran76",
+      "host": "github.com",
+      "repository": "CochranResearchGroup/codex-wake",
+      "action": "create",
+      "idempotency_marker": "p220-retro-20261111-f6",
+      "readback_verified": true,
+      "timestamp": "2026-11-11T22:45:00.082560+00:00"
+    }
+  ]
+}

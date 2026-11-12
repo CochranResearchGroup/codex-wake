@@ -87,8 +87,8 @@ def _delegated_grant(policy,thread,allocation_id,root):
     if selected in allocations:
         return dict(allocations[selected],allocation_id=selected,host_delegated=True)
     if template is None:raise ValueError('select an existing host objective allocation')
-    fields={'app_server','codex_path','codex_home','max_tokens','max_seconds','rpc_timeout'}
-    if not isinstance(template,dict) or set(template)-fields or not fields-{'rpc_timeout'}<=set(template):
+    fields={'app_server','codex_path','codex_home','max_tokens','max_seconds','rpc_timeout','requires_enforcement'}
+    if not isinstance(template,dict) or set(template)-fields or not fields-{'rpc_timeout','requires_enforcement'}<=set(template):
         raise ValueError('host self-enrollment envelope is invalid')
     own='native-'+thread
     selected=selected or own
@@ -180,7 +180,7 @@ def _public(receipt):
     from .goal_time import public_time
     receipt.update(public_time(receipt))
     return dict({key:value for key,value in receipt.items() if key not in ('grant','policy_path','prior_allocation')},
-        stop_scope='registered_goal_campaign',descendant_stop_verified=False)
+        stop_scope='qualified_task_tree' if receipt.get('descendant_stop_verified') else 'registered_goal_campaign',descendant_stop_verified=receipt.get('descendant_stop_verified',False))
 
 
 def _request(grant,method,params):
@@ -253,7 +253,7 @@ def _save_request_accounting(path, receipt):
 
 def _allocation_admit(directory,receipt,old,*,commit=True):
     renewal=bool(old and old['allocation_id']!=receipt['allocation_id'])
-    anchor=None
+    anchor=receipt.get('reset_anchor')
     if renewal:
         if receipt['grant'].get('renews_allocation')!=old['allocation_id']:
             raise ValueError('changing allocation requires explicit host renewal of the prior allocation')
@@ -269,7 +269,7 @@ def _allocation_admit(directory,receipt,old,*,commit=True):
             _private(path);allocation=json.loads(path.read_text())
             if allocation.get('pending_recovery'):raise ValueError('allocation recovery is pending reconciliation')
             if allocation['grant']!=receipt['grant']:raise ValueError('host allocation changed; explicit renewal required')
-            if (receipt['token_limit']>allocation['token_limit'] or
+            if not receipt.get('task_window') and (receipt['token_limit']>allocation['token_limit'] or
                     receipt['time_limit_seconds']>allocation['time_limit_seconds']):
                 raise ValueError('same allocation may only tighten limits')
             if receipt['token_accounting']!=allocation['token_accounting']:
@@ -298,27 +298,42 @@ def _allocation_admit(directory,receipt,old,*,commit=True):
                 # otherwise spending between renewal and enrollment disappears.
                 members[root_thread]=dict(goal_created_at=created,reset_anchor=initial_anchor)
             allocation=dict(version=1,allocation_id=receipt['allocation_id'],grant=receipt['grant'],
-                token_limit=receipt['token_limit'],time_limit_seconds=receipt['time_limit_seconds'],
+                token_limit=receipt['grant']['max_tokens'] if receipt.get('task_window') else receipt['token_limit'],
+                time_limit_seconds=receipt['grant']['max_seconds'] if receipt.get('task_window') else receipt['time_limit_seconds'],
                 token_accounting=receipt['token_accounting'],time_origin=origin,
-                deadline=origin+receipt['time_limit_seconds'],members=members,charges={},used_tokens=0,stop_latched=False,boot_id=boot_id_value())
+                deadline=origin+(receipt['grant']['max_seconds'] if receipt.get('task_window') else receipt['time_limit_seconds']),members=members,charges={},used_tokens=0,stop_latched=False,boot_id=boot_id_value())
         from .goal_time import relative, FIELDS, merge_allocation
         if not allocation['members'] and relative(receipt) and 'time_basis' not in allocation:
             allocation.update({key:receipt[key] for key in FIELDS})
         merge_allocation(receipt,allocation)
         if receipt['thread_id'] not in allocation['members'] and len(allocation['members'])>=32:
             raise ValueError('allocation member limit reached')
-        allocation['token_limit']=min(receipt['token_limit'],allocation['token_limit'])
-        allocation['time_limit_seconds']=min(receipt['time_limit_seconds'],allocation['time_limit_seconds'])
+        if not receipt.get('task_window'):
+            allocation['token_limit']=min(receipt['token_limit'],allocation['token_limit'])
+            allocation['time_limit_seconds']=min(receipt['time_limit_seconds'],allocation['time_limit_seconds'])
         allocation['deadline']=min(allocation['deadline'],allocation['time_origin']+allocation['time_limit_seconds'])
         allocation['members'].setdefault(receipt['thread_id'],dict(goal_created_at=receipt['goal_created_at'],reset_anchor=anchor,
-            **{key:receipt[key] for key in ('usage_thread_id','usage_goal_created_at','usage_reset_anchor','session_scope') if key in receipt}))
+            **{key:receipt[key] for key in ('usage_thread_id','usage_goal_created_at','usage_reset_anchor','session_scope','lifetime_tokens_before_window','activation_baseline','task_window','task_owner_thread_id') if key in receipt}))
         member=allocation['members'][receipt['thread_id']]
+        task_owner=member.get('task_owner_thread_id',receipt['thread_id'])
+        if task_owner!=receipt['thread_id'] and allocation['members'].get(task_owner,{}).get('task_window'):
+            task=allocation['members'][task_owner]['task_window']
+            task['token_limit']=min(task['token_limit'],receipt['token_limit'])
+            task['time_limit_seconds']=min(task['time_limit_seconds'],receipt['time_limit_seconds'])
+            task['deadline']=min(task['deadline'],task['time_origin']+task['time_limit_seconds'])
+            receipt['task_window']=task
+        for key in ('lifetime_tokens_before_window','activation_baseline'):
+            if key in member:receipt[key]=member[key]
+        if member.get('activation_baseline'):receipt['reset_anchor']=member.get('reset_anchor')
+        if receipt.get('task_window') and old:
+            member['task_window']=receipt['task_window']
+        if member.get('task_window'):receipt['task_window']=member['task_window']
         if renewal and member.get('reset_anchor')!=anchor:
             raise ValueError('renewal boundary changed; reconcile the persisted target allocation before continuing')
         receipt.update(goal_created_at=member['goal_created_at'],time_origin=allocation['time_origin'],
             deadline=allocation['deadline'],token_limit=allocation['token_limit'],
             time_limit_seconds=allocation['time_limit_seconds'],allocation_path=str(path),
-            used_tokens=allocation['used_tokens'])
+            used_tokens=old.get('used_tokens',0) if receipt.get('task_window') and old else 0 if receipt.get('task_window') else allocation['used_tokens'])
         if allocation.get('boot_id')!=boot_id_value():allocation['stop_latched']=True
         if allocation['stop_latched']:
             receipt['stop_latched']=True
@@ -364,6 +379,9 @@ def _allocation_admit(directory,receipt,old,*,commit=True):
 
 
 def _usage(receipt):
+    if receipt.get('advisory_without_window'):
+        from .goal_usage import observe_session_usage
+        return observe_session_usage(receipt['grant']['codex_home'],receipt['thread_id'])
     if receipt.get('request_accounting'):
         from .objective_ledger import ObjectiveLedger
         from .lifecycle_budget import trusted_upper
@@ -379,7 +397,7 @@ def _usage(receipt):
             session_scope=receipt.get('session_scope',False))
     path=Path(receipt['allocation_path']);_private(path)
     with _lock(path.parent,path.stem):
-        allocation=json.loads(path.read_text());charges={}
+        allocation=json.loads(path.read_text());charges={};qualified_threads=set()
         if 'finalized_charges' in allocation['members'][receipt['thread_id']]:
             return dict(state='unknown',used_tokens=None,reason='member_renewal_pending')
         for thread,member in allocation['members'].items():
@@ -396,6 +414,7 @@ def _usage(receipt):
             if observation['state']!='qualified':
                 return dict(state='unknown',used_tokens=None,reason='allocation_member_accounting_unknown',
                     member_thread_id=thread,member_reason=observation.get('reason'))
+            qualified_threads.update(observation.get('thread_ids', [thread]))
             for key,value in observation['charges'].items():
                 if key in charges and charges[key]!=value:
                     return dict(state='unknown',used_tokens=None,reason='allocation_response_conflict')
@@ -407,7 +426,20 @@ def _usage(receipt):
         from .goal_time import merge_allocation
         merge_allocation(receipt,allocation)
         _save(path,allocation)
-        receipt.update(token_limit=allocation['token_limit'],deadline=allocation['deadline'])
+        task_observation=None
+        task_owner=allocation['members'][receipt['thread_id']].get('task_owner_thread_id',receipt['thread_id'])
+        if allocation['members'].get(task_owner,{}).get('task_window'):
+            task=allocation['members'][task_owner]['task_window']
+            task_observation=observe_usage(receipt['grant']['codex_home'],task.get('thread_id',task_owner),task['goal_created_at'],
+                reset_anchor=task['reset_anchor'],token_accounting=allocation['token_accounting'],session_scope=True)
+            if task_observation.get('state')!='qualified':return task_observation
+            receipt.update(task_window=task,shared_limits=dict(token_limit=allocation['token_limit'],
+                deadline=allocation['deadline'],used_tokens=used,time_limit_seconds=allocation['time_limit_seconds']),
+                token_limit=task['token_limit'],deadline=task['deadline'],time_origin=task['time_origin'],
+                time_limit_seconds=task['time_limit_seconds'],lifetime_tokens_before_window=task['lifetime_tokens_before_window'])
+            receipt['limiting_scope']='shared' if used>=allocation['token_limit'] else 'task'
+        else:
+            receipt.update(token_limit=allocation['token_limit'],deadline=allocation['deadline'])
         if allocation.get('first_stop'):
             key='first_stop' if allocation['first_stop'].get('receipt_generation')==receipt['generation'] else 'allocation_first_stop'
             receipt.setdefault(key,allocation['first_stop'])
@@ -419,9 +451,11 @@ def _usage(receipt):
             receipt['active_stop_id']=allocation['pending_recovery'].get('stop_episode_id')
         if 'winddown_deadline' in allocation:
             receipt['allocation_winddown_deadline']=allocation['winddown_deadline']
+        if task_observation is not None:
+            return dict(task_observation,shared_used_tokens=used,member_thread_ids=sorted(allocation['members']))
         return dict(state='qualified',used_tokens=used,token_accounting=allocation['token_accounting'],
             renewed_out_tokens=sum(value['tokens'] for value in allocation.get('renewed_out_charges',{}).values()),
-            member_thread_ids=sorted(allocation['members']),sampled=True,reason=None)
+            member_thread_ids=sorted(allocation['members']),thread_ids=sorted(qualified_threads),sampled=True,reason=None)
 
 
 def _accounting_decreased(receipt,observation):
@@ -564,7 +598,7 @@ def diagnose(root,policy_path,caller_thread_id,allocation_id=None,*,permission_p
 
 def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
            checkpoint_token_percent=5,checkpoint_seconds=60,token_accounting=None,
-           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None,session_scope=False,prepare_only=False):
+           allocation_id=None,native_context=None,permission_principal=None,task_id=None,operation_id=None,session_scope=False,prepare_only=False,activation_baseline=False,requires_native_guard=False,replace_advisory=False):
     from .permission_enforcement import principal_for,authorize,enrollment_action
     principal=principal_for(root,caller_thread_id,native_context=native_context,principal=permission_principal)
     name=_name(caller_thread_id);grant=_grant(policy_path,caller_thread_id,allocation_id,root)
@@ -575,13 +609,27 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         raise ValueError('invalid checkpoint token reserve')
     if type(checkpoint_seconds) not in (int,float) or not math.isfinite(checkpoint_seconds) or checkpoint_seconds<0:raise ValueError('invalid checkpoint time reserve')
     directory=_directory(root);path=directory/(name+'.json')
+    if not path.exists() and not replace_advisory:
+        from .goal_governance import control_path,control_snapshot
+        if control_path(root,caller_thread_id).exists():return control_snapshot(root,caller_thread_id)
+        if session_scope:
+            native_control=_request(grant,'thread/read',dict(threadId=caller_thread_id,includeTurns=False))['thread']
+            parent=native_control.get('parentThreadId')
+            if not parent:
+                from .goal_usage import observe_session_usage
+                parent=observe_session_usage(grant['codex_home'],caller_thread_id).get('parent_thread_id')
+            if parent and control_path(root,parent).exists() and not (directory/(_name(parent)+'.json')).exists():
+                inherited=control_snapshot(root,parent)
+                return dict(inherited,thread_id=caller_thread_id,control_inherited_from=parent,
+                    reason='inherited_operator_'+inherited.get('governor_mode','disabled'),used_tokens=None,lifetime_used_tokens=None,
+                    last_verified_usage={},accounting=dict(state='unknown',reason='inherited_inactive_control'))
     # Configured service repair is a distinct common-policy action. Never undo a
     # mask or infer authority from enrollment permission alone.
     from .goal_governance import sync
     if path.exists():
         with _lock(directory,name):
             _private(path);retained=json.loads(path.read_text())
-            if sync(retained):return _public(retained)
+            if sync(retained) and not (replace_advisory and retained.get('advisory_without_window')):return _public(retained)
     watcher_setup=None
     if not session_scope and principal and not _heartbeat(directory).get('fresh'):
         from .session_permissions import PermissionStore
@@ -595,6 +643,8 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         admission_guard(directory)
         old=None
         if path.exists():_private(path);old=json.loads(path.read_text())
+        prior_advisory=old if old and old.get('advisory_without_window') and replace_advisory else None
+        if prior_advisory:old=None
         if old:
             if sync(old):return _public(old)
             from .goal_renewal import renewal_hold
@@ -639,7 +689,7 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             _private(allocation_path);retained_allocation=json.loads(allocation_path.read_text())
             if (retained_allocation.get('allocation_id')!=grant['allocation_id']
                     or retained_allocation.get('grant')!=grant
-                    or caller_thread_id not in retained_allocation.get('members',{})):
+                    or caller_thread_id not in retained_allocation.get('members',{}) and not activation_baseline):
                 raise ValueError('qualified existing allocation clock required')
             clock_previous=retained_allocation
         from .goal_time import admit, relative
@@ -662,9 +712,11 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         receipt=dict(old) if same else dict(thread_id=caller_thread_id,generation=uuid4().hex,
             allocation_id=grant['allocation_id'],goal_created_at=created,used_tokens=0,
             started_upper=now,started_boottime=boottime,boot_id=boot_id_value(),
-            time_origin=now if old or created is None or allow_counter else created,effects={},checkpoint=None,
+            time_origin=now if old or created is None or allow_counter or activation_baseline else created,effects={},checkpoint=None,
             prior_allocation=old if old else None)
         receipt.update(time_fields)
+        if prior_advisory:receipt['prior_advisory_control']=prior_advisory
+        if requires_native_guard:receipt['requires_native_guard']=True
         if session_scope and not old:
             receipt['session_scope']=True
         receipt.update(caller_binding=binding,grant=grant,policy_path=str(Path(policy_path).absolute()),token_limit=token_limit,
@@ -680,6 +732,14 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             receipt['enrollment_revision']=old.get('enrollment_revision',0)+1 if same else 1
             receipt.pop('poll_ack',None)
         else:receipt.setdefault('enrollment_revision',1)
+        prior_guard=(old or {}).get('native_guard',{})
+        guard_stale=(prior_guard.get('status') in ('expired','lost','released') or
+            prior_guard.get('status')=='armed' and
+            (prior_guard.get('controller_generation')!=controller.get('generation') or
+             time.clock_gettime(time.CLOCK_BOOTTIME)-prior_guard.get('ack_boottime',-1e30)>=prior_guard.get('ttl_ms',0)/1000))
+        if old and requires_native_guard and guard_stale:
+            receipt['enrollment_revision']+=1
+            receipt.pop('poll_ack',None)
         if grant.get('auto_enrolled') and grant['allocation_id']=='native-'+caller_thread_id and not old:
             from .goal_usage import observe_usage
             native=_request(grant,'thread/read',dict(threadId=caller_thread_id,includeTurns=False))['thread']
@@ -704,11 +764,16 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                     usage_created=predecessor.get('usage_goal_created_at',predecessor['goal_created_at'])
                     usage_anchor=predecessor.get('usage_reset_anchor',predecessor.get('reset_anchor'))
                     original=observe_usage(grant['codex_home'],usage_thread,usage_created,
-                        reset_anchor=usage_anchor,token_accounting=predecessor['token_accounting'])
+                        reset_anchor=usage_anchor,token_accounting=predecessor['token_accounting'],
+                        session_scope=predecessor.get('session_scope',False))
                     if original.get('state')!='qualified' or caller_thread_id not in original.get('thread_ids',[]):
                         raise AccountingUnavailable('successor requires qualified original objective lineage',original)
                     receipt.update(usage_thread_id=usage_thread,usage_goal_created_at=usage_created,
                         usage_reset_anchor=usage_anchor)
+                if predecessor.get('requires_native_guard'):receipt['requires_native_guard']=True
+                if predecessor.get('task_window'):
+                    receipt.update(task_window=predecessor['task_window'],
+                        task_owner_thread_id=predecessor.get('task_owner_thread_id',parent))
                 inherited=_grant(policy_path,caller_thread_id,predecessor['allocation_id'],root)
                 if any(inherited[key]!=grant[key] for key in ('app_server','codex_home','codex_path')):
                     raise ValueError('cross-native successor allocation is unsupported')
@@ -721,14 +786,36 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
                     receipt['token_accounting']=basis
                 receipt.update(grant=grant,allocation_id=grant['allocation_id'],
                     continuation_source_thread_id=parent)
+        # A new ordinary window excludes qualified pre-activation charges while
+        # retaining lifetime evidence. Existing allocations/continuations keep
+        # their original owner boundary; activation cannot renew shared limits.
+        if activation_baseline and not old and not receipt.get('continuation_source_thread_id') and not allocation_path.exists():
+            if not session_scope or not fresh_usage or fresh_usage.get('state')!='qualified':
+                raise ValueError('activation baseline requires qualified session accounting')
+            receipt.update(goal_created_at=fresh_usage['anchor']['goal_created_at'],reset_anchor=fresh_usage['anchor'],
+                lifetime_tokens_before_window=fresh_usage['used_tokens'],
+                activation_baseline=True)
+        if activation_baseline and grant.get('host_delegated') and not old and not receipt.get('continuation_source_thread_id'):
+            receipt['activation_baseline']=True
+            receipt['task_window']=dict(thread_id=caller_thread_id,token_limit=token_limit,time_limit_seconds=time_limit_seconds,
+                time_origin=now,deadline=now+time_limit_seconds,reset_anchor=fresh_usage['anchor'],
+                goal_created_at=fresh_usage['anchor']['goal_created_at'],session_scope=True,
+                lifetime_tokens_before_window=fresh_usage['used_tokens'],generation=receipt['generation'],revision=1)
+        elif old and old.get('task_window'):
+            receipt['task_window']=dict(old['task_window'],token_limit=token_limit,
+                time_limit_seconds=time_limit_seconds,deadline=old['task_window']['time_origin']+time_limit_seconds)
         if grant.get('host_delegated'):_allocation_admit(directory,receipt,old,commit=not prepare_only)
+        if receipt.get('task_window'):
+            receipt.update({key:receipt['task_window'][key] for key in ('token_limit','deadline','time_limit_seconds','time_origin','lifetime_tokens_before_window')})
         retained_allocation=not receipt.get('allocation_path') or Path(receipt['allocation_path']).exists()
         if retained_allocation and sync(receipt):
             if not prepare_only:
                 _record_supervision_notice(path,receipt,'deactivation')
                 _save(path,receipt)
             return _public(receipt)
-        observation=fresh_usage if prepare_only and not retained_allocation else _usage(receipt)
+        observation=fresh_usage if prepare_only and (not retained_allocation or session_scope and not old) else _usage(receipt)
+        if prepare_only and receipt.get('activation_baseline') and not old:
+            observation=dict(observation,used_tokens=0,charges={})
         # Enrollment is not admitted until the first complete observation is
         # qualified. A transient setup scan must not publish a stop receipt that
         # only a resource renewal could clear. Existing campaigns still fail
@@ -760,13 +847,19 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             if not basis_changed and _accounting_decreased(receipt,observation):
                 receipt['accounting']=observation;hold('accounting_decreased')
             else:
-                receipt.update(used_tokens=observation['used_tokens'],accounting=observation,state='armed',reason=None)
+                receipt.update(used_tokens=observation['used_tokens'],accounting=observation,state='armed',reason=None,
+                    qualified_task_members=observation.get('thread_ids',[caller_thread_id]))
+                receipt['last_verified_usage']=dict(generation=receipt['generation'],used_tokens=receipt['used_tokens'],
+                    lifetime_used_tokens=receipt.get('lifetime_tokens_before_window',0)+receipt['used_tokens'],elapsed_seconds=max(0,now-receipt['time_origin']))
         else:
             receipt['accounting']=observation;hold('accounting_unknown')
         controller=_heartbeat(directory);receipt['controller_generation']=controller.get('generation')
         if not controller['fresh']:receipt.update(state='held',reason='controller_unavailable')
-        if receipt.get('used_tokens',0)>=token_limit or now>=receipt['deadline']:
+        shared=receipt.get('shared_limits')
+        if shared and (shared['used_tokens']>=shared['token_limit'] or now>=shared['deadline']):
             hold('allocation_exhausted')
+        elif receipt.get('used_tokens',0)>=token_limit or now>=receipt['deadline']:
+            hold('task_exhausted' if receipt.get('task_window') else 'allocation_exhausted')
         if receipt.get('stop_latched') or (same and old['state'] in ('stopped','stop_unverified')):
             hold('continuation_held')
         if receipt['boot_id']!=boot_id_value():
@@ -780,15 +873,24 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             hold('native_goal_state_unknown')
         _record_supervision_notice(path,receipt,'activation',controller)
         _save(path,receipt)
+        if receipt.get('requires_native_guard'):
+            from .goal_native_guard import arm
+            exhausted=receipt.get('first_stop',{}).get('reason') in ('allocation_exhausted','task_exhausted','continuation_held')
+            if not receipt.get('stop_latched') or exhausted:
+                guarded=arm(path,receipt,force=True,stop=bool(receipt.get('stop_latched')))
+            else:guarded=False
+            if not guarded:
+                receipt.update(state='held',reason=receipt.get('native_guard',{}).get('reason','native_guard_unavailable'))
+                _save(path,receipt)
         from .goal_readiness import engagement
         from .goal_notices import governor_status
         return dict(_public(receipt),controller=controller,sampled=True,maximum_token_overshoot=None,
             governor=governor_status(root,receipt),engagement=engagement(receipt,controller))
 
 
-def _effect(path,receipt,key,method,params):
+def _effect(path,receipt,key,method,params,*,locked_allocation=None):
     from .goal_governance import sync
-    if sync(receipt):return False
+    if sync(receipt,locked_allocation=locked_allocation):return False
     if method=='turn/steer':
         from .permission_enforcement import controller_permission
         permission=controller_permission(path.parent.parent,receipt)
@@ -812,6 +914,7 @@ def _effect(path,receipt,key,method,params):
 
 def _allocation_latch(receipt,reason,deadline=None):
     if not receipt.get('allocation_path'):return deadline
+    if reason=='task_exhausted' or reason=='continuation_held' and receipt.get('first_stop',{}).get('reason')=='task_exhausted':return deadline
     path=Path(receipt['allocation_path']);_private(path)
     with _lock(path.parent,path.stem):
         allocation=json.loads(path.read_text())
@@ -915,6 +1018,15 @@ def _stop(path,receipt,reason,goal=None,active=None):
     _stop_episode(path,receipt,reason)
     _first_stop(path,receipt,reason)
     receipt.update(reason=reason,state='stop_unverified',stop_latched=True)
+    if receipt.get('requires_native_guard'):
+        # The native owner retains actual goal identity and automatic-turn
+        # attribution. Never recapture a later operator reply from this session.
+        from .goal_native_guard import expire
+        _allocation_latch(receipt,reason)
+        expire(path,receipt,reason)
+        _record_supervision_notice(path,receipt,'stop')
+        _save(path,receipt)
+        return receipt
     _allocation_latch(receipt,reason)
     try:
         if active is None:goal,active=_native(receipt['grant'],receipt['thread_id'])
@@ -949,10 +1061,51 @@ def _stop(path,receipt,reason,goal=None,active=None):
         receipt.update(state='stopped' if proven else 'stop_unverified',stop_proof=proven,
             pause_observed=not final_goal or final_goal.get('status')=='paused')
     except Exception as exc:receipt['control_error']=type(exc).__name__
+    descendants = _stop_descendants(path, receipt)
+    receipt['descendant_stop_verified'] = descendants
+    if not descendants and receipt.get('qualified_task_members'):
+        receipt.update(state='stop_unverified',stop_proof=False)
     _record_supervision_notice(path,receipt,'stop')
     _save(path,receipt)
     return receipt
 
+
+
+def _stop_descendants(path, receipt):
+    """Stop only the original-history qualified tree, journaling exact turns.
+
+    Later operator replies are outside captured campaign work. Unknown lineage
+    cannot be substituted with a process kill or an unrelated loaded session.
+    """
+    members = receipt.get('qualified_task_members')
+    if not isinstance(members, list) or receipt['thread_id'] not in members:
+        return False
+    verified = True
+    for member in members:
+        if member == receipt['thread_id']:
+            continue
+        try:
+            _name(member)
+            goal, active = _native(receipt['grant'], member)
+            stop = receipt.setdefault('descendant_stops', {}).setdefault(member,
+                dict(turns=list(active), goal_created_at=goal.get('createdAt') if goal else None))
+            _save(path, receipt)
+            if (goal.get('createdAt') if goal else None) != stop['goal_created_at']:
+                raise ValueError('descendant native goal changed; preserve the captured scope')
+            if goal and goal.get('status') != 'paused':
+                _effect(path, receipt, 'descendant-pause:'+member, 'thread/goal/set',
+                    dict(threadId=member,status='paused',origin='automatic'))
+            for turn in set(active).intersection(stop['turns']):
+                _effect(path, receipt, 'descendant-interrupt:'+member+':'+turn, 'turn/interrupt',
+                    dict(threadId=member,turnId=turn))
+            observed, running = _native(receipt['grant'], member)
+            stop['verified'] = ((not observed or observed.get('status') == 'paused')
+                and not set(running).intersection(stop['turns']))
+            verified = verified and stop['verified']
+        except Exception as error:
+            receipt.setdefault('descendant_stop_errors', {})[member] = type(error).__name__
+            verified = False
+    return verified
 
 def _wind_down(path, receipt, reason, goal, active, upper):
     """Pause autonomous continuation, allow a bounded checkpoint, then stop work.
@@ -960,6 +1113,7 @@ def _wind_down(path, receipt, reason, goal, active, upper):
     Qualification loss cannot authorize more product work. The reserve permits
     only winddown, never extends the original deadline, and survives retries.
     """
+    if receipt.get('requires_native_guard'):return _stop(path,receipt,reason,goal,active)
     if 'winddown_deadline' not in receipt:
         _first_stop(path,receipt,reason)
         deadline=min(receipt['deadline'],upper+min(60,receipt['checkpoint_seconds']))
@@ -1006,11 +1160,23 @@ def poll(root):
             try:
                 from .goal_governance import sync
                 if sync(receipt):
+                    if receipt.get('governor_mode')=='advisory':
+                        observation=_usage(receipt);receipt['accounting']=observation
+                        if observation.get('state')=='qualified':
+                            if receipt.get('advisory_without_window'):receipt['lifetime_used_tokens']=observation['used_tokens']
+                            elif not _accounting_decreased(receipt,observation):receipt['used_tokens']=observation['used_tokens']
+                        _save(path,receipt)
                     results.append(dict(receipt,state='inactive'));continue
                 from .goal_renewal import renewal_hold
                 pending=renewal_hold(root,receipt)
                 if pending:
                     results.append(dict(receipt,**pending));continue
+                if receipt.get('requires_native_guard') and receipt.get('native_guard',{}).get('lease_id'):
+                    from .goal_native_guard import qualified, matches, reconcile_expiry
+                    guard=receipt['native_guard']
+                    if matches(receipt) and (guard.get('status') in ('lost','expired') or guard.get('status')=='armed' and not qualified(receipt)):
+                        reconcile_expiry(path,receipt)
+                        results.append(receipt);continue
                 from .permission_enforcement import controller_permission
                 permission=controller_permission(root,receipt)
                 receipt['enforcement_continuation_permission']=permission
@@ -1023,6 +1189,7 @@ def poll(root):
                 try:
                     upper=time_upper(receipt)
                 except GoalTimeUnavailable as error:
+                    receipt['clock_failure']=error.code
                     results.append(_stop(path,receipt,error.code));continue
                 goal,active=_native(grant,receipt['thread_id'])
                 receipt['native_goal_status']=goal.get('status') if goal else None
@@ -1035,16 +1202,33 @@ def poll(root):
                 receipt['accounting']=observation
                 if invalid:
                     results.append(_wind_down(path,receipt,'accounting_unknown',goal,active,upper));continue
+                receipt['qualified_task_members']=observation.get('thread_ids',[receipt['thread_id']])
                 receipt['used_tokens']=used;receipt['observed_boottime']=time.clock_gettime(time.CLOCK_BOOTTIME)
-                if used>=receipt['token_limit'] or upper>=receipt['deadline']:
+                receipt['last_verified_usage']=dict(generation=receipt['generation'],used_tokens=used,
+                    lifetime_used_tokens=receipt.get('lifetime_tokens_before_window',0)+used,elapsed_seconds=max(0,upper-receipt['time_origin']))
+                shared=receipt.get('shared_limits')
+                if shared and (shared['used_tokens']>=shared['token_limit'] or upper>=shared['deadline']):
+                    receipt['limiting_scope']='shared'
                     results.append(_stop(path,receipt,'allocation_exhausted',goal,active));continue
-                if receipt.get('stop_latched') or receipt.get('state') in ('stopped','stop_unverified'):
+                task_disabled=receipt.get('task_governor_enabled') is False
+                if not task_disabled and (used>=receipt['token_limit'] or upper>=receipt['deadline']):
+                    receipt['limiting_scope']='task'
+                    results.append(_stop(path,receipt,'task_exhausted' if receipt.get('task_window') else 'allocation_exhausted',goal,active));continue
+                if (receipt.get('stop_latched') or receipt.get('state') in ('stopped','stop_unverified')) and not (task_disabled and receipt.get('first_stop',{}).get('reason')=='task_exhausted'):
                     results.append(_stop(path,receipt,receipt.get('reason','continuation_held'),goal,active));continue
                 if permission['permission'] not in ('allow','legacy'):
                     receipt.update(state='held',reason='permission_revoked',campaign_continuation='held')
                     _save(path,receipt);results.append(receipt);continue
                 receipt.pop('campaign_continuation',None)
-                checkpoint=(receipt['token_limit']-used<=receipt['token_limit']*receipt['checkpoint_token_percent']/100
+                if receipt.get('requires_native_guard'):
+                    from .goal_native_guard import arm
+                    if not arm(path,receipt):
+                        receipt.update(state='held',reason=receipt.get('native_guard',{}).get('reason','native_guard_unavailable'))
+                        _save(path,receipt);results.append(receipt);continue
+                if receipt.get('requires_native_guard'):
+                    captured=next((item['turnIds'] for item in receipt.get('native_guard',{}).get('member_turns',[]) if item['threadId']==receipt['thread_id']),[])
+                    active=[turn for turn in active if turn in captured]
+                checkpoint=not task_disabled and (receipt['token_limit']-used<=receipt['token_limit']*receipt['checkpoint_token_percent']/100
                     or receipt['deadline']-upper<=receipt['checkpoint_seconds'])
                 if checkpoint:
                     if not receipt.get('checkpoint'):
@@ -1077,6 +1261,13 @@ def _acknowledge_enrollments(directory,controller,observations):
             if sync(receipt):continue
             if any(receipt.get(key)!=observed.get(key) for key in
                     ('generation','enrollment_revision','token_limit','deadline','used_tokens')):continue
+            if (observed.get('state')=='held' and observed.get('reason')=='idle_session_future_task_isolation_unsupported'
+                    and receipt.get('requires_native_guard') and not receipt.get('stop_latched')
+                    and receipt.get('accounting',{}).get('state')=='qualified'):
+                receipt['prepared_poll_ack']=dict(enrollment_revision=receipt['enrollment_revision'],receipt_generation=receipt['generation'],
+                    controller_generation=controller['generation'],observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME))
+                _save(path,receipt)
+                continue
             if (observed.get('state') not in ('armed','checkpoint_requested') or
                     receipt.get('state') not in ('armed','checkpoint_requested') or receipt.get('stop_latched')
                     or (receipt.get('accounting') or {}).get('state')!='qualified'):
@@ -1102,7 +1293,7 @@ def watch(root,interval=1):
         prior={sig:signal.signal(sig,finish) for sig in (signal.SIGTERM,signal.SIGINT)}
         heartbeat=dict(generation=generation,pid=os.getpid(),identity=process_identity(os.getpid()),
             boot_id=boot_id_value(),interval=interval,time_bases=['qualified_utc','authenticated_host_counter'],
-            session_scope_without_goal=True)
+            session_scope_without_goal=True,governor_protocol=1)
         import threading
         from .goal_notices import run_presenter
         presentation_stop=threading.Event()
@@ -1125,7 +1316,11 @@ def watch(root,interval=1):
                     for path in directory.glob('*.json'):
                         if path.name=='controller.json':continue
                         with _lock(directory,path.stem):
-                            _private(path);receipt=json.loads(path.read_text());_stop(path,receipt,'controller_stopped')
+                            _private(path);receipt=json.loads(path.read_text())
+                            if receipt.get('requires_native_guard'):
+                                from .goal_native_guard import expire
+                                expire(path,receipt)
+                            else:_stop(path,receipt,'controller_stopped')
             _save(directory/'controller.json',dict(heartbeat,active=False,observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
             # Stop control precedes presentation. Drain the newly journaled stop
             # once; stalled native I/O must not hold controller exit indefinitely.

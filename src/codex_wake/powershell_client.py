@@ -47,15 +47,21 @@ try {
  $client.Timeout=[System.Threading.Timeout]::InfiniteTimeSpan
  $client.DefaultRequestHeaders.Authorization=New-Object System.Net.Http.Headers.AuthenticationHeaderValue('Bearer',[string]$connection.token)
  $command=@($Arguments)
- if ($command.Count -gt 0 -and $command[0] -ne 'control') { $command=@('control')+$command }
+ if ($command.Count -gt 0 -and $command[0] -notin @('control','governor')) { $command=@('control')+$command }
  $retryKey=$null
+ $keyFlag=$null
  if ($command.Count -ge 2 -and $command[0] -eq 'control' -and $command[1] -in @('prompt','create','load')) {
+  $keyFlag='--idempotency-key'
+ } elseif ($command.Count -ge 2 -and $command[0] -eq 'governor' -and $command[1] -ne 'status') {
+  $keyFlag='--request-id'
+ }
+ if ($keyFlag) {
   for ($index=0;$index -lt $Arguments.Count;$index++) {
-   if ($Arguments[$index].StartsWith('--idempotency-key=')) { $retryKey=$Arguments[$index].Substring(18) }
-   elseif ($Arguments[$index] -eq '--idempotency-key' -and $index+1 -lt $Arguments.Count) { $retryKey=$Arguments[$index+1] }
+   if ($Arguments[$index].StartsWith($keyFlag+'=')) { $retryKey=$Arguments[$index].Substring($keyFlag.Length+1) }
+   elseif ($Arguments[$index] -eq $keyFlag -and $index+1 -lt $Arguments.Count) { $retryKey=$Arguments[$index+1] }
   }
   if ($null -eq $retryKey) {
-   $retryKey=[Guid]::NewGuid().ToString('N');$Arguments=@($Arguments)+@('--idempotency-key',$retryKey)
+   $retryKey=[Guid]::NewGuid().ToString('N');$Arguments=@($Arguments)+@($keyFlag,$retryKey)
   }
  }
  $payload=@{arguments=@($Arguments)} | ConvertTo-Json -Depth 32 -Compress
@@ -67,18 +73,20 @@ try {
  if (-not $response.IsSuccessStatusCode) { throw ('Local controller rejected the request: HTTP '+[int]$response.StatusCode) }
  $reader=New-Object System.IO.StreamReader($response.Content.ReadAsStreamAsync().GetAwaiter().GetResult(),[Text.Encoding]::UTF8)
  $code=3
+ $terminalReceipt=$false
  while (($line=$reader.ReadLine()) -ne $null) {
   $frame=$line | ConvertFrom-Json
   if ($frame.PSObject.Properties.Name -contains 'stdout') { [Console]::Out.Write([string]$frame.stdout) }
   if ($frame.PSObject.Properties.Name -contains 'stderr') { [Console]::Error.Write([string]$frame.stderr) }
   if ($frame.PSObject.Properties.Name -contains 'operation_id') { $script:LastWakeOperation=[string]$frame.operation_id }
-  if ($frame.PSObject.Properties.Name -contains 'exit_code') { $code=[int]$frame.exit_code; break }
+  if ($frame.PSObject.Properties.Name -contains 'exit_code') { $code=[int]$frame.exit_code; $terminalReceipt=$true; break }
  }
  $reader.Dispose()
+ if (-not $terminalReceipt -and $retryKey) { [Console]::Error.WriteLine('Connection ended without an exit receipt; reconcile with '+$keyFlag+' '+$retryKey+'.') }
  exit $code
 } catch {
  [Console]::Error.WriteLine('Codex Wake client: '+$_.Exception.Message)
- if ($retryKey) { [Console]::Error.WriteLine('No new intent is needed: reuse --idempotency-key '+$retryKey+' to reconcile submission.') }
+ if ($retryKey) { [Console]::Error.WriteLine('No new intent is needed: reuse '+$keyFlag+' '+$retryKey+' to reconcile submission.') }
  exit 2
 } finally {
  if ($null -ne $client) { $client.Dispose() }
