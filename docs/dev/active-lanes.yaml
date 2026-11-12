@@ -1328,4 +1328,18 @@ lanes:
     dependencies: [P221]
     overlaps: [P210, P216]
     updated_at: 2026-11-11
-    disposition: PR584 merged6dbeeeef; dev9 installed; startup active and recovery opted in;43tabs verified; task checkout cleanup at closeout
+    disposition: PR584 integrated; startup and formatting now suspended under native tmux crash incident P223; original activation evidence retained
+
+  - id: P223
+    owner: primary / ecochran76
+    objective: Remove native tmux subscription crash trigger
+    work_items: [LOCAL-P223]
+    plan: docs/dev/plans/0223-2026-11-11-tmux-subscription-crash.md
+    branch: fix/tmux-subscription-crash
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: [P222]
+    overlaps: [P216, P222]
+    updated_at: 2026-11-11
+    disposition: Live automation contained; native isolated reproduction confirmed

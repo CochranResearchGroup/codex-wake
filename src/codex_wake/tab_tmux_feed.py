@@ -19,6 +19,7 @@ from .tab_organization import TabError, TmuxTransport
 class TmuxMetadataFeed:
     MAX_BYTES = 1048576
     MAX_PANES = 4096
+    SNAPSHOT_INTERVAL = 1.0
     FORMAT = '\t'.join('#{' + name + '}' for name in (
         'pid', 'session_id', 'window_id', 'window_index', 'window_name',
         'window_active', 'pane_id', 'pane_pid', 'pane_title', 'pane_current_path', 'pane_tty', 'pane_current_command'))
@@ -47,6 +48,7 @@ class TmuxMetadataFeed:
         self.closed = False
         self.started_at = None
         self.startup_seconds = None
+        self.next_snapshot_at = 0.
 
     def _event(self, kind, data):
         self.sequence += 1
@@ -90,6 +92,7 @@ class TmuxMetadataFeed:
 
     def _request_snapshot(self):
         self._send('snapshot', 'list-panes', '-a', '-F', self.FORMAT)
+        self.next_snapshot_at = self.monotonic() + self.SNAPSHOT_INTERVAL
         self.dirty = False
 
     def _connect(self):
@@ -159,10 +162,10 @@ class TmuxMetadataFeed:
                 self.state = 'available'
                 if first:
                     self.startup_seconds = self.monotonic() - self.started_at
-                    self._send('subscription', 'refresh-client', '-B',
-                               'wake-windows:@*:#{window_id} #{window_index} #{window_name} #{window_active}')
-                    self._send('subscription', 'refresh-client', '-B',
-                               'wake-panes:%*:#{pane_id} #{pane_pid} #{pane_title} #{pane_current_path} #{pane_tty} #{pane_current_command}')
+                    # No native -B subscriptions: tmux 3.4's timer can
+                    # dereference a detached client's NULL session and crash
+                    # the entire server (control.c:924). Fixed metadata queries
+                    # retain the same connection without that native timer.
                 return [self._event('baseline' if first else 'update', dict(snapshot=snapshot))] if changed else []
         elif line.startswith('%exit'):
             raise ValueError('control_disconnected')
@@ -197,7 +200,8 @@ class TmuxMetadataFeed:
                 pending_at = self.frame[3] if self.frame else self.pending[0][1] if self.pending else None
                 if pending_at is not None and self.monotonic() - pending_at > self.timeout:
                     return events + self._lost('metadata_timeout')
-                if self.dirty and self.snapshot is not None and not self.pending and self.frame is None:
+                if (self.snapshot is not None and not self.pending and self.frame is None
+                        and (self.dirty or self.monotonic() >= self.next_snapshot_at)):
                     self._request_snapshot()
                 ready = self.selector.select(max(0., end - self.monotonic()))
                 if not ready:

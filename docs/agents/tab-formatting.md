@@ -230,3 +230,16 @@ Normal automatic updates can also apply configured changes when the monitor runs
 Rollback always restores the original captured baseline, including after switching
 presets. Native Windows pixel/color fidelity remains separately qualified; this
 preset release is accepted on tmux, not a new Windows rendering claim.
+
+## tmux3.4 crash containment
+
+Version0.22.0.dev10 avoids native wildcard format subscriptions. A detached or
+closing subscribed client can trigger tmux3.4's subscription timer to crash the
+whole server. Metadata now uses ordinary events plus bounded1-second snapshots
+on the same read-only control connection; it creates no per-tab processes.
+
+Following the incident, working formatting is globally disabled, original window
+settings restored and startup disabled. Package installation alone does not remove
+this containment or restart Byobu. Keep it in place until reactivation is explicitly
+requested after qualification. `tabs startup status` and `tabs monitor-status`
+inspect the hold without enabling anything.

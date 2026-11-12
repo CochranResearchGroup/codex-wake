@@ -1,5 +1,6 @@
 """Private stock-tmux qualification at the public feed seam."""
 import shutil
+import signal
 import os
 from unittest.mock import patch
 import subprocess
@@ -60,6 +61,27 @@ class TmuxFeedTests(unittest.TestCase):
         self.feed.close()
         self.assertEqual(before, self.tmux('list-panes', '-a', '-F', '#{pane_id} #{pane_pid} #{window_layout} #{window_active}'))
         self.assertEqual(self.feed.status()['state'], 'closed')
+
+    def test_stalled_client_losing_its_session_cannot_crash_surviving_session(self):
+        self.tmux('new-session','-d','-s','survivor','exec sleep 90')
+        survivor=self.tmux('list-panes','-t','survivor','-F','#{pane_pid}')
+        self.events_until('baseline')
+        deadline=time.monotonic()+2
+        while self.feed.status()['pending_commands']:
+            self.feed.poll(.05)
+            self.assertLess(time.monotonic(),deadline,'metadata startup commands not acknowledged')
+        pid=self.feed.status()['owned_pid']
+        try:
+            os.kill(pid,signal.SIGSTOP)  # Only our unreaped fixture child.
+            self.tmux('kill-session','-t','fixture')
+            time.sleep(1.5)  # Native subscription timer fires every second.
+            result=subprocess.run(['tmux','-S',self.socket,'has-session','-t','survivor'],
+                                  capture_output=True,text=True,timeout=3)
+            self.assertEqual(result.returncode,0,'tmux server crashed and destroyed the unrelated survivor')
+            self.assertEqual(self.tmux('list-panes','-t','survivor','-F','#{pane_pid}'),survivor)
+        finally:
+            try:os.kill(pid,signal.SIGCONT)
+            except ProcessLookupError:pass
 
     def test_read_only_attach_preserves_session_environment(self):
         variable='WAKE_METADATA_ENV_FIXTURE'
