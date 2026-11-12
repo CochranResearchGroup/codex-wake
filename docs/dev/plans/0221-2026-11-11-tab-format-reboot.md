@@ -10,11 +10,15 @@ Base: 95bbebb308d22eb81b9909717ed61358d16095e5
 
 ## Current State
 
-DONE (source-only). Exact stale_target reproduced twice against primary source and once
-against current origin/main with a disposable real tmux restart. Plain system
-Python lacks msgspec on current main; use the installed candidate Python with
-PYTHONPATH=src. Runtime was already repaired separately; no deployment is authorized.
-Local ticket is used because external issue mutation was not requested.
+CLOSED: PR582 merged4dfd8b08; exact0.22.0.dev8 installed after real UID1017
+qualification. All319 package members and9 launchers match the merged package.
+Working45tabs have zero native-option mismatches; new monitor is fresh with
+settings preserved. All29 native generations,10 protected files and the supervisor
+PID are unchanged. Prior prefix and supported rollback helper remain retained.
+See [deployment receipt](../evidence/plan0221/deployment.json).
+
+The original diagnosis used LOCAL-P221 because external mutation had not yet
+been requested; the later PR/review/merge/install instruction authorized rollout.
 
 ## Scope and acceptance
 
@@ -92,3 +96,33 @@ Standards review: no blocking documented-standard or baseline-smell finding.
 Spec review: no blocking finding; explicit intent, namespace originals, alias
 custody and old-intent/refresh fences satisfy LOCAL-P221. Schema change is additive
 and documented. Serial primary review is proportionate for this26-line owner fix.
+
+## Installed acceptance and cleanup
+
+Release revision5f6f87c4 passed100 formatting tests (70.789s) and34 related tests
+(12.392s), plus pinned repository lint, compilation and policy wiring. Standards
+and Spec primary reviews found no blocking findings. PR582 merged4dfd8b08.
+
+Exact wheel SHA256da11770ce8620dce2fc901157226f41030298abe69bac484082a6b466844993f.
+Real UID1017 installed the complete candidate and prior public package, passed
+7regressions and actual CLI/stdio/OAuth API acceptance, then verified
+prior→candidate→prior→candidate launcher selection with durable policy and
+no-dispatch daemon polling. All319 package members match merged source and both
+installs. Test Python3.12.3 and working3.12.13 share the Linux kernel. This is a
+Python Wake package change, not a native account-daemon binary upgrade; no new
+native-history/provider acceptance is claimed. Initial sudo-root install commands
+were denied and an inherited inaccessible cwd prevented uv setup; using the
+already authorized UID1017 from /tmp resolved setup without changing permissions.
+
+Working CLI links and completion now select the new immutable prefix. Supported
+monitor stop/start selected the new code with exactly preserved settings; old
+monitor exited. Supervisor/native services were not restarted. Fresh OS readback
+verified29 native process generations unchanged, zero option mismatches across
+45tabs, active supervisor with zero restarts. No model/provider request was made.
+
+Private qualification, hashes, original links, cutover and rollback commands are
+retained under user-scoped qualification/plan0221. Task checkout will be removed
+after this documentation checkpoint has merged and remote custody is verified;
+117 registered entries before cleanup,116 expected after, other entries untouched.
+Memory disposition forbidden under the explicit memory-update request boundary;
+no memory write is part of this publication/installation request.

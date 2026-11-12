@@ -1310,8 +1310,8 @@ lanes:
     branch: fix/tab-format-reboot
     target: origin/main
     plan_state: CLOSED
-    custody_state: ACTIVE_WORKTREE
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: [P210, P216]
     updated_at: 2026-11-11
-    disposition: Validated source-only repair; local review checkout retained until integration decision
+    disposition: PR582 merged4dfd8b08; exact dev8 deployed after UID1017 qualification;45tabs verified; task checkout cleanup at documentation closeout
