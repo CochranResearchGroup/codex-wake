@@ -131,6 +131,10 @@ def permitted(actor, target):
     return any(all(target.get(key) == value for key, value in scope.items()) for scope in actor.targets)
 
 
+from .governor_commands import schemas as governor_schemas
+TOOLS.update({'wake_governor_' + verb: ('governor.' + verb, schema) for verb, schema in governor_schemas().items()})
+
+
 class ProtectedOperations:
     """Shared API/MCP admission. Binding and client registration confer no grant."""
     # operation: (capability, list collection or None, singleton key).
@@ -200,6 +204,8 @@ class ProtectedOperations:
 
     READ_POLICIES.update({'builds.' + verb: ('admin', None, None) for verb in ('prepare','status','build','resume','qualify','cleanup','run')})
 
+    READ_POLICIES.update({'governor.' + verb: ('observe' if verb == 'status' else 'control', None, None) for verb in governor_schemas()})
+
     def __init__(self, authority, operations):
         self.authority, self.operations = authority, operations
 
@@ -213,7 +219,13 @@ class ProtectedOperations:
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
         from .profile_operations import OPERATIONS as profile_operations
-        if operation in profile_operations:
+        if operation.startswith('governor.'):
+            from .governor_commands import protected_execute
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'Host governor owner unavailable.')
+            result = protected_execute(self.operations.inventory.root, operation.rsplit('.', 1)[1],
+                arguments, actor, authorize=lambda: self.authority.authenticate(token))
+        elif operation in profile_operations:
             from .profile_operations import execute
             if self.operations.accounts is None or self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'host account owner unavailable')

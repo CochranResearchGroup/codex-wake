@@ -122,8 +122,9 @@ def serve_counter(directory, *, command=None, idle_seconds=60):
                 server.bind(str(address))
                 address.chmod(0o600)
                 server.listen(16)
+                # Windows interop cannot traverse another WSL user's private cwd.
                 producer = subprocess.Popen(command or COMMAND, stdin=subprocess.PIPE,
-                                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=0)
+                                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=0, cwd='/tmp')
                 server.settimeout(idle_seconds)
                 while True:
                     try:

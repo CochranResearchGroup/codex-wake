@@ -13,7 +13,7 @@ def _parsed(arguments):
     from .cli import build_parser
     from .command_contract import parser_paths
     arguments=list(arguments)
-    if not arguments or arguments[0] not in ('control','self-limits'):arguments.insert(0,'control')
+    if not arguments or arguments[0] not in ('control','self-limits','governor'):arguments.insert(0,'control')
     parser=build_parser()
     if '--help' in arguments or '-h' in arguments:
         paths=dict(parser_paths(parser));path=[]
@@ -41,6 +41,20 @@ def cli_frames(owner,arguments):
     try:
         args,help_text=_parsed(arguments)
         if help_text is not None:yield {'stdout':help_text};yield {'exit_code':0};return
+        if args.command == 'governor':
+            from .governor_commands import schemas, render
+            schema = schemas()[args.governor_verb]
+            values = {key: value for key, value in vars(args).items()
+                      if key in schema['properties'] and value is not None}
+            values = owner.validated_arguments('local.governor.' + args.governor_verb, values)
+            from .governor_commands import execute
+            from .governor import local_operator_principal
+            # /cli is the authenticated local host-operator bridge used by WSL
+            # and PowerShell. API/MCP operations retain session-only authority.
+            value = execute(args.governor_verb, values, owner.root, principal=local_operator_principal())
+            yield {'stdout': (json.dumps(value, sort_keys=True) if args.json else render(value)) + '\n'}
+            yield {'exit_code': 2 if value.get('error') or value.get('status') in ('failed', 'held') else 0}
+            return
         if args.command=='self-limits':
             values={k:v for k,v in vars(args).items() if k in ('selector','endpoint','token_limit','time_limit_seconds') and v is not None}
             value=owner.execute('local.self_limits.'+args.self_limits_verb,values)
@@ -83,14 +97,19 @@ def remote(root,arguments):
     from .local_control_server import connection_info
     info=connection_info(root)
     arguments=list(arguments)
-    command=arguments if arguments[:1]==['control'] else ['control',*arguments]
+    command=arguments if arguments[:1] in (['control'], ['governor']) else ['control',*arguments]
     retry_key=None
+    flag = None
     if len(command)>1 and command[0]=='control' and command[1] in ('prompt','create','load'):
+        flag = '--idempotency-key'
+    elif len(command)>1 and command[0]=='governor' and command[1] != 'status':
+        flag = '--request-id'
+    if flag:
         for index,argument in enumerate(arguments):
-            if argument.startswith('--idempotency-key='):retry_key=argument.split('=',1)[1]
-            elif argument=='--idempotency-key' and index+1<len(arguments):retry_key=arguments[index+1]
+            if argument.startswith(flag+'='):retry_key=argument.split('=',1)[1]
+            elif argument==flag and index+1<len(arguments):retry_key=arguments[index+1]
         if retry_key is None:
-            retry_key=uuid4().hex;arguments.extend(['--idempotency-key',retry_key])
+            retry_key=uuid4().hex;arguments.extend([flag,retry_key])
     request=Request(info['url']+'/cli',json.dumps({'arguments':arguments}).encode(),headers={'Content-Type':'application/json','Authorization':'Bearer '+info['token']})
     try:
         with build_opener(ProxyHandler({})).open(request,timeout=3700) as response:
@@ -101,9 +120,9 @@ def remote(root,arguments):
                 if 'exit_code' in value:return value['exit_code']
     except (OSError,ValueError) as error:
         if retry_key:
-            raise ValueError('controller transport failed; retain the original intent and retry only with idempotency key '+retry_key) from error
+            raise ValueError('controller transport failed; retain the original intent and retry only with '+str(flag)+' '+retry_key) from error
         raise
-    raise ValueError('controller connection ended without an exit receipt; retry only with the original idempotency key '+str(retry_key))
+    raise ValueError('controller connection ended without an exit receipt; retry only with the original '+str(flag)+' '+str(retry_key))
 
 
 def output_frames(owner,identifier,mode,timeout,cursor=0,limit=100):

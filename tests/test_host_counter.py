@@ -13,7 +13,8 @@ from codex_wake.host_counter import read_counter, serve_counter
 
 
 def fake_bridge(directory):
-    script = "import sys\nn=100\nfor line in sys.stdin:\n n+=1\n print(line.strip()+','+str(n)+',10000000',flush=True)\n"
+    script = "import os,sys\nif os.stat(os.getcwd()).st_mode & 5 != 5: raise SystemExit(7)\nn=100\nfor line in sys.stdin:\n n+=1\n print(line.strip()+','+str(n)+',10000000',flush=True)\n"
+    os.chdir(directory)  # Windows interop cannot use this other user's private cwd.
     serve_counter(Path(directory), command=[sys.executable, '-u', '-c', script], idle_seconds=.5)
 
 

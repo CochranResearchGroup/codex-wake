@@ -12,6 +12,11 @@ def execute(root,verb,arguments,*,selector=None,endpoint='unix://',policy=None):
     selector=selector or ('thread:'+os.environ['CODEX_THREAD_ID'] if os.environ.get('CODEX_THREAD_ID') else None)
     if selector is None:raise ValueError('choose your session selector, or run inside a session with CODEX_THREAD_ID')
     row=resolve(root,selector,endpoint=endpoint)
+    policy=policy_for(root,row,policy)
+    return local_execute(root,policy,verb,arguments,thread_id=row['thread_id'])
+
+
+def policy_for(root,row,policy=None):
     if policy is None:
         # The resolved owned endpoint supplies the envelope. This is a private
         # voluntary policy, not an override of any configured external policy.
@@ -23,7 +28,7 @@ def execute(root,verb,arguments,*,selector=None,endpoint='unix://',policy=None):
             if policy.exists():
                 if read(policy)!=value:raise ValueError('retained voluntary limit binding changed; inspect existing policy')
             else:write(policy,value)
-    return local_execute(root,policy,verb,arguments,thread_id=row['thread_id'])
+    return policy
 
 
 def register_parser(subparsers):

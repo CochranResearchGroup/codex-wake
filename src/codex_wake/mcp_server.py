@@ -222,7 +222,9 @@ SPECS.update(local_control_specs())
 from .local_control_service import definitions as local_definitions
 for _operation, (_tool, _description, _schema, _handler, _readonly) in local_definitions().items():
     if not _operation.startswith('local.self_limits.'):
-        SPECS[_tool]=('local',_operation.removeprefix('local.'),_description,_schema['properties'],_schema['required'],_readonly)
+        _group = 'governor' if _operation.startswith('local.governor.') else 'local'
+        _verb = _operation.rsplit('.', 1)[1] if _group == 'governor' else _operation.removeprefix('local.')
+        SPECS[_tool]=(_group,_verb,_description,_schema['properties'],_schema['required'],_readonly)
 
 from .command_contract import apply_native_contract
 apply_native_contract(SPECS)
@@ -350,7 +352,7 @@ class CommandRunner:
             except (ValueError, OSError) as error:
                 return {'error': {'code': 'configuration_unavailable', 'message': str(error)}}, True
         local_root = self.wake_root
-        if group in ('local', 'local-slash', 'self-limits') and local_root is None:
+        if group in ('local', 'local-slash', 'self-limits', 'governor') and local_root is None:
             from .local_control_lifecycle import root_for
             from types import SimpleNamespace
             local_root = root_for(SimpleNamespace(wake_root=None))
@@ -361,6 +363,25 @@ class CommandRunner:
                 return value, value.get('status') == 'failed'
             except (ValueError, OSError) as error:
                 return {'error': {'code': getattr(error, 'code', 'local_control_unavailable'), 'message': str(error)}}, True
+        if group == 'governor':
+            try:
+                from .goal_supervision import verified_native_caller
+                from .session_permissions import Principal
+                from .governor import native_principal
+                from .governor_commands import execute
+                thread = (native_context or {}).get('threadId')
+                verified_native_caller(native_context, thread)
+                arguments = dict(arguments)
+                if arguments.get('selector', 'thread:' + thread) != 'thread:' + thread:
+                    raise ValueError('native governor controls target only the verified current session')
+                arguments['selector'] = 'thread:' + thread
+                arguments['endpoint'] = self.app_server
+                result = execute(verb, arguments, self.goal_limits_root or local_root,
+                                 principal=native_principal(thread, policy=self.goal_limits_policy,
+                                                            principal=Principal(thread)))
+                return result, bool(result.get('error') or result.get('status') in ('failed', 'held'))
+            except (WakeError, ValueError, OSError) as error:
+                return {'error': {'code': getattr(error, 'code', 'governor_unavailable'), 'message': str(error)}}, True
         if group == 'self-limits':
             try:
                 from .goal_supervision import verified_native_caller

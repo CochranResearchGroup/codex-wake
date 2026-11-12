@@ -170,7 +170,7 @@ def pane(name,tid):
  if 'Resume paused goal?' in frame and 'Leave paused' in frame:t('send-keys','-t',name,'Escape')
 try:
  t('new-session','-d','-s','bootstrap','-x','180','-y','55',shlex.join([str(launcher),'--no-alt-screen','-C',str(ws)]))
- wait(lambda:'mock-model' in t('capture-pane','-p','-t','bootstrap',check=False),'Managed bootstrap',30)
+ wait(lambda:'mock-model' in t('capture-pane','-p','-t','bootstrap',check=False),'Managed bootstrap',60)
  endpoint='unix://'+str(control.resolve(strict=True))
  def rpc(method,params):return native_request(endpoint,str(baseline),method,params,5)
  with socket.socket(socket.AF_UNIX) as s:s.connect(endpoint[7:]);native_pid,uid,_=struct.unpack('3i',s.getsockopt(socket.SOL_SOCKET,socket.SO_PEERCRED,12))

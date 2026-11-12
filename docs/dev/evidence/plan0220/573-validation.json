@@ -1,0 +1,66 @@
+{
+  "status": "source_and_transport_validated_installed_journey_pending",
+  "source_commit": "0c8ded72",
+  "ticket": 573,
+  "python": [
+    "3.11",
+    "3.12"
+  ],
+  "checks": [
+    {
+      "command": "PYTHONPATH=src:tests /tmp/wake216-py312/bin/python -m unittest test_governor_commands test_command_parity",
+      "tests": 9,
+      "result": "PASS",
+      "seconds": 0.863,
+      "note": "After explicit continuation options and held normalization for uncertain native lease release."
+    },
+    {
+      "result": "PASS",
+      "tests": 7,
+      "seconds": 46.634,
+      "evidence": "573-api-mcp-green.log",
+      "surface": "Private local-controller server API/MCP governor status with transport/contract regression selection"
+    },
+    {
+      "surface": "Actual Windows PowerShell governor status and four prompt response modes",
+      "result": "PASS",
+      "tests": 1,
+      "seconds": 46.185,
+      "evidence": "573-powershell-governor-recovered.log",
+      "retained_failure": "573-powershell-governor.log",
+      "note": "Initial WSL bootstrap failed with UtilAcceptVsock110. Read-only interop preflight recovered; one bounded rerun passed. No product root-cause fix claimed."
+    },
+    {
+      "surface": "Mutation retry keys through existing dropped-HTTP transport",
+      "result": "PASS",
+      "tests": 10,
+      "seconds": 2.038,
+      "evidence": "573-retry-green.log"
+    },
+    {
+      "command": "PYTHONPATH=src:tests /tmp/wake216-py311/bin/python -m unittest test_governor_commands test_command_parity",
+      "tests": 9,
+      "seconds": 2.41,
+      "result": "PASS"
+    },
+    {
+      "command": "/tmp/wake216-py312/bin/python scripts/generate_command_reference.py --check",
+      "result": "PASS"
+    },
+    {
+      "command": "python scripts/check_policy_wiring.py",
+      "result": "PASS"
+    }
+  ],
+  "remaining": [
+    "Exact installed candidate mutation journey using final backend and native package",
+    "One final broad review and one bounded remediation pass after ticket acceptance"
+  ],
+  "hosted_ci": false,
+  "environment_differences": "Local WSL Python3.11/3.12; real Windows PowerShell client. GitHub hosted CI skipped by cost policy. Native compile/test and final installed qualification are separate pending gates.",
+  "fresh_windows_process_sample": {
+    "largest_sampled_powershell_working_set_bytes": 300113920,
+    "private_receipt": "~/.local/state/codex-wake/qualification/governor-p220/powershell-processes-after.json",
+    "limitations": "Bounded snapshot; not a long-run resource claim."
+  }
+}

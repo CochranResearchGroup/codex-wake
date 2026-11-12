@@ -8,30 +8,104 @@
     {
       "id": 571,
       "owner": "backend",
-      "state": "running",
-      "blockers": []
+      "state": "accepted",
+      "blockers": [],
+      "worker": "/root/governor_backend571",
+      "branch": "feat/governor-backend-571",
+      "integrated_checkpoints": [
+        "503b0659",
+        "c4f8a704",
+        "6068aaa7",
+        "cc64666a",
+        "bd8848b0"
+      ],
+      "remaining": [],
+      "validation": "Exact bd8848b0: governor16 PASS Python3.11 19.167s and3.12 18.802s; affected3.12 governor/self_limits/goal_renewal/deactivation/supervision77 PASS79.741s. Integrated9fb28fc6; packaged modules unchanged in7064f62b.",
+      "installed_acceptance": "model/limit/watcher-loss allPASS on exact80c8ad9f package; actualtoolsstop, peerpreservation, singleexplicitresume/nohiddengoal"
     },
     {
       "id": 572,
       "owner": "native",
       "state": "running",
-      "blockers": []
+      "blockers": [],
+      "worker": "/root/native572",
+      "branch": "feat/governor-native-572",
+      "integrated_checkpoints": [
+        "a40fc9b4"
+      ],
+      "native_source": "bd519d5232aef6f55a4a665cd0c7461ec5b223f9",
+      "qualification": "537.227s productionpackagebuildPASS; former live-tool/falseproofredcase nowactualPASS inbudget+watcher-loss. UIcoldbootstrap needs60s initialfixturebound after measured19.076s installationlifecycle.",
+      "preview": "https://previews.ecochran.dyndns.org/s/62350ca5d460",
+      "remaining": [
+        "Recover missing temporary QA environment",
+        "Resolve actual native extend/resume timeout",
+        "Installed managed UI/cold resume journey"
+      ]
     },
     {
       "id": 573,
       "owner": "primary",
-      "state": "running",
-      "blockers": []
+      "state": "accepted",
+      "blockers": [],
+      "validation": "Latest governor/contract selection: 9 PASS (Python3.12). Existing transport10 PASS; ownedUnix native protocol CLIstatusPASS; privateAPI/MCPstatusPASS. Actual Windows PowerShell governorstatus plus four response modes PASS46.185s after retained WSL bootstrap failure and successful preflight.",
+      "owned_paths": [
+        "src/codex_wake/governor_commands.py",
+        "src/codex_wake/cli.py",
+        "src/codex_wake/local_control_service.py",
+        "src/codex_wake/mcp_server.py",
+        "src/codex_wake/controller_http.py",
+        "src/codex_wake/controller_client.py"
+      ],
+      "remaining": "Full UI572 and aggregate574 remain independent gates.",
+      "root_routing": "DefaultCLI/UI/privatecontroller deriveexisting localMCP --goal-limits-root/policy; typednativecaller honorshostpolicy, explicitisolatedrootsstayexact. ExistingrealUnixpeerCLI poisonnamespacecheckPASS32.850s;8gov/contractPASS3.11/12."
     },
     {
       "id": 574,
       "owner": "primary",
-      "state": "pending",
+      "state": "blocked",
       "blockers": [
         571,
         572,
         573
+      ],
+      "prepared": "Existing goal_limit_native_ux_acceptance --governor-ui-only reuses actualnativeappserver/TUI/providerfixture, checks controls, forcedstop, reconnect, SIGKILLduringactivework and no unintendedinference.",
+      "worker": "/root",
+      "remaining": [
+        "#572 installed UI acceptance",
+        "Exact final native upgrade/rollback and failed-start recovery",
+        "Reconcile qualification artifact and fresh process/resource census"
       ]
     }
-  ]
+  ],
+  "contract_revision": 3,
+  "operator_admission": "opaque local_operator_principal(); native model Principal(thread) after verified_native_caller; OAuth owner+admin+exact thread grant only for loosen actions",
+  "integration_tip": "866edc9a94acc7bbdd5948791b04d5e3cafe00bd",
+  "package_candidate_version": "0.22.0.dev8",
+  "review_fixed_point_confirmation": "Parent #570 explicitly freezes 3f8a18fa196037fa9efe00bf2ad36b05c61f2a3c; native review base d3e311260b46c88fc8eac08b869f276cd0345e8b.",
+  "native_cache": "Prior release cleanup reclaimed18GB; cachepathretainedbutcompiledobjectsabsent; currentnativecompilecold. Same toolchain/profile/target; keepresultingcache.",
+  "blocking_acceptance": "Managed UI + exact corrected-package upgrade/rollback/failedstart need completed acceptance; cold-bootstrapfixturelimits causallyrepaired. Source review0/remediation0.",
+  "qualification_environment": {
+    "uid": 1017,
+    "root": "/tmp/wake-governor-p220-2dac7qs6",
+    "python": "3.12.3",
+    "dependencies": "Pinned to working dev7 constraints; installed successfully",
+    "wheel_installed": true,
+    "working_deployment": false,
+    "wheel_source_commit": "fbef8b22fff5994a5a4612cbc63479d81c96ed57",
+    "wheel_sha256": "8f43b09ccc8c4ba442b93ae93c1fd1c4db26b8a13015809b0955a294073df099",
+    "source_wheel_installed_members_equal": 323,
+    "dependency_versions_equal_working": 31,
+    "installed_surface_tests": "14PASS6.634s",
+    "current_status": "Historical installation no longer exists; worker recovering fresh isolated QA. Historical measurements retained, not current installed proof."
+  },
+  "continuation_checkpoint": {
+    "date": "2026-11-11",
+    "authority": "Operator explicitly resumed implement-spec: close #572/#574, one broad review and one bounded findings remediation; #576-581 follow-up out of this packet.",
+    "concurrency": "Primary owns #574 preparation/integration, /root/native572 owns #572 and exclusive UID1017 runtime/clock; no nested delegation.",
+    "state_transition": "handoff -> reanchored",
+    "progress_classification": "blocker_reduction",
+    "evidence": "Git tips and live #570/#572/#574 verified; temporary QA root and u7 raw captures absent, durable package/procedure retained.",
+    "next": "Recover isolated QA, diagnose extend/resume timeout; validate #572 before #574 execution.",
+    "memory_discovery": "skip: supplied detailed handoff and current canonical sources sufficient; lightweight registry search had no relevant Plan0220 result."
+  }
 }

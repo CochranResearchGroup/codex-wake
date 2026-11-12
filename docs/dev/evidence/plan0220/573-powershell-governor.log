@@ -1,0 +1,28 @@
+/home/ecochran76/workspace.local/.worktrees/codex-wake/governor-experience/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/.worktrees/codex-wake/governor-experience/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/.worktrees/codex-wake/governor-experience/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/.worktrees/codex-wake/governor-experience/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/.worktrees/codex-wake/governor-experience/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/.worktrees/codex-wake/governor-experience/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/.worktrees/codex-wake/governor-experience/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+F
+======================================================================
+FAIL: test_auto_connection_api_and_mcp_share_owned_discovery (test_local_controller_server.LocalControllerServerTests.test_auto_connection_api_and_mcp_share_owned_discovery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/.worktrees/codex-wake/governor-experience/tests/test_local_controller_server.py", line 108, in test_auto_connection_api_and_mcp_share_owned_discovery
+    self.assertEqual(called.returncode,0,called.stderr.decode(errors='replace'))
+AssertionError: 1 != 0 : <3>WSL (3100134 - ) ERROR: UtilAcceptVsock:281: accept4 failed 110
+
+
+----------------------------------------------------------------------
+Ran 1 test in 36.043s
+
+FAILED (failures=1)
