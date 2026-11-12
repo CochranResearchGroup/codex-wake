@@ -10,6 +10,24 @@ Base: 34194dbf7cc2fe54c44f9c6e8c7997ef22c52797
 
 ## Current State
 
+DEPLOYED. PR590 squash-merged `55a2ee5d0266f1a731a109629c3971059ba7dac6`;
+exact0.22.0.dev12 installed with322matching Python members and9launchers.
+Final67focused checks pass;10exact installed checks pass. Independent review
+`/root/delivery_review` reports no Standards or Spec findings. Rollback to the
+complete dev11 prefix was exercised through all9fixture launchers before cutover.
+All10resident services and27native identities present immediately before cutover
+were preserved;1native process had already exited before the cutover baseline.
+Global formatting stays disabled; startup stays inactive/disabled. Source and
+deployment receipt: [deployment](../evidence/plan0225/deployment.json).
+Root main and unrelated dirty work stay untouched because overlapping docs make
+an automatic fast-forward unsafe. Delivery checkout can be removed after the
+closeout PR establishes custody; retain branch refs. No native replacement,
+service restart, formatting reactivation, budget renewal or provider input.
+
+## Earlier source-only closeout
+
+The following snapshot predates the operator's subsequent delivery request.
+
 DONE for the bounded source fix at `f4167c0e76d2ab398cb4fc5ea8538ad7e44eed10`.
 Workspace enable/reenable restores its preference; global opt-out explains its
 block and recovery. Tab outcomes lead human output, unsuccessful effects and
