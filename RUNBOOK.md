@@ -9163,3 +9163,7 @@ Added explicit-enable namespace custody rollover with retained originals,
 read-only stale inspection and unchanged refresh/rollback/request pin fences.
 Public controller regression went red before source fix, then green; returning
 namespace and alias custody tests also pass. Working installation is unchanged.
+
+P221 source checkpoint008e949f:100 formatting+34 related tests PASS, packaged CLI
+restart/enable/rollback PASS. See docs/dev/evidence/plan0221/validation.md for exact
+commands and exclusions. Local commit only; source-review checkout retained.

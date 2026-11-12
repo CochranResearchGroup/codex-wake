@@ -75,3 +75,5 @@ Registered inventory before creation116;117 after creation. Others' registration
 (including stale entries) are outside this task's cleanup scope. Retain this one
 until review/integration; next review point is the integration decision. No remote
 source publication or merge authority was inferred from the diagnosis request.
+
+Exact commands, source commit, wheel identity and limitations: [validation](../evidence/plan0221/validation.md).
