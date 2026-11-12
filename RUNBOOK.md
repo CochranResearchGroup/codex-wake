@@ -9230,3 +9230,20 @@ fixture readiness corrections pass21checks. Corrected installed UID1017 regressi
 and transport/rollback qualification pass. See evidence/plan0223/validation.md.
 Native tmux not upgraded, no agent relaunched or host reboot. Production
 reactivation withheld; fixed CLI publication/install preserves the quarantine.
+
+## Turn | 2026-11-11 | P223 fixed package selected, quarantine retained
+
+PR587 merged e16bc4d2; exact dev10 wheel qualified/installed with320matching members
+and9launchers. Corrected UID1017 22case regression selection PASS19.647s, installed
+CLI/stdio/OAuth API and package rollback PASS. Source native-trigger regression red
+then green;264broad checks plus21case readiness remediation retained in evidence.
+No production reactivation. Formatting globally disabled and original styles
+restored; startup disabled/stopped and its verified owned unit retargeted to the
+fixed prefix without start/enable. Same live Byobu server and43of43initial pane
+process identities retained.10protected files unchanged.26of28sampled native
+process generations remain;2absent with exit reason unobserved, no native lifecycle
+calls or universal transient-process continuity claim. No native tmux/Codex upgrade,
+provider request or host reboot. See evidence/plan0223/deployment.json. Exact old
+unit/manifest, package/launcher rollback and raw crash proofs remain private.
+Task-only QA/checkout cleanup follows verified publication. Memory forbidden by
+explicit-request boundary; no memory write.
