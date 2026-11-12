@@ -119,7 +119,7 @@
     "findings": "docs/dev/evidence/plan0220/review.json"
   },
   "remediation": {
-    "status": "running",
+    "status": "source_verified_installed_pending",
     "worker": "/root/native572",
     "accepted_blockers": [
       "SPEC220-1",
@@ -138,9 +138,16 @@
         "remaining": "Exact rebuilt native package and installed qualification"
       },
       "SPEC220-2": {
-        "state": "red test running",
-        "job": "remediation-spec2-red/job-20261112T022447Z-1f95ce3fd121"
+        "red": "Corrected public rendering test failed missing scope assertion;0compilererrors,325.248s",
+        "green": "Six focused governor rendering testsPASS,0diagnostics,369.102s",
+        "retained_attempts": [
+          "Private sibling helper compileE0603, not behavioral red",
+          "Initial green exact-owned group cancelled-15 at66.588s before correcting literal2m 00s"
+        ],
+        "remaining": "Complete immutable package-v4 and exact installed qualification"
       }
-    }
+    },
+    "native_source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+    "package_build": "CargoSignal package-build-v4/job-20261112T024103Z-656884cdbc3e"
   }
 }

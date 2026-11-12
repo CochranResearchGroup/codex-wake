@@ -55,12 +55,19 @@
   ],
   "remediation": {
     "pass": 1,
-    "status": "running",
+    "status": "source_verified_installed_pending",
     "owner": "/root/native572",
     "scope": [
       "SPEC220-1",
       "SPEC220-2"
     ],
-    "verification": "closed_world: accepted findings and their critical regressions only; no second broad review"
+    "verification": "closed_world: accepted findings and their critical regressions only; no second broad review",
+    "native_source": "15626ed7031a0246543b1703be69dbbc22e917d2",
+    "focused_tests": {
+      "passed": 6,
+      "seconds": 369.102,
+      "receipt": "remediation-spec2-green-corrected/job-20261112T023503Z-6b2ca9acd9c8/20261112T023503Z-c3a2c62274c3/receipt.json"
+    },
+    "primary_verification": "Closed-world two-file diff confirms authoritative remaining_tokens with unknown preservation, limiting_scope, and real normalized shared identity/ceilings. No second broad review."
   }
 }
