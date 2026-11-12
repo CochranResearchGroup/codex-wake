@@ -44,7 +44,7 @@ def _request(args, root):
     stop = getattr(args, "stop_at", None)
     stop = precise_deadline(stop).isoformat().replace("+00:00", "Z") if stop else None
     target = {"transport": "native", "thread_id": args.thread_id,
-              "codex_cmd": resolve_codex_cmd(args.codex_path, required=True),
+              "codex_cmd": resolve_codex_cmd(args.codex_path, required=True, preserve_launcher=True),
               "endpoint": args.endpoint, "expires_at": None,
               "resume_policy": "same_thread" if args.resume_missing else "hold"}
     content = {"root": str(root), "cwd": str(Path.cwd().resolve()), "target": target,

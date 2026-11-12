@@ -65,14 +65,16 @@ def resolve_codex_cmd(
     env: Mapping[str, str] | None = None,
     path: str | None = None,
     required: bool = False,
+    preserve_launcher: bool = False,
 ) -> str:
+    """Validate a command; durable native intents may retain its launcher pathname."""
     source_env = env if env is not None else os.environ
     candidate = raw or source_env.get(APP_SERVER_CODEX_ENV) or ""
     if candidate:
         if "/" in candidate:
             resolved = Path(candidate).expanduser()
             if resolved.is_file() and os.access(resolved, os.X_OK):
-                return str(resolved.resolve())
+                return str(resolved.absolute() if preserve_launcher else resolved.resolve())
             if required:
                 if resolved.exists():
                     raise WakeError(f"configured Codex CLI path is not executable: {candidate}")
@@ -80,13 +82,13 @@ def resolve_codex_cmd(
             return ""
         found = shutil.which(candidate, path=path)
         if found:
-            return str(Path(found).resolve())
+            return str(Path(found).absolute() if preserve_launcher else Path(found).resolve())
         if required:
             raise WakeError(f"Codex CLI command not found: {candidate}")
         return ""
     found = shutil.which("codex", path=path)
     if found:
-        return str(Path(found).resolve())
+        return str(Path(found).absolute() if preserve_launcher else Path(found).resolve())
     if required:
         raise WakeError(
             "Codex CLI command not found: codex; configure "
