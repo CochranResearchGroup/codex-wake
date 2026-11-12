@@ -3,7 +3,12 @@
 `codex-wake tabs monitor-start` starts the existing single host monitor. It retains
 one metadata-only tmux control client per selected session and passive native
 Codex connections per endpoint. Byobu uses stock tmux; no patched Byobu is needed.
-The default tick is one second. Status changes use cached attachment bindings;
+The default tick is one second. tmux metadata uses ordinary control notifications
+plus periodic fixed metadata snapshots on that retained connection (one-second
+fallback cadence, with ordinary event-triggered updates). Native
+`refresh-client -B` wildcard subscriptions are not used: tmux3.4 can crash the
+whole server if their timer encounters a closing client without a session.
+Status changes use cached attachment bindings;
 ordinary ticks do not spawn a Python inventory probe for every workspace.
 
 ```sh
