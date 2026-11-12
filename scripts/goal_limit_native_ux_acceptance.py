@@ -725,7 +725,18 @@ def qualify(options):
 
         def rpc(method, params):
             bounded()
-            return native_request(endpoint, str(tui), method, params, 3)
+            started = time.monotonic()
+            try:
+                return native_request(endpoint, str(tui), method, params, 3)
+            except Exception as error:
+                import traceback
+                failure = dict(method=method, elapsed_seconds=time.monotonic() - started,
+                    exception_type=type(error).__name__,
+                    stack=traceback.format_tb(error.__traceback__, limit=6))
+                report['native_rpc_failure'] = failure
+                save('native-rpc-failure.json', failure)
+                raise RuntimeError(f"native {method} raised {type(error).__name__} after "
+                    f"{failure['elapsed_seconds']:.3f}s") from error
 
         def model_start_snapshot():
             # Native external_notice crosses flush_rollout before replying. This
