@@ -1,5 +1,5 @@
 {
-  "status": "SOURCE_ACCEPTED_FINAL_INSTALLED_CHECK_PENDING",
+  "status": "NATIVE_ALIAS_BLOCKER_REMEDIATION",
   "source_commit": "6465aa6a4aac1d605a4db1f7f4a81002b4018305",
   "main_base": "92c00a0d8495f2d7d386cd7d85cd4f610e8f6ded",
   "version": "0.22.0.dev10",
@@ -114,5 +114,17 @@
   "initial_failure": "Source-bound101 selection failed late-socket6s/12s despite timingmargin; originalFAILretained. Realformatting race identified and fixed; original6sbound restored. Current102 selection passesbothversions.",
   "review": "One completed broadStandards/Spec review + one bounded remediation retained; this review isclosed-worldintegrationanddeployment-readiness, notsecondbroaddiscovery.",
   "hosted_ci": "Skipped by operator cost policy; localchecks authoritative.",
-  "deployment_authority": "Operator explicitly requested PR review merge deploy. Working artifacts/service activation waits for exactmerged-main and applicableisolatedproof."
+  "deployment_authority": "Operator explicitly requested PR review merge deploy. Working artifacts/service activation waits for exactmerged-main and applicableisolatedproof.",
+  "installed_startup": "41 PASS 19.538s exact wheel7395 UID1017",
+  "native_alias_blocker": {
+    "id": "INT223-2",
+    "status": "implementing",
+    "actual_endpoint": "owned account app-server-control/app-server-control.sock alias",
+    "actual_selector": "exact fixture thread present on same daemon",
+    "alias_discovery": "PARTIAL, sessions=[], source_unavailable",
+    "physical_discovery": "COMPLETE, holds=[], three sessions including exact selector",
+    "proof": "Synchronous actual native child command wrapper, before execution and cleanup",
+    "correction": "Canonicalize native Unix remote address before invoking Wake; preserve Python explicit no-symlink and same-user ownership contracts",
+    "new_native_qualification": "required before merge/deployment"
+  }
 }

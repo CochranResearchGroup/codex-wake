@@ -51,3 +51,23 @@ preserves later generation changes; injected owners unchanged. Original6s test
 bound restored. Focused41PASS on3.11/3.12; source-bound102PASS onboth versions.
 Finalcandidatewheel7395 differs fromfirstdev10onlytab_observer.py; finalinstalled
 qualification isrunning. No second broadreview or workingeffect yet.
+
+## INT223-2 | Native control-socket alias
+
+Owner: native572 / primary. Priority P1. State: implementing bounded correction.
+Final installed Python7395 observer/startup41 tests pass, but actual UI activation
+refused session ownership. Targeted live command-boundary capture proves the exact
+UI selector exists on the intended same-UID daemon: actual control-socket alias
+(lstat symlink, UID1017) yields partial discovery with no sessions; its resolved
+physical socket yields complete discovery with three sessions including that
+selector. Earlier default-locator mismatch was insufficient and is not the cause.
+Native UI must resolve its Unix remote address before handing it to Wake's
+explicit-endpoint boundary. Preserve Python's no-symlink and peer/home/process
+ownership checks. Existing actual UI and upgrade proof for package-v4 remains
+historical; new native bytes require new exact-package qualification before merge
+and working deployment. Prior failures are retained; no retry relabeling.
+Native worker owns native source, focused red/green, complete package build and
+serialized UID1017 acceptance. Primary owns integration, review and deployment.
+Working effects remain zero. Deployment helper review also corrected controller
+lifecycle to use the existing systemd owner instead of racing Restart=always.
+Current disabled/inactive tab startup state is preserved.
