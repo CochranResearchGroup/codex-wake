@@ -1343,3 +1343,31 @@ lanes:
     overlaps: [P220]
     updated_at: 2026-11-11
     disposition: Delivered and qualified on integration branch; one review/one bounded remediation complete; retained worktree, no production deployment
+
+- id: P221
+    owner: primary / ecochran76
+    objective: Explicit formatting enable after terminal server replacement
+    work_items: [LOCAL-P221]
+    plan: docs/dev/plans/0221-2026-11-11-tab-format-reboot.md
+    branch: fix/tab-format-reboot
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [P210, P216]
+    updated_at: 2026-11-11
+    disposition: PR582 merged4dfd8b08; exact dev8 deployed after UID1017 qualification;45tabs verified; task checkout cleanup at documentation closeout
+
+  - id: P222
+    owner: primary / ecochran76
+    objective: Automatic tab monitor startup and opted-in namespace recovery
+    work_items: [LOCAL-P222]
+    plan: docs/dev/plans/0222-2026-11-11-tab-startup-recovery.md
+    branch: feat/tab-format-startup
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    dependencies: [P221]
+    overlaps: [P210, P216]
+    updated_at: 2026-11-11
+    disposition: PR584 merged6dbeeeef; dev9 installed; startup active and recovery opted in;43tabs verified; task checkout cleanup at closeout

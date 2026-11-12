@@ -44,6 +44,55 @@ whole-tab dimming is added.
 Actual visibility also follows the backend's redraw interval, which Wake bounds
 at five seconds while decoration owns it.
 
+## After reboot or terminal server replacement
+
+Run `codex-wake tabs format enable --workspace WORKSPACE` again. Explicit enable
+retains the previous namespace's original settings in the controller's
+`tab-formatting/state.json` under `retired_workspaces`, then captures the current
+namespace's originals before decorating it. Existing schema-version 1 files
+remain readable; the retained map is additive. Returning to a previously seen
+namespace reuses its originals. No old baseline is restored onto a new server.
+
+Before enable, status and inspect report `status: stale_target` with
+`namespace_matches: false` when saved custody belongs to another namespace.
+The reported record is that saved baseline; window options describe the current
+server. These reads do not change custody. Rollback, resume, reenable, reset,
+pause remain fenced until explicit enable establishes current custody. Automatic
+refresh retains this fence unless recover_namespace is explicitly enabled. Requests pinned to the old presentation are still rejected.
+The optional startup workflow below enables automatic recovery at login; without
+that opt-in, enable starts the monitor through the normal supported path.
+
+## Automatic startup and replacement recovery
+
+On Linux with a systemd user manager, opt in for the selected workspace:
+
+```sh
+codex-wake tabs format configure --workspace WORKSPACE --policy '{"recover_namespace":true}'
+codex-wake tabs format enable --workspace WORKSPACE
+codex-wake tabs startup enable
+codex-wake tabs startup status
+```
+
+Startup installs one root-specific owned user unit, enabled for `default.target`,
+and hands the existing monitor to its foreground service. It preserves monitor
+settings and waits safely for configured or automatically discovered terminal
+sockets/sessions. It does not create terminals, launch agents or keep the host
+awake. Startup follows the user's normal manager/login lifecycle; it does not
+change linger settings. `tabs startup disable` disables and stops this owned
+service; unrelated units remain untouched. These commands are local CLI only.
+
+`recover_namespace` defaults to false. When explicitly enabled, automatic refresh
+may retain an enabled workspace's prior namespace baseline and capture originals
+for its observed replacement, including after reboot. Disabled, rolled-back and
+paused workspace records remain held. Returning namespace baselines preserve
+their own disabled/paused state. Unavailable observations cannot authorize this
+transition. Requests pinned to old identities remain rejected. Workspace IDs
+must match exactly; names are not used to guess old-to-new session identities.
+Turn recovery off with `--policy '{"recover_namespace":false}'`.
+
+An edited/foreign startup unit is preserved and reported as a conflict. A missing
+user-manager bus is a startup gate, not authority to change system services.
+
 ## One-command rollback and re-enable
 
 ```sh

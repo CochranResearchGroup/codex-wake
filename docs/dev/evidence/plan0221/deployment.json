@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "source": "4dfd8b08e00d7bff2e57477b1015381979de6658",
+  "version": "0.22.0.dev8",
+  "wheel_sha256": "da11770ce8620dce2fc901157226f41030298abe69bac484082a6b466844993f",
+  "python_members_equal": 319,
+  "launchers": 9,
+  "protected_preserved": 10,
+  "native_generations_preserved": 29,
+  "tabs_verified": 45,
+  "native_option_mismatches": [],
+  "monitor_fresh": true,
+  "provider_calls": 0,
+  "feature_pr": 582,
+  "qualification_uid": 1017,
+  "qualification_checks": [
+    "previous-and-candidate-immutable-prefix-install",
+    "seven-public-controller-and-cli-regressions",
+    "installed-cli-stdio-oauth-api-acceptance",
+    "previous-candidate-rollback-reselect-with-durable-policy-and-no-dispatch-poll"
+  ],
+  "supervisor_preserved": true,
+  "monitor_settings_preserved": true,
+  "rollback_retained": true,
+  "review": {
+    "standards": "no blocking findings",
+    "spec": "no blocking findings",
+    "mode": "serial primary"
+  },
+  "local_tests": {
+    "formatting": 100,
+    "related": 34,
+    "uid1017_regressions": 7
+  },
+  "limitations": [
+    "Linux/WSL Python3.12; shared host kernel",
+    "No native Windows qualification or native Codex binary upgrade",
+    "No full-suite or Python3.11 claim",
+    "Previous test package byte-exact repack of installed public package, not original wheel"
+  ],
+  "hosted_ci": "skipped by operator cost policy"
+}

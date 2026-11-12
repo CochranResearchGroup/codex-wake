@@ -39,6 +39,108 @@ class FormattingTests(unittest.TestCase):
         self.assertEqual(self.tmux('show-options','-w','-t','@0'),before)
         self.assertEqual(self.tmux('display-message','-p','-t','@0','#{window_name}').strip(),'original name')
 
+    def test_enable_after_server_restart_preserves_old_baseline_and_new_rollback(self):
+        self.tmux('set-option','-w','-t','@0','window-status-format','before reboot #W')
+        self.call('enable')
+        old=self.call('status')['record']
+        self.tmux('kill-server')
+        self.socket=str(self.root/'restarted.sock')
+        self.tmux('new-session','-d','-s','fixture','-n','after reboot','sleep 120')
+        self.transport=TmuxAttachmentTransport(self.socket,'$0')
+        self.tabs.workspaces['work']['transport']=self.transport
+        self.tmux('set-option','-w','-t','@0','window-status-format','after reboot #W')
+        before=self.tmux('show-options','-w','-t','@0')
+        panes=self.tmux('list-panes','-F','#{pane_id}:#{pane_pid}')
+        self.assertEqual(self.call('enable')['status'],'applied')
+        self.assertIn('SH',self.tmux('show-options','-w','-v','-t','@0','window-status-format'))
+        state=json.loads((self.root/'tab-formatting'/'state.json').read_text())
+        self.assertEqual(state['retired_workspaces']['work'][old['identity']],old)
+        self.assertEqual(self.call('rollback')['status'],'rolled_back')
+        self.assertEqual(self.tmux('show-options','-w','-t','@0'),before)
+        self.assertEqual(self.tmux('list-panes','-F','#{pane_id}:#{pane_pid}'),panes)
+
+    def test_opted_in_refresh_recovers_replacement_and_rollback_stays_disabled(self):
+        from codex_wake.tab_format_monitor import refresh_formatting
+        self.call('configure',policy={'recover_namespace':True})
+        self.call('enable')
+        original=self.call('status')['record']
+        self.tmux('new-session','-d','-s','replacement','sleep 120')
+        self.tabs.workspaces['work']['transport']=TmuxAttachmentTransport(self.socket,'$1')
+        before=self.tmux('show-options','-w','-t','@1')
+        observed=self.tabs.execute('tabs.list',{})
+        unavailable=dict(observed,resources=[dict(row,monitor_unavailable=True) for row in observed['resources']])
+        held=refresh_formatting(self.root,unavailable,tabs=self.tabs)
+        self.assertEqual(held['workspaces'][0]['code'],'stale_target')
+        self.assertEqual(self.call('status')['record'],original)
+        result=refresh_formatting(self.root,observed,tabs=self.tabs)
+        self.assertEqual(result['workspaces'][0]['status'],'applied',result)
+        state=json.loads((self.root/'tab-formatting'/'state.json').read_text())
+        self.assertEqual(state['retired_workspaces']['work'][original['identity']],original)
+        self.assertEqual(self.call('rollback')['status'],'rolled_back')
+        self.assertEqual(self.tmux('show-options','-w','-t','@1'),before)
+        self.tmux('new-session','-d','-s','next','sleep 120')
+        self.tabs.workspaces['work']['transport']=TmuxAttachmentTransport(self.socket,'$2')
+        result=refresh_formatting(self.root,self.tabs.execute('tabs.list',{}),tabs=self.tabs)
+        self.assertEqual(result['workspaces'][0]['status'],'disabled')
+        self.assertEqual(self.tmux('show-options','-w','-v','-t','@2','window-status-format'),'')
+
+    def test_automatic_recovery_does_not_reenable_a_retired_rollback_hold(self):
+        from codex_wake.tab_format_monitor import refresh_formatting
+        self.call('configure',policy={'recover_namespace':True})
+        self.call('enable');self.call('rollback')
+        old_transport=self.transport
+        before=self.tmux('show-options','-w','-t','@0')
+        self.tmux('new-session','-d','-s','replacement','sleep 120')
+        self.tabs.workspaces['work']['transport']=TmuxAttachmentTransport(self.socket,'$1')
+        self.call('enable')
+        self.tabs.workspaces['work']['transport']=old_transport
+        outcome=refresh_formatting(self.root,self.tabs.execute('tabs.list',{}),tabs=self.tabs)
+        self.assertEqual(outcome['workspaces'][0]['status'],'disabled')
+        self.assertEqual(self.tmux('show-options','-w','-t','@0'),before)
+        self.assertFalse(self.call('status')['record']['enabled'])
+
+    def test_changed_namespace_is_inspectable_but_refresh_and_old_intent_are_fenced(self):
+        from codex_wake.managed_inventory import InventoryError
+        from codex_wake.tab_format_monitor import refresh_formatting
+        self.call('enable')
+        pin=self.tabs.format_target(workspace='work')
+        path=self.root/'tab-formatting'/'state.json'
+        original=path.read_bytes()
+        self.tmux('new-session','-d','-s','replacement','sleep 120')
+        self.tabs.workspaces['work']['transport']=TmuxAttachmentTransport(self.socket,'$1')
+        for verb in ('status','inspect'):
+            inspected=self.call(verb)
+            self.assertEqual(inspected['status'],'stale_target')
+            self.assertFalse(inspected['namespace_matches'])
+        for verb in ('rollback','resume','reenable','reset','pause'):
+            with self.assertRaises(InventoryError) as error:self.call(verb)
+            self.assertEqual(error.exception.code,'stale_target')
+        result=refresh_formatting(self.root,self.tabs.execute('tabs.list',{}),tabs=self.tabs)
+        self.assertEqual(result['workspaces'][0]['code'],'stale_target')
+        with self.assertRaises(InventoryError) as error:self.call('enable',expected_target=pin)
+        self.assertEqual(error.exception.code,'stale_target')
+        self.assertEqual(path.read_bytes(),original)
+        self.assertEqual(self.tmux('show-options','-w','-v','-t','@1','window-status-format'),'')
+
+    def test_returning_namespace_reuses_originals_and_retired_alias_is_fenced(self):
+        from codex_wake.managed_inventory import InventoryError
+        self.tmux('set-option','-w','-t','@0','window-status-format','original namespace #W')
+        before=self.tmux('show-options','-w','-t','@0')
+        self.call('enable')
+        old_transport=self.transport
+        self.tmux('new-session','-d','-s','replacement','sleep 120')
+        self.tabs.workspaces['work']['transport']=TmuxAttachmentTransport(self.socket,'$1')
+        self.call('enable')
+        self.tabs.workspaces['alias']=dict(kind='tmux',transport=old_transport)
+        with self.assertRaises(InventoryError) as error:
+            self.tabs.execute('tabs.format.enable',dict(workspace='alias'))
+        self.assertEqual(error.exception.code,'formatting_custody_conflict')
+        del self.tabs.workspaces['alias']
+        self.tabs.workspaces['work']['transport']=old_transport
+        self.assertEqual(self.call('enable')['status'],'applied')
+        self.assertEqual(self.call('rollback')['status'],'rolled_back')
+        self.assertEqual(self.tmux('show-options','-w','-t','@0'),before)
+
     def test_public_cli_and_mcp_contract_share_reversible_operations(self):
         from codex_wake.tab_contract import tool_specs
         from codex_wake.controller_http import TOOLS

@@ -111,6 +111,9 @@
     "tabs.session.show",
     "tabs.session.update",
     "tabs.show",
+    "tabs.startup.disable",
+    "tabs.startup.enable",
+    "tabs.startup.status",
     "tabs.undo",
     "tabs.view-delete",
     "tabs.view-evaluate",
@@ -125,7 +128,10 @@
     "configuration.default-root",
     "history.recent",
     "history.import-recent",
-    "tabs.result"
+    "tabs.result",
+    "tabs.startup.enable",
+    "tabs.startup.disable",
+    "tabs.startup.status"
   ],
   "deferred_commands": [
     "a2a.ack-projections",

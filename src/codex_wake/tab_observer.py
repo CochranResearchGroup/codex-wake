@@ -182,6 +182,29 @@ class TabObserver:
                 result.append((name, info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns))
             except OSError:
                 result.append((name, None))
+        if not self.external_owner:
+            # Unit startup may precede terminal startup. Rebuild adapters when
+            # a configured socket appears or changes generation, without waiting
+            # for an unrelated config-file edit.
+            for path in sorted({str(c['socket_path']) for c in self.owner.workspaces.values()
+                                if c.get('socket_path')})[:64]:
+                try:
+                    info=Path(path).stat()
+                    result.append((path,info.st_dev,info.st_ino))
+                except OSError:result.append((path,None))
+            if result[0][1] is None:
+                # Automatic discovery must also notice new sessions on an
+                # unchanged server. Poll the existing bounded discovery seam;
+                # keep feeds/cache when its workspace identities are unchanged.
+                now=self.monotonic()
+                if now-getattr(self,'_discovery_checked_at',-float('inf'))>=5:
+                    from .tab_workspace_discovery import discover
+                    found,_=discover(deadline=time.monotonic()+.5)
+                    self._discovery_signature=tuple(sorted((name,c.get('kind'),c.get('socket_path'),
+                        c.get('session_id'),tuple(getattr(c.get('transport'),'socket_identity',[]) or []))
+                        for name,c in found.items()))
+                    self._discovery_checked_at=now
+                result.append(('discovery',getattr(self,'_discovery_signature',())))
         return tuple(result)
 
     def _prepare_owner(self):
@@ -474,7 +497,7 @@ class TabObserver:
             self._close_feeds()
             self.owner = self.owner_factory(self.root)
             self._prepare_owner()
-            self.configuration = configuration
+            self.configuration = self._configuration()
             self.last_inventory = -float('inf')
         dirty = False
         tmux_items=list(self.tmux.items())

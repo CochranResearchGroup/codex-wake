@@ -56,6 +56,24 @@ class FormattingAutostartTests(unittest.TestCase):
         self.assertTrue(reenabling['monitor']['already_running'])
         self.assertEqual(self.monitor.execute('tabs.monitor.status',{})['monitor']['process'],before)
 
+    def test_monitor_started_before_configured_socket_discovers_it_when_created(self):
+        # Config is fixed before startup; only native socket availability changes.
+        self.tmux('kill-server')
+        self.socket=str(self.root/'late.sock')
+        config=self.root/'controller-tabs.json'
+        config.write_text(json.dumps(dict(schema_version=1,workspaces=dict(work=dict(
+            kind='tmux',socket_path=self.socket,session_id='$0')))))
+        config.chmod(0o600)
+        self.monitor.execute('tabs.monitor.start',dict(interval=.2))
+        self.tmux('new-session','-d','-s','late','-n','later terminal','sleep 60')
+        deadline=time.monotonic()+6
+        while True:
+            shown=self.tmux('show-options','-w','-v','-t','@0','window-status-format')
+            if 'SH' in shown:break
+            self.assertLess(time.monotonic(),deadline,'startup monitor never discovered the late terminal socket')
+            time.sleep(.05)
+        self.assertEqual(self.tmux('display-message','-p','-t','@0','#{window_name}').strip(),'later terminal')
+
     def test_injected_owner_and_global_optout_do_not_start_background_discovery(self):
         from codex_wake.controller_tabs import controller_tabs_from_root, ControllerTabs
         factory=controller_tabs_from_root(self.root)

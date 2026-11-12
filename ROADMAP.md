@@ -1586,3 +1586,28 @@ CLOSED:#570 and tickets571–574. Plan0220 exact nativev4/Wake accepted in UID10
 READY backlog: #576–581. [Findings and action index](docs/dev/evidence/plan0220/retrospective.md).
 Plan0220 implementation is complete; these remain separate follow-up hardening.
 Reuse existing preflight/summary tooling and preserve the no-paid-CI boundary.
+
+## Native active-tab service-context repair
+
+CLOSED (local source diagnosis): [Plan0220](docs/dev/plans/0220-2026-11-11-native-active-tab-executable.md).
+Current state: deterministic missing-PATH reproduction and source regression/fix
+qualified;233 related tests and staged-wheel service-context probe pass. Operator-approved installation and one actual automatic continuation now pass;
+separate protocol acknowledgment fields remain unobserved.
+
+Plan0220 publication: source reviewed and locally qualified through broad tests
+plus focused retention-fixture remediation (see note0220); PR575 integrates the
+exact installed product code. No remaining scoped source/installation/delivery
+gate; independent protocol acknowledgment fields remain unobserved.
+
+## P221 | Formatting after terminal server replacement
+
+CLOSED (PR582 merged; 0.22.0.dev8 installed): [LOCAL-P221](docs/dev/plans/0221-2026-11-11-tab-format-reboot.md).
+Explicit enable establishes namespace-specific originals while retaining earlier
+baselines; automatic refresh and rollback remain fenced. UID1017 qualification
+and working45-tab acceptance PASS; native services unchanged.
+
+## P222 | Automatic tab formatting startup recovery
+
+CLOSED (PR584 merged; dev9 installed and startup enabled): [LOCAL-P222](docs/dev/plans/0222-2026-11-11-tab-startup-recovery.md).
+Owned user-service startup plus explicit opt-in namespace recovery; preserve
+originals and disabled/paused custody. No host reboot or agent launch.

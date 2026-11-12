@@ -9157,3 +9157,120 @@ dirty4paths preserved. Review1/remediation1, no broader rerun or hostedCI.
 Parent570 CLOSED03:06:26Z; children571–574 closed/readbackverified.
 Merge/release/deploy and576–581 remain separate. Memory dispositionforbidden
 under explicit-write-request boundary; machine non-write receipt retained outsideGit.
+
+## Native active-tab service-context diagnosis | 2026-11-11
+
+[Plan0220](docs/dev/plans/0220-2026-11-11-native-active-tab-executable.md) owns the
+bounded lane from installed dev7 source7af9b29. Real read-only probe passes
+interactively and fails under systemd with active_attachment_unavailable, zero
+submissions. Adding only the operator-local executable directory to PATH makes
+it pass. A public native factory→session observer regression fails before the
+source fix; two negative/control cases pass. Fix resolves the existing wake's
+endpoint with its pinned executable before attachment inventory. All3 regressions
+and the original service-context source-candidate probe pass. Working services and
+production wake records are unchanged; broader related tests follow.
+
+Final bounded diagnosis:233 related tests, pinned lint, compilation, policy wiring
+and diff checks pass. The source/packaged wheel recognize the original exact
+attachment under the same service environment where installed code fails, with
+zero submissions. Existing control tests confirm effects-gate cancellation refusal
+and release behavior. No debugging instrumentation remains in product source.
+[Diagnosis note0220](docs/dev/notes/0220-2026-11-11-native-active-tab-path-diagnosis.md)
+records RED/GREEN, minimisation, ranked hypotheses and limits. Plan0220 is CLOSED
+for source diagnosis; one content-bound local wheel is staged outside Git. Source
+is uncommitted; working package/services remain unchanged. Real automatic delivery
+requires separately authorized adoption/acceptance. No hosted CI or remote issue
+mutation was used in this diagnosis. Retain the dedicated checkout for review.
+
+Operator approved runtime adoption and one automatic continuation. Isolated real
+UID1017 candidate/rollback/reselect checks and3 regressions pass. The immutable
+candidate prefix is selected by all9 managed launchers and the shared supervisor;
+14 enabled roots were admission-held only while polls drained, then their exact
+registry bytes were restored. Old supervisor exited; new children use candidate;
+no automatic restarts. Working installed read-only probe passes. One exact-self
+file wake is armed with ready monitor, original key and fixed expiry. Plan0220 is
+OPEN for this explicitly approved acceptance extension; actual automatic delivery
+remains pending. No further Slack test, credential use or shared native restart.
+
+
+Final installed acceptance: the completion marker triggered the exact registered
+wake and resumed this same thread automatically after idle. Native submission
+marker matches the retained record, with exactly1attempt on existing_tab and
+accepted queue evidence. Supervisor remains active on the candidate, zero
+restarts. Independent native acknowledgment/execution fields remain not_observed;
+no synthetic protocol receipt was inserted. Private verification preserves this
+boundary. Plan0220 CLOSED for approved source/installation/one-continuation scope.
+Source remains uncommitted/unpublished; old package, rollback and source checkout
+are retained. No extra wake, Slack message or credential operation occurred.
+
+## Plan0220 publication closeout | 2026-11-11
+
+Operator requested review/merge/deploy/test. Final qualification in note0220
+records the initial CI-isolation omission, corrected2432-test run and one
+retention fixture timeout repaired by the documented30s wait. Remaining2430
+tests PASS/1skip; repaired fixture passes twice, all assertions retained.
+New regressions also3/3 on Python3.11.15. Product files317/317 and9 launchers
+match the already-qualified working candidate; no additional restart/dispatch.
+PR575 owns source integration. Auth PR325/326 and Receipts PR51 are merged;
+Auth owner deployment/control/link/account/state/guard checks PASS.
+
+## Turn  | 2026-11-11 | P221 formatting after terminal server replacement
+
+LOCAL-P221 reproduced stale_target on actual isolated tmux server replacement in
+about0.2s, including on origin/main95bbebb3. Fresh connections still failed and
+no monitor was involved, confirming the persisted baseline fence as the cause.
+Added explicit-enable namespace custody rollover with retained originals,
+read-only stale inspection and unchanged refresh/rollback/request pin fences.
+Public controller regression went red before source fix, then green; returning
+namespace and alias custody tests also pass. Working installation is unchanged.
+
+P221 source checkpoint008e949f:100 formatting+34 related tests PASS, packaged CLI
+restart/enable/rollback PASS. See docs/dev/evidence/plan0221/validation.md for exact
+commands and exclusions. Local commit only; source-review checkout retained.
+
+## Turn | 2026-11-11 | P221 reviewed, merged and installed
+
+Operator requested PR/review/merge/install. Standards and Spec primary reviews
+found no blockers; release revision passed100formatting+34related local tests,
+pinned lint, compile and policy wiring. Hosted CI skipped by cost policy. PR582
+merged4dfd8b08. Exact0.22.0.dev8 wheel qualified as real UID1017, including7public
+regressions, CLI/stdio/OAuth API controls and prior/candidate rollback/reselection.
+All319package members match merged source and installations. Working9launchers
+and completion select dev8; tab monitor replaced through supported controls with
+settings preserved. Fresh acceptance:45tabs, zero native-option mismatches,
+29native generations and10protected files unchanged; supervisor43260 retained,
+zero restarts. See docs/dev/evidence/plan0221/deployment.json. Previous prefix and
+private rollback helper retained. No native binary upgrade or provider calls.
+Task-only checkout removal follows verified closeout publication; main dirty work
+and all unrelated registered worktrees remain untouched. Memory forbidden by
+explicit-request boundary, zero memory writes.
+
+## Turn | 2026-11-11 | P222 automatic formatting startup
+
+User approved proceeding after the recommended startup-recovery follow-up.
+LOCAL-P222 adds an owned local-only startup service and explicit default-false
+recover_namespace preference, preserving baseline custody and disabled/paused
+holds. Fixed the real startup-ordering gap where a configured late socket was
+never rediscovered. Red controller/startup-ordering/quoting tests precede green.
+258tab-test run retained one catalog integration failure; declared local-only
+operations and regenerated command docs; corrected contract checks pass. Real
+systemd fixture starts before terminal readiness, recovers replacement formatting,
+keeps settings/panes and rollback across service restarts, and safely disables.
+No host reboot or provider calls. UID1017 has no manager bus; package qualification
+and real unit acceptance are separate receipts. Working account remains dev8
+until exact merged-package qualification and supported cutover complete.
+
+## Turn | 2026-11-11 | P222 startup activated
+
+PR584 merged6dbeeeef. Exact dev9 wheel qualified as UID1017 (16public regressions,
+CLI/stdio/OAuth API and package rollback/reselection) plus5actual systemd fixture
+checks.320members match source and installed package;9launchers/completion select
+new immutable prefix. Startup unit enabled/active, recovery enabled only for the
+selected current workspace;43tabs verified, monitor fresh and settings preserved.
+10protected files preserved;29of30sampled native generations remain, one absent
+with exit reason unobserved. No native lifecycle calls or provider requests.
+Supervisor retained through activation. No actual host reboot/login claim. Exact
+receipt: docs/dev/evidence/plan0222/deployment.json. Prior prefix and private
+rollback.py retained. Synthetic fixtures and task checkout cleanup follow durable
+publication. Original dirty main and unrelated worktrees preserved. Memory
+forbidden under explicit-request boundary; no memory write.
