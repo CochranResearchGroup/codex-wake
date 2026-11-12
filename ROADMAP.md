@@ -1648,3 +1648,7 @@ Source READY: retain selected stable launcher for new native intents across rele
 rotation.97focused tests and isolated wheel regression pass. Existing missing pins
 remain held; operator-approved installation and seven-record original-window
 recovery are separate gates. See Plan0226 and diagnosis note; no live change.
+
+P0226 activation update2026-11-12: dev13 installed; seven preserved-deadline
+successors armed. Remaining: resident MCP reconnect for stable launcher bindings
+and overdue delivery readback. See installation note; no durability overclaim.

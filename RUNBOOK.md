@@ -9390,3 +9390,12 @@ native launcher pathname; default resolver/literal pins remain unchanged.97focus
 checks pass; isolated wheel3cases pass. No live install/wake edit/replay;7remaining
 zero-attempt intents need separately approved original-window recovery. Local ticket
 Plan0226READY, exact note0226-native-launcher-continuity-diagnosis. No hosted CI.
+
+## 2026-11-12 | P0226 approved CLI install and seven-wake recovery
+
+PR592 merged; dev13 installed and97installed-package tests pass. Seven original
+reviews8–14 cancelled with preserved history; seven attributed successors armed
+at original due/TTL. Fixed trial end unchanged. Resident MCPdev11 and unsupported
+thread-scoped refresh mean successors use valid literal0.167.2pins; stable-path
+registration requires MCP reconnect. Overdue review busy/firing is not delivery
+proof. See note0226-native-launcher-installation and private recovery readbacks.
