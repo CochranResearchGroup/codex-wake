@@ -98,6 +98,11 @@ def register_parser(subparsers):
     from .tab_contract import tool_specs, cli_verb
     parser = subparsers.add_parser('tabs', help='observe, group and control exact owned terminal attachments')
     verbs = parser.add_subparsers(dest='tabs_command', required=True)
+    startup=verbs.add_parser('startup',help='Enable, disable or inspect persistent local tab-monitor startup.')
+    startup_verbs=startup.add_subparsers(dest='startup_command',required=True)
+    for verb in ('enable','disable','status'):
+        item=startup_verbs.add_parser(verb)
+        item.add_argument('--json',dest='as_json',action='store_true')
     formatting=verbs.add_parser('format',help='Reversible tab decoration; rollback restores originals, reenable reapplies saved policy.')
     formatting_verbs=formatting.add_subparsers(dest='format_command',required=True)
     sessions=verbs.add_parser('sessions',help='Create, list, inspect, edit and delete named terminal sessions.')
@@ -177,6 +182,9 @@ def register_parser(subparsers):
 
 
 def run(args, root, *, observer=None):
+    if args.tabs_command=='startup':
+        from .tab_startup import command
+        return command(args)
     legacy = args.tabs_command in ('preview','show','apply','undo') and (
         getattr(args,'socket_path',None) is not None or getattr(args,'session_id',None) is not None or
         (args.tabs_command=='show' and (getattr(args,'plan_id',None) or getattr(args,'receipt_id',None))))

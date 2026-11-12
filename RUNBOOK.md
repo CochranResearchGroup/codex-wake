@@ -9184,3 +9184,18 @@ private rollback helper retained. No native binary upgrade or provider calls.
 Task-only checkout removal follows verified closeout publication; main dirty work
 and all unrelated registered worktrees remain untouched. Memory forbidden by
 explicit-request boundary, zero memory writes.
+
+## Turn | 2026-11-11 | P222 automatic formatting startup
+
+User approved proceeding after the recommended startup-recovery follow-up.
+LOCAL-P222 adds an owned local-only startup service and explicit default-false
+recover_namespace preference, preserving baseline custody and disabled/paused
+holds. Fixed the real startup-ordering gap where a configured late socket was
+never rediscovered. Red controller/startup-ordering/quoting tests precede green.
+258tab-test run retained one catalog integration failure; declared local-only
+operations and regenerated command docs; corrected contract checks pass. Real
+systemd fixture starts before terminal readiness, recovers replacement formatting,
+keeps settings/panes and rollback across service restarts, and safely disables.
+No host reboot or provider calls. UID1017 has no manager bus; package qualification
+and real unit acceptance are separate receipts. Working account remains dev8
+until exact merged-package qualification and supported cutover complete.

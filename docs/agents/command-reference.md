@@ -6258,6 +6258,42 @@ Examples:
   codex-wake --wake-root ROOT tabs result --request-id REQUEST
 ```
 
+## tabs startup enable
+
+Manage the owned per-controller tab-monitor systemd user unit.
+
+Local operator only; enable/disable affects only this root-specific user service. No agent or terminal launch.
+
+Transport: Local human CLI only.
+
+```sh
+codex-wake --wake-root ROOT tabs startup enable
+```
+
+## tabs startup disable
+
+Manage the owned per-controller tab-monitor systemd user unit.
+
+Local operator only; enable/disable affects only this root-specific user service. No agent or terminal launch.
+
+Transport: Local human CLI only.
+
+```sh
+codex-wake --wake-root ROOT tabs startup disable
+```
+
+## tabs startup status
+
+Manage the owned per-controller tab-monitor systemd user unit.
+
+Local operator only; enable/disable affects only this root-specific user service. No agent or terminal launch.
+
+Transport: Local human CLI only.
+
+```sh
+codex-wake --wake-root ROOT tabs startup status
+```
+
 
 ## Local session controller
 

@@ -149,6 +149,10 @@ OPERATIONS += tuple(Operation(spec[1],spec[2],tool,tuple(spec[3]),tuple(spec[4])
 OPERATIONS += (Operation('tabs.result','Read a retained local UID-owned tab request after disconnect or workspace closure.',
     None,effect='Local CLI shortcut for authenticated common operations.result; no live workspace or new effect.',
     example='tabs result --request-id REQUEST'),)
+OPERATIONS += tuple(Operation('tabs.startup.'+verb,
+    'Manage the owned per-controller tab-monitor systemd user unit.',None,
+    effect='Local operator only; enable/disable affects only this root-specific user service. No agent or terminal launch.',
+    example='tabs startup '+verb) for verb in ('enable','disable','status'))
 BY_NAME = {op.name: op for op in OPERATIONS}
 
 

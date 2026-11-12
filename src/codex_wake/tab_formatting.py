@@ -95,6 +95,19 @@ class TabFormatting:
         state['workspaces'][name]=record
         return record
 
+    def replace_namespace(self,state,name,identity,*,enabled=False):
+        """Retain originals before explicit or opted-in namespace rollover."""
+        record=state['workspaces'][name]
+        retired=state.setdefault('retired_workspaces',{}).setdefault(name,{})
+        previous=retired.get(identity)
+        self.new_record(state,name,identity,enabled=enabled)  # checks alias custody
+        retired[record['identity']]=record
+        record=previous or state['workspaces'][name]
+        state['workspaces'][name]=record
+        retired.pop(identity,None)
+        self.save(state)
+        return record
+
     def execute(self,operation,arguments):
         result=self._execute(operation,arguments)
         if (operation in ('tabs.format.enable','tabs.format.resume','tabs.format.reenable')
@@ -183,19 +196,7 @@ class TabFormatting:
                     available_presets=['slate','dusk','graphite','legacy'],
                     windows=[dict(window=w['window_id'],options=transport.formatting('read',dict(window=w['window_id']),deadline)) for w in snapshot['windows']])
             if namespace_changed:
-                # Explicit enable is new intent for the current namespace, never
-                # authority to restore a different server's saved originals.
-                # Save both custodians before any native formatting write. If a
-                # previous namespace returns, reuse its baseline rather than
-                # capturing our own decoration as its originals.
-                retired=state.setdefault('retired_workspaces',{}).setdefault(name,{})
-                previous=retired.get(identity)
-                self.new_record(state,name,identity,enabled=False)  # alias custody check
-                retired[record['identity']]=record
-                record=previous or state['workspaces'][name]
-                state['workspaces'][name]=record
-                retired.pop(identity,None)
-                self.save(state)
+                record=self.replace_namespace(state,name,identity)
             if record is None:
                 if verb in ('rollback','reenable','resume'):
                     raise InventoryError('baseline_missing','No saved original formatting baseline; use enable first.')
@@ -567,7 +568,11 @@ class TabFormatting:
                     else:raise InventoryError('stale_target','Physical panes changed during bounded formatting inspection.')
                     identity=self.identity(physical)
                     if record and identity!=record['identity']:
-                        raise InventoryError('stale_target','Formatting namespace changed; baseline preserved.')
+                        if not policy['recover_namespace'] or not any(not row.get('monitor_unavailable') for row in rows.values()):
+                            raise InventoryError('stale_target','Formatting namespace changed; baseline preserved.')
+                        record=self.replace_namespace(state,name,identity,enabled=True)
+                        if not record.get('enabled') or record.get('paused'):
+                            results.append(dict(workspace=name,status='paused' if record.get('paused') else 'disabled'));continue
                     if record is None:
                         record=self.new_record(state,name,identity,enabled=True);self.save(state)
                     # Clear old dynamic cues for missing samples before renewing a
