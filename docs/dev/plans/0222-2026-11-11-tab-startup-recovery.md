@@ -1,6 +1,6 @@
 # Automatic tab formatting startup recovery
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Work item: LOCAL-P222
 Priority: bug follow-up
@@ -10,10 +10,13 @@ Base: a337f510c27bef600fc95a375682c2fadbf5f59d
 
 ## Current State
 
-IN_PROGRESS (source and packaged fixture qualification complete; publication/activation next). User said "pl gp" after the proposed automatic reboot-recovery slice;
-interpreted as plan and go. Installed dev8 solves explicit enable; no tab-monitor
-startup unit exists. Test UID1017 has no user-manager bus. Primary main is dirty
-and behind current origin/main; one new checkout isolates this intent.
+DONE. PR584 merged6dbeeeef; exact0.22.0.dev9 installed after package and real-unit
+qualification. Startup is enabled/active for the private user controller and
+recover_namespace is enabled for its selected workspace. All43 current tabs
+match native options; monitor settings are preserved and observations fresh.
+All320 package members and9 launchers match the merged source. Supervisor remained
+running; no native lifecycle call or host reboot. See the
+[deployment receipt](../evidence/plan0222/deployment.json).
 
 ## Scope and acceptance
 
@@ -85,3 +88,27 @@ fixture. See [validation](../evidence/plan0222/validation.md). Proceed instructi
 covers this proposed startup follow-up; source publication and account activation
 follow qualification without another confirmation round. Existing native services
 and supervisor are preserved; previous prefix and startup-disable rollback remain.
+
+## Installation and final custody
+
+Source6dbeeeef1ff239ed7f0ee2b9d40519c0d8f0d8d6, wheel
+0477bb482c44109cce782d0a34d46cdfa5ece0b9f866451c447abd8f510b7c9e.
+Real UID1017 package code, working immutable prefix and merged source all match320
+members. Source review and qualified wheel precede selection. Supported startup
+enable handed the detached monitor to the new user service without changing saved
+settings; unit is enabled/active with zero restarts. Current43tabs have no native
+option mismatches.10protected files retained.29of30 sampled native generations
+remain; one prior native process is absent at final census, exit reason not
+observed. No native lifecycle operation was performed and no causal continuity
+claim is made for that process. Supervisor PID/state stayed unchanged across
+activation. No model/provider call or actual host reboot.
+
+Private qualification/plan0222 retains exact original launcher links, source/wheel
+hashes, unit/formatting snapshots and rollback.py. Rollback disables only this
+root's service, restores its prior recovery preference and previous complete CLI,
+and starts the prior monitor with saved settings. It does not overwrite evolving
+baseline/wake records. Old prefix remains intact. Synthetic QA receipts are
+retained before task fixtures are removed. Task checkout cleanup follows remote
+closeout readback;117registered before removal,116expected after. No unrelated
+worktree or dirty main file is changed. Memory disposition forbidden by the
+explicit memory-update boundary, no write attempted.
