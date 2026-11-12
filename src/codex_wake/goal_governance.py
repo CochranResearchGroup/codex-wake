@@ -11,10 +11,12 @@ from .permission_enforcement import authorize
 from .session_permissions import PermissionDenied, Principal
 
 
-def sync(receipt):
+def sync(receipt, *, locked_allocation=None):
     """Allocation state is authoritative, including after a partial member write."""
-    source = receipt
-    if receipt.get("allocation_path"):
+    # A campaign caller already holds this exact allocation lock through effect
+    # admission; use its authoritative snapshot instead of locking it again.
+    source = locked_allocation if locked_allocation is not None else receipt
+    if locked_allocation is None and receipt.get("allocation_path"):
         path = Path(receipt["allocation_path"])
         with supervision._lock(path.parent, path.stem):
             supervision._private(path)

@@ -1137,7 +1137,8 @@ def resume_existing(root, policy, thread, *, principal, operation_id):
                 _fail('renewal_resume_held', 'finish the current operator turn before continuing the paused task')
             if goal.get('status') != 'paused':
                 _fail('renewal_resume_held', 'the selected native task is not paused')
-            supervision._effect(path, receipt, key, 'thread/goal/set', dict(threadId=thread, status='active', origin='user'))
+            supervision._effect(path, receipt, key, 'thread/goal/set', dict(threadId=thread, status='active', origin='user'),
+                locked_allocation=allocation)
             observed, _ = supervision._native(receipt['grant'], thread)
             verified = bool(observed and observed.get('createdAt') == goal.get('createdAt') and observed.get('status') == 'active')
         else:
@@ -1146,7 +1147,8 @@ def resume_existing(root, policy, thread, *, principal, operation_id):
             if active:
                 _fail('renewal_resume_held', 'finish the current operator turn before continuing the interrupted task')
             verified = supervision._effect(path, receipt, key, 'turn/start', dict(threadId=thread,
-                clientUserMessageId=key, input=[dict(type='text', text='Continue the interrupted task within its existing governor allowance.')]))
+                clientUserMessageId=key, input=[dict(type='text', text='Continue the interrupted task within its existing governor allowance.')]),
+                locked_allocation=allocation)
         if verified and task_disabled and receipt.get('first_stop',{}).get('reason')=='task_exhausted':
             receipt.update(stop_latched=False,state='armed',reason=None,task_stop_bypassed_by_operator=operation_id)
             supervision._save(path,receipt)

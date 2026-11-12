@@ -888,9 +888,9 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             governor=governor_status(root,receipt),engagement=engagement(receipt,controller))
 
 
-def _effect(path,receipt,key,method,params):
+def _effect(path,receipt,key,method,params,*,locked_allocation=None):
     from .goal_governance import sync
-    if sync(receipt):return False
+    if sync(receipt,locked_allocation=locked_allocation):return False
     if method=='turn/steer':
         from .permission_enforcement import controller_permission
         permission=controller_permission(path.parent.parent,receipt)
