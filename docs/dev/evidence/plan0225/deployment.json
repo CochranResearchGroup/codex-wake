@@ -1,0 +1,112 @@
+{
+  "source_commit": "55a2ee5d0266f1a731a109629c3971059ba7dac6",
+  "version": "0.22.0.dev12",
+  "prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev12-55a2ee5",
+  "launchers": {
+    "codex-wake": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev12-55a2ee5/bin/codex-wake",
+    "codex-profiles": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev12-55a2ee5/bin/codex-profiles",
+    "codex-profile": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev12-55a2ee5/bin/codex-profile",
+    "codex-stock": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev12-55a2ee5/bin/codex-stock",
+    "codex-modded": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev12-55a2ee5/bin/codex-modded",
+    "codex-waked": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev12-55a2ee5/bin/codex-waked",
+    "codex-wake-hook": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev12-55a2ee5/bin/codex-wake-hook",
+    "codex-wake-github-webhook": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev12-55a2ee5/bin/codex-wake-github-webhook",
+    "codex-wake-mcp": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev12-55a2ee5/bin/codex-wake-mcp"
+  },
+  "protected_files_unchanged": true,
+  "protected_file_count": 7,
+  "resident_services_preserved": 10,
+  "native_processes_preserved": 27,
+  "native_exited_before_cutover": 1,
+  "rollback_prefix": "/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev11-32eb90f",
+  "rollback_exercised": true,
+  "formatting_activated": false,
+  "service_restarts": 0,
+  "recorded_at": 1794486719.0663867,
+  "schema_version": 1,
+  "status": "DEPLOYED_VERIFIED",
+  "plan": "LOCAL-P225",
+  "authorization": "Operator explicitly requested pr review merge deploy",
+  "actor": "ecochran76 / primary",
+  "pr": "https://github.com/CochranResearchGroup/codex-wake/pull/590",
+  "review": "https://github.com/CochranResearchGroup/codex-wake/pull/590#issuecomment-6823645499",
+  "wheel": {
+    "source_commit": "55a2ee5d0266f1a731a109629c3971059ba7dac6",
+    "wheel_sha256": "ea39e35436f39a8fd4aaefc832f96f506034ab5e9229d188b4b84b56a8aee2ca",
+    "qualified_wheel_sha256": "84f29e0a4d918160979644ae6592fd4986beefc89c1084825c8843f696a2ea79",
+    "all_unzipped_members_equal": true,
+    "member_count": 329
+  },
+  "installed_python_members_verified": 322,
+  "local_validation": {
+    "final_focused_python312": {
+      "passed": 67,
+      "seconds": 56.968
+    },
+    "exact_installed": {
+      "passed": 10,
+      "seconds": 10.104
+    },
+    "python311_prior_focused": {
+      "passed": 67,
+      "seconds": 65.289
+    },
+    "independent_review": {
+      "handle": "/root/delivery_review",
+      "standards": "no findings",
+      "spec": "no findings"
+    },
+    "hosted_workflow": {
+      "run": 43218104097,
+      "conclusion": "cancelled",
+      "reason": "repository local CI cost policy"
+    }
+  },
+  "known_limits": [
+    "Inherited monitor cadence test fails on both candidate and unchanged installed baseline",
+    "P220/P224 inherited planning headers remain unchanged",
+    "Resident services keep their existing loaded dev11 runtime; future CLI invocations use dev12"
+  ],
+  "global_formatting_enabled": false,
+  "startup": {
+    "active": false,
+    "enabled": false,
+    "main_pid": 0
+  },
+  "live_status": {
+    "workspace": "tmux-7cbd633a-1",
+    "tabs": 42,
+    "formatting": "disabled",
+    "preset": "slate"
+  },
+  "qualification_python_survivors": [],
+  "fresh_installed_runtime_processes": [],
+  "working_checkout": "Root main and its unrelated dirty edits preserved; no forced fast-forward",
+  "memory_disposition": "forbidden: session developer explicit-request boundary",
+  "receipts": [
+    {
+      "name": "before-deployment.json",
+      "sha256": "2567aae3001f848d86312c5ee5a26d97a3ebbd82a91b72e19a310de39539e0a9"
+    },
+    {
+      "name": "merged-wheel-equivalence.json",
+      "sha256": "1687ba8e82f3cccfaaa3be0417a6b77e3b70e60572c1c2a6a22e34c8dbf16475"
+    },
+    {
+      "name": "launcher-rollback.json",
+      "sha256": "5eb76fef8a6ee896c504ef57fd06d142f46907668482b47b9305a66f4992dc13"
+    },
+    {
+      "name": "deployment-verification.json",
+      "sha256": "f608861d8af93083feba802c2834462e509699ad37a629e4a8e9cd028691d043"
+    },
+    {
+      "name": "exact-installed-tests.log",
+      "sha256": "2c673873664ba8beb813ce3eb587cc7872d9d4d45650204eedb2af042b0a4ada"
+    },
+    {
+      "name": "release-focused.log",
+      "sha256": "f96042d778935f526bc1f8908fd8f003233bd99be08195a0eb1cc8bed90912b9"
+    }
+  ]
+}

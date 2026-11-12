@@ -1,5 +1,29 @@
 # Codex Wake Runbook
 
+## Turn | 2026-11-12 | P225 reviewed, merged and deployed
+
+Operator authorized PR/review/merge/deploy. Independent reviewer
+`/root/delivery_review` found no Standards or Spec defects; primary reconciled
+the frozen review and version-only follow-up. PR590 squash-merged55a2ee5d. Exact
+0.22.0.dev12 wheel has329members identical to the qualified candidate;322Python
+members match installed files. Final67focused checks PASS56.968s;10exact installed
+checks PASS10.104s. Hosted auto-start43218104097 canceled; final commits skipCI.
+Inherited cadence/planning findings remain separate and unchanged.
+
+9launchers now select the merged release. Nine-link upgrade/rollback/re-upgrade
+fixture passed before working cutover.10resident services and27native process
+births present at cutover are preserved;1initial native process exited before
+the fresh baseline.7protected files unchanged. Live status shows42tabs/Slate,
+globally disabled formatting and inactive/disabled startup. No service/native
+restart, model input, renewal or formatting activation. A newly started configured
+MCP client uses dev12; it is a production client, not a leaked qualification
+worker. Fresh qualification process census:0survivors.
+
+See [receipt](docs/dev/evidence/plan0225/deployment.json). Root main's overlapping
+dirty documentation is preserved without forced update. Same isolated checkout
+reused for documentation closeout; remove after closeout PR custody is verified,
+with branch refs retained. Memory forbidden by explicit-request session boundary.
+
 ## Turn | 2026-11-12 | Actionable tab CLI outcomes
 
 LOCAL-P225 fixes the operator's completed-but-disabled formatting result at source

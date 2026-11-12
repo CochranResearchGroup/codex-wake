@@ -9,8 +9,10 @@ CLI presentation, retained-result exit codes and bounded formatting status at
 `f4167c0e`.67focused checks pass on each Python3.11/3.12 and10private installed
 checks pass. Expanded tab validation retains one installed-baseline cadence
 failure; existing P220/P224 planning-header findings are separate. Source fix is
-complete on `fix/actionable-cli-output`; working installation and formatting
-reactivation remain separate.
+integrated by PR590 at55a2ee5d and exact0.22.0.dev12 is installed. Final67focused
+and10exact installed checks pass.9launchers,10resident services and27native
+identities verified; global formatting/startup hold preserved. Formatting
+reactivation remains separate. [Deployment](docs/dev/evidence/plan0225/deployment.json).
 
 Plan: [Actionable CLI outcomes](docs/dev/plans/0225-2026-11-12-actionable-cli-output.md)
 

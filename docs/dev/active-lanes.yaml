@@ -9,11 +9,11 @@ lanes:
     branch: fix/actionable-cli-output
     target: origin/main
     plan_state: CLOSED
-    custody_state: ACTIVE_WORKTREE
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: [P216, P223]
     updated_at: 2026-11-12
-    disposition: Source f4167c0e validated locally; retained for review/integration without remote custody; installation and reactivation separate
+    disposition: PR590 merged55a2ee5d; exactdev12 installed with9launchers; global formatting hold preserved; closeout checkout retires after published custody
   - id: P218
     owner: primary / ecochran76
     objective: Close shared-monitor consolidation tickets with isolated scheduling and safe qualification
