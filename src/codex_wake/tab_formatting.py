@@ -87,7 +87,9 @@ class TabFormatting:
         return dict(status='configured',policy=result,scope='global' if workspace is None else 'workspace')
 
     def new_record(self,state,name,identity,*,enabled):
-        if any(other!=name and value.get('identity')==identity for other,value in state['workspaces'].items()):
+        active_conflict=any(other!=name and value.get('identity')==identity for other,value in state['workspaces'].items())
+        retired_conflict=any(other!=name and identity in records for other,records in state.get('retired_workspaces',{}).items())
+        if active_conflict or retired_conflict:
             raise InventoryError('formatting_custody_conflict','Another workspace alias owns this namespace baseline; use that workspace.')
         record=dict(identity=identity,enabled=enabled,paused=False,windows={})
         state['workspaces'][name]=record
@@ -170,14 +172,30 @@ class TabFormatting:
         with self.locked(deadline):
             state=self.read();record=state['workspaces'].get(name)
             identity=self.identity(snapshot)
-            if record and record['identity']!=identity:
-                raise InventoryError('stale_target','Formatting baseline belongs to a different namespace; preserve it for recovery.')
+            namespace_changed=bool(record and record['identity']!=identity)
+            if namespace_changed and verb not in ('enable','status','inspect'):
+                raise InventoryError('stale_target','Formatting baseline belongs to a different namespace; use enable to capture the current namespace while preserving it.')
             if verb in ('status','inspect'):
                 from .tab_format_rendering import capabilities
-                return dict(status='inspection',target=expected,policy=effective_policy(state,name),record=record,
+                return dict(status='stale_target' if namespace_changed else 'inspection',
+                    namespace_matches=not namespace_changed,target=expected,policy=effective_policy(state,name),record=record,
                     capabilities=capabilities(config['kind'],identity=config.get('formatting_identity')),
                     available_presets=['slate','dusk','graphite','legacy'],
                     windows=[dict(window=w['window_id'],options=transport.formatting('read',dict(window=w['window_id']),deadline)) for w in snapshot['windows']])
+            if namespace_changed:
+                # Explicit enable is new intent for the current namespace, never
+                # authority to restore a different server's saved originals.
+                # Save both custodians before any native formatting write. If a
+                # previous namespace returns, reuse its baseline rather than
+                # capturing our own decoration as its originals.
+                retired=state.setdefault('retired_workspaces',{}).setdefault(name,{})
+                previous=retired.get(identity)
+                self.new_record(state,name,identity,enabled=False)  # alias custody check
+                retired[record['identity']]=record
+                record=previous or state['workspaces'][name]
+                state['workspaces'][name]=record
+                retired.pop(identity,None)
+                self.save(state)
             if record is None:
                 if verb in ('rollback','reenable','resume'):
                     raise InventoryError('baseline_missing','No saved original formatting baseline; use enable first.')
