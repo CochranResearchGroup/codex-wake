@@ -15,12 +15,15 @@ history copying, real-provider experiment, paid CI or unrelated cleanup.
 
 ## Current State
 
-Main advanced10commits with dev9 tab-startup and formatting repairs. Merge
-conflicts are append-only documents plus version fields: both intents retained;
-new candidate is dev10. Native15626ed7/packageca29 remains immutable and qualified.
-Merged Python source needs affected local checks and isolated installed proof.
-The completed single broad review is retained; PR review is closed-world against
-its accepted findings plus main-integration/deployment risks.
+Exact dev11 source965c6efe/wheel244180 and nativef986f6ed/package4712 pass
+source, installed and all five UID1017 runtime cases. All324 installed members
+and six native package members remain unchanged afterward. Public modded launch
+under outer002 yields daemon/TUI077 and new history600. Clock restored and owned
+Linux processes empty; preexisting Windows/working counter owners preserved.
+The initial3.11 timeout remains a known reliability gap with owner/review577;
+no clean-unflaky claim. Canonical mainab56445a is integrated. PR586 final review,
+merge, exact-main build and guarded working deployment remain. Working effects0.
+Detailed current evidence: docs/dev/evidence/plan0224/integration.json.
 
 ## Execution and acceptance
 

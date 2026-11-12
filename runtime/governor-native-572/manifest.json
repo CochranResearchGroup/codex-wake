@@ -63,7 +63,7 @@
   "cargo_jobs": 2,
   "toolchain": "1.95.0",
   "build_evidence": "/home/ecochran76/.local/state/codex-wake/governor-native-572",
-  "qualification": "Package-v5 production build PASS166.963s and seven focused TUI tests PASS384.751s; exact UID1017 installed runtime qualification pending. Prior v4 acceptance remains historical.",
+  "qualification": "Exact final wheel244180 and package-v5 pass84 installed tests, actual public launcher UI under outer002, normal upgrade/rollback, failed-start recovery/rollback and both delegated cases in UID1017. Post-runtime324/six members unchanged; clock restored and owned processes empty. See docs/dev/evidence/plan0224/integration.json.",
   "production_install": false,
   "full_patch_sha256": "dc95e6a0286521c8a810f35230f9a4df9874e02edeb83337daa1829e422206c5",
   "guard_capabilities": {
@@ -141,6 +141,8 @@
     "features": "default",
     "jobs": 2,
     "toolchain": "1.95.0",
-    "five_companions": "unchanged verified v4 bytes"
+    "five_companions": "unchanged verified v4 bytes",
+    "driver": "/home/ecochran76/.local/state/codex-wake/governor-native-572/build-package-v5.sh",
+    "driver_sha256": "09cec4c6d148adddef052db4b34fa238a363ba1502c88435da069d2069a1ec67"
   }
 }
