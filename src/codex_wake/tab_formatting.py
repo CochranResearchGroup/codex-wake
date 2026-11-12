@@ -231,8 +231,19 @@ class TabFormatting:
                 try:transport.formatting('refresh',{},deadline)
                 except Exception as error:failures.append(dict(code=getattr(error,'code','refresh_failed')))
                 return dict(status='partial' if failures else 'reset' if verb=='reset' else 'rolled_back',failures=failures,target=expected)
+            workspace_policy=state.get('workspace_policies',{}).get(name,{})
+            if verb in ('enable','reenable') and state['policy']['enabled'] and workspace_policy.get('enabled') is False:
+                workspace_policy['enabled']=True
+                self.save(state)
             policy=effective_policy(state,name)
-            if not policy['enabled']:return dict(status='disabled',target=expected,policy=policy)
+            if not policy['enabled']:
+                import shlex
+                global_disabled=not state['policy']['enabled']
+                return dict(status='disabled',target=expected,policy=policy,
+                    reason='global_policy_disabled' if global_disabled else 'workspace_policy_disabled',
+                    message='Formatting was not applied: the '+('global' if global_disabled else 'workspace')+' formatting policy is disabled.',
+                    next_action=('codex-wake tabs format configure --scope global --policy \'{"enabled":true}\''
+                                 if global_disabled else 'codex-wake tabs format enable --workspace '+shlex.quote(name)))
             if verb=='resume':
                 record.pop('pause_reason',None)
                 for saved in record['windows'].values():

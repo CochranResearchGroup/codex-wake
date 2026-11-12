@@ -78,6 +78,45 @@ def emit(value, args, *, file=None):
     if getattr(args, 'as_json', False) or getattr(args, 'json', False) or getattr(args, 'output', None) == 'json':
         print(json.dumps(value, sort_keys=True), file=stream)
         return
+    result=value.get('result')
+    retained=result.get('operation') if isinstance(result,dict) else None
+    if not value.get('error') and isinstance(retained,dict) and str(retained.get('operation','')).startswith('tabs.'):
+        import shlex
+        outcome=retained.get('result')
+        outcome=outcome if isinstance(outcome,dict) else {}
+        status=('uncertain' if retained.get('phase')=='uncertain' else
+                outcome.get('status') or retained.get('execution') or retained.get('phase') or 'unknown')
+        print(_text(retained['operation'])+': '+_text(status),file=stream)
+        if outcome.get('message'):
+            print(_text(outcome['message']),file=stream)
+        reason=outcome.get('reason') or retained.get('reason')
+        if reason:
+            print('Reason: '+_text(reason),file=stream)
+        if status=='uncertain':
+            print('The effect is unknown. Inspect the retained result before retrying.',file=stream)
+        if retained['operation'].startswith('tabs.monitor.'):
+            print('Inspect current monitor state with codex-wake tabs monitor-status --json.',file=stream)
+        detail=_details({key:item for key,item in outcome.items()
+                         if key not in ('status','message','next_action','reason') and item not in ([],{})
+                         and not (key=='policy' and status=='disabled')})
+        if detail:print(detail,file=stream)
+        if outcome.get('next_action'):
+            prefix='codex-wake'
+            if getattr(args,'wake_root',None):
+                prefix+=' --wake-root '+shlex.quote(str(args.wake_root))
+            action=outcome['next_action']
+            if action.startswith('codex-wake '):action=prefix+action[len('codex-wake'):]
+            print('Next: '+_text(action),file=stream)
+            if status=='disabled':
+                print('Then run the formatting command again; use a new request ID if supplying one.',file=stream)
+        identifier=retained.get('operation_id','')
+        print('Operation id: '+_text(identifier),file=stream)
+        if identifier.startswith('tab-cli-'):
+            command=['codex-wake']
+            if getattr(args,'wake_root',None):command+=['--wake-root',str(args.wake_root)]
+            command+=['tabs','result','--request-id',identifier[len('tab-cli-'):],'--json']
+            print('Details: '+_text(shlex.join(command)),file=stream)
+        return
     error = value.get('error')
     if error:
         print('Error: ' + _text(error.get('message', error.get('code', 'Command failed'))), file=stream)

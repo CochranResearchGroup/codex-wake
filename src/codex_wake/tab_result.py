@@ -7,6 +7,11 @@ def exit_status(value):
     retained=result.get('operation',{}) if isinstance(result,dict) else {}
     retained=retained if isinstance(retained,dict) else {}
     outcome=retained.get('result')
-    incomplete=(value.get('status') in ('partial','uncertain','held') or retained.get('phase')=='uncertain'
-                or isinstance(outcome,dict) and outcome.get('status') in ('partial','uncertain','held'))
+    outcome=outcome if isinstance(outcome,dict) else value
+    unsuccessful={'partial','uncertain','held','disabled','unsupported','failed','stale_target','unavailable'}
+    incomplete=(value.get('status') in unsuccessful or outcome.get('status') in unsuccessful
+                or retained.get('phase')=='uncertain' or retained.get('execution') in ('failed','not_started','unknown')
+                or bool(outcome.get('error') or outcome.get('failures'))
+                or outcome.get('status')=='paused' and retained.get('operation') in
+                   ('tabs.format.enable','tabs.format.reenable','tabs.format.resume'))
     return 3 if incomplete else 0

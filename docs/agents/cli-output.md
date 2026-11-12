@@ -26,7 +26,22 @@ codex-wake builds list --json
 JSON preserves the complete structured envelope, including exact target/generation
 pins. Human output hides protocol envelopes and generation metadata. Do not parse
 human table columns or labels as a stable interface. Existing scripts that parsed
-unflagged JSON must select `--json`; command exit statuses are unchanged.
+unflagged JSON must select `--json`.
+
+Tab mutations lead with the actual outcome, such as `tabs.format.enable: disabled`
+or `tabs.relocate.apply: partial`, followed by reasons and failure details. Journal
+execution completing does not mean the requested effect succeeded. The operation
+ID and a `tabs result --request-id ID --json` command retain access to the complete
+journal without repeating the mutation. Unknown effects must be reconciled before
+retrying; a completed disabled request needs a new request ID after fixing policy.
+
+Tab commands and retained-result lookup exit `3` for disabled, unsupported, held,
+partial, uncertain, stale, unavailable or failed outcomes. Deliberate pause and
+successful rollback exit `0`; an enable/resume blocked by a manual-style pause
+exits `3`. Invalid arguments or configuration errors exit `2`. JSON envelopes keep
+their existing journal status and full result; scripts should check the exit code
+and actual outcome rather than treating outer `status: completed` as effect proof.
+Session and monitor tables defer to failure details when a result is incomplete.
 
 The shared presentation applies to accounts/stores/configuration, controller
 inventory, builds, daemons, health, history, migration, hosts, tabs, flows,

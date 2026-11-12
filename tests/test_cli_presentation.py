@@ -10,6 +10,25 @@ from codex_wake.entrypoint import main
 
 
 class CLIPresentationTests(unittest.TestCase):
+    def test_tab_summaries_defer_to_failure_details_for_partial_payloads(self):
+        from codex_wake.terminal_session_cli import render
+        from codex_wake.tab_commands import render_monitor
+        from codex_wake.cli_output import emit
+        from types import SimpleNamespace
+        for operation,payload,renderer in [
+            ('tabs.session.delete',{'session':{'name':'work','backend':'tmux'}},render),
+            ('tabs.monitor.start',{'monitor':{'status':'running'}},render_monitor),
+        ]:
+            value={'status':'completed','result':{'operation':{
+                'operation':operation,'operation_id':'tab-cli-partial','execution':'completed','phase':'terminal',
+                'result':dict(payload,status='partial',failures=[{'code':'fixture_native_failure'}])}}}
+            with self.subTest(operation=operation):
+                self.assertIsNone(renderer(value))
+                output=io.StringIO()
+                emit(value,SimpleNamespace(as_json=False),file=output)
+                self.assertTrue(output.getvalue().startswith(operation+': partial\n'))
+                self.assertIn('fixture_native_failure',output.getvalue())
+
     def test_accounts_list_is_readable_even_when_redirected_and_json_is_explicit(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

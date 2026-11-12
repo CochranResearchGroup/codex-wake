@@ -1,5 +1,29 @@
 # Codex Wake Runbook
 
+## Turn | 2026-11-12 | Actionable tab CLI outcomes
+
+LOCAL-P225 fixes the operator's completed-but-disabled formatting result at source
+`f4167c0e76d2ab398cb4fc5ea8538ad7e44eed10`. Explicit enable/reenable restores a
+disabled workspace preference while preserving global opt-out. Human mutations
+lead with effect outcome/reason/recovery, retained-result lookup and unsupported
+results return nonzero, partial session/monitor summaries preserve failures, and
+formatting status is concise. JSON/inspect retain full evidence. Release notes
+document the intentional shell exit-code change.
+
+67focused checks PASS on Python3.12/3.11;10private installed checks PASS;313wheel
+Python members match source. Expanded269-tab run retains one cadence failure
+also reproduced on the unchanged installed baseline; no clean-full-suite claim.
+Static/policy/reference checks pass. Active planning audit retains only the two
+unchanged P220/P224 combined-state-header findings. Details and exact commands:
+[P225 validation](docs/dev/evidence/plan0225/validation.md). Fresh census finds
+0qualification-Python survivors; root main's unrelated dirty work is preserved.
+
+Source checkpoint remains on `fix/actionable-cli-output`, with its isolated
+checkout retained for review/integration pending durable shared custody. No
+external post, hosted CI, working package installation, live formatting activation,
+monitor restart or provider turn. Memory disposition forbidden by session developer
+explicit-request boundary; a non-write receipt is outside Git and0writes attempted.
+
 ## Turn 1 | 2026-05-18
 
 Policy bootstrap for the new wake-timer repo.
