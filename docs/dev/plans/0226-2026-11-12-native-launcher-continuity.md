@@ -1,6 +1,6 @@
 # Native wake launcher continuity (local ticket P0226)
 
-State: READY — source validated; review/installation/recovery not applied
+State: IN_PROGRESS — operator approved CLI installation and seven-wake recovery
 Owner: primary agent; priority high; dependencies none for source-only repair.
 User request: diagnose morning Sentinel wake8 fa84b127 delivery failure with the
 diagnosing-bugs skill. This artifact is the repo-local ticket because external
@@ -58,3 +58,10 @@ checks. See docs/dev/notes/0226-native-launcher-continuity-diagnosis.md. Origina
 installed stale intent remains RED intentionally, pending separate live authority.
 Seven exact zero-attempt records enumerated privately; due/expiry preserved in
 proposed recovery only. No queued review or working installation changed.
+
+## Explicit activation authority
+
+Operator2026-11-12 “yes approved” authorizes reviewed source merge, CLI-only
+dev13installation and attributed successors for seven stale Sentinel reviews,
+preserving each original due/TTL and campaign end. No daemon binary upgrade,
+provider policy change or arbitrary other wake recovery is included.
