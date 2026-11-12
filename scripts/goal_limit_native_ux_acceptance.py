@@ -891,17 +891,24 @@ def qualify(options):
             visible('disabled', 'governor-disabled.txt')
             disabled = governor('status')
             # Explicit fixture cleanup of that one resumed turn, not a product action.
-            rpc('thread/goal/set', dict(threadId=thread, objective='Owned paused UI probe',
-                status='paused', tokenBudget=1000000))
+            paused = rpc('thread/goal/set', dict(threadId=thread, status='paused', origin='user'))
+            require(paused['goal']['status'] == 'paused', 'explicit fixture user pause was not retained')
             for turn in rpc('thread/read', dict(threadId=thread, includeTurns=True))['thread']['turns']:
                 if turn['status'] in ('inProgress', 'in_progress'):
                     rpc('turn/interrupt', dict(threadId=thread, turnId=turn['id']))
+            wait(lambda: not any(turn['status'] in ('inProgress', 'in_progress') for turn in
+                rpc('thread/read', dict(threadId=thread, includeTurns=True))['thread']['turns']),
+                'explicitly paused fixture work is idle')
             starts_after_resume = model_start_snapshot()
             require(len(starts_after_resume['model_turn_ids']) == len(before_ui['model_turn_ids']) + 1,
                     'explicit resume did not submit exactly one native turn')
             tmux('kill-session', '-t', 'ux')
             attach(endpoint, thread)
             visible('disabled', 'governor-reconnect.txt')
+            require(rpc('thread/goal/get', dict(threadId=thread))['goal']['status'] == 'paused',
+                    'reconnect unpaused explicit fixture user pause')
+            require(model_start_snapshot()['model_turn_ids'] == starts_after_resume['model_turn_ids'],
+                    'reconnect resumed explicitly paused fixture work')
             require(governor('status')['revision'] == disabled['revision'], 'reconnect changed control revision')
             ui_command('/wake governor activate --token-limit 1500 --time-limit-seconds 120')
             visible('enforced', 'governor-reactivated.txt')
