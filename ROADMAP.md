@@ -1641,3 +1641,10 @@ six configured future modded launches. Two idle package selections updated;
 controller/supervisor refreshed,13 fresh roots and existing hold preserved.
 All14 temporary pauses restored; existing stock clients and disabled automation
 preserved. Plan0224 and docs/dev/evidence/plan0224/deployment.json own evidence.
+
+## Native launcher continuity — P0226
+
+Source READY: retain selected stable launcher for new native intents across release
+rotation.97focused tests and isolated wheel regression pass. Existing missing pins
+remain held; operator-approved installation and seven-record original-window
+recovery are separate gates. See Plan0226 and diagnosis note; no live change.

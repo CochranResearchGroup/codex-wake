@@ -9379,3 +9379,14 @@ Plan0224 preserves concurrent tmux incident Plan0223 and mainab56445a. Source965
 ## Turn 417 | 2026-11-11 | Governor merged and deployed
 
 PR586 self-reviewed at995273bb and merged32eb90fb. Exact-main wheelc29e4777 has all329 unpacked members identical to UID1017-qualified244180; working prefix dev11-32eb90f verifies324 modules. Native f986f6ed/package4712 registered only for six named future modded accounts; supported exact-target updates changed two idle package selections without starting daemons. Nine launchers/completion switched;10 captured protected files and stock launcher unchanged. Controller2287442 retains37185 and exposes seven governor tools (anonymous401); supervisor2274820 preserves interval1/workers2/poll300 and reports13 fresh roots plus the original im-receipts hold. Fourteen pause generations restored. Normal persistent multiprocessing children were classified by exact prefix/executable/PPID/argv; graceful old-pool shutdown verified. Health readiness follows pause restoration because skipped polls do not write health. All26 pre-service native identities preserved. Startup/formatting remain disabled; no governor enrollment/renewal, history/credential migration or provider experiment. Complete rollback and typed private intents retained. Canonical receipt: docs/dev/evidence/plan0224/deployment.json. Fresh Windows readback retains only existing QPC53412; no new producer. Known source3.11 TIMEOUT180 remains under577, diagnostic145PASS104.865s does not erase it. Memory forbidden by explicit-request boundary. Original dirty checkout preserved.
+
+## 2026-11-12 | P0226 native launcher continuity diagnosis/source repair
+
+Missed Sentinel wake8 held because persisted0.167.0executable removed after upgrade;
+current selected launcher0.167.2. Installed real observer RED in0.1s; changing only
+command or endpoint in copied target restores busy observation. Registration was
+dereferencing stable alias into disposable release pin. Source opt-in preserves
+native launcher pathname; default resolver/literal pins remain unchanged.97focused
+checks pass; isolated wheel3cases pass. No live install/wake edit/replay;7remaining
+zero-attempt intents need separately approved original-window recovery. Local ticket
+Plan0226READY, exact note0226-native-launcher-continuity-diagnosis. No hosted CI.

@@ -433,3 +433,10 @@ explicit recover_namespace preference; rollback never crosses it.
 An explicitly enabled, root-specific systemd user unit running the existing tab
 monitor at login. It follows saved formatting policy and holds; it neither creates
 terminal sessions nor grants authority to submit prompts.
+
+**Codex launcher pathname**:
+The absolute operator-selected executable path retained by a durable native wake.
+If that path is a stable symlink, subsequent operator-selected builds may replace
+its target without changing the registered launcher. An explicit release path
+remains a release pin; missing historical pins do not authorize account fallback
+or rewriting existing scheduling intent.
