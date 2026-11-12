@@ -332,7 +332,7 @@
     "source_clean_before_after": true
   },
   "installed_disposable_journey": {
-    "status": "V3_BLOCKED_GOAL_PASS_UI_RESUME_TIMEOUT",
+    "status": "V3_NATIVE_UI_PASS_AGGREGATE574_PENDING",
     "owner": "primary/native UI worker and backend runtime worker",
     "native_v1_failure": "State S task-owned sleep processes survived root+child interrupted turns; stopVerified was incorrectly true",
     "native_v1_failure_receipt": "/tmp/wake-governor-p220-2dac7qs6/backend-watcher-loss-05/result.json",
@@ -377,7 +377,65 @@
       "exact blocked goal paused at deadline",
       "apply-only budget reset"
     ],
-    "remaining_gate": "Diagnose backend pending extend/resume and finish UI disable/reconnect/watcher-loss/cold-resume journey; no additional current-artifact retries authorized"
+    "remaining_gate": "Aggregate574 exact updated-wheel upgrade/rollback and failed-start plus final clock/process/resource cleanup; no working-account deployment.",
+    "managed_ui_pass": {
+      "verdict": "PASS_REAL_NATIVE_GOVERNOR_UI",
+      "started_at": "2026-11-12T01:08:54.953744+00:00",
+      "elapsed_seconds": 65.46229856199989,
+      "source_commit": "9e0cc33ce9b64cb25d86898ef0df1b23a1e21886",
+      "acceptance_script_sha256": "b014a5658e912b002eb8b1c05dd35d7132f18d0275edc9f793b19db677b8f4f2",
+      "wake_prefix": "/home/codex-daemon-test/governor-p220-continue/venv",
+      "wake_version": "0.22.0.dev8",
+      "app_server_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa",
+      "native_cold_resume": {
+        "no_automatic_model_turn": true,
+        "old_pid": 295230,
+        "paused": true,
+        "recovered_lease": {
+          "armed": false,
+          "expired": true,
+          "guardRequestId": null,
+          "leaseId": "01a1cd4d-264a-74d3-b84a-db85b58d263a:86b107bd705c4abdbb213f9025629b7f:4",
+          "memberOutcomes": [
+            {
+              "error": null,
+              "goalPaused": true,
+              "goalPreserved": false,
+              "interruptedTurnIds": [],
+              "stopVerified": true,
+              "threadId": "01a1cd4d-264a-74d3-b84a-db85b58d263a"
+            }
+          ],
+          "reason": null,
+          "releaseVerified": false,
+          "startState": null,
+          "startedTurnId": null,
+          "stopVerified": false,
+          "supported": true,
+          "ttlMs": 10000
+        },
+        "replacement_pid": 304469
+      },
+      "explicit_resume_native_turns": 2,
+      "abrupt_watcher_loss_exact_turn_stopped": true,
+      "non_resume_ui_commands_started_inference": false,
+      "native_strip_and_notices": true,
+      "peer_unchanged": true,
+      "final_owned_process_census": [],
+      "receipt": "/home/codex-daemon-test/governor-p220-continue/ui-pass-03/receipt.json",
+      "receipt_sha256": "46922c67cc90a82bbee9a91f19c3e2bb8bf9109f18eaad9c315a4128ec785a5d",
+      "localhost_posts": 3,
+      "external_provider_calls": 0,
+      "installed_identity": {
+        "wheel_sha256": "7a5c5e6ce0f427cedd6f18794279729b19c538ba96fff5ffddac3cc704830919",
+        "member_count": 323,
+        "source_wheel_installed_equal": true,
+        "source_commit": "9e0cc33ce9b64cb25d86898ef0df1b23a1e21886",
+        "wheel_source_commit": "3a8659fcf73ede2e5e46554d5b2147a19176b58c",
+        "python": "3.12.3",
+        "native_sha256": "1171e7f63ae255426738c5d1a2e44250d322031f7758b13426082be4615706aa"
+      }
+    }
   },
   "hosted_ci": "skipped per no-paid-CI policy",
   "memory_disposition": {
