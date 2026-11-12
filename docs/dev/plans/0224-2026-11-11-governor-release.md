@@ -111,3 +111,5 @@ Python wheel, qualify new installed bytes with unchanged native4712 package, and
 retain the original privacy refusal and causal private-umask pass separately.
 
 INT224-4 correction integrated237b8928 (worker aad1b0b3): three modded native subprocess boundaries use077; stock inheritance unchanged. Public launcher/admin RED observed002, GREEN26 onPython3.11/3.12 plus lint/compile/diff checks pass. Exact installed combined package proof remains required.
+
+Final source965c6efe/wheel244180:145PASS3.12;3.11firstTIMEOUT180 retained, verbose145PASS104.865 unchangedbound. Owner ec / review2026-11-19 / reliabilityfollow-up577; no clean-unflaky claim. Installed84PASS; actualpubliccodex-modded/outer002 UI71.480PASS withdaemon077/newrollouts600. Normalexact4712upgrade+rollbackPASS85.840s. Failed-start/delegates remain pending. Historicalcanonicalv4/cfa6 receipts did use publiccodex-modded; only newexplicitnative-directdiagnostics lacked that boundary.

@@ -1,9 +1,9 @@
 {
-  "status": "NATIVE_V5_RUNTIME_PENDING",
-  "source_commit": "4b865807ed1e485d923c2aff1d9524c64a96c592",
-  "main_base": "e16bc4d2a9c17ea42ad99d8e59daac8265ff2558",
+  "status": "SOURCE_AND_PUBLIC_UI_ACCEPTED_FINAL_NATIVE_CASES_PENDING",
+  "source_commit": "965c6efeb2cb14d43201c3fa20c5ae0b8ef34a56",
+  "main_base": "ab56445ad78250f2cb41f73e9de38f39721e9748",
   "version": "0.22.0.dev11",
-  "wheel_sha256": "e1352bc56a1e4f60dc3145b4f08ce9bbac9aacf6648fc9c926c4a731ae7d1852",
+  "wheel_sha256": "244180ed2a9bd00572d33c4bf744983cb78fd4459d85cea14c031597b09683bb",
   "package_members": 324,
   "native_source": "f986f6ed53d6b324aedbd7e32991e0185eacae14",
   "native_sha256": "4712ca4a88e64b367899b5b45334552c42248453d70f0e606c0dbf918de980fa",
@@ -118,7 +118,7 @@
   "installed_startup": "41 PASS 19.538s exact wheel7395 UID1017",
   "native_alias_blocker": {
     "id": "INT223-2",
-    "status": "fixed_focused_verified_runtime_pending",
+    "status": "fixed_public_ui_verified",
     "actual_endpoint": "owned account app-server-control/app-server-control.sock alias",
     "actual_selector": "exact fixture thread present on same daemon",
     "alias_discovery": "PARTIAL, sessions=[], source_unavailable",
@@ -148,5 +148,48 @@
     "retained_failure": "Original58 FAIL1 in31.377s; close handshake followed by immediate nonblocking public tick raced receive-queue close observation",
     "correction": "Wait on actual public source-loss evidence within existing two-second event bound; no production edit",
     "receipt_sha256": "9d1972d8a12435a6f1e23c1ad71ba30a09ce316adb89794c7b02e6627c34a9ea"
+  },
+  "installed_final": {
+    "python_version": "3.12.3",
+    "uid": 1017,
+    "production_members": 324,
+    "source_wheel_installed_equal": true,
+    "tests": "84 PASS36.939s: observer/startup/feed/monitor plus public launcher/admin",
+    "actual_entrypoint": "venv-final/bin/codex-modded",
+    "native_ui": "PASS71.480s,3localhostPOST,0external,emptyownedcensus",
+    "privacy": "Outer002; actualdaemonandTUI0077; newrollouts0600, nonsymlink,UID1017"
+  },
+  "private_launch_fix": {
+    "primary_commit": "237b89282273492fbc61d245f0b9aecc1243bbb6",
+    "worker_commit": "aad1b0b3c4e3349d3d91eb63871eb887200516f5",
+    "scope": "Three modded native child launch boundaries; stock inheritance unchanged",
+    "red": "Actualmoddedchild0002 atlauncherandadmin seams",
+    "green": "26PASS on3.11/3.12; actualnewfile0600 underouter002",
+    "existing_histories": "No chmod/copy/migration; eight workingtargethistorymetadata samples already0600"
+  },
+  "final_source_checks": {
+    "source": "965c6efeb2cb14d43201c3fa20c5ae0b8ef34a56",
+    "py312": "145PASS118.707s pluslintandpolicyPASS",
+    "py311_first": "TIMEOUT180s; rawfailedreceipt retained, no partialoutputcaptured",
+    "py311_diagnostic": "145PASS104.865s verbose, unchanged source/timeout",
+    "disposition": "Retainasflakyqualificationtiming; causeunresolved, no clean-unflaky claim. Ownerecochran76,review2026-11-19,follow-up#577; focused26bothversions and installed84/publicnativeUI retain blockingbehaviorcoverage",
+    "receipts": [
+      {
+        "file": "integration-private.json",
+        "sha256": "499cae76fbe738759dd8ae396099cded55da4abe3cec727b1af183200c314cc8"
+      },
+      {
+        "file": "integration-private311-diagnostic.json",
+        "sha256": "031218b6b322852622152ee3549c8df7b06feb01e319fa07fa050bd10a158062"
+      },
+      {
+        "file": "observer-readiness.json",
+        "sha256": "9d1972d8a12435a6f1e23c1ad71ba30a09ce316adb89794c7b02e6627c34a9ea"
+      }
+    ]
+  },
+  "native_case_progress": {
+    "normal_upgrade_rollback": "PASS85.840s exact4712/baseline56a10",
+    "failed_start_and_delegates": "PENDING"
   }
 }
