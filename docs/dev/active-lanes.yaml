@@ -1301,3 +1301,17 @@ lanes:
     overlaps: [P216]
     updated_at: 2026-11-10
     disposition: PR551/553/556 merged; dev5 deployed; Slate monitor enabled46tabs; rollback verified; worktrees retained
+
+  - id: P221
+    owner: primary / ecochran76
+    objective: Explicit formatting enable after terminal server replacement
+    work_items: [LOCAL-P221]
+    plan: docs/dev/plans/0221-2026-11-11-tab-format-reboot.md
+    branch: fix/tab-format-reboot
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [P210, P216]
+    updated_at: 2026-11-11
+    disposition: Validated source-only repair; local review checkout retained until integration decision

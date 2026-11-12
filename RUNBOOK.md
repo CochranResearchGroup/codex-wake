@@ -9153,3 +9153,13 @@ New regressions also3/3 on Python3.11.15. Product files317/317 and9 launchers
 match the already-qualified working candidate; no additional restart/dispatch.
 PR575 owns source integration. Auth PR325/326 and Receipts PR51 are merged;
 Auth owner deployment/control/link/account/state/guard checks PASS.
+
+## Turn  | 2026-11-11 | P221 formatting after terminal server replacement
+
+LOCAL-P221 reproduced stale_target on actual isolated tmux server replacement in
+about0.2s, including on origin/main95bbebb3. Fresh connections still failed and
+no monitor was involved, confirming the persisted baseline fence as the cause.
+Added explicit-enable namespace custody rollover with retained originals,
+read-only stale inspection and unchanged refresh/rollback/request pin fences.
+Public controller regression went red before source fix, then green; returning
+namespace and alias custody tests also pass. Working installation is unchanged.

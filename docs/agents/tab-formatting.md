@@ -44,6 +44,24 @@ whole-tab dimming is added.
 Actual visibility also follows the backend's redraw interval, which Wake bounds
 at five seconds while decoration owns it.
 
+## After reboot or terminal server replacement
+
+Run `codex-wake tabs format enable --workspace WORKSPACE` again. Explicit enable
+retains the previous namespace's original settings in the controller's
+`tab-formatting/state.json` under `retired_workspaces`, then captures the current
+namespace's originals before decorating it. Existing schema-version 1 files
+remain readable; the retained map is additive. Returning to a previously seen
+namespace reuses its originals. No old baseline is restored onto a new server.
+
+Before enable, status and inspect report `status: stale_target` with
+`namespace_matches: false` when saved custody belongs to another namespace.
+The reported record is that saved baseline; window options describe the current
+server. These reads do not change custody. Rollback, resume, reenable, reset,
+pause and automatic refresh remain fenced until explicit enable establishes
+current custody. Requests pinned to the old presentation are still rejected.
+This recovery does not automatically start at boot; enable starts the monitor
+through the normal supported path.
+
 ## One-command rollback and re-enable
 
 ```sh

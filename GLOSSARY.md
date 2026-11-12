@@ -408,3 +408,9 @@ The persistent named-account registry and host control state selected by an
 explicit root, optional host override or saved default. First use defaults to
 `XDG_STATE_HOME/codex-wake/controller`; project-local wake records keep their
 separate project root.
+
+**Formatting namespace baseline**:
+The original managed terminal settings captured before decoration for one
+terminal server/session identity. Explicit enable on a replacement namespace
+retains the earlier baseline and captures new originals; returning namespaces
+reuse their originals. Automatic refresh and rollback cannot cross this boundary.

@@ -1588,3 +1588,9 @@ Plan0220 publication: source reviewed and locally qualified through broad tests
 plus focused retention-fixture remediation (see note0220); PR575 integrates the
 exact installed product code. No remaining scoped source/installation/delivery
 gate; independent protocol acknowledgment fields remain unobserved.
+
+## P221 | Formatting after terminal server replacement
+
+CLOSED (validated source; unintegrated): [LOCAL-P221](docs/dev/plans/0221-2026-11-11-tab-format-reboot.md).
+Explicit enable establishes namespace-specific originals while retaining earlier
+baselines; automatic refresh and rollback remain fenced. Source-only repair.
