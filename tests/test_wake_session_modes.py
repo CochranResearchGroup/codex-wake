@@ -14,7 +14,7 @@ from codex_wake.daemon import poll_once
 from codex_wake.records import all_records
 from codex_wake.process import process_identity
 THREAD = "11111111-1111-4111-8111-111111111111"
-CLOCK = {"utc": {"lower": 2000000000, "upper": 2000000000, "source": "test"}, "counter": None}
+CLOCK = {"utc": {"lower": 2000000000, "upper": 2000000000, "status": "network", "sources": ["clock-a", "clock-b"]}, "counter": None}
 class WakeSessionModes(unittest.TestCase):
     def test_session_only_survives_detach_and_cancels_after_exact_process_exits(self):
         with tempfile.TemporaryDirectory() as d:

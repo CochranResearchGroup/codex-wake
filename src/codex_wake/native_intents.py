@@ -48,12 +48,16 @@ def _request(args, root):
               "endpoint": args.endpoint, "expires_at": None,
               "resume_policy": "same_thread" if args.resume_missing else "hold"}
     from .wake_session_modes import bind_mode
-    bind_mode(args, root, target)
+    if hasattr(args, "_schedule_target"):
+        target = dict(args._schedule_target)
+    else:
+        bind_mode(args, root, target)
     content = {"root": str(root), "cwd": str(Path.cwd().resolve()), "target": target,
                "schedule": schedule, "ttl_seconds": ttl, "prompt": prompt,
                "tolerance_seconds": tolerance, "stop_at": stop}
     from .wake_policy import request_policy
-    policy = request_policy(root, args, "codex:" + args.thread_id)
+    policy = (args._schedule_wake_policy if hasattr(args, "_schedule_wake_policy")
+              else request_policy(root, args, "codex:" + args.thread_id))
     if policy is not None:
         content["wake_policy"] = policy
         target["startup_policy"] = policy["startup"]

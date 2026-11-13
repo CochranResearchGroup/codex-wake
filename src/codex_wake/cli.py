@@ -96,6 +96,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicit runtime root; account commands use the saved user controller, project wakes use .codex/wake",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+    from .recurring_commands import register_parser as register_schedules
+    register_schedules(subparsers)
     from .completion import register_parser as register_completion
     register_completion(subparsers)
     from .local_control_commands import register_parser as register_local_control
@@ -2846,6 +2848,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         from .time_inspection import time_command
         return time_command(args)
     root = resolve_root(args)
+    if args.command == "schedules":
+        from .recurring_commands import command as schedule_command
+        return schedule_command(args, root)
     if args.command == 'goal-limits':
         from .goal_limits_cli import goal_limits_command
         return goal_limits_command(args, root)
