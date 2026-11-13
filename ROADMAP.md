@@ -1684,11 +1684,17 @@ preserved. Plan0224 and docs/dev/evidence/plan0224/deployment.json own evidence.
 
 ## Native launcher continuity — P0226
 
-Source READY: retain selected stable launcher for new native intents across release
-rotation.97focused tests and isolated wheel regression pass. Existing missing pins
-remain held; operator-approved installation and seven-record original-window
-recovery are separate gates. See Plan0226 and diagnosis note; no live change.
+State: CLOSED
 
-P0226 activation update2026-11-12: dev13 installed; seven preserved-deadline
-successors armed. Remaining: resident MCP reconnect for stable launcher bindings
-and overdue delivery readback. See installation note; no durability overclaim.
+[Plan0226](docs/dev/plans/0226-2026-11-12-native-launcher-continuity.md) closes the
+bounded launcher repair, approved dev13 CLI installation and overdue recovery
+verification. PR592 merged;97installed checks and3installed launcher regressions
+pass. Current caller MCP reportsdev13. Reviews8/9 completion artifacts match
+exact successor/submission IDs within original windows; transport acknowledgment
+remains independently unobserved. No new reload or replay was performed.
+
+[Acceptance and residual LP-01](docs/dev/evidence/plan0226/closeout.md): existing
+successors retain literal release pins; recipient MCP identity was unavailable
+while notLoaded. These remain explicit limits, not claims of universal durability
+or completion of future reviews. Future release retirement/recovery needs its
+own exact-record reconciliation and applicable authority.

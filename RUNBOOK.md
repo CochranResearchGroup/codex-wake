@@ -9441,3 +9441,18 @@ primary accepted, no remediation. LOCAL-P228 recovery complete; merge/deploy not
 authorized by this slice. Publish coherent checkpoint, preserve original ref,
 then remove exact duplicated root edits only after backup/equality proof.
 Memoryforbidden under session developer boundary; zero memorywrites.
+
+## Turn | 2026-11-13 | P0226 bounded repair acceptance reconciled
+
+Closed only launcher repair/approved CLI installation/overdue result readback.
+PR592dev13 installation97checks, current caller MCPdev13, installed3launcher
+regressions and exact reviews8/9 wake/submission/result correlation support closure.
+Both reviews completed within original windows. No inferred acknowledgment:
+transport still not_observed. Recipient notLoaded leaves its MCP version unknown;
+LP-01 retains existing literal-pin durability as a separate scoped residual risk.
+No wake mutation, replay, refresh, recipient loading, provider call or deadline
+extension. Future campaign reviews retain their owner/windows. Exact curated
+acceptance: docs/dev/evidence/plan0226/closeout.md; private proofs outside Git.
+Unrelated root tab/source/test/RUNBOOK edits preserved via isolated docs branch.
+Memoryforbidden; zero writes. No implementation review/TDD reset or new runtime
+qualification claimed by this documentation closure.
