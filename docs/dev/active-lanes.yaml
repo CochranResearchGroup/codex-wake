@@ -1,6 +1,20 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P231
+    owner: primary / ecochran76
+    objective: Deliver persistent bot families and identifiable worker tabs
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/601]
+    plan: docs/dev/plans/0231-2026-11-13-bot-tab-hierarchy.md
+    branch: feat/bot-family-hierarchy
+    worker_branches: [feat/bot-family-placement, feat/bot-family-display]
+    target: origin/main
+    plan_state: OPEN
+    custody_state: PUBLISHED
+    dependencies: []
+    overlaps: [P211, P216]
+    updated_at: 2026-11-13
+    disposition: T1/T2/T3/T4 validated; T5 joined adapter running; one broad review and remediation reserved
   - id: P229
     owner: primary / ecochran76
     objective: Detect reconnect errors above editable drafts and deploy the monitor

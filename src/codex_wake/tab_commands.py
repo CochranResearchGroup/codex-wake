@@ -86,7 +86,7 @@ def command(args, owner=None):
         if owner is None:
             from .controller_tabs import controller_tabs_from_root
             owner = controller_tabs_from_root(args.wake_root)
-        operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1).replace('relocate-','relocate.',1).replace('route-','route.',1)
+        operation = 'tabs.' + args.tab_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1).replace('relocate-','relocate.',1).replace('route-','route.',1).replace('family-','family.',1)
         from .terminal_session_cli import select_workspace, render
         arguments=dict(args.arguments)
         selector=arguments.pop('session_selector',None)
@@ -97,7 +97,7 @@ def command(args, owner=None):
             from .terminal_selection_cli import expression
             selected=expression(owner,args,arguments.get('selection'))
             if selected is not None:arguments['selection']=selected
-        if 'workspace' in properties and arguments.get('scope')!='global' and (selector is not None or 'workspace' not in arguments):
+        if 'workspace' in properties and arguments.get('scope')!='global' and (selector is not None or ('workspace' not in arguments and not operation.startswith('tabs.family.'))):
             arguments['workspace']=select_workspace(owner,selector,server=server,interactive=not getattr(args,'as_json',False))
         value = owner.execute(operation,arguments) if operation in owner.READS else operator_execute(operation,arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
         readable=render(value) if operation.startswith('tabs.session.') and not getattr(args,'as_json',False) else None
@@ -171,6 +171,13 @@ def operator_execute(operation, arguments, root, *, owner=None, request_id=None)
     owner = owner or controller_tabs_from_root(root)
     payload = dict(arguments)
     from .tab_views import TabViews
+    if operation.startswith('tabs.family.'):
+        from .bot_families import BotFamilies
+        payload.setdefault('expected_target',BotFamilies(root,tabs=owner).target())
+        key=_intent_key(operation,payload,request_id)
+        payload.setdefault('_request',dict(operation_id='tab-cli-'+key,idempotency_key='tab-cli-'+key,correlation_id=key,binding='local-cli',target=payload['expected_target']))
+        actor=local_operator(payload['expected_target'],('control','observe'))
+        return AuthorizedTabs(SimpleNamespace(authenticate=lambda unused:actor),owner,ControllerRuntime(root)).execute('local-cli',operation,payload)
     if operation in TabViews.READS|TabViews.MUTATIONS or operation.startswith(('tabs.monitor.','tabs.policy.')):
         payload.setdefault('expected_target',owner.monitor_target() if operation.startswith('tabs.monitor.') else owner.policy_target() if operation.startswith('tabs.policy.') else owner.logical_target())
         key=_intent_key(operation,payload,request_id)

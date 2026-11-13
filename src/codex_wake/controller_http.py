@@ -192,6 +192,8 @@ class ProtectedOperations:
         'configuration.explain': ('configuration.observe', None, 'account'),
     }
 
+    from .bot_family_contract import specs as _family_specs
+    READ_POLICIES.update({spec[1]:('observe' if spec[5] else 'control',None,None) for spec in _family_specs().values()})
     from .terminal_session_contract import specs as _session_specs
     READ_POLICIES.update({spec[1]:('observe' if spec[5] else 'control',None,None) for spec in _session_specs().values()})
     READ_POLICIES.update({'tabs.format.'+v:('observe' if v in ('status','inspect') else 'control',None,None) for v in ('status','inspect','enable','pause','resume','rollback','reenable','reset','configure')})
@@ -292,6 +294,12 @@ class ProtectedOperations:
             result=self.operations.execute(operation,arguments)
             target=result['result']['target'] if operation.endswith('preview') else tabs.recovery_target()
             if not permitted(actor,target):raise AuthError('insufficient_scope')
+        elif operation in ('tabs.family.list','tabs.family.show'):
+            from .bot_families import BotFamilies
+            tabs=self.operations.tabs
+            if tabs is None or not permitted(actor,BotFamilies(tabs.root,tabs=tabs).target()):
+                raise AuthError('insufficient_scope')
+            result=self.operations.execute(operation,arguments)
         elif operation in ('tabs.session.list','tabs.session.show','tabs.relocate.status','tabs.route.list','tabs.route.show','tabs.route.status'):
             from .terminal_sessions import TerminalSessions
             tabs=self.operations.tabs

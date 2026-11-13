@@ -1,0 +1,143 @@
+{
+  "spec": "docs/dev/plans/0231-bot-family-spec.md",
+  "parent_spec": "https://github.com/CochranResearchGroup/codex-wake/issues/601",
+  "integration_branch": "feat/bot-family-hierarchy",
+  "bases": {
+    "wake": "e8c79a79da0b0482e2403e634394c70f5c66e333",
+    "bots": "1e315c3fddce194321e9587080091af1e36a1682"
+  },
+  "review_limit": 1,
+  "remediation_limit": 1,
+  "review_runs": 0,
+  "remediation_runs": 0,
+  "tickets": [
+    {
+      "key": "T1",
+      "repo": "CochranResearchGroup/codex-bots",
+      "number": 75,
+      "id": 6380126571,
+      "url": "https://github.com/CochranResearchGroup/codex-bots/issues/75",
+      "title": "Bot families: create durable specialist descendants with inherited guidance",
+      "blocked_by": [],
+      "state": "validated",
+      "worker": "/root/bot_family_model",
+      "result_sha": "8889cbc37932ced0dad79616bfa717e65905faf1",
+      "worktree": "codex-bots-standalone/bot-family-hierarchy",
+      "validation": "service13PASS2optionalbrowserSKIP;handoff16PASS1optionalbrowserSKIP;src/bot-family service/settings/native guidance"
+    },
+    {
+      "key": "T2",
+      "repo": "CochranResearchGroup/codex-wake",
+      "number": 602,
+      "id": 6380127005,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/602",
+      "title": "Bot families: register lineage and exact client tab bindings",
+      "blocked_by": [],
+      "state": "validated",
+      "worker": "/root",
+      "owned_paths": [
+        "src/codex_wake/bot_families.py",
+        "src/codex_wake/bot_family_contract.py",
+        "public tab API/CLI registration",
+        "tests/test_bot_families.py"
+      ],
+      "result_sha": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
+      "validation": "4public family tests PASS1.705s;17affected contract/destination/profile tests PASS11.919s;RuffPASS"
+    },
+    {
+      "key": "T3",
+      "repo": "CochranResearchGroup/codex-wake",
+      "number": 603,
+      "id": 6380127433,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/603",
+      "title": "Bot families: open grouped background tabs and clean accepted temporary workers",
+      "blocked_by": [
+        2
+      ],
+      "state": "validated",
+      "worker": "/root/family_placement",
+      "worker_branch": "feat/bot-family-placement",
+      "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
+      "result_sha": "75da46b635fed0a65ac8ad6cd41b0b4ebf6b7fd1",
+      "integrated_sha": "d01e5d06",
+      "validation": "worker25PASS19.725s;coordinator joined16PASS10.068s"
+    },
+    {
+      "key": "T4",
+      "repo": "CochranResearchGroup/codex-wake",
+      "number": 604,
+      "id": 6380127819,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/604",
+      "title": "Bot families: show specialization labels and reversible muted family colors",
+      "blocked_by": [
+        2
+      ],
+      "state": "validated",
+      "worker": "/root/family_display",
+      "worker_branch": "feat/bot-family-display",
+      "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
+      "result_sha": "480756dd91373cc4959661d303b7aa46122d4fcd",
+      "integrated_sha": "e86a7aa6",
+      "validation": "worker73affectedPASS; binding-loss3PASS; coordinator registry/display6PASS"
+    },
+    {
+      "key": "T5",
+      "repo": "CochranResearchGroup/codex-bots",
+      "number": 76,
+      "id": 6380128323,
+      "url": "https://github.com/CochranResearchGroup/codex-bots/issues/76",
+      "title": "Bot families: supervise children and hand exact attachments to Wake",
+      "blocked_by": [
+        1,
+        2,
+        3
+      ],
+      "state": "validated",
+      "integration_requirements": [
+        "Reuse parent delegable execution settings without default-reset friction; provider grants remain provider-owned.",
+        "Wake movement must preserve native Bot binding and session-switch ownership checks currently tied to codex-bots session."
+      ],
+      "worker": "/root/bot_family_model",
+      "worker_branch": "feat/bot-family-hierarchy",
+      "worker_base": "8889cbc37932ced0dad79616bfa717e65905faf1",
+      "owned_paths": [
+        "Bots service/MCP supervision",
+        "native exact session bindings",
+        "explicit Wake adapter",
+        "delegable execution context"
+      ],
+      "result_sha": "7e16e59c9f4358e3b8f79e0e5967bada8359f289",
+      "validation": "46PASS4optionalSKIP;actual Wake sourceCLI/tmux/native proof1PASS7.53s",
+      "limitations": [
+        "Provider-qualified child enrollment required; no new provider grants.",
+        "Unknown failed moved-TUI auto-recovery remains held."
+      ]
+    }
+  ],
+  "wake_validation": {
+    "selected_suite": {
+      "tests": 287,
+      "seconds": 127.423,
+      "result": "PASS",
+      "source": "4a121aa5 product code; descriptor label refresh delta a33b19dc focused6PASS1.072s"
+    },
+    "lint": "Ruff0.14.2F821/F822/F823 allsrc/scripts/tests/hooks PASS",
+    "compile": "PASS",
+    "policy_wiring": "PASS",
+    "hosted_ci": "SKIPPED costpolicy",
+    "environment": "Linux Python3.12.13; no3.11orfullunrelatedsuite claim"
+  },
+  "program_id": "P231",
+  "previous_local_design_id": "P230; renumbered after concurrent mailbox plan0230 entered main",
+  "review_bases": {
+    "wake": "17e2c3fe57592fa8f071a30c6f885a9cc48258df",
+    "bots": "1e315c3fddce194321e9587080091af1e36a1682"
+  },
+  "upstream_reconciliation": {
+    "upstream": "17e2c3fe57592fa8f071a30c6f885a9cc48258df",
+    "product_version": "0.22.0.dev19",
+    "preserved_upstream_files": 18,
+    "validation": "76family/mailbox/bootstrap checks PASS23.883s; compile/policy/diff PASS",
+    "note": "initial verification used moving origin/main and was replaced by pinned-SHA comparison; source unaffected"
+  }
+}

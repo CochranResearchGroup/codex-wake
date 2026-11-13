@@ -181,7 +181,8 @@ def project(resource, policy=None, *, now=None):
         if cue and policy.get('_source_lease'):
             for key in ('window-status-format','window-status-current-format'):
                 options[key]=options[key].replace(']'+cue,']'+lease(cue))
-    return dict(label=label, state=state, colour=colour,
+    from .bot_family_display import decorate
+    return decorate(dict(label=label, state=state, colour=colour,
                 fallback_styles={'window-status-style':fallback_normal,'window-status-current-style':fallback_current},
                 details=dict(panes=details,mixed=len(kinds)>1,activity=activity,rendering=rendering),
-                options=options)
+                options=options),resource,policy)

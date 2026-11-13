@@ -60,7 +60,7 @@ def _projection_key(snapshot):
             traits.append((pane.get('pane_id'),[(name,[(key,dimensions[name].get(key))
                 for key in _EVIDENCE]) for name in _DIMENSIONS if isinstance(dimensions.get(name),dict)]))
         resources.append((resource.get('target'),resource.get('window'),resource.get('backend_identity'),
-                          resource.get('monitor_unavailable'),traits))
+                          resource.get('monitor_unavailable'),resource.get('bot_family'),traits))
     raw=json.dumps((resources,snapshot.get('unavailable',[])),sort_keys=True,
                    separators=(',',':'),allow_nan=False).encode()
     return hashlib.sha256(raw).hexdigest()
@@ -77,6 +77,20 @@ def refresh_formatting(root,snapshot,*,tabs=None,deadline=None,resources_loader=
     from .controller_tabs import controller_tabs_from_root
     from .tab_formatting import TabFormatting
     tabs=tabs or controller_tabs_from_root(root)
+    # Monitor resources bypass public inventory. Requalify family identity here
+    # rather than trusting retained labels or semantic trait revision tokens.
+    family_path=Path(root)/'bot-families'/'registry.json'
+    if family_path.exists():
+        from .bot_families import BotFamilies
+        if resources_loader is not None:
+            resources_loader()
+            resources_loader=None
+        snapshot=copy.deepcopy(snapshot)
+        snapshot.pop('projection_revision',None)
+        for resource in snapshot.get('resources',[]):
+            resource.pop('bot_family',None)
+            resource.pop('projection_revision',None)
+        BotFamilies(root,tabs=tabs).annotate(snapshot.get('resources',[]))
     now=time.monotonic()
     if (resources_loader is not None and 'resources' not in snapshot
             and semantic_revision(snapshot,trusted=snapshot.get('origin')=='daemon') is None):
