@@ -7,6 +7,7 @@ never by model registration arguments or a saved target field.
 from pathlib import Path
 from uuid import UUID
 
+from .agent_resume import SavedRuntime
 from .runtime_delivery import RuntimeTargetError
 from .records import WakeError
 
@@ -21,10 +22,14 @@ class LiveWakeRestorer:
         try:
             if target.get('session_mode') != 'reopen_live' or str(UUID(target['thread_id'])) != target['thread_id']:
                 raise RuntimeTargetError('unavailable', 'live_recipient_identity_unverified')
-            snapshot = observe(endpoint=target['endpoint'], timeout=5)
+            snapshot = observe(endpoint=target['endpoint'], socket_path=target.get('tmux_socket'), timeout=5)
             rows = [row for row in snapshot.get('sessions', []) if row.get('thread_id') == target['thread_id']]
             ambiguous = any(target['thread_id'] in row.get('candidates', []) for row in snapshot.get('sessions', []))
-            if not snapshot.get('complete') or len(rows) > 1 or ambiguous:
+            if not snapshot.get('complete'):
+                from .wake_mode_runtime import observe_mode_presence
+                if observe_mode_presence(target) != 'background':
+                    raise RuntimeTargetError('unavailable', 'live_recipient_ownership_unverified')
+            if len(rows) > 1 or ambiguous:
                 raise RuntimeTargetError('unavailable', 'live_recipient_ownership_unverified')
             if rows and rows[0].get('attachments'):
                 row = rows[0]
@@ -79,6 +84,8 @@ class LiveWakeRestorer:
         if agent['conversation_id'] != target['thread_id'] or agent['runtime'] != 'codex':
             raise RuntimeTargetError('unavailable', 'live_restore_managed_identity_changed')
         profile = config['profiles'][binding['profile']]
+        if target.get('tmux_socket') is not None and profile.get('tmux_socket') != target['tmux_socket']:
+            raise RuntimeTargetError('unavailable', 'live_restore_terminal_server_changed')
         latest = dict(target, endpoint=profile['app_server'],
                       codex_cmd=resolve_codex_cmd(profile['codex_path'], required=True, preserve_launcher=True))
         thread = read_codex_thread(latest)
@@ -100,7 +107,8 @@ class LiveWakeRestorer:
                 raise WakeError('live_restore_binding_changed')
             return current
 
-        owner = AgentResume(self.root, config, config_loader=current_config, **kwargs)
+        owner = AgentResume(self.root, config, runtime=_RestoreRuntime(self.root),
+                            config_loader=current_config, **kwargs)
         result = owner.resume(dict(managed_agent_id=binding['managed_agent_id'], profile=binding['profile'],
             intent='wake-live:' + occurrence, expires_at=expires), principal)
         if result.get('status') != 'resumed':
@@ -110,3 +118,42 @@ class LiveWakeRestorer:
         # AgentResume re-reads profiles and checks common permissions before every
         # terminal command; it keeps uncertain launches fenced across restarts.
         return dict(latest, startup_policy='active_tab', resume_policy='hold')
+
+
+class _RestoreRuntime(SavedRuntime):
+    """Reopen a host-declared terminal container before the existing exact resume.
+
+    AgentResume journals the launch before entering this method, so lost session
+    creation responses retain the same crash fence as lost tab creation responses.
+    """
+    def __init__(self, root):
+        super().__init__()
+        self.root = root
+
+    def launch(self, record, profile, guard, name):
+        from types import SimpleNamespace
+        from .session_lifecycle import tmux_command
+        runtime = SimpleNamespace(**({'tmux_socket': None} | profile), effect_guard=guard)
+        try:
+            tmux_command(runtime, 'has-session', '-t', profile['tmux_session'])
+        except WakeError:
+            socket = profile.get('tmux_socket')
+            if not isinstance(socket, str) or not Path(socket).is_absolute():
+                raise RuntimeTargetError('unavailable', 'live_restore_terminal_server_required')
+            # The fixed host attachment configuration authorizes which server is
+            # managed. It is not inferred from a name or the daemon environment.
+            from .wake_policy import _read
+            host = _read(self.root / 'controller-tabs.json')
+            workspaces = host.get('workspaces', {})
+            if host.get('schema_version') != 1 or not any(
+                    row.get('kind') in ('tmux', 'byobu') and row.get('socket_path') == socket
+                    for row in workspaces.values()):
+                raise RuntimeTargetError('unavailable', 'live_restore_terminal_server_unqualified')
+            from .controller_tabs import controller_tabs_from_root
+            from .terminal_sessions import TerminalSessions
+            guard()
+            tabs = controller_tabs_from_root(self.root)
+            sessions = TerminalSessions(self.root, tabs=tabs)
+            sessions.execute('tabs.session.ensure', dict(name=profile['tmux_session'], backend='byobu',
+                server=socket, start=True, defaults=dict(cwd=profile['cwd'])))
+        return super().launch(record, profile, guard, name)

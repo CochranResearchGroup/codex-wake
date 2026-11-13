@@ -30,7 +30,7 @@ class LiveWakeRestoreTests(unittest.TestCase):
 
     def test_unknown_inventory_holds_without_launching(self):
         with tempfile.TemporaryDirectory() as directory, patch('codex_wake.sessions.observe', return_value=dict(complete=False, sessions=[])):
-            with self.assertRaisesRegex(RuntimeTargetError, 'live_recipient_ownership_unverified'):
+            with self.assertRaisesRegex(RuntimeTargetError, 'recipient_ownership_unknown'):
                 LiveWakeRestorer(Path(directory)).prepare(self.target())
 
     def test_absent_recipient_requires_existing_host_profile_binding(self):
@@ -39,6 +39,12 @@ class LiveWakeRestoreTests(unittest.TestCase):
                 LiveWakeRestorer(Path(directory)).prepare(self.target())
 
     def test_absent_recipient_uses_latest_private_profile_through_existing_resume_owner(self):
+        self.exercise_restore()
+
+    def test_missing_pinned_byobu_server_is_recreated_before_exact_resume(self):
+        self.exercise_restore(missing_server=True)
+
+    def exercise_restore(self, missing_server=False):
         from codex_wake.a2a_identity import RuntimeIdentity
         from codex_wake.managed_inventory import ManagedInventory, Observation
         from codex_wake.process import process_identity
@@ -62,18 +68,39 @@ class LiveWakeRestoreTests(unittest.TestCase):
             mapping = root / 'wake-live-restore.json'
             mapping.write_text(json.dumps(dict(version=1, bindings={THREAD:dict(profiles=str(profiles),
                 managed_agent_id=agent['managed_agent_id'], profile='latest')}))); mapping.chmod(0o600)
+            socket = base / 'tmux.sock'
+            if missing_server:
+                config = json.loads(profiles.read_text())
+                config['profiles']['latest']['tmux_socket'] = str(socket)
+                profiles.write_text(json.dumps(config))
+                host_config = root / 'controller-tabs.json'
+                host_config.write_text(json.dumps(dict(schema_version=1, workspaces=dict(saved=dict(
+                    kind='byobu', socket_path=str(socket), session_id='$0')))))
+                host_config.chmod(0o600)
+                self.addCleanup(lambda: subprocess.run(['tmux','-S',str(socket),'kill-server'], capture_output=True))
             target = self.target() | dict(codex_cmd='/missing-old-harness', _wake_permission_context=dict(
                 subject=THREAD, role='session', tasks=[], target=THREAD, task_id=None, revision=1),
                 _wake_expires_at='2035-01-01T00:00:00Z', _wake_occurrence_id='wake-original')
+            if missing_server:
+                target.update(tmux_socket=str(socket), session_origin=dict(pid=99999999, identity=dict(
+                    boot_id='previous-boot', start_time_ticks=1)))
             live = False; commands = []
+            real_run = subprocess.run
             def observe(**kwargs):
                 pane = dict(pane_id='%7', client_pid=os.getpid(), client_start_time_ticks=identity['start_time_ticks'])
-                return dict(complete=True, sources=dict(app_server=dict(availability='available')),
-                    sessions=[dict(thread_id=THREAD,cwd=str(cwd),binding_status='metadata_matched',attachments=[pane] if live else [])])
+                absent = missing_server and not socket.exists()
+                return dict(complete=not absent, sources=dict(app_server=dict(availability='available'),
+                    tmux=dict(availability='unavailable' if absent else 'available')),
+                    sessions=[dict(thread_id=THREAD,cwd=str(cwd),runtime_state='not_loaded' if absent else 'idle',
+                        binding_status='metadata_matched',attachments=[pane] if live else [])])
             def terminal(argv, **kwargs):
                 nonlocal live
                 commands.append(argv)
-                if 'new-window' in argv: live = True
+                if 'new-window' in argv:
+                    live = True
+                    return subprocess.CompletedProcess(argv, 0, stdout='@4\t%7', stderr='')
+                if missing_server:
+                    return real_run(argv, **kwargs)
                 return subprocess.CompletedProcess(argv, 0, stdout='@4\t%7', stderr='')
             with patch('codex_wake.sessions.observe', side_effect=observe), patch('codex_wake.sessions.revalidate_attachment', return_value=True), patch('codex_wake.shared_app_server.SharedAppServerReader') as reader, patch('codex_wake.session_lifecycle.subprocess.run', side_effect=terminal):
                 reader.return_value.__enter__.return_value.read_thread.return_value = thread
@@ -91,3 +118,5 @@ class LiveWakeRestoreTests(unittest.TestCase):
             self.assertIn(str(cwd), launches[0][-1])
             self.assertEqual(prepared['codex_cmd'], sys.executable)
             self.assertEqual(prepared['startup_policy'], 'active_tab')
+            if missing_server:
+                self.assertEqual(len([cmd for cmd in commands if 'new-session' in cmd]), 1)
