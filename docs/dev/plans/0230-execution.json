@@ -107,5 +107,18 @@
         "delegable execution context"
       ]
     }
-  ]
+  ],
+  "wake_validation": {
+    "selected_suite": {
+      "tests": 287,
+      "seconds": 127.423,
+      "result": "PASS",
+      "source": "4a121aa5 product code; descriptor label refresh delta a33b19dc focused6PASS1.072s"
+    },
+    "lint": "Ruff0.14.2F821/F822/F823 allsrc/scripts/tests/hooks PASS",
+    "compile": "PASS",
+    "policy_wiring": "PASS",
+    "hosted_ci": "SKIPPED costpolicy",
+    "environment": "Linux Python3.12.13; no3.11orfullunrelatedsuite claim"
+  }
 }
