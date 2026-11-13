@@ -125,3 +125,22 @@ labels/scope and muted root accents without changing formatting policy.
 Independent actual tmux option readback confirmed specialist labels on all three
 restored windows and muted dim root backgrounds (colour109, colour66, colour60).
 These are installed visible options, beyond formatter-only projections.
+
+## Tracker and checkout closeout
+
+Bots compatibility issue79 read back CLOSED. Closeout-only Bots PR81 merged
+`e29ae5feb22339fa3fe6efa61f12b25e1c2aa9d9`; its difference from deployed
+c7fe3a1 is the Plan0127 documentation only. Original feature tickets remain
+closed, with parent601 deliberately open under the existing ticket contract.
+
+The Bots deployment checkout was removed normally after verified source custody;
+registered Bots checkouts returned2to1. Owned dependency symlink, smoke roots and
+unused initial artifact were removed; rollback packages/config/helper preimages
+remain. Shared native daemon generation was independently rechecked unchanged.
+The Bots primary checkout is clean and preserves its three local policy commits
+(three ahead/seven behind canonical main); it was never reset for deployment.
+Wake used exact archived source and Git objects for this evidence PR, creating no
+additional checkout. Existing unrelated Wake worktrees were preserved.
+
+Memory disposition: forbidden; no explicit memory-update request. Zero graph
+memory writes. Private deployment/rollback/provenance receipts remain outside Git.

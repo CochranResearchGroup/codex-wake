@@ -194,7 +194,7 @@
   "status": "all five implementation tickets CLOSED; review1/remediation1 complete; operator-authorized installed follow-up recorded separately",
   "remaining_accepted_blockers": [],
   "parent_spec_state": "OPEN per to-tickets instruction; no parent closure",
-  "cleanup": "original worker and integration checkouts removed after verified remote custody; later deployment lane has separate cleanup receipt",
+  "cleanup": "original worker/integration checkouts and later Bots deployment checkout removed normally after verified remote custody; root local policy commits and unrelated checkouts preserved",
   "deployment_evidence": "docs/dev/evidence/plan0231/deployment.md",
   "deployment": {
     "authorization": "subsequent operator instruction: pr review merge deploy",
