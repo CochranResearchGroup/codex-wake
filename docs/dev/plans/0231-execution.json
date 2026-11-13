@@ -92,7 +92,7 @@
         2,
         3
       ],
-      "state": "running",
+      "state": "validated",
       "integration_requirements": [
         "Reuse parent delegable execution settings without default-reset friction; provider grants remain provider-owned.",
         "Wake movement must preserve native Bot binding and session-switch ownership checks currently tied to codex-bots session."
@@ -105,6 +105,12 @@
         "native exact session bindings",
         "explicit Wake adapter",
         "delegable execution context"
+      ],
+      "result_sha": "7e16e59c9f4358e3b8f79e0e5967bada8359f289",
+      "validation": "46PASS4optionalSKIP;actual Wake sourceCLI/tmux/native proof1PASS7.53s",
+      "limitations": [
+        "Provider-qualified child enrollment required; no new provider grants.",
+        "Unknown failed moved-TUI auto-recovery remains held."
       ]
     }
   ],
@@ -126,5 +132,12 @@
   "review_bases": {
     "wake": "17e2c3fe57592fa8f071a30c6f885a9cc48258df",
     "bots": "1e315c3fddce194321e9587080091af1e36a1682"
+  },
+  "upstream_reconciliation": {
+    "upstream": "17e2c3fe57592fa8f071a30c6f885a9cc48258df",
+    "product_version": "0.22.0.dev19",
+    "preserved_upstream_files": 18,
+    "validation": "76family/mailbox/bootstrap checks PASS23.883s; compile/policy/diff PASS",
+    "note": "initial verification used moving origin/main and was replaced by pinned-SHA comparison; source unaffected"
   }
 }

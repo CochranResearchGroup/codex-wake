@@ -107,5 +107,5 @@ execution. One coordinator owns the joined delivery, with one integration branch
 per participating Git repository. GitHub implementation tickets close after their
 integrated PR acceptance; parent spec remains open. Merge needed for that acceptance
 is part of requested ticket closure; production deployment remains out of scope.
-Fixed review bases: Wake e8c79a79da0b0482e2403e634394c70f5c66e333;
+Fixed review bases after upstream reconciliation: Wake17e2c3fe57592fa8f071a30c6f885a9cc48258df;
 Bots origin/main is recorded in the execution ledger before workers start.
