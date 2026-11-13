@@ -67,3 +67,18 @@ policy routing, preservation and dated evidence; Spec0findings after comparing
 original definition of done against the acceptance table. Closure preserves
 explicit-pin behavior and all authority boundaries. No independent reviewer or
 new implementation review is claimed; no source behavior changed.
+
+## PR598 integration verification
+
+Base advanced to6150e5a5 (merged P229 reconnect work). Merge resolutionf36ec348
+retains both RUNBOOK append blocks and all P229 changes. Source/tests/scripts/
+package files byte-match that base; final PR delta remains four P0226 Markdown
+files. Relative links, policy wiring and whitespace pass. No new runtime tests
+or repeated implementation review are required for this documentation conflict.
+Primary Standards/Spec integration verification found0new candidates.
+
+The initial integration audit wrapper expected the earlier two findings and
+failed on P229's newly inherited missing Current State section. Base6150e5a5
+contains that exact defect; the corrected comparison retains0220/0224 headers
+plus0229 missing Current State, with0new findings from this branch. No baseline
+expansion or unrelated plan repair. P0226's own header finding stays resolved.
