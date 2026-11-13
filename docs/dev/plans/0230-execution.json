@@ -33,14 +33,16 @@
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/602",
       "title": "Bot families: register lineage and exact client tab bindings",
       "blocked_by": [],
-      "state": "running",
+      "state": "validated",
       "worker": "/root",
       "owned_paths": [
         "src/codex_wake/bot_families.py",
         "src/codex_wake/bot_family_contract.py",
         "public tab API/CLI registration",
         "tests/test_bot_families.py"
-      ]
+      ],
+      "result_sha": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
+      "validation": "4public family tests PASS1.705s;17affected contract/destination/profile tests PASS11.919s;RuffPASS"
     },
     {
       "key": "T3",
@@ -52,7 +54,10 @@
       "blocked_by": [
         2
       ],
-      "state": "pending"
+      "state": "running",
+      "worker": "/root/family_placement",
+      "worker_branch": "feat/bot-family-placement",
+      "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557"
     },
     {
       "key": "T4",
@@ -64,7 +69,10 @@
       "blocked_by": [
         2
       ],
-      "state": "pending"
+      "state": "running",
+      "worker": "/root/family_display",
+      "worker_branch": "feat/bot-family-display",
+      "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557"
     },
     {
       "key": "T5",
@@ -78,7 +86,11 @@
         2,
         3
       ],
-      "state": "pending"
+      "state": "pending",
+      "integration_requirements": [
+        "Reuse parent delegable execution settings without default-reset friction; provider grants remain provider-owned.",
+        "Wake movement must preserve native Bot binding and session-switch ownership checks currently tied to codex-bots session."
+      ]
     }
   ]
 }
