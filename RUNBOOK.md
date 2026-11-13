@@ -9676,3 +9676,22 @@ passing metadata at final guard. Exact installeddev18candidate26PASS4.435s,324pa
 files match; wheel5e2628144087730f55e8dbcaaea199df95d66fe508a5c74e864491aae7d860de.
 Bounded branchfix/p230-final-composer-check integrates the missing argument and
 correct-seam regression. Existing safety and StableTime configuration retained.
+
+## Turn | 2026-11-13 | P230 installed native acceptance complete
+
+PR606 merged17e2c3fe. Qualifieddev18 activated for five Wake entrypoints and exact
+participant worker, automatic discovery retained. Real native fresh actor-free
+recipient first contact completed. Final narrow-client replacement changed PID/
+binding generation and fresh post-fix notification completed, independently read
+back. Prior proven-unsent failed attempt preserved; cancellation refused as already
+terminal, no replay. Two new diagnostic actors retired, owned tab/binding removed;
+conversation and receipt history retained. StableTime selected through existing
+network adapter; no clocksource change, time-policy migration or sharedMCP reload.
+
+See docs/dev/evidence/plan0230/runtime-acceptance.md. Baseline163installed tests and
+StableTime smoke plus final26affected checks pass; no combined/full-suite claim.
+Loaded MCP61older-prefix processes require normal reconnect; effective refresh.shared
+permission approval_required, separately presented. Core P230 CLOSED with that
+rollout boundary explicit. Final source checkout closes after acceptance-note remote
+custody; unused candidate directories removed only when no process references them.
+Memory forbidden; non-write receipt retained outside Git.

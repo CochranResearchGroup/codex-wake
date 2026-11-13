@@ -1,12 +1,25 @@
 # LOCAL-P230 | Native mailbox first contact and notification bindings
 
-State: OPEN
+State: CLOSED
 Ticket: LOCAL-P230
 Owner: primary WebB
 Priority: P1
 Branch: fix/notification-binding-lifecycle
 Dependencies: none
 WIP limit: one implementation lane
+
+## Current State
+
+CLOSED: systemic source repair merged (PR600,605,606), qualified dev18 participant
+worker/entrypoints activated. Real native first-contact and replacement-client
+notification/read/claim/completion verified without manual binding. StableTime is
+used through the existing adapter; no host clock change or production-policy reset.
+See [runtime acceptance](../evidence/plan0230/runtime-acceptance.md).
+Existing loaded MCP connections retain older code until reconnect; shared refresh
+requires separate effective permission and was not forced. Historical failures,
+including the missed final composer call, remain in the evidence. Owned diagnostic
+actors/tab/binding cleaned; conversations and receipts retained. Final checkout can
+close after remote custody of this acceptance record is verified.
 
 ## Scope and acceptance
 
@@ -19,7 +32,7 @@ notifications without weakening composer, exact-identity or uncertain-effect fen
 No implicit root enrollment, new grant, automatic replay, daemon replacement or
 working-host deployment. Existing explicit binding mode remains supported.
 
-## Current State
+## Implementation history
 
 Isolated implementation worktree from e8c79a79; root checkout preserved. Reuses
 existing native bootstrap and notification harnesses. First-contact regression red:
