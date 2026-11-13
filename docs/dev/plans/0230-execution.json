@@ -69,10 +69,13 @@
       "blocked_by": [
         2
       ],
-      "state": "running",
+      "state": "validated",
       "worker": "/root/family_display",
       "worker_branch": "feat/bot-family-display",
-      "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557"
+      "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
+      "result_sha": "480756dd91373cc4959661d303b7aa46122d4fcd",
+      "integrated_sha": "e86a7aa6",
+      "validation": "worker73affectedPASS; binding-loss3PASS; coordinator registry/display6PASS"
     },
     {
       "key": "T5",
