@@ -9424,3 +9424,20 @@ LOCAL-P227 documentation review completed on frozen732d9568/base1a276d0f:
 accepted both. No new implementation review/TDD; original P2161/1 unchanged.
 PR title/body prepared in user state; no PR creation, merge or live effects.
 Documentation outcome closed; branch checkpoint preserves the coherent packet.
+
+## Turn | 2026-11-13 | LOCAL-P228 preserved policy recovered on reviewed branch
+
+Compared preserve13d11145's4commits against currentmain728b797f. All10policy
+surfaces were still absent/older; recovered exact final bytes on
+chore/reconcile-preserved-policy. No broad adoption/source/service changes.
+Separate comment/glossary commit preserves cargo-signal semantic config and two
+observation definitions. Selector0.1.35 digest, governance hashes, wiring, glossary,
+TOML equality, Ruff, CI-scope1test and goal audit PASS. Active audit retains only
+inherited0220/0224/0226 header findings. Initial checker key assumption corrected
+without manifest changes. Evidence docs/dev/evidence/plan0228/.
+
+Independent /root/policy_recovery_review: Standards0/Spec0 on frozen4c0c0c05;
+primary accepted, no remediation. LOCAL-P228 recovery complete; merge/deploy not
+authorized by this slice. Publish coherent checkpoint, preserve original ref,
+then remove exact duplicated root edits only after backup/equality proof.
+Memoryforbidden under session developer boundary; zero memorywrites.

@@ -1,7 +1,7 @@
 # LOCAL-P228 | Preserved policy and local edit reconciliation
 
-State: OPEN
-Workflow: IN_PROGRESS
+State: CLOSED
+Workflow: DONE; recovered and reviewed, integration pending
 Work item: LOCAL-P228
 Owner: primary / ecochran76
 Priority: P1 repository continuity
@@ -50,3 +50,14 @@ completed; planning audit retains exactly inherited0220/0224/0226 failures.
 An initial ad-hoc hash checker expected a `sources` key; actual manifest uses
 `governance_inventory`/profiles. Recursive declared-source verification passed.
 No source or manifest change was made to accommodate the checker.
+
+## Final evidence and remaining gate
+
+[Validation](../evidence/plan0228/validation.md) records passing scope/hash/bundle/
+wiring/TOML/glossary/lint/goal checks and3inherited planning findings,0new.
+[Independent review](../evidence/plan0228/review.md): Standards0/Spec0; no remediation.
+Two coherent commits retain policy recovery separately from comment/glossary work.
+Branch publication establishes custody, not integration or runtime deployment.
+Primary root edits may be removed only after exact branch equality and backup;
+main remains canonical728b797f until a separately authorized merge. Original
+preserve branch remains intact. Memory forbidden; zero Graphiti writes.
