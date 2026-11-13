@@ -2,8 +2,8 @@
 
 ## P229 | Reconnect failures
 
-Issue #596: detect reconnect failures above editable drafts; integrate and deploy
-only the monitor package, preserving native sessions. See
+Issue #596 delivered: PR597 merged6150e5a5; dev14 monitor deployed and actual
+tab16 reconnect error detected, preserving pane identities and settings. See
 [Plan0229](docs/dev/plans/0229-2026-11-13-reconnect-error-detection.md).
 
 ## Evidence reconciliation | 2026-11-12
