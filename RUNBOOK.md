@@ -9565,3 +9565,30 @@ new P229 reconnect-error records while resolving an append-only RUNBOOK conflict
 The P229 source, tests, release and policy files match current main6150e5a5;
 this branch adds only P0226 documentation relative to that base. No behavioral
 remediation or product requalification is introduced by this merge resolution.
+
+## Turn | 2026-11-13 | P229 reconnect monitor deployed
+
+PR597 merged6150e5a5 under operator authority. Merged dev14 wheelSHA73ef27e0
+matches324installed/source members;23installed checks PASS14.276s;31existing
+dependency versions equal under PEP503 name normalization (initial raw pip/uv
+name-spelling mismatch corrected without dependency changes).9stable launchers
+now dev14. Only monitor owner replaced103657→1587828, one root owner, no error,
+settings bytes unchanged. Actual retained @16/%16 overlf now redacted errorpresent;
+original pane PID1726675/birth1135977 and CodexPID1533890/birth6632791 preserved.
+No terminal input, native restart, dispatch, governor or recovery action.
+
+Deployment script initially stopped its verification on whole-screen hash change.
+Effects reconciled without repeating stop/start: new owner already healthy and
+publishing expected error. Two-read screen probe changed only reconnect duration.
+Exact pre/post draft contents were not retained; no byte-equality claim. A readback
+initially used bare Python without package; repeated read-only via exact installed
+interpreter succeeded. First verification errors remain in session/local receipts.
+
+Evidence docs/dev/evidence/reconnect-errors/deployment.json; full private install,
+rollback mapping and prior immutable prefixes retained in user-scoped state.
+Stable Time qualified_live NTS UTC2026-11-13T15:00:35.923944049Z ±313.36709ms.
+Source270PASS138.689s plus classifier/policy/lint/compile/diff checks; Python3.12
+selected local lane, not full unrelated/3.11/hosted. Source and live monitor outcome
+complete; issue596 closes from this actual readback. Docs-only closeout receipt
+merges separately; remove exact task checkout after clean published custody.
+Memory forbidden under explicit-request-only developer boundary; zero writes.

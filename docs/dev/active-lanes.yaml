@@ -8,12 +8,12 @@ lanes:
     plan: docs/dev/plans/0229-2026-11-13-reconnect-error-detection.md
     branch: fix/reconnect-error-detection
     target: origin/main
-    plan_state: OPEN
-    custody_state: LOCAL
+    plan_state: CLOSED
+    custody_state: INTEGRATED
     dependencies: []
     overlaps: [P216]
     updated_at: 2026-11-13
-    disposition: Qualified reconnect fix; PR integration and monitor-only deployment authorized
+    disposition: PR597 merged6150e5a5; exactdev14 deployed; tab16 redacted present; settings and pane identities preserved; closeout checkout retires after receipt merge
   - id: P225
     owner: primary / ecochran76
     objective: Make CLI outcomes actionable and format enable truthful
