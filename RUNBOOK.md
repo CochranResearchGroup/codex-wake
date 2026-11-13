@@ -9695,3 +9695,39 @@ permission approval_required, separately presented. Core P230 CLOSED with that
 rollout boundary explicit. Final source checkout closes after acceptance-note remote
 custody; unused candidate directories removed only when no process references them.
 Memory forbidden; non-write receipt retained outside Git.
+
+
+## Turn | 2026-11-13 | P231 bot families delivered and five tickets closed
+
+Operator invoked to-spec/to-tickets/implement-spec with bounded delegation, then
+exactly one broad review and one TDD remediation. Spec601 published with five native
+subissues and5blocking edges. Primary owned Wake602; /root/bot_family_model owned
+Bots75 then76; /root/family_placement owned603; /root/family_display owned604.
+Workers returned coherent SHAs/acceptance; primary integrated serially and unlocked
+only from validated code. Execution ledger preserves bases/results/custody.
+
+Concurrent mailbox P230 required carrying17e2c3fe into our branch;18nonoverlapping
+upstream files compared byte-for-byte at pinned SHA. This program became P231,
+source versiondev19, with unchanged ticket IDs/review limits. Initial moving-ref
+carry probe and transient joined-CLI syntax failure retained; fixed-source join
+passed. Wake PR607merged88aca4fc and Bots77merged78501a84 closed all5implementation
+tickets. Parent spec601 deliberately remains open under to-tickets instruction.
+
+One Standards/Spec review accepted3Bots findings: child desktop/private-auth holds,
+connected peer guidance freshness, null model inheritance. Primary verified causal
+source and delegated one bounded TDD pass. Each regression observed red then green;
+primary focused5PASS0SKIP1.176s and syntax/diff checks. Corrective Bots78mergeda9e868fd.
+No second broad review, fixture framework, unrelated hardening or live effect.
+
+Wake selected287PASS127.423s plus carried mailbox/family76PASS23.883s; source CLI
+replay5PASS2.111s. Bots focused46PASS4optionalbrowserSKIP plus actual source WakeCLI/
+private tmux/native ownership1PASS7.53s. Local pinned Ruff, policy, compilation and
+diff checks PASS. Python3.12/Node24/Linux; no paid hosted/full-unrelated/3.11/provider
+qualification claim. No live install/account enrollment/grants/daemon rebuild.
+Provider-qualified child routes remain prerequisite; unknown moved-TUI recovery
+is held. Exact scope/results in docs/dev/evidence/plan0231 and linked Bot plans.
+
+Placement/display worker checkouts were removed after remote custody/clean checks.
+Two reused integration checkouts retire after this docs-only closeout receipt's
+verified merge; root anchors remain main, unrelated checkouts unchanged. Memory
+forbidden by explicit-request-only developer boundary; zero Graphiti writes.

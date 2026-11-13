@@ -8,8 +8,8 @@
   },
   "review_limit": 1,
   "remediation_limit": 1,
-  "review_runs": 0,
-  "remediation_runs": 0,
+  "review_runs": 1,
+  "remediation_runs": 1,
   "tickets": [
     {
       "key": "T1",
@@ -23,7 +23,8 @@
       "worker": "/root/bot_family_model",
       "result_sha": "8889cbc37932ced0dad79616bfa717e65905faf1",
       "worktree": "codex-bots-standalone/bot-family-hierarchy",
-      "validation": "service13PASS2optionalbrowserSKIP;handoff16PASS1optionalbrowserSKIP;src/bot-family service/settings/native guidance"
+      "validation": "service13PASS2optionalbrowserSKIP;handoff16PASS1optionalbrowserSKIP;src/bot-family service/settings/native guidance",
+      "tracker_state": "CLOSED"
     },
     {
       "key": "T2",
@@ -42,7 +43,8 @@
         "tests/test_bot_families.py"
       ],
       "result_sha": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
-      "validation": "4public family tests PASS1.705s;17affected contract/destination/profile tests PASS11.919s;RuffPASS"
+      "validation": "4public family tests PASS1.705s;17affected contract/destination/profile tests PASS11.919s;RuffPASS",
+      "tracker_state": "CLOSED"
     },
     {
       "key": "T3",
@@ -60,7 +62,8 @@
       "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
       "result_sha": "75da46b635fed0a65ac8ad6cd41b0b4ebf6b7fd1",
       "integrated_sha": "d01e5d06",
-      "validation": "worker25PASS19.725s;coordinator joined16PASS10.068s"
+      "validation": "worker25PASS19.725s;coordinator joined16PASS10.068s",
+      "tracker_state": "CLOSED"
     },
     {
       "key": "T4",
@@ -78,7 +81,8 @@
       "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
       "result_sha": "480756dd91373cc4959661d303b7aa46122d4fcd",
       "integrated_sha": "e86a7aa6",
-      "validation": "worker73affectedPASS; binding-loss3PASS; coordinator registry/display6PASS"
+      "validation": "worker73affectedPASS; binding-loss3PASS; coordinator registry/display6PASS",
+      "tracker_state": "CLOSED"
     },
     {
       "key": "T5",
@@ -111,7 +115,8 @@
       "limitations": [
         "Provider-qualified child enrollment required; no new provider grants.",
         "Unknown failed moved-TUI auto-recovery remains held."
-      ]
+      ],
+      "tracker_state": "CLOSED"
     }
   ],
   "wake_validation": {
@@ -139,5 +144,55 @@
     "preserved_upstream_files": 18,
     "validation": "76family/mailbox/bootstrap checks PASS23.883s; compile/policy/diff PASS",
     "note": "initial verification used moving origin/main and was replaced by pinned-SHA comparison; source unaffected"
-  }
+  },
+  "review_targets": {
+    "wake": "aaf21dfaadf708fd04ba954ad996d44ec3f52c04",
+    "bots": "7e16e59c9f4358e3b8f79e0e5967bada8359f289"
+  },
+  "review_workers": {
+    "standards": "/root/p231_standards_review",
+    "spec": "/root/p231_spec_review"
+  },
+  "merged_implementation": {
+    "wake": {
+      "pr": 607,
+      "sha": "88aca4fc2f8cbfe0c7363a1715c9e682968ea111"
+    },
+    "bots": {
+      "pr": 77,
+      "sha": "78501a8458fec3dec27d29ca915c3f7b27abf1e7"
+    }
+  },
+  "review_result": {
+    "standards": {
+      "accepted": 1,
+      "highest": "P1",
+      "ids": [
+        "STD-1"
+      ]
+    },
+    "spec": {
+      "accepted": 2,
+      "highest": "P1",
+      "ids": [
+        "SPEC-1",
+        "SPEC-2"
+      ]
+    },
+    "wake_blockers": 0
+  },
+  "remediation": {
+    "worker": "/root/bot_family_model",
+    "branch": "fix/bot-family-review",
+    "scope": "accepted three Bots findings only",
+    "state": "validated",
+    "result_sha": "19129412f10e60e3ab547df74c9a44a2f1fc4899",
+    "merge_sha": "a9e868fd9539c593e3c5ca1b06516bb8e1f041ce",
+    "pr": 78,
+    "verification": "5PASS0FAIL0SKIP1.176s; syntax/diffPASS"
+  },
+  "status": "all five implementation tickets CLOSED; review1/remediation1 complete; no deployment",
+  "remaining_accepted_blockers": [],
+  "parent_spec_state": "OPEN per to-tickets instruction; no parent closure",
+  "cleanup": "worker placement/display checkouts removed after remote custody; two integration checkouts retire after closeout receipt merge"
 }

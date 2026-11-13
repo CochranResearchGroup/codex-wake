@@ -1,7 +1,7 @@
 # LOCAL-P231 | Specialist bot hierarchy and worker-tab organization
 
-State: OPEN
-Workflow: IMPLEMENTING; design confirmed
+State: CLOSED
+Workflow: DONE; source integrated, tickets closed, one review/remediation complete
 Work item: https://github.com/CochranResearchGroup/codex-wake/issues/601
 Owner: primary / ecochran76
 Branch: feat/bot-family-hierarchy
@@ -125,3 +125,27 @@ dev18. This program is nowP231, same spec601/tickets/worker custody/review limit
 Merged both histories by intent; only package version conflicted, resolved asdev19.
 Other mailbox/composer/StabeTime behavior and its P230 evidence remain intact.
 Review fixed point for our Wake delta is17e2c3fe, excluding unrelated initiative.
+
+## Final source acceptance
+
+Wake PR607 merged88aca4fc; Bots PR77 merged78501a84. Wake602/603/604 and
+Bots75/76 read back CLOSED. Parent spec601 remains open under to-tickets contract.
+One broad review (Standards /root/p231_standards_review; Spec /root/p231_spec_review)
+accepted STD-1(P1),SPEC-1(P1),SPEC-2(P2), all Bots; no Wake blocker. One bounded
+TDD pass by /root/bot_family_model observed each regression red then green;
+coordinator focused5PASS0SKIP1.176s and source/syntax checks verified correction.
+Bots corrective PR78 mergeda9e868fd. No second broad review or accepted blocker.
+
+Local affected Wake287PASS127.423s, post-merge family/mailbox76PASS23.883s;
+CLI replay5PASS2.111s; installed disposable earlier wheel16PASS14.344s.
+Bots source46PASS4optionalbrowserSKIP; actual source WakeCLI/tmux/native binding
+join1PASS7.53s. Exact commands/failures remain in per-ticket records. These are
+selected source/package checks, not full unrelated/3.11/provider/live acceptance.
+Existing provider-qualified child auth enrollment remains required; source does
+not synthesize grants. Unknown moved-TUI recovery holds rather than replacing a
+conversation. Live installation, account enrollment and provider journeys excluded.
+
+Source delivery and requested ticket closure are complete. Final docs-only receipt
+records results; both task integration checkouts retire after its verified merged
+custody. Root checkouts stay main; unrelated worktrees remain untouched.
+Memory disposition forbidden: no explicit memory-update request; zero graph writes.

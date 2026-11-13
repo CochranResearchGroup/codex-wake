@@ -1,0 +1,48 @@
+{
+  "review_runs": 1,
+  "remediation_runs": 1,
+  "status": "all accepted findings fixed and integrated",
+  "candidates": [
+    {
+      "id": "STD-1",
+      "axis": "Standards",
+      "severity": "P1",
+      "disposition": "blocking",
+      "source": "Bots service.mjs279/family-supervision.mjs24-25",
+      "finding": "Child supervision bypasses desktop/private-auth admission holds.",
+      "resolution": "fixed; focused red/green verified and PR78 merged"
+    },
+    {
+      "id": "SPEC-1",
+      "axis": "Spec",
+      "severity": "P1",
+      "disposition": "blocking",
+      "source": "Bots service.mjs109/messaging.mjs37-57",
+      "finding": "Connected peer delivery captures stale inherited guidance.",
+      "resolution": "fixed; focused red/green verified and PR78 merged"
+    },
+    {
+      "id": "SPEC-2",
+      "axis": "Spec",
+      "severity": "P2",
+      "disposition": "blocking",
+      "source": "Bots settings.mjs62",
+      "finding": "Null inherit override discards nearest parent setting.",
+      "resolution": "fixed; focused red/green verified and PR78 merged"
+    }
+  ],
+  "accepted_findings": [
+    "STD-1",
+    "SPEC-1",
+    "SPEC-2"
+  ],
+  "remediation_source": "19129412f10e60e3ab547df74c9a44a2f1fc4899",
+  "remediation_merge": "a9e868fd9539c593e3c5ca1b06516bb8e1f041ce",
+  "verification": {
+    "tests": 5,
+    "passed": 5,
+    "skipped": 0,
+    "seconds": 1.176,
+    "mode": "focused accepted blockers only; no second broad review"
+  }
+}
