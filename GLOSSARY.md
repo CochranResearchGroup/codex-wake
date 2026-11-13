@@ -359,6 +359,26 @@ makes affected evidence uncertain without changing the tab's identity or appeara
 A named or criteria-based collection of terminal attachments. Group membership
 alone does not move attachments or change their conversations.
 
+**Worker tab**:
+A terminal tab presenting an agent carrying out work delegated by another agent.
+Its placement is separate from the identity and lifetime of that work.
+
+**Bot**:
+A persistent specialist identity shared across its clients. Its identity survives
+individual conversations, runtimes and terminal attachments.
+_Avoid_: Tab, conversation or client as synonyms for bot.
+
+**Sub-bot**:
+A bot supervised by a parent bot, with a specialization inherited and further
+focused from that parent.
+
+**Bot family**:
+A root bot and all its descendant sub-bots. A sub-bot's immediate parent and
+its family root can be different bots.
+
+**Workers session**:
+A terminal session collecting worker tabs from one or more bot families.
+
 **Tab view**:
 A filtered and ordered presentation of terminal attachments and their traits.
 Updating a view is separate from physically rearranging the attachments.

@@ -111,6 +111,8 @@ def register_parser(subparsers):
     relocation_verbs=relocation.add_subparsers(dest='relocate_command',required=True)
     routing=verbs.add_parser('routing',help='Manage saved routing rules and manual holds.')
     routing_verbs=routing.add_subparsers(dest='routing_command',required=True)
+    family=verbs.add_parser('family',help='Register, inspect and organize persistent bot-family attachments.')
+    family_verbs=family.add_subparsers(dest='family_command',required=True)
     aliases = {'pins':'pin', 'members':'member', 'criteria':'criterion'}
     for _, operation, summary, properties, required, readonly in tool_specs().values():
         action=cli_verb(operation)
@@ -123,6 +125,8 @@ def register_parser(subparsers):
             commands.append(relocation_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
         if operation.startswith('tabs.route.'):
             commands.append(routing_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
+        if operation.startswith('tabs.family.'):
+            commands.append(family_verbs.add_parser(operation.rsplit('.',1)[1],help=summary,description=summary))
         for command in commands:
             command.set_defaults(tabs_command=action,group_by=[],sort_by=[],filters=[],pins=[],members=[],mode='activity')
             if action.startswith(('view-','group-')) and not action.endswith('-list'):
@@ -193,7 +197,7 @@ def run(args, root, *, observer=None):
         from .tab_contract import BY_OPERATION
         args.tab_command=args.tabs_command
         args.arguments=dict(args.arguments or {})
-        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1).replace('relocate-','relocate.',1).replace('route-','route.',1)
+        operation='tabs.'+args.tabs_command.replace('monitor-','monitor.',1).replace('policy-','policy.',1).replace('recovery-','recovery.',1).replace('format-','format.',1).replace('session-','session.',1).replace('relocate-','relocate.',1).replace('route-','route.',1).replace('family-','family.',1)
         if operation in BY_OPERATION:
             properties=BY_OPERATION[operation][1][3]
             for field in properties:

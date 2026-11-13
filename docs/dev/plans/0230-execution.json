@@ -1,0 +1,84 @@
+{
+  "spec": "docs/dev/plans/0230-bot-family-spec.md",
+  "parent_spec": "https://github.com/CochranResearchGroup/codex-wake/issues/601",
+  "integration_branch": "feat/bot-family-hierarchy",
+  "bases": {
+    "wake": "e8c79a79da0b0482e2403e634394c70f5c66e333",
+    "bots": "1e315c3fddce194321e9587080091af1e36a1682"
+  },
+  "review_limit": 1,
+  "remediation_limit": 1,
+  "review_runs": 0,
+  "remediation_runs": 0,
+  "tickets": [
+    {
+      "key": "T1",
+      "repo": "CochranResearchGroup/codex-bots",
+      "number": 75,
+      "id": 6380126571,
+      "url": "https://github.com/CochranResearchGroup/codex-bots/issues/75",
+      "title": "Bot families: create durable specialist descendants with inherited guidance",
+      "blocked_by": [],
+      "state": "validated",
+      "worker": "/root/bot_family_model",
+      "result_sha": "8889cbc37932ced0dad79616bfa717e65905faf1",
+      "worktree": "codex-bots-standalone/bot-family-hierarchy",
+      "validation": "service13PASS2optionalbrowserSKIP;handoff16PASS1optionalbrowserSKIP;src/bot-family service/settings/native guidance"
+    },
+    {
+      "key": "T2",
+      "repo": "CochranResearchGroup/codex-wake",
+      "number": 602,
+      "id": 6380127005,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/602",
+      "title": "Bot families: register lineage and exact client tab bindings",
+      "blocked_by": [],
+      "state": "running",
+      "worker": "/root",
+      "owned_paths": [
+        "src/codex_wake/bot_families.py",
+        "src/codex_wake/bot_family_contract.py",
+        "public tab API/CLI registration",
+        "tests/test_bot_families.py"
+      ]
+    },
+    {
+      "key": "T3",
+      "repo": "CochranResearchGroup/codex-wake",
+      "number": 603,
+      "id": 6380127433,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/603",
+      "title": "Bot families: open grouped background tabs and clean accepted temporary workers",
+      "blocked_by": [
+        2
+      ],
+      "state": "pending"
+    },
+    {
+      "key": "T4",
+      "repo": "CochranResearchGroup/codex-wake",
+      "number": 604,
+      "id": 6380127819,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/604",
+      "title": "Bot families: show specialization labels and reversible muted family colors",
+      "blocked_by": [
+        2
+      ],
+      "state": "pending"
+    },
+    {
+      "key": "T5",
+      "repo": "CochranResearchGroup/codex-bots",
+      "number": 76,
+      "id": 6380128323,
+      "url": "https://github.com/CochranResearchGroup/codex-bots/issues/76",
+      "title": "Bot families: supervise children and hand exact attachments to Wake",
+      "blocked_by": [
+        1,
+        2,
+        3
+      ],
+      "state": "pending"
+    }
+  ]
+}

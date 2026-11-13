@@ -12,7 +12,7 @@ from .tab_organization import TabOrganization, TabError, digest
 
 
 class ControllerTabs:
-    READS = frozenset(('tabs.session.list','tabs.session.show','tabs.relocate.status','tabs.route.list','tabs.route.show','tabs.route.status','tabs.format.status','tabs.format.inspect','tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
+    READS = frozenset(('tabs.family.list','tabs.family.show','tabs.session.list','tabs.session.show','tabs.relocate.status','tabs.route.list','tabs.route.show','tabs.route.status','tabs.format.status','tabs.format.inspect','tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
     MUTATIONS = frozenset(('tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input'))
 
     def __init__(self, root, *, workspaces, host, environment, host_managed=False, observation_cache=None):
@@ -41,6 +41,9 @@ class ControllerTabs:
         return TabLifecycle(self.root,workspaces=self.workspaces,host=self.host,environment=self.environment).execute('tabs.create',payload)
 
     def execute(self, operation, arguments, *, deadline=None):
+        if operation.startswith('tabs.family.'):
+            from .bot_families import BotFamilies
+            return BotFamilies(self.root,tabs=self).execute(operation,arguments)
         if operation=='tabs.create':return self.create_tab(arguments)
         if operation.startswith('tabs.route.'):
             from .terminal_routing import TerminalRouting
@@ -205,6 +208,8 @@ class ControllerTabs:
                 return dict(target=lifecycle_target, **owner.undo(arguments['receipt_id'], deadline=deadline))
             except TabError as error:
                 raise InventoryError(error.code, str(error)) from error
+        from .bot_families import BotFamilies
+        BotFamilies(self.root,tabs=self).annotate(resources)
         value = dict(resources=resources)
         if unavailable:
             value['unavailable'] = unavailable

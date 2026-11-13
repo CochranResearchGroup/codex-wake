@@ -1,5 +1,13 @@
 # Codex Wake Roadmap
 
+## P230 | Specialist bot families
+
+Accepted cross-repo design and spec #601. Implement durable specialist/account/task
+hierarchy and inherited guidance in codex-bots; Wake supplies exact tab bindings,
+background family placement, reversible accents/navigation and accepted temporary
+worker cleanup. Execution: [Plan0230](docs/dev/plans/0230-2026-11-13-bot-tab-hierarchy.md)
+and its ticket ledger. No live deployment or provider effects in this packet.
+
 ## P229 | Reconnect failures
 
 Issue #596 delivered: PR597 merged6150e5a5; dev14 monitor deployed and actual
