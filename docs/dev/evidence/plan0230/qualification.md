@@ -111,3 +111,46 @@ Working-host activation and full installed-smoke qualification are BLOCKED until
 host clock continuity is restored and the original smoke passes. Draft source
 publication is permitted; do not call the candidate runtime-qualified or merge-ready.
 No daemon replacement, active MCP reload or notification worker restart occurred.
+
+## StableTime operator correction and final candidate
+
+The operator directed StableTime use instead of host-clock modification. Both the
+StableTime MCP and the installed Wake adapter returned finite, NTS-verified bounds
+from Cloudflare and Netnod. The production bus readback was already schema3 /
+network-first with the existing provider-selection adapter; the failing smoke had
+created a fresh schema2 legacy-guest bus. Conflating those boundaries caused the
+incorrect host-clock proposal. No clocksource switch was performed.
+
+Added explicit --require-stable-time activation through the existing time-policy
+seam and --stable-time to the same installed smoke. The new persisted provider pin
+rejects plain sources or missing/uncertain StableTime, prevents downgrade, retains
+legacy checkpoints and refuses pending legacy-work migration. Older readers reject
+this policy. The existing production policy was not migrated or changed.
+
+A closed-world regression also exposed an existing in-memory Mailbox instance not
+observing a newly activated pin. It went red (no BusError), then green after checking
+policy inside BEGIN IMMEDIATE. No earlier fixture or failing result was discarded.
+
+Final immutable candidate version 0.22.0.dev16 (r2 qualification prefix). Wheel SHA256:
+bf192632cf31b05b67670ad8287063541dd6a79231e5fb73ac813d1b3a62eeaa.
+All324 wheel payload files equal source. Installed qualification, PYTHONPATH=tests:
+
+<python> -m unittest test_network_mailbox test_stable_time test_host_counter
+ test_time_provider test_a2a_delivery test_native_mailbox_bootstrap
+ test_a2a_tmux_delivery test_a2a_scheduler test_a2a_scheduler_faults test_a2a_cli
+ test_messages_cli test_a2a_mcp test_tab_targets_mcp test_tab_targets
+ test_a2a_mailbox test_a2a_mailbox_faults
+
+163 PASS /102.398s. Focused, not comprehensive. The initial candidate passed162
+but did not yet cover the stale-instance pin finding; final163 includes that repair.
+The installed original mailbox workflow with --stable-time --scheduler --operations
+PASS:2requests,1reply,2received receipts,1scheduler projection, operator operations,
+22connections closed, zero runtime effect methods, zero introduced child residue,
+temporary bus/roots removed. Actual service supplies time; native identity metadata
+is injected as in the existing smoke, not claimed as fresh native-live acceptance.
+
+The legacy-guest failure remains historical evidence. It no longer requires a host
+clock fix: operator-selected authenticated-time qualification passes. Future host
+activation can preserve the current compatible network-time policy; applying the
+stronger pin requires upgraded readers and a quiescent domain. No production bus
+migration, shared-MCP reload or host clock change occurred in this qualification.

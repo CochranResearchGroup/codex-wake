@@ -25,3 +25,13 @@ safeguard is unchanged. Working-host installation must still verify new-session
 first contact and reconnect; source tests alone do not prove activation.
 
 Review summary: Standards 0 accepted; Spec 1 accepted (resolved).
+
+## StableTime closed-world extension
+
+Operator-selected StableTime is the time authority. Existing production network
+mode and fresh smoke legacy mode were distinguished explicitly. The optional
+provider pin preserves history, denies unsafe migration/downgrade/fallback, and
+older readers fail closed. One new accepted Spec finding (stale in-memory policy)
+was reproduced and resolved under the transaction lock; final installed163 pass
+includes it. No new broad discovery review; cumulative accepted Spec findings2,
+both resolved. Standards remains0 accepted. Real native rollout is still separate.

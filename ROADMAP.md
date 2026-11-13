@@ -1707,5 +1707,5 @@ own exact-record reconciliation and applicable authority.
 
 ## P230 | Native mailbox first contact and bindings
 
-BLOCKED (installed smoke / host clock continuity): [LOCAL-P230](docs/dev/plans/0230-2026-11-13-mailbox-first-contact-bindings.md).
+OPEN (StableTime qualification passed): [LOCAL-P230](docs/dev/plans/0230-2026-11-13-mailbox-first-contact-bindings.md).
 One source lane; remove first-poll prerequisite and qualify opt-in client rebinding.

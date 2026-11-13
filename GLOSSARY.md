@@ -459,3 +459,8 @@ existing root grants, revocation and cross-root restrictions.
 An operator opt-in that reconciles a pending authorized notification's exact
 recipient with its current live tmux client. It refreshes delivery binding only,
 without enrollment, actor reauthorization, client launch or notification replay.
+
+**StableTime-required mailbox**:
+A mailbox whose persisted time policy requires the configured StableTime service's
+finite authenticated UTC evidence, without guest-clock or plain-NTP fallback.
+Existing mailbox instances observe activation at their next transaction.

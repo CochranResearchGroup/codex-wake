@@ -1,6 +1,6 @@
 # LOCAL-P230 | Native mailbox first contact and notification bindings
 
-State: BLOCKED
+State: OPEN
 Ticket: LOCAL-P230
 Owner: primary WebB
 Priority: P1
@@ -40,3 +40,22 @@ focused local checks, document installed-versus-source distinction and leave a
 reviewable patch. Commit, merge and working-host activation remain separate.
 Remote branch provides durable custody. Close the clean task checkout after publication;
 recreate from the same branch when the host-clock gate clears. No other lane owned.
+
+## StableTime correction (operator direction)
+
+The operator selected existing StableTime for clock problems; do not change the
+host clocksource. Current StableTime MCP and installed Wake adapter both provide
+finite qualified NTS evidence. Extend the existing mailbox time-policy seam with
+--require-stable-time, provider pinning without guest/plain-NTP fallback, and a
+StableTime variant of the original installed mailbox workflow. Preserve legacy
+checkpoint/history. Pending legacy work holds migration; do not reassign its
+uncertain deadline semantics. Older readers must reject the new pinned policy.
+No production bus migration is implied by source qualification. Re-qualify the
+immutable candidate before proposing source integration and scoped activation.
+
+StableTime correction qualified: final installed dev16 candidate163PASS and original
+installed mailbox workflow with --stable-time PASS. Source review has no outstanding
+accepted finding. The earlier host-clock gate is superseded by qualified StableTime
+use; no clocksource change. Production bus already uses network time and is not
+migrated. Next: integrate source, then activate the qualified worker/discovery code
+with compatible existing time policy and verify actual new-session delivery.

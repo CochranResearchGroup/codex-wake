@@ -9634,3 +9634,18 @@ hyperv_clocksource_tsc_page, hyperv_clocksource_msr and acpi_pm alternatives. Gl
 clocksource change is a separate host operation, not performed under source scope.
 Clean task checkout can close after this custody update; immutable candidate and
 wheel remain user-scoped for the original smoke once host continuity is restored.
+
+## Turn | 2026-11-13 | LOCAL-P230 StableTime correction
+
+Operator chose StableTime. Actual service and installed adapter qualified NTS UTC;
+production bus was already network mode, while the failing smoke used a fresh
+legacy bus. Corrected that conflation; no host-clock change. Added explicit pinned
+StableTime mailbox mode and same-smoke qualification option. Preserves checkpoint,
+holds pending legacy migration, denies fallback/downgrade and old readers; stale
+in-memory pin regression observed red then fixed under transaction lock.
+
+Final immutable dev16-r2 candidate324payload files match source, wheelbf192632cf31b05b67670ad8287063541dd6a79231e5fb73ac813d1b3a62eeaa.
+Installed163focusedPASS102.398s and StableTime mailbox workflow PASS with clean
+connections/children/temp-root receipts. Prior failures retained. No production
+bus migration or shared-MCP reload. PR600 source update follows; runtime integration
+remains separate from these fixture-backed source qualifications. Memory forbidden.
