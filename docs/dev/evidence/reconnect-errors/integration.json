@@ -1,0 +1,36 @@
+{
+  "base": "4b7da1f9dc2ad16e67f091f1cbc8d85468252407",
+  "issue": 596,
+  "version": "0.22.0.dev14",
+  "checks": {
+    "tab_selection": {
+      "tests": 270,
+      "seconds": 138.689,
+      "result": "PASS"
+    },
+    "ci_scope": {
+      "tests": 1,
+      "result": "PASS"
+    },
+    "policy_wiring": "PASS",
+    "ruff": "PASS",
+    "diff_check": "PASS"
+  },
+  "source_hashes": {
+    "src/codex_wake/tab_traits.py": "6b011b21f0af09df9c5a194ffd3e09c40d36fb21ddf31d093b4e680668cee60f",
+    "tests/test_tab_traits.py": "cf1eae2e13fc2200e17d56316ef291c0da28aa62e6bec05268dca54cb0f8e9aa",
+    "tests/test_tab_observer.py": "239aa2073ff1d2eb8cd86717e185e25083830718372264dceb90173c98fce603",
+    "tests/test_tab_monitor_publication.py": "78fc8a2d1326e65e80a2f3b5ddd9425644308725066ad79394aefe91ed4a01c3",
+    "tests/test_tab_traits_default_error.py": "d928e0d5be67caa4853994046066b404b0d644c9f9b1e57f0920682abbd1b5fb"
+  },
+  "review": {
+    "standards": "No unresolved code findings; isolated lane corrects integration custody.",
+    "spec": "Composer suppression finding repaired; default-error assertion reconciled with required output-before-draft semantics."
+  },
+  "limitations": [
+    "Local Python3.12 only",
+    "Changed-surface selection, not full suite",
+    "No native daemon change or qualification claim",
+    "Deployment readback pending"
+  ]
+}

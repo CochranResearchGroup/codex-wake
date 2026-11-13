@@ -1,0 +1,30 @@
+Installed 9 packages in 63ms
+usage: codex-wake [-h] [--version] [--wake-root WAKE_ROOT]
+                  {completion,control,self-limits,governor,pause,resume,pause-status,interrupt,time,sessions,controller,accounts,stores,configuration,builds,daemons,history,migration,hosts,health,notices,recovery,flow-sessions,flows,operations,profiles,native,grok,wake-policy,task-briefs,agents,resources,attention,acceptance,jobs,tabs,interactions,a2a,messages,goal-limits,permissions,after,at,app,openclaw,openclaw-plugin,file,changed,filesystem,process-exit,systemd-unit,github-ci,http-json,github-webhook,pid,list,status,show,cancel,archive,cleanup,support,schema,service,monitor,supervisor,hook,doctor,product-readiness,open}
+                  ...
+codex-wake: error: unrecognized arguments: --retire-source
+usage: codex-wake [-h] [--version] [--wake-root WAKE_ROOT]
+                  {completion,control,self-limits,governor,pause,resume,pause-status,interrupt,time,sessions,controller,accounts,stores,configuration,builds,daemons,history,migration,hosts,health,notices,recovery,flow-sessions,flows,operations,profiles,native,grok,wake-policy,task-briefs,agents,resources,attention,acceptance,jobs,tabs,interactions,a2a,messages,goal-limits,permissions,after,at,app,openclaw,openclaw-plugin,file,changed,filesystem,process-exit,systemd-unit,github-ci,http-json,github-webhook,pid,list,status,show,cancel,archive,cleanup,support,schema,service,monitor,supervisor,hook,doctor,product-readiness,open}
+                  ...
+codex-wake: error: unrecognized arguments: --force
+/home/ecochran76/workspace.local/.worktrees/codex-wake/reconnect-error-detection/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/.worktrees/codex-wake/reconnect-error-detection/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/.worktrees/codex-wake/reconnect-error-detection/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+======================================================================
+FAIL: test_private_secret_and_wrapped_draft_remain_unknown_without_disclosure (test_tab_traits_default_error.DefaultErrorObservationTests.test_private_secret_and_wrapped_draft_remain_unknown_without_disclosure) (screen='Error: failed\n› unsubmitted synthetic draft')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/.worktrees/codex-wake/reconnect-error-detection/tests/test_tab_traits_default_error.py", line 60, in test_private_secret_and_wrapped_draft_remain_unknown_without_disclosure
+    self.assertEqual(result['traits']['error']['value'], 'unknown')
+AssertionError: 'present' != 'unknown'
+- present
++ unknown
+
+
+----------------------------------------------------------------------
+Ran 270 tests in 139.053s
+
+FAILED (failures=1)

@@ -202,7 +202,7 @@ class ObserverTests(unittest.TestCase):
             root=Path(directory)
             tmux=['tmux','-S',str(root/'tmux.sock')]
             subprocess.run([*tmux,'new-session','-d','-s','fixture',
-                "printf '\\033[31mError: synthetic_private_text\\033[0m\\n'; exec sleep 60"],check=True)
+                "printf '\\033[31m• Reconnect failed — check the endpoint, then relaunch (7h 56m 39s) synthetic_private_text\\033[0m\\n'; exec sleep 60"],check=True)
             path=root/'controller-tabs.json'
             path.write_text(json.dumps(dict(schema_version=1,workspaces=dict(fixture=dict(
                 kind='tmux',socket_path=str(root/'tmux.sock'),session_id='$0')))));path.chmod(0o600)

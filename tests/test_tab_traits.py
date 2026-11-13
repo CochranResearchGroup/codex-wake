@@ -8,6 +8,36 @@ from codex_wake.process import process_identity
 
 
 class TabTraitsTests(unittest.TestCase):
+    def test_reconnect_failures_are_visible_errors_but_drafts_are_not(self):
+        from codex_wake.tab_traits import TabTraits
+        class Screen:
+            text = ''
+            def visible_screen(self, pane, deadline):
+                return self.text
+        screen = Screen()
+        window = dict(window_id='@1', panes=[dict(pane_id='%1', pid=os.getpid())])
+        messages = (
+            '■ Automatic reconnect could not restore this session. Your draft is still editable. '
+            'Copy it before quitting with Ctrl+C, then reconnect with the same command.',
+            '■ Automatic reconnect timed out while connecting to the server.',
+            '• Reconnect failed — check the endpoint, then relaunch (7h 56m 39s)',
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            owner = TabTraits(directory)
+            def observe(text):
+                screen.text = text
+                return owner.observe_window(window, transport=screen, privacy=lambda pane: 'safe',
+                                            deadline=time.monotonic()+2)['traits']['error']
+            for message in messages:
+                with self.subTest(message=message):
+                    self.assertEqual(observe(message)['value'], 'present')
+                    self.assertEqual(observe('\x1b[31m'+message+'\x1b[0m')['value'], 'present')
+                    self.assertEqual(observe('› Explain this message\n'+message)['value'], 'unknown')
+                    self.assertEqual(observe(message+'\n› private editable draft\nfooter')['value'], 'present')
+                    self.assertEqual(observe(message+'\nResolved: session restored')['value'], 'absent')
+            self.assertEqual(observe('• Reconnecting... 2/5')['value'], 'absent')
+            self.assertEqual(observe('Session ready')['value'], 'absent')
+
     def test_public_window_observation_keeps_activity_health_and_error_separate(self):
         from codex_wake.tab_traits import TabTraits
         birth = process_identity(os.getpid())

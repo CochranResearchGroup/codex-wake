@@ -1,0 +1,18 @@
+usage: codex-wake [-h] [--version] [--wake-root WAKE_ROOT]
+                  {completion,control,self-limits,governor,pause,resume,pause-status,interrupt,time,sessions,controller,accounts,stores,configuration,builds,daemons,history,migration,hosts,health,notices,recovery,flow-sessions,flows,operations,profiles,native,grok,wake-policy,task-briefs,agents,resources,attention,acceptance,jobs,tabs,interactions,a2a,messages,goal-limits,permissions,after,at,app,openclaw,openclaw-plugin,file,changed,filesystem,process-exit,systemd-unit,github-ci,http-json,github-webhook,pid,list,status,show,cancel,archive,cleanup,support,schema,service,monitor,supervisor,hook,doctor,product-readiness,open}
+                  ...
+codex-wake: error: unrecognized arguments: --retire-source
+usage: codex-wake [-h] [--version] [--wake-root WAKE_ROOT]
+                  {completion,control,self-limits,governor,pause,resume,pause-status,interrupt,time,sessions,controller,accounts,stores,configuration,builds,daemons,history,migration,hosts,health,notices,recovery,flow-sessions,flows,operations,profiles,native,grok,wake-policy,task-briefs,agents,resources,attention,acceptance,jobs,tabs,interactions,a2a,messages,goal-limits,permissions,after,at,app,openclaw,openclaw-plugin,file,changed,filesystem,process-exit,systemd-unit,github-ci,http-json,github-webhook,pid,list,status,show,cancel,archive,cleanup,support,schema,service,monitor,supervisor,hook,doctor,product-readiness,open}
+                  ...
+codex-wake: error: unrecognized arguments: --force
+/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+/home/ecochran76/workspace.local/codex-wake/src/codex_wake/shared_app_server.py:93: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  self.connection.send(json.dumps({"id": request_id, "method": method, "params": params}))
+----------------------------------------------------------------------
+Ran 270 tests in 132.297s
+
+OK
