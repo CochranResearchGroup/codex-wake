@@ -38,3 +38,21 @@ exact metadata; Standards0. Original pending notice is deferred/provably unsent,
 not an uncertain submission. Integrate this correction before activation; then
 reconcile that notice without replay or a new intent key. No host clock change,
 StableTime policy migration, draft clearing or safety-guard bypass authorized.
+
+## Final pre-submit check correction
+
+PR605's first fix missed a third composer check immediately before native queueing.
+The real job remained provably unsent and exhausted its three-attempt bound as
+notification_failed; it was not reset or replayed. Added a full dispatcher-through-
+native-queue regression using the existing real mailbox/scheduler harness and
+injected native boundaries. It went red with explicit_not_sent, then green after
+passing fresh session metadata to that final call. Parser/probe-only tests had
+missed the call-site gap; the new seam covers every composer check.
+
+Final candidate0.22.0.dev18 wheel SHA256:
+5e2628144087730f55e8dbcaaea199df95d66fe508a5c74e864491aae7d860de.
+324payload files equal source. Installed test_a2a_tmux_delivery + test_a2a_delivery:
+26PASS/4.435s. Scope is one missing metadata argument plus the full-path regression;
+StableTime/binding behavior remains the previously qualified source. A fresh
+post-fix diagnostic may run after integration because the earlier attempt has an
+explicit terminal failure; it is a new test, never an ambiguous-effect resend.

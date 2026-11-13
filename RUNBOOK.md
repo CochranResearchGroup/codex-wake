@@ -9665,3 +9665,14 @@ dev17candidate25PASS5.543s,324payload files match. Private real pane passes only
 with matching native title. Branchfix/p230-wrapped-footer requires integration,
 then reconcile same unsent notice. See plan0230/wrapped-footer.md. No historical
 uncaptured-state claim or guard relaxation. Memory forbidden.
+
+## Turn | 2026-11-13 | P230 final composer call-site correction
+
+PR605 merged45a66b19 anddev17 activated; real native flow then exposed a third
+pre-submit composer check without metadata. Queue was never entered. The old
+notice exhausted its safe3attempt bound and remains failed, not reset/replayed.
+New full dispatcher/native-queue regression red explicit_not_sent then green after
+passing metadata at final guard. Exact installeddev18candidate26PASS4.435s,324payload
+files match; wheel5e2628144087730f55e8dbcaaea199df95d66fe508a5c74e864491aae7d860de.
+Bounded branchfix/p230-final-composer-check integrates the missing argument and
+correct-seam regression. Existing safety and StableTime configuration retained.
