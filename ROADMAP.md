@@ -1,5 +1,11 @@
 # Codex Wake Roadmap
 
+## P229 | Reconnect failures
+
+Issue #596: detect reconnect failures above editable drafts; integrate and deploy
+only the monitor package, preserving native sessions. See
+[Plan0229](docs/dev/plans/0229-2026-11-13-reconnect-error-detection.md).
+
 ## Evidence reconciliation | 2026-11-12
 
 This bounded documentation reconciliation uses delivery base `1a276d0f` and

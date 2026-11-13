@@ -1,0 +1,16 @@
+test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat (test_tab_monitor_publication.MonitorPublicationTests.test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat) ... ok
+test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat (test_tab_monitor_publication.MonitorPublicationTests.test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat) ... FAIL
+test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat (test_tab_monitor_publication.MonitorPublicationTests.test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat) ... ok
+
+======================================================================
+FAIL: test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat (test_tab_monitor_publication.MonitorPublicationTests.test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ecochran76/workspace.local/codex-wake/tests/test_tab_monitor_publication.py", line 71, in test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat
+    self.assertLess(time.monotonic(),until)
+AssertionError: 115866.771204188 not less than 115866.736057194
+
+----------------------------------------------------------------------
+Ran 3 tests in 21.776s
+
+FAILED (failures=1)
