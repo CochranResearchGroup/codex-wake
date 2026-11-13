@@ -1,0 +1,60 @@
+{
+  "source_commit": "6150e5a52036c9c611c229ae43fa988665f11fcc",
+  "version": "0.22.0.dev14",
+  "wheel_sha256": "73ef27e01c13de1fd48b18f10ae2ade9e5626653d11c4286c49cab3e87f68475",
+  "matching_package_members": 324,
+  "preserved_dependencies": 31,
+  "dependency_comparison": "PEP503 normalized package names and exact versions",
+  "installed_tests": {
+    "count": 23,
+    "result": "PASS",
+    "seconds": 14.276
+  },
+  "live_promoted": true,
+  "pr": 597,
+  "old_monitor_pid": 103657,
+  "new_monitor_pid": 1587828,
+  "monitor_state": "running",
+  "monitor_last_error": null,
+  "monitor_count_for_root": 1,
+  "tab16_error": {
+    "value": "present",
+    "status": "observed",
+    "source": "current_visible_screen",
+    "observed_at": 1794582016.5355282,
+    "freshness": "fresh",
+    "reason": "current_visible_error_marker",
+    "message": "Terminal error (content redacted)",
+    "location": {
+      "pane_id": "%16",
+      "row": 26,
+      "region": "bottom"
+    },
+    "confidence": "suspected"
+  },
+  "pane_identity_unchanged": true,
+  "verified_process_births": {
+    "1726675": {
+      "start_time_ticks": 1135977,
+      "boot_id": "827d9db9-f9ca-4d4b-bf58-9f657be1e719"
+    },
+    "1533890": {
+      "start_time_ticks": 6632791,
+      "boot_id": "827d9db9-f9ca-4d4b-bf58-9f657be1e719"
+    }
+  },
+  "settings_bytes_unchanged": true,
+  "launchers_verified": 9,
+  "screen_byte_equality": "failed: reconnect duration updates; subsequent two-read probe changed only reconnect-status duration row",
+  "terminal_input_sent": false,
+  "draft_bytes_before_after": "not retained; no exact byte-equality claim",
+  "rollback": "private preimage.json, monitor-settings-preimage.json, old immutable release prefixes retained",
+  "prefix_release": "0.22.0.dev14-6150e5a",
+  "stable_time": {
+    "utc": "2026-11-13T15:00:35.923944049Z",
+    "maximum_error_ms": 313.36709,
+    "status": "qualified_live",
+    "authority": "NTS-verified Windows Stable Time",
+    "evidence_generation": 1678
+  }
+}
