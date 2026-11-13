@@ -149,3 +149,15 @@ Source delivery and requested ticket closure are complete. Final docs-only recei
 records results; both task integration checkouts retire after its verified merged
 custody. Root checkouts stay main; unrelated worktrees remain untouched.
 Memory disposition forbidden: no explicit memory-update request; zero graph writes.
+
+
+## Operator-authorized installed follow-up
+
+The subsequent instruction `pr review merge deploy` authorized live package
+deployment separately from the source-only packet above. Wakedev19 installed from
+282dcf02; Bots compatibility PR80 mergedc7fe3a1 qualifies the exact already-running
+0.169.0 daemon and Wakedev19 versions. The feature's broad review/remediation
+counts remain1/1; only the bounded compatibility delta received a focused check.
+See [installed evidence](../evidence/plan0231/deployment.md) for package identities,
+local checks, actual service/ingress/attachment readbacks, preserved holds and
+rollback custody. Account grants and model/provider journeys remain excluded.

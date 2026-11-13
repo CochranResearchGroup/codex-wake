@@ -191,8 +191,23 @@
     "pr": 78,
     "verification": "5PASS0FAIL0SKIP1.176s; syntax/diffPASS"
   },
-  "status": "all five implementation tickets CLOSED; review1/remediation1 complete; no deployment",
+  "status": "all five implementation tickets CLOSED; review1/remediation1 complete; operator-authorized installed follow-up recorded separately",
   "remaining_accepted_blockers": [],
   "parent_spec_state": "OPEN per to-tickets instruction; no parent closure",
-  "cleanup": "worker placement/display checkouts removed after remote custody; two integration checkouts retire after closeout receipt merge"
+  "cleanup": "original worker and integration checkouts removed after verified remote custody; later deployment lane has separate cleanup receipt",
+  "deployment_evidence": "docs/dev/evidence/plan0231/deployment.md",
+  "deployment": {
+    "authorization": "subsequent operator instruction: pr review merge deploy",
+    "wake_source": "282dcf02cda3aa9ddd88ce2ac86de48e4bed7d92",
+    "wake_version": "0.22.0.dev19",
+    "bots_source": "c7fe3a1ad8691201b47c130d73f257b70f145261",
+    "bots_candidate": "556d9a220ebe8305da814ccb53643c84d44aa4ea309facb7973d9086a09126cb",
+    "families_registered": 4,
+    "exact_root_bindings": 3,
+    "preserved_hold": "grok-bots input_unknown; unbound",
+    "native_child_move": "retained/tab_protected; live movement unproven",
+    "authenticated_app_health": "200/200; exact identity; Codex and RemoteView connected",
+    "native_daemon_restarted": false,
+    "model_turns": 0
+  }
 }

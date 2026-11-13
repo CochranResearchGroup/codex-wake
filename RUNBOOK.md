@@ -1,5 +1,23 @@
 # Codex Wake Runbook
 
+## Turn | 2026-11-13 | P231 packages deployed
+
+Operator explicitly authorized PR/review/merge/deploy after source closeout. Wake
+dev19 deployed from282dcf02; Bots compatibility PR80 mergedc7fe3a1 adds only the
+qualified exact Codex0.169.0/Wakedev19 versions. Original broadreview/remediation
+remain1/1. Installed17family checks and11dependency/docs checks passed; exact
+package identities and boundaries are in
+[deployment evidence](docs/dev/evidence/plan0231/deployment.md).
+
+Wake monitor refreshed with unchanged settings; native daemon remained running.
+Bots package and explicit family adapter are live; separate messaging worker code
+is unchanged and its process was retained. Final anonymous protection401 and
+authenticated app/health200 verified exact source/build and Codex/RemoteView.
+Four roots registered, three restored exact bindings adopted to preserve placement;
+one pre-existing Grok input_unknown hold retained. Protected native child move
+remains unproven; no provider/model turn, input reset or daemon upgrade. Private
+rollback preimages and per-attempt receipts retained outside Git.
+
 ## Turn | 2026-11-12 | P225 reviewed, merged and deployed
 
 Operator authorized PR/review/merge/deploy. Independent reviewer

@@ -7,8 +7,10 @@ tickets closed; one review and one bounded remediation complete. Spec #601 stays
 open. Durable specialist/account/task
 hierarchy and inherited guidance in codex-bots; Wake supplies exact tab bindings,
 background family placement, reversible accents/navigation and accepted temporary
-worker cleanup. Execution: [Plan0230](docs/dev/plans/0231-2026-11-13-bot-tab-hierarchy.md)
-and its ticket ledger. No live deployment or provider effects in this packet.
+worker cleanup. Execution: [Plan0231](docs/dev/plans/0231-2026-11-13-bot-tab-hierarchy.md)
+and its ticket ledger. Subsequent authorized installation deployed Wakedev19 and
+Bots c7fe3a1; see [deployment evidence](docs/dev/evidence/plan0231/deployment.md)
+for actual acceptance and preserved holds. No provider/account grant expansion.
 
 ## P229 | Reconnect failures
 
