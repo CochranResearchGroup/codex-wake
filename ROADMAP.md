@@ -2,7 +2,9 @@
 
 ## P231 | Specialist bot families
 
-Accepted cross-repo design and spec #601. Implement durable specialist/account/task
+Delivered source: Wake607/Bots77 plus corrective Bots78; five implementation
+tickets closed; one review and one bounded remediation complete. Spec #601 stays
+open. Durable specialist/account/task
 hierarchy and inherited guidance in codex-bots; Wake supplies exact tab bindings,
 background family placement, reversible accents/navigation and accepted temporary
 worker cleanup. Execution: [Plan0230](docs/dev/plans/0231-2026-11-13-bot-tab-hierarchy.md)
