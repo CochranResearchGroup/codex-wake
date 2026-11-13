@@ -9626,3 +9626,11 @@ is unused; stable entrypoints and running services unchanged. Draft publication
 only; no runtime-qualified/merge-ready claim. Worktree retained for gated review,
 not abandoned. See plan0230/qualification.md and review.md. Memory forbidden;
 no external memory write authorized.
+
+P230 publication: source commit f54ac9f1f385ef62fff01271cd7f914c37eb6942 pushed and
+read back on origin/fix/notification-binding-lifecycle. Draft PR600 read back OPEN,
+draft=true, exact head matches. No merge. Active clocksource tsc; host offers
+hyperv_clocksource_tsc_page, hyperv_clocksource_msr and acpi_pm alternatives. Global
+clocksource change is a separate host operation, not performed under source scope.
+Clean task checkout can close after this custody update; immutable candidate and
+wheel remain user-scoped for the original smoke once host continuity is restored.

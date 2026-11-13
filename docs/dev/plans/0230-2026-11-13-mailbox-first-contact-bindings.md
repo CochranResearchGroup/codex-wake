@@ -28,9 +28,9 @@ error when recipient has not polled. A previous live diagnostic proved a manuall
 bound WebB receives notifications; this is symptom evidence, not systemic acceptance.
 
 Source repair and serial review complete. Exact installed candidate passes 115
-focused tests; broader installed smoke is blocked by measured host clock jumps. See [qualification](../evidence/plan0230/qualification.md). Source is being published for review; integration and working-host activation
-remain outstanding until the installed-smoke clock gate passes.
-No service configuration or installed package changed in this slice.
+focused tests; broader installed smoke is blocked by measured host clock jumps. See [qualification](../evidence/plan0230/qualification.md). Source is committed and published in draft PR600; integration and working-host
+activation remain outstanding until the installed-smoke clock gate passes.
+No active service configuration or installed entrypoint changed in this slice.
 
 ## Definition of done
 
@@ -38,4 +38,5 @@ Observe red then green for first contact and missing/replaced notification bindi
 cover revoked/unenrolled/ambiguous peers and preserve explicit-mode behavior. Run
 focused local checks, document installed-versus-source distinction and leave a
 reviewable patch. Commit, merge and working-host activation remain separate.
-Worktree retained for review until changes have durable custody; no other lane owned.
+Remote branch provides durable custody. Close the clean task checkout after publication;
+recreate from the same branch when the host-clock gate clears. No other lane owned.
