@@ -4,6 +4,7 @@
 def specs():
     string = {'type': 'string'}
     descriptor = {key: dict(string) for key in ('bot_id', 'parent_bot_id', 'name', 'scope_kind', 'scope_ref')}
+    descriptor['parent_bot_id'] = {'type': ['string', 'null']}
     descriptor['temporary'] = {'type': 'boolean'}
     identity = {key: dict(string) for key in ('bot_id', 'client_id', 'environment')}
     fields = {

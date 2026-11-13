@@ -54,10 +54,13 @@
       "blocked_by": [
         2
       ],
-      "state": "running",
+      "state": "validated",
       "worker": "/root/family_placement",
       "worker_branch": "feat/bot-family-placement",
-      "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557"
+      "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
+      "result_sha": "75da46b635fed0a65ac8ad6cd41b0b4ebf6b7fd1",
+      "integrated_sha": "d01e5d06",
+      "validation": "worker25PASS19.725s;coordinator joined16PASS10.068s"
     },
     {
       "key": "T4",
@@ -89,10 +92,19 @@
         2,
         3
       ],
-      "state": "pending",
+      "state": "running",
       "integration_requirements": [
         "Reuse parent delegable execution settings without default-reset friction; provider grants remain provider-owned.",
         "Wake movement must preserve native Bot binding and session-switch ownership checks currently tied to codex-bots session."
+      ],
+      "worker": "/root/bot_family_model",
+      "worker_branch": "feat/bot-family-hierarchy",
+      "worker_base": "8889cbc37932ced0dad79616bfa717e65905faf1",
+      "owned_paths": [
+        "Bots service/MCP supervision",
+        "native exact session bindings",
+        "explicit Wake adapter",
+        "delegable execution context"
       ]
     }
   ]
