@@ -9649,3 +9649,19 @@ Installed163focusedPASS102.398s and StableTime mailbox workflow PASS with clean
 connections/children/temp-root receipts. Prior failures retained. No production
 bus migration or shared-MCP reload. PR600 source update follows; runtime integration
 remains separate from these fixture-backed source qualifications. Memory forbidden.
+
+## Turn | 2026-11-13 | P230 real native acceptance and wrapped footer
+
+PR600 mergedeac0d01e; qualifieddev16 activated for five Wake entrypoints and exact
+participant worker with automatic discovery. Existing bus/grants/network time
+policy preserved, no sharedMCP reload or host clock change. Real new native sender
+contacted actor-free/unpolled recipient, which was auto-bound/notified/read/claimed/
+completed. Private deployment receipt owns exact synthetic message/runtime handles.
+
+Client replacement automatically changed PID/binding generation; second notice
+then exposed reproducible narrow-footer composer_protected. Captured title wrapping
+adds one footer row. Regression red then metadata-scoped fix green; exact installed
+dev17candidate25PASS5.543s,324payload files match. Private real pane passes only
+with matching native title. Branchfix/p230-wrapped-footer requires integration,
+then reconcile same unsent notice. See plan0230/wrapped-footer.md. No historical
+uncaptured-state claim or guard relaxation. Memory forbidden.
