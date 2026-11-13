@@ -140,3 +140,19 @@ class FamilyPlacementTests(unittest.TestCase):
         self.assertEqual(result['status'],'root-tab-unavailable')
         self.assertEqual(self.call('show',bot_id='child')['bot']['root_bot_id'],'a')
         self.assertEqual(len(self.tabs.execute('tabs.session.list',{})['sessions']),1)
+
+    def test_cli_open_replays_original_request_after_workers_session_creation(self):
+        import json
+        import sys
+        config=self.root/'controller-tabs.json'
+        config.write_text(json.dumps(dict(schema_version=1,workspaces=dict(source=dict(
+            kind='tmux',socket_path=self.sock,session_id=self.source['native_session_id'])))))
+        config.chmod(0o600)
+        command=[sys.executable,'-m','codex_wake.entrypoint','--wake-root',str(self.root),
+                 'tabs','family','open','--bot-id','a','--client-id','cli','--server',self.sock,
+                 '--argv','/bin/sh','--request-id','family-open-a','--json']
+        for _ in range(2):
+            value=subprocess.run(command,capture_output=True,text=True)
+            self.assertEqual(value.returncode,0,value.stdout+value.stderr)
+            result=json.loads(value.stdout)['result']['operation']
+            self.assertEqual(result['phase'],'terminal')

@@ -97,7 +97,7 @@ def command(args, owner=None):
             from .terminal_selection_cli import expression
             selected=expression(owner,args,arguments.get('selection'))
             if selected is not None:arguments['selection']=selected
-        if 'workspace' in properties and arguments.get('scope')!='global' and (selector is not None or 'workspace' not in arguments):
+        if 'workspace' in properties and arguments.get('scope')!='global' and (selector is not None or ('workspace' not in arguments and not operation.startswith('tabs.family.'))):
             arguments['workspace']=select_workspace(owner,selector,server=server,interactive=not getattr(args,'as_json',False))
         value = owner.execute(operation,arguments) if operation in owner.READS else operator_execute(operation,arguments,args.wake_root,owner=owner,request_id=getattr(args,'request_id',None))
         readable=render(value) if operation.startswith('tabs.session.') and not getattr(args,'as_json',False) else None
