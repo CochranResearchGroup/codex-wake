@@ -188,6 +188,32 @@ class OwningClientDeliveryTests(unittest.TestCase):
         self.assertEqual(outcome['results'][0]['reason'], 'capability_unavailable')
         bind.assert_not_called()
 
+    def test_wrapped_footer_survives_every_native_pre_submit_check(self):
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        from codex_wake.a2a_delivery import binding_dict
+        from codex_wake.a2a_tmux_delivery import TmuxBinding
+        from codex_wake.process import boot_id_value, process_start_time_ticks
+        binding = TmuxBinding('fixture', 'recipient', str(self.repo), '/owned/tmux/socket',
+            os.getpid(), process_start_time_ticks(os.getpid()), boot_id_value(), 'native-generation')
+        self.bindings.write_text(json.dumps(dict(schema_version=1, bindings=[binding_dict(binding)])))
+        identifier = self.send()
+        thread = dict(name='Wake P230 recipient', status=dict(type='idle'), canAcceptDirectInput=True)
+        screen = ('› Ask Codex to do anything\nGPT-6.1-Sol low · /owned/repo · Wake P230\n'
+                  'recipient\n← for agents · ? for shortcuts        ⚠ 1 warning · f2 to view\n')
+        queued = SimpleNamespace(returncode=0, stdout='Queued message 00000000-0000-7000-8000-000000000099 for thread recipient.\n')
+        with patch.object(TmuxBinding, 'locate', return_value=(thread, dict(pane_id='%1'))), \
+             patch('codex_wake.a2a_tmux_delivery.SubprocessTmuxRunner') as runner, \
+             patch('codex_wake.a2a_tmux_delivery.notification_expired', return_value=False), \
+             patch('codex_wake.app_server.resolve_codex_cmd', return_value='/qualified/codex'), \
+             patch('codex_wake.a2a_tmux_delivery.locate_shared_endpoint', return_value='unix:///owned/server'), \
+             patch('codex_wake.a2a_tmux_delivery.subprocess.run', return_value=queued) as queue:
+            runner.return_value.capture_pane.return_value = screen
+            outcome = self.dispatcher.tick()
+        self.assertEqual(outcome['submitted'], 1, outcome)
+        queue.assert_called_once()
+        self.assertEqual(self.mailbox.show(self.actors[0], identifier)['state']['notification'], 'submitted')
+
     def test_actual_unix_binding_dispatches_pointer_and_keeps_consumption_separate(self):
         identifier = self.send()
         outcome = self.dispatcher.tick()

@@ -148,7 +148,8 @@ class TmuxBinding:
                     return dict(status='unsent', reason='explicit_not_sent')
                 thread, current = self.locate()
                 if current['pane_id'] != pane['pane_id'] or not empty_composer(
-                        runner.capture_pane(self.tmux_socket, current['pane_id'])):
+                        runner.capture_pane(self.tmux_socket, current['pane_id']),
+                        session_name=thread.get('name')):
                     return dict(status='unsent', reason='explicit_not_sent')
                 entered = True
                 result = subprocess.run([codex, 'queue', '--remote', endpoint, '--thread', self.thread_id,
