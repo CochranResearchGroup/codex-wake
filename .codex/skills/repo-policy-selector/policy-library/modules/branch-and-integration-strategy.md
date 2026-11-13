@@ -17,6 +17,11 @@ tags:
   - direct to `main`
   - short-lived feature branches
   - release or stabilization branches
+- Ordinarily anchor the primary/root checkout on `main` or the documented default
+  branch. Off-main development may use a linked worktree under
+  `git-worktree-hygiene`; keeping the root anchored is a valid reason for one.
+  A direct-to-main integration model does not require a worktree for every edit.
+  Temporary root-branch exceptions need a reason and a safe restoration step.
 - Prefer short-lived branches unless the repo has a documented reason for long-lived branch divergence.
 - Prefer explicit track naming when different work classes coexist, for example maintenance-oriented branches versus architecture-oriented branches.
 - State whether merge commits, rebased histories, or squash merges are preferred for shared history.

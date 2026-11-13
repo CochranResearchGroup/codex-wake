@@ -14,6 +14,12 @@
   - pause and review roadmap alignment
 - Do not end with vague “what do you want next?” language when a best recommendation is available.
 
+- For tasks using linked worktrees, apply `git-worktree-hygiene` before closeout:
+  remove unneeded task-owned checkouts after verified custody, or report each
+  retained path with owner, concrete need/blocker, and next review point. Include
+  the final registered-worktree readback; finished implementation alone does not
+  establish cleanup-complete. Do not create a checkout solely for closeout.
+
 ## Adoption Notes
 
 Use this module when the repo values consistent turn endings and explicit next-step guidance.

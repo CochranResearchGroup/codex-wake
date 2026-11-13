@@ -48,7 +48,7 @@
     },
     {
       "path": "docs/dev/policies/0005-engineering-git-and-release.md",
-      "sha256": "07dae82e04ed6c9807cb9d527be6f5a408774030a13d2d2f9eafecbc3d523284"
+      "sha256": "b203b8b6aebe7bdf009754ee94df309e8358b6e55010f3323c999316984bfc19"
     },
     {
       "path": "docs/dev/policies/0006-validation-and-closeout.md",
@@ -88,7 +88,7 @@
     },
     {
       "path": "docs/dev/policies/0015-turn-closeout.md",
-      "sha256": "08eaff1f573bf5e82ecf45fbf389116955306c96cdd7417cfd8dc458c7b08818"
+      "sha256": "59ff7d4d0915a6c1bc31d027c44bf9d34ebf63e10810cf82262eebefe2a73f99"
     },
     {
       "path": "docs/dev/policies/0016-code-testing-discipline.md",
@@ -162,7 +162,7 @@
         },
         {
           "path": "docs/dev/policies/0005-engineering-git-and-release.md",
-          "sha256": "07dae82e04ed6c9807cb9d527be6f5a408774030a13d2d2f9eafecbc3d523284",
+          "sha256": "b203b8b6aebe7bdf009754ee94df309e8358b6e55010f3323c999316984bfc19",
           "sections": [
             {
               "heading_path": [
@@ -228,7 +228,7 @@
         },
         {
           "path": "docs/dev/policies/0015-turn-closeout.md",
-          "sha256": "08eaff1f573bf5e82ecf45fbf389116955306c96cdd7417cfd8dc458c7b08818",
+          "sha256": "59ff7d4d0915a6c1bc31d027c44bf9d34ebf63e10810cf82262eebefe2a73f99",
           "sections": [
             {
               "heading_path": [

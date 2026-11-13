@@ -342,6 +342,15 @@ not establish another.
 The observed work state of a conversation associated with a tab, such as running,
 idle or waiting for input. It does not establish that the terminal interface is responsive.
 
+**Tab responsiveness**:
+The observed ability of the exact terminal interface associated with a tab to
+answer a health check. Conversation activity or an available metadata source
+alone does not establish responsiveness.
+
+**Visible tab error**:
+An error freshly observed as displayed on a terminal attachment. It is distinct
+from an internal runtime error and from an unavailable observation source.
+
 **Observation availability**:
 Whether the source supplying a tab trait is currently usable. Losing that source
 makes affected evidence uncertain without changing the tab's identity or appearance preferences.
