@@ -2,8 +2,8 @@
 
 Scope: `bot_family_placement.py`, focused public-interface tests. Base source:
 `ee592e5dfbf7e1dc3bedc1463845ad90aed43557` (#602). Branch:
-`feat/bot-family-placement`. Frozen acceptance: `0230-bot-family-spec.md` and
-primary-owned `0230-family-contract.md`. Implementation commit is the commit
+`feat/bot-family-placement`. Frozen acceptance: `0231-bot-family-spec.md` and
+primary-owned `0231-family-contract.md`. Implementation commit is the commit
 containing this receipt; coordinator owns integration and ticket disposition.
 
 Implemented background open/reuse, exact prebound native attachment organization,

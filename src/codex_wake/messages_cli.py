@@ -53,6 +53,8 @@ def add_messages_parser(subparsers):
             command.add_argument('--subject')
             command.add_argument('--task-id')
         if verb == 'send':
+            command.add_argument('--host-operator-capability', type=Path,
+                help='host delegation for verified recipients in existing enrolled roots')
             command.add_argument('--to', required=True)
             command.add_argument('--tmux-socket')
             command.add_argument('--tmux-session')
@@ -178,6 +180,7 @@ def messages_command(args):
             else:
                 recipient = resolve_identity(args.to, endpoint=args.app_server, socket_path=args.tmux_socket,
                                              session=args.tmux_session, allow_offline=True)
+            prepare_host_recipient(args, bus, actor, recipient)
             value = mailbox.send(actor, recipient, body=body_input(args.body_file), idempotency_key=intent_key,
                                  kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
                                  subject=args.subject, selector=dict(selector=args.to, identity=recipient.thread_id),
@@ -216,3 +219,19 @@ def messages_command(args):
     except (OSError, WakeError):
         result(dict(error=dict(code='operation_unavailable', message='operation unavailable; reconcile the original key before retry'), idempotency_key=intent_key), success=False)
         return 8
+
+
+def prepare_host_recipient(args, bus, actor, recipient):
+    """Host opt-in removes recipient first-poll ordering, never root authorization."""
+    operator = getattr(args, 'host_operator_capability', None)
+    if operator is None:
+        return
+    with bus.connection(read_only=True) as db:
+        bus.operator(db, operator)
+        bus.validate_actor(db, actor, permission='send')
+        roots = [r['root'] for r in db.execute('SELECT root FROM enrollments')
+                 if Path(recipient.cwd).is_relative_to(Path(r['root']))]
+        if roots and max(roots, key=lambda r: len(Path(r).parts)) != actor.root and not bus.meta(db, 'allow_cross_root'):
+            raise BusError('cross_root_denied', 'cross-root messaging requires explicit bus permission')
+    from .native_mailbox_bootstrap import runtime_actor_context
+    runtime_actor_context(bus, operator, recipient, permission='receive')

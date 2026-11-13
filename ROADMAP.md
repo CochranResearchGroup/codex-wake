@@ -1,11 +1,11 @@
 # Codex Wake Roadmap
 
-## P230 | Specialist bot families
+## P231 | Specialist bot families
 
 Accepted cross-repo design and spec #601. Implement durable specialist/account/task
 hierarchy and inherited guidance in codex-bots; Wake supplies exact tab bindings,
 background family placement, reversible accents/navigation and accepted temporary
-worker cleanup. Execution: [Plan0230](docs/dev/plans/0230-2026-11-13-bot-tab-hierarchy.md)
+worker cleanup. Execution: [Plan0230](docs/dev/plans/0231-2026-11-13-bot-tab-hierarchy.md)
 and its ticket ledger. No live deployment or provider effects in this packet.
 
 ## P229 | Reconnect failures
@@ -1712,3 +1712,8 @@ successors retain literal release pins; recipient MCP identity was unavailable
 while notLoaded. These remain explicit limits, not claims of universal durability
 or completion of future reviews. Future release retirement/recovery needs its
 own exact-record reconciliation and applicable authority.
+
+## P230 | Native mailbox first contact and bindings
+
+OPEN (StableTime qualification passed): [LOCAL-P230](docs/dev/plans/0230-2026-11-13-mailbox-first-contact-bindings.md).
+One source lane; remove first-poll prerequisite and qualify opt-in client rebinding.

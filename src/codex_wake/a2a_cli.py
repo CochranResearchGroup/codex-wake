@@ -61,6 +61,8 @@ def add_a2a_parser(subparsers):
             command.add_argument('--wake-root', type=Path, required=True)
             command.add_argument('--sender-receipt-authority', type=Path, required=True)
         if verb in ('dispatch', 'worker'):
+            command.add_argument('--discover-tmux-socket',
+                help='opt in to exact pending-recipient binding discovery/reconnect on this owned socket')
             command.add_argument('--limit', type=int, default=10, choices=range(1, 11))
             command.add_argument('--wake-root', type=Path)
             command.add_argument('--sender-receipt-authority', type=Path)
@@ -69,7 +71,9 @@ def add_a2a_parser(subparsers):
             command.add_argument('--interval', type=float, default=2)
             command.add_argument('--max-dispatches', type=int, default=2)
         if verb == 'network-time':
-            command.add_argument('--accept-unauthenticated-ntp', action='store_true', required=True, help='opt this bus into bounded plain-NTP time; authenticated UTC is not claimed')
+            policy = command.add_mutually_exclusive_group(required=True)
+            policy.add_argument('--accept-unauthenticated-ntp', action='store_true', help='opt this bus into bounded plain-NTP time; authenticated UTC is not claimed')
+            policy.add_argument('--require-stable-time', action='store_true', help='require authenticated StableTime; never fall back to guest or plain-NTP time')
         if verb == 'permissions':
             command.add_argument('--wake-root',type=Path,required=True)
         if verb == 'permission-tasks':
@@ -196,7 +200,7 @@ def a2a_command(args):
                 result(value)
         elif args.a2a_command == 'network-time':
             from .a2a_mailbox import Mailbox
-            result(dict(receipt_id=Mailbox.activate_network_time(store,args.operator_capability),time_policy='network-first-v1'))
+            result(dict(receipt_id=Mailbox.activate_network_time(store,args.operator_capability, require_stable_time=getattr(args,'require_stable_time',False)),time_policy='network-first-v1'))
         elif args.a2a_command == 'delegate-receipts':
             from .a2a_sender_receipts import SenderReceiptAuthority
             from .a2a_identity import Actor
@@ -242,7 +246,8 @@ def a2a_command(args):
                 from .a2a_reply_wake import ReplyWakeGate
                 gate = ReplyWakeGate(scheduler, args.wake_root, args.sender_receipt_authority)
                 gate.authority.senders()  # validate independent configuration before starting the reader
-            dispatcher = NotificationDispatcher(scheduler, args.bindings_file, receipt_gate=gate)
+            dispatcher = NotificationDispatcher(scheduler, args.bindings_file, receipt_gate=gate,
+                discover_tmux_socket=getattr(args, 'discover_tmux_socket', None))
             if args.a2a_command == 'dispatch':
                 result(dict(dispatch=dispatcher.tick(limit=args.limit)))
             else:

@@ -34,6 +34,31 @@ class TmuxDeliveryTests(unittest.TestCase):
                      'Approve this command?', '', 'shell $', EMPTY.replace('›', '>')):
             self.assertFalse(empty_composer(text))
 
+    def test_wrapped_native_footer_is_empty_only_with_matching_session_identity(self):
+        screen = ('› Ask Codex to do anything\n'
+                  'GPT-6.1-Sol low · ~/workspace.local/soylei-website · Wake P230\n'
+                  'recipient\n'
+                  '← for agents · ? for shortcuts        ⚠ 1 warning · f2 to view\n')
+        self.assertTrue(empty_composer(screen, session_name='Wake P230 recipient'))
+        self.assertFalse(empty_composer(screen))
+        self.assertFalse(empty_composer(screen, session_name='Other session'))
+        self.assertFalse(empty_composer(screen.replace('Ask Codex to do anything', 'human draft'),
+                                        session_name='Wake P230 recipient'))
+        self.assertFalse(empty_composer(screen.replace('recipient\n', 'recipient\nhuman draft\n'),
+                                        session_name='Wake P230 recipient'))
+
+    def test_narrow_footer_uses_verified_metadata_during_probe(self):
+        screen = ('› Ask Codex to do anything\n'
+                  'GPT-6.1-Sol low · ~/workspace.local/soylei-website · Wake P230\n'
+                  'recipient\n← for agents · ? for shortcuts        ⚠ 1 warning · f2 to view\n')
+        thread = dict(name='Wake P230 recipient', status=dict(type='idle'), canAcceptDirectInput=True)
+        with patch.object(TmuxBinding, 'locate', return_value=(thread, self.pane)), \
+             patch('codex_wake.a2a_tmux_delivery.SubprocessTmuxRunner') as runner:
+            runner.return_value.capture_pane.return_value = screen
+            self.assertEqual(self.binding.probe()['status'], 'ready')
+            runner.return_value.capture_pane.return_value = screen.replace('Ask Codex to do anything', 'human draft')
+            self.assertEqual(self.binding.probe()['reason'], 'composer_protected')
+
     def test_existing_transport_uses_bracketed_paste_and_one_submit(self):
         from codex_wake.injector import SubprocessTmuxRunner
         with patch('codex_wake.injector.subprocess.run') as run, patch('codex_wake.injector.time.sleep'):

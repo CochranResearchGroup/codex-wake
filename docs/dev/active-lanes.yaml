@@ -1,11 +1,11 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: P230
+  - id: P231
     owner: primary / ecochran76
     objective: Deliver persistent bot families and identifiable worker tabs
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/601]
-    plan: docs/dev/plans/0230-2026-11-13-bot-tab-hierarchy.md
+    plan: docs/dev/plans/0231-2026-11-13-bot-tab-hierarchy.md
     branch: feat/bot-family-hierarchy
     worker_branches: [feat/bot-family-placement, feat/bot-family-display]
     target: origin/main

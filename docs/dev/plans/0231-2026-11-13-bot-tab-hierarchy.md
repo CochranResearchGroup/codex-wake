@@ -1,4 +1,4 @@
-# LOCAL-P230 | Specialist bot hierarchy and worker-tab organization
+# LOCAL-P231 | Specialist bot hierarchy and worker-tab organization
 
 State: OPEN
 Workflow: IMPLEMENTING; design confirmed
@@ -109,11 +109,19 @@ this design/documentation interview authorizes no durable-memory capture.
 
 Operator confirmed shared understanding and explicitly invoked to-spec, to-tickets,
 implement-spec, one broad code-review and one bounded TDD finding-remediation pass.
-Canonical frozen requirements: 0230-bot-family-spec.md. GitHub spec601 stays open;
-implementation ticket readiness and worker custody live in0230-execution.json.
+Canonical frozen requirements: 0231-bot-family-spec.md. GitHub spec601 stays open;
+implementation ticket readiness and worker custody live in0231-execution.json.
 Primary owns Wake registry T2. Bots hierarchy T1 is the other initially unblocked
 lane; placement T3 and display T4 unlock after T2; joined bridge T5 after T1/T2/T3.
 One integration branch per repo is necessary for the cross-repository delivery;
 there is one coordinator and joined acceptance ledger. Current repo roots remain
 main. Existing design checkout is reused, with explicit ownership through final
 closure; all task-owned worker checkouts retire after merged published custody.
+
+## Integration reconciliation
+
+Concurrent mailbox initiative occupied plan0230 and main advanced to17e2c3fe with
+dev18. This program is nowP231, same spec601/tickets/worker custody/review limits.
+Merged both histories by intent; only package version conflicted, resolved asdev19.
+Other mailbox/composer/StabeTime behavior and its P230 evidence remain intact.
+Review fixed point for our Wake delta is17e2c3fe, excluding unrelated initiative.

@@ -1,4 +1,4 @@
-# P230 frozen integration interface
+# P231 frozen integration interface
 
 Owner: primary. Bot descriptor: bot_id,parent_bot_id(nullable),name,scope_kind
 (specialist/account/task),scope_ref(nonsecret),temporary(defaultfalse).

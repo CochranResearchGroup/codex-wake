@@ -1,4 +1,4 @@
-# P230 | Specialist bot families and identifiable terminal tabs
+# P231 | Specialist bot families and identifiable terminal tabs
 
 ## Problem Statement
 

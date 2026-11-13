@@ -1,5 +1,5 @@
 {
-  "spec": "docs/dev/plans/0230-bot-family-spec.md",
+  "spec": "docs/dev/plans/0231-bot-family-spec.md",
   "parent_spec": "https://github.com/CochranResearchGroup/codex-wake/issues/601",
   "integration_branch": "feat/bot-family-hierarchy",
   "bases": {
@@ -120,5 +120,11 @@
     "policy_wiring": "PASS",
     "hosted_ci": "SKIPPED costpolicy",
     "environment": "Linux Python3.12.13; no3.11orfullunrelatedsuite claim"
+  },
+  "program_id": "P231",
+  "previous_local_design_id": "P230; renumbered after concurrent mailbox plan0230 entered main",
+  "review_bases": {
+    "wake": "17e2c3fe57592fa8f071a30c6f885a9cc48258df",
+    "bots": "1e315c3fddce194321e9587080091af1e36a1682"
   }
 }
