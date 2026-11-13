@@ -1,0 +1,8 @@
+test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat (test_tab_monitor_publication.MonitorPublicationTests.test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat) ... ok
+test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat (test_tab_monitor_publication.MonitorPublicationTests.test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat) ... ok
+test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat (test_tab_monitor_publication.MonitorPublicationTests.test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 18.728s
+
+OK

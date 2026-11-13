@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P229
+    owner: primary / ecochran76
+    objective: Detect reconnect errors above editable drafts and deploy the monitor
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/596]
+    plan: docs/dev/plans/0229-2026-11-13-reconnect-error-detection.md
+    branch: fix/reconnect-error-detection
+    target: origin/main
+    plan_state: OPEN
+    custody_state: LOCAL
+    dependencies: []
+    overlaps: [P216]
+    updated_at: 2026-11-13
+    disposition: Qualified reconnect fix; PR integration and monitor-only deployment authorized
   - id: P225
     owner: primary / ecochran76
     objective: Make CLI outcomes actionable and format enable truthful

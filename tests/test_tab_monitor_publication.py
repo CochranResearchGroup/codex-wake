@@ -67,7 +67,9 @@ class MonitorPublicationTests(unittest.TestCase):
                 first=status['snapshot']['observed_at']
                 ticks=status['monitor']['observer']['costs']['ticks']
                 until=time.monotonic()+9
-                while status['snapshot']['observed_at']<first+5.9:
+                # Publication cadence uses monotonic time. Host wall-clock
+                # corrections may move the next observation timestamp backward.
+                while status['snapshot']['observed_at']==first:
                     self.assertLess(time.monotonic(),until)
                     time.sleep(.05)
                     status=monitor.execute('tabs.monitor.status',{})

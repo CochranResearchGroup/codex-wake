@@ -46,18 +46,18 @@ class DefaultErrorObservationTests(unittest.TestCase):
         self.assertNotIn('private-synthetic-payload', json.dumps(result))
         self.assertEqual(before, self.tmux('capture-pane', '-p', '-e', '-t', '%0'))
 
-    def test_private_secret_and_wrapped_draft_remain_unknown_without_disclosure(self):
-        for screen in (
-            'Error: failed\nPassword: synthetic-secret',
-            'Error: failed\nAPI key: synthetic-secret',
-            'Error: failed\n› unsubmitted synthetic draft',
-            '› \nError: wrapped draft line',
+    def test_draft_boundaries_preserve_prior_errors_without_disclosure(self):
+        for screen, expected in (
+            ('Error: failed\nPassword: synthetic-secret', 'unknown'),
+            ('Error: failed\nAPI key: synthetic-secret', 'unknown'),
+            ('Error: failed\n› unsubmitted synthetic draft', 'present'),
+            ('› \nError: wrapped draft line', 'unknown'),
         ):
             with self.subTest(screen=screen):
                 window = self.screen(screen)
                 before = self.tmux('capture-pane', '-p', '-e', '-t', '%0')
                 result = self.owner.observe_window(window, transport=self.transport, deadline=time.monotonic()+2)
-                self.assertEqual(result['traits']['error']['value'], 'unknown')
+                self.assertEqual(result['traits']['error']['value'], expected)
                 self.assertNotIn('synthetic', json.dumps(result))
                 self.assertEqual(before, self.tmux('capture-pane', '-p', '-e', '-t', '%0'))
         window = self.screen('Error: failed')

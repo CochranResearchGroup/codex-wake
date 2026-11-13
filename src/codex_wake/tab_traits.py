@@ -21,9 +21,12 @@ _ACTIVITY = {'working': 'running', 'active': 'running', 'ready': 'idle', 'idle':
              'awaiting-human': 'waiting-for-input', 'waiting-for-input': 'waiting-for-input',
              'disconnected': 'disconnected', 'not_loaded': 'disconnected'}
 _ANSI = re.compile(r'\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|\x1b\[[0-?]*[ -/]*[@-~]')
-_ERROR = re.compile(r'^(?:[✗×!⚠●■]\s*)?(?:error\s*:|fatal(?:\s+error)?\s*:|panic\s*:|'
+_ERROR = re.compile(r'^(?:[✗×!⚠●■•]\s*)?(?:error\s*:|fatal(?:\s+error)?\s*:|panic\s*:|'
                     r'thread\s+.+\s+panicked\b|traceback\s*\(most recent call last\)|'
-                    r'error\s+(?:running|connecting|sending|loading|executing)\b)', re.I)
+                    r'error\s+(?:running|connecting|sending|loading|executing)\b|'
+                    r'automatic\s+reconnect\s+(?:could\s+not\s+restore\s+this\s+session\b|'
+                    r'timed\s+out\s+while\s+connecting\s+to\s+the\s+server\b)|'
+                    r'reconnect\s+failed\b)', re.I)
 # Explicit terminal status markers only; READY/success output is not evidence
 # that an unrelated error was resolved. These markers apply to earlier lines.
 _RESOLVED = re.compile(r'^(?:[✓✔]\s*)?(?:resolved|error\s+(?:resolved|dismissed))\s*:\s*\S', re.I)
@@ -464,14 +467,18 @@ class TabTraits:
             visible = [(i, _ANSI.sub('', value).strip()) for i, value in enumerate(lines)]
             nonempty = [(i, value) for i, value in visible if value]
             bottom = nonempty[-8:]
-            # A composer may wrap onto bare error-looking lines. Suppress the
-            # whole uncertain bottom region rather than infer draft/output.
+            # A composer may wrap onto bare error-looking lines. Exclude its
+            # entire suffix, while retaining errors printed before the draft.
+            input_held = False
             for position, (_, value) in enumerate(bottom):
                 prompt = _COMPOSER.match(value)
-                if (_SECRET_PROMPT.match(value) or
-                    (prompt and (value[prompt.end():].strip() or
-                                 any(_ERROR.match(tail) for _, tail in bottom[position+1:])))):
+                if _SECRET_PROMPT.match(value):
                     return _trait(reason='visible_input_or_secret_prompt')
+                if prompt:
+                    input_held = bool(value[prompt.end():].strip() or
+                                      any(_ERROR.match(tail) for _, tail in bottom[position+1:]))
+                    bottom = bottom[:position]
+                    break
             for i, value in reversed(bottom):
                 if _RESOLVED.match(value):
                     return _trait('absent', source='current_visible_screen', observed_at=self.clock(), status='observed',
@@ -482,6 +489,8 @@ class TabTraits:
                                   location=dict(pane_id=pane['pane_id'], row=i, region='bottom'),
                                   confidence='suspected', reason='current_visible_error_marker')
                     return result
+            if input_held:
+                return _trait(reason='visible_input_or_secret_prompt')
             return _trait('absent', source='current_visible_screen', observed_at=self.clock(), status='observed',
                           reason='no_current_bottom_error_marker')
         except (OSError, ValueError, TimeoutError, subprocess.SubprocessError):

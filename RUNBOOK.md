@@ -9441,3 +9441,105 @@ primary accepted, no remediation. LOCAL-P228 recovery complete; merge/deploy not
 authorized by this slice. Publish coherent checkpoint, preserve original ref,
 then remove exact duplicated root edits only after backup/equality proof.
 Memoryforbidden under session developer boundary; zero memorywrites.
+
+## Turn | 2026-11-13 | Reconnect failure visible-error detection
+
+Source baseline 4b7da1f9; bounded matcher regression fix in the current clean
+main checkout (no additional worktree). Existing visible-screen error detection
+strips ANSI color and matches message prefixes; all three operator-supplied
+reconnect failures returned absent. Plain/red differential probes confirmed the
+matcher gap, including the unsupported bullet prefix. Added reconnect failure
+patterns and bullet support without changing observation cadence, draft privacy,
+health authority or recovery behavior. Public TabTraits regression covers all
+three messages, ANSI red, composer suppression, explicit resolution and ordinary
+reconnect progress. Existing real-tmux TabObserver cached-redaction regression
+now exercises the reported reconnect-failed status.
+
+Focused red: PYTHONPATH=src python -m unittest discover -s tests -p test_tab_traits.py -q
+failed on all three supplied messages before the fix; passed 7 tests afterward.
+Broader tab-suite validation recorded below. Python 3.12.13 local Linux;
+hosted CI skipped per cost policy; Python 3.11 hosted matrix not exercised.
+No installed package/service change or existing-session recovery performed.
+
+Validation environment correction: initial broader tab run failed (245 tests,
+159 errors/3 failures) because the default Python lacks websockets/msgspec.
+Isolated dependency run uses:
+PYTHONPATH=src uv run --no-project --with websockets --with msgspec python -m unittest discover -s tests -p 'test_tab_*.py' -q
+Focused real-tmux observer run with the same environment passed 5 tests in 3.030s.
+Compileall and uvx ruff check --select F821,F822,F823 on the three changed
+Python files PASS; default python -m ruff unavailable, supplied via uvx.
+Memory disposition forbidden: developer permits memory updates only upon an
+explicit user request; graphiti-runtime recorded_no_write, zero Graphiti writes.
+Graphiti discovery skipped: supplied exact symptoms and current source suffice.
+Broader isolated run: 270 tests in 128.291s, 269 passed; one failure:
+test_tab_monitor_publication.MonitorPublicationTests.test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat
+expired its wall-clock deadline. Diagnostic single-test rerun with
+PYTHONPATH=src:tests uv run --no-project --with websockets --with msgspec python -m unittest test_tab_monitor_publication.MonitorPublicationTests.test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat -q
+passed in 6.232s. Classified pass-on-retry timing flake; broader lane is not clean.
+No cadence code changed; retained timing risk requires separate disposition
+before claiming full presubmit validation. Reconnect acceptance checks passed.
+Raw broader log: /tmp/codex-wake-reconnect-tests.log (local ephemeral evidence).
+Changes remain uncommitted and uninstalled; no release readiness claim.
+
+## Turn | 2026-11-13 | Reconnect review and actual tab16 reproduction
+
+Review fixed point4b7da1f9, working-tree diff; original operator messages are
+Spec authority. Separate Standards/Spec primary reviews used the existing
+privacy/validation policies. Spec found a second blocker during operator-provided
+live readback: tab16 overlf/@16/%16 has reconnect errors above an editable composer.
+Old draft suppression returned unknown for the whole bottom region. A new public
+regression failed all3messages with a later draft; classification now excludes
+the composer suffix and retains earlier output. Draft-before-error remains held.
+Read-only source observation of the exact real tab now returns present, redacted,
+row49. No terminal input, draft modification, service restart or recovery.
+Installed capture failed stale_target; direct same-user read-only tmux observation
+used exact socket/window/pane after identity readback; no uncertain mutation replay.
+
+Heartbeat diagnosis:3bounded repetitions reproduced1timeout. A3run timestamp/tick
+probe proved a host wall-clock backstep (~2.3s) while monotonic six-second
+publication continued at tick13 with no error. Test incorrectly required wall
+observed_at>=first+5.9. Changed it to await a different snapshot timestamp under
+the original monotonic9s bound and tick-count invariant.3repetitions PASS18.728s.
+Evidence docs/dev/evidence/reconnect-errors/. No product cadence change.
+Operator requests Stable Time for time-critical work; qualified_live NTS finite
+UTC readbacks used, latest2026-11-13T14:20:12.420510317Z +/-283.016212ms.
+No wall-clock timestamp used as deadline authority in this qualification.
+
+An earlier wheel passed12installed tests3.692s, but predates composer repair;
+final wheel rebuilt and retested separately. Running monitor readback: PID103657,
+immutable0.22.0.dev12-55a2ee5 prefix, errors enabled/error_interval5s. Unchanged.
+Live deployment gate:0021 requires merged origin/main source; current diff is
+uncommitted/unintegrated. No deployment or full release-readiness claim.
+Validation closeout: broader tab selection270PASS132.297s (overlapped final source
+edit; not immutable final-tree proof). Exact final-wheel installed focused suite
+result retained in installed-final.log; qualification.json pins source/wheel hashes.
+Pinned Ruff0.14.2 undefined-name selection PASS; git diff --check PASS.
+Review accepted Spec1blocking composer finding repaired; Standards0code findings,
+with workflow/integration custody still incomplete. No new worktree created.
+Memory disposition forbidden under explicit-request-only developer boundary;
+no durable-memory writes authorized or attempted.
+Exact final installed wheel:19PASS13.186s (traits, observer, publication), including
+real-tmux observation and heartbeat. Final package SHA in qualification.json.
+
+## Turn | 2026-11-13 | P229 integration and monitor replacement authorized
+
+Operator Okay go explicitly authorizes PR integration and installation. Issue596
+created/read back under ecochran76; origin/main refreshed at4b7da1f9. New isolated
+fix/reconnect-error-detection lane preserves main and prior edits.120registered
+worktrees before/121after; task checkout retires after merge/deployment. Dev14
+version/release note prepared; no native daemon binary or persisted schema change.
+Primary Standards/Spec review uses operator messages and exact tab16 screen shape.
+Integration source270run retained1failure139.053s: existing default-error test
+expected preceding Error output to remain unknown with a later draft. Updated
+only that case to present, preserving secret/private/wrapped-draft unknown checks,
+no-disclosure assertion and unchanged-screen assertion. Focused default-error4PASS.
+A new full tab selection runs against frozen product code and final assertions.
+No hosted CI; local Python3.12.13, pinned Ruff0.14.2. Full unrelated suite and
+Python3.11 matrix are not claimed. Policy wiring, compile and diff checks PASS.
+Rollback metadata/dependency31freeze stored privately outside Git. Only monitor
+owner is scheduled for replacement; native daemon, governor and agents unchanged.
+Final frozen integration tab selection270PASS138.689s; CI-scope classifier1PASS
+4.058s; canonical policy wiringPASS; pinned Ruff0.14.2undefined-name selection,
+compileall and git diff --check PASS. Final local product bytes unchanged during
+this run; first-run assertion mismatch retained in integration-first.log. Python
+3.12local changed-surface presubmit only; no hosted/full-unrelated/3.11claim.
