@@ -82,6 +82,112 @@ class OwningClientDeliveryTests(unittest.TestCase):
         return self.mailbox.send(self.actors[0], self.identities[1], body='Untrusted test body',
                                  idempotency_key='test')['message']['message_id']
 
+    def test_opted_in_worker_discovers_missing_recipient_binding_before_dispatch(self):
+        from unittest.mock import patch
+        from dataclasses import replace
+        from codex_wake.a2a_delivery import binding_dict
+        original = next(iter(load_bindings(self.bindings).values()))
+        # Keep one unrelated explicit binding; the intended recipient is absent.
+        self.bindings.write_text(json.dumps(dict(schema_version=1,
+            bindings=[binding_dict(replace(original, thread_id='unrelated',
+                socket_path=str(self.private / 'unrelated.sock')))])))
+        identifier = self.send()
+        dispatcher = NotificationDispatcher(self.scheduler, self.bindings,
+                                            discover_tmux_socket='/owned/tmux/socket')
+        def bind_discovered(*args):
+            data = json.loads(self.bindings.read_text())
+            data['bindings'].append(binding_dict(original))
+            self.bindings.write_text(json.dumps(data))
+        with patch('codex_wake.a2a_tmux_delivery.bind_tmux', side_effect=bind_discovered) as bind, \
+             patch('codex_wake.a2a_cli.resolve_identity', return_value=self.identities[1]):
+            outcome = dispatcher.tick()
+        self.assertEqual(outcome['submitted'], 1, outcome)
+        self.assertEqual(self.deliveries[0]['message_id'], identifier)
+        self.assertEqual(bind.call_args.args[2], self.identities[1])
+        self.assertEqual(dispatcher.tick()['results'], [])
+
+    def test_opted_in_worker_starts_without_seed_binding_file(self):
+        from unittest.mock import patch
+        from codex_wake.a2a_delivery import binding_dict
+        original = next(iter(load_bindings(self.bindings).values()))
+        self.bindings.unlink()
+        self.send()
+        dispatcher = NotificationDispatcher(self.scheduler, self.bindings,
+                                            discover_tmux_socket='/owned/tmux/socket')
+        def bind_discovered(*args):
+            self.bindings.write_text(json.dumps(dict(schema_version=1, bindings=[binding_dict(original)])))
+        with patch('codex_wake.a2a_tmux_delivery.bind_tmux', side_effect=bind_discovered), \
+             patch('codex_wake.a2a_cli.resolve_identity', return_value=self.identities[1]):
+            outcome = dispatcher.tick()
+        self.assertEqual(outcome['submitted'], 1, outcome)
+
+    def test_opted_in_worker_refreshes_replaced_tmux_client_generation(self):
+        from unittest.mock import patch
+        from codex_wake.a2a_delivery import binding_dict
+        from codex_wake.a2a_tmux_delivery import TmuxBinding
+        from codex_wake.process import boot_id_value, process_start_time_ticks
+        original = next(iter(load_bindings(self.bindings).values()))
+        stale = TmuxBinding(original.namespace, original.thread_id, original.root,
+            '/owned/tmux/socket', os.getpid(), process_start_time_ticks(os.getpid()) + 1,
+            boot_id_value(), 'old-generation')
+        self.bindings.write_text(json.dumps(dict(schema_version=1, bindings=[binding_dict(stale)])))
+        identifier = self.send()
+        dispatcher = NotificationDispatcher(self.scheduler, self.bindings,
+                                            discover_tmux_socket='/owned/tmux/socket')
+        def bind_discovered(*args):
+            self.bindings.write_text(json.dumps(dict(schema_version=1, bindings=[binding_dict(original)])))
+        with patch('codex_wake.a2a_tmux_delivery.bind_tmux', side_effect=bind_discovered) as bind, \
+             patch('codex_wake.a2a_cli.resolve_identity', return_value=self.identities[1]):
+            outcome = dispatcher.tick()
+        self.assertEqual(outcome['submitted'], 1, outcome)
+        self.assertEqual(self.deliveries[0]['message_id'], identifier)
+        bind.assert_called_once()
+
+    def test_discovery_rejects_changed_identity_without_binding_or_delivery(self):
+        from unittest.mock import patch
+        from dataclasses import replace
+        from codex_wake.a2a_delivery import binding_dict
+        original = next(iter(load_bindings(self.bindings).values()))
+        self.bindings.write_text(json.dumps(dict(schema_version=1,
+            bindings=[binding_dict(replace(original, thread_id='unrelated'))])))
+        self.send()
+        dispatcher = NotificationDispatcher(self.scheduler, self.bindings,
+                                            discover_tmux_socket='/owned/tmux/socket')
+        with patch('codex_wake.a2a_tmux_delivery.bind_tmux') as bind, \
+             patch('codex_wake.a2a_cli.resolve_identity', return_value=replace(self.identities[1], namespace='other')):
+            outcome = dispatcher.tick()
+        self.assertEqual(outcome['submitted'], 0)
+        bind.assert_not_called()
+        self.assertEqual(self.deliveries, [])
+
+    def test_discovery_source_failure_defers_without_stopping_worker(self):
+        from unittest.mock import patch
+        from codex_wake.shared_app_server import SharedSourceError
+        self.send()
+        self.bindings.unlink()
+        dispatcher = NotificationDispatcher(self.scheduler, self.bindings,
+                                            discover_tmux_socket='/owned/tmux/socket')
+        with patch('codex_wake.a2a_cli.resolve_identity', side_effect=SharedSourceError('unavailable')), \
+             patch('codex_wake.a2a_tmux_delivery.bind_tmux') as bind:
+            outcome = dispatcher.tick()
+        self.assertEqual(outcome['submitted'], 0)
+        self.assertEqual(outcome['results'][0]['reason'], 'runtime_unavailable')
+        bind.assert_not_called()
+        self.assertEqual(self.deliveries, [])
+
+    def test_explicit_mode_does_not_discover_missing_bindings(self):
+        from unittest.mock import patch
+        from dataclasses import replace
+        from codex_wake.a2a_delivery import binding_dict
+        original = next(iter(load_bindings(self.bindings).values()))
+        self.bindings.write_text(json.dumps(dict(schema_version=1,
+            bindings=[binding_dict(replace(original, thread_id='unrelated'))])))
+        self.send()
+        with patch('codex_wake.a2a_tmux_delivery.bind_tmux') as bind:
+            outcome = self.dispatcher.tick()
+        self.assertEqual(outcome['results'][0]['reason'], 'capability_unavailable')
+        bind.assert_not_called()
+
     def test_actual_unix_binding_dispatches_pointer_and_keeps_consumption_separate(self):
         identifier = self.send()
         outcome = self.dispatcher.tick()

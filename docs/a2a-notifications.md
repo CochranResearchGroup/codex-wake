@@ -166,6 +166,25 @@ installed CLI so consumption commands use the same released version.
 Use unique intent keys per new exchange. On an uncertain result, reconcile the
 same intent; do not send a new key as an effect retry.
 
+## Optional automatic client binding maintenance
+
+For host-managed mailboxes, an authorized sender can contact a verified native
+recipient in an already enrolled root without requiring that recipient to poll
+its inbox first. Host delegation provisions the recipient at the pinned send
+boundary. Fixed-actor launches retain explicit provisioning. Revoked actors,
+disabled receiving, unenrolled roots and denied cross-root sends remain denied.
+No root is enrolled automatically.
+
+An operator can enable pending-recipient discovery on the existing worker with
+`--discover-tmux-socket /absolute/owned/tmux/socket`. The worker then creates a
+missing binding, or refreshes a replaced tmux client generation, only for an
+already admitted and currently authorized notification. It can start without a
+seed binding file. Fresh native identity and one unambiguous matching live client
+are required; drafts, busy clients, unknown UI and uncertain effects still hold.
+Existing owning-client and Grok bindings are not converted. Binding updates merge
+under a shared lock; unrelated bindings are retained. Omitting the option preserves
+explicit binding/rebinding. This option neither launches clients nor resumes work.
+
 ## Reconnect and cancellation
 
 Reconnect with the native `codex resume ORIGINAL_THREAD_ID` in the designated

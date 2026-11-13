@@ -449,3 +449,13 @@ If that path is a stable symlink, subsequent operator-selected builds may replac
 its target without changing the registered launcher. An explicit release path
 remains a release pin; missing historical pins do not authorize account fallback
 or rewriting existing scheduling intent.
+
+**Mailbox first contact**:
+A host-delegated sender's initial message to a verified native recipient in an
+already enrolled root. The recipient need not poll first; provisioning preserves
+existing root grants, revocation and cross-root restrictions.
+
+**Pending-recipient discovery**:
+An operator opt-in that reconciles a pending authorized notification's exact
+recipient with its current live tmux client. It refreshes delivery binding only,
+without enrollment, actor reauthorization, client launch or notification replay.

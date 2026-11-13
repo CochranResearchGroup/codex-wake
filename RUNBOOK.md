@@ -9592,3 +9592,37 @@ selected local lane, not full unrelated/3.11/hosted. Source and live monitor out
 complete; issue596 closes from this actual readback. Docs-only closeout receipt
 merges separately; remove exact task checkout after clean published custody.
 Memory forbidden under explicit-request-only developer boundary; zero writes.
+
+## Turn | 2026-11-13 | LOCAL-P230 systemic mailbox lifecycle repair
+
+Operator clarified WebB was a symptom, not the product scope. Existing bootstrap
+harness reproduced original recipient authorization refusal without its first-poll
+workaround; missing-binding dispatcher regression separately reproduced zero-send
+capability_unavailable. Source now provisions a verified native recipient under
+existing host delegation, and opt-in workers discover/rebind pending tmux recipients.
+No implicit enrollment, revoked-grant renewal or uncertain notification replay.
+
+114 distinct focused tests pass; source CLI option, policy wiring, active-goal audit
+and whitespace pass. See docs/dev/evidence/plan0230/qualification.md for exact commands,
+red/green evidence and environment limitations. Branch fix/notification-binding-lifecycle
+from e8c79a79 is uncommitted, retained in its isolated review worktree; root main and
+unrelated worktrees preserved. No source commit, merge or installed-service activation
+authorized/performed. Next review point is source review and explicit integration.
+Memory disposition forbidden: no external memory write authorized for this slice.
+
+## Turn | 2026-11-13 | LOCAL-P230 review and candidate qualification
+
+Operator continued source delivery. Standards0/Spec1(resolved): native lookup
+unavailability now defers rather than stopping the notification worker. Regression
+observed red then green. Exact dev15 wheel324payload files equal source; source115
+PASS65.018s and installed115PASS50.126s, installed source-registry smoke PASS.
+Wheel0aaa823ec71210f33d8112f4c9c7f71dc711961b78404501c21d504f54c8a57d.
+
+Broader installed mailbox smoke FAILED clock_anomaly during retention. Fresh6second
+host sampling shows wall-minus-monotonic step -5.677s to+5.173s; guard held correctly.
+First failure preserved, no blind retry/checkpoint reset/clock adjustment. P230
+BLOCKED on clock continuity and original installed-smoke acceptance. Candidate prefix
+is unused; stable entrypoints and running services unchanged. Draft publication
+only; no runtime-qualified/merge-ready claim. Worktree retained for gated review,
+not abandoned. See plan0230/qualification.md and review.md. Memory forbidden;
+no external memory write authorized.

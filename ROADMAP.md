@@ -1704,3 +1704,8 @@ successors retain literal release pins; recipient MCP identity was unavailable
 while notLoaded. These remain explicit limits, not claims of universal durability
 or completion of future reviews. Future release retirement/recovery needs its
 own exact-record reconciliation and applicable authority.
+
+## P230 | Native mailbox first contact and bindings
+
+BLOCKED (installed smoke / host clock continuity): [LOCAL-P230](docs/dev/plans/0230-2026-11-13-mailbox-first-contact-bindings.md).
+One source lane; remove first-poll prerequisite and qualify opt-in client rebinding.

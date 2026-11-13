@@ -61,6 +61,8 @@ def add_a2a_parser(subparsers):
             command.add_argument('--wake-root', type=Path, required=True)
             command.add_argument('--sender-receipt-authority', type=Path, required=True)
         if verb in ('dispatch', 'worker'):
+            command.add_argument('--discover-tmux-socket',
+                help='opt in to exact pending-recipient binding discovery/reconnect on this owned socket')
             command.add_argument('--limit', type=int, default=10, choices=range(1, 11))
             command.add_argument('--wake-root', type=Path)
             command.add_argument('--sender-receipt-authority', type=Path)
@@ -242,7 +244,8 @@ def a2a_command(args):
                 from .a2a_reply_wake import ReplyWakeGate
                 gate = ReplyWakeGate(scheduler, args.wake_root, args.sender_receipt_authority)
                 gate.authority.senders()  # validate independent configuration before starting the reader
-            dispatcher = NotificationDispatcher(scheduler, args.bindings_file, receipt_gate=gate)
+            dispatcher = NotificationDispatcher(scheduler, args.bindings_file, receipt_gate=gate,
+                discover_tmux_socket=getattr(args, 'discover_tmux_socket', None))
             if args.a2a_command == 'dispatch':
                 result(dict(dispatch=dispatcher.tick(limit=args.limit)))
             else:
