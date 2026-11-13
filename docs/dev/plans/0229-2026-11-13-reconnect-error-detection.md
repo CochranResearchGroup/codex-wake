@@ -37,7 +37,8 @@ Source/wheel evidence: docs/dev/evidence/reconnect-errors/qualification.json.
 Prior baseline270tabtests PASS132.297s; final preintegrationwheel19PASS13.186s.
 Heartbeat diagnostic traces show wall-clock backstep while six-second monotonic
 publication succeeds; fixed test3PASS18.728s. Exact live tab16 source probepresent.
-Installed working monitor still dev12; stable CLIdev13. Native daemon unchanged.
+Installed working monitor and stable CLI are now dev14 from merged6150e5a5.
+Native daemon unchanged; deployment evidence below supersedes prior qualification.
 
 ## Definition of done
 
