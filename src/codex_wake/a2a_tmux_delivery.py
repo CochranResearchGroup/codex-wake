@@ -22,7 +22,7 @@ from .sessions import tmux_inventory
 from .shared_app_server import SharedAppServerReader, locate_shared_endpoint
 
 
-def empty_composer(text):
+def empty_composer(text, *, session_name=None):
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     prompts = [i for i, line in enumerate(lines) if line.startswith('›')]
     if not prompts or unsafe_pane_reason(text):
@@ -33,7 +33,17 @@ def empty_composer(text):
     legacy = len(tail) == 3 and ' · ' in tail[1] and '? for shortcuts' in tail[2]
     current = len(tail) == 2 and re.fullmatch(
         r'GPT-[\w.-]+ (?:default|low|medium|high|xhigh|max|ultra) · .+ · .+', tail[1]) is not None
-    return legacy or current
+    if legacy or current:
+        return True
+    # A narrow native client may wrap its known session title. Do not accept
+    # arbitrary continuation rows: only reconstruct an exact metadata title.
+    if (not isinstance(session_name, str) or not session_name
+            or len(tail) < 4 or not tail[-1].startswith('← for agents · ? for shortcuts')):
+        return False
+    footer = ' '.join(tail[1:-1])
+    return re.fullmatch(
+        r'GPT-[\w.-]+(?: (?:default|low|medium|high|xhigh|max|ultra))? · .+ · '
+        + re.escape(session_name), footer) is not None
 
 
 @dataclass(frozen=True)
@@ -88,8 +98,9 @@ class TmuxBinding:
                 or thread.get('canAcceptDirectInput') is not True):
             return dict(status='deferred', reason='busy' if status.get('type') == 'active' else 'offline')
         text = SubprocessTmuxRunner().capture_pane(self.tmux_socket, pane['pane_id'])
-        return dict(status='ready' if empty_composer(text) else 'deferred',
-                    reason=None if empty_composer(text) else 'composer_protected')
+        eligible = empty_composer(text, session_name=thread.get('name'))
+        return dict(status='ready' if eligible else 'deferred',
+                    reason=None if eligible else 'composer_protected')
 
     def deliver(self, claim, job, bus_root, *, scheduler=None):
         entered = False
@@ -106,10 +117,11 @@ class TmuxBinding:
             with PaneLock(root, self.tmux_socket, pane['pane_id']):
                 if self.probe()['status'] != 'ready':
                     return dict(status='unsent', reason='explicit_not_sent')
-                _, current = self.locate()
+                thread, current = self.locate()
                 if current['pane_id'] != pane['pane_id']:
                     return dict(status='unsent', reason='explicit_not_sent')
-                if not empty_composer(runner.capture_pane(self.tmux_socket, pane['pane_id'])):
+                if not empty_composer(runner.capture_pane(self.tmux_socket, pane['pane_id']),
+                                      session_name=thread.get('name')):
                     return dict(status='unsent', reason='explicit_not_sent')
                 if notification_expired(bus_root, job['expires_at']):
                     return dict(status='unsent', reason='explicit_not_sent')
@@ -134,7 +146,7 @@ class TmuxBinding:
                 # Native command/capability preparation may outlast the first UI check.
                 if self.probe()['status'] != 'ready':
                     return dict(status='unsent', reason='explicit_not_sent')
-                _, current = self.locate()
+                thread, current = self.locate()
                 if current['pane_id'] != pane['pane_id'] or not empty_composer(
                         runner.capture_pane(self.tmux_socket, current['pane_id'])):
                     return dict(status='unsent', reason='explicit_not_sent')

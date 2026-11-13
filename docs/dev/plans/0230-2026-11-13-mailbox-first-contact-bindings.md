@@ -59,3 +59,20 @@ accepted finding. The earlier host-clock gate is superseded by qualified StableT
 use; no clocksource change. Production bus already uses network time and is not
 migrated. Next: integrate source, then activate the qualified worker/discovery code
 with compatible existing time policy and verify actual new-session delivery.
+
+## Native acceptance extension: wrapped footer
+
+Initial merged source eac0d01e activated as qualified dev16. New sender contacted
+an actor-free/unpolled native recipient; automatic binding and completion passed.
+Replacing only that owned diagnostic client refreshed its PID/binding generation,
+but the pending notice hit composer_protected. Idle capture reproduced a narrow
+footer wrapping the known session title over two physical lines. Strict row count,
+not a draft or unsafe modal, rejected it. This is a current runtime finding; the
+older historical uncaptured occurrence is not retrospectively proven identical.
+
+Bounded branch fix/p230-wrapped-footer from integrated main owns the correction.
+Acceptance: recognize only a reconstructed footer ending in the exact fresh native
+session name, pass that metadata through probe and pre-submit recheck, retain
+unknown/draft/mismatch protection. Exact installed dev17 candidate25focusedPASS;
+actual captured pane now eligible with metadata and held without it. Integrate
+before worker activation, then reconcile original pending notice without resend.
