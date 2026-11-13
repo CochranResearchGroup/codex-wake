@@ -9442,6 +9442,21 @@ authorized by this slice. Publish coherent checkpoint, preserve original ref,
 then remove exact duplicated root edits only after backup/equality proof.
 Memoryforbidden under session developer boundary; zero memorywrites.
 
+## Turn | 2026-11-13 | P0226 bounded repair acceptance reconciled
+
+Closed only launcher repair/approved CLI installation/overdue result readback.
+PR592dev13 installation97checks, current caller MCPdev13, installed3launcher
+regressions and exact reviews8/9 wake/submission/result correlation support closure.
+Both reviews completed within original windows. No inferred acknowledgment:
+transport still not_observed. Recipient notLoaded leaves its MCP version unknown;
+LP-01 retains existing literal-pin durability as a separate scoped residual risk.
+No wake mutation, replay, refresh, recipient loading, provider call or deadline
+extension. Future campaign reviews retain their owner/windows. Exact curated
+acceptance: docs/dev/evidence/plan0226/closeout.md; private proofs outside Git.
+Unrelated root tab/source/test/RUNBOOK edits preserved via isolated docs branch.
+Memoryforbidden; zero writes. No implementation review/TDD reset or new runtime
+qualification claimed by this documentation closure.
+
 ## Turn | 2026-11-13 | Reconnect failure visible-error detection
 
 Source baseline 4b7da1f9; bounded matcher regression fix in the current clean
@@ -9544,6 +9559,12 @@ compileall and git diff --check PASS. Final local product bytes unchanged during
 this run; first-run assertion mismatch retained in integration-first.log. Python
 3.12local changed-surface presubmit only; no hosted/full-unrelated/3.11claim.
 
+
+P0226 PR598 integration: preserved both the P0226 acceptance closeout and all
+new P229 reconnect-error records while resolving an append-only RUNBOOK conflict.
+The P229 source, tests, release and policy files match current main6150e5a5;
+this branch adds only P0226 documentation relative to that base. No behavioral
+remediation or product requalification is introduced by this merge resolution.
 
 ## Turn | 2026-11-13 | P229 reconnect monitor deployed
 
