@@ -26,6 +26,11 @@ def actor_context(bus_root, operator, claimed, native_context, *, endpoint):
     identity = resolve_identity('thread:' + claimed, endpoint=endpoint, allow_offline=True)
     if identity.thread_id != claimed:
         raise BusError('identity_unavailable', 'Native runtime differs from the verified caller.')
+    return runtime_actor_context(store, operator, identity)
+
+
+def runtime_actor_context(store, operator, identity, *, permission='inspect'):
+    """Provision a host-verified identity only within existing root authority."""
     cwd = Path(identity.cwd).resolve(strict=True)
     # Serialize first use across MCP processes; issue_actor retains its own DB transaction.
     descriptor = os.open(store.root / 'native-actor-bootstrap.lock',
@@ -49,6 +54,8 @@ def actor_context(bus_root, operator, claimed, native_context, *, endpoint):
                 raise BusError('mailbox_root_not_enrolled', 'Enroll this project root once with a2a enroll; native identity alone grants no mailbox authority.')
             root = max(roots, key=lambda p: len(p.parts))
             grant = db.execute('SELECT can_send,can_receive FROM enrollments WHERE root=?', (str(root),)).fetchone()
+            if permission == 'receive' and not grant['can_receive']:
+                raise BusError('authorization_denied', 'Mailbox enrollment disables receiving.')
             if not grant['can_send'] and not grant['can_receive']:
                 raise BusError('authorization_denied', 'Mailbox enrollment disables both send and receive.')
             row = db.execute('SELECT * FROM actors WHERE namespace=? AND thread_id=?',

@@ -4,6 +4,7 @@ Eligibility is observed immediately before queue submission, not an atomic serve
 Only an empty recognized composer is eligible; unknown UI states remain held.
 """
 from dataclasses import asdict, dataclass
+import time
 import json
 import os
 from pathlib import Path
@@ -159,6 +160,30 @@ def notification_expired(bus_root, expires_at):
 
 
 def bind_tmux(path, socket_path, identity):
+    import fcntl
+    # Explicit rebinding and worker discovery share one atomic read/merge/write.
+    from .a2a_bus import private_path
+    path = Path(path)
+    if not path.is_absolute() or path != path.resolve():
+        raise BusError('binding_invalid', 'binding path must be absolute and canonical')
+    private_path(path.parent, directory=True)
+    lock_path = path.with_name(path.name + '.lock')
+    fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, 'a') as lock:
+        private_path(lock_path)
+        deadline = time.monotonic() + 5
+        while True:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                if time.monotonic() >= deadline:
+                    raise BusError('binding_busy', 'notification binding update is busy') from None
+                time.sleep(.02)
+        return _bind_tmux(path, socket_path, identity)
+
+
+def _bind_tmux(path, socket_path, identity):
     from .a2a_bus import private_path
     from .a2a_delivery import load_bindings, binding_dict
     path = Path(path)

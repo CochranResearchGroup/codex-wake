@@ -62,6 +62,8 @@ def routed_send(args, bus, mailbox, actor, body, key, resolve_identity):
         report=revalidate_target(report,target_args)
         if report['status'] != 'resolved':
             return dict(target=report,idempotency_key=key,admitted=False),False
+        from .messages_cli import prepare_host_recipient
+        prepare_host_recipient(args, bus, actor, recipient)
         from .records import parse_duration
         value=mailbox.send(actor,recipient,body=body,idempotency_key=key,kind=args.kind,
             ttl=parse_duration(args.ttl).total_seconds(),delivery=args.delivery,subject=args.subject,

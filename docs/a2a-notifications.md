@@ -166,6 +166,25 @@ installed CLI so consumption commands use the same released version.
 Use unique intent keys per new exchange. On an uncertain result, reconcile the
 same intent; do not send a new key as an effect retry.
 
+## Optional automatic client binding maintenance
+
+For host-managed mailboxes, an authorized sender can contact a verified native
+recipient in an already enrolled root without requiring that recipient to poll
+its inbox first. Host delegation provisions the recipient at the pinned send
+boundary. Fixed-actor launches retain explicit provisioning. Revoked actors,
+disabled receiving, unenrolled roots and denied cross-root sends remain denied.
+No root is enrolled automatically.
+
+An operator can enable pending-recipient discovery on the existing worker with
+`--discover-tmux-socket /absolute/owned/tmux/socket`. The worker then creates a
+missing binding, or refreshes a replaced tmux client generation, only for an
+already admitted and currently authorized notification. It can start without a
+seed binding file. Fresh native identity and one unambiguous matching live client
+are required; drafts, busy clients, unknown UI and uncertain effects still hold.
+Existing owning-client and Grok bindings are not converted. Binding updates merge
+under a shared lock; unrelated bindings are retained. Omitting the option preserves
+explicit binding/rebinding. This option neither launches clients nor resumes work.
+
 ## Reconnect and cancellation
 
 Reconnect with the native `codex resume ORIGINAL_THREAD_ID` in the designated
@@ -195,3 +214,25 @@ The current installed stock-Codex0.162 automatic exchange is recorded under
 [Plan0122 activation](dev/evidence/plan0122/activation/requirement-audit.md).
 This qualifies a bounded operator-started worker; it does not enable an indefinite
 service or silently migrate another bus.
+
+## Authenticated StableTime mailbox time
+
+For new or quiescent mailbox domains, `a2a network-time --require-stable-time`
+selects the existing authenticated StableTime adapter. Supply the existing bus
+root and operator capability as with other operator commands. The persisted policy
+requires qualified finite NTS evidence and never substitutes guest time or plain
+NTP when StableTime is unavailable. It cannot silently downgrade. A running mailbox
+instance rechecks the pin under its transaction lock after policy activation.
+
+Legacy-domain activation retains its original checkpoint and requires outstanding
+legacy work to be reconciled first; it does not reinterpret pending deadlines or
+clear uncertain attempts. An existing network domain can strengthen its provider
+pin after qualified continuity and quiescence checks. Older readers reject the new
+policy, so update/reconnect consumers before activating it. Existing network-time
+policy plus a configured StableTime adapter already uses that adapter; a legacy
+smoke bus is not evidence that a production bus uses guest time.
+
+Qualification: `scripts/a2a_mailbox_smoke.py --stable-time --scheduler --operations
+--cli /path/to/codex-wake` exercises the same installed mailbox workflow using
+StableTime while keeping its temporary actors and bus isolated. No host clock
+change is needed.

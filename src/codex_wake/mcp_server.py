@@ -716,6 +716,8 @@ class CommandRunner:
         if verb not in ('spawn', 'refresh', 'handoff', 'configuration'):
             command += ["--app-server", self.app_server]
         if group == "messages":
+            if mailbox_context and verb == 'send':
+                command += ['--host-operator-capability', str(self.mailbox_operator_capability)]
             if self.actor_runtime == 'grok':
                 command += ['--actor-runtime','grok','--caller-session-id',arguments['caller_thread_id']]
             if self.runtime_root is not None:
