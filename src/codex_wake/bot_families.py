@@ -84,8 +84,11 @@ class BotFamilies:
                    scope_ref=text(arguments.get('scope_ref', ''), 'scope_ref', empty=True), temporary=temporary)
         existing = state['bots'].get(bot_id)
         if existing is not None:
-            if {k: existing[k] for k in bot} != bot:
+            if any(existing[k] != value for k, value in bot.items() if k != 'name'):
                 raise InventoryError('identity_conflict', 'Bot descriptor conflicts with its registered identity.')
+            if existing['name'] != bot['name']:
+                existing['name'] = bot['name']
+                self.save(state)
             return deepcopy(existing)
         if len(state['bots']) >= 2048:
             raise InventoryError('capacity', 'Bot registry capacity reached.')

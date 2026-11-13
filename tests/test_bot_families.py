@@ -28,6 +28,9 @@ class BotFamilyTests(unittest.TestCase):
             descriptor = dict(bot_id='root', name='Root')
             first = tabs.execute('tabs.family.register', descriptor)['bot']
             self.assertEqual(tabs.execute('tabs.family.register', descriptor)['bot'], first)
+            renamed=tabs.execute('tabs.family.register',dict(descriptor,name='Renamed'))['bot']
+            self.assertEqual(renamed['root_bot_id'],'root')
+            self.assertEqual(renamed['name'],'Renamed')
             with self.assertRaises(InventoryError):
                 tabs.execute('tabs.family.register', dict(bot_id='child', name='Child', parent_bot_id='missing'))
             tabs.execute('tabs.family.register', dict(bot_id='child', name='Child', parent_bot_id='root'))
