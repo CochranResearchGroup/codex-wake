@@ -47,6 +47,8 @@ def _request(args, root):
               "codex_cmd": resolve_codex_cmd(args.codex_path, required=True, preserve_launcher=True),
               "endpoint": args.endpoint, "expires_at": None,
               "resume_policy": "same_thread" if args.resume_missing else "hold"}
+    from .wake_session_modes import bind_mode
+    bind_mode(args, root, target)
     content = {"root": str(root), "cwd": str(Path.cwd().resolve()), "target": target,
                "schedule": schedule, "ttl_seconds": ttl, "prompt": prompt,
                "tolerance_seconds": tolerance, "stop_at": stop}
@@ -126,6 +128,8 @@ def _receipt(args, record, path, deduplicated):
              "automatic_recovery": recovery, "requires_original_clock_evidence": unanchored,
              "requires_worker_schema": record["schema_version"], "wake_policy": record.get("wake_policy")}
     projection = schedule_projection(record)
+    if record.get("target", {}).get("session_mode"):
+        value["session_mode"] = record["target"]["session_mode"]
     owner_held = record.get('policy_outcome', {}).get('state') in ('held', 'retired')
     unsupported = projection['basis'] == 'outside_supported_calendar'
     armed = bool(monitored and not unanchored and not owner_held and not unsupported
@@ -335,7 +339,8 @@ def evaluate(root, identifier, clock, *, record_validator=None):
             return "pending"
         from .wake_policy import apply_owner_state
         try:
-            held = apply_owner_state(root, record)
+            from .wake_session_modes import apply_session_mode
+            held = apply_session_mode(record) or apply_owner_state(root, record)
         except WakeError as exc:
             held = str(exc)
         if held:

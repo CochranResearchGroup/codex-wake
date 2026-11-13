@@ -1,6 +1,20 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: persistent-wakes-610
+    owner: root / ecochran76
+    objective: Explicit wake session modes and durable recurring schedules
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/610]
+    plan: docs/dev/plans/0173-agent-harness/persistent-wake-spec.md
+    branch: docs/persistent-wake-design
+    worker_branches: [feat/persistent-wake-live-613, feat/persistent-wake-background-614]
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE
+    dependencies: []
+    overlaps: [HF-20, HF-18]
+    updated_at: 2026-11-13
+    disposition: Approved spec and six tickets; primary owns integration and shared contracts
   - id: P229
     owner: primary / ecochran76
     objective: Detect reconnect errors above editable drafts and deploy the monitor

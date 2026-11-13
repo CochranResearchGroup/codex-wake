@@ -28,6 +28,8 @@ def add_native_parser(subparsers):
         command = commands.add_parser(verb)
         from .wake_policy import add_options
         add_options(command)
+        from .wake_session_modes import MODES
+        command.add_argument('--session-mode', choices=MODES, help='explicit session lifecycle mode; legacy CLI calls retain their policy contract')
         command.add_argument('--codex-path', default='codex')
         command.add_argument('--endpoint', default='unix://')
         command.add_argument('--ttl', default='24h', help='expiry after time due, or after file registration')

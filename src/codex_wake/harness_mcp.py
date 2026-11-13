@@ -12,7 +12,7 @@ from .records import WakeError
 TEXT = {'type': 'string', 'minLength': 1, 'maxLength': 256}
 CALLER = {'type': 'string', 'pattern': '^[0-9a-f-]{36}$'}
 ROUTES={'type':'array','minItems':1,'maxItems':4,'uniqueItems':True,'items':{'enum':['background','existing_tab','new_tab','fresh_task']}}
-POLICY = {'routes':ROUTES,'wake_lifetime': {'enum': ['conversation', 'task', 'persistent']},
+POLICY = {'session_mode': {'enum': ['session_only', 'reopen_live', 'background']}, 'routes':ROUTES,'wake_lifetime': {'enum': ['conversation', 'task', 'persistent']},
           'owner_id': TEXT, 'owner_end': {'enum': ['retire', 'hold', 'retain']},
           'recipient_startup': {'enum': ['active_tab', 'background_saved', 'create_load_run']}}
 
@@ -85,7 +85,7 @@ def tool_specs():
             dict(caller_thread_id=CALLER, trigger={'type': 'string', 'minLength': 1, 'maxLength': 1024},
                  prompt={'type': 'string', 'minLength': 1, 'maxLength': 32768},
                  idempotency_key=TEXT, ttl=dict(TEXT, description='Delivery window after due for time wakes; from registration for file wakes.'), **POLICY),
-            ['caller_thread_id', 'trigger', 'prompt', 'idempotency_key'], False)
+            ['caller_thread_id', 'trigger', 'prompt', 'idempotency_key', 'session_mode'], False)
     result['wake_owner_complete'] = ('harness-owner', 'complete',
         'Reconcile an explicit operator-approved owner completion. Caller identity alone cannot declare work complete. Never retract or replay uncertain effects.',
         dict(caller_thread_id=CALLER, owner_kind={'enum': ['conversation', 'task']}, owner_id=TEXT, event_id=TEXT),
@@ -181,6 +181,8 @@ def call(runner, group, verb, arguments, native_context):
         from .wake_policy import reconcile_owner_completion
         return reconcile_owner_completion(root, dict(kind=kind, id=owner), arguments['event_id'])
     if group == 'harness-native':
+        if arguments.get('session_mode') not in ('session_only', 'reopen_live', 'background'):
+            raise WakeError('explicit_session_mode_required')
         if any(isinstance(arguments.get(key), str) and arguments[key].startswith('-') for key in ('trigger', 'owner_id', 'idempotency_key', 'ttl')):
             raise WakeError('invalid_option_prefixed_argument')
         from .cli import run

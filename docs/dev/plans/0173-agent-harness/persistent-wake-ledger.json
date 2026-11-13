@@ -1,0 +1,73 @@
+{
+  "spec": "#610 persistent-wake-spec.md",
+  "owner": "ecochran76 / root",
+  "branch": "docs/persistent-wake-design",
+  "base": "e8c79a79da0b0482e2403e634394c70f5c66e333",
+  "review_fixed_point": "e8c79a79da0b0482e2403e634394c70f5c66e333",
+  "review_runs": 0,
+  "remediation_passes": 0,
+  "tickets": {
+    "611": {
+      "state": "validated",
+      "blockers": [],
+      "worker": "root"
+    },
+    "612": {
+      "state": "pending",
+      "blockers": [
+        611
+      ],
+      "worker": "root"
+    },
+    "613": {
+      "state": "pending",
+      "blockers": [
+        611
+      ],
+      "worker": null
+    },
+    "614": {
+      "state": "pending",
+      "blockers": [
+        611
+      ],
+      "worker": null
+    },
+    "615": {
+      "state": "pending",
+      "blockers": [
+        612
+      ],
+      "worker": null
+    },
+    "616": {
+      "state": "pending",
+      "blockers": [
+        612,
+        613,
+        614,
+        615
+      ],
+      "worker": "root"
+    }
+  },
+  "validation": [
+    {
+      "ticket": 611,
+      "seam": "native CLI registration and daemon poll; agent tool schema",
+      "red": "PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p test_wake_session_modes.py -q",
+      "red_result": "2 failed: flag missing and schema mode absent (after rerun using existing dependency environment)",
+      "green": "same command: 2 passed; test_wake_policy.py: 8 passed",
+      "environment": "Python 3.12 existing repo venv; source PYTHONPATH; isolated temporary roots; no provider effects"
+    }
+  ],
+  "contracts": {
+    "target.session_mode": [
+      "session_only",
+      "reopen_live",
+      "background"
+    ],
+    "target.session_owner": "session_only original verified pid + process identity + pane/socket",
+    "runtime_routing": "ModeRuntimeAdapter(root, adapter); #614 owns native_delivery hooks. #613 LiveWakeRestorer(root).prepare(target) returns exact verified target or RuntimeTargetError; #614 invokes for reopen_live. No shared edits by workers."
+  }
+}
