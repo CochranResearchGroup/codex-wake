@@ -18,6 +18,8 @@ def decorate(projection, resource, policy):
                           space_style=resource.get('target',{}).get('presentation')=='psmux')
     label=text(family.get('scope_kind','specialist'),12)+':'+text(family.get('name',family.get('bot_id','')),24)
     if family.get('scope_ref'):label+=' '+text(family['scope_ref'],20)
+    if family.get('parent_bot_id'):label+=' <'+text(family.get('parent_name') or family['parent_bot_id'],16)
+    if family.get('root_tab_available') is False:label+=' [root tab unavailable]'
     # Keep existing attention cues and preset colours; family text is readable
     # even in plain mode and never replaces the user's native window name.
     for key in ('window-status-format','window-status-current-format'):

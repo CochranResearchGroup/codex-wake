@@ -175,9 +175,18 @@ class BotFamilies:
                     exact = [p for p in live if all(p.get(k) == attachment.get(k)
                              for k in ('pane_id', 'namespace', 'process'))]
                     if len(exact) == 1 and exact[0]['workspace'] == row['target']['workspace']:
-                        matches.append(bot)
+                        matches.append((bot, bound))
             if len(matches) == 1:
-                row['bot_family'] = {k: v for k, v in matches[0].items() if k != 'bindings'}
+                bot, bound = matches[0]
+                family = {k: v for k, v in bot.items() if k != 'bindings'}
+                parent = state['bots'].get(bot.get('parent_bot_id'))
+                family['parent_name'] = parent['name'] if parent else None
+                root = state['bots'][bot['root_bot_id']]
+                root_bound = root['bindings'].get(binding_key(bound['client_id'], bound['environment']), {})
+                root_attachment = root_bound.get('attachment', {})
+                family['root_tab_available'] = any(all(p.get(k) == root_attachment.get(k)
+                    for k in ('pane_id', 'namespace', 'process')) for p in live)
+                row['bot_family'] = family
         return resources
 
     def execute(self, operation, arguments):

@@ -58,6 +58,9 @@ class BotFamilyTests(unittest.TestCase):
                 for client, window in zip(('a','b'), windows):
                     tabs.execute('tabs.family.bind',dict(bot_id='child',client_id=client,workspace='w',window_id=window['window_id'],pane_id=window['panes'][0]['pane_id']))
                 self.assertEqual(len(tabs.execute('tabs.family.show',dict(bot_id='child'))['bindings']),2)
+                family=tabs.execute('tabs.list',{})['resources'][0]['bot_family']
+                self.assertEqual(family['parent_name'],'Root')
+                self.assertFalse(family['root_tab_available'])
                 with self.assertRaises(InventoryError):
                     tabs.execute('tabs.family.bind',dict(bot_id='root',client_id='a',workspace='w',window_id=windows[0]['window_id'],pane_id=windows[0]['panes'][0]['pane_id']))
                 registry=BotFamilies(root,tabs=tabs)
