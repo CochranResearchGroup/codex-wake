@@ -273,7 +273,7 @@ class AuthorizedTabs:
                     required<=scope.keys() and all(selected.get(k)==v for k,v in scope.items()) for scope in actor.targets):
                 raise AuthError('insufficient_scope')
         from .terminal_launch_defaults import session_profile
-        profile=arguments.get('profile') if operation=='tabs.create' else session_profile(self.tabs,operation,arguments)
+        profile=arguments.get('profile') if operation in ('tabs.create','tabs.family.open') else session_profile(self.tabs,operation,arguments)
         if profile and not actor.issuer.startswith('local://uid/'):
             from .controller_http import permitted
             if not permitted(actor,self.tabs.profile_owner().authorization_target(profile)):
