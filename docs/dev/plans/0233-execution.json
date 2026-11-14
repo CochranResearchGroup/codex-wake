@@ -165,7 +165,9 @@
         "Accepted account revision binding in private bearer path",
         "Canonical selection and cumulative usage attribution",
         "Focused public worker/auth/usage checks"
-      ]
+      ],
+      "progress": "Account revision pinning source slice green (auth9/catalog1/native selection1); native mixed-worker selection/inheritance and canonical usage acceptance remain unfinished.",
+      "progress_evidence": "docs/dev/evidence/plan0233/t5-account-pinning-progress.md"
     },
     {
       "key": "T6",

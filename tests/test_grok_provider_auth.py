@@ -134,7 +134,7 @@ class GrokSessionTest(unittest.TestCase):
                     accounts.bearer('personal', 1800000000)
 
     def test_cli_registration_status_and_native_private_bearer_channel(self):
-        from contextlib import redirect_stdout
+        from contextlib import redirect_stdout, redirect_stderr
         import io
         from unittest.mock import patch
         from codex_wake.cli import run
@@ -151,8 +151,32 @@ class GrokSessionTest(unittest.TestCase):
                 self.assertEqual(run(prefix + ['register', 'personal', '--label', 'Personal', '--auth-path', str(auth)]), 0)
                 self.assertEqual(run(prefix + ['status', 'personal']), 0)
             self.assertNotIn('synthetic-private-bearer', public.getvalue())
+            accepted_revision = json.loads(public.getvalue().splitlines()[-1])['registration_revision']
             private = io.StringIO()
             time = TimeDecision('network', ('stable-time:cloudflare', 'stable-time:netnod'), 1800000000, 1800000001)
             with patch('codex_wake.time_inspection.stable_time_config', return_value='configured'), patch('codex_wake.stable_time.service_time_decision', return_value=time), redirect_stdout(private):
-                self.assertEqual(run(prefix + ['token', 'personal']), 0)
+                self.assertEqual(run(prefix + ['token', 'personal', '--expected-account-revision', accepted_revision]), 0)
             self.assertEqual(private.getvalue(), 'synthetic-private-bearer')
+            rejected, errors = io.StringIO(), io.StringIO()
+            with patch('codex_wake.time_inspection.stable_time_config', return_value='configured'), patch('codex_wake.stable_time.service_time_decision', return_value=time), redirect_stdout(rejected), redirect_stderr(errors):
+                self.assertEqual(run(prefix + ['token', 'personal', '--expected-account-revision', 'stale']), 3)
+            self.assertEqual(rejected.getvalue(), '')
+            self.assertIn('account_registration_changed', errors.getvalue())
+            self.assertNotIn('synthetic-private-bearer', errors.getvalue())
+
+    def test_accepted_selection_holds_changed_registration_and_allows_token_rotation(self):
+        from codex_wake.grok_provider_auth import GrokAccounts
+        with tempfile.TemporaryDirectory() as directory:
+            auth = Path(directory) / 'auth.json'
+            value = {'key': 'original-secret', 'auth_mode': 'oidc', 'user_id': 'one',
+                     'expires_at': '2030-01-01T00:00:00Z'}
+            auth.write_text(json.dumps({'https://auth.x.ai': value}))
+            auth.chmod(0o600)
+            accounts = GrokAccounts(Path(directory) / 'wake')
+            accounts.register('personal', 'Personal', auth)
+            revision = accounts.status('personal')['registration_revision']
+            with self.assertRaisesRegex(ValueError, 'account_registration_changed'):
+                accounts.bearer('personal', 1800000000, expected_revision='stale-registration')
+            value['key'] = 'rotated-secret'
+            auth.write_text(json.dumps({'https://auth.x.ai': value}))
+            self.assertEqual(accounts.bearer('personal', 1800000000, expected_revision=revision), 'rotated-secret')

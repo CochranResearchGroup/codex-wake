@@ -114,6 +114,8 @@ def register_parser(commands):
     for verb in ('status', 'token'):
         command = verbs.add_parser(verb)
         command.add_argument('account')
+        if verb == 'token':
+            command.add_argument('--expected-account-revision')
 
 
 def command(args, root):
@@ -140,15 +142,16 @@ def command(args, root):
     try:
         decision = service_time_decision(config) if config else None
         upper = require_time_decision(decision).upper if decision else None
-        accounts.bearer(args.account, upper)
+        accounts.bearer(args.account, upper, expected_revision=args.expected_account_revision)
         # Metadata refresh may have waited on the native writer. Acquire fresh
         # qualified time and revalidate account/expiry immediately before use.
         current = require_time_decision(service_time_decision(config))
-        token = accounts.bearer(args.account, current.upper, refresh=False)
-    except (OSError, ValueError):
+        token = accounts.bearer(args.account, current.upper, refresh=False, expected_revision=args.expected_account_revision)
+    except (OSError, ValueError) as error:
         # Native Codex includes command stderr in its own diagnostics. Never emit
         # provider exceptions, native login output, paths or credential contents.
-        print('grok_auth_unavailable', file=sys.stderr)
+        reason = ':account_registration_changed' if str(error) == 'account_registration_changed' else ''
+        print('grok_auth_unavailable' + reason, file=sys.stderr)
         return 3
     sys.stdout.write(token)
     return 0
@@ -162,6 +165,11 @@ def identity_binding(session):
     value = [identity, session.get('principal_type'), session.get('principal_id'),
              session.get('team_id'), session.get('organization_id')]
     return hashlib.sha256(json.dumps(value, separators=(',', ':')).encode()).hexdigest()
+
+
+def registration_revision(record):
+    """Identity of the operator registration, independent of native token rotation."""
+    return hashlib.sha256(json.dumps(record, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
 
 class GrokAccounts:
@@ -218,10 +226,13 @@ class GrokAccounts:
     def status(self, account):
         record = self._record(account)
         session = GrokSession(record['auth_path'], record['identity_binding'])
-        return dict(account=account, label=record['label'], **session.status())
+        return dict(account=account, label=record['label'],
+                    registration_revision=registration_revision(record), **session.status())
 
-    def bearer(self, account, qualified_upper, *, refresh=True):
+    def bearer(self, account, qualified_upper, *, refresh=True, expected_revision=None):
         record = self._record(account)
+        if expected_revision is not None and registration_revision(record) != expected_revision:
+            raise ValueError('account_registration_changed')
         session = GrokSession(record['auth_path'], record['identity_binding'])
         try:
             return session.bearer(qualified_upper)

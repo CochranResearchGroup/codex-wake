@@ -72,7 +72,9 @@ class GrokModelCatalogTest(unittest.TestCase):
                 self.assertEqual(provider['wire_api'], 'grok')
                 self.assertEqual(provider['name'], 'Grok')
                 self.assertEqual(provider['base_url'], 'https://cli-chat-proxy.grok.com/v1')
-                self.assertEqual(provider['auth']['args'][-4:], ['grok', 'auth', 'token', 'personal'])
+                self.assertEqual(provider['auth']['args'][-6:], ['grok', 'auth', 'token', 'personal',
+                    '--expected-account-revision', selection['selection']['accountRevision']])
+                self.assertEqual(provider['auth']['refresh_interval_ms'], 0)
                 self.assertNotIn(str(auth), json.dumps(native))
                 self.assertNotIn('synthetic-private-bearer', json.dumps(native))
                 from types import SimpleNamespace

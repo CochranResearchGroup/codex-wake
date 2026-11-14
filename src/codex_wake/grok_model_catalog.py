@@ -239,8 +239,9 @@ class GrokModels:
             providers['grok__' + account] = dict(name='Grok',
                 base_url='https://cli-chat-proxy.grok.com/v1', wire_api='grok',
                 auth=dict(command=str(executable), args=['--wake-root', str(self.root.absolute()),
-                    'grok', 'auth', 'token', account], timeout_ms=25000,
-                    refresh_interval_ms=60000, cwd=str(self.root.absolute())),
+                    'grok', 'auth', 'token', account, '--expected-account-revision',
+                    digest(self.accounts._record(account))], timeout_ms=25000,
+                    refresh_interval_ms=0, cwd=str(self.root.absolute())),
                 requires_openai_auth=False, supports_websockets=False)
         return dict(schemaVersion=1, sourceRevision=digest(revisions), selections=selections, providers=providers)
 
