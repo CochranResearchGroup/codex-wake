@@ -5,7 +5,7 @@ lanes:
     owner: root / ecochran76
     objective: Unified hierarchical connector control over Byobu and durable programs
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/623]
-    plan: docs/dev/plans/0234-unified-control-spec.md
+    plan: docs/dev/plans/0234-2026-11-14-unified-control-spec.md
     branch: feat/unified-control-0234
     worker_branches: [feat/unified-programs-625, feat/unified-observation-626]
     target: origin/main

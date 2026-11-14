@@ -1,6 +1,6 @@
 # Unified Wake control surface design interview
 
-State: OPEN
+State: CLOSED
 Owner: ecochran76 / root
 Scope: design interview; no implementation or runtime effects
 
@@ -10,7 +10,8 @@ Operator requested a next specification gathering and deepening wake functions,
 tab functions, structured programming, session/account controls and session/harness
 read/write. CLI/API/MCP must form a coherent hierarchy, usable by external
 connectors managing "my tabs". Round1 decisions below confirmed by operator;
-all19decisions accepted; final shared-understanding confirmation pending.
+all19decisions and shared understanding confirmed. Approved specification and
+eleven-ticket implementation graph now own execution.
 Existing GLOSSARY.md remains terminology authority. Preserve the separate Grok
 in Codex design0233 and existing runtime/permission contracts.
 
@@ -116,9 +117,10 @@ claim; absent first-class constructs and capability limits must be addressed.
 
 ## Decision frontier
 
-All19interview decisions accepted. Awaiting explicit confirmation that this
-captures shared understanding before deriving the next specification. No
-implementation, ticket publication or runtime effects authorized by this record.
+All19interview decisions and shared understanding confirmed. The operator
+subsequently approved the public seam, eleven-ticket graph and implementation.
+See0234-2026-11-14-unified-control-spec.md and its execution ledger; this interview record
+adds no live-effect authority.
 Exact schemas, command verb spellings and retention sizing remain specification
 work constrained by these decisions, not new authority or implicit policy choices.
 
