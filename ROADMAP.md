@@ -1704,3 +1704,14 @@ successors retain literal release pins; recipient MCP identity was unavailable
 while notLoaded. These remain explicit limits, not claims of universal durability
 or completion of future reviews. Future release retirement/recovery needs its
 own exact-record reconciliation and applicable authority.
+
+
+## Persistent wakes | Explicit session modes and recurring schedules
+
+Status: OPEN
+Work item: #610; children #611–#616
+Plan: [Persistent wake specification](docs/dev/plans/0173-agent-harness/persistent-wake-spec.md)
+Current State: Operator approved the design and six-ticket graph. Source slices
+are integrated on `docs/persistent-wake-design`; final local validation, one
+review/remediation and tracker closure remain. Production acceptance/deployment
+are distinct and are not initiated by this lane.

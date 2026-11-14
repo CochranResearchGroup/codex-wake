@@ -9592,3 +9592,16 @@ selected local lane, not full unrelated/3.11/hosted. Source and live monitor out
 complete; issue596 closes from this actual readback. Docs-only closeout receipt
 merges separately; remove exact task checkout after clean published custody.
 Memory forbidden under explicit-request-only developer boundary; zero writes.
+
+
+## Turn | 2026-11-13 | Explicit persistent wake modes and recurrence
+
+Operator confirmed the three explicit per-schedule modes and recurrence contract,
+approved spec #610 and tickets #611–#616, and authorized implementation with one
+ticket per worker, one final review and one bounded remediation. Primary took
+#611/#612/#616; live613, background614 and clock615 worked in isolated checkouts.
+Integration branch `docs/persistent-wake-design`; execution ledger and source spec:
+[ledger](docs/dev/plans/0173-agent-harness/persistent-wake-ledger.json),
+[spec](docs/dev/plans/0173-agent-harness/persistent-wake-spec.md). Current status:
+source slices integrated; final validation/review and tracker closure pending.
+No production registration, provider action or deployment.
