@@ -32,6 +32,8 @@ def definitions():
         if verb=='set':
             properties.update(token_limit={'type':'integer','minimum':1},time_limit_seconds={'type':'integer','minimum':1});required=['token_limit','time_limit_seconds']
         result['local.self_limits.'+verb]=('wake_self_limits_'+verb,'Inspect or tighten voluntary own-session limits with automatic enforcement readiness.',schema(properties,required),partial(limits,verb),verb=='show')
+    from .local_session_observation import definitions as observation_definitions
+    result.update(observation_definitions())
     from .governor_commands import definitions as governor_definitions
     result.update(governor_definitions())
     return result
