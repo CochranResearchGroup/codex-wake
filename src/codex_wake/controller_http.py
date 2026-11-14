@@ -135,6 +135,10 @@ from .governor_commands import schemas as governor_schemas
 TOOLS.update({'wake_governor_' + verb: ('governor.' + verb, schema) for verb, schema in governor_schemas().items()})
 
 
+from .unified_contract import api_aliases
+api_aliases(TOOLS)
+
+
 class ProtectedOperations:
     """Shared API/MCP admission. Binding and client registration confer no grant."""
     # operation: (capability, list collection or None, singleton key).
@@ -212,6 +216,8 @@ class ProtectedOperations:
         self.authority, self.operations = authority, operations
 
     def execute(self, token, operation, arguments):
+        from .unified_contract import original
+        operation = original(operation, self.READ_POLICIES.keys() | {"runtime.input", "runtime.recover", "grants.revoke"})
         actor = self.authority.authenticate(token)
         policy = self.READ_POLICIES.get(operation)
         required = policy[0] if policy else {'runtime.input': 'control', 'runtime.recover': 'recovery',

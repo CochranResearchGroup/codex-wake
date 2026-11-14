@@ -780,7 +780,8 @@ def build_parser() -> argparse.ArgumentParser:
     from .account_shortcuts import register as register_shortcuts
     register_shortcuts(parser)
     from .command_contract import apply_help
-    return apply_help(parser)
+    from .unified_contract import apply_cli
+    return apply_cli(apply_help(parser))
 
 
 def add_target_options(parser: argparse.ArgumentParser) -> None:
@@ -2825,6 +2826,11 @@ def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
 
 
 def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
+    from .unified_contract import expand_cli, metadata
+    argv, discover = expand_cli(argv)
+    if discover:
+        print(json.dumps(metadata(), sort_keys=True))
+        return 0
     parser = build_parser()
     args = parser.parse_args(argv)
     if (args.command in ('accounts', 'stores', 'configuration', 'history', 'builds', 'daemons', 'migration', 'tabs')

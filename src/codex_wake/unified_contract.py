@@ -1,0 +1,128 @@
+"""Canonical resource names; existing owners retain execution and authority."""
+from copy import deepcopy
+import argparse
+
+FAMILIES=('environment','wakes','programs','accounts','harnesses','operations','connectors')
+PREFIXES=(('tabs.session.','environment.sessions.'),('tabs.','environment.tabs.'),
+ ('local.','environment.conversations.'),('inventory.','environment.resources.'),
+ ('agent_sessions.','environment.agents.'),('history.','environment.conversations.history.'),
+ ('sessions.','programs.sessions.'),('flows.','programs.flows.'),
+ ('conditions.','programs.conditions.'),('functions.','programs.functions.'),
+ ('configuration.','accounts.configuration.'),('stores.','accounts.stores.'),
+ ('builds.','harnesses.builds.'),('daemons.','harnesses.runtimes.'),
+ ('hosts.','connectors.hosts.'),('grants.','connectors.grants.'),
+ ('native.','wakes.intents.'),('schedules.','wakes.schedules.'))
+# Whole legacy parser owners are reused, including their validation and root rules.
+CLI_ALIASES={('environment','sessions'):('tabs','sessions'),
+ ('environment','tabs'):('tabs',),('environment','agents'):('agents',),
+ ('environment','conversations','history'):('history',),
+ ('environment','conversations'):('control',),
+ ('programs','flows'):('flows',),('programs','sessions'):('flow-sessions',),
+ ('accounts','profiles'):('accounts',),('accounts','stores'):('stores',),
+ ('accounts','configuration'):('configuration',),
+ ('harnesses','builds'):('builds',),('harnesses','runtimes'):('daemons',),
+ ('connectors','hosts'):('hosts',),('wakes','intents'):('native',),
+ ('wakes','schedules'):('schedules',)}
+
+FLOW_NAMES={'propose':'definitions.propose','publish':'definitions.publish','definition':'definitions.show',
+            'start':'runs.start','inspect':'runs.show','advance':'runs.advance','reconcile':'runs.reconcile','cancel':'runs.cancel'}
+for _verb,_path in FLOW_NAMES.items():
+    CLI_ALIASES[tuple(['programs',*_path.split('.')])]=('flows',_verb)
+
+def canonical(operation):
+    if operation.startswith('flows.') and operation[6:] in FLOW_NAMES:return 'programs.'+FLOW_NAMES[operation[6:]]
+    for before,after in PREFIXES:
+        if operation.startswith(before):return after+operation[len(before):]
+    return operation
+
+def original(operation,available):
+    if operation in available:return operation
+    matches=[key for key in available if canonical(key)==operation]
+    if len(matches)>1:raise ValueError('conflicting canonical operation: '+operation)
+    return matches[0] if matches else operation
+
+def tool_name(operation):return 'wake_'+operation.replace('.','_')
+
+def api_aliases(tools):
+    for name,(operation,schema) in list(tools.items()):
+        alias=tool_name(canonical(operation))
+        entry=(operation,schema)
+        if alias in tools and tools[alias]!=entry:raise ValueError('conflicting MCP alias: '+alias)
+        tools.setdefault(alias,entry)
+    return tools
+
+def local_aliases(definitions):
+    for operation,(tool,description,schema,handler,readonly) in list(definitions.items()):
+        alias=canonical(operation)
+        if alias==operation:continue
+        if alias in definitions:raise ValueError('conflicting local alias: '+alias)
+        definitions[alias]=(tool_name(alias),description,schema,handler,readonly)
+    return definitions
+
+def native_operation(group,verb):
+    if group=='local':return 'local.'+verb
+    if group.startswith('controller-'):
+        if '.' in verb:return verb
+        prefixes={'controller-hosts':'hosts','controller-builds':'builds',
+                  'controller-operations':'operations','controller-history':'history'}
+        return prefixes.get(group,group.removeprefix('controller-'))+'.'+verb
+    return {'controller':'inventory','sessions':'agent_sessions',
+            'harness-native':'native','harness-schedules':'schedules'}.get(group,group)+'.'+verb
+
+def native_aliases(specs):
+    for name,spec in list(specs.items()):
+        operation=native_operation(spec[0],spec[1]);alias=tool_name(canonical(operation))
+        if canonical(operation)==operation and not spec[0].startswith('controller-'):continue
+        if alias in specs and (specs[alias][:2],specs[alias][3:])!=(spec[:2],spec[3:]):raise ValueError('conflicting native alias: '+alias)
+        specs.setdefault(alias,spec)
+    return specs
+
+def metadata():
+    from .local_control_service import definitions
+    from .controller_http import TOOLS
+    operations={}
+    for operation,(tool,description,schema,handler,readonly) in definitions().items():
+        if operation!=canonical(operation):continue
+        operations.setdefault(operation,{})['local']={'schema':schema,'mcp':tool,'readonly':readonly}
+    for tool,(operation,schema) in TOOLS.items():
+        operations.setdefault(canonical(operation),{})['protected']={'schema':schema,'mcp':tool_name(canonical(operation))}
+    return dict(schema_version=1,families=list(FAMILIES),operations=operations,
+                admission='Transport-owned identity and permission checks remain authoritative.',
+                compatibility='Legacy entry points retain their original owners and receipts.')
+
+def _subs(parser):
+    return next((a for a in parser._actions if isinstance(a,argparse._SubParsersAction)),None)
+
+def _parser(parser,path):
+    for part in path:
+        action=_subs(parser)
+        if action is None or part not in action.choices:return None
+        parser=action.choices[part]
+    return parser
+
+def apply_cli(parser):
+    sources={path:deepcopy(_parser(parser,source)) for path,source in CLI_ALIASES.items() if _parser(parser,source)}
+    for path,source in sorted(sources.items(),key=lambda item:len(item[0])):
+        parent=parser
+        for part in path[:-1]:
+            action=_subs(parent) or parent.add_subparsers(dest='_unified_'+part,required=True)
+            parent=action.choices.get(part) or action.add_parser(part)
+        action=_subs(parent) or parent.add_subparsers(dest='_unified_action',required=True)
+        if path[-1] not in action.choices:action.add_parser(path[-1],parents=[source],add_help=False)
+    environment=_parser(parser,('environment',));action=_subs(environment)
+    action.add_parser('capabilities',help='discover canonical operation contracts and transport capabilities')
+    return parser
+
+def expand_cli(argv):
+    import sys
+    args=list(sys.argv[1:] if argv is None else argv);offset=0
+    # Preserve global options; do not rewrite text in option values or prompts.
+    while offset<len(args) and args[offset].startswith('-'):
+        if args[offset]=='--wake-root':offset+=2
+        elif args[offset].startswith('--wake-root='):offset+=1
+        else:break
+    rest=args[offset:]
+    if rest==['environment','capabilities']:return args,True
+    for path,legacy in sorted(CLI_ALIASES.items(),key=lambda item:-len(item[0])):
+        if rest[:len(path)]==list(path):return args[:offset]+list(legacy)+rest[len(path):],False
+    return args,False

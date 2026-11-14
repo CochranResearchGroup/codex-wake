@@ -11,14 +11,16 @@
     "1": {
       "title": "Canonical hierarchical contract and compatibility",
       "blockers": [],
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "worker": "root",
       "owned_scope": "canonical registry, shared CLI/API/MCP hooks, contract generation",
       "packet": "docs/dev/plans/0234-unified-control-tickets/01.md",
       "issue": 624,
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/624",
-      "base": "1aa498674a4907f93b5216a4a98dd75a22c6ecec"
+      "base": "1aa498674a4907f93b5216a4a98dd75a22c6ecec",
+      "validation": "Public canonical CLI discovery/help/owner dispatch and existing contract/wiring8PASS; RuffPASS; red2fail/1error retained",
+      "receipt": "~/.local/state/codex-wake/unified-0234/624-green-final.log"
     },
     "2": {
       "title": "Bounded control structures and typed semantic functions",
@@ -53,9 +55,9 @@
       "blockers": [
         1
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
-      "worker": "pending",
+      "worker": "root",
       "owned_scope": "environment resource owner and tab/session inventory adapters",
       "packet": "docs/dev/plans/0234-unified-control-tickets/04.md",
       "issue": 627,

@@ -178,6 +178,20 @@
     "acceptance.define",
     "acceptance.evaluate",
     "acceptance.inspect",
+    "accounts.configuration.default-root",
+    "accounts.configuration.explain",
+    "accounts.configuration.sync.apply",
+    "accounts.configuration.sync.preview",
+    "accounts.profiles.create",
+    "accounts.profiles.init",
+    "accounts.profiles.list",
+    "accounts.profiles.login",
+    "accounts.profiles.readiness",
+    "accounts.profiles.resolve",
+    "accounts.profiles.status",
+    "accounts.stores.list",
+    "accounts.stores.register",
+    "accounts.stores.resolve",
     "after",
     "agents.configure",
     "agents.enroll",
@@ -206,6 +220,14 @@
     "cancel",
     "changed",
     "cleanup",
+    "connectors.hosts.list",
+    "connectors.hosts.map-principal",
+    "connectors.hosts.observe",
+    "connectors.hosts.register",
+    "connectors.hosts.resolve",
+    "connectors.hosts.revoke-principal",
+    "connectors.hosts.route",
+    "connectors.hosts.ssh-serve",
     "controller.auth-configure",
     "controller.authorize-client",
     "controller.list",
@@ -214,6 +236,164 @@
     "controller.revoke-grant",
     "controller.serve",
     "doctor",
+    "environment.agents.configure",
+    "environment.agents.enroll",
+    "environment.agents.focus",
+    "environment.agents.list",
+    "environment.agents.observe",
+    "environment.agents.overview",
+    "environment.agents.reconcile",
+    "environment.agents.reenable",
+    "environment.agents.resume",
+    "environment.agents.show",
+    "environment.agents.unenroll",
+    "environment.agents.wait",
+    "environment.capabilities",
+    "environment.conversations.connection",
+    "environment.conversations.history.import",
+    "environment.conversations.history.import-recent",
+    "environment.conversations.history.read",
+    "environment.conversations.history.recent",
+    "environment.conversations.history.resume",
+    "environment.conversations.history.search",
+    "environment.conversations.mcp",
+    "environment.conversations.powershell",
+    "environment.conversations.remote",
+    "environment.conversations.server.run",
+    "environment.conversations.server.start",
+    "environment.conversations.server.status",
+    "environment.conversations.server.stop",
+    "environment.sessions.create",
+    "environment.sessions.delete",
+    "environment.sessions.ensure",
+    "environment.sessions.list",
+    "environment.sessions.open",
+    "environment.sessions.show",
+    "environment.sessions.update",
+    "environment.tabs.apply",
+    "environment.tabs.capture",
+    "environment.tabs.close",
+    "environment.tabs.create",
+    "environment.tabs.family-accept",
+    "environment.tabs.family-adopt",
+    "environment.tabs.family-bind",
+    "environment.tabs.family-focus",
+    "environment.tabs.family-list",
+    "environment.tabs.family-open",
+    "environment.tabs.family-register",
+    "environment.tabs.family-show",
+    "environment.tabs.family.accept",
+    "environment.tabs.family.adopt",
+    "environment.tabs.family.bind",
+    "environment.tabs.family.focus",
+    "environment.tabs.family.list",
+    "environment.tabs.family.open",
+    "environment.tabs.family.register",
+    "environment.tabs.family.show",
+    "environment.tabs.focus",
+    "environment.tabs.format-configure",
+    "environment.tabs.format-enable",
+    "environment.tabs.format-inspect",
+    "environment.tabs.format-pause",
+    "environment.tabs.format-reenable",
+    "environment.tabs.format-reset",
+    "environment.tabs.format-resume",
+    "environment.tabs.format-rollback",
+    "environment.tabs.format-status",
+    "environment.tabs.format.configure",
+    "environment.tabs.format.enable",
+    "environment.tabs.format.inspect",
+    "environment.tabs.format.pause",
+    "environment.tabs.format.reenable",
+    "environment.tabs.format.reset",
+    "environment.tabs.format.resume",
+    "environment.tabs.format.rollback",
+    "environment.tabs.format.status",
+    "environment.tabs.group-delete",
+    "environment.tabs.group-list",
+    "environment.tabs.group-save",
+    "environment.tabs.group-show",
+    "environment.tabs.input",
+    "environment.tabs.list",
+    "environment.tabs.monitor-refresh",
+    "environment.tabs.monitor-start",
+    "environment.tabs.monitor-status",
+    "environment.tabs.monitor-stop",
+    "environment.tabs.move",
+    "environment.tabs.park",
+    "environment.tabs.policy-configure",
+    "environment.tabs.policy-disable",
+    "environment.tabs.policy-enable",
+    "environment.tabs.policy-pause",
+    "environment.tabs.policy-status",
+    "environment.tabs.policy-tick",
+    "environment.tabs.preview",
+    "environment.tabs.reattach-apply",
+    "environment.tabs.reattach-preview",
+    "environment.tabs.reattach-status",
+    "environment.tabs.recovery-apply",
+    "environment.tabs.recovery-capture",
+    "environment.tabs.recovery-preview",
+    "environment.tabs.recovery-status",
+    "environment.tabs.relocate-apply",
+    "environment.tabs.relocate-preview",
+    "environment.tabs.relocate-status",
+    "environment.tabs.relocate-undo",
+    "environment.tabs.relocate.apply",
+    "environment.tabs.relocate.preview",
+    "environment.tabs.relocate.status",
+    "environment.tabs.relocate.undo",
+    "environment.tabs.rename",
+    "environment.tabs.restore",
+    "environment.tabs.result",
+    "environment.tabs.route-delete",
+    "environment.tabs.route-enable",
+    "environment.tabs.route-hold",
+    "environment.tabs.route-list",
+    "environment.tabs.route-pause",
+    "environment.tabs.route-pin",
+    "environment.tabs.route-resume",
+    "environment.tabs.route-save",
+    "environment.tabs.route-show",
+    "environment.tabs.route-status",
+    "environment.tabs.route-tick",
+    "environment.tabs.route-unpin",
+    "environment.tabs.routing.delete",
+    "environment.tabs.routing.enable",
+    "environment.tabs.routing.hold",
+    "environment.tabs.routing.list",
+    "environment.tabs.routing.pause",
+    "environment.tabs.routing.pin",
+    "environment.tabs.routing.resume",
+    "environment.tabs.routing.save",
+    "environment.tabs.routing.show",
+    "environment.tabs.routing.status",
+    "environment.tabs.routing.tick",
+    "environment.tabs.routing.unpin",
+    "environment.tabs.session-create",
+    "environment.tabs.session-delete",
+    "environment.tabs.session-ensure",
+    "environment.tabs.session-list",
+    "environment.tabs.session-open",
+    "environment.tabs.session-show",
+    "environment.tabs.session-update",
+    "environment.tabs.sessions.create",
+    "environment.tabs.sessions.delete",
+    "environment.tabs.sessions.ensure",
+    "environment.tabs.sessions.list",
+    "environment.tabs.sessions.open",
+    "environment.tabs.sessions.show",
+    "environment.tabs.sessions.update",
+    "environment.tabs.show",
+    "environment.tabs.startup.disable",
+    "environment.tabs.startup.enable",
+    "environment.tabs.startup.status",
+    "environment.tabs.undo",
+    "environment.tabs.view-delete",
+    "environment.tabs.view-evaluate",
+    "environment.tabs.view-list",
+    "environment.tabs.view-save",
+    "environment.tabs.view-show",
     "file",
     "filesystem.changed",
     "filesystem.created",
@@ -287,6 +467,24 @@
     "grok.show",
     "grok.stdio-host",
     "grok.wait",
+    "harnesses.builds.build",
+    "harnesses.builds.cleanup",
+    "harnesses.builds.launch",
+    "harnesses.builds.list",
+    "harnesses.builds.prepare",
+    "harnesses.builds.qualify",
+    "harnesses.builds.resume",
+    "harnesses.builds.rollback",
+    "harnesses.builds.run",
+    "harnesses.builds.select",
+    "harnesses.builds.stage",
+    "harnesses.builds.status",
+    "harnesses.runtimes.list",
+    "harnesses.runtimes.restart",
+    "harnesses.runtimes.start",
+    "harnesses.runtimes.status",
+    "harnesses.runtimes.stop",
+    "harnesses.runtimes.update",
     "health.observe",
     "hook.check",
     "hook.install",
@@ -364,6 +562,29 @@
     "process-exit",
     "product-readiness",
     "profiles",
+    "programs.definitions.propose",
+    "programs.definitions.publish",
+    "programs.definitions.show",
+    "programs.flows.advance",
+    "programs.flows.cancel",
+    "programs.flows.definition",
+    "programs.flows.inspect",
+    "programs.flows.propose",
+    "programs.flows.publish",
+    "programs.flows.reconcile",
+    "programs.flows.start",
+    "programs.runs.advance",
+    "programs.runs.cancel",
+    "programs.runs.reconcile",
+    "programs.runs.show",
+    "programs.runs.start",
+    "programs.sessions.cancel",
+    "programs.sessions.capabilities",
+    "programs.sessions.checkpoint",
+    "programs.sessions.create",
+    "programs.sessions.fork",
+    "programs.sessions.prompt",
+    "programs.sessions.wait",
     "recovery.apply",
     "recovery.check",
     "recovery.configure",
@@ -429,7 +650,17 @@
     "time.inspect",
     "wake-policy.configure",
     "wake-policy.owner-complete",
-    "wake-policy.show"
+    "wake-policy.show",
+    "wakes.intents.after",
+    "wakes.intents.at",
+    "wakes.intents.file",
+    "wakes.intents.migrate",
+    "wakes.intents.reconcile",
+    "wakes.schedules.cancel",
+    "wakes.schedules.list",
+    "wakes.schedules.register",
+    "wakes.schedules.revise",
+    "wakes.schedules.show"
   ],
   "adapter_exceptions": {
     "accounts.login": "Local native credential stdin/stdio only.",
@@ -1475,6 +1706,961 @@
           "advisory"
         ],
         "mcp_tool": "wake_governor_advisory",
+        "description": "Explicitly select advisory operation under qualified operator authority.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "resume": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.create": {
+        "cli": [
+          "environment",
+          "conversations",
+          "create"
+        ],
+        "mcp_tool": "wake_environment_conversations_create",
+        "description": "Create an owned headless Grok ACP session with harness=grok; Codex creation is unsupported.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "idempotency_key": {
+              "type": "string"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.load": {
+        "cli": [
+          "environment",
+          "conversations",
+          "load"
+        ],
+        "mcp_tool": "wake_environment_conversations_load",
+        "description": "Load an explicitly selected owned Grok conversation through its fresh ACP profile; Codex load is unsupported.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "selector": {
+              "type": "string"
+            },
+            "idempotency_key": {
+              "type": "string"
+            },
+            "expected_target": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "selector"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.prompt": {
+        "cli": [
+          "environment",
+          "conversations",
+          "prompt"
+        ],
+        "mcp_tool": "wake_environment_conversations_prompt",
+        "description": "Same-user durable session operation; output observes the original turn without replay.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            },
+            "timeout": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 30
+            },
+            "cursor": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "selector": {
+              "type": "string"
+            },
+            "prompt": {
+              "type": "string"
+            },
+            "idempotency_key": {
+              "type": "string"
+            },
+            "expected_target": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "selector",
+            "prompt"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.output": {
+        "cli": [
+          "environment",
+          "conversations",
+          "output"
+        ],
+        "mcp_tool": "wake_environment_conversations_output",
+        "description": "Same-user durable session operation; output observes the original turn without replay.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            },
+            "timeout": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 30
+            },
+            "cursor": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "operation_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "environment.conversations.result": {
+        "cli": [
+          "environment",
+          "conversations",
+          "result"
+        ],
+        "mcp_tool": "wake_environment_conversations_result",
+        "description": "Same-user durable session operation; output observes the original turn without replay.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            },
+            "timeout": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 30
+            },
+            "cursor": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "operation_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "environment.conversations.cancel": {
+        "cli": [
+          "environment",
+          "conversations",
+          "cancel"
+        ],
+        "mcp_tool": "wake_environment_conversations_cancel",
+        "description": "Same-user durable session operation; output observes the original turn without replay.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "operation_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.list": {
+        "cli": [
+          "environment",
+          "conversations",
+          "list"
+        ],
+        "mcp_tool": "wake_environment_conversations_list",
+        "description": "Discover running owned conversations and presentation bindings.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "environment.conversations.resolve": {
+        "cli": [
+          "environment",
+          "conversations",
+          "resolve"
+        ],
+        "mcp_tool": "wake_environment_conversations_resolve",
+        "description": "Resolve one owned conversation and pin its generation.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "selector"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "environment.conversations.health": {
+        "cli": [
+          "environment",
+          "conversations",
+          "health"
+        ],
+        "mcp_tool": "wake_environment_conversations_health",
+        "description": "Fresh exact controlling-TUI loop health, never inferred from process liveness.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "endpoint": {
+              "type": "string"
+            },
+            "timeout": {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 5
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "selector"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "environment.conversations.slash.list": {
+        "cli": [
+          "environment",
+          "conversations",
+          "slash",
+          "list"
+        ],
+        "mcp_tool": "wake_environment_conversations_slash_list",
+        "description": "Discover qualified same-user native slash mappings and interaction support.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "selector"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "environment.conversations.slash.run": {
+        "cli": [
+          "environment",
+          "conversations",
+          "slash",
+          "run"
+        ],
+        "mcp_tool": "wake_environment_conversations_slash_run",
+        "description": "Execute a supported native slash action with durable tracking; never submits command text as a prompt.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "harness": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "grok"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "command": {
+              "type": "string",
+              "minLength": 1
+            },
+            "arguments": {
+              "type": "string"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            }
+          },
+          "required": [
+            "selector",
+            "command",
+            "idempotency_key"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.slash.result": {
+        "cli": [
+          "environment",
+          "conversations",
+          "slash",
+          "result"
+        ],
+        "mcp_tool": "wake_environment_conversations_slash_result",
+        "description": "Inspect, explicitly answer, or cancel an exact controller-owned native slash interaction.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "operation_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            },
+            "cursor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "environment.conversations.slash.respond": {
+        "cli": [
+          "environment",
+          "conversations",
+          "slash",
+          "respond"
+        ],
+        "mcp_tool": "wake_environment_conversations_slash_respond",
+        "description": "Inspect, explicitly answer, or cancel an exact controller-owned native slash interaction.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "interaction_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "interaction_id",
+            "value",
+            "idempotency_key"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.slash.cancel": {
+        "cli": [
+          "environment",
+          "conversations",
+          "slash",
+          "cancel"
+        ],
+        "mcp_tool": "wake_environment_conversations_slash_cancel",
+        "description": "Inspect, explicitly answer, or cancel an exact controller-owned native slash interaction.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "interaction_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "stream",
+                "transcript",
+                "final",
+                "silent"
+              ]
+            }
+          },
+          "required": [
+            "interaction_id"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.self_limits.show": {
+        "cli": [
+          "environment",
+          "conversations",
+          "self_limits",
+          "show"
+        ],
+        "mcp_tool": "wake_environment_conversations_self_limits_show",
+        "description": "Inspect or tighten voluntary own-session limits with automatic enforcement readiness.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "environment.conversations.self_limits.set": {
+        "cli": [
+          "environment",
+          "conversations",
+          "self_limits",
+          "set"
+        ],
+        "mcp_tool": "wake_environment_conversations_self_limits_set",
+        "description": "Inspect or tighten voluntary own-session limits with automatic enforcement readiness.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "token_limit": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "time_limit_seconds": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "token_limit",
+            "time_limit_seconds"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.governor.status": {
+        "cli": [
+          "environment",
+          "conversations",
+          "governor",
+          "status"
+        ],
+        "mcp_tool": "wake_environment_conversations_governor_status",
+        "description": "Show task limits, consumption and actual enforcement readiness without activating work.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": true
+      },
+      "environment.conversations.governor.activate": {
+        "cli": [
+          "environment",
+          "conversations",
+          "governor",
+          "activate"
+        ],
+        "mcp_tool": "wake_environment_conversations_governor_activate",
+        "description": "Activate or tighten own-task time and token limits without per-session provisioning.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "token_limit": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "time_limit_seconds": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "token_limit",
+            "time_limit_seconds"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.governor.extend": {
+        "cli": [
+          "environment",
+          "conversations",
+          "governor",
+          "extend"
+        ],
+        "mcp_tool": "wake_environment_conversations_governor_extend",
+        "description": "Increase an existing allowance under qualified operator authority; retain usage.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "add_tokens": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "add_seconds": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "resume": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.governor.reset": {
+        "cli": [
+          "environment",
+          "conversations",
+          "governor",
+          "reset"
+        ],
+        "mcp_tool": "wake_environment_conversations_governor_reset",
+        "description": "Start a new authorized budget window, preserving lifetime accounting and stop history.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "token_limit": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "time_limit_seconds": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "resume": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.governor.disable": {
+        "cli": [
+          "environment",
+          "conversations",
+          "governor",
+          "disable"
+        ],
+        "mcp_tool": "wake_environment_conversations_governor_disable",
+        "description": "Disable this governor under qualified operator authority; resume only with --resume.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "resume": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.governor.resume": {
+        "cli": [
+          "environment",
+          "conversations",
+          "governor",
+          "resume"
+        ],
+        "mcp_tool": "wake_environment_conversations_governor_resume",
+        "description": "Resume the exact affected task only when its allowance and enforcement are qualified.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "selector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "endpoint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "environment.conversations.governor.advisory": {
+        "cli": [
+          "environment",
+          "conversations",
+          "governor",
+          "advisory"
+        ],
+        "mcp_tool": "wake_environment_conversations_governor_advisory",
         "description": "Explicitly select advisory operation under qualified operator authority.",
         "input_schema": {
           "type": "object",

@@ -6803,3 +6803,26 @@ See [workflow](local-session-control.md) and generated [transport contract](loca
 | `governor disable` | `local.governor.disable` | `wake_governor_disable` |
 | `governor resume` | `local.governor.resume` | `wake_governor_resume` |
 | `governor advisory` | `local.governor.advisory` | `wake_governor_advisory` |
+| `environment conversations create` | `environment.conversations.create` | `wake_environment_conversations_create` |
+| `environment conversations load` | `environment.conversations.load` | `wake_environment_conversations_load` |
+| `environment conversations prompt` | `environment.conversations.prompt` | `wake_environment_conversations_prompt` |
+| `environment conversations output` | `environment.conversations.output` | `wake_environment_conversations_output` |
+| `environment conversations result` | `environment.conversations.result` | `wake_environment_conversations_result` |
+| `environment conversations cancel` | `environment.conversations.cancel` | `wake_environment_conversations_cancel` |
+| `environment conversations list` | `environment.conversations.list` | `wake_environment_conversations_list` |
+| `environment conversations resolve` | `environment.conversations.resolve` | `wake_environment_conversations_resolve` |
+| `environment conversations health` | `environment.conversations.health` | `wake_environment_conversations_health` |
+| `environment conversations slash list` | `environment.conversations.slash.list` | `wake_environment_conversations_slash_list` |
+| `environment conversations slash run` | `environment.conversations.slash.run` | `wake_environment_conversations_slash_run` |
+| `environment conversations slash result` | `environment.conversations.slash.result` | `wake_environment_conversations_slash_result` |
+| `environment conversations slash respond` | `environment.conversations.slash.respond` | `wake_environment_conversations_slash_respond` |
+| `environment conversations slash cancel` | `environment.conversations.slash.cancel` | `wake_environment_conversations_slash_cancel` |
+| `environment conversations self_limits show` | `environment.conversations.self_limits.show` | `wake_environment_conversations_self_limits_show` |
+| `environment conversations self_limits set` | `environment.conversations.self_limits.set` | `wake_environment_conversations_self_limits_set` |
+| `environment conversations governor status` | `environment.conversations.governor.status` | `wake_environment_conversations_governor_status` |
+| `environment conversations governor activate` | `environment.conversations.governor.activate` | `wake_environment_conversations_governor_activate` |
+| `environment conversations governor extend` | `environment.conversations.governor.extend` | `wake_environment_conversations_governor_extend` |
+| `environment conversations governor reset` | `environment.conversations.governor.reset` | `wake_environment_conversations_governor_reset` |
+| `environment conversations governor disable` | `environment.conversations.governor.disable` | `wake_environment_conversations_governor_disable` |
+| `environment conversations governor resume` | `environment.conversations.governor.resume` | `wake_environment_conversations_governor_resume` |
+| `environment conversations governor advisory` | `environment.conversations.governor.advisory` | `wake_environment_conversations_governor_advisory` |

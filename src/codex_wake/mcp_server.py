@@ -221,14 +221,19 @@ SPECS.update(local_health_specs())
 from .local_control_commands import tool_specs as local_control_specs
 SPECS.update(local_control_specs())
 from .local_control_service import definitions as local_definitions
-for _operation, (_tool, _description, _schema, _handler, _readonly) in local_definitions().items():
-    if not _operation.startswith('local.self_limits.'):
-        _group = 'governor' if _operation.startswith('local.governor.') else 'local'
-        _verb = _operation.rsplit('.', 1)[1] if _group == 'governor' else _operation.removeprefix('local.')
+_local_definitions = local_definitions()
+from .unified_contract import original as original_operation
+for _operation, (_tool, _description, _schema, _handler, _readonly) in _local_definitions.items():
+    _legacy_operation = original_operation(_operation, [key for key in _local_definitions if key.startswith('local.')])
+    if not _legacy_operation.startswith('local.self_limits.'):
+        _group = 'governor' if _legacy_operation.startswith('local.governor.') else 'local'
+        _verb = _legacy_operation.rsplit('.', 1)[1] if _group == 'governor' else _legacy_operation.removeprefix('local.')
         SPECS[_tool]=(_group,_verb,_description,_schema['properties'],_schema['required'],_readonly)
 
 from .command_contract import apply_native_contract
 apply_native_contract(SPECS)
+from .unified_contract import native_aliases
+native_aliases(SPECS)
 
 class CommandRunner:
     def __init__(self, *, cli=None, bus_root=None, capability=None, app_server="unix://",
