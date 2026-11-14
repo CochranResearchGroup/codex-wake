@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlsplit
 
-SCOPES = frozenset({'observe', 'control', 'recovery', 'admin', 'account.observe', 'configuration.observe', 'history.observe', 'history.resume', 'migration.observe'})
+SCOPES = frozenset({'observe', 'control', 'recovery', 'admin', 'account.observe', 'configuration.observe', 'history.observe', 'history.resume', 'migration.observe', 'content.observe', 'terminal.input'})
 
 
 class AuthError(ValueError):
@@ -41,6 +41,8 @@ class Actor:
     scopes: frozenset
     targets: list
     expires_at: float
+    actions: frozenset | None = None
+    delegated: bool = False
 
 
 class OAuthAuthority:
@@ -64,6 +66,8 @@ class OAuthAuthority:
                 CREATE TABLE IF NOT EXISTS authority (id INTEGER PRIMARY KEY CHECK(id=1), issuer TEXT, resource TEXT);
                 CREATE TABLE IF NOT EXISTS clients (id TEXT PRIMARY KEY, metadata TEXT);
                 CREATE TABLE IF NOT EXISTS grants (id TEXT PRIMARY KEY, subject TEXT, kind TEXT, client TEXT, scopes TEXT, targets TEXT, revoked INTEGER DEFAULT 0);
+                CREATE TABLE IF NOT EXISTS delegation_intents (intent TEXT PRIMARY KEY, fingerprint TEXT, result TEXT);
+                CREATE TABLE IF NOT EXISTS delegations (grant_id TEXT PRIMARY KEY, parent_id TEXT, expires REAL, actions TEXT);
                 CREATE TABLE IF NOT EXISTS codes (hash TEXT PRIMARY KEY, grant_id TEXT, redirect TEXT, challenge TEXT, expires REAL, used INTEGER DEFAULT 0);
                 CREATE TABLE IF NOT EXISTS tokens (hash TEXT PRIMARY KEY, grant_id TEXT, kind TEXT, expires REAL, used INTEGER DEFAULT 0);
                 CREATE TABLE IF NOT EXISTS revocations (grant_id TEXT PRIMARY KEY, pending INTEGER, result TEXT, attempts INTEGER NOT NULL DEFAULT 0);
@@ -116,7 +120,7 @@ class OAuthAuthority:
             raise AuthError('invalid_request')
         if not scopes or not set(scopes) <= SCOPES: raise AuthError('invalid_scope')
         def valid_target(target):
-            if not isinstance(target, dict) or not target or set(target) - {'host', 'environment', 'runtime', 'namespace', 'conversation_id', 'provider', 'account', 'home', 'home_generation', 'configuration_revision', 'rollout_revision', 'build_channel', 'build_sha256', 'build_revision', 'executable', 'recipe', 'recipe_sha256', 'authority', 'generation', 'workspace', 'presentation', 'fixture_id', 'migration_revision', 'migration_id', 'flow_id', 'backend_id', 'channel', 'connection_generation', 'process_pid', 'process_start_ticks', 'process_boot_id', 'registry', 'registry_revision', 'store_id', 'process', 'socket_generation'}:
+            if not isinstance(target, dict) or not target or set(target) - {'host', 'environment', 'runtime', 'namespace', 'conversation_id', 'provider', 'account', 'home', 'home_generation', 'configuration_revision', 'rollout_revision', 'build_channel', 'build_sha256', 'build_revision', 'executable', 'recipe', 'recipe_sha256', 'authority', 'generation', 'workspace', 'presentation', 'fixture_id', 'migration_revision', 'migration_id', 'flow_id', 'backend_id', 'channel', 'connection_generation', 'process_pid', 'process_start_ticks', 'process_boot_id', 'registry', 'registry_revision', 'store_id', 'process', 'socket_generation', 'resource_id', 'pane_id', 'window_id', 'tab_id', 'terminal_session_id', 'bot_id'}:
                 return False
             for key, value in target.items():
                 if key == 'process':
@@ -169,6 +173,7 @@ class OAuthAuthority:
                     raise AuthError('invalid_grant', 'refresh replay revoked grant')
             else: raise AuthError('unsupported_grant_type')
             current = db.execute('SELECT client,scopes,revoked FROM grants WHERE id=?', (grant,)).fetchone()
+            boundary, unused_actions = self.delegation(grant, db=db)
             if not current or current[2] or current[0] != args.get('client_id'): raise AuthError('invalid_grant')
             if grant_type == 'authorization_code':
                 db.execute('UPDATE codes SET used=1 WHERE hash=?', (digest(args['code']),))
@@ -176,8 +181,8 @@ class OAuthAuthority:
             db.execute('UPDATE tokens SET used=1 WHERE grant_id=?', (grant,))
             access, refresh = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
             for secret, kind, lifetime in ((access, 'access', 600), (refresh, 'refresh', 86400)):
-                db.execute('INSERT INTO tokens VALUES(?,?,?,?,0)', (digest(secret), grant, kind, self.now() + lifetime))
-            return dict(access_token=access, refresh_token=refresh, token_type='Bearer', expires_in=600,
+                db.execute('INSERT INTO tokens VALUES(?,?,?,?,0)', (digest(secret), grant, kind, min(self.now() + lifetime,boundary)))
+            return dict(access_token=access, refresh_token=refresh, token_type='Bearer', expires_in=min(600,boundary-self.now()),
                         scope=' '.join(json.loads(current[1])))
 
     def authenticate(self, token):
@@ -186,7 +191,67 @@ class OAuthAuthority:
                 FROM tokens t JOIN grants g ON g.id=t.grant_id
                 WHERE t.hash=? AND t.kind='access' AND t.used=0 AND g.revoked=0''', (digest(token),)).fetchone()
         if not row or row[6] <= self.now(): raise AuthError()
-        return Actor(*row[:4], self.issuer, self.resource, frozenset(json.loads(row[4])), json.loads(row[5]), row[6])
+        unused_expiry,actions=self.delegation(row[3])
+        return Actor(*row[:4], self.issuer, self.resource, frozenset(json.loads(row[4])), json.loads(row[5]), row[6],actions,self.is_delegated(row[3]))
+
+    def is_delegated(self,grant_id):
+        with self.connect() as db:return db.execute('SELECT 1 FROM delegations WHERE grant_id=?',(grant_id,)).fetchone() is not None
+
+    def delegation(self, grant_id, *, db=None):
+        """Recheck the inherited grant chain, including parent revocation."""
+        if db is None:
+            with self.connect() as connection:return self.delegation(grant_id,db=connection)
+        current=grant_id;seen=set();expiry=float('inf');actions=None
+        while current is not None:
+            if current in seen or len(seen)>=16:raise AuthError()
+            seen.add(current)
+            row=db.execute('SELECT revoked FROM grants WHERE id=?',(current,)).fetchone()
+            if not row or row[0]:raise AuthError()
+            value=db.execute('SELECT parent_id,expires,actions FROM delegations WHERE grant_id=?',(current,)).fetchone()
+            if value is None:break
+            current,until,declared=value
+            expiry=min(expiry,until)
+            if expiry<=self.now():raise AuthError()
+            if declared is not None:
+                permitted=frozenset(json.loads(declared));actions=permitted if actions is None else actions & permitted
+        return expiry,actions
+
+    def delegate(self, actor, *, client_id, redirect_uri, code_challenge, mode,
+                 scopes=None, targets=None, actions=None, expires_in=600):
+        from .unified_connectors import intersect_targets,canonical_actions
+        if actor.principal_kind!='owner' or 'admin' not in actor.scopes:
+            raise AuthError('operator_required','connector issuance requires authenticated operator administration')
+        # A caller cannot manufacture an Actor with a more powerful role.
+        self.revalidate_original(dict(issuer=actor.issuer,resource=actor.resource,subject=actor.subject,client_id=actor.client_id,grant_id=actor.grant_id),
+            dict(scopes=sorted(actor.scopes),targets=actor.targets,expires_at=actor.expires_at,principal_kind=actor.principal_kind))
+        if type(expires_in) is not int or not 1<=expires_in<=86400:raise AuthError('invalid_request')
+        if mode=='full':
+            if any(value is not None for value in (scopes,targets,actions)):raise AuthError('invalid_request')
+            scopes=sorted(actor.scopes);targets=actor.targets;actions=actor.actions
+        elif mode=='subset':
+            if not isinstance(scopes,list) or not scopes or not set(scopes)<=actor.scopes:raise AuthError('invalid_scope')
+            targets=intersect_targets(actor.targets,targets);actions=canonical_actions(actions)
+            if actor.actions is not None and not actions<=actor.actions:raise AuthError('insufficient_scope')
+        else:raise AuthError('invalid_request')
+        code=self.authorize(subject=actor.subject,principal_kind='service',client_id=client_id,
+            redirect_uri=redirect_uri,resource=self.resource,scopes=scopes,targets=targets,code_challenge=code_challenge)
+        with self.connect() as db:
+            grant=db.execute('SELECT grant_id FROM codes WHERE hash=?',(digest(code),)).fetchone()[0]
+            until=min(actor.expires_at,self.now()+expires_in)
+            db.execute('INSERT INTO delegations VALUES(?,?,?,?)',(grant,actor.grant_id,until,None if actions is None else json.dumps(sorted(actions))))
+        return dict(code=code,grant_id=grant,expires_at=until,principal_kind='service',scopes=sorted(scopes),targets=targets,
+            actions=None if actions is None else sorted(actions),mode=mode)
+
+    def grant_metadata(self, actor, grant_id=None):
+        with self.connect() as db:
+            rows=db.execute('SELECT g.id,g.subject,g.kind,g.client,g.scopes,g.targets,g.revoked,d.parent_id,d.expires,d.actions FROM grants g LEFT JOIN delegations d ON g.id=d.grant_id').fetchall()
+        def visible(row):
+            return row[0]==actor.grant_id or actor.principal_kind=='owner' and 'admin' in actor.scopes and row[7]==actor.grant_id
+        values=[dict(grant_id=row[0],subject=row[1],principal_kind=row[2],client_id=row[3],scopes=json.loads(row[4]),targets=json.loads(row[5]),revoked=bool(row[6]),parent_grant_id=row[7],expires_at=row[8],actions=None if row[9] is None else json.loads(row[9])) for row in rows if visible(row) and (grant_id is None or row[0]==grant_id)]
+        if grant_id is not None:
+            if not values:raise AuthError('insufficient_scope')
+            return values[0]
+        return values
 
     def revalidate_original(self, principal, authorization):
         """Host-only scheduled-policy continuation, without issuing credentials.
@@ -213,8 +278,9 @@ class OAuthAuthority:
             raise AuthError()
         if json.loads(row[3])!=authorization['scopes'] or json.loads(row[4])!=authorization['targets']:
             raise AuthError()
+        unused_expiry,actions=self.delegation(principal['grant_id'])
         return Actor(principal['subject'],authorization['principal_kind'],principal['client_id'],principal['grant_id'],
-            self.issuer,self.resource,frozenset(authorization['scopes']),authorization['targets'],expires)
+            self.issuer,self.resource,frozenset(authorization['scopes']),authorization['targets'],expires,actions,self.is_delegated(principal['grant_id']))
 
     def recover_revocations(self, *, limit=4, grant_id=None):
         if self.on_revoke is None:
