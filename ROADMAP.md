@@ -1735,9 +1735,10 @@ One source lane; remove first-poll prerequisite and qualify opt-in client rebind
 
 ## P234 | Unified hierarchical connector control
 
-Status: OPEN
+Status: CLOSED (source delivery); integration pending
 Work item: #623; eleven child tickets
 Plan: [Unified control spec](docs/dev/plans/0234-2026-11-14-unified-control-spec.md)
-Current State: Nineteen design decisions, seams and ticket graph approved.
-Canonical contract, program controls and arbitrary-turn observation underway.
+Current State: All eleven child tickets CLOSED; one two-axis review and one TDD
+pass resolved accepted findings. Source/installed-candidate evidence and limits:
+[validation](docs/dev/evidence/plan0234/validation.md), [review](docs/dev/evidence/plan0234/review.md).
 No merge/deployment or live provider effects authorized by this lane.

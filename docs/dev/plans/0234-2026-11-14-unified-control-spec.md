@@ -1,6 +1,6 @@
 # Unified hierarchical control for the Byobu environment
 
-State: OPEN
+State: CLOSED
 Owner: ecochran76 / root
 Work item: #623
 Design: Plan0234, nineteen operator-confirmed decisions
@@ -8,9 +8,11 @@ Base: 1aa498674a4907f93b5216a4a98dd75a22c6ecec
 
 ## Current State
 
-Design, public seams,11-ticket graph and review fixed point approved.
-Spec and child tickets published; implementation is authorized.
-Existing implementations are the baseline. No provider effects, merge or deployment.
+All eleven child tickets are validated and CLOSED. Canonical CLI/API/MCP control,
+connector attenuation, observation/input/presentation and bounded programs are
+source-delivered. One two-axis review and one bounded TDD pass resolved all accepted
+findings; evidence: docs/dev/evidence/plan0234/{validation,review}.md.
+Parent623 remains open for integration. No provider effects, merge or deployment.
 
 ## Problem Statement
 

@@ -137,3 +137,5 @@ accept them while ignoring restrictions. The authority migrates old pre-release
 delegated codes and invalidates unfenced delegated tokens; ordinary existing grants
 are preserved. Exact historical-reader qualification is tested against the recorded
 Git baseline, with code exchange, access authentication and refresh all refusing.
+
+Delegated program-definition reads and run-state returns require `content.observe` in addition to their base observe/control scope, because definitions and run snapshots contain literal prompts, inputs and child results. This applies equally to compatibility routes; discovery lists `delegated_required_scopes`. Metadata-only bulk status remains redacted.

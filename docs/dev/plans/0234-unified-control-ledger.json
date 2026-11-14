@@ -5,8 +5,8 @@
   "branch": "feat/unified-control-0234",
   "base": "1aa498674a4907f93b5216a4a98dd75a22c6ecec",
   "packet_approval": "Operator yes on2026-11-14 accepts proposed seams,11tickets/dependencies and review base",
-  "review_runs": 0,
-  "remediation_passes": 0,
+  "review_runs": 1,
+  "remediation_passes": 1,
   "tickets": {
     "1": {
       "title": "Canonical hierarchical contract and compatibility",
@@ -197,7 +197,7 @@
         10
       ],
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "worker": "root",
       "owned_scope": "generated docs, connector journey, integration validation and closeout",
       "packet": "docs/dev/plans/0234-unified-control-tickets/11.md",
@@ -233,5 +233,7 @@
       "red": "old-auth-contract-red.log: exact legacy code redemption incorrectly accepted; independent probe showed old access authentication ignored actions",
       "green": "20auth/connector/bulk/transportsPASS21.966s; old reader refuses code/access/refresh; new reader retains attenuation and inherited revocation"
     }
-  ]
+  ],
+  "reviewed_head": "bf4b5e00d1b925b3daf21e079a192a6295d00d15",
+  "review_report": "docs/dev/evidence/plan0234/review.md"
 }

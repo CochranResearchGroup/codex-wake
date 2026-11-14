@@ -15,6 +15,9 @@
     "accounts.configuration.explain": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "configuration.observe"
+        ],
         "mcp": "wake_accounts_configuration_explain",
         "required_scope": "configuration.observe",
         "schema": {
@@ -40,6 +43,9 @@
     "accounts.configuration.sync.apply": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_accounts_configuration_sync_apply",
         "required_scope": "control",
         "schema": {
@@ -105,6 +111,9 @@
     "accounts.configuration.sync.preview": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "configuration.observe"
+        ],
         "mcp": "wake_accounts_configuration_sync_preview",
         "required_scope": "configuration.observe",
         "schema": {
@@ -165,6 +174,9 @@
     "accounts.migration.apply": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_accounts_migration_apply",
         "required_scope": "admin",
         "schema": {
@@ -191,6 +203,9 @@
     "accounts.migration.preview": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "migration.observe"
+        ],
         "mcp": "wake_accounts_migration_preview",
         "required_scope": "migration.observe",
         "schema": {
@@ -205,6 +220,9 @@
     "accounts.migration.rollback": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_accounts_migration_rollback",
         "required_scope": "admin",
         "schema": {
@@ -236,6 +254,9 @@
     "accounts.profiles.create": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_accounts_profiles_create",
         "required_scope": "admin",
         "schema": {
@@ -277,6 +298,9 @@
     "accounts.profiles.init": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_accounts_profiles_init",
         "required_scope": "admin",
         "schema": {
@@ -298,6 +322,9 @@
     "accounts.profiles.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "account.observe"
+        ],
         "mcp": "wake_accounts_profiles_list",
         "required_scope": "account.observe",
         "schema": {
@@ -312,6 +339,9 @@
     "accounts.profiles.readiness": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "account.observe"
+        ],
         "mcp": "wake_accounts_profiles_readiness",
         "required_scope": "account.observe",
         "schema": {
@@ -337,6 +367,9 @@
     "accounts.profiles.resolve": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "account.observe"
+        ],
         "mcp": "wake_accounts_profiles_resolve",
         "required_scope": "account.observe",
         "schema": {
@@ -362,6 +395,9 @@
     "accounts.profiles.status": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "account.observe"
+        ],
         "mcp": "wake_accounts_profiles_status",
         "required_scope": "account.observe",
         "schema": {
@@ -387,6 +423,9 @@
     "accounts.stores.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "account.observe"
+        ],
         "mcp": "wake_accounts_stores_list",
         "required_scope": "account.observe",
         "schema": {
@@ -401,6 +440,9 @@
     "accounts.stores.register": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_accounts_stores_register",
         "required_scope": "admin",
         "schema": {
@@ -427,6 +469,9 @@
     "accounts.stores.resolve": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "account.observe"
+        ],
         "mcp": "wake_accounts_stores_resolve",
         "required_scope": "account.observe",
         "schema": {
@@ -523,6 +568,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_connectors_grants_create",
         "required_scope": "admin",
         "schema": {
@@ -612,6 +660,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_connectors_grants_list",
         "required_scope": "observe",
         "schema": {
@@ -646,6 +697,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_connectors_grants_revoke",
         "required_scope": "admin",
         "schema": {
@@ -688,6 +742,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_connectors_grants_show",
         "required_scope": "observe",
         "schema": {
@@ -710,6 +767,9 @@
     "connectors.hosts.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_connectors_hosts_list",
         "required_scope": "observe",
         "schema": {
@@ -723,6 +783,9 @@
     "connectors.hosts.resolve": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_connectors_hosts_resolve",
         "required_scope": "observe",
         "schema": {
@@ -750,6 +813,9 @@
     "connectors.hosts.route": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_connectors_hosts_route",
         "required_scope": "observe",
         "schema": {
@@ -805,6 +871,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_children",
         "required_scope": "observe",
         "schema": {
@@ -920,6 +989,9 @@
     "environment.conversations.history.import": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_conversations_history_import",
         "required_scope": "control",
         "schema": {
@@ -975,6 +1047,10 @@
     "environment.conversations.history.read": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "history.observe"
+        ],
         "mcp": "wake_environment_conversations_history_read",
         "required_scope": "history.observe",
         "schema": {
@@ -1005,6 +1081,9 @@
     "environment.conversations.history.resume": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "history.resume"
+        ],
         "mcp": "wake_environment_conversations_history_resume",
         "required_scope": "history.resume",
         "schema": {
@@ -1046,6 +1125,9 @@
     "environment.conversations.history.search": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "history.observe"
+        ],
         "mcp": "wake_environment_conversations_history_search",
         "required_scope": "history.observe",
         "schema": {
@@ -1104,6 +1186,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_environment_conversations_input_result",
         "required_scope": "content.observe",
         "schema": {
@@ -1170,6 +1255,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_conversations_input_submit",
         "required_scope": "control",
         "schema": {
@@ -1302,6 +1390,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_environment_conversations_observation_cancel",
         "required_scope": "content.observe",
         "schema": {
@@ -1353,6 +1444,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_environment_conversations_observation_output",
         "required_scope": "content.observe",
         "schema": {
@@ -1413,6 +1507,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_environment_conversations_observation_result",
         "required_scope": "content.observe",
         "schema": {
@@ -1493,6 +1590,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_environment_conversations_observe",
         "required_scope": "content.observe",
         "schema": {
@@ -1655,6 +1755,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_conversations_presentation_background",
         "required_scope": "control",
         "schema": {
@@ -1792,6 +1895,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_conversations_presentation_foreground",
         "required_scope": "control",
         "schema": {
@@ -2042,6 +2148,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_conversations_slash_cancel",
         "required_scope": "control",
         "schema": {
@@ -2100,6 +2209,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_conversations_slash_list",
         "required_scope": "observe",
         "schema": {
@@ -2163,6 +2275,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_conversations_slash_respond",
         "required_scope": "control",
         "schema": {
@@ -2227,6 +2342,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_environment_conversations_slash_result",
         "required_scope": "content.observe",
         "schema": {
@@ -2307,6 +2425,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_conversations_slash_run",
         "required_scope": "control",
         "schema": {
@@ -2345,6 +2466,9 @@
     "environment.health.observe": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_health_observe",
         "required_scope": "observe",
         "schema": {
@@ -2506,6 +2630,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_environment_panes_capture",
         "required_scope": "content.observe",
         "schema": {
@@ -2654,6 +2781,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "terminal.input"
+        ],
         "mcp": "wake_environment_panes_keys",
         "required_scope": "terminal.input",
         "schema": {
@@ -2817,6 +2947,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_environment_panes_observe",
         "required_scope": "content.observe",
         "schema": {
@@ -2902,6 +3035,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_environment_panes_output",
         "required_scope": "content.observe",
         "schema": {
@@ -2983,6 +3119,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "terminal.input"
+        ],
         "mcp": "wake_environment_panes_paste",
         "required_scope": "terminal.input",
         "schema": {
@@ -3035,6 +3174,9 @@
     "environment.resources.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_resources_list",
         "required_scope": "observe",
         "schema": {
@@ -3052,6 +3194,9 @@
     "environment.resources.resolve": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_resources_resolve",
         "required_scope": "observe",
         "schema": {
@@ -3075,6 +3220,9 @@
     "environment.sessions.create": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_sessions_create",
         "required_scope": "control",
         "schema": {
@@ -3131,6 +3279,9 @@
     "environment.sessions.delete": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_sessions_delete",
         "required_scope": "control",
         "schema": {
@@ -3177,6 +3328,9 @@
     "environment.sessions.ensure": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_sessions_ensure",
         "required_scope": "control",
         "schema": {
@@ -3233,6 +3387,9 @@
     "environment.sessions.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_sessions_list",
         "required_scope": "observe",
         "schema": {
@@ -3256,6 +3413,9 @@
     "environment.sessions.open": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_sessions_open",
         "required_scope": "control",
         "schema": {
@@ -3291,6 +3451,9 @@
     "environment.sessions.show": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_sessions_show",
         "required_scope": "observe",
         "schema": {
@@ -3316,6 +3479,9 @@
     "environment.sessions.update": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_sessions_update",
         "required_scope": "control",
         "schema": {
@@ -3368,6 +3534,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_snapshot",
         "required_scope": "observe",
         "schema": {
@@ -3382,6 +3551,9 @@
     "environment.tabs.apply": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_apply",
         "required_scope": "control",
         "schema": {
@@ -3418,6 +3590,10 @@
     "environment.tabs.capture": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "control"
+        ],
         "mcp": "wake_environment_tabs_capture",
         "required_scope": "control",
         "schema": {
@@ -3460,6 +3636,9 @@
     "environment.tabs.close": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_close",
         "required_scope": "control",
         "schema": {
@@ -3504,6 +3683,9 @@
     "environment.tabs.create": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_create",
         "required_scope": "control",
         "schema": {
@@ -3561,6 +3743,9 @@
     "environment.tabs.family.accept": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_family_accept",
         "required_scope": "control",
         "schema": {
@@ -3616,6 +3801,9 @@
     "environment.tabs.family.adopt": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_family_adopt",
         "required_scope": "control",
         "schema": {
@@ -3656,6 +3844,9 @@
     "environment.tabs.family.bind": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_family_bind",
         "required_scope": "control",
         "schema": {
@@ -3715,6 +3906,9 @@
     "environment.tabs.family.focus": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_family_focus",
         "required_scope": "control",
         "schema": {
@@ -3764,6 +3958,9 @@
     "environment.tabs.family.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_family_list",
         "required_scope": "observe",
         "schema": {
@@ -3783,6 +3980,9 @@
     "environment.tabs.family.open": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_family_open",
         "required_scope": "control",
         "schema": {
@@ -3858,6 +4058,9 @@
     "environment.tabs.family.register": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_family_register",
         "required_scope": "control",
         "schema": {
@@ -3912,6 +4115,9 @@
     "environment.tabs.family.show": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_family_show",
         "required_scope": "observe",
         "schema": {
@@ -3933,6 +4139,9 @@
     "environment.tabs.focus": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_focus",
         "required_scope": "control",
         "schema": {
@@ -3973,6 +4182,9 @@
     "environment.tabs.format.configure": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_format_configure",
         "required_scope": "control",
         "schema": {
@@ -4025,6 +4237,9 @@
     "environment.tabs.format.enable": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_format_enable",
         "required_scope": "control",
         "schema": {
@@ -4063,6 +4278,9 @@
     "environment.tabs.format.inspect": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_format_inspect",
         "required_scope": "observe",
         "schema": {
@@ -4090,6 +4308,9 @@
     "environment.tabs.format.pause": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_format_pause",
         "required_scope": "control",
         "schema": {
@@ -4128,6 +4349,9 @@
     "environment.tabs.format.reenable": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_format_reenable",
         "required_scope": "control",
         "schema": {
@@ -4166,6 +4390,9 @@
     "environment.tabs.format.reset": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_format_reset",
         "required_scope": "control",
         "schema": {
@@ -4204,6 +4431,9 @@
     "environment.tabs.format.resume": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_format_resume",
         "required_scope": "control",
         "schema": {
@@ -4242,6 +4472,9 @@
     "environment.tabs.format.rollback": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_format_rollback",
         "required_scope": "control",
         "schema": {
@@ -4280,6 +4513,9 @@
     "environment.tabs.format.status": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_format_status",
         "required_scope": "observe",
         "schema": {
@@ -4307,6 +4543,9 @@
     "environment.tabs.group-delete": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_group-delete",
         "required_scope": "control",
         "schema": {
@@ -4338,6 +4577,9 @@
     "environment.tabs.group-list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_group-list",
         "required_scope": "observe",
         "schema": {
@@ -4352,6 +4594,9 @@
     "environment.tabs.group-save": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_group-save",
         "required_scope": "control",
         "schema": {
@@ -4399,6 +4644,9 @@
     "environment.tabs.group-show": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_group-show",
         "required_scope": "observe",
         "schema": {
@@ -4420,6 +4668,10 @@
     "environment.tabs.input": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control",
+          "terminal.input"
+        ],
         "mcp": "wake_environment_tabs_input",
         "required_scope": "control",
         "schema": {
@@ -4475,6 +4727,9 @@
     "environment.tabs.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_list",
         "required_scope": "observe",
         "schema": {
@@ -4489,6 +4744,9 @@
     "environment.tabs.monitor.refresh": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_monitor_refresh",
         "required_scope": "observe",
         "schema": {
@@ -4503,6 +4761,9 @@
     "environment.tabs.monitor.start": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_monitor_start",
         "required_scope": "control",
         "schema": {
@@ -4569,6 +4830,9 @@
     "environment.tabs.monitor.status": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_monitor_status",
         "required_scope": "observe",
         "schema": {
@@ -4583,6 +4847,9 @@
     "environment.tabs.monitor.stop": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_monitor_stop",
         "required_scope": "control",
         "schema": {
@@ -4613,6 +4880,9 @@
     "environment.tabs.move": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_move",
         "required_scope": "control",
         "schema": {
@@ -4672,6 +4942,9 @@
     "environment.tabs.park": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_park",
         "required_scope": "control",
         "schema": {
@@ -4726,6 +4999,9 @@
     "environment.tabs.policy.configure": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_policy_configure",
         "required_scope": "control",
         "schema": {
@@ -4795,6 +5071,9 @@
     "environment.tabs.policy.disable": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_policy_disable",
         "required_scope": "control",
         "schema": {
@@ -4821,6 +5100,9 @@
     "environment.tabs.policy.enable": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_policy_enable",
         "required_scope": "control",
         "schema": {
@@ -4851,6 +5133,9 @@
     "environment.tabs.policy.pause": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_policy_pause",
         "required_scope": "control",
         "schema": {
@@ -4881,6 +5166,9 @@
     "environment.tabs.policy.status": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_policy_status",
         "required_scope": "observe",
         "schema": {
@@ -4895,6 +5183,9 @@
     "environment.tabs.policy.tick": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_policy_tick",
         "required_scope": "control",
         "schema": {
@@ -4921,6 +5212,9 @@
     "environment.tabs.preview": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_preview",
         "required_scope": "control",
         "schema": {
@@ -4974,6 +5268,9 @@
     "environment.tabs.reattach-apply": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_reattach-apply",
         "required_scope": "control",
         "schema": {
@@ -5005,6 +5302,9 @@
     "environment.tabs.reattach-preview": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_reattach-preview",
         "required_scope": "control",
         "schema": {
@@ -5059,6 +5359,9 @@
     "environment.tabs.reattach-status": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_reattach-status",
         "required_scope": "observe",
         "schema": {
@@ -5084,6 +5387,9 @@
     "environment.tabs.recovery.apply": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_recovery_apply",
         "required_scope": "control",
         "schema": {
@@ -5129,6 +5435,9 @@
     "environment.tabs.recovery.capture": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_recovery_capture",
         "required_scope": "control",
         "schema": {
@@ -5164,6 +5473,9 @@
     "environment.tabs.recovery.preview": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_recovery_preview",
         "required_scope": "observe",
         "schema": {
@@ -5194,6 +5506,9 @@
     "environment.tabs.recovery.status": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_recovery_status",
         "required_scope": "observe",
         "schema": {
@@ -5217,6 +5532,9 @@
     "environment.tabs.relocate.apply": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_relocate_apply",
         "required_scope": "control",
         "schema": {
@@ -5263,6 +5581,9 @@
     "environment.tabs.relocate.preview": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_relocate_preview",
         "required_scope": "control",
         "schema": {
@@ -5310,6 +5631,9 @@
     "environment.tabs.relocate.status": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_relocate_status",
         "required_scope": "observe",
         "schema": {
@@ -5345,6 +5669,9 @@
     "environment.tabs.relocate.undo": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_relocate_undo",
         "required_scope": "control",
         "schema": {
@@ -5391,6 +5718,9 @@
     "environment.tabs.rename": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_rename",
         "required_scope": "control",
         "schema": {
@@ -5436,6 +5766,9 @@
     "environment.tabs.restore": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_restore",
         "required_scope": "control",
         "schema": {
@@ -5495,6 +5828,9 @@
     "environment.tabs.route.delete": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_route_delete",
         "required_scope": "control",
         "schema": {
@@ -5529,6 +5865,9 @@
     "environment.tabs.route.enable": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_route_enable",
         "required_scope": "control",
         "schema": {
@@ -5567,6 +5906,9 @@
     "environment.tabs.route.hold": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_route_hold",
         "required_scope": "control",
         "schema": {
@@ -5602,6 +5944,9 @@
     "environment.tabs.route.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_route_list",
         "required_scope": "observe",
         "schema": {
@@ -5616,6 +5961,9 @@
     "environment.tabs.route.pause": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_route_pause",
         "required_scope": "control",
         "schema": {
@@ -5650,6 +5998,9 @@
     "environment.tabs.route.pin": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_route_pin",
         "required_scope": "control",
         "schema": {
@@ -5685,6 +6036,9 @@
     "environment.tabs.route.resume": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_route_resume",
         "required_scope": "control",
         "schema": {
@@ -5720,6 +6074,9 @@
     "environment.tabs.route.save": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_route_save",
         "required_scope": "control",
         "schema": {
@@ -5777,6 +6134,9 @@
     "environment.tabs.route.show": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_route_show",
         "required_scope": "observe",
         "schema": {
@@ -5800,6 +6160,9 @@
     "environment.tabs.route.status": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_route_status",
         "required_scope": "observe",
         "schema": {
@@ -5814,6 +6177,9 @@
     "environment.tabs.route.tick": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_route_tick",
         "required_scope": "control",
         "schema": {
@@ -5840,6 +6206,9 @@
     "environment.tabs.route.unpin": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_route_unpin",
         "required_scope": "control",
         "schema": {
@@ -5875,6 +6244,9 @@
     "environment.tabs.show": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_show",
         "required_scope": "observe",
         "schema": {
@@ -5900,6 +6272,9 @@
     "environment.tabs.undo": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_undo",
         "required_scope": "control",
         "schema": {
@@ -5936,6 +6311,9 @@
     "environment.tabs.view-delete": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_view-delete",
         "required_scope": "control",
         "schema": {
@@ -5967,6 +6345,9 @@
     "environment.tabs.view-evaluate": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_view-evaluate",
         "required_scope": "observe",
         "schema": {
@@ -5988,6 +6369,9 @@
     "environment.tabs.view-list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_view-list",
         "required_scope": "observe",
         "schema": {
@@ -6002,6 +6386,9 @@
     "environment.tabs.view-save": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_environment_tabs_view-save",
         "required_scope": "control",
         "schema": {
@@ -6038,6 +6425,9 @@
     "environment.tabs.view-show": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_environment_tabs_view-show",
         "required_scope": "observe",
         "schema": {
@@ -6059,6 +6449,9 @@
     "harnesses.builds.build": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_harnesses_builds_build",
         "required_scope": "admin",
         "schema": {
@@ -6123,6 +6516,9 @@
     "harnesses.builds.cleanup": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_harnesses_builds_cleanup",
         "required_scope": "admin",
         "schema": {
@@ -6187,6 +6583,9 @@
     "harnesses.builds.launch": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_harnesses_builds_launch",
         "required_scope": "control",
         "schema": {
@@ -6234,6 +6633,9 @@
     "harnesses.builds.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "account.observe"
+        ],
         "mcp": "wake_harnesses_builds_list",
         "required_scope": "account.observe",
         "schema": {
@@ -6255,6 +6657,9 @@
     "harnesses.builds.prepare": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_harnesses_builds_prepare",
         "required_scope": "admin",
         "schema": {
@@ -6321,6 +6726,9 @@
     "harnesses.builds.qualify": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_harnesses_builds_qualify",
         "required_scope": "admin",
         "schema": {
@@ -6385,6 +6793,9 @@
     "harnesses.builds.resume": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_harnesses_builds_resume",
         "required_scope": "admin",
         "schema": {
@@ -6449,6 +6860,9 @@
     "harnesses.builds.rollback": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_harnesses_builds_rollback",
         "required_scope": "admin",
         "schema": {
@@ -6489,6 +6903,9 @@
     "harnesses.builds.run": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_harnesses_builds_run",
         "required_scope": "admin",
         "schema": {
@@ -6589,6 +7006,9 @@
     "harnesses.builds.select": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_harnesses_builds_select",
         "required_scope": "admin",
         "schema": {
@@ -6634,6 +7054,9 @@
     "harnesses.builds.stage": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_harnesses_builds_stage",
         "required_scope": "admin",
         "schema": {
@@ -6660,6 +7083,9 @@
     "harnesses.builds.status": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_harnesses_builds_status",
         "required_scope": "admin",
         "schema": {
@@ -6724,6 +7150,9 @@
     "harnesses.grok.cancel": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_harnesses_grok_cancel",
         "required_scope": "control",
         "schema": {
@@ -6746,6 +7175,9 @@
     "harnesses.grok.capabilities": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_harnesses_grok_capabilities",
         "required_scope": "observe",
         "schema": {
@@ -6772,6 +7204,9 @@
     "harnesses.grok.checkpoint": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_harnesses_grok_checkpoint",
         "required_scope": "observe",
         "schema": {
@@ -6798,6 +7233,9 @@
     "harnesses.grok.create": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_harnesses_grok_create",
         "required_scope": "control",
         "schema": {
@@ -6828,6 +7266,9 @@
     "harnesses.grok.fork": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_harnesses_grok_fork",
         "required_scope": "control",
         "schema": {
@@ -6858,6 +7299,9 @@
     "harnesses.grok.health": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_harnesses_grok_health",
         "required_scope": "observe",
         "schema": {
@@ -6884,6 +7328,9 @@
     "harnesses.grok.load": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_harnesses_grok_load",
         "required_scope": "control",
         "schema": {
@@ -6914,6 +7361,10 @@
     "harnesses.grok.prompt": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "control"
+        ],
         "mcp": "wake_harnesses_grok_prompt",
         "required_scope": "control",
         "schema": {
@@ -6950,6 +7401,10 @@
     "harnesses.grok.wait": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "observe"
+        ],
         "mcp": "wake_harnesses_grok_wait",
         "required_scope": "observe",
         "schema": {
@@ -6977,6 +7432,9 @@
     "harnesses.recovery.apply": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "recovery"
+        ],
         "mcp": "wake_harnesses_recovery_apply",
         "required_scope": "recovery",
         "schema": {
@@ -7218,6 +7676,9 @@
     "harnesses.recovery.check": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_harnesses_recovery_check",
         "required_scope": "observe",
         "schema": {
@@ -7459,6 +7920,9 @@
     "harnesses.recovery.configure": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "recovery"
+        ],
         "mcp": "wake_harnesses_recovery_configure",
         "required_scope": "recovery",
         "schema": {
@@ -7801,6 +8265,9 @@
     "harnesses.recovery.disable": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "recovery"
+        ],
         "mcp": "wake_harnesses_recovery_disable",
         "required_scope": "recovery",
         "schema": {
@@ -8042,6 +8509,9 @@
     "harnesses.recovery.enable": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "recovery"
+        ],
         "mcp": "wake_harnesses_recovery_enable",
         "required_scope": "recovery",
         "schema": {
@@ -8283,6 +8753,9 @@
     "harnesses.recovery.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_harnesses_recovery_list",
         "required_scope": "observe",
         "schema": {
@@ -8392,6 +8865,9 @@
     "harnesses.recovery.reconcile": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "recovery"
+        ],
         "mcp": "wake_harnesses_recovery_reconcile",
         "required_scope": "recovery",
         "schema": {
@@ -8507,6 +8983,9 @@
     "harnesses.recovery.show": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_harnesses_recovery_show",
         "required_scope": "observe",
         "schema": {
@@ -8622,6 +9101,9 @@
     "harnesses.recovery.tick": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "recovery"
+        ],
         "mcp": "wake_harnesses_recovery_tick",
         "required_scope": "recovery",
         "schema": {
@@ -8863,6 +9345,9 @@
     "harnesses.runtimes.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_harnesses_runtimes_list",
         "required_scope": "observe",
         "schema": {
@@ -8886,6 +9371,9 @@
     "harnesses.runtimes.restart": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_harnesses_runtimes_restart",
         "required_scope": "control",
         "schema": {
@@ -8929,6 +9417,9 @@
     "harnesses.runtimes.start": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_harnesses_runtimes_start",
         "required_scope": "control",
         "schema": {
@@ -8972,6 +9463,9 @@
     "harnesses.runtimes.status": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_harnesses_runtimes_status",
         "required_scope": "observe",
         "schema": {
@@ -9001,6 +9495,9 @@
     "harnesses.runtimes.stop": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_harnesses_runtimes_stop",
         "required_scope": "control",
         "schema": {
@@ -9044,6 +9541,9 @@
     "harnesses.runtimes.update": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_harnesses_runtimes_update",
         "required_scope": "control",
         "schema": {
@@ -9087,6 +9587,9 @@
     "operations.cancel": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_operations_cancel",
         "required_scope": "control",
         "schema": {
@@ -9107,6 +9610,9 @@
     "operations.notices.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_operations_notices_list",
         "required_scope": "observe",
         "schema": {
@@ -9221,6 +9727,9 @@
     "operations.notices.publish": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_operations_notices_publish",
         "required_scope": "observe",
         "schema": {
@@ -9462,6 +9971,9 @@
     "operations.notices.reconcile": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_operations_notices_reconcile",
         "required_scope": "observe",
         "schema": {
@@ -9577,6 +10089,9 @@
     "operations.rebind": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_operations_rebind",
         "required_scope": "control",
         "schema": {
@@ -9605,6 +10120,10 @@
     "operations.result": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "observe"
+        ],
         "mcp": "wake_operations_result",
         "required_scope": "observe",
         "schema": {
@@ -9625,6 +10144,9 @@
     "operations.send": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_operations_send",
         "required_scope": "control",
         "schema": {
@@ -9686,6 +10208,10 @@
     "operations.stream": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "observe"
+        ],
         "mcp": "wake_operations_stream",
         "required_scope": "observe",
         "schema": {
@@ -9720,6 +10246,10 @@
     "operations.wait": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "observe"
+        ],
         "mcp": "wake_operations_wait",
         "required_scope": "observe",
         "schema": {
@@ -9765,6 +10295,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_bulk_advance",
         "required_scope": "control",
         "schema": {
@@ -9807,6 +10340,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_bulk_cancel",
         "required_scope": "control",
         "schema": {
@@ -9849,6 +10385,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_bulk_reconcile",
         "required_scope": "control",
         "schema": {
@@ -9891,6 +10430,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_programs_bulk_result",
         "required_scope": "content.observe",
         "schema": {
@@ -10053,6 +10595,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_bulk_start",
         "required_scope": "control",
         "schema": {
@@ -10215,6 +10760,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_programs_bulk_status",
         "required_scope": "observe",
         "schema": {
@@ -10237,6 +10785,9 @@
     "programs.definitions.propose": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_programs_definitions_propose",
         "required_scope": "observe",
         "schema": {
@@ -10257,6 +10808,9 @@
     "programs.definitions.publish": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_definitions_publish",
         "required_scope": "control",
         "schema": {
@@ -10277,6 +10831,10 @@
     "programs.definitions.show": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "observe"
+        ],
         "mcp": "wake_programs_definitions_show",
         "required_scope": "observe",
         "schema": {
@@ -10347,6 +10905,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_governor_activate",
         "required_scope": "control",
         "schema": {
@@ -10427,6 +10988,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_governor_advisory",
         "required_scope": "control",
         "schema": {
@@ -10499,6 +11063,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_governor_disable",
         "required_scope": "control",
         "schema": {
@@ -10579,6 +11146,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_governor_extend",
         "required_scope": "control",
         "schema": {
@@ -10667,6 +11237,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_governor_reset",
         "required_scope": "control",
         "schema": {
@@ -10744,6 +11317,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_governor_resume",
         "required_scope": "control",
         "schema": {
@@ -10801,6 +11377,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_programs_governor_status",
         "required_scope": "observe",
         "schema": {
@@ -10887,6 +11466,10 @@
     "programs.runs.advance": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "control"
+        ],
         "mcp": "wake_programs_runs_advance",
         "required_scope": "control",
         "schema": {
@@ -10909,6 +11492,10 @@
     "programs.runs.cancel": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "control"
+        ],
         "mcp": "wake_programs_runs_cancel",
         "required_scope": "control",
         "schema": {
@@ -10931,6 +11518,10 @@
     "programs.runs.reconcile": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "control"
+        ],
         "mcp": "wake_programs_runs_reconcile",
         "required_scope": "control",
         "schema": {
@@ -10953,6 +11544,10 @@
     "programs.runs.show": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "observe"
+        ],
         "mcp": "wake_programs_runs_show",
         "required_scope": "observe",
         "schema": {
@@ -10975,6 +11570,10 @@
     "programs.runs.start": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "control"
+        ],
         "mcp": "wake_programs_runs_start",
         "required_scope": "control",
         "schema": {
@@ -11018,6 +11617,9 @@
     "programs.sessions.cancel": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_sessions_cancel",
         "required_scope": "control",
         "schema": {
@@ -11040,6 +11642,9 @@
     "programs.sessions.capabilities": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_programs_sessions_capabilities",
         "required_scope": "observe",
         "schema": {
@@ -11066,6 +11671,9 @@
     "programs.sessions.checkpoint": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "observe"
+        ],
         "mcp": "wake_programs_sessions_checkpoint",
         "required_scope": "observe",
         "schema": {
@@ -11092,6 +11700,9 @@
     "programs.sessions.create": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_sessions_create",
         "required_scope": "control",
         "schema": {
@@ -11122,6 +11733,9 @@
     "programs.sessions.fork": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_sessions_fork",
         "required_scope": "control",
         "schema": {
@@ -11156,6 +11770,9 @@
     "programs.sessions.prompt": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_programs_sessions_prompt",
         "required_scope": "control",
         "schema": {
@@ -11192,6 +11809,10 @@
     "programs.sessions.wait": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe",
+          "observe"
+        ],
         "mcp": "wake_programs_sessions_wait",
         "required_scope": "observe",
         "schema": {
@@ -11266,6 +11887,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_wakes_intents_after",
         "required_scope": "control",
         "schema": {
@@ -11362,6 +11986,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_wakes_intents_at",
         "required_scope": "control",
         "schema": {
@@ -11458,6 +12085,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_wakes_intents_file",
         "required_scope": "control",
         "schema": {
@@ -11531,6 +12161,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_wakes_schedules_cancel",
         "required_scope": "control",
         "schema": {
@@ -11569,6 +12202,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_wakes_schedules_list",
         "required_scope": "content.observe",
         "schema": {
@@ -11601,6 +12237,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_wakes_schedules_register",
         "required_scope": "control",
         "schema": {
@@ -11649,6 +12288,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "control"
+        ],
         "mcp": "wake_wakes_schedules_revise",
         "required_scope": "control",
         "schema": {
@@ -11698,6 +12340,9 @@
       },
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [
+          "content.observe"
+        ],
         "mcp": "wake_wakes_schedules_show",
         "required_scope": "content.observe",
         "schema": {

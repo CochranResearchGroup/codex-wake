@@ -107,6 +107,42 @@ class BulkTests(unittest.TestCase):
                 ready[0]=True;owner().advance(run);result=owner().result(run)
             self.assertEqual(result['phase'],'completed');self.assertEqual(result['members'][0]['result']['operation']['answer']['text'],'Done.');self.assertEqual(len(submitted),1)
 
+    def test_terminal_wait_reconciles_original_handle_after_uncertainty_or_disconnect(self):
+        from codex_wake.unified_bulk import BulkControls
+        from test_unified_connectors import ConnectorTests
+        original=ProtectedOperations.execute
+        for lost_reply in (False,True):
+            with self.subTest(lost_reply=lost_reply),tempfile.TemporaryDirectory() as directory,patch('codex_wake.sessions.observe',return_value={'complete':False,'sessions':[]}):
+                root=Path(directory);auth=OAuthAuthority(root/'auth.sqlite',issuer='https://wake.test',resource='https://wake.test/controller')
+                thread='11111111-1111-4111-8111-111111111111';target=dict(host='h',environment='e',conversation_id=thread)
+                token=ConnectorTests().token(auth,['control','observe','content.observe'],[target])
+                operations=SimpleNamespace(host='h',environment='e',inventory=SimpleNamespace(root=root));ready=[False];submitted=[]
+                members=[dict(id='prompt',target=target,operation='environment.conversations.input.submit',arguments=dict(selector='thread:'+thread,prompt='Check status',policy='reject'),completion='terminal',wait_operation='environment.conversations.input.result')]
+                def native(service,token,operation,args):
+                    if operation=='environment.conversations.input.submit':
+                        submitted.append(args['idempotency_key'])
+                        return dict(schema_version=1,operation=operation,status='completed',result=dict(operation=dict(operation_id='native-original',phase='waiting',execution='queued')))
+                    if operation=='environment.conversations.input.result':
+                        self.assertEqual(args['operation_id'],'native-original')
+                        if lost_reply and not ready[0]:raise SystemExit('disconnect during original wait')
+                        return dict(schema_version=1,operation=operation,status='completed',result=dict(operation=dict(operation_id='native-original',phase='terminal' if ready[0] else 'uncertain',execution='completed' if ready[0] else 'unknown',answer='Done' if ready[0] else None)))
+                    return original(service,token,operation,args)
+                def owner():return BulkControls(auth,operations,token)
+                run=owner().start(members=members,policies=dict(failure='stop',join='all_success',uncertain='hold',retry=dict(max_attempts=1,when=[])),inputs={},limits={},intent='wait-recovery',binding='connector')['run_id']
+                with patch('codex_wake.controller_http.ProtectedOperations.execute',native):
+                    if lost_reply:
+                        with self.assertRaises(SystemExit):owner().advance(run)
+                    else:
+                        uncertain=owner().advance(run)
+                        self.assertEqual(uncertain['phase'],'uncertain')
+                        self.assertEqual(uncertain['members'][0]['state'],'uncertain')
+                    ready[0]=True
+                    owner().reconcile(run);owner().advance(run)
+                result=owner().result(run)
+                self.assertEqual(result['phase'],'completed')
+                self.assertEqual(result['members'][0]['result']['operation']['answer'],'Done')
+                self.assertEqual(len(submitted),1)
+
     def test_explicit_safe_read_retry_is_bounded_and_effect_retries_are_refused(self):
         from codex_wake.unified_bulk import BulkControls
         from codex_wake.managed_inventory import InventoryError

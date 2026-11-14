@@ -34,12 +34,16 @@ def check_action(actor,operation):
     return actor
 
 
+def delegated_content_scope(operation):
+    content={'tabs.capture','history.read','operations.result','operations.wait','operations.stream','sessions.wait','grok.wait','grok.prompt',
+             'flows.definition','flows.inspect','flows.start','flows.advance','flows.reconcile','flows.cancel'}
+    return 'terminal.input' if operation in ('tabs.input','runtime.input') else 'content.observe' if operation in content else None
+
+
 def check_legacy_content(actor,operation):
     """New attenuated grants cannot use compatibility routes to bypass RW scopes."""
-    if not actor.delegated:return actor
-    content={'tabs.capture','history.read','operations.result','operations.wait','operations.stream','sessions.wait','grok.wait','grok.prompt'}
-    required='terminal.input' if operation in ('tabs.input','runtime.input') else 'content.observe' if operation in content else None
-    if required is not None and required not in actor.scopes:raise AuthError('insufficient_scope')
+    required=delegated_content_scope(operation)
+    if actor.delegated and required is not None and required not in actor.scopes:raise AuthError('insufficient_scope')
     return actor
 
 

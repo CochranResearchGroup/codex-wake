@@ -9,12 +9,12 @@ lanes:
     branch: feat/unified-control-0234
     worker_branches: [feat/unified-programs-625, feat/unified-observation-626]
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
     dependencies: []
     overlaps: [P233, P231, persistent-wakes-610]
     updated_at: 2026-11-14
-    disposition: Approved11tickets; primary owns shared contract/integration; two ready workers each own one ticket; no live effects
+    disposition: All11children closed; one review/one TDD pass resolved findings; shared feature ref retained, worker checkouts removed; no merge/deploy authority
 
   - id: persistent-wakes-610
     owner: root / ecochran76

@@ -17,3 +17,5 @@ Observation is snapshot-derived with explicit gaps, not a live native notificati
 ## Validation limits and custody
 
 Local Python3.12.13/Linux replaces hosted GitHub CI under repository cost policy. Python3.11 matrix, full historical suite, production provider/runtime and complete hosted installed-smoke matrix were not run. OpenClaw is parked and no plugin work was performed. First failures and corrected runs remain outside Git at `~/.local/state/codex-wake/unified-0234/`; setup failures are not product failures. The baseline direct-file controller_client invocation also fails its relative import; supported module invocation passes existing tests.
+
+Local CI-scope classifier test:1 case PASS4.687s; compileall PASS. No hosted CI requested.

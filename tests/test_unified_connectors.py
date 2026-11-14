@@ -42,6 +42,28 @@ class ConnectorTests(unittest.TestCase):
             auth.revoke_grant(auth.authenticate(owner).grant_id)
             with self.assertRaises(AuthError):auth.authenticate(child)
 
+    def test_metadata_only_delegation_cannot_read_stored_program_definition(self):
+        import socket,os
+        host=socket.gethostname();environment=os.environ.get('WSL_DISTRO_NAME') or os.name
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            auth=OAuthAuthority(root/'auth.sqlite',issuer='https://wake.test',resource='https://wake.test/controller')
+            operator=self.token(auth,['admin','control','observe','content.observe'],[dict(host=host,environment=environment)])
+            api=ProtectedOperations(auth,SimpleNamespace(host=host,environment=environment,inventory=SimpleNamespace(root=root)))
+            definition=dict(id='private-plan',version=1,entry='done',nodes=[dict(id='done',type='end',value='private prompt')])
+            api.execute(operator,'programs.definitions.publish',dict(definition=definition))
+            client=auth.register({'redirect_uris':['http://localhost/callback']});verifier='z'*43
+            challenge=base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+            for scopes in (['observe'],['observe','content.observe']):
+                grant=api.execute(operator,'connectors.grants.create',dict(mode='subset',client_id=client['client_id'],redirect_uri=client['redirect_uris'][0],code_challenge=challenge,scopes=scopes,targets=[dict(host=host,environment=environment)],actions=['programs.definitions.show'],expires_in=900,idempotency_key='read-'+str(len(scopes))))['result']
+                token=auth.token(dict(grant_type='authorization_code',client_id=client['client_id'],code=grant['code'],redirect_uri=client['redirect_uris'][0],code_verifier=verifier,resource=auth.resource))['access_token']
+                for operation in ('flows.definition','programs.definitions.show'):
+                    if 'content.observe' not in scopes:
+                        with self.assertRaises(AuthError):api.execute(token,operation,dict(flow_id='private-plan',version=1))
+                    else:
+                        value=api.execute(token,operation,dict(flow_id='private-plan',version=1))
+                        self.assertEqual(value['result']['definition']['nodes'][0]['value'],'private prompt')
+
     def test_environment_projection_honors_resource_scope_and_legacy_action_names(self):
         from codex_wake.controller_tabs import ControllerTabs
         with tempfile.TemporaryDirectory() as directory:
@@ -112,12 +134,12 @@ class ConnectorTests(unittest.TestCase):
             host=socket.gethostname();environment=os.environ.get('WSL_DISTRO_NAME') or os.name
             operations=['flows.publish','flows.definition']
             registered=registry.register(host,environment,kind='remote',authority='authority',destination='fixed-peer',capabilities=operations,operator=True)
-            registry.map_principal('connector',subject='operator',scopes=['control','observe'],targets=[dict(host=host,environment=environment,flow_id='owned')],expires_at=time.time()+300,operator=True)
+            registry.map_principal('connector',subject='operator',scopes=['control','observe','content.observe'],targets=[dict(host=host,environment=environment,flow_id='owned')],expires_at=time.time()+300,operator=True)
             receiver=SSHReceiver(registry,ControllerOperations(ManagedInventory(root/'wake'),host=host,environment=environment),principal_id='connector',target=registered['target'])
             sent=[]
             class Transport:
                 def send(self,registered,request):sent.append(request);return receiver.execute(request)
-            actor=Actor('owner','service','client','grant','https://wake.test','https://wake.test/controller',frozenset({'control','observe'}),[dict(registered['target'],flow_id='owned')],time.time()+200,frozenset({'programs.definitions.publish','programs.definitions.show'}))
+            actor=Actor('owner','service','client','grant','https://wake.test','https://wake.test/controller',frozenset({'control','observe','content.observe'}),[dict(registered['target'],flow_id='owned')],time.time()+200,frozenset({'programs.definitions.publish','programs.definitions.show'}))
             owner=HostOperations(registry,transport=Transport())
             definition=dict(id='owned',version=1,entry='done',nodes=[dict(id='done',type='end',value='published')])
             args=dict(target=registered['target'],operation='flows.publish',arguments={'definition':definition},operation_id='publish',idempotency_key='publish')
@@ -125,6 +147,8 @@ class ConnectorTests(unittest.TestCase):
             self.assertEqual(first['route']['execution'],'completed')
             self.assertEqual(first['route']['effect'],'management_action')
             self.assertEqual(owner.route(args,actor=actor),first);self.assertEqual(len(sent),1)
+            denied=owner.route(dict(args,operation='flows.definition',arguments=dict(flow_id='owned',version=1),operation_id='metadata-only',idempotency_key='metadata-only'),actor=replace(actor,scopes=frozenset({'control','observe'})))
+            self.assertEqual(denied['route']['execution'],'not_started')
             read=owner.route(dict(args,operation='flows.definition',arguments=dict(flow_id='owned',version=1),operation_id='read',idempotency_key='read'),actor=actor)
             self.assertEqual(read['route']['result']['result']['definition'],definition)
             with self.assertRaises(AuthError):owner.route(dict(args,operation='flows.publish',operation_id='denied',idempotency_key='denied'),actor=replace(actor,actions=frozenset({'programs.definitions.show'})))

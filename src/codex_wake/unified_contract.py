@@ -107,6 +107,12 @@ def metadata():
         operations.setdefault(operation,{})['local']={'schema':schema,'mcp':tool,'readonly':readonly,'admission':'authenticated_controller_transport_required' if operation.startswith(('connectors.grants.','programs.bulk.')) else 'same_user_private_connection','available':not operation.startswith(('connectors.grants.','programs.bulk.'))}
     for tool,(operation,schema) in TOOLS.items():
         operations.setdefault(canonical(operation),{})['protected']={'schema':schema,'mcp':tool_name(canonical(operation)),'required_scope':ProtectedOperations.READ_POLICIES.get(operation,({'runtime.input':'control','runtime.recover':'recovery','grants.revoke':'admin'}.get(operation),))[0],'admission':'fresh_authenticated_actor_and_exact_target','supported_registration':True}
+    from .unified_connectors import delegated_content_scope
+    for operation,transports in operations.items():
+        if 'protected' in transports:
+            policy=transports['protected']
+            extra=delegated_content_scope(original(operation,ProtectedOperations.READ_POLICIES))
+            policy['delegated_required_scopes']=sorted(set(filter(None,(policy['required_scope'],extra))))
     return dict(schema_version=1,families=list(FAMILIES),operations=operations,
                 admission='Transport-owned identity and permission checks remain authoritative.',
                 compatibility='Legacy entry points retain their original owners and receipts.',

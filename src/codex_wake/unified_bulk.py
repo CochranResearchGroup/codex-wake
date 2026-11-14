@@ -18,6 +18,9 @@ from .unified_connectors import check_action,permits
 def _digest(value):return hashlib.sha256(encoded(value).encode()).hexdigest()
 
 
+def _member_prefix(index):return 'm'+str(index).zfill(3)
+
+
 def _inputs(value,inputs):
     if isinstance(value,dict) and set(value)=={'ref'}:
         path=value['ref']
@@ -144,7 +147,21 @@ class BulkControls:
             match=re.search(r'\.m([0-9]+)_(call|wait)(?:\.try[0-9]+)?$',identifier)
             if not match:raise InventoryError('invalid_bulk_custody','child belongs to another run')
             member=members[int(match[1])];actor=self._member(member)
-            if operation=='operations.result' and request is None:
+            if operation=='operations.result' and request is None and match[2]=='wait':
+                # Wait nodes observe an existing owner handle, not a new effect.
+                # Recover that handle from the durable completed call step.
+                unused,state=self._load(identifier.rsplit('.m',1)[0])
+                if state.get('child_operation_id')!=identifier:
+                    raise InventoryError('invalid_bulk_custody','wait does not own this active attempt')
+                prefix=_member_prefix(member['index'])
+                original=_owner_result(state['steps'].get(prefix+'_call',{})).get('result',{}).get('operation',{})
+                original_id=original.get('operation_id')
+                if not isinstance(original_id,str):
+                    raise InventoryError('invalid_bulk_custody','original wait handle is unavailable')
+                value=protected.execute(self.token,member['wait_operation'],dict(operation_id=original_id))
+                if value.get('result',{}).get('operation',{}).get('operation_id')!=original_id:
+                    raise InventoryError('stale_target','wait owner returned a different operation')
+            elif operation=='operations.result' and request is None:
                 journal=ControllerRuntime(self.root)
                 if member['operation']=='wakes.schedules.register' and not member['request_owner']:
                     def original_registration(record):
@@ -216,7 +233,7 @@ class BulkControls:
     def _definition(metadata):
         nodes=[]
         for index,member in enumerate(metadata['members']):
-            prefix='m'+str(index).zfill(3);after='m'+str(index+1).zfill(3)+'_guard' if index+1<len(metadata['members']) else 'done'
+            prefix=_member_prefix(index);after=_member_prefix(index+1)+'_guard' if index+1<len(metadata['members']) else 'done'
             nodes.append(dict(id=prefix+'_guard',type='branch',condition=member.get('condition',True),then=prefix+'_call',**{'else':after}))
             call=dict(id=prefix+'_call',type='call',operation=member['operation'],arguments=member['arguments'],failure=metadata['policies']['failure'],next=prefix+'_wait' if member['completion']=='terminal' else after)
             if metadata['policies']['retry']['max_attempts']>1:call['retry']=metadata['policies']['retry']
@@ -244,7 +261,7 @@ class BulkControls:
     def _projection(self,state,*,content):
         metadata=state['inputs']['_bulk'];items=[]
         for member in metadata['members']:
-            prefix='m'+str(member['index']).zfill(3);value=state['steps'].get(prefix+'_call')
+            prefix=_member_prefix(member['index']);value=state['steps'].get(prefix+'_call')
             guard=state['steps'].get(prefix+'_guard',{})
             outcome='skipped' if guard.get('status')=='known' and guard.get('value') is False else 'not_started'
             result=None;receipt=None;error=None
@@ -254,8 +271,10 @@ class BulkControls:
                 result=owner.get('result');error=owner.get('error',{}).get('code') or child.get('reason')
                 waited=state['steps'].get(prefix+'_wait')
                 if waited:
-                    native=waited.get('result',{}).get('operation',{});outcome='failed' if _failed(waited) else 'completed' if native.get('phase')=='terminal' and native.get('execution')=='completed' else 'failed' if native.get('phase')=='terminal' else 'admitted'
+                    native=waited.get('result',{}).get('operation',{});outcome='failed' if _failed(waited) else 'completed' if native.get('phase')=='terminal' and native.get('execution')=='completed' else 'failed' if native.get('phase')=='terminal' else 'uncertain' if native.get('phase') in ('uncertain','executing','dispatching') else 'admitted'
                     result=waited.get('result')
+                if state.get('executing_node')==prefix+'_wait' and state['phase'] in ('executing','uncertain','held'):
+                    outcome='uncertain'
             elif state.get('executing_node') in (prefix+'_call',prefix+'_wait'):
                 outcome='uncertain' if state['phase'] in ('executing','uncertain','held') else 'admitted'
                 receipt=state.get('child_operation_id')
