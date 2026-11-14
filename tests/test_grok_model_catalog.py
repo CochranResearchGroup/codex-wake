@@ -63,6 +63,8 @@ class GrokModelCatalogTest(unittest.TestCase):
                 self.assertEqual(selection['selection']['accountLabel'], 'Personal Grok')
                 self.assertTrue(selection['selection']['defaultForAccount'])
                 self.assertEqual(selection['selection']['disabledFeatures'], ['image_generation', 'web_search', 'reasoning_summary'])
+                self.assertEqual(invoke(['models', 'resolve', 'personal', '--model', 'other-model',
+                    '--selection-id', selection['selection']['selectionId']])[0], 3)
                 code, native = invoke(['models', 'native-catalog', '--wake-executable', '/operator/bin/codex-wake'])
                 self.assertEqual(code, 0)
                 self.assertEqual(native['selections'][0], selection['selection'])

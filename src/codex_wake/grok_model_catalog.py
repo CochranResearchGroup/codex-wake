@@ -144,6 +144,8 @@ class GrokModels:
         return self.catalog(account)
 
     def resolve(self, account, model=None, selection_id=None):
+        if model is not None and selection_id is not None:
+            raise ValueError('conflicting_model_selectors')
         record = _read(self._path(account), private=True)
         catalog = self.catalog(account)
         if selection_id:
