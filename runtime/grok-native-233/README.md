@@ -27,3 +27,8 @@ isolated upgrade/rollback and installed behavior are not established here.
 Future ticket deltas must preserve this acceptance boundary. The program retains
 one broad review and one bounded remediation after its implementation tickets,
 then exact package qualification and authorized merge/deployment.
+
+Source deltas omit unchanged context; apply them with `git apply --unidiff-zero`
+against their exact manifest base. This avoids meaningless trailing-space
+context records inside tracked patch data. Each delta was independently applied
+in an isolated Git index and verified against its complete expected source tree.

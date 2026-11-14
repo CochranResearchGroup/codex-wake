@@ -2,26 +2,14 @@ diff --git a/codex-rs/Cargo.lock b/codex-rs/Cargo.lock
 index d8afe8cfe5830146060a2458156d0da527f11391..53f72a558b4b985daa1828fee840e5a8590b4adf 100644
 --- a/codex-rs/Cargo.lock
 +++ b/codex-rs/Cargo.lock
-@@ -2038,6 +2038,7 @@ dependencies = [
-  "pretty_assertions",
-  "rcgen",
-  "regex-lite",
+@@ -2040,0 +2041 @@ dependencies = [
 + "reqwest 0.12.28",
-  "rustls",
-  "schemars 0.8.22",
-  "serde",
 diff --git a/codex-rs/codex-api/Cargo.toml b/codex-rs/codex-api/Cargo.toml
 index 90db05b840e451b5242e2a7fb21b347aad75e2a4..ad3da3a5a527434412598ade2237a214b5845387 100644
 --- a/codex-rs/codex-api/Cargo.toml
 +++ b/codex-rs/codex-api/Cargo.toml
-@@ -32,6 +32,7 @@ url = { workspace = true }
- uuid = { workspace = true }
- 
- [dev-dependencies]
+@@ -34,0 +35 @@ uuid = { workspace = true }
 +reqwest = { workspace = true }
- anyhow = { workspace = true }
- assert_matches = { workspace = true }
- pretty_assertions = { workspace = true }
 diff --git a/codex-rs/codex-api/src/endpoint/grok.rs b/codex-rs/codex-api/src/endpoint/grok.rs
 new file mode 100644
 index 0000000000000000000000000000000000000000..0e3a06eac3917cfd450f5408213bd220094cd258
@@ -183,11 +171,8 @@ diff --git a/codex-rs/codex-api/src/endpoint/mod.rs b/codex-rs/codex-api/src/end
 index f3d3c4fd3cca5d6d0f84b9a37db6fbd6eb9632e4..d1ba240810758fa43e1167c1ea237291ba2d9f54 100644
 --- a/codex-rs/codex-api/src/endpoint/mod.rs
 +++ b/codex-rs/codex-api/src/endpoint/mod.rs
-@@ -1,3 +1,4 @@
+@@ -0,0 +1 @@
 +pub(crate) mod grok;
- pub(crate) mod images;
- pub(crate) mod memories;
- pub(crate) mod models;
 diff --git a/codex-rs/codex-api/src/grok.rs b/codex-rs/codex-api/src/grok.rs
 new file mode 100644
 index 0000000000000000000000000000000000000000..4af9a192d00d7a7d734415119fd13ce4f2b7f532
@@ -431,18 +416,9 @@ diff --git a/codex-rs/codex-api/src/lib.rs b/codex-rs/codex-api/src/lib.rs
 index 88d5568703c6d3021deead30fc4885dbf1e6241e..7837f925486806ea3a4f3aa2833cb1e7866742cd 100644
 --- a/codex-rs/codex-api/src/lib.rs
 +++ b/codex-rs/codex-api/src/lib.rs
-@@ -4,6 +4,7 @@ pub(crate) mod common;
- pub(crate) mod endpoint;
- pub(crate) mod error;
- pub(crate) mod files;
+@@ -6,0 +7 @@ pub(crate) mod files;
 +mod grok;
- mod guardian_assessment;
- pub(crate) mod images;
- pub(crate) mod provider;
-@@ -128,3 +129,6 @@ pub use crate::telemetry::SseTelemetry;
- pub use crate::telemetry::WebsocketTelemetry;
- pub use codex_protocol::protocol::RealtimeAudioFrame;
- pub use codex_protocol::protocol::RealtimeEvent;
+@@ -130,0 +132,3 @@ pub use codex_protocol::protocol::RealtimeEvent;
 +
 +pub use crate::endpoint::grok::GrokClient;
 +pub use crate::endpoint::grok::validate_grok_base_url;
@@ -845,19 +821,13 @@ diff --git a/codex-rs/codex-api/src/sse/mod.rs b/codex-rs/codex-api/src/sse/mod.
 index b4872ba6ac66bf9ad6e2eb8b7348d702b6c9b26a..87b9538562e51afec4dc9de7459e98724d94dd69 100644
 --- a/codex-rs/codex-api/src/sse/mod.rs
 +++ b/codex-rs/codex-api/src/sse/mod.rs
-@@ -1,3 +1,4 @@
+@@ -0,0 +1 @@
 +pub(crate) mod grok;
- pub(crate) mod responses;
- mod responses_error;
- 
 diff --git a/codex-rs/codex-api/tests/clients.rs b/codex-rs/codex-api/tests/clients.rs
 index 664697da323ab6963d080b9e33f0558382b0cb0a..f1ebd524b5300f348f9aad97fee5dc8cb5b4746f 100644
 --- a/codex-rs/codex-api/tests/clients.rs
 +++ b/codex-rs/codex-api/tests/clients.rs
-@@ -770,3 +770,173 @@ async fn async_auth_provider_rejects_sync_resolution_and_authenticates_requests(
-     );
-     Ok(())
- }
+@@ -772,0 +773,170 @@ async fn async_auth_provider_rejects_sync_resolution_and_authenticates_requests(
 +
 +fn grok_request(input: Vec<ResponseItem>) -> ResponsesApiRequest {
 +    ResponsesApiRequest {
@@ -1032,64 +1002,27 @@ diff --git a/codex-rs/config/src/thread_config/proto/codex.thread_config.v1.prot
 index 1e7d72bf33f8512696dacd6693139a2227883a2c..0ab56473e9c80c2f978a4b63375031d6e6127763 100644
 --- a/codex-rs/config/src/thread_config/proto/codex.thread_config.v1.proto
 +++ b/codex-rs/config/src/thread_config/proto/codex.thread_config.v1.proto
-@@ -75,4 +75,5 @@ message ModelProviderAuthInfo {
- enum WireApi {
-   WIRE_API_UNSPECIFIED = 0;
-   WIRE_API_RESPONSES = 1;
+@@ -77,0 +78 @@ enum WireApi {
 +  WIRE_API_GROK = 2;
- }
 diff --git a/codex-rs/config/src/thread_config/proto/codex.thread_config.v1.rs b/codex-rs/config/src/thread_config/proto/codex.thread_config.v1.rs
 index c6e5b161960dfab0d894cb770324ae5fc3589616..53653660fb6a80189195ca3e9c94afbf0fd2ec0c 100644
 --- a/codex-rs/config/src/thread_config/proto/codex.thread_config.v1.rs
 +++ b/codex-rs/config/src/thread_config/proto/codex.thread_config.v1.rs
-@@ -117,6 +117,7 @@ pub struct ModelProviderAuthInfo {
- pub enum WireApi {
-     Unspecified = 0,
-     Responses = 1,
+@@ -119,0 +120 @@ pub enum WireApi {
 +    Grok = 2,
- }
- impl WireApi {
-     /// String value of the enum field names used in the ProtoBuf definition.
-@@ -127,6 +128,7 @@ impl WireApi {
-         match self {
-             Self::Unspecified => "WIRE_API_UNSPECIFIED",
-             Self::Responses => "WIRE_API_RESPONSES",
+@@ -129,0 +131 @@ impl WireApi {
 +            Self::Grok => "WIRE_API_GROK",
-         }
-     }
-     /// Creates an enum from field names used in the ProtoBuf definition.
-@@ -134,6 +136,7 @@ impl WireApi {
-         match value {
-             "WIRE_API_UNSPECIFIED" => Some(Self::Unspecified),
-             "WIRE_API_RESPONSES" => Some(Self::Responses),
+@@ -136,0 +139 @@ impl WireApi {
 +            "WIRE_API_GROK" => Some(Self::Grok),
-             _ => None,
-         }
-     }
 diff --git a/codex-rs/config/src/thread_config/remote.rs b/codex-rs/config/src/thread_config/remote.rs
 index fd616daa271de69d8a56f23cd281120abd278314..d89b4dbe7c1246e7a5744f20961a94fe43a34915 100644
 --- a/codex-rs/config/src/thread_config/remote.rs
 +++ b/codex-rs/config/src/thread_config/remote.rs
-@@ -161,6 +161,7 @@ fn model_provider_from_proto(
-     let id = provider.id;
-     let wire_api = match proto::WireApi::try_from(provider.wire_api) {
-         Ok(proto::WireApi::Responses) => WireApi::Responses,
+@@ -163,0 +164 @@ fn model_provider_from_proto(
 +        Ok(proto::WireApi::Grok) => WireApi::Grok,
-         Ok(proto::WireApi::Unspecified) => {
-             return Err(parse_error("remote thread config omitted wire_api"));
-         }
-@@ -332,6 +333,7 @@ fn proto_string_map(values: HashMap<String, RedactedString>) -> proto::StringMap
- fn proto_wire_api(wire_api: WireApi) -> proto::WireApi {
-     match wire_api {
-         WireApi::Responses => proto::WireApi::Responses,
+@@ -334,0 +336 @@ fn proto_wire_api(wire_api: WireApi) -> proto::WireApi {
 +        WireApi::Grok => proto::WireApi::Grok,
-     }
- }
- 
-@@ -641,3 +643,22 @@ mod tests {
-             .join("workspace")
-     }
- }
+@@ -643,0 +646,19 @@ mod tests {
 +
 +#[cfg(test)]
 +#[test]
@@ -1113,10 +1046,7 @@ diff --git a/codex-rs/core/config.schema.json b/codex-rs/core/config.schema.json
 index f5149c6efdf7ab9f1550aa0639dd5f2401205f25..92d8239b9c17163743dc35f16bd12234d632c1e0 100644
 --- a/codex-rs/core/config.schema.json
 +++ b/codex-rs/core/config.schema.json
-@@ -7360,6 +7360,13 @@
-             "responses"
-           ],
-           "type": "string"
+@@ -7362,0 +7363,7 @@
 +        },
 +        {
 +          "description": "Grok CLI session proxy; not the removed generic Chat Completions API.",
@@ -1124,36 +1054,18 @@ index f5149c6efdf7ab9f1550aa0639dd5f2401205f25..92d8239b9c17163743dc35f16bd12234
 +            "grok"
 +          ],
 +          "type": "string"
-         }
-       ]
-     },
 diff --git a/codex-rs/core/src/client.rs b/codex-rs/core/src/client.rs
 index 889a62680f58370efe3518bd72af035ffcd4b3fd..494254eaa5bb01f5f6efaebbdb0fd1f079fcffcf 100644
 --- a/codex-rs/core/src/client.rs
 +++ b/codex-rs/core/src/client.rs
-@@ -1188,7 +1188,8 @@ impl ModelClient {
-     ///
-     /// WebSocket use is controlled by provider capability and session-scoped fallback state.
-     pub fn responses_websocket_enabled(&self) -> bool {
+@@ -1191 +1191,2 @@ impl ModelClient {
 -        if !self.state.provider.info().supports_websockets
 +        if self.state.provider.info().wire_api == WireApi::Grok
 +            || !self.state.provider.info().supports_websockets
-             || self.state.disable_websockets.load(Ordering::Relaxed)
-         {
-             return false;
-@@ -1896,7 +1897,7 @@ impl ResponsesHttpExecutor<'_> {
-         fields(
-             model = %model_info.slug,
-             wire_api = %self.client.state.provider.info().wire_api,
+@@ -1899 +1900 @@ impl ResponsesHttpExecutor<'_> {
 -            transport = "responses_http",
 +            transport = tracing::field::Empty,
-             http.method = "POST",
-             api.path = tracing::field::Empty,
-             turn.has_metadata_header = responses_metadata.has_turn_metadata()
-@@ -1923,10 +1924,49 @@ impl ResponsesHttpExecutor<'_> {
-         let mut provider_auth_recovery_attempted = false;
-         let mut pending_retry = PendingUnauthorizedRetry::default();
-         loop {
+@@ -1926,4 +1927,43 @@ impl ResponsesHttpExecutor<'_> {
 -            let client_setup = self
 -                .client
 -                .current_client_setup(ClientRouting::Workspace)
@@ -1201,13 +1113,7 @@ index 889a62680f58370efe3518bd72af035ffcd4b3fd..494254eaa5bb01f5f6efaebbdb0fd1f0
 +            if grok {
 +                client_setup.redirect_policy = ClientRedirectPolicy::Reject;
 +            }
-             if expected_auth_owner.is_some_and(|owner| {
-                 Some(owner) != client_setup.auth_owner_generation
-                     || Some(owner) != self.client.auth_owner_generation()
-@@ -1941,8 +1981,13 @@ impl ResponsesHttpExecutor<'_> {
-             let responses_headers = self
-                 .client
-                 .responses_headers(client_setup.auth.as_ref(), &model_info.slug);
+@@ -1944,2 +1984,7 @@ impl ResponsesHttpExecutor<'_> {
 -            tracing::Span::current().record("api.path", "/responses");
 -            let transport = client_setup.build_api_transport("/responses")?;
 +            let endpoint = if grok {
@@ -1217,22 +1123,10 @@ index 889a62680f58370efe3518bd72af035ffcd4b3fd..494254eaa5bb01f5f6efaebbdb0fd1f0
 +            };
 +            tracing::Span::current().record("api.path", endpoint);
 +            let transport = client_setup.build_api_transport(endpoint)?;
-             let request_auth_context = AuthRequestTelemetryContext::new(
-                 client_setup.auth.as_ref().map(CodexAuth::auth_mode),
-                 client_setup.api_auth.as_ref(),
-@@ -1953,7 +1998,7 @@ impl ResponsesHttpExecutor<'_> {
-             let (request_telemetry, sse_telemetry) = ModelClientSession::build_streaming_telemetry(
-                 session_telemetry,
-                 request_auth_context,
+@@ -1956 +2001 @@ impl ResponsesHttpExecutor<'_> {
 -                RequestRouteTelemetry::for_endpoint("/responses"),
 +                RequestRouteTelemetry::for_endpoint(endpoint),
-                 self.client.state.auth_env_telemetry.clone(),
-             );
-             let compression = self.responses_request_compression(client_setup.auth.as_ref());
-@@ -2020,13 +2065,24 @@ impl ResponsesHttpExecutor<'_> {
-                 request.input = input;
-             }
-             inference_trace_attempt.record_started(&request);
+@@ -2023,7 +2068,18 @@ impl ResponsesHttpExecutor<'_> {
 -            let client = ApiResponsesClient::new(
 -                transport,
 -                client_setup.api_provider,
@@ -1258,26 +1152,14 @@ index 889a62680f58370efe3518bd72af035ffcd4b3fd..494254eaa5bb01f5f6efaebbdb0fd1f0
 +                .with_telemetry(Some(request_telemetry), Some(sse_telemetry));
 +                client.stream_request(request, options).await
 +            };
- 
-             match stream_result {
-                 Ok(stream) => {
-@@ -2509,7 +2565,7 @@ impl ModelClientSession {
-     ) -> Result<ResponseStream> {
-         let wire_api = self.client.state.provider.info().wire_api;
-         match wire_api {
+@@ -2512 +2568 @@ impl ModelClientSession {
 -            WireApi::Responses => {
 +            WireApi::Responses | WireApi::Grok => {
-                 if self.client.responses_websocket_enabled() {
-                     let request_trace = current_span_w3c_trace_context();
-                     match self
 diff --git a/codex-rs/core/tests/suite/rmcp_client.rs b/codex-rs/core/tests/suite/rmcp_client.rs
 index 64900ec0224a3e33be57a4b069a8e6bafc501bac..13ef7327efb658dc8667e86c0f0f4cc621116a18 100644
 --- a/codex-rs/core/tests/suite/rmcp_client.rs
 +++ b/codex-rs/core/tests/suite/rmcp_client.rs
-@@ -5416,3 +5416,108 @@ impl Drop for EnvVarGuard {
-         }
-     }
- }
+@@ -5418,0 +5419,105 @@ impl Drop for EnvVarGuard {
 +
 +/// The real Codex loop executes terminal, file-edit and MCP calls from fragmented Grok
 +/// chunks, then sends their attributable results back before a final assistant answer.
@@ -1387,40 +1269,20 @@ diff --git a/codex-rs/model-provider-info/src/lib.rs b/codex-rs/model-provider-i
 index 96408491631e40298676bb79a6766b79a5abefad..3aa844c7af4315ba22ac5e02b824dd804b4ca245 100644
 --- a/codex-rs/model-provider-info/src/lib.rs
 +++ b/codex-rs/model-provider-info/src/lib.rs
-@@ -117,12 +117,15 @@ pub enum WireApi {
-     /// The Responses API exposed by OpenAI at `/v1/responses`.
-     #[default]
-     Responses,
+@@ -119,0 +120,2 @@ pub enum WireApi {
 +    /// Grok CLI session proxy; not the removed generic Chat Completions API.
 +    Grok,
- }
- 
- impl fmt::Display for WireApi {
-     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-         let value = match self {
-             Self::Responses => "responses",
+@@ -125,0 +128 @@ impl fmt::Display for WireApi {
 +            Self::Grok => "grok",
-         };
-         f.write_str(value)
-     }
-@@ -136,8 +139,12 @@ impl<'de> Deserialize<'de> for WireApi {
-         let value = String::deserialize(deserializer)?;
-         match value.as_str() {
-             "responses" => Ok(Self::Responses),
+@@ -138,0 +142 @@ impl<'de> Deserialize<'de> for WireApi {
 +            "grok" => Ok(Self::Grok),
-             "chat" => Err(serde::de::Error::custom(CHAT_WIRE_API_REMOVED_ERROR)),
+@@ -140 +144,4 @@ impl<'de> Deserialize<'de> for WireApi {
 -            _ => Err(serde::de::Error::unknown_variant(&value, &["responses"])),
 +            _ => Err(serde::de::Error::unknown_variant(
 +                &value,
 +                &["responses", "grok"],
 +            )),
-         }
-     }
- }
-@@ -335,6 +342,25 @@ other non-default provider fields are not supported"
-     }
- 
-     pub fn validate(&self) -> std::result::Result<(), String> {
+@@ -337,0 +345,19 @@ other non-default provider fields are not supported"
 +        if self.wire_api == WireApi::Grok {
 +            if self.auth.is_none()
 +                || self.is_openai()
@@ -1440,17 +1302,11 @@ index 96408491631e40298676bb79a6766b79a5abefad..3aa844c7af4315ba22ac5e02b824dd80
 +                );
 +            }
 +        }
-         if self.is_gcp() {
-             self.validate_gcp_credential_file()?;
-         }
 diff --git a/codex-rs/model-provider-info/src/model_provider_info_tests.rs b/codex-rs/model-provider-info/src/model_provider_info_tests.rs
 index 68b48aadc58475a4fa8c15a04aa651947f87648a..18199c96671511f2ea3cca5afc0082d96a2f6f50 100644
 --- a/codex-rs/model-provider-info/src/model_provider_info_tests.rs
 +++ b/codex-rs/model-provider-info/src/model_provider_info_tests.rs
-@@ -1109,3 +1109,29 @@ fn cyber_access_program_capability_uses_provider_identity_and_explicit_overrides
-         }
-     }
- }
+@@ -1111,0 +1112,26 @@ fn cyber_access_program_capability_uses_provider_identity_and_explicit_overrides
 +
 +#[test]
 +fn grok_wire_is_explicit_and_generic_chat_stays_removed() {
@@ -1481,10 +1337,7 @@ diff --git a/codex-rs/model-provider/src/capabilities.rs b/codex-rs/model-provid
 index 311a83fe459c2e15e7e9d2690dd78f45cd062af0..2acf67d0c91a6f38a746168bfe9eddd863fe1128 100644
 --- a/codex-rs/model-provider/src/capabilities.rs
 +++ b/codex-rs/model-provider/src/capabilities.rs
-@@ -32,6 +32,15 @@ impl Default for ProviderCapabilities {
- 
- impl ProviderCapabilities {
-     pub(crate) fn from_config(info: &ModelProviderInfo) -> Self {
+@@ -34,0 +35,9 @@ impl ProviderCapabilities {
 +        if info.wire_api == codex_model_provider_info::WireApi::Grok {
 +            return Self {
 +                reasoning_summaries: false,
@@ -1494,9 +1347,6 @@ index 311a83fe459c2e15e7e9d2690dd78f45cd062af0..2acf67d0c91a6f38a746168bfe9eddd8
 +                remote_compaction: RemoteCompactionSupport::Unsupported,
 +            };
 +        }
-         let defaults = Self {
-             remote_compaction: if info.is_openai()
-                 || is_azure_responses_provider(&info.name, info.base_url.as_deref())
 diff --git a/docs/grok-provider.md b/docs/grok-provider.md
 new file mode 100644
 index 0000000000000000000000000000000000000000..50464db6efd151e1779354dd188f424f7eb393f7

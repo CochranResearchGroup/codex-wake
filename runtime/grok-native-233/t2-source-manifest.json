@@ -10,7 +10,7 @@
   "source_commit": "7699650e005abe2bcedc138434c59aa95bfbf044",
   "source_tree": "bd92911d261f37aa1e2f125f8d0a5ccc8f4af0d9",
   "patch": "t2-native-provider.patch",
-  "patch_sha256": "c1762f0ebc9387006ad38755b0ce07348d5590bff1561d66e9579246a4873980",
+  "patch_sha256": "d7ae3b22f9120e9834359b55d4134f27a391a52e27144219cffada9f1cb6e4fe",
   "patch_reconstructed_tree": "bd92911d261f37aa1e2f125f8d0a5ccc8f4af0d9",
   "source_files": {
     "codex-rs/Cargo.lock": "ce00620a0d77f60780c3b543044c0893758c7dd3e520b70eea8f614374a1605a",
@@ -135,5 +135,8 @@
     "broad review",
     "post-closure remediation"
   ],
-  "private_validation_sha256": "03d7a4cb356ab94f4ab1cab5377a819468a659073503fce2ac94c97b55a5c25f"
+  "private_validation_sha256": "03d7a4cb356ab94f4ab1cab5377a819468a659073503fce2ac94c97b55a5c25f",
+  "patch_apply_flags": [
+    "--unidiff-zero"
+  ]
 }

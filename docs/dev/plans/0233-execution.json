@@ -103,7 +103,7 @@
         "T2"
       ],
       "owner": "worker-native-selection",
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "acceptance": [
         "A unified native picker and public model operations distinguish qualified, unavailable, stale and unverified choices.",
@@ -124,13 +124,17 @@
         "Wake model/account catalog and qualified defaults",
         "Focused public selection acceptance"
       ],
-      "checkout_custody": "Wake writer returned to primary; native checkout/schema/cache remains exclusive worker until final T4 result.",
+      "checkout_custody": "Both writer leases returned to primary; existing native checkout retained for next T5.",
       "worker_wake_branch": "feat/p233-qualified-selection",
       "worker_wake_base": "03fe5335fed71429195898fdebdadaef8f14651c",
       "worker_wake_parent_branch": "feat/grok-native-provider",
       "wake_result_sha": "c489aa9703019206e44df6c66f09ef1fd4888764",
       "wake_integrated_sha": "c489aa9703019206e44df6c66f09ef1fd4888764",
-      "wake_validation": "Primary fast-forwarded exact worker commit; model catalog public CLI/API/MCP1PASS3.740s; original auth8PASS1.009s. Native final source/schema acceptance pending."
+      "wake_validation": "Primary fast-forwarded exact worker commit; model catalog public CLI/API/MCP1PASS3.740s; original auth8PASS1.009s. Native final source/schema acceptance pending.",
+      "result_sha": "1eee8143f7642561f5d5573613b1e3658e208e63",
+      "native_result_sha": "1eee8143f7642561f5d5573613b1e3658e208e63",
+      "source_manifest": "runtime/grok-native-233/t4-source-manifest.json",
+      "validation": "Native model/list+thread/start, picker/remote serializer, OpenAI regressions, public Wake surfaces, remote roundtrips, schema/SDK numeric contract and final affected production check pass; primary51native/7Wake hashes, exact patch tree and bundle verified."
     },
     {
       "key": "T5",
