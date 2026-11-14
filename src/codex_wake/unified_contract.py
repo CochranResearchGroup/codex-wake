@@ -8,7 +8,7 @@ PREFIXES=(('tabs.session.','environment.sessions.'),('tabs.','environment.tabs.'
  ('agent_sessions.','environment.agents.'),('history.','environment.conversations.history.'),
  ('sessions.','programs.sessions.'),('flows.','programs.flows.'),
  ('conditions.','programs.conditions.'),('functions.','programs.functions.'),
- ('configuration.','accounts.configuration.'),('stores.','accounts.stores.'),
+ ('configuration.','accounts.configuration.'),('stores.','accounts.stores.'),('accounts.','accounts.profiles.'),
  ('builds.','harnesses.builds.'),('daemons.','harnesses.runtimes.'),
  ('hosts.','connectors.hosts.'),('grants.','connectors.grants.'),
  ('native.','wakes.intents.'),('schedules.','wakes.schedules.'))
@@ -30,6 +30,7 @@ for _verb,_path in FLOW_NAMES.items():
     CLI_ALIASES[tuple(['programs',*_path.split('.')])]=('flows',_verb)
 
 def canonical(operation):
+    if operation.startswith(('accounts.profiles.','accounts.configuration.','accounts.stores.')):return operation
     if operation.startswith('flows.') and operation[6:] in FLOW_NAMES:return 'programs.'+FLOW_NAMES[operation[6:]]
     for before,after in PREFIXES:
         if operation.startswith(before):return after+operation[len(before):]
@@ -54,6 +55,8 @@ def api_aliases(tools):
 def local_aliases(definitions):
     from .unified_environment import definitions as environment_definitions
     definitions.update(environment_definitions())
+    from .unified_wakes import definitions as wake_definitions
+    definitions.update(wake_definitions())
     for operation,(tool,description,schema,handler,readonly) in list(definitions.items()):
         alias=canonical(operation)
         if alias==operation:continue
