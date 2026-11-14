@@ -5,7 +5,7 @@ import argparse
 FAMILIES=('environment','wakes','programs','accounts','harnesses','operations','connectors')
 PREFIXES=(('tabs.session.','environment.sessions.'),('tabs.','environment.tabs.'),
  ('local.','environment.conversations.'),('inventory.','environment.resources.'),
- ('agent_sessions.','environment.agents.'),('history.','environment.conversations.history.'),
+ ('agent_sessions.','environment.discovery.'),('agents.','environment.agents.'),('history.','environment.conversations.history.'),
  ('sessions.','programs.sessions.'),('flows.','programs.flows.'),
  ('conditions.','programs.conditions.'),('functions.','programs.functions.'),
  ('configuration.','accounts.configuration.'),('stores.','accounts.stores.'),('accounts.','accounts.profiles.'),
@@ -15,6 +15,7 @@ PREFIXES=(('tabs.session.','environment.sessions.'),('tabs.','environment.tabs.'
 # Whole legacy parser owners are reused, including their validation and root rules.
 CLI_ALIASES={('environment','sessions'):('tabs','sessions'),
  ('environment','tabs'):('tabs',),('environment','agents'):('agents',),
+ ('environment','discovery'):('sessions',),
  ('environment','conversations','history'):('history',),
  ('environment','conversations'):('control',),
  ('programs','flows'):('flows',),('programs','sessions'):('flow-sessions',),
@@ -78,7 +79,7 @@ def native_operation(group,verb):
                   'controller-operations':'operations','controller-history':'history'}
         return prefixes.get(group,group.removeprefix('controller-'))+'.'+verb
     return {'controller':'inventory','sessions':'agent_sessions',
-            'harness-native':'native','harness-schedules':'schedules'}.get(group,group)+'.'+verb
+            'harness-native':'native','harness-schedules':'schedules','self-limits':'local.self_limits'}.get(group,group)+'.'+verb
 
 def native_aliases(specs):
     for name,spec in list(specs.items()):

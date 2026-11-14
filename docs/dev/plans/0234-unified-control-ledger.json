@@ -77,7 +77,7 @@
         4
       ],
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "worker": "unified_programs_625",
       "owned_scope": "connector owner, existing permission and host adapters",
       "packet": "docs/dev/plans/0234-unified-control-tickets/05.md",
@@ -149,7 +149,7 @@
         1
       ],
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "worker": "root",
       "owned_scope": "wake canonical owner and existing schedule adapter",
       "packet": "docs/dev/plans/0234-unified-control-tickets/09.md",
@@ -200,5 +200,10 @@
   "live_effects": "none authorized by this packet",
   "routing": "primary owns shared contract, authority, integration and final acceptance; workers inherit default model/effort; no calibration experiment",
   "review_fixed_point": "1aa498674a4907f93b5216a4a98dd75a22c6ecec",
-  "parent_issue": 623
+  "parent_issue": 623,
+  "contract_notes": [
+    "Managed agents and invoking-session discovery retain distinct canonical paths.",
+    "Native self-limit aliases retain existing attested native owner.",
+    "Connector grant administration is protected-transport-only; CLI forwards authenticated requests."
+  ]
 }
