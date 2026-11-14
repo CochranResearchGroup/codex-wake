@@ -1,5 +1,6 @@
 {
   "admission": "Transport-owned identity and permission checks remain authoritative.",
+  "capability_notes": "Registration is not current target readiness. Harness-specific capability and exact target observation remain required; unsupported actions never fall back.",
   "compatibility": "Legacy entry points retain their original owners and receipts.",
   "families": [
     "environment",
@@ -13,7 +14,9 @@
   "operations": {
     "accounts.configuration.explain": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_configuration_explain",
+        "required_scope": "configuration.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -30,12 +33,15 @@
             "selector"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "accounts.configuration.sync.apply": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_configuration_sync_apply",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -92,12 +98,15 @@
             "expected_snapshot"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "accounts.configuration.sync.preview": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_configuration_sync_preview",
+        "required_scope": "configuration.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -149,12 +158,15 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "accounts.profiles.create": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_profiles_create",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -187,12 +199,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "accounts.profiles.init": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_profiles_init",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -205,23 +220,29 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "accounts.profiles.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_profiles_list",
+        "required_scope": "account.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "accounts.profiles.readiness": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_profiles_readiness",
+        "required_scope": "account.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -238,12 +259,15 @@
             "selector"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "accounts.profiles.resolve": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_profiles_resolve",
+        "required_scope": "account.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -260,12 +284,15 @@
             "selector"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "accounts.profiles.status": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_profiles_status",
+        "required_scope": "account.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -282,23 +309,29 @@
             "selector"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "accounts.stores.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_stores_list",
+        "required_scope": "account.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "accounts.stores.register": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_stores_register",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -316,12 +349,15 @@
             "home"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "accounts.stores.resolve": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_accounts_stores_resolve",
+        "required_scope": "account.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -334,11 +370,14 @@
             "selector"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "connectors.grants.create": {
       "local": {
+        "admission": "protected_operator_transport_required",
+        "available": false,
         "mcp": "wake_connectors_grants_create",
         "readonly": false,
         "schema": {
@@ -412,7 +451,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_connectors_grants_create",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -481,11 +522,14 @@
             "code_challenge"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "connectors.grants.list": {
       "local": {
+        "admission": "protected_operator_transport_required",
+        "available": false,
         "mcp": "wake_connectors_grants_list",
         "readonly": true,
         "schema": {
@@ -496,17 +540,22 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_connectors_grants_list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "connectors.grants.revoke": {
       "local": {
+        "admission": "protected_operator_transport_required",
+        "available": false,
         "mcp": "wake_connectors_grants_revoke",
         "readonly": false,
         "schema": {
@@ -525,7 +574,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_connectors_grants_revoke",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -539,11 +590,14 @@
             "grant_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "connectors.grants.show": {
       "local": {
+        "admission": "protected_operator_transport_required",
+        "available": false,
         "mcp": "wake_connectors_grants_show",
         "readonly": true,
         "schema": {
@@ -562,7 +616,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_connectors_grants_show",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -576,22 +632,28 @@
             "grant_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "connectors.hosts.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_connectors_hosts_list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "connectors.hosts.resolve": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_connectors_hosts_resolve",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -610,12 +672,15 @@
             "environment"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "connectors.hosts.route": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_connectors_hosts_route",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -643,11 +708,14 @@
             "idempotency_key"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.children": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_children",
         "readonly": true,
         "schema": {
@@ -665,7 +733,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_children",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -679,11 +749,14 @@
             "resource_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.cancel": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_cancel",
         "readonly": false,
         "schema": {
@@ -702,6 +775,8 @@
     },
     "environment.conversations.create": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_create",
         "readonly": false,
         "schema": {
@@ -729,6 +804,8 @@
     },
     "environment.conversations.governor.activate": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_governor_activate",
         "readonly": false,
         "schema": {
@@ -772,6 +849,8 @@
     },
     "environment.conversations.governor.advisory": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_governor_advisory",
         "readonly": false,
         "schema": {
@@ -807,6 +886,8 @@
     },
     "environment.conversations.governor.disable": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_governor_disable",
         "readonly": false,
         "schema": {
@@ -842,6 +923,8 @@
     },
     "environment.conversations.governor.extend": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_governor_extend",
         "readonly": false,
         "schema": {
@@ -885,6 +968,8 @@
     },
     "environment.conversations.governor.reset": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_governor_reset",
         "readonly": false,
         "schema": {
@@ -928,6 +1013,8 @@
     },
     "environment.conversations.governor.resume": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_governor_resume",
         "readonly": false,
         "schema": {
@@ -960,6 +1047,8 @@
     },
     "environment.conversations.governor.status": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_governor_status",
         "readonly": true,
         "schema": {
@@ -983,6 +1072,8 @@
     },
     "environment.conversations.health": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_health",
         "readonly": true,
         "schema": {
@@ -1025,7 +1116,9 @@
     },
     "environment.conversations.history.import": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_history_import",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1072,12 +1165,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.history.read": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_history_read",
+        "required_scope": "history.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1099,12 +1195,15 @@
             "thread_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.history.resume": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_history_resume",
+        "required_scope": "history.resume",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1137,12 +1236,15 @@
             "expires_at"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.history.search": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_history_search",
+        "required_scope": "history.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1173,11 +1275,14 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.input.result": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_input_result",
         "readonly": true,
         "schema": {
@@ -1195,7 +1300,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_input_result",
+        "required_scope": "content.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1208,11 +1315,14 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.input.submit": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_input_submit",
         "readonly": false,
         "schema": {
@@ -1256,7 +1366,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_input_submit",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1292,11 +1404,14 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.list": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_list",
         "readonly": true,
         "schema": {
@@ -1326,6 +1441,8 @@
     },
     "environment.conversations.load": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_load",
         "readonly": false,
         "schema": {
@@ -1361,6 +1478,8 @@
     },
     "environment.conversations.observation.cancel": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_observation_cancel",
         "readonly": false,
         "schema": {
@@ -1379,7 +1498,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_observation_cancel",
+        "required_scope": "content.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1393,11 +1514,14 @@
             "observation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.observation.output": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_observation_output",
         "readonly": true,
         "schema": {
@@ -1425,7 +1549,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_observation_output",
+        "required_scope": "content.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1448,11 +1574,14 @@
             "observation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.observation.result": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_observation_result",
         "readonly": true,
         "schema": {
@@ -1480,7 +1609,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_observation_result",
+        "required_scope": "content.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1503,11 +1634,14 @@
             "observation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.observe": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_observe",
         "readonly": true,
         "schema": {
@@ -1555,7 +1689,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_observe",
+        "required_scope": "content.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1594,11 +1730,14 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.output": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_output",
         "readonly": true,
         "schema": {
@@ -1643,6 +1782,8 @@
     },
     "environment.conversations.presentation.background": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_presentation_background",
         "readonly": false,
         "schema": {
@@ -1710,7 +1851,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_presentation_background",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1769,11 +1912,14 @@
             "route"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.presentation.foreground": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_presentation_foreground",
         "readonly": false,
         "schema": {
@@ -1842,7 +1988,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_presentation_foreground",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -1902,11 +2050,14 @@
             "receipt_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.prompt": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_prompt",
         "readonly": false,
         "schema": {
@@ -1972,6 +2123,8 @@
     },
     "environment.conversations.resolve": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_resolve",
         "readonly": true,
         "schema": {
@@ -2011,6 +2164,8 @@
     },
     "environment.conversations.result": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_result",
         "readonly": true,
         "schema": {
@@ -2055,6 +2210,8 @@
     },
     "environment.conversations.self_limits.set": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_self_limits_set",
         "readonly": false,
         "schema": {
@@ -2089,6 +2246,8 @@
     },
     "environment.conversations.self_limits.show": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_self_limits_show",
         "readonly": true,
         "schema": {
@@ -2112,6 +2271,8 @@
     },
     "environment.conversations.slash.cancel": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_slash_cancel",
         "readonly": false,
         "schema": {
@@ -2138,7 +2299,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_slash_cancel",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2151,11 +2314,14 @@
             "interaction_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.slash.list": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_slash_list",
         "readonly": true,
         "schema": {
@@ -2191,7 +2357,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_slash_list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2208,11 +2376,14 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.slash.respond": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_slash_respond",
         "readonly": false,
         "schema": {
@@ -2249,7 +2420,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_slash_respond",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2272,11 +2445,14 @@
             "idempotency_key"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.slash.result": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_slash_result",
         "readonly": true,
         "schema": {
@@ -2308,7 +2484,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_slash_result",
+        "required_scope": "content.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2321,11 +2499,14 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.conversations.slash.run": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_conversations_slash_run",
         "readonly": false,
         "schema": {
@@ -2383,7 +2564,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_conversations_slash_run",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2413,11 +2596,14 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.panes.capture": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_panes_capture",
         "readonly": true,
         "schema": {
@@ -2455,7 +2641,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_panes_capture",
+        "required_scope": "content.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2488,11 +2676,14 @@
             "expected_pane"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.panes.keys": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_panes_keys",
         "readonly": false,
         "schema": {
@@ -2598,7 +2789,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_panes_keys",
+        "required_scope": "terminal.input",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2699,11 +2892,14 @@
             "idempotency_key"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.panes.observe": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_panes_observe",
         "readonly": true,
         "schema": {
@@ -2756,7 +2952,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_panes_observe",
+        "required_scope": "content.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2804,11 +3002,14 @@
             "expected_pane"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.panes.output": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_panes_output",
         "readonly": true,
         "schema": {
@@ -2836,7 +3037,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_panes_output",
+        "required_scope": "content.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2859,11 +3062,14 @@
             "observation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.panes.paste": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_panes_paste",
         "readonly": false,
         "schema": {
@@ -2912,7 +3118,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_panes_paste",
+        "required_scope": "terminal.input",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2956,12 +3164,15 @@
             "idempotency_key"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.resources.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_resources_list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2970,12 +3181,15 @@
             }
           },
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.resources.resolve": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_resources_resolve",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -2990,12 +3204,15 @@
             "selector"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.sessions.create": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_sessions_create",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3043,12 +3260,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.sessions.delete": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_sessions_delete",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3086,12 +3306,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.sessions.ensure": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_sessions_ensure",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3139,12 +3362,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.sessions.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_sessions_list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3159,12 +3385,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.sessions.open": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_sessions_open",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3191,12 +3420,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.sessions.show": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_sessions_show",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3213,12 +3445,15 @@
             "session"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.sessions.update": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_sessions_update",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3250,11 +3485,14 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.snapshot": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_environment_snapshot",
         "readonly": true,
         "schema": {
@@ -3265,18 +3503,23 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_snapshot",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.apply": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_apply",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3304,12 +3547,15 @@
             "plan_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.capture": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_capture",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3343,12 +3589,15 @@
             "pane"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.close": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_close",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3384,12 +3633,15 @@
             "window"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.create": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_create",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3438,12 +3690,15 @@
             "name"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.family.accept": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_family_accept",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3490,12 +3745,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.family.adopt": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_family_adopt",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3527,12 +3785,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.family.bind": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_family_bind",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3583,12 +3844,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.family.focus": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_family_focus",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3629,12 +3893,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.family.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_family_list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3645,12 +3912,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.family.open": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_family_open",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3717,12 +3987,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.family.register": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_family_register",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3768,12 +4041,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.family.show": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_family_show",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3786,12 +4062,15 @@
             "bot_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.focus": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_focus",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3823,12 +4102,15 @@
             "window"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.format.configure": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_format_configure",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3872,12 +4154,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.format.enable": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_format_enable",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3907,12 +4192,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.format.inspect": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_format_inspect",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3931,12 +4219,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.format.pause": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_format_pause",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -3966,12 +4257,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.format.reenable": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_format_reenable",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4001,12 +4295,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.format.reset": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_format_reset",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4036,12 +4333,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.format.resume": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_format_resume",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4071,12 +4371,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.format.rollback": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_format_rollback",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4106,12 +4409,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.format.status": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_format_status",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4130,12 +4436,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.group-delete": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_group-delete",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4158,23 +4467,29 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.group-list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_group-list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.group-save": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_group-save",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4213,12 +4528,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.group-show": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_group-show",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4231,12 +4549,15 @@
             "name"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.input": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_input",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4283,34 +4604,43 @@
             "transport"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.monitor.refresh": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_monitor_refresh",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.monitor.start": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_monitor_start",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4368,23 +4698,29 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.monitor.status": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_monitor_status",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.monitor.stop": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_monitor_stop",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4406,12 +4742,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.move": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_move",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4462,12 +4801,15 @@
             "expected_destination"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.park": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_park",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4513,12 +4855,15 @@
             "expected_destination"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.policy.configure": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_policy_configure",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4579,12 +4924,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.policy.disable": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_policy_disable",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4602,12 +4950,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.policy.enable": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_policy_enable",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4629,12 +4980,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.policy.pause": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_policy_pause",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4656,23 +5010,29 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.policy.status": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_policy_status",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.policy.tick": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_policy_tick",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4690,12 +5050,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.preview": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_preview",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4740,12 +5103,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.reattach-apply": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_reattach-apply",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4768,12 +5134,15 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.reattach-preview": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_reattach-preview",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4819,12 +5188,15 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.reattach-status": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_reattach-status",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4841,12 +5213,15 @@
             "plan_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.recovery.apply": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_recovery_apply",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4883,12 +5258,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.recovery.capture": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_recovery_capture",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4915,12 +5293,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.recovery.preview": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_recovery_preview",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4942,12 +5323,15 @@
             "capture_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.recovery.status": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_recovery_status",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -4962,12 +5346,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.relocate.apply": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_relocate_apply",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5005,12 +5392,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.relocate.preview": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_relocate_preview",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5049,12 +5439,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.relocate.status": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_relocate_status",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5081,12 +5474,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.relocate.undo": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_relocate_undo",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5124,12 +5520,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.rename": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_rename",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5166,12 +5565,15 @@
             "name"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.restore": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_restore",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5222,12 +5624,15 @@
             "receipt_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.delete": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_delete",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5253,12 +5658,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.enable": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_enable",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5288,12 +5696,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.hold": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_hold",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5320,23 +5731,29 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.pause": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_pause",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5362,12 +5779,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.pin": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_pin",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5394,12 +5814,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.resume": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_resume",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5426,12 +5849,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.save": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_save",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5480,12 +5906,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.show": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_show",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5500,23 +5929,29 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.status": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_status",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.tick": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_tick",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5534,12 +5969,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.route.unpin": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_route_unpin",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5566,12 +6004,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.show": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_show",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5588,12 +6029,15 @@
             "workspace"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.undo": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_undo",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5621,12 +6065,15 @@
             "receipt_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.view-delete": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_view-delete",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5649,12 +6096,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.view-evaluate": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_view-evaluate",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5667,23 +6117,29 @@
             "name"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.view-list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_view-list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.view-save": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_view-save",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5711,12 +6167,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "environment.tabs.view-show": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_environment_tabs_view-show",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5729,12 +6188,15 @@
             "name"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "governor.activate": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_governor_activate",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5771,12 +6233,15 @@
             "time_limit_seconds"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "governor.advisory": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_governor_advisory",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5805,12 +6270,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "governor.disable": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_governor_disable",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5839,12 +6307,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "governor.extend": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_governor_extend",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5881,12 +6352,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "governor.reset": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_governor_reset",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5923,12 +6397,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "governor.resume": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_governor_resume",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5954,12 +6431,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "governor.status": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_governor_status",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5976,12 +6456,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "grok.cancel": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_grok_cancel",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -5995,12 +6478,15 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "grok.capabilities": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_grok_capabilities",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6018,12 +6504,15 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "grok.checkpoint": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_grok_checkpoint",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6041,12 +6530,15 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "grok.create": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_grok_create",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6068,12 +6560,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "grok.fork": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_grok_fork",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6095,12 +6590,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "grok.health": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_grok_health",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6118,12 +6616,15 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "grok.load": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_grok_load",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6145,12 +6646,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "grok.prompt": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_grok_prompt",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6178,12 +6682,15 @@
             "prompt"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "grok.wait": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_grok_wait",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6202,12 +6709,15 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.build": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_build",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6263,12 +6773,15 @@
             "run_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.cleanup": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_cleanup",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6324,12 +6837,15 @@
             "run_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.launch": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_launch",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6368,12 +6884,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_list",
+        "required_scope": "account.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6386,12 +6905,15 @@
             "account"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.prepare": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_prepare",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6449,12 +6971,15 @@
             "mod_revision"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.qualify": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_qualify",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6510,12 +7035,15 @@
             "run_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.resume": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_resume",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6571,12 +7099,15 @@
             "run_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.rollback": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_rollback",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6608,12 +7139,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.run": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_run",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "oneOf": [
@@ -6705,12 +7239,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.select": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_select",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6747,12 +7284,15 @@
             "identifier"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.stage": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_stage",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6770,12 +7310,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.builds.status": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_builds_status",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6831,12 +7374,15 @@
             "run_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.runtimes.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_runtimes_list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6851,12 +7397,15 @@
           },
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.runtimes.restart": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_runtimes_restart",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6891,12 +7440,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.runtimes.start": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_runtimes_start",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6931,12 +7483,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.runtimes.status": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_runtimes_status",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6957,12 +7512,15 @@
             "account"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.runtimes.stop": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_runtimes_stop",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -6997,12 +7555,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "harnesses.runtimes.update": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_harnesses_runtimes_update",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7037,12 +7598,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "health.observe": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_health_observe",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7156,12 +7720,15 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "migration.apply": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_migration_apply",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7179,23 +7746,29 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "migration.preview": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_migration_preview",
+        "required_scope": "migration.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "migration.rollback": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_migration_rollback",
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7218,12 +7791,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "notices.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_notices_list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7329,12 +7905,15 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "notices.publish": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_notices_publish",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7567,12 +8146,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "notices.reconcile": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_notices_reconcile",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7679,12 +8261,15 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "operations.cancel": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_operations_cancel",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7696,12 +8281,15 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "operations.rebind": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_operations_rebind",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7721,12 +8309,15 @@
             "binding"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "operations.result": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_operations_result",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7738,12 +8329,15 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "operations.send": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_operations_send",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7796,12 +8390,15 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "operations.stream": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_operations_stream",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7827,12 +8424,15 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "operations.wait": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_operations_wait",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7849,12 +8449,15 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.definitions.propose": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_definitions_propose",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7866,12 +8469,15 @@
             "definition"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.definitions.publish": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_definitions_publish",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7883,12 +8489,15 @@
             "definition"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.definitions.show": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_definitions_show",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7907,12 +8516,15 @@
             "version"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.runs.advance": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_runs_advance",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7926,12 +8538,15 @@
             "run_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.runs.cancel": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_runs_cancel",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7945,12 +8560,15 @@
             "run_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.runs.reconcile": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_runs_reconcile",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7964,12 +8582,15 @@
             "run_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.runs.show": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_runs_show",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -7983,12 +8604,15 @@
             "run_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.runs.start": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_runs_start",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -8023,12 +8647,15 @@
             "binding"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.sessions.cancel": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_sessions_cancel",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -8042,12 +8669,15 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.sessions.capabilities": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_sessions_capabilities",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -8065,12 +8695,15 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.sessions.checkpoint": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_sessions_checkpoint",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -8088,12 +8721,15 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.sessions.create": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_sessions_create",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -8115,12 +8751,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.sessions.fork": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_sessions_fork",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -8146,12 +8785,15 @@
             "checkpoint"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.sessions.prompt": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_sessions_prompt",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -8179,12 +8821,15 @@
             "prompt"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "programs.sessions.wait": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_programs_sessions_wait",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -8203,12 +8848,15 @@
             "operation_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "recovery.apply": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_recovery_apply",
+        "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -8441,12 +9089,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "recovery.check": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_recovery_check",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -8679,12 +9330,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "recovery.configure": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_recovery_configure",
+        "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -9018,12 +9672,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "recovery.disable": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_recovery_disable",
+        "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -9256,12 +9913,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "recovery.enable": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_recovery_enable",
+        "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -9494,12 +10154,15 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "recovery.list": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_recovery_list",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -9600,12 +10263,15 @@
             "expected_target"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "recovery.reconcile": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_recovery_reconcile",
+        "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -9712,12 +10378,15 @@
             "policy_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "recovery.show": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_recovery_show",
+        "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -9824,12 +10493,15 @@
             "policy_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "recovery.tick": {
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_recovery_tick",
+        "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -10062,11 +10734,14 @@
             "_request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "wakes.intents.after": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_wakes_intents_after",
         "readonly": false,
         "schema": {
@@ -10112,7 +10787,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_wakes_intents_after",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -10153,11 +10830,14 @@
             "delivery_window_seconds"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "wakes.intents.at": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_wakes_intents_at",
         "readonly": false,
         "schema": {
@@ -10203,7 +10883,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_wakes_intents_at",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -10244,11 +10926,14 @@
             "delivery_window_seconds"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "wakes.intents.file": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_wakes_intents_file",
         "readonly": false,
         "schema": {
@@ -10294,7 +10979,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_wakes_intents_file",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -10335,11 +11022,14 @@
             "delivery_window_seconds"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "wakes.schedules.cancel": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_wakes_schedules_cancel",
         "readonly": false,
         "schema": {
@@ -10362,7 +11052,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_wakes_schedules_cancel",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -10380,11 +11072,14 @@
             "expected_revision"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "wakes.schedules.list": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_wakes_schedules_list",
         "readonly": true,
         "schema": {
@@ -10395,17 +11090,22 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_wakes_schedules_list",
+        "required_scope": "content.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {},
           "required": [],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "wakes.schedules.register": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_wakes_schedules_register",
         "readonly": false,
         "schema": {
@@ -10422,7 +11122,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_wakes_schedules_register",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -10434,11 +11136,14 @@
             "request"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "wakes.schedules.revise": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_wakes_schedules_revise",
         "readonly": false,
         "schema": {
@@ -10465,7 +11170,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_wakes_schedules_revise",
+        "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -10487,11 +11194,14 @@
             "expected_revision"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     },
     "wakes.schedules.show": {
       "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
         "mcp": "wake_wakes_schedules_show",
         "readonly": true,
         "schema": {
@@ -10509,7 +11219,9 @@
         }
       },
       "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
         "mcp": "wake_wakes_schedules_show",
+        "required_scope": "content.observe",
         "schema": {
           "additionalProperties": false,
           "properties": {
@@ -10522,7 +11234,8 @@
             "schedule_id"
           ],
           "type": "object"
-        }
+        },
+        "supported_registration": true
       }
     }
   },

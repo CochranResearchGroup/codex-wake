@@ -93,16 +93,17 @@ def native_aliases(specs):
 
 def metadata():
     from .local_control_service import definitions
-    from .controller_http import TOOLS
+    from .controller_http import TOOLS, ProtectedOperations
     operations={}
     for operation,(tool,description,schema,handler,readonly) in definitions().items():
         if operation!=canonical(operation):continue
-        operations.setdefault(operation,{})['local']={'schema':schema,'mcp':tool,'readonly':readonly}
+        operations.setdefault(operation,{})['local']={'schema':schema,'mcp':tool,'readonly':readonly,'admission':'protected_operator_transport_required' if operation.startswith('connectors.grants.') else 'same_user_private_connection','available':not operation.startswith('connectors.grants.')}
     for tool,(operation,schema) in TOOLS.items():
-        operations.setdefault(canonical(operation),{})['protected']={'schema':schema,'mcp':tool_name(canonical(operation))}
+        operations.setdefault(canonical(operation),{})['protected']={'schema':schema,'mcp':tool_name(canonical(operation)),'required_scope':ProtectedOperations.READ_POLICIES.get(operation,({'runtime.input':'control','runtime.recover':'recovery','grants.revoke':'admin'}.get(operation),))[0],'admission':'fresh_authenticated_actor_and_exact_target','supported_registration':True}
     return dict(schema_version=1,families=list(FAMILIES),operations=operations,
                 admission='Transport-owned identity and permission checks remain authoritative.',
-                compatibility='Legacy entry points retain their original owners and receipts.')
+                compatibility='Legacy entry points retain their original owners and receipts.',
+                capability_notes='Registration is not current target readiness. Harness-specific capability and exact target observation remain required; unsupported actions never fall back.')
 
 def _subs(parser):
     return next((a for a in parser._actions if isinstance(a,argparse._SubParsersAction)),None)
