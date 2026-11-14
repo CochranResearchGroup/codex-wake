@@ -71,6 +71,8 @@ def local_aliases(definitions):
     definitions.update(presentation_definitions())
     from .unified_connectors import definitions as connector_definitions
     definitions.update(connector_definitions())
+    from .unified_bulk import definitions as bulk_definitions
+    definitions.update(bulk_definitions())
     for operation,(tool,description,schema,handler,readonly) in list(definitions.items()):
         alias=canonical(operation)
         if alias==operation:continue
@@ -102,7 +104,7 @@ def metadata():
     operations={}
     for operation,(tool,description,schema,handler,readonly) in definitions().items():
         if operation!=canonical(operation):continue
-        operations.setdefault(operation,{})['local']={'schema':schema,'mcp':tool,'readonly':readonly,'admission':'protected_operator_transport_required' if operation.startswith('connectors.grants.') else 'same_user_private_connection','available':not operation.startswith('connectors.grants.')}
+        operations.setdefault(operation,{})['local']={'schema':schema,'mcp':tool,'readonly':readonly,'admission':'authenticated_controller_transport_required' if operation.startswith(('connectors.grants.','programs.bulk.')) else 'same_user_private_connection','available':not operation.startswith(('connectors.grants.','programs.bulk.'))}
     for tool,(operation,schema) in TOOLS.items():
         operations.setdefault(canonical(operation),{})['protected']={'schema':schema,'mcp':tool_name(canonical(operation)),'required_scope':ProtectedOperations.READ_POLICIES.get(operation,({'runtime.input':'control','runtime.recover':'recovery','grants.revoke':'admin'}.get(operation),))[0],'admission':'fresh_authenticated_actor_and_exact_target','supported_registration':True}
     return dict(schema_version=1,families=list(FAMILIES),operations=operations,
@@ -155,7 +157,7 @@ def apply_cli(parser):
         parser._unified_direct_paths.add(tuple(parts))
         item.set_defaults(_unified_operation=operation,_unified_fields=list(schema['properties']))
         item.add_argument('--arguments',type=__import__('json').loads,default={})
-        if handler is None or operation.startswith('connectors.grants.'):
+        if handler is None or operation.startswith(('connectors.grants.','programs.bulk.')):
             item.set_defaults(_unified_route='protected')
             item.add_argument('--controller-endpoint',required=True)
             item.add_argument('--controller-token-file',type=__import__('pathlib').Path,required=True)

@@ -300,6 +300,6 @@ def protected_operations():
 
 
 def definitions():
-    def protected_only(args,root):raise InventoryError('operator_transport_required','Bulk actions require the existing authenticated controller identity.')
+    def protected_only(args,root):raise InventoryError('authenticated_transport_required','Bulk actions require the existing authenticated controller identity.')
     return {operation:(tool,'Run frozen members through the existing durable program executor.',schema,protected_only,operation.endswith(('.status','.result')))
         for operation,(tool,schema,required,handler) in protected_operations().items()}

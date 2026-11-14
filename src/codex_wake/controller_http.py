@@ -145,6 +145,8 @@ from .unified_session_input import protected_operations as protected_input_opera
 from .unified_session_presentation import protected_operations as protected_presentation_operations
 PROTECTED_ADAPTERS.update(protected_input_operations())
 PROTECTED_ADAPTERS.update(protected_presentation_operations())
+from .unified_bulk import protected_operations as protected_bulk_operations
+PROTECTED_ADAPTERS.update(protected_bulk_operations())
 TOOLS.update({tool:(operation,schema) for operation,(tool,schema,required,handler) in PROTECTED_ADAPTERS.items()})
 from .unified_contract import api_aliases
 api_aliases(TOOLS)

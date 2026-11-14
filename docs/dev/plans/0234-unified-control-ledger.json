@@ -168,7 +168,7 @@
         7,
         9
       ],
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "worker": "unified_programs_625",
       "owned_scope": "bulk/program composition owner and operation reconciliation",
@@ -177,7 +177,10 @@
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/642",
       "branch": "feat/unified-bulk-642",
       "worktree": "unified-programs-625 reused clean",
-      "base": "4c819ea68ece85c4040efa0d64c05969c6c9d2ad"
+      "base": "4c819ea68ece85c4040efa0d64c05969c6c9d2ad",
+      "result_sha": "e97dd8f6e370ee8fedc790cfc57531b102b5df3f",
+      "integrated_sha": "a9d7ec5f",
+      "validation": "Worker52PASS47.911s+26affectedPASS22.464s; integration bulk/program/transport selectedPASS; stable derived top/nested domain keys, actual wake registration and uncertain-original recovery"
     },
     "11": {
       "title": "Deliver connector discovery documentation and acceptance",
@@ -193,9 +196,9 @@
         9,
         10
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
-      "worker": "pending",
+      "worker": "root",
       "owned_scope": "generated docs, connector journey, integration validation and closeout",
       "packet": "docs/dev/plans/0234-unified-control-tickets/11.md",
       "issue": 643,

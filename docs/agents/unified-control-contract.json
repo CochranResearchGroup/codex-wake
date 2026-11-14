@@ -447,7 +447,7 @@
     },
     "connectors.grants.create": {
       "local": {
-        "admission": "protected_operator_transport_required",
+        "admission": "authenticated_controller_transport_required",
         "available": false,
         "mcp": "wake_connectors_grants_create",
         "readonly": false,
@@ -599,7 +599,7 @@
     },
     "connectors.grants.list": {
       "local": {
-        "admission": "protected_operator_transport_required",
+        "admission": "authenticated_controller_transport_required",
         "available": false,
         "mcp": "wake_connectors_grants_list",
         "readonly": true,
@@ -625,7 +625,7 @@
     },
     "connectors.grants.revoke": {
       "local": {
-        "admission": "protected_operator_transport_required",
+        "admission": "authenticated_controller_transport_required",
         "available": false,
         "mcp": "wake_connectors_grants_revoke",
         "readonly": false,
@@ -667,7 +667,7 @@
     },
     "connectors.grants.show": {
       "local": {
-        "admission": "protected_operator_transport_required",
+        "admission": "authenticated_controller_transport_required",
         "available": false,
         "mcp": "wake_connectors_grants_show",
         "readonly": true,
@@ -9736,6 +9736,498 @@
           },
           "required": [
             "operation_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.bulk.advance": {
+      "local": {
+        "admission": "authenticated_controller_transport_required",
+        "available": false,
+        "mcp": "wake_programs_bulk_advance",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_bulk_advance",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.bulk.cancel": {
+      "local": {
+        "admission": "authenticated_controller_transport_required",
+        "available": false,
+        "mcp": "wake_programs_bulk_cancel",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_bulk_cancel",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.bulk.reconcile": {
+      "local": {
+        "admission": "authenticated_controller_transport_required",
+        "available": false,
+        "mcp": "wake_programs_bulk_reconcile",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_bulk_reconcile",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.bulk.result": {
+      "local": {
+        "admission": "authenticated_controller_transport_required",
+        "available": false,
+        "mcp": "wake_programs_bulk_result",
+        "readonly": true,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_bulk_result",
+        "required_scope": "content.observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.bulk.start": {
+      "local": {
+        "admission": "authenticated_controller_transport_required",
+        "available": false,
+        "mcp": "wake_programs_bulk_start",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "binding": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "inputs": {
+              "type": "object"
+            },
+            "intent": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "limits": {
+              "type": "object"
+            },
+            "members": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "arguments": {
+                    "type": "object"
+                  },
+                  "completion": {
+                    "enum": [
+                      "admission",
+                      "terminal"
+                    ]
+                  },
+                  "condition": {
+                    "type": [
+                      "boolean",
+                      "object"
+                    ]
+                  },
+                  "id": {
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+                    "type": "string"
+                  },
+                  "operation": {
+                    "type": "string"
+                  },
+                  "target": {
+                    "type": "object"
+                  },
+                  "wait_operation": {
+                    "enum": [
+                      "operations.wait",
+                      "sessions.wait",
+                      "environment.conversations.input.result"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "target",
+                  "operation",
+                  "arguments",
+                  "completion"
+                ],
+                "type": "object"
+              },
+              "maxItems": 16,
+              "minItems": 1,
+              "type": "array"
+            },
+            "policies": {
+              "additionalProperties": false,
+              "properties": {
+                "failure": {
+                  "enum": [
+                    "stop",
+                    "continue"
+                  ]
+                },
+                "join": {
+                  "enum": [
+                    "all_success",
+                    "all_complete"
+                  ]
+                },
+                "retry": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "max_attempts": {
+                      "maximum": 3,
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "when": {
+                      "items": {
+                        "enum": [
+                          "timeout",
+                          "unavailable",
+                          "source_unavailable",
+                          "native_unavailable"
+                        ]
+                      },
+                      "maxItems": 4,
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "max_attempts",
+                    "when"
+                  ],
+                  "type": "object"
+                },
+                "uncertain": {
+                  "const": "hold"
+                }
+              },
+              "required": [
+                "failure",
+                "join",
+                "uncertain",
+                "retry"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "members",
+            "policies",
+            "inputs",
+            "limits",
+            "intent",
+            "binding"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_bulk_start",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "binding": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "inputs": {
+              "type": "object"
+            },
+            "intent": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "limits": {
+              "type": "object"
+            },
+            "members": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "arguments": {
+                    "type": "object"
+                  },
+                  "completion": {
+                    "enum": [
+                      "admission",
+                      "terminal"
+                    ]
+                  },
+                  "condition": {
+                    "type": [
+                      "boolean",
+                      "object"
+                    ]
+                  },
+                  "id": {
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$",
+                    "type": "string"
+                  },
+                  "operation": {
+                    "type": "string"
+                  },
+                  "target": {
+                    "type": "object"
+                  },
+                  "wait_operation": {
+                    "enum": [
+                      "operations.wait",
+                      "sessions.wait",
+                      "environment.conversations.input.result"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "target",
+                  "operation",
+                  "arguments",
+                  "completion"
+                ],
+                "type": "object"
+              },
+              "maxItems": 16,
+              "minItems": 1,
+              "type": "array"
+            },
+            "policies": {
+              "additionalProperties": false,
+              "properties": {
+                "failure": {
+                  "enum": [
+                    "stop",
+                    "continue"
+                  ]
+                },
+                "join": {
+                  "enum": [
+                    "all_success",
+                    "all_complete"
+                  ]
+                },
+                "retry": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "max_attempts": {
+                      "maximum": 3,
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "when": {
+                      "items": {
+                        "enum": [
+                          "timeout",
+                          "unavailable",
+                          "source_unavailable",
+                          "native_unavailable"
+                        ]
+                      },
+                      "maxItems": 4,
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "max_attempts",
+                    "when"
+                  ],
+                  "type": "object"
+                },
+                "uncertain": {
+                  "const": "hold"
+                }
+              },
+              "required": [
+                "failure",
+                "join",
+                "uncertain",
+                "retry"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "members",
+            "policies",
+            "inputs",
+            "limits",
+            "intent",
+            "binding"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.bulk.status": {
+      "local": {
+        "admission": "authenticated_controller_transport_required",
+        "available": false,
+        "mcp": "wake_programs_bulk_status",
+        "readonly": true,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_bulk_status",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
           ],
           "type": "object"
         },
