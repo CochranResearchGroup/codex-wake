@@ -37,7 +37,9 @@
         "public generated auth controls",
         "private bearer interface",
         "focused account-auth tests"
-      ]
+      ],
+      "progress": "Account-pinned private bearer, sanitized official device login, exact-grant public status and official metadata-based refresh delegation implemented; seven focused local tests pass. Real sign-in/refresh acceptance pending.",
+      "checkpoint_sha": "15190e1b"
     },
     {
       "key": "T2",

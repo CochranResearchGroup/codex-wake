@@ -57,3 +57,28 @@ An official device login was initiated through the new sanitized CLI bridge.
 The operator received the native verification link/code; account confirmation
 and real provider readiness remain pending. No model inference was requested.
 Device codes and links are intentionally excluded from this tracked receipt.
+
+Refresh delegation is implemented through the registered, SHA-256 pinned
+native `models` utility. Wake never writes auth.json or refresh tokens. The
+utility owns AuthManager, native locking and rotation. A durable attempt marker
+holds failed/interrupted attempts against the same credential generation;
+changed native credentials can be reconciled without replaying the old attempt.
+The broker obtains fresh StableTime again after the utility before emitting a
+bearer. Exact account identity is rechecked under the native read lock.
+
+Focused suite: seven PASS (0.227s last run). Refresh delegation red was the
+missing `executable` registration argument, then green after pinned delegation.
+A further public-boundary regression proves an uncertain helper is not invoked
+again: the adversarial helper would return a usable credential on replay, but
+two broker calls both hold for reconciliation. This is local seam evidence,
+not real provider refresh acceptance.
+
+Upstream source inspection was pinned to public main
+`2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8`. Relevant utility code:
+https://github.com/xai-org/grok-build/blob/2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8/crates/codegen/xai-grok-pager/src/models.rs
+It initializes the catalog through an in-process ACP shell and installs an
+AgentShutdownGuard on every return path; no coding prompt is submitted.
+Installed native version reports `1.0.70 (f50904eaee6c)`, stable. That revision
+was not resolvable in the public source repository (422); source review alone
+does not prove installed behavior. Live refresh interoperability remains an
+explicit acceptance gate.

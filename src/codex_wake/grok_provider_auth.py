@@ -49,16 +49,21 @@ class GrokSession:
         return session
 
     def status(self):
+        reason = None
         try:
-            self._read()
+            credential = self._read()
             authentication = 'present'
+            if not credential.get('expires_at'):
+                reason = 'native_expiry_unknown'
         except FileNotFoundError:
             authentication = 'logged_out'
         except ValueError as error:
             authentication = 'account_changed' if str(error) == 'account_changed' else 'unavailable'
+            reason = str(error) if str(error) in ('account_changed', 'insecure_native_auth', 'invalid_native_auth', 'native_session_missing_or_ambiguous') else 'native_auth_unavailable'
         except OSError:
             authentication = 'unavailable'
-        return dict(authentication=authentication, entitlement='unverified', inference='unverified')
+        return dict(authentication=authentication, entitlement='unverified', inference='unverified',
+                    freshness='unverified', reason=reason)
 
     def bearer(self, qualified_upper):
         """Return a private token only before its expiry's conservative boundary.
@@ -102,6 +107,7 @@ def register_parser(commands):
     register.add_argument('account')
     register.add_argument('--label', required=True)
     register.add_argument('--auth-path', type=Path, required=True)
+    register.add_argument('--executable', type=Path, help='pin official Grok binary for native refresh')
     login_parser = verbs.add_parser('login', help='operator-only official device login with sanitized progress')
     login_parser.add_argument('--executable', type=Path, required=True)
     login_parser.add_argument('--auth-path', type=Path, required=True)
@@ -119,7 +125,7 @@ def command(args, root):
         return 0 if result['authentication'] == 'present' else 3
     accounts = GrokAccounts(root)
     if args.grok_auth_command == 'register':
-        print(json.dumps(accounts.register(args.account, args.label, args.auth_path), sort_keys=True))
+        print(json.dumps(accounts.register(args.account, args.label, args.auth_path, executable=args.executable), sort_keys=True))
         return 0
     if args.grok_auth_command == 'status':
         print(json.dumps(dict(target=accounts.target(args.account), **accounts.status(args.account)), sort_keys=True))
@@ -134,7 +140,11 @@ def command(args, root):
     try:
         decision = service_time_decision(config) if config else None
         upper = require_time_decision(decision).upper if decision else None
-        token = accounts.bearer(args.account, upper)
+        accounts.bearer(args.account, upper)
+        # Metadata refresh may have waited on the native writer. Acquire fresh
+        # qualified time and revalidate account/expiry immediately before use.
+        current = require_time_decision(service_time_decision(config))
+        token = accounts.bearer(args.account, current.upper, refresh=False)
     except (OSError, ValueError):
         # Native Codex includes command stderr in its own diagnostics. Never emit
         # provider exceptions, native login output, paths or credential contents.
@@ -164,7 +174,7 @@ class GrokAccounts:
             raise ValueError('invalid_grok_account')
         return self.directory / (account + '.json')
 
-    def register(self, account, label, auth_path):
+    def register(self, account, label, auth_path, *, executable=None):
         path = self._path(account)
         if not isinstance(label, str) or not label.strip() or len(label) > 100 or any(ord(c) < 32 for c in label):
             raise ValueError('invalid_grok_account_label')
@@ -172,6 +182,9 @@ class GrokAccounts:
         session = GrokSession(auth_path)._read()
         record = dict(schema=1, account=account, label=label,
                       auth_path=str(auth_path), identity_binding=identity_binding(session))
+        if executable is not None:
+            executable = Path(executable).absolute()
+            record.update(executable=str(executable), executable_sha256=executable_digest(executable))
         self.directory.mkdir(mode=0o700, parents=True, exist_ok=True)
         fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
         with os.fdopen(fd, 'w') as stream:
@@ -207,9 +220,16 @@ class GrokAccounts:
         session = GrokSession(record['auth_path'], record['identity_binding'])
         return dict(account=account, label=record['label'], **session.status())
 
-    def bearer(self, account, qualified_upper):
+    def bearer(self, account, qualified_upper, *, refresh=True):
         record = self._record(account)
-        return GrokSession(record['auth_path'], record['identity_binding']).bearer(qualified_upper)
+        session = GrokSession(record['auth_path'], record['identity_binding'])
+        try:
+            return session.bearer(qualified_upper)
+        except ValueError as error:
+            if str(error) != 'native_refresh_required' or not refresh or not record.get('executable'):
+                raise
+        native_refresh(self.directory, record, session)
+        return session.bearer(qualified_upper)
 
 
 def login(executable, auth_path, *, emit, timeout=600):
@@ -340,3 +360,50 @@ def observe(root, arguments, *, actor, authorize):
 def protected_observe(root, arguments):
     from .operation_commands import local_actor
     return observe(root, arguments, actor=local_actor(root), authorize=lambda: local_actor(root))
+
+
+def executable_digest(path):
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(fd, 'rb') as stream:
+        info = os.fstat(stream.fileno())
+        if not stat.S_ISREG(info.st_mode) or info.st_mode & 0o022 or info.st_uid not in (0, os.getuid()):
+            raise ValueError('untrusted_grok_executable')
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def native_refresh(directory, record, session):
+    """Ask official metadata utility to service auth; never write credentials.
+
+    Official `models` performs catalog initialization with its AuthManager and
+    shuts down its in-process shell. No coding turn is submitted. Native flock,
+    refresh-token rotation and atomic persistence remain owned by Grok. A failed
+    or interrupted attempt stays held until the native credential changes.
+    """
+    import subprocess
+    executable = Path(record['executable'])
+    if executable_digest(executable) != record['executable_sha256']:
+        raise ValueError('native_executable_changed')
+    credential = session._read()
+    generation = hashlib.sha256(json.dumps(credential, sort_keys=True).encode()).hexdigest()
+    marker = Path(directory) / (record['account'] + '-refresh-' + generation + '.json')
+    try:
+        fd = os.open(marker, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    except FileExistsError:
+        raise ValueError('native_refresh_requires_reconciliation') from None
+    with os.fdopen(fd, 'w') as stream:
+        json.dump(dict(state='attempted', operation='official_catalog_auth_refresh'), stream)
+        stream.flush()
+        os.fsync(stream.fileno())
+    environment = {key: value for key, value in os.environ.items()
+                   if not key.startswith(('XAI_', 'GROK_', 'OAUTH_'))}
+    environment.update(GROK_AUTH_PATH=record['auth_path'],
+                       GROK_HOME=str(Path(record['auth_path']).parent),
+                       GROK_DISABLE_API_KEY_AUTH='true', RUST_LOG='off')
+    try:
+        result = subprocess.run([str(executable), 'models'], env=environment,
+                                stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL, timeout=20)
+    except (OSError, subprocess.TimeoutExpired):
+        raise ValueError('native_refresh_requires_reconciliation') from None
+    if result.returncode != 0:
+        raise ValueError('native_refresh_requires_reconciliation')

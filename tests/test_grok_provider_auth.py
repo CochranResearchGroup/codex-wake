@@ -89,3 +89,35 @@ class GrokSessionTest(unittest.TestCase):
                           frozenset({'account.observe'}), [target], 4000000000)
             result = observe(root, arguments, actor=actor, authorize=lambda: actor)
             self.assertEqual(result['result']['authentication']['authentication'], 'logged_out')
+
+    def test_expired_broker_reuses_official_refresh_owner_and_rechecks_identity(self):
+        from codex_wake.grok_provider_auth import GrokAccounts
+        with tempfile.TemporaryDirectory() as directory:
+            auth = Path(directory) / 'auth.json'
+            value = {'key': 'expired-secret', 'auth_mode': 'oidc', 'user_id': 'one',
+                     'expires_at': '2020-01-01T00:00:00Z'}
+            auth.write_text(json.dumps({'https://auth.x.ai': value}))
+            auth.chmod(0o600)
+            executable = Path(directory) / 'grok'
+            executable.write_text("#!/usr/bin/env python3\nimport json,os\np=os.environ['GROK_AUTH_PATH']\nd=json.load(open(p))\na=d['https://auth.x.ai']\na.update(key='rotated-secret', expires_at='2030-01-01T00:00:00Z')\nwith open(p,'w') as f: json.dump(d,f)\n")
+            executable.chmod(0o700)
+            accounts = GrokAccounts(Path(directory) / 'wake')
+            accounts.register('personal', 'Personal', auth, executable=executable)
+            self.assertEqual(accounts.bearer('personal', 1800000000), 'rotated-secret')
+
+    def test_uncertain_native_refresh_is_not_replayed(self):
+        from codex_wake.grok_provider_auth import GrokAccounts
+        with tempfile.TemporaryDirectory() as directory:
+            auth = Path(directory) / 'auth.json'
+            auth.write_text(json.dumps({'https://auth.x.ai': {
+                'key': 'expired-secret', 'auth_mode': 'oidc', 'user_id': 'one',
+                'expires_at': '2020-01-01T00:00:00Z'}}))
+            auth.chmod(0o600)
+            executable = Path(directory) / 'grok'
+            executable.write_text("#!/usr/bin/env python3\nimport os,json,pathlib\np=pathlib.Path(os.environ['GROK_AUTH_PATH'])\nm=p.with_name('attempted')\nif not m.exists():\n m.touch(); raise SystemExit(1)\nd=json.loads(p.read_text()); d['https://auth.x.ai'].update(key='replayed-secret',expires_at='2030-01-01T00:00:00Z'); p.write_text(json.dumps(d))\n")
+            executable.chmod(0o700)
+            accounts = GrokAccounts(Path(directory) / 'wake')
+            accounts.register('personal', 'Personal', auth, executable=executable)
+            for _ in range(2):
+                with self.assertRaisesRegex(ValueError, 'requires_reconciliation'):
+                    accounts.bearer('personal', 1800000000)
