@@ -27,3 +27,19 @@ not product passes and were not erased by the corrected environment check.
 Remaining T1 acceptance: registered account binding, official login initiation,
 qualified native refresh/rotation interoperability, public generated controls,
 and operational readiness. Entitlement and inference remain unverified.
+
+Second vertical slices (same focused unittest command): registration was RED
+with `GrokAccounts` absent, then GREEN after account binding implementation.
+Native rotation for the same identity is admitted; substituted user/principal
+identity holds. Official-login bridge was RED with `login` absent, then GREEN;
+native exit zero without a credential remains logged out, and raw provider
+stderr never leaves the boundary. Four focused tests now pass.
+
+The private CLI contract now selects a registered account:
+`codex-wake --wake-root ROOT grok auth token ACCOUNT`. Registration pins the
+native identity without copying credentials. Operator `grok auth login` runs an
+explicit native executable with device authentication and emits only validated
+human verification information. Default native-store observation was logged
+out; no actual login was initiated. Native `login --help` and `models --help`
+were inspected without account/provider activity. Refresh delegation through
+`models` is still an investigation, not implemented or qualified.

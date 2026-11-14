@@ -5,6 +5,8 @@ is deliberately separate from entitlement and inference qualification.
 """
 from datetime import datetime
 import fcntl
+import hashlib
+import re
 import json
 import math
 import os
@@ -13,11 +15,12 @@ import stat
 
 
 class GrokSession:
-    def __init__(self, auth_path):
+    def __init__(self, auth_path, expected_binding=None):
         self.auth_path = Path(auth_path)
+        self.expected_binding = expected_binding
 
     def _read(self):
-        fd = os.open(self.auth_path, os.O_RDONLY | os.O_NOFOLLOW)
+        fd = os.open(self.auth_path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
         with os.fdopen(fd) as stream:
             info = os.fstat(stream.fileno())
             if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
@@ -25,7 +28,10 @@ class GrokSession:
             if info.st_size > 1024 * 1024:
                 raise ValueError('invalid_native_auth')
             try:
-                data = json.load(stream)
+                raw = stream.read(1024 * 1024 + 1)
+                if len(raw) > 1024 * 1024:
+                    raise ValueError('invalid_native_auth')
+                data = json.loads(raw)
             except (ValueError, UnicodeError):
                 raise ValueError('invalid_native_auth') from None
         if not isinstance(data, dict):
@@ -35,7 +41,12 @@ class GrokSession:
                     and isinstance(value.get('key'), str) and value['key']]
         if len(sessions) != 1:
             raise ValueError('native_session_missing_or_ambiguous')
-        return sessions[0]
+        session = sessions[0]
+        if len(session['key']) > 32768 or any(ord(c) < 33 or ord(c) == 127 for c in session['key']):
+            raise ValueError('invalid_native_auth')
+        if self.expected_binding and identity_binding(session) != self.expected_binding:
+            raise ValueError('account_changed')
+        return session
 
     def status(self):
         try:
@@ -43,7 +54,9 @@ class GrokSession:
             authentication = 'present'
         except FileNotFoundError:
             authentication = 'logged_out'
-        except (OSError, ValueError):
+        except ValueError as error:
+            authentication = 'account_changed' if str(error) == 'account_changed' else 'unavailable'
+        except OSError:
             authentication = 'unavailable'
         return dict(authentication=authentication, entitlement='unverified', inference='unverified')
 
@@ -85,18 +98,31 @@ class GrokSession:
 def register_parser(commands):
     parser = commands.add_parser('auth', help='official Grok session status and private native command auth')
     verbs = parser.add_subparsers(dest='grok_auth_command', required=True)
+    register = verbs.add_parser('register', help='operator-only account binding to an existing official session')
+    register.add_argument('account')
+    register.add_argument('--label', required=True)
+    register.add_argument('--auth-path', type=Path, required=True)
+    login_parser = verbs.add_parser('login', help='operator-only official device login with sanitized progress')
+    login_parser.add_argument('--executable', type=Path, required=True)
+    login_parser.add_argument('--auth-path', type=Path, required=True)
     for verb in ('status', 'token'):
         command = verbs.add_parser(verb)
-        command.add_argument('--auth-path', type=Path, required=True,
-                             help='operator-selected official Grok credential store')
+        command.add_argument('account')
 
 
 def command(args, root):
     """Local operator boundary; token is intentionally absent from MCP tools."""
     import sys
-    session = GrokSession(args.auth_path)
+    if args.grok_auth_command == 'login':
+        result = login(args.executable, args.auth_path, emit=lambda event: print(json.dumps(event), flush=True))
+        print(json.dumps(result, sort_keys=True))
+        return 0 if result['authentication'] == 'present' else 3
+    accounts = GrokAccounts(root)
+    if args.grok_auth_command == 'register':
+        print(json.dumps(accounts.register(args.account, args.label, args.auth_path), sort_keys=True))
+        return 0
     if args.grok_auth_command == 'status':
-        print(json.dumps(session.status(), sort_keys=True))
+        print(json.dumps(accounts.status(args.account), sort_keys=True))
         return 0
     if sys.stdout.isatty():
         print('private_channel_required', file=sys.stderr)
@@ -108,7 +134,7 @@ def command(args, root):
     try:
         decision = service_time_decision(config) if config else None
         upper = require_time_decision(decision).upper if decision else None
-        token = session.bearer(upper)
+        token = accounts.bearer(args.account, upper)
     except (OSError, ValueError):
         # Native Codex includes command stderr in its own diagnostics. Never emit
         # provider exceptions, native login output, paths or credential contents.
@@ -116,3 +142,147 @@ def command(args, root):
         return 3
     sys.stdout.write(token)
     return 0
+
+
+def identity_binding(session):
+    identity = session.get('user_id')
+    if not isinstance(identity, str) or not identity:
+        raise ValueError('native_identity_unknown')
+    # Team/principal selection is part of account identity, not only the human.
+    value = [identity, session.get('principal_type'), session.get('principal_id'),
+             session.get('team_id'), session.get('organization_id')]
+    return hashlib.sha256(json.dumps(value, separators=(',', ':')).encode()).hexdigest()
+
+
+class GrokAccounts:
+    """Operator-owned references to official stores; never a credential copy."""
+    def __init__(self, root):
+        self.directory = Path(root) / 'grok-provider-accounts'
+
+    def _path(self, account):
+        if not isinstance(account, str) or not re.fullmatch(r'[a-z0-9][a-z0-9_-]{0,63}', account):
+            raise ValueError('invalid_grok_account')
+        return self.directory / (account + '.json')
+
+    def register(self, account, label, auth_path):
+        path = self._path(account)
+        if not isinstance(label, str) or not label.strip() or len(label) > 100 or any(ord(c) < 32 for c in label):
+            raise ValueError('invalid_grok_account_label')
+        auth_path = Path(auth_path).absolute()
+        session = GrokSession(auth_path)._read()
+        record = dict(schema=1, account=account, label=label,
+                      auth_path=str(auth_path), identity_binding=identity_binding(session))
+        self.directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+        fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
+        with os.fdopen(fd, 'w') as stream:
+            json.dump(record, stream)
+            stream.flush()
+            os.fsync(stream.fileno())
+        return self.status(account)
+
+    def _record(self, account):
+        fd = os.open(self._path(account), os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        with os.fdopen(fd) as stream:
+            info = os.fstat(stream.fileno())
+            if info.st_uid != os.getuid() or info.st_mode & 0o077 or not stat.S_ISREG(info.st_mode) or info.st_size > 16384:
+                raise ValueError('insecure_grok_registration')
+            record = json.load(stream)
+        if record.get('schema') != 1 or record.get('account') != account:
+            raise ValueError('invalid_grok_registration')
+        return record
+
+    def status(self, account):
+        record = self._record(account)
+        session = GrokSession(record['auth_path'], record['identity_binding'])
+        return dict(account=account, label=record['label'], **session.status())
+
+    def bearer(self, account, qualified_upper):
+        record = self._record(account)
+        return GrokSession(record['auth_path'], record['identity_binding']).bearer(qualified_upper)
+
+
+def login(executable, auth_path, *, emit, timeout=600):
+    """Run official login; relay only a validated human verification URL.
+
+    The native program owns OAuth and all credential writes. Its arbitrary
+    diagnostic text is discarded, including errors. A successful process exit
+    does not establish a usable session or entitlement.
+    """
+    import selectors
+    import subprocess
+    import time
+    from urllib.parse import urlsplit, parse_qsl
+    executable = Path(executable).absolute()
+    info = executable.stat()
+    if not stat.S_ISREG(info.st_mode) or info.st_mode & 0o022 or info.st_uid not in (0, os.getuid()):
+        raise ValueError('untrusted_grok_executable')
+    environment = {key: value for key, value in os.environ.items()
+                   if not key.startswith(('XAI_', 'GROK_', 'OAUTH_'))}
+    environment['GROK_AUTH_PATH'] = str(Path(auth_path).absolute())
+    environment['GROK_HOME'] = str(Path(auth_path).absolute().parent)
+    environment['RUST_LOG'] = 'off'
+    deadline = time.monotonic() + timeout
+    process = subprocess.Popen([str(executable), 'login', '--device-auth'],
+                               env=environment, stdin=subprocess.DEVNULL,
+                               stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    buffer = b''
+    sent = set()
+    awaiting_user_code = False
+    with selectors.DefaultSelector() as selector:
+        selector.register(process.stderr, selectors.EVENT_READ)
+        try:
+            while selector.get_map():
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    process.terminate()
+                    break
+                for key, _ in selector.select(min(remaining, 1)):
+                    chunk = os.read(key.fileobj.fileno(), 4096)
+                    if not chunk:
+                        selector.unregister(key.fileobj)
+                        continue
+                    buffer += chunk
+                    while b'\n' in buffer:
+                        line, buffer = buffer.split(b'\n', 1)
+                        if len(line) > 4096:
+                            continue
+                        candidate = line.decode('utf-8', errors='replace').strip()
+                        if candidate in ('Confirm this code in your browser:', 'Then enter this code:'):
+                            awaiting_user_code = True
+                            continue
+                        if awaiting_user_code and candidate:
+                            awaiting_user_code = False
+                            if re.fullmatch(r'[A-Za-z0-9-]{1,32}', candidate):
+                                emit(dict(status='login_pending', user_code=candidate))
+                            continue
+                        try:
+                            url = urlsplit(candidate)
+                            port = url.port
+                        except ValueError:
+                            continue
+                        if (url.scheme != 'https' or url.hostname not in ('auth.x.ai', 'accounts.x.ai', 'grok.com')
+                                or url.username or url.password or port not in (None, 443)
+                                or url.fragment or any(ord(c) < 33 for c in candidate)
+                                or len(candidate) > 2048):
+                            continue
+                        query = parse_qsl(url.query, keep_blank_values=True)
+                        if any(name != 'user_code' or not re.fullmatch(r'[A-Za-z0-9-]{1,64}', value)
+                               for name, value in query):
+                            continue
+                        if candidate not in sent:
+                            emit(dict(status='login_pending', verification_uri=candidate))
+                            sent.add(candidate)
+                    if len(buffer) > 4096:
+                        buffer = b''
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+        finally:
+            process.stderr.close()
+            if process.poll() is None:
+                process.kill()
+                process.wait()
+    result = GrokSession(auth_path).status()
+    return dict(status='login_finished' if process.returncode == 0 else 'login_failed', **result)
