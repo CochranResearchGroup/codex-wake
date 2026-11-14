@@ -104,7 +104,7 @@
       ],
       "owner": "worker-native-selection",
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "acceptance": [
         "A unified native picker and public model operations distinguish qualified, unavailable, stale and unverified choices.",
         "Exact account labels, model capabilities and an explicit validated default resolve one inference selection before work.",
@@ -134,7 +134,8 @@
       "result_sha": "1eee8143f7642561f5d5573613b1e3658e208e63",
       "native_result_sha": "1eee8143f7642561f5d5573613b1e3658e208e63",
       "source_manifest": "runtime/grok-native-233/t4-source-manifest.json",
-      "validation": "Native model/list+thread/start, picker/remote serializer, OpenAI regressions, public Wake surfaces, remote roundtrips, schema/SDK numeric contract and final affected production check pass; primary51native/7Wake hashes, exact patch tree and bundle verified."
+      "validation": "Native model/list+thread/start, picker/remote serializer, OpenAI regressions, public Wake surfaces, remote roundtrips, schema/SDK numeric contract and final affected production check pass; primary51native/7Wake hashes, exact patch tree and bundle verified.",
+      "integrated_sha": "94e6646e"
     },
     {
       "key": "T5",
@@ -142,8 +143,8 @@
       "blocked_by": [
         "T4"
       ],
-      "owner": "pending",
-      "state": "pending",
+      "owner": "primary",
+      "state": "running",
       "tracker_state": "OPEN",
       "acceptance": [
         "An OpenAI parent can explicitly select a Grok worker and vice versa through normal Codex worker controls.",
@@ -155,7 +156,16 @@
       "id": 6394426093,
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/634",
       "parent_link": "native_sub_issue",
-      "dependencies_published": "native"
+      "dependencies_published": "native",
+      "worker": "/root",
+      "worker_base": "1eee8143f7642561f5d5573613b1e3658e208e63",
+      "worker_branch": "feat/p233-mixed-provider-workers",
+      "owned_paths": [
+        "Native worker provider/account/model inheritance and explicit override",
+        "Accepted account revision binding in private bearer path",
+        "Canonical selection and cumulative usage attribution",
+        "Focused public worker/auth/usage checks"
+      ]
     },
     {
       "key": "T6",
