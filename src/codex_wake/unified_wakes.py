@@ -74,6 +74,9 @@ def protected_execute(authority,operations,token,operation,args):
     owner=WakeControls(root,principal=Principal(actor.subject,'controller'),authorize=authorize)
     value=owner.execute(operation,args)
     authority.authenticate(token)
+    if 'content.observe' not in actor.scopes and isinstance(value,dict):
+        value={key:value[key] for key in ('id','revision','state','status','armed','next_due_at','session_mode','scheduling_status') if key in value}
+        value['content_redacted']=True
     return dict(schema_version=1,operation=operation,status='completed',result=value)
 
 def protected_operations():

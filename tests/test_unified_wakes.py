@@ -34,3 +34,18 @@ class UnifiedWakeTests(unittest.TestCase):
             self.assertEqual(first['id'],same['id'])
             allowed[0]=False
             with self.assertRaisesRegex(InventoryError,'revoked'):owner.execute('wakes.schedules.cancel',{'schedule_id':first['id'],'expected_revision':1})
+
+    def test_protected_schedule_operations_use_actual_actor_and_revoke_future_access(self):
+        from types import SimpleNamespace
+        from codex_wake.controller_auth import OAuthAuthority,AuthError
+        from codex_wake.controller_http import ProtectedOperations
+        from test_unified_connectors import ConnectorTests
+        with tempfile.TemporaryDirectory() as d,patch('codex_wake.sessions.observe',return_value={'complete':False,'sessions':[]}):
+            auth=OAuthAuthority(Path(d)/'auth.sqlite',issuer='https://wake.test',resource='https://wake.test/controller')
+            token=ConnectorTests().token(auth,['control','content.observe'],[dict(host='h',environment='e')])
+            owner=ProtectedOperations(auth,SimpleNamespace(host='h',environment='e',inventory=SimpleNamespace(root=Path(d))))
+            created=owner.execute(token,'wakes.schedules.register',{'request':request()})['result']
+            same=owner.execute(token,'wakes.schedules.register',{'request':request()})['result']
+            self.assertEqual(created['id'],same['id'])
+            auth.revoke_grant(auth.authenticate(token).grant_id)
+            with self.assertRaises(AuthError):owner.execute(token,'wakes.schedules.show',{'schedule_id':created['id']})

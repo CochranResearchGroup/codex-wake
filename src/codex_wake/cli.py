@@ -2861,6 +2861,10 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
             if hasattr(args, key):
                 if key in payload:raise WakeError('duplicate_unified_argument')
                 payload[key] = getattr(args, key)
+        if getattr(args, '_unified_route', None) == 'protected':
+            from .controller_client import execute_cli
+            from types import SimpleNamespace
+            return execute_cli(SimpleNamespace(endpoint=args.controller_endpoint, token_file=args.controller_token_file, transport=args.controller_transport, operation=args._unified_operation, arguments=payload))
         print(json.dumps(LocalOperations(root).execute(args._unified_operation, payload), sort_keys=True))
         return 0
     if args.command == "schedules":

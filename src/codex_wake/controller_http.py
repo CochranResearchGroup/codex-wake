@@ -137,6 +137,10 @@ TOOLS.update({'wake_governor_' + verb: ('governor.' + verb, schema) for verb, sc
 
 from .unified_connectors import protected_operations
 PROTECTED_ADAPTERS=protected_operations()
+from .unified_wakes import protected_operations as protected_wake_operations
+PROTECTED_ADAPTERS.update(protected_wake_operations())
+from .unified_terminal import protected_operations as protected_terminal_operations
+PROTECTED_ADAPTERS.update(protected_terminal_operations())
 TOOLS.update({tool:(operation,schema) for operation,(tool,schema,required,handler) in PROTECTED_ADAPTERS.items()})
 from .unified_contract import api_aliases
 api_aliases(TOOLS)

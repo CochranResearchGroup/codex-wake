@@ -26,7 +26,7 @@
       "title": "Bounded control structures and typed semantic functions",
       "blockers": [],
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "worker": "unified_programs_625",
       "owned_scope": "flow/condition owners and focused existing program tests",
       "packet": "docs/dev/plans/0234-unified-control-tickets/02.md",
@@ -76,7 +76,7 @@
         1,
         4
       ],
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "worker": "unified_programs_625",
       "owned_scope": "connector owner, existing permission and host adapters",
@@ -85,7 +85,10 @@
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/631",
       "branch": "feat/unified-connectors-631",
       "worktree": "unified-programs-625 reused clean",
-      "base": "ea54777f08a62d6d3efbca03548e9f4723274ffa"
+      "base": "ea54777f08a62d6d3efbca03548e9f4723274ffa",
+      "result_sha": "4807ed5a24c55198809cf13dfdc221b926175488",
+      "integrated_sha": "42d371de",
+      "validation": "Worker62PASS31.598s+16affectedPASS; integrated protected connector/wake/terminal15PASS2.875s; actual remote immutable-flow receiver/private auth paths"
     },
     "6": {
       "title": "Read terminal streams and explicitly write exact panes",
@@ -94,7 +97,7 @@
         4
       ],
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "worker": "unified_observation_626",
       "owned_scope": "terminal observation/input owners and existing tab transport",
       "packet": "docs/dev/plans/0234-unified-control-tickets/06.md",
@@ -132,7 +135,7 @@
         4
       ],
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "worker": "root",
       "owned_scope": "account/harness/history canonical mappings and capability adapters",
       "packet": "docs/dev/plans/0234-unified-control-tickets/08.md",
@@ -145,14 +148,14 @@
       "blockers": [
         1
       ],
-      "state": "implemented",
+      "state": "validated",
       "tracker_state": "OPEN",
       "worker": "root",
       "owned_scope": "wake canonical owner and existing schedule adapter",
       "packet": "docs/dev/plans/0234-unified-control-tickets/09.md",
       "issue": 641,
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/641",
-      "validation": "Canonical program-callable local schedule registration/revision/cancel15PASS7.512s; protected dispatch wiring remains"
+      "validation": "Trusted delegated schedule retry/revocation12PASS5.154s; protected register/retry+revoke3PASS1.051s; canonical wake and generated metadata wired"
     },
     "10": {
       "title": "Compose durable bulk and semantic management programs",

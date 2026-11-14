@@ -61,6 +61,8 @@ def local_aliases(definitions):
     definitions.update(terminal_definitions())
     from .unified_session_input import definitions as input_definitions
     definitions.update(input_definitions())
+    from .unified_connectors import definitions as connector_definitions
+    definitions.update(connector_definitions())
     for operation,(tool,description,schema,handler,readonly) in list(definitions.items()):
         alias=canonical(operation)
         if alias==operation:continue
@@ -127,7 +129,7 @@ def apply_cli(parser):
     action.add_parser('capabilities',help='discover canonical operation contracts and transport capabilities')
     from .local_control_service import definitions
     for operation,(tool,description,schema,handler,readonly) in definitions().items():
-        if not operation.startswith(('environment.','wakes.')) or _parser(parser,operation.split('.')) is not None:continue
+        if not operation.startswith(('environment.','wakes.','connectors.')) or _parser(parser,operation.split('.')) is not None:continue
         parent=parser
         parts=operation.split('.')
         for part in parts[:-1]:
@@ -138,6 +140,11 @@ def apply_cli(parser):
         parser._unified_direct_paths.add(tuple(parts))
         item.set_defaults(_unified_operation=operation,_unified_fields=list(schema['properties']))
         item.add_argument('--arguments',type=__import__('json').loads,default={})
+        if operation.startswith('connectors.grants.'):
+            item.set_defaults(_unified_route='protected')
+            item.add_argument('--controller-endpoint',required=True)
+            item.add_argument('--controller-token-file',type=__import__('pathlib').Path,required=True)
+            item.add_argument('--controller-transport',choices=('api','mcp'),default='api')
         for field,prop in schema['properties'].items():
             if field=='arguments':continue
             options=dict(default=argparse.SUPPRESS,dest=field)

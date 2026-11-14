@@ -224,3 +224,17 @@ def definitions():
     return {'environment.panes.'+verb:('wake_environment_panes_'+verb,
         'Explicit terminal content/input with host/pane generations, privacy and separate permissions; rendered snapshots are not native byte streams and delivery is not semantic execution.',
         contract,partial(invoke,verb),verb not in ('paste','keys')) for verb,contract in contracts.items()}
+
+
+def protected_operations():
+    result={}
+    for operation,(tool,description,schema,handler,readonly) in definitions().items():
+        def invoke(authority,operations,token,operation,args):
+            from .unified_connectors import protected_callback
+            if operations.tabs is None or operations.inventory is None:
+                raise InventoryError('configuration_unavailable','Host terminal owner is unavailable.')
+            value=TerminalControl(operations.inventory.root,tabs=operations.tabs,
+                authorize=protected_callback(authority,token,operations)).execute(operation,args)
+            return dict(schema_version=1,operation=operation,status='completed',result=value)
+        result[operation]=(tool,schema,'content.observe' if readonly else 'terminal.input',invoke)
+    return result
