@@ -1,0 +1,178 @@
+{
+  "spec": "docs/dev/plans/0234-unified-control-spec.md",
+  "design": "docs/dev/plans/0234-2026-11-14-unified-control-design.md",
+  "owner": "ecochran76 / root",
+  "branch": "feat/unified-control-0234",
+  "base": "1aa498674a4907f93b5216a4a98dd75a22c6ecec",
+  "packet_approval": "Operator yes on2026-11-14 accepts proposed seams,11tickets/dependencies and review base",
+  "review_runs": 0,
+  "remediation_passes": 0,
+  "tickets": {
+    "1": {
+      "title": "Canonical hierarchical contract and compatibility",
+      "blockers": [],
+      "state": "running",
+      "tracker_state": "OPEN",
+      "worker": "root",
+      "owned_scope": "canonical registry, shared CLI/API/MCP hooks, contract generation",
+      "packet": "docs/dev/plans/0234-unified-control-tickets/01.md",
+      "issue": 624,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/624",
+      "base": "1aa498674a4907f93b5216a4a98dd75a22c6ecec"
+    },
+    "2": {
+      "title": "Bounded control structures and typed semantic functions",
+      "blockers": [],
+      "state": "running",
+      "tracker_state": "OPEN",
+      "worker": "unified_programs_625",
+      "owned_scope": "flow/condition owners and focused existing program tests",
+      "packet": "docs/dev/plans/0234-unified-control-tickets/02.md",
+      "issue": 625,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/625",
+      "base": "1aa498674a4907f93b5216a4a98dd75a22c6ecec",
+      "branch": "feat/unified-programs-625",
+      "worktree": "unified-programs-625"
+    },
+    "3": {
+      "title": "Observe arbitrary existing turns with resumable results",
+      "blockers": [],
+      "state": "running",
+      "tracker_state": "OPEN",
+      "worker": "unified_observation_626",
+      "owned_scope": "local native session observation/event owners and focused tests",
+      "packet": "docs/dev/plans/0234-unified-control-tickets/03.md",
+      "issue": 626,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/626",
+      "base": "1aa498674a4907f93b5216a4a98dd75a22c6ecec",
+      "branch": "feat/unified-observation-626",
+      "worktree": "unified-observation-626"
+    },
+    "4": {
+      "title": "Navigate the Byobu environment and resource relationships",
+      "blockers": [
+        1
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "worker": "pending",
+      "owned_scope": "environment resource owner and tab/session inventory adapters",
+      "packet": "docs/dev/plans/0234-unified-control-tickets/04.md",
+      "issue": 627,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/627"
+    },
+    "5": {
+      "title": "Delegate connector access and route to the owning host",
+      "blockers": [
+        1,
+        4
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "worker": "pending",
+      "owned_scope": "connector owner, existing permission and host adapters",
+      "packet": "docs/dev/plans/0234-unified-control-tickets/05.md",
+      "issue": 631,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/631"
+    },
+    "6": {
+      "title": "Read terminal streams and explicitly write exact panes",
+      "blockers": [
+        1,
+        4
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "worker": "pending",
+      "owned_scope": "terminal observation/input owners and existing tab transport",
+      "packet": "docs/dev/plans/0234-unified-control-tickets/06.md",
+      "issue": 635,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/635"
+    },
+    "7": {
+      "title": "Control prompts, slash interactions and presentation lifecycle",
+      "blockers": [
+        1,
+        3,
+        4
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "worker": "pending",
+      "owned_scope": "local prompt/slash/lifecycle adapters and session mode routing",
+      "packet": "docs/dev/plans/0234-unified-control-tickets/07.md",
+      "issue": 638,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/638"
+    },
+    "8": {
+      "title": "Unify account harness and conversation-history controls",
+      "blockers": [
+        1,
+        4
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "worker": "pending",
+      "owned_scope": "account/harness/history canonical mappings and capability adapters",
+      "packet": "docs/dev/plans/0234-unified-control-tickets/08.md",
+      "issue": 640,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/640"
+    },
+    "9": {
+      "title": "Unify wakes and expose schedule operations to programs",
+      "blockers": [
+        1
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "worker": "pending",
+      "owned_scope": "wake canonical owner and existing schedule adapter",
+      "packet": "docs/dev/plans/0234-unified-control-tickets/09.md",
+      "issue": 641,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/641"
+    },
+    "10": {
+      "title": "Compose durable bulk and semantic management programs",
+      "blockers": [
+        2,
+        5,
+        7,
+        9
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "worker": "pending",
+      "owned_scope": "bulk/program composition owner and operation reconciliation",
+      "packet": "docs/dev/plans/0234-unified-control-tickets/10.md",
+      "issue": 642,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/642"
+    },
+    "11": {
+      "title": "Deliver connector discovery documentation and acceptance",
+      "blockers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "worker": "pending",
+      "owned_scope": "generated docs, connector journey, integration validation and closeout",
+      "packet": "docs/dev/plans/0234-unified-control-tickets/11.md",
+      "issue": 643,
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/643"
+    }
+  },
+  "concurrency": "maximum three substantive implementation lanes: primary plus two workers; remaining workers queued",
+  "live_effects": "none authorized by this packet",
+  "routing": "primary owns shared contract, authority, integration and final acceptance; workers inherit default model/effort; no calibration experiment",
+  "review_fixed_point": "1aa498674a4907f93b5216a4a98dd75a22c6ecec",
+  "parent_issue": 623
+}

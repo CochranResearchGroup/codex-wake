@@ -1732,3 +1732,12 @@ Live provider/closed-Byobu execution remains unexercised; no schedules created.
 
 CLOSED (merged/deployed; native first-contact and reconnect accepted): [LOCAL-P230](docs/dev/plans/0230-2026-11-13-mailbox-first-contact-bindings.md).
 One source lane; remove first-poll prerequisite and qualify opt-in client rebinding.
+
+## P234 | Unified hierarchical connector control
+
+Status: OPEN
+Work item: #623; eleven child tickets
+Plan: [Unified control spec](docs/dev/plans/0234-unified-control-spec.md)
+Current State: Nineteen design decisions, seams and ticket graph approved.
+Canonical contract, program controls and arbitrary-turn observation underway.
+No merge/deployment or live provider effects authorized by this lane.

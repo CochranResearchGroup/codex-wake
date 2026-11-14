@@ -9809,3 +9809,11 @@ No native upgrade, terminal input or production schedules; MCP imports refresh o
 normal reconnect. Exact proof/limits: [deployment](docs/dev/plans/0173-agent-harness/persistent-wake-deployment.md).
 Owned integration checkout retires after verified closeout remote custody; unrelated
 worktrees preserved. Memory forbidden, zero writes.
+
+## Turn | 2026-11-14 | Unified connector control implementation begins
+
+Operator approved Plan0234, public operation seam, eleven-ticket graph and fixed
+review base1aa49867. Spec623 and children624/625/626/627/631/635/638/640/641/642/643
+published with native blockers and subissue links. Primary624, workers625/626.
+Integration feat/unified-control-0234; no live effects. One final broad two-axis
+review and one bounded TDD remediation pass reserved. Reuse existing test harness.
