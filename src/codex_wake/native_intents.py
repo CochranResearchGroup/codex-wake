@@ -171,7 +171,7 @@ def retain(args, root):
         found = _existing(root, fingerprint, key)
         if found:
             return _receipt(args, found.record, found.path, True)
-        clock = snapshot()
+        clock = args._schedule_clock if hasattr(args, "_schedule_clock") else snapshot()
         record = {"schema_version": SCHEMA_VERSION, "id": "wake_intent_" + uuid4().hex,
                   "created_at": "", "updated_at": "", "cwd": content["cwd"],
                   "target": content["target"], "predicate": predicate, "prompt": content["prompt"],

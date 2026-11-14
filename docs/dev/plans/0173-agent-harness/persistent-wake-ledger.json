@@ -21,32 +21,42 @@
       "worker": "root"
     },
     "613": {
-      "state": "running",
+      "state": "validated",
       "blockers": [
         611
       ],
       "worker": "persistent_live_613",
       "branch": "feat/persistent-wake-live-613",
-      "base": "53aac91d"
+      "base": "53aac91d",
+      "result_sha": "9e84816f507352585689e8622d88411fd3a9eea6",
+      "integrated_sha": "aaaa5372",
+      "validation": "5 live restoration seam tests pass on integrated branch; prior existing resume4/protocol7 pass"
     },
     "614": {
-      "state": "running",
+      "state": "validated",
       "blockers": [
         611
       ],
       "worker": "persistent_background_614",
       "branch": "feat/persistent-wake-background-614",
-      "base": "53aac91d"
+      "base": "53aac91d",
+      "result_sha": "365c3defd90153f4935945d722e0075f7d8801f0",
+      "integrated_sha": "bf877aef",
+      "validation": "7 mode/native-dispatch tests passed on integrated branch"
     },
     "615": {
-      "state": "pending",
+      "state": "validated",
       "blockers": [
         612
       ],
-      "worker": null
+      "worker": "persistent_clock_615",
+      "branch": "feat/persistent-wake-clock-615",
+      "result_sha": "3f6a9dbf7a1a05406f91dc5df610266baa7e5a1f",
+      "integrated_sha": "a14887c7",
+      "validation": "4 clock +3 interval tests passed on integrated branch"
     },
     "616": {
-      "state": "pending",
+      "state": "implemented",
       "blockers": [
         612,
         613,
@@ -72,6 +82,13 @@
       "green": "same command 3 passed; session modes 2 passed",
       "environment": "Python3.12 existing venv/source; trusted UTC injected at clock boundary; no live effects",
       "limitation": "ruff unavailable in existing environment; install declared checker before final validation"
+    },
+    {
+      "ticket": 616,
+      "red": "PYTHONPATH=src /tmp/codex-wake-persistent-610-env/bin/python -m unittest discover -s tests -p test_recurring_schedules.py -q",
+      "red_result": "daemon failed to create occurrence; MCP schedule tool unknown",
+      "green_result": "5 passed after integration/control implementation",
+      "environment": "isolated task venv installed declared .[mcp,dev]; Python3.12.13; source PYTHONPATH"
     }
   ],
   "contracts": {

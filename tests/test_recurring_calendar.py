@@ -32,7 +32,7 @@ def request(clock):
 class ClockSchedules(unittest.TestCase):
     def cli(self, root, *args):
         output = io.StringIO()
-        with contextlib.redirect_stdout(output):
+        with patch("codex_wake.sessions.observe", return_value={"complete": False, "sessions": []}), contextlib.redirect_stdout(output):
             code = run(['--wake-root', str(root), 'schedules', *args])
         self.assertEqual(code, 0)
         return json.loads(output.getvalue())

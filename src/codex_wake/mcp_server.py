@@ -552,7 +552,7 @@ class CommandRunner:
             if len(raw.encode())>65536:
                 return {'error':{'code':'invalid_argument'}},True
             return self._execute([sys.executable,'-m','codex_wake.permission_commands'],arguments,readonly,raw)
-        if group in ('agents', 'agent-state', 'resources', 'task-briefs', 'harness-native', 'harness-owner'):
+        if group in ('agents', 'agent-state', 'resources', 'task-briefs', 'harness-native', 'harness-owner', 'harness-schedules'):
             try:
                 from .harness_mcp import call as harness_call
                 return harness_call(self, group, verb, arguments, native_context), False

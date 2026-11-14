@@ -119,7 +119,7 @@ class WakeControlMCPTests(unittest.TestCase):
         with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
                 'codex_wake.native_clock.snapshot', return_value=clock):
             made, failed = runner.call('wake_native_after', dict(caller_thread_id=CALLER,
-                trigger='3650d', ttl='24h', prompt='Read-only review', idempotency_key='inspect-future',
+                trigger='3650d', ttl='24h', prompt='Read-only review', idempotency_key='inspect-future', session_mode='background',
                 wake_lifetime='persistent'), native_context=context)
         self.assertFalse(failed, made)
         listed, failed = runner.call('wake_list', dict(caller_thread_id=CALLER))
@@ -151,7 +151,7 @@ class WakeControlMCPTests(unittest.TestCase):
                 'codex_wake.native_clock.snapshot', return_value=clock):
             for caller in (CALLER, peer):
                 value, failed = runner.call('wake_native_after', dict(caller_thread_id=caller,
-                    trigger='24h', prompt='Read-only review', idempotency_key='owned-' + caller,
+                    trigger='24h', prompt='Read-only review', idempotency_key='owned-' + caller, session_mode='background',
                     wake_lifetime='persistent'), native_context=context(caller))
                 self.assertFalse(failed, value)
                 made[caller] = value['id']

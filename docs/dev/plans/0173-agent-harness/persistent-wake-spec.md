@@ -4,8 +4,15 @@ State: OPEN
 Owner: ecochran76
 Design: confirmed by operator 2026-11-13
 Implementation: authorized; ticket breakdown and test seams approved
+Work item: #610 / children #611–#616
 Integration branch: docs/persistent-wake-design
 Base: e8c79a79da0b0482e2403e634394c70f5c66e333
+
+## Current State
+
+All six implementation slices are integrated locally. Focused public-interface
+checks pass; final local validation, ticket closure, the single broad review and
+bounded remediation remain. No production schedules or deployment were changed.
 
 ## Problem Statement
 

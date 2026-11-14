@@ -49,14 +49,14 @@ def validate_request(request):
     for key, maximum in (('prompt', 32768), ('idempotency_key', 160)):
         if not isinstance(request[key], str) or not request[key].strip() or len(request[key].encode()) > maximum:
             raise WakeError('invalid_schedule_' + key)
-    positive(request['delivery_window_seconds'], 'delivery_window')
+    positive(request['delivery_window_seconds'], 'delivery_window', integer=True)
     cadence = request['cadence']
     if not isinstance(cadence, dict):
         raise WakeError('invalid_cadence')
     if cadence.get('kind') == 'interval':
         if set(cadence) != {'kind', 'seconds', 'start_at'}:
             raise WakeError('explicit_interval_fields_required')
-        positive(cadence['seconds'], 'interval')
+        positive(cadence['seconds'], 'interval', integer=True)
         start = timestamp(cadence['start_at'])
         try:
             start + timedelta(seconds=cadence['seconds'])
@@ -132,6 +132,11 @@ class ScheduleStore:
 
     def register(self, request, *, codex_path='codex', endpoint='unix://', principal=None):
         request = validate_request(request)
+        from .session_permissions import PermissionStore
+        if principal is not None and principal.role != 'operator' and principal.subject != request['thread_id']:
+            raise WakeError('schedule_exact_self_required')
+        if PermissionStore(self.root).active() and principal is None:
+            raise WakeError('schedule_verified_principal_required')
         key = request['idempotency_key']
         identifier = 'schedule_' + hashlib.sha256(key.encode()).hexdigest()[:32]
         with WakeLifecycleLock(self.root, 'recurring-schedules'):
@@ -165,26 +170,89 @@ class ScheduleStore:
             as_json=True, require_monitor=False, busy_policy='wait')
 
     def authorize(self, value, principal):
+        if principal is not None and principal.role != 'operator' and principal.subject != value['request']['thread_id']:
+            raise WakeError('schedule_authority_denied')
         context = (value.get('wake_policy') or {}).get('permission_context')
         if context and (principal is None or principal.role != 'operator' and principal.subject != context['subject']):
             raise WakeError('schedule_authority_denied')
+
+    def revise(self, identifier, request, expected_revision, *, principal=None, codex_path='codex', endpoint='unix://'):
+        request = validate_request(request)
+        with WakeLifecycleLock(self.root, 'recurring-schedules'):
+            value = self.read(identifier)
+            self.authorize(value, principal)
+            if value['revision'] != expected_revision:
+                raise WakeError('schedule_revision_conflict')
+            if value['state'] == 'cancelled':
+                raise WakeError('cancelled_schedule_requires_new_registration')
+            if any(request[k] != value['request'][k] for k in ('idempotency_key', 'thread_id')):
+                raise WakeError('schedule_identity_immutable')
+            due = first_due(request['cadence'])
+            # Cadence edits never regenerate occurrences already planned. Mode
+            # edits retain the next original due when cadence is unchanged.
+            if request['cadence'] == value['request']['cadence']:
+                due = timestamp(value['next_due_at'])
+            elif value['occurrences']:
+                latest = max(timestamp(o['due_at']) for o in value['occurrences'])
+                while due <= latest:
+                    due = next_due(request['cadence'], due)
+            args = self.native_args(request, due, 'schedule-revision:' + identifier + ':' + str(expected_revision+1), codex_path, endpoint)
+            args._permission_principal = principal
+            from .native_intents import _request
+            _, content, *_ = _request(args, self.root)
+            value['revisions'].append(dict(revision=value['revision'], request=value['request'], target=value['target'], wake_policy=value['wake_policy']))
+            value.update(revision=value['revision']+1, request=request, target=content['target'], wake_policy=content.get('wake_policy'), next_due_at=iso(due), state='enabled')
+            value.pop('attention', None)
+            self.save(value)
+            return self.receipt(value)
+
+    def cancel(self, identifier, expected_revision, *, principal=None):
+        with WakeLifecycleLock(self.root, 'recurring-schedules'):
+            value = self.read(identifier)
+            self.authorize(value, principal)
+            if value['revision'] != expected_revision:
+                raise WakeError('schedule_revision_conflict')
+            value['state'] = 'cancelled'
+            self.save(value)  # Future occurrence admission stops before child sweep.
+            self.cancel_pending(value)
+            self.save(value)
+            return self.receipt(value)
+
+    def cancel_pending(self, value):
+        from .records import find_record, replace_record, append_event
+        for item in value['occurrences']:
+            if item['state'] == 'queued':
+                item['state'] = 'cancelled'
+            if not item.get('wake_id'):
+                continue
+            with WakeLifecycleLock(self.root, item['wake_id']):
+                found = find_record(self.root, item['wake_id'])
+                record = dict(found.record)
+                if record['status'] not in ('pending', 'firing') or record.get('native_delivery', {}).get('state') in ('accepted', 'uncertain'):
+                    continue
+                record['status'] = 'cancelled'
+                record = append_event(record, 'schedule_cancelled', value['id'], None)
+                replace_record(self.root, found, record)
+                item['state'] = 'cancelled'
 
     def receipt(self, value):
         from .monitor import read_monitor_health
         from .signal_records import probe_managed_reader_capability
         health = read_monitor_health(self.root) or {}
         reader = probe_managed_reader_capability(self.root)
-        ready = bool(reader and 8 in reader.schema_versions and health.get('mode') == 'loop')
+        ready = bool(reader and 8 in reader.schema_versions and health.get('mode') == 'loop'
+                     and 'recurring_schedules_v1' in health.get('reader_capabilities', []))
         return dict(value, session_mode=value['request']['session_mode'],
             armed=ready and value['state'] == 'enabled',
             scheduling_status='armed' if ready and value['state']=='enabled' else 'retained_unmonitored' if not ready and value['state']=='enabled' else value['state'],
             monitor=dict(ready=ready, wake_root=str(self.root)))
 
-    def emit(self, value, occurrence):
+    def emit(self, value, occurrence, clock):
         due = timestamp(occurrence['due_at'])
         request = occurrence['request']
         target = occurrence['target']
         args = self.native_args(request, due, occurrence['id'], target['codex_cmd'], target['endpoint'])
+        args._schedule_clock = clock
         args._schedule_target = target
         args._schedule_wake_policy = occurrence['wake_policy']
         from .native_intents import retain
@@ -195,7 +263,7 @@ class ScheduleStore:
         occurrence['state'] = 'pending'
 
 
-def poll_schedules(root, clock):
+def poll_schedules(root, clock, *, runtime_adapter=None):
     """Bounded scheduling only; existing daemon owns native dispatch and evidence."""
     store = ScheduleStore(root)
     if not store.directory.exists():
@@ -208,6 +276,10 @@ def poll_schedules(root, clock):
     with WakeLifecycleLock(store.root, 'recurring-schedules'):
         wakes = {w.record['id']: w.record for w in all_records(store.root, include_archive=True)}
         for value in store.records():
+            if value['state'] == 'cancelled':
+                store.cancel_pending(value)
+                store.save(value)
+                continue
             if value['state'] not in ('enabled', 'exhausted'):
                 continue
             from .wake_session_modes import session_state
@@ -215,6 +287,7 @@ def poll_schedules(root, clock):
             if state == 'closed':
                 value['state'] = 'cancelled'
                 value['reason'] = 'session_closed'
+                store.cancel_pending(value)
                 store.save(value)
                 continue
             if state == 'unknown':
@@ -223,12 +296,43 @@ def poll_schedules(root, clock):
                 continue
             for item in value['occurrences']:
                 wake = wakes.get(item.get('wake_id'))
-                if wake:
+                if wake and item['state'] not in ('completed', 'turn_failed', 'turn_interrupted'):
                     item['state'] = wake['status']
-                    if wake.get('native_delivery', {}).get('execution') == 'completed':
-                        item['state'] = 'completed'
+                    delivery = wake.get('native_delivery', {})
+                    execution = delivery.get('execution')
+                    if delivery.get('state') == 'accepted' and execution not in ('turn_completed', 'turn_failed', 'turn_interrupted'):
+                        try:
+                            from .native_delivery import _codex_adapter, native_prompt
+                            adapter = runtime_adapter or _codex_adapter()
+                            recipient = adapter.resolve(wake['target'])
+                            evidence = adapter.reconcile(recipient, native_prompt(store.root, wake)).evidence
+                            if (recipient.runtime == 'codex' and recipient.session_id == wake['target']['thread_id'] and evidence
+                                    and evidence.get('source') == 'native_turn' and all(evidence.get(k) for k in ('turn_id', 'user_message_id', 'client_message_id'))):
+                                execution = evidence.get('execution')
+                        except Exception:
+                            pass
+                    if execution in ('turn_completed', 'turn_failed', 'turn_interrupted'):
+                        item['state'] = 'completed' if execution == 'turn_completed' else execution
+                    outcome = wake.get('policy_outcome', {})
+                    observation = wake.get('runtime_observation', {})
+                    reason = outcome.get('reason') or observation.get('reason')
+                    if reason and reason not in ('conversation_check_in_progress', 'recipient_busy', 'mode_route_not_selected') and observation.get('state') in ('unavailable', 'unsupported'):
+                        item['state'] = 'attention'
+                        item['reason'] = reason
+                        value['attention'] = reason
+                        # Keep deadline/identity; require explicit schedule revision
+                        # after resolving configuration before another launch.
+                        value['state'] = 'attention'
+                        store.cancel_pending(value)
+                        item['state'] = 'attention'
+                        publish_attention(store, value, item, now)
+
             request = value['request']
             newly_due = []
+            if value['state'] == 'attention':
+                store.save(value)
+                results.append(store.receipt(value))
+                continue
             for _ in range(MAX_POLL_OCCURRENCES):
                 due = timestamp(value['next_due_at'])
                 end = request['end']
@@ -287,7 +391,7 @@ def poll_schedules(root, clock):
                 candidate = pending[0]
                 store.save(value)
                 try:
-                    store.emit(value, candidate)
+                    store.emit(value, candidate, clock)
                 except (WakeError, OSError, ValueError) as exc:
                     candidate['state'] = 'attention'
                     candidate['reason'] = str(exc)
@@ -295,3 +399,26 @@ def poll_schedules(root, clock):
             store.save(value)
             results.append(store.receipt(value))
     return results
+
+
+def publish_attention(store, value, occurrence, now):
+    """A notice grants no resume authority; failure remains inspectable in schedule."""
+    from .attention_queue import AttentionQueue
+    from .session_permissions import Principal, PermissionStore
+    context = (occurrence.get('wake_policy') or {}).get('permission_context') or {}
+    principal = Principal(context.get('subject', value['request']['thread_id']), context.get('role', 'session'), tuple(context.get('tasks', [])))
+    permissions = PermissionStore(store.root)
+    try:
+        revision = permissions._read()['revision'] if permissions.active() else 1
+        request = dict(key='schedule:' + occurrence['id'], kind='notice',
+            question='Scheduled check needs attention: ' + occurrence.get('reason', 'recipient unavailable'),
+            options=['acknowledge'], evidence=[value['id'], occurrence['id']], priority='normal',
+            expires_at=timestamp(occurrence['expires_at']).timestamp(), permission_decision=False,
+            context=dict(owner=principal.subject, operation_id=occurrence['id'], attempt=1,
+                task_id=context.get('task_id') or 'none', allocation_id='unchanged', runtime='codex',
+                conversation_id=value['request']['thread_id'], account='not_attested', target=value['request']['thread_id'],
+                action='wake.background' if value['request']['session_mode']=='background' else 'wake.new_tab',
+                effect_scope='resume_existing_scope', policy_root=str(permissions.root), policy_revision=revision, operation_state='blocked'))
+        occurrence['attention_id'] = AttentionQueue(store.root, now=lambda: now).request(principal, request)['request_id']
+    except (WakeError, OSError, ValueError, KeyError) as exc:
+        occurrence['attention_error'] = str(exc)

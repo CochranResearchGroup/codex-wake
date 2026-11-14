@@ -337,6 +337,15 @@ def poll_once(
     from .agent_handoff import poll_handoffs
     from .wake_control import read_control
     emergency = read_control(root)
+    if not emergency['paused'] and (root / 'schedules').is_dir():
+        from .recurring_schedules import poll_schedules
+        if time_provider is None:
+            from .native_clock import snapshot
+            schedule_clock = snapshot()
+        else:
+            from dataclasses import asdict
+            schedule_clock = {'utc': asdict(time_provider()), 'counter': None}
+        poll_schedules(root, schedule_clock)
     poll_handoffs(root,supervision=None if emergency['paused'] else lifecycle_supervision,
                   stop_reason='emergency_interrupt' if emergency['interrupt_requested'] else None)
     from .lifecycle_supervision import poll_spawns

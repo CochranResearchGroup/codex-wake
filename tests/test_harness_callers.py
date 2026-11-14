@@ -150,7 +150,7 @@ class HarnessCallerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             runner = CommandRunner(wake_root=root)
-            body = dict(caller_thread_id=THREAD, trigger='1m', prompt='Continue', idempotency_key='native-mcp',
+            body = dict(caller_thread_id=THREAD, trigger='1m', prompt='Continue', idempotency_key='native-mcp', session_mode='background',
                         wake_lifetime='conversation', owner_end='hold', recipient_startup='background_saved')
             denied, failed = runner.call('wake_native_after', body)
             self.assertTrue(failed)
@@ -175,7 +175,7 @@ class HarnessCallerTests(unittest.TestCase):
                 root = Path(temporary)
                 runner = CommandRunner(wake_root=root)
                 body = dict(caller_thread_id=THREAD, trigger=delay, ttl='24h', prompt='Read-only review',
-                    idempotency_key='future-fixture', wake_lifetime='persistent', recipient_startup='create_load_run')
+                    idempotency_key='future-fixture', session_mode='reopen_live', wake_lifetime='persistent', recipient_startup='create_load_run')
                 with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
                         'codex_wake.native_clock.snapshot', return_value=clock):
                     value, failed = runner.call('wake_native_after', body, native_context=META)
@@ -198,7 +198,7 @@ class HarnessCallerTests(unittest.TestCase):
             root = Path(temporary) / 'wake'
             runner = CommandRunner(wake_root=root)
             body = dict(caller_thread_id=THREAD, trigger='3650d', ttl='24h', prompt='Read-only review',
-                idempotency_key='future-monitor-fixture', wake_lifetime='persistent')
+                idempotency_key='future-monitor-fixture', session_mode='background', wake_lifetime='persistent')
             write_monitor_health(wake_root=root, source='qualification-fixture', mode='once')
             with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
                     'codex_wake.native_clock.snapshot', return_value=clock):

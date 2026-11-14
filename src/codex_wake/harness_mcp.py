@@ -86,6 +86,21 @@ def tool_specs():
                  prompt={'type': 'string', 'minLength': 1, 'maxLength': 32768},
                  idempotency_key=TEXT, ttl=dict(TEXT, description='Delivery window after due for time wakes; from registration for file wakes.'), **POLICY),
             ['caller_thread_id', 'trigger', 'prompt', 'idempotency_key', 'session_mode'], False)
+    for verb in ('register', 'list', 'show', 'revise', 'cancel'):
+        properties = dict(caller_thread_id=CALLER)
+        required = ['caller_thread_id']
+        if verb in ('register', 'revise'):
+            properties['request'] = {'type': 'object'}
+            required.append('request')
+        if verb in ('show', 'revise', 'cancel'):
+            properties['schedule_id'] = TEXT
+            required.append('schedule_id')
+        if verb in ('revise', 'cancel'):
+            properties['expected_revision'] = {'type': 'integer', 'minimum': 1}
+            required.append('expected_revision')
+        result['wake_schedules_' + verb] = ('harness-schedules', verb,
+            'Manage explicit exact-self durable recurring schedules. Require agreed mode/cadence/end/missed/overlap/delivery fields. Retained is not armed; cancellation does not stop running turns.',
+            properties, required, verb in ('list', 'show'))
     result['wake_owner_complete'] = ('harness-owner', 'complete',
         'Reconcile an explicit operator-approved owner completion. Caller identity alone cannot declare work complete. Never retract or replay uncertain effects.',
         dict(caller_thread_id=CALLER, owner_kind={'enum': ['conversation', 'task']}, owner_id=TEXT, event_id=TEXT),
@@ -174,6 +189,33 @@ def call(runner, group, verb, arguments, native_context):
                                revision=arguments.get('revision'), assignment_id=arguments.get('assignment_id'),
                                brief_json=json.dumps(arguments.get('brief')) if 'brief' in arguments else None)
         return execute_task_briefs(args, root, authority=authority)
+    if group == 'harness-schedules':
+        from .recurring_schedules import ScheduleStore
+        from .session_permissions import Principal
+        store = ScheduleStore(root)
+        tasks = controller_tasks(runner, caller)
+        principal = Principal(caller, 'controller' if tasks else 'session', tuple(tasks))
+        if verb in ('register', 'revise'):
+            request = arguments['request']
+            if request.get('thread_id') != caller:
+                raise WakeError('schedule_exact_self_required')
+            if verb == 'register':
+                return store.register(request, endpoint=runner.app_server, principal=principal)
+            return store.revise(arguments['schedule_id'], request, arguments['expected_revision'], endpoint=runner.app_server, principal=principal)
+        if verb == 'cancel':
+            return store.cancel(arguments['schedule_id'], arguments['expected_revision'], principal=principal)
+        if verb == 'show':
+            value = store.read(arguments['schedule_id'])
+            store.authorize(value, principal)
+            return store.receipt(value)
+        values = []
+        for value in store.records():
+            try:
+                store.authorize(value, principal)
+                values.append(store.receipt(value))
+            except WakeError:
+                continue
+        return dict(schedules=values)
     if group == 'harness-owner':
         kind, owner = arguments['owner_kind'], arguments['owner_id']
         if (kind == 'conversation' and owner != 'codex:' + caller) or (kind == 'task' and owner not in controller_tasks(runner, caller)):
