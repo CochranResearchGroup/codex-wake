@@ -232,8 +232,28 @@
       "baseline": "1aa498674a4907f93b5216a4a98dd75a22c6ecec",
       "red": "old-auth-contract-red.log: exact legacy code redemption incorrectly accepted; independent probe showed old access authentication ignored actions",
       "green": "20auth/connector/bulk/transportsPASS21.966s; old reader refuses code/access/refresh; new reader retains attenuation and inherited revocation"
+    },
+    {
+      "tier": "focused post-review",
+      "source": "f38abc6dc4dd06be0b49192edca05e4fe66d8dd6",
+      "result": "33PASS38.160s; final wheel344member exact match",
+      "wheel_sha256": "4130b2bf2ed15135e519f34b76b68b56b4148083a2f1f98c3f6c101064902a43",
+      "receipt": "docs/dev/evidence/plan0234/validation.md"
     }
   ],
   "reviewed_head": "bf4b5e00d1b925b3daf21e079a192a6295d00d15",
-  "review_report": "docs/dev/evidence/plan0234/review.md"
+  "review_report": "docs/dev/evidence/plan0234/review.md",
+  "qualified_source": "f38abc6dc4dd06be0b49192edca05e4fe66d8dd6",
+  "accepted_findings": {
+    "Standards": {
+      "count": 2,
+      "highest": "P1",
+      "unresolved": 0
+    },
+    "Spec": {
+      "count": 3,
+      "highest": "P1",
+      "unresolved": 0
+    }
+  }
 }

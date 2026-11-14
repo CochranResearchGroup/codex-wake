@@ -20,8 +20,8 @@ Existing public seams: ProtectedOperations plus actual OAuth subset grants catch
 Exact commands (PYTHONPATH=src:tests, Python temporary source environment):
 
 - `python -m unittest test_unified_connectors.ConnectorTests.test_metadata_only_delegation_cannot_read_stored_program_definition -q`: corrected red AuthError not raised; green1PASS0.865s. Initial setup error used wrong host/environment and is retained separately.
-- `python -m unittest test_unified_bulk.BulkTests.test_terminal_wait_reconciles_original_handle_after_uncertainty_or_disconnect -q`: red2 operation_not_found errors; green1PASS2.237s. Next vertical assertion red admitted != uncertain; green retained in review-member-green.log.
+- `python -m unittest test_unified_bulk.BulkTests.test_terminal_wait_reconciles_original_handle_after_uncertainty_or_disconnect -q`: red2 operation_not_found errors; green1PASS2.237s. Next vertical assertion red admitted != uncertain; green1PASS2.088s retained in review-member-green.log.
 
-Raw red/green receipts live in user-state `unified-0234/review-{content,wait,member}-*.log`. Focused post-fix regression and exact reviewed wheel qualification follow; no native/provider/live acceptance is inferred.
+Raw red/green receipts live in user-state `unified-0234/review-{content,wait,member}-*.log`. Focused post-fix regression33PASS38.160s and exact reviewed wheel qualification PASS at f38abc6d; no native/provider/live acceptance is inferred.
 
 Accepted findings: Standards2 (highest P1), Spec3 (highest P1); three unique blocking defects plus one naming-duplication judgment resolved. No rejected, backlog or unresolved findings.
