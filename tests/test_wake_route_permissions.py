@@ -149,11 +149,11 @@ print(json.dumps({'result':result.status,'record':all_records(root)[0].record}))
         meta=dict(threadId=THREAD,sessionId=THREAD,callId='wake-call',**{
             'x-codex-turn-metadata':dict(thread_id=THREAD,session_id=THREAD,turn_id='wake-turn')})
         arguments=dict(caller_thread_id=THREAD,trigger='1m',prompt='Continue approved work',
-            idempotency_key='native-mcp',routes=['background'])
-        with patch('codex_wake.native_clock.snapshot',return_value=CLOCK), patch('codex_wake.app_server.resolve_codex_cmd',return_value=sys.executable):
+            idempotency_key='native-mcp', session_mode='background',routes=['existing_tab','background'])
+        with patch('codex_wake.sessions.observe',return_value={'complete':False,'sessions':[]}), patch('codex_wake.native_clock.snapshot',return_value=CLOCK), patch('codex_wake.app_server.resolve_codex_cmd',return_value=sys.executable):
             value,failed=runner.call('wake_native_after',arguments,native_context=meta)
         self.assertFalse(failed,value)
-        self.assertEqual(value['wake_policy']['routes'],['background'])
+        self.assertEqual(value['wake_policy']['routes'],['existing_tab','background'])
         self.assertEqual(value['wake_policy']['permission_context']['subject'],THREAD)
         rejected,failed=runner.call('wake_native_after',dict(arguments,idempotency_key='spoofed'),native_context={})
         self.assertTrue(failed,rejected)

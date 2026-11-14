@@ -1,0 +1,142 @@
+{
+  "spec": {
+    "labels": [
+      {
+        "id": "LA_kwDOShLp5M8AAAACjvSTZg",
+        "name": "enhancement",
+        "description": "New feature or request",
+        "color": "a2eeef"
+      },
+      {
+        "id": "LA_kwDOShLp5M8AAAAC8WtCJw",
+        "name": "ready-for-agent",
+        "description": "Matt engineering triage state: ready-for-agent",
+        "color": "ededed"
+      }
+    ],
+    "number": 610,
+    "state": "OPEN",
+    "title": "Spec: explicit persistent wake modes and durable recurrence",
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/610"
+  },
+  "01": {
+    "labels": [
+      {
+        "id": "LA_kwDOShLp5M8AAAACjvSTZg",
+        "name": "enhancement",
+        "description": "New feature or request",
+        "color": "a2eeef"
+      },
+      {
+        "id": "LA_kwDOShLp5M8AAAAC8WtCJw",
+        "name": "ready-for-agent",
+        "description": "Matt engineering triage state: ready-for-agent",
+        "color": "ededed"
+      }
+    ],
+    "number": 611,
+    "state": "OPEN",
+    "title": "Persistent wakes: explicit modes and session-only cancellation",
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/611"
+  },
+  "02": {
+    "labels": [
+      {
+        "id": "LA_kwDOShLp5M8AAAACjvSTZg",
+        "name": "enhancement",
+        "description": "New feature or request",
+        "color": "a2eeef"
+      },
+      {
+        "id": "LA_kwDOShLp5M8AAAAC8WtCJw",
+        "name": "ready-for-agent",
+        "description": "Matt engineering triage state: ready-for-agent",
+        "color": "ededed"
+      }
+    ],
+    "number": 612,
+    "state": "OPEN",
+    "title": "Persistent wakes: durable interval recurring schedules",
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/612"
+  },
+  "03": {
+    "labels": [
+      {
+        "id": "LA_kwDOShLp5M8AAAACjvSTZg",
+        "name": "enhancement",
+        "description": "New feature or request",
+        "color": "a2eeef"
+      },
+      {
+        "id": "LA_kwDOShLp5M8AAAAC8WtCJw",
+        "name": "ready-for-agent",
+        "description": "Matt engineering triage state: ready-for-agent",
+        "color": "ededed"
+      }
+    ],
+    "number": 613,
+    "state": "OPEN",
+    "title": "Persistent wakes: restore the exact conversation in a live tab",
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/613"
+  },
+  "04": {
+    "labels": [
+      {
+        "id": "LA_kwDOShLp5M8AAAACjvSTZg",
+        "name": "enhancement",
+        "description": "New feature or request",
+        "color": "a2eeef"
+      },
+      {
+        "id": "LA_kwDOShLp5M8AAAAC8WtCJw",
+        "name": "ready-for-agent",
+        "description": "Matt engineering triage state: ready-for-agent",
+        "color": "ededed"
+      }
+    ],
+    "number": 614,
+    "state": "OPEN",
+    "title": "Persistent wakes: exclusive foreground or background continuation",
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/614"
+  },
+  "05": {
+    "labels": [
+      {
+        "id": "LA_kwDOShLp5M8AAAACjvSTZg",
+        "name": "enhancement",
+        "description": "New feature or request",
+        "color": "a2eeef"
+      },
+      {
+        "id": "LA_kwDOShLp5M8AAAAC8WtCJw",
+        "name": "ready-for-agent",
+        "description": "Matt engineering triage state: ready-for-agent",
+        "color": "ededed"
+      }
+    ],
+    "number": 615,
+    "state": "OPEN",
+    "title": "Persistent wakes: explicit clock cadence and DST behavior",
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/615"
+  },
+  "06": {
+    "labels": [
+      {
+        "id": "LA_kwDOShLp5M8AAAACjvSTZg",
+        "name": "enhancement",
+        "description": "New feature or request",
+        "color": "a2eeef"
+      },
+      {
+        "id": "LA_kwDOShLp5M8AAAAC8WtCJw",
+        "name": "ready-for-agent",
+        "description": "Matt engineering triage state: ready-for-agent",
+        "color": "ededed"
+      }
+    ],
+    "number": 616,
+    "state": "OPEN",
+    "title": "Persistent wakes: manage and recover recurring schedules through CLI and MCP",
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/616"
+  }
+}

@@ -1,6 +1,21 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: persistent-wakes-610
+    owner: root / ecochran76
+    objective: Explicit wake session modes and durable recurring schedules
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/610]
+    plan: docs/dev/plans/0173-agent-harness/persistent-wake-spec.md
+    branch: docs/persistent-wake-design
+    worker_branches: [feat/persistent-wake-live-613, feat/persistent-wake-background-614]
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
+    dependencies: []
+    overlaps: [HF-20, HF-18]
+    updated_at: 2026-11-13
+    disposition: Six tickets closed; PR618 source handoff; review1/remediation1 resolved7; no deployment; owned checkouts retire after verified remote custody
+
   - id: P231
     owner: primary / ecochran76
     objective: Deliver persistent bot families and identifiable worker tabs

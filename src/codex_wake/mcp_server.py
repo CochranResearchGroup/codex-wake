@@ -160,7 +160,8 @@ for _name in ('wake_goal_limits_set','wake_goal_limits_show'):
 from .harness_mcp import POLICY as WAKE_POLICY_PROPERTIES
 for _name, _spec in tuple(SPECS.items()):
     if _spec[0] == 'grok' and _spec[1] in ('after', 'at', 'file'):
-        SPECS[_name] = (*_spec[:3], {**_spec[3], **WAKE_POLICY_PROPERTIES}, *_spec[4:])
+        # Session-mode routing is qualified only for native Codex.
+        SPECS[_name] = (*_spec[:3], {**_spec[3], **{key:value for key,value in WAKE_POLICY_PROPERTIES.items() if key != 'session_mode'}}, *_spec[4:])
 
 
 from .profile_operations import tool_specs as profile_tool_specs
@@ -552,7 +553,7 @@ class CommandRunner:
             if len(raw.encode())>65536:
                 return {'error':{'code':'invalid_argument'}},True
             return self._execute([sys.executable,'-m','codex_wake.permission_commands'],arguments,readonly,raw)
-        if group in ('agents', 'agent-state', 'resources', 'task-briefs', 'harness-native', 'harness-owner'):
+        if group in ('agents', 'agent-state', 'resources', 'task-briefs', 'harness-native', 'harness-owner', 'harness-schedules'):
             try:
                 from .harness_mcp import call as harness_call
                 return harness_call(self, group, verb, arguments, native_context), False

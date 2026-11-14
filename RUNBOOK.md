@@ -9611,6 +9611,19 @@ complete; issue596 closes from this actual readback. Docs-only closeout receipt
 merges separately; remove exact task checkout after clean published custody.
 Memory forbidden under explicit-request-only developer boundary; zero writes.
 
+
+## Turn | 2026-11-13 | Explicit persistent wake modes and recurrence
+
+Operator confirmed the three explicit per-schedule modes and recurrence contract,
+approved spec #610 and tickets #611–#616, and authorized implementation with one
+ticket per worker, one final review and one bounded remediation. Primary took
+#611/#612/#616; live613, background614 and clock615 worked in isolated checkouts.
+Integration branch `docs/persistent-wake-design`; execution ledger and source spec:
+[ledger](docs/dev/plans/0173-agent-harness/persistent-wake-ledger.json),
+[spec](docs/dev/plans/0173-agent-harness/persistent-wake-spec.md). Current status:
+source slices integrated; final validation/review and tracker closure pending.
+No production registration, provider action or deployment.
+
 ## Turn | 2026-11-13 | LOCAL-P230 systemic mailbox lifecycle repair
 
 Operator clarified WebB was a symptom, not the product scope. Existing bootstrap
@@ -9749,6 +9762,20 @@ Placement/display worker checkouts were removed after remote custody/clean check
 Two reused integration checkouts retire after this docs-only closeout receipt's
 verified merge; root anchors remain main, unrelated checkouts unchanged. Memory
 forbidden by explicit-request-only developer boundary; zero Graphiti writes.
+
+## Turn | 2026-11-13 | Persistent wake source closeout
+
+Tickets #611–#616 CLOSED; parent #610 retains specification discussion. PR618
+contains explicit session_only/reopen_live/background and durable interval/clock
+recurrence, revision/cancel/recovery controls. One review and one TDD remediation
+resolved seven findings. Final code a32da00c; validation and limits recorded in
+[validation](docs/dev/plans/0173-agent-harness/persistent-wake-validation.md).
+Coverage assembled across bounded continuations:2564 cases/2546 unique IDs,
+no missing IDs; no single full-suite-at-final-SHA claim. Disposable final wheel
+register/show/revise/cancel passed, armed=false. No hosted CI or live deployment.
+Three worker checkouts removed after matching remote-tip readback; integration
+checkout retires after final clean remote custody. Branch refs remain preserved.
+Memory disposition forbidden: developer explicit-request-only boundary, no write.
 
 ## Turn | 2026-11-13 | P230 approved shared refresh expired without effect
 

@@ -28,6 +28,8 @@ def add_native_parser(subparsers):
         command = commands.add_parser(verb)
         from .wake_policy import add_options
         add_options(command)
+        from .wake_session_modes import MODES
+        command.add_argument('--session-mode', choices=MODES, help='explicit session lifecycle mode; legacy CLI calls retain their policy contract')
         command.add_argument('--codex-path', default='codex')
         command.add_argument('--endpoint', default='unix://')
         command.add_argument('--ttl', default='24h', help='expiry after time due, or after file registration')
@@ -129,6 +131,10 @@ def _codex_adapter():
     )
 
 
+from .wake_mode_runtime import guard_mode_dispatch
+
+
+@guard_mode_dispatch
 def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: RuntimeAdapter | None = None):
     from .injector import DispatchResult
     record = dict(found.record)
@@ -172,8 +178,8 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
         from .wake_policy import startup_reason
         policy_reason = startup_reason(record, observation)
         ready = observation.state == 'ready' and policy_reason is None
-        if policy_reason:
-            record['policy_outcome'] = dict(state='held', reason=policy_reason)
+        if policy_reason or (target.get('session_mode') and observation.state != 'ready'):
+            record['policy_outcome'] = dict(state='held', reason=policy_reason or observation.reason)
         if observation.resumed:
             record = append_event(record, 'native_same_thread_resumed',
                                   'explicit workflow policy resumed its exact saved thread', now)
@@ -210,6 +216,12 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
     record['native_delivery'] = {'state': 'uncertain', 'execution': 'not_observed',
                                  'acknowledgment': 'not_observed',
                                  'submission_id': str(uuid4())}
+    if target.get('session_mode'):
+        for route in ('existing_tab', 'background', 'new_tab'):
+            capability = observation.capabilities.get('wake.' + route)
+            if capability is not None and capability.state == 'supported':
+                record['native_delivery']['route'] = route
+                break
     prompt = native_prompt(root, record)
     record['native_delivery']['prompt_sha256'] = hashlib.sha256(prompt.encode()).hexdigest()
     # Count the durable submission intent, including a crash before queueing.
@@ -219,17 +231,19 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
     replace_record(root, found, record)
     try:
         submitted = adapter.submit(recipient, prompt)
-        if not isinstance(submitted, RuntimeSubmission):
-            raise WakeError('invalid runtime submission outcome')
-        if submitted.state == 'accepted':
-            if submitted.evidence_kind != 'native_queue_acceptance':
-                raise WakeError('runtime evidence does not confirm native queue acceptance')
-            UUID(submitted.receipt_id)
+        from .runtime_delivery import validate_native_submission
+        validate_native_submission(submitted, target['thread_id'], allow_background=target.get('session_mode') == 'background')
     except Exception as exc:
         submitted = RuntimeSubmission(
             'uncertain', reason='runtime_adapter_exception', exception_type=type(exc).__name__,
             failure=submission_failure('runtime_adapter_exception', None, exc),
         )
+    if submitted.state == 'not_sent' and submitted.pre_io is True:
+        record.pop('native_delivery', None)
+        record.update(status='cancelled' if submitted.reason == 'session_closed' else 'pending',
+                      policy_outcome=dict(state='retired' if submitted.reason == 'session_closed' else 'held', reason=submitted.reason))
+        replace_record(root, found, record)
+        return DispatchResult('requeued', submitted.reason or 'native mode changed before submission')
     if submitted.state != 'accepted':
         record['native_delivery']['submission_failure'] = submitted.failure or {
             'reason': submitted.reason or 'runtime_submission_unconfirmed',
@@ -239,7 +253,8 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
         replace_record(root, found, record)
         return DispatchResult('skipped', record['last_error'])
     record['status'] = 'submitted'
-    record['native_delivery'].update(state='accepted', queue_id=submitted.receipt_id, accepted_at=None if intent else format_utc(now))
+    receipt_field = 'turn_id' if submitted.evidence_kind == 'native_turn_acceptance' else 'queue_id'
+    record['native_delivery'].update(state='accepted', **{receipt_field: submitted.receipt_id}, accepted_at=None if intent else format_utc(now))
     record = append_event(record, 'native_accepted', 'native queue accepted; execution not yet observed', now)
     replace_record(root, found, record)
     return DispatchResult('submitted', 'native queue accepted')

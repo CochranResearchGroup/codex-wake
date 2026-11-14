@@ -84,7 +84,12 @@ def decorate_policy(root,args,conversation,policy):
     principal=_principal(args);target=_target(conversation)
     if principal.role!='operator' and principal.subject!=target:
         raise PermissionDenied('wake_exact_self_required')
-    routes=getattr(args,'wake_routes',None) or DEFAULT_ROUTES[policy['startup']]
+    mode = getattr(args, 'session_mode', None)
+    mode_routes = {'session_only': ['existing_tab'], 'reopen_live': ['existing_tab', 'new_tab'],
+                   'background': ['existing_tab', 'background']}
+    routes = getattr(args, 'wake_routes', None) or mode_routes.get(mode, DEFAULT_ROUTES[policy['startup']])
+    if mode in mode_routes and routes != mode_routes[mode]:
+        raise WakeError('session_mode_routes_conflict')
     if not valid_routes(routes):raise WakeError('invalid_wake_routes')
     if policy['startup']=='active_tab' and routes!=['existing_tab']:
         raise WakeError('active_tab_conflicts_with_routes')
@@ -177,7 +182,7 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
             if not supported(route,observation):
                 reasons.append(route+':unsupported');continue
             if observation.state!='ready':
-                reasons.append(route+':not_ready');break
+                reasons.append(route+':'+observation.reason);break
             record['permission_check']=check_route(root,record,route)
             verdict=dispatch_gate(record,clock_provider())
             if verdict['state']!='due':
@@ -201,14 +206,19 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
         try:
             record['permission_check']=check_route(root,record,route)
             submitted=selected.submit(recipient,prompt)
-            if not isinstance(submitted,RuntimeSubmission):raise WakeError('invalid submission result')
-            if submitted.state=='accepted':
-                if submitted.evidence_kind!='native_queue_acceptance':raise WakeError('native acceptance not verified')
-                UUID(submitted.receipt_id)
+            from .runtime_delivery import validate_native_submission
+            validate_native_submission(submitted, record['target']['thread_id'],
+                allow_background=route == 'background' and record['target'].get('session_mode') == 'background')
         except PermissionDenied as exc:
             submitted=RuntimeSubmission('not_sent',reason=exc.code,pre_io=True)
         except Exception:
             submitted=RuntimeSubmission('uncertain',reason='adapter_outcome_unknown')
+        if submitted.state=='not_sent' and submitted.pre_io is True and record['target'].get('session_mode'):
+            record.pop('native_delivery', None)
+            record.update(status='cancelled' if submitted.reason == 'session_closed' else 'pending',
+                          policy_outcome=dict(state='retired' if submitted.reason == 'session_closed' else 'held', reason=submitted.reason))
+            replace_record(root, found, record)
+            return DispatchResult('requeued', submitted.reason or 'mode_route_changed')
         if submitted.state=='not_sent' and submitted.pre_io is True:
             progress={'next':index+1,'history':[*progress['history'],dict(route=route,
                 state='not_sent',pre_io=True,reason=submitted.reason,submission_id=delivery['submission_id'])]}
@@ -223,7 +233,8 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
             replace_record(root,found,record)
             return DispatchResult('skipped',record['last_error'])
         record['status']='submitted'
-        delivery.update(state='accepted',queue_id=submitted.receipt_id,accepted_at=None)
+        receipt_field = 'turn_id' if submitted.evidence_kind == 'native_turn_acceptance' else 'queue_id'
+        delivery.update(state='accepted', **{receipt_field: submitted.receipt_id}, accepted_at=None)
         record=append_event(record,'native_accepted','exact native queue accepted on '+route,now)
         replace_record(root,found,record)
         return DispatchResult('submitted','native queue accepted')

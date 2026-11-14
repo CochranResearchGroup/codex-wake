@@ -47,11 +47,17 @@ def _request(args, root):
               "codex_cmd": resolve_codex_cmd(args.codex_path, required=True, preserve_launcher=True),
               "endpoint": args.endpoint, "expires_at": None,
               "resume_policy": "same_thread" if args.resume_missing else "hold"}
+    from .wake_session_modes import bind_mode
+    if hasattr(args, "_schedule_target"):
+        target = dict(args._schedule_target)
+    else:
+        bind_mode(args, root, target)
     content = {"root": str(root), "cwd": str(Path.cwd().resolve()), "target": target,
                "schedule": schedule, "ttl_seconds": ttl, "prompt": prompt,
                "tolerance_seconds": tolerance, "stop_at": stop}
     from .wake_policy import request_policy
-    policy = request_policy(root, args, "codex:" + args.thread_id)
+    policy = (args._schedule_wake_policy if hasattr(args, "_schedule_wake_policy")
+              else request_policy(root, args, "codex:" + args.thread_id))
     if policy is not None:
         content["wake_policy"] = policy
         target["startup_policy"] = policy["startup"]
@@ -114,7 +120,9 @@ def _receipt(args, record, path, deduplicated):
     reader = probe_managed_reader_capability(root)
     from .monitor import read_monitor_health
     health = read_monitor_health(root) or {}
-    monitored = reader is not None and record['schema_version'] in reader.schema_versions and health.get('mode') == 'loop'
+    required_capabilities = ['wake_session_modes_v1'] if record.get('target', {}).get('session_mode') else []
+    monitored = (reader is not None and record['schema_version'] in reader.schema_versions and health.get('mode') == 'loop'
+                 and all(c in health.get('reader_capabilities', []) for c in required_capabilities))
     if getattr(args, 'require_monitor', False) and not monitored:
         raise WakeError(f"schema{record['schema_version']} intent retained as {record['id']}; active compatible worker unavailable; upgrade or enroll the owning monitor")
     intent = record['scheduling_intent']
@@ -124,8 +132,10 @@ def _receipt(args, record, path, deduplicated):
     value = {"id": record["id"], "path": str(path), "status": record["status"],
              "time_recovery": record["time_recovery"], "deduplicated": deduplicated,
              "automatic_recovery": recovery, "requires_original_clock_evidence": unanchored,
-             "requires_worker_schema": record["schema_version"], "wake_policy": record.get("wake_policy")}
+             "requires_worker_schema": record["schema_version"], "requires_worker_capabilities": required_capabilities, "wake_policy": record.get("wake_policy")}
     projection = schedule_projection(record)
+    if record.get("target", {}).get("session_mode"):
+        value["session_mode"] = record["target"]["session_mode"]
     owner_held = record.get('policy_outcome', {}).get('state') in ('held', 'retired')
     unsupported = projection['basis'] == 'outside_supported_calendar'
     armed = bool(monitored and not unanchored and not owner_held and not unsupported
@@ -163,7 +173,7 @@ def retain(args, root):
         found = _existing(root, fingerprint, key)
         if found:
             return _receipt(args, found.record, found.path, True)
-        clock = snapshot()
+        clock = args._schedule_clock if hasattr(args, "_schedule_clock") else snapshot()
         record = {"schema_version": SCHEMA_VERSION, "id": "wake_intent_" + uuid4().hex,
                   "created_at": "", "updated_at": "", "cwd": content["cwd"],
                   "target": content["target"], "predicate": predicate, "prompt": content["prompt"],
@@ -335,7 +345,8 @@ def evaluate(root, identifier, clock, *, record_validator=None):
             return "pending"
         from .wake_policy import apply_owner_state
         try:
-            held = apply_owner_state(root, record)
+            from .wake_session_modes import apply_session_mode
+            held = apply_session_mode(record) or apply_owner_state(root, record)
         except WakeError as exc:
             held = str(exc)
         if held:

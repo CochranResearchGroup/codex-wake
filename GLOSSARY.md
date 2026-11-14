@@ -204,6 +204,10 @@ and acceptance are separate outcomes.
 An evidence-backed decision that a result meets its declared acceptance
 conditions. A worker's completion report alone is not that decision.
 
+**Recurring schedule**:
+An agreement defining when repeated checks become due, which conversation receives
+them, their session mode, and the conditions under which scheduling ends.
+
 **Scheduled occurrence**:
 One planned execution arising from a recurring schedule, distinct from attempts
 to deliver or execute that occurrence.
@@ -235,6 +239,23 @@ an assignment. An admitted instruction refers to a particular revision.
 **Recipient-startup policy**:
 The selected conditions under which a wake may use an existing recipient, load
 a saved conversation or start its declared task. It is separate from wake lifetime.
+
+**Wake session mode**:
+An explicitly selected policy for whether a wake ends with its recipient session,
+restores that conversation visibly, or continues it through an available live or
+background recipient. Selecting a mode does not define recurrence or cadence.
+
+**This session only**:
+A wake session mode that cancels future wakes when the recipient agent exits or
+its pane or tab is destroyed. Detaching a terminal client is not session closure.
+
+**Re-open session live**:
+A wake session mode that restores the same conversation in a visible terminal
+when needed, using its most recently verified harness and working directory.
+
+**Background**:
+A wake session mode that uses the same conversation in its live terminal when
+available and otherwise continues that conversation without a visible terminal.
 
 **Semantic agent state**:
 A fresh evidence-backed account of what an exact managed conversation is doing.

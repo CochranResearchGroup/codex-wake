@@ -108,7 +108,7 @@ class MonitorPublicationTests(unittest.TestCase):
                 while True:
                     report=monitor.execute('tabs.monitor.status',{})
                     snapshot=report['snapshot']
-                    if snapshot and snapshot.get('resource_count')==3:
+                    if snapshot and snapshot.get('resource_count')==3 and snapshot.get('freshness')=='fresh':
                         break
                     self.assertLess(time.monotonic(),until)
                     time.sleep(.02)

@@ -83,11 +83,13 @@ def configure(root, **options):
 
 
 def valid(policy):
-    if (type(policy) is not dict or set(policy) != ({'version', 'lifetime', 'owner', 'owner_end', 'startup', 'configuration_revision'} | ({'routes','permission_context'} if policy.get('version')==2 else set()))
+    if (type(policy) is not dict or set(policy) != ({'version', 'lifetime', 'owner', 'owner_end', 'startup', 'configuration_revision'} | ({'routes','permission_context'} if policy.get('version')==2 else set()) | ({'session_mode'} if 'session_mode' in policy else set()))
             or type(policy['version']) is not int or policy['version'] not in (1,2)
             or policy['lifetime'] not in LIFETIMES or policy['owner_end'] not in OWNER_END
             or policy['startup'] not in STARTUP or not isinstance(policy['configuration_revision'], str)
             or re.fullmatch(r'[0-9a-f]{64}', policy['configuration_revision']) is None):
+        return False
+    if 'session_mode' in policy and policy['session_mode'] not in ('session_only', 'reopen_live', 'background'):
         return False
     if policy['version']==2:
         from .permission_wake import valid_routes,valid_context
@@ -142,6 +144,9 @@ def request_policy(root, args, conversation):
         json.dumps(config, sort_keys=True).encode()).hexdigest(), **selected)
     from .permission_wake import decorate_policy
     value=decorate_policy(root,args,conversation,value)
+    mode = getattr(args, "session_mode", None)
+    if mode is not None:
+        value["session_mode"] = mode
     if not valid(value):
         raise WakeError('invalid_wake_policy')
     return value

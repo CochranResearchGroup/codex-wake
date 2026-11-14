@@ -116,10 +116,10 @@ class WakeControlMCPTests(unittest.TestCase):
         context = dict(threadId=CALLER, sessionId=CALLER, callId='fixture-native',
             **{'x-codex-turn-metadata':dict(thread_id=CALLER, session_id=CALLER, turn_id='fixture-turn')})
         clock = dict(utc=dict(status='network', sources=['a', 'b'], lower=1893456000, upper=1893456000.2), counter=None)
-        with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+        with patch('codex_wake.sessions.observe', return_value={'complete':False,'sessions':[]}), patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
                 'codex_wake.native_clock.snapshot', return_value=clock):
             made, failed = runner.call('wake_native_after', dict(caller_thread_id=CALLER,
-                trigger='3650d', ttl='24h', prompt='Read-only review', idempotency_key='inspect-future',
+                trigger='3650d', ttl='24h', prompt='Read-only review', idempotency_key='inspect-future', session_mode='background',
                 wake_lifetime='persistent'), native_context=context)
         self.assertFalse(failed, made)
         listed, failed = runner.call('wake_list', dict(caller_thread_id=CALLER))
@@ -147,11 +147,11 @@ class WakeControlMCPTests(unittest.TestCase):
             return dict(threadId=caller, sessionId=caller, callId='fixture-native',
                 **{'x-codex-turn-metadata':dict(thread_id=caller, session_id=caller, turn_id='fixture-turn')})
         made = {}
-        with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+        with patch('codex_wake.sessions.observe', return_value={'complete':False,'sessions':[]}), patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
                 'codex_wake.native_clock.snapshot', return_value=clock):
             for caller in (CALLER, peer):
                 value, failed = runner.call('wake_native_after', dict(caller_thread_id=caller,
-                    trigger='24h', prompt='Read-only review', idempotency_key='owned-' + caller,
+                    trigger='24h', prompt='Read-only review', idempotency_key='owned-' + caller, session_mode='background',
                     wake_lifetime='persistent'), native_context=context(caller))
                 self.assertFalse(failed, value)
                 made[caller] = value['id']

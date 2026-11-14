@@ -1717,6 +1717,16 @@ while notLoaded. These remain explicit limits, not claims of universal durabilit
 or completion of future reviews. Future release retirement/recovery needs its
 own exact-record reconciliation and applicable authority.
 
+
+## Persistent wakes | Explicit session modes and recurring schedules
+
+Status: CLOSED (source delivery; PR #618)
+Work item: #610; children #611–#616 CLOSED
+Plan: [Persistent wake specification](docs/dev/plans/0173-agent-harness/persistent-wake-spec.md)
+Current State: Explicit three-mode scheduling and durable recurrence implemented.
+One review and one bounded remediation resolved seven findings; local validation
+recorded. Merge, installed runtime acceptance and deployment remain separate gates.
+
 ## P230 | Native mailbox first contact and bindings
 
 CLOSED (merged/deployed; native first-contact and reconnect accepted): [LOCAL-P230](docs/dev/plans/0230-2026-11-13-mailbox-first-contact-bindings.md).

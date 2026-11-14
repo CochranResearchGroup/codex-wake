@@ -1,0 +1,90 @@
+{
+  "fixed_point": "e8c79a79da0b0482e2403e634394c70f5c66e333",
+  "reviewed_head": "5ba3f6e368792b719a1467c4366ef20aaf13c562",
+  "broad_review_runs": 1,
+  "remediation_passes": 1,
+  "reviewers": {
+    "Standards": "persistent_standards_review",
+    "Spec": "persistent_spec_review"
+  },
+  "inherited_main": "c919ec99ddbe53b50b859bd13be11d1355a6ee4f",
+  "findings": [
+    {
+      "id": "SPEC-1",
+      "axis": "Spec",
+      "severity": "P1",
+      "classification": "blocking",
+      "finding": "Ordinary polling jitter incorrectly becomes a skipped missed run",
+      "resolution": "Classify fresh arrivals once using observed scheduler-generation continuity; retain ordinary jitter within original window",
+      "verification": "test_ordinary_poll_jitter_does_not_turn_skip_policy_into_skip_every_check; confirmed monitor restart regression",
+      "status": "resolved"
+    },
+    {
+      "id": "SPEC-2",
+      "axis": "Spec",
+      "severity": "P1",
+      "classification": "blocking",
+      "finding": "Downtime latest/catch-up coalesces an already admitted overlap queue",
+      "resolution": "Separate unclassified arrivals from previously admitted queued occurrences; process per revision",
+      "verification": "test_missed_latest_does_not_coalesce_an_on_time_overlap_queue",
+      "status": "resolved"
+    },
+    {
+      "id": "SPEC-3",
+      "axis": "Spec",
+      "severity": "P1",
+      "classification": "blocking",
+      "finding": "Active non-wake background turn becomes permanent live-restore attention",
+      "resolution": "Report verified active conversation as busy, preserving pending check and original deadline",
+      "verification": "existing public LiveWakeRestorer.prepare tests now verify busy before idle restoration",
+      "status": "resolved"
+    },
+    {
+      "id": "STD-1",
+      "axis": "Standards",
+      "severity": "P2",
+      "classification": "blocking",
+      "finding": "Revision iterates unbounded ticks while holding schedule lock",
+      "standard": "0004-agent-runtime-governance timeout/watchdog requirement",
+      "resolution": "Use exact timedelta arithmetic for intervals and bounded calendar successor lookup; unchanged binding edits avoid rediscovery",
+      "verification": "test_revising_to_old_one_second_cadence_is_bounded",
+      "status": "resolved"
+    },
+    {
+      "id": "STD-2",
+      "axis": "Standards",
+      "severity": "P2",
+      "classification": "blocking",
+      "finding": "Changed public native tests read live operator inventory",
+      "standard": "0016-code-testing-discipline hermetic default lane",
+      "resolution": "Supply deterministic evidence at sessions.observe external boundary and isolate subprocess HOME/XDG",
+      "verification": "Existing public native MCP/caller/control/route tests pass without live inventory",
+      "status": "resolved"
+    },
+    {
+      "id": "STD-3",
+      "axis": "Standards",
+      "severity": "P2",
+      "classification": "blocking",
+      "finding": "Historical peers repeatedly reconcile all prior turns under conversation lock",
+      "standard": "0004-agent-runtime-governance timeout/watchdog requirement",
+      "resolution": "Persist exact submission-bound terminal facts, lazy five-second local scan and at most one ten-second-bounded remote reconciliation per admission; unknown stays held",
+      "verification": "public admission verifies no repeated terminal query and bounded progress over legacy history",
+      "status": "resolved"
+    },
+    {
+      "id": "STD-4",
+      "axis": "Standards",
+      "severity": "P3",
+      "classification": "nonblocking_backlog",
+      "finding": "Possible duplicated native turn acceptance validation",
+      "resolution": "Centralized receipt validation at runtime delivery boundary, preserving stricter route-specific background admission",
+      "verification": "native delivery and permissioned route public regressions",
+      "status": "resolved"
+    }
+  ],
+  "red_receipt": "/tmp/codex-wake-persistent-610-validation/remediation-red.log",
+  "green_receipt": "/tmp/codex-wake-persistent-610-validation/remediation-green-final.log",
+  "green_result": "90 tests passed; two additional focused critical-regression checks added after this command",
+  "final_validation": "persistent-wake-validation.md"
+}

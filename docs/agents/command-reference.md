@@ -6228,6 +6228,485 @@ Examples:
 | `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
 | `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
 
+## tabs family register
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_family_register`).
+
+```sh
+codex-wake --wake-root ROOT tabs family-register
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs family-register [-h] [--arguments ARGUMENTS] [--json]
+                                       [--request-id REQUEST_ID]
+                                       [--bot-id BOT_ID]
+                                       [--expected-target EXPECTED_TARGET]
+                                       [--name NAME]
+                                       [--parent-bot-id PARENT_BOT_ID]
+                                       [--scope-kind SCOPE_KIND]
+                                       [--scope-ref SCOPE_REF] [--temporary]
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced operation JSON; typed flags fill only omitted
+                        fields.
+  --json                Emit structured results.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --bot-id BOT_ID       Bot id.
+  --expected-target EXPECTED_TARGET
+                        Exact current target object; ordinary local CLI
+                        resolves it, remote callers must supply it.
+  --name NAME           Name.
+  --parent-bot-id PARENT_BOT_ID
+                        Parent bot id.
+  --scope-kind SCOPE_KIND
+                        Scope kind.
+  --scope-ref SCOPE_REF
+                        Scope ref.
+  --temporary           Temporary.
+
+Examples:
+  codex-wake --wake-root ROOT tabs family-register
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `bot_id` | yes | bot id. |
+| `parent_bot_id` | no | parent bot id. |
+| `name` | no | name. |
+| `scope_kind` | no | scope kind. |
+| `scope_ref` | no | scope ref. |
+| `temporary` | no | temporary. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs family list
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_family_list`).
+
+```sh
+codex-wake --wake-root ROOT tabs family-list
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs family-list [-h] [--arguments ARGUMENTS] [--json]
+                                   [--root-bot-id ROOT_BOT_ID]
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced operation JSON; typed flags fill only omitted
+                        fields.
+  --json                Emit structured results.
+  --root-bot-id ROOT_BOT_ID
+                        Root bot id.
+
+Examples:
+  codex-wake --wake-root ROOT tabs family-list
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `root_bot_id` | no | root bot id. |
+
+## tabs family show
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_family_show`).
+
+```sh
+codex-wake --wake-root ROOT tabs family-show
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs family-show [-h] [--arguments ARGUMENTS] [--json]
+                                   [--bot-id BOT_ID]
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced operation JSON; typed flags fill only omitted
+                        fields.
+  --json                Emit structured results.
+  --bot-id BOT_ID       Bot id.
+
+Examples:
+  codex-wake --wake-root ROOT tabs family-show
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `bot_id` | yes | bot id. |
+
+## tabs family bind
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_family_bind`).
+
+```sh
+codex-wake --wake-root ROOT tabs family-bind --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs family-bind [-h] [--arguments ARGUMENTS] [--json]
+                                   [--request-id REQUEST_ID] [--bot-id BOT_ID]
+                                   [--client-id CLIENT_ID]
+                                   [--environment ENVIRONMENT]
+                                   [--expected-target EXPECTED_TARGET]
+                                   [--pane-id PANE_ID] [--thread-id THREAD_ID]
+                                   [--window-id WINDOW_ID]
+                                   [--workspace WORKSPACE]
+                                   [--session SESSION_SELECTOR]
+                                   [--server SESSION_SERVER]
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced operation JSON; typed flags fill only omitted
+                        fields.
+  --json                Emit structured results.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --bot-id BOT_ID       Bot id.
+  --client-id CLIENT_ID
+                        Client id.
+  --environment ENVIRONMENT
+                        Environment.
+  --expected-target EXPECTED_TARGET
+                        Exact current target object; ordinary local CLI
+                        resolves it, remote callers must supply it.
+  --pane-id PANE_ID     Pane id.
+  --thread-id THREAD_ID
+                        Thread id.
+  --window-id WINDOW_ID
+                        Window id.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+  --session SESSION_SELECTOR
+                        Terminal session name or stable ID (alias for
+                        --workspace).
+  --server SESSION_SERVER
+                        Terminal server qualifier.
+
+Examples:
+  codex-wake --wake-root ROOT tabs family-bind --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `bot_id` | yes | bot id. |
+| `client_id` | yes | client id. |
+| `environment` | no | environment. |
+| `workspace` | yes | workspace. |
+| `window_id` | yes | window id. |
+| `pane_id` | yes | pane id. |
+| `thread_id` | no | Native saved conversation identifier in its owning account. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs family open
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_family_open`).
+
+```sh
+codex-wake --wake-root ROOT tabs family-open --workspace WORKSPACE
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs family-open [-h] [--arguments ARGUMENTS] [--json]
+                                   [--request-id REQUEST_ID] [--argv ARGV]
+                                   [--bot-id BOT_ID] [--client-id CLIENT_ID]
+                                   [--cwd CWD] [--environment ENVIRONMENT]
+                                   [--expected-target EXPECTED_TARGET]
+                                   [--placement {workers,adjacent}]
+                                   [--profile PROFILE] [--server SERVER]
+                                   [--thread-id THREAD_ID]
+                                   [--workspace WORKSPACE]
+                                   [--session SESSION_SELECTOR]
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced operation JSON; typed flags fill only omitted
+                        fields.
+  --json                Emit structured results.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --argv ARGV           Argv.
+  --bot-id BOT_ID       Bot id.
+  --client-id CLIENT_ID
+                        Client id.
+  --cwd CWD             Cwd.
+  --environment ENVIRONMENT
+                        Environment.
+  --expected-target EXPECTED_TARGET
+                        Exact current target object; ordinary local CLI
+                        resolves it, remote callers must supply it.
+  --placement {workers,adjacent}
+                        Placement.
+  --profile PROFILE     Profile.
+  --server SERVER       Server.
+  --thread-id THREAD_ID
+                        Thread id.
+  --workspace WORKSPACE
+                        Workspace ID or unique label from tabs list; same-user
+                        CLI can select its only workspace.
+  --session SESSION_SELECTOR
+                        Terminal session name or stable ID (alias for
+                        --workspace).
+
+Examples:
+  codex-wake --wake-root ROOT tabs family-open --workspace WORKSPACE
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `bot_id` | yes | bot id. |
+| `client_id` | yes | client id. |
+| `environment` | no | environment. |
+| `workspace` | no | workspace. |
+| `server` | no | server. |
+| `profile` | no | profile. |
+| `cwd` | no | cwd. |
+| `thread_id` | no | Native saved conversation identifier in its owning account. |
+| `argv` | no | argv. |
+| `placement` | no | placement. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs family accept
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_family_accept`).
+
+```sh
+codex-wake --wake-root ROOT tabs family-accept
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs family-accept [-h] [--arguments ARGUMENTS] [--json]
+                                     [--request-id REQUEST_ID]
+                                     [--bot-id BOT_ID] [--client-id CLIENT_ID]
+                                     [--environment ENVIRONMENT]
+                                     [--expected-target EXPECTED_TARGET]
+                                     [--parent-bot-id PARENT_BOT_ID]
+                                     [--result-id RESULT_ID] [--successful]
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced operation JSON; typed flags fill only omitted
+                        fields.
+  --json                Emit structured results.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --bot-id BOT_ID       Bot id.
+  --client-id CLIENT_ID
+                        Client id.
+  --environment ENVIRONMENT
+                        Environment.
+  --expected-target EXPECTED_TARGET
+                        Exact current target object; ordinary local CLI
+                        resolves it, remote callers must supply it.
+  --parent-bot-id PARENT_BOT_ID
+                        Parent bot id.
+  --result-id RESULT_ID
+                        Result id.
+  --successful          Successful.
+
+Examples:
+  codex-wake --wake-root ROOT tabs family-accept
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `bot_id` | yes | bot id. |
+| `client_id` | yes | client id. |
+| `environment` | no | environment. |
+| `parent_bot_id` | yes | parent bot id. |
+| `result_id` | yes | result id. |
+| `successful` | yes | successful. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs family adopt
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_family_adopt`).
+
+```sh
+codex-wake --wake-root ROOT tabs family-adopt
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs family-adopt [-h] [--arguments ARGUMENTS] [--json]
+                                    [--request-id REQUEST_ID]
+                                    [--bot-id BOT_ID] [--client-id CLIENT_ID]
+                                    [--environment ENVIRONMENT]
+                                    [--expected-target EXPECTED_TARGET]
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced operation JSON; typed flags fill only omitted
+                        fields.
+  --json                Emit structured results.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --bot-id BOT_ID       Bot id.
+  --client-id CLIENT_ID
+                        Client id.
+  --environment ENVIRONMENT
+                        Environment.
+  --expected-target EXPECTED_TARGET
+                        Exact current target object; ordinary local CLI
+                        resolves it, remote callers must supply it.
+
+Examples:
+  codex-wake --wake-root ROOT tabs family-adopt
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `bot_id` | yes | bot id. |
+| `client_id` | yes | client id. |
+| `environment` | no | environment. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
+## tabs family focus
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+Transport: CLI / API / OAuth MCP / native MCP (`wake_tabs_family_focus`).
+
+```sh
+codex-wake --wake-root ROOT tabs family-focus
+```
+
+### CLI help
+
+```text
+usage: codex-wake tabs family-focus [-h] [--arguments ARGUMENTS] [--json]
+                                    [--request-id REQUEST_ID]
+                                    [--bot-id BOT_ID] [--client-id CLIENT_ID]
+                                    [--environment ENVIRONMENT]
+                                    [--expected-target EXPECTED_TARGET]
+                                    [--relation {self,parent,root}]
+
+Organize durable bot families and exact client tabs; identity does not grant account or input authority.
+
+Same-user local CLI resolves exact generations and retains durable request identity; API/MCP use explicit pins and authenticated scopes. Uncertain effects are never replayed. Grok/SSH exact health and unsupported backend continuity remain explicit unknown/held. Raw capture and input retain separate privacy/custody checks; observation grants no input access.
+
+options:
+  -h, --help            show this help message and exit
+  --arguments ARGUMENTS
+                        Advanced operation JSON; typed flags fill only omitted
+                        fields.
+  --json                Emit structured results.
+  --request-id REQUEST_ID
+                        Stable intent ID; reuse only for identical inputs.
+                        Retrieve with tabs result.
+  --bot-id BOT_ID       Bot id.
+  --client-id CLIENT_ID
+                        Client id.
+  --environment ENVIRONMENT
+                        Environment.
+  --expected-target EXPECTED_TARGET
+                        Exact current target object; ordinary local CLI
+                        resolves it, remote callers must supply it.
+  --relation {self,parent,root}
+                        Relation.
+
+Examples:
+  codex-wake --wake-root ROOT tabs family-focus
+```
+
+| Argument | Required remotely | Meaning |
+|---|---|---|
+| `bot_id` | yes | bot id. |
+| `client_id` | yes | client id. |
+| `environment` | no | environment. |
+| `relation` | no | relation. |
+| `expected_target` | yes | Exact target JSON from the corresponding resolve, list or status command; replacement is refused. |
+| `_request` | yes | Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target. |
+
 ## tabs result
 
 Read a retained local UID-owned tab request after disconnect or workspace closure.
