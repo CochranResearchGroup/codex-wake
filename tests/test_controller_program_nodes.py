@@ -122,3 +122,18 @@ class ProgramNodesTests(unittest.TestCase):
             owner.publish(actor(),definition)
             with self.assertRaises(InventoryError) as caught:owner.start(actor(),'program',3,inputs={},intent='exact',binding='caller')
             self.assertEqual(caught.exception.code,'unsupported_flow_limits')
+
+    def test_semantic_action_requires_prompt_and_wait_actions_before_dispatch(self):
+        import json
+        from dataclasses import replace
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);registry=root/'controller-conditions.json'
+            registry.write_text(json.dumps(dict(version=1,functions={'judge@1':dict(kind='semantic',inputs={},effects='action',estimated_tokens=4)})));registry.chmod(0o600)
+            restricted=replace(actor(),actions=frozenset({'programs.runs.advance'}))
+            owner=ControllerFlows(root,host='host',environment='test',invoke=lambda *a,**kw:self.fail('unrelated operation'),authorize=lambda:restricted,now=lambda:100)
+            definition=dict(id='program',version=1,entry='judge',limits=dict(max_tokens=4,metering='estimate_opt_in'),nodes=[dict(id='judge',type='branch',condition=dict(function='judge',version=1,arguments={}),then='wrong',**{'else':'wrong'},error='denied'),dict(id='wrong',type='end',value='wrong'),dict(id='denied',type='end',value='denied')])
+            owner.publish(restricted,definition);run=owner.start(restricted,'program',1,inputs={},intent='restricted',binding='caller')
+            with patch('codex_wake.controller_condition_native.invoke',side_effect=AssertionError('unauthorized native action')) as native:
+                result=owner.advance(restricted,run['run_id'])
+            self.assertEqual(result['result'],'denied');self.assertEqual(result['steps']['judge']['reason'],'insufficient_scope');self.assertEqual(native.call_count,0)
