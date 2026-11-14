@@ -49,7 +49,7 @@
       "blocked_by": [],
       "owner": "worker-native-provider",
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "acceptance": [
         "A Grok-native provider streams text and fragmented function calls into the existing Codex loop, executes existing terminal/file/MCP tools and continues with their results.",
         "Configuration and remote/native protocol serialization support the Grok-specific transport without re-enabling the removed generic chat provider.",
@@ -67,7 +67,8 @@
       "worker_base": "f986f6ed53d6b324aedbd7e32991e0185eacae14",
       "result_sha": "7699650e005abe2bcedc138434c59aa95bfbf044",
       "source_manifest": "runtime/grok-native-233/t2-source-manifest.json",
-      "validation": "Native Grok+2 OpenAI regressions3PASS; API274PASS; remote1PASS; proto byte equal; focused API lint and touched formatting pass; primary19file hashes/patch tree/bundle verified. Joined live/package qualification remains T8."
+      "validation": "Native Grok+2 OpenAI regressions3PASS; API274PASS; remote1PASS; proto byte equal; focused API lint and touched formatting pass; primary19file hashes/patch tree/bundle verified. Joined live/package qualification remains T8.",
+      "integrated_sha": "550f9b6e"
     },
     {
       "key": "T3",
@@ -101,8 +102,8 @@
         "T1",
         "T2"
       ],
-      "owner": "pending",
-      "state": "pending",
+      "owner": "worker-native-selection",
+      "state": "running",
       "tracker_state": "OPEN",
       "acceptance": [
         "A unified native picker and public model operations distinguish qualified, unavailable, stale and unverified choices.",
@@ -114,7 +115,16 @@
       "id": 6394425400,
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/633",
       "parent_link": "native_sub_issue",
-      "dependencies_published": "native"
+      "dependencies_published": "native",
+      "worker": "/root/p233_native_seams",
+      "worker_branch": "feat/p233-native-provider-t2",
+      "worker_base": "7699650e005abe2bcedc138434c59aa95bfbf044",
+      "owned_paths": [
+        "Native provider/account/model picker and remote selection contract",
+        "Wake model/account catalog and qualified defaults",
+        "Focused public selection acceptance"
+      ],
+      "checkout_custody": "Exclusive delegated writer for existing Wake integration checkout and native lane; primary read-only until completion."
     },
     {
       "key": "T5",

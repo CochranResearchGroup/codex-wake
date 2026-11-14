@@ -14,7 +14,7 @@ lanes:
     dependencies: []
     overlaps: [P231, P234]
     updated_at: 2026-11-14
-    disposition: T1 and T3 closed from integrated acceptance; T2 final native checks before custody; T4 waits T2; live account and complete package qualification remain T8; review0 remediation0
+    disposition: T1 T2 T3 closed from integrated source acceptance; T4 delegated selection in progress; primary read-only during worker checkout custody; live and package qualification remain T8; review0 remediation0
 
   - id: persistent-wakes-610
     owner: root / ecochran76
