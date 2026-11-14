@@ -9776,3 +9776,22 @@ register/show/revise/cancel passed, armed=false. No hosted CI or live deployment
 Three worker checkouts removed after matching remote-tip readback; integration
 checkout retires after final clean remote custody. Branch refs remain preserved.
 Memory disposition forbidden: developer explicit-request-only boundary, no write.
+
+## Turn | 2026-11-13 | P230 approved shared refresh expired without effect
+
+Operator approved the idle-only shared MCP refresh. Exact intent
+p230-shared-mcp-refresh-20261113-1 was registered with a fresh monitor, current-build
+catalog proof and a bounded approval. Original receipt reconciled terminal expired
+at its2026-11-14T00:23:37.935469Z deadline; reload_attempted/reload_acknowledged absent.
+The monitor did not complete an all-idle preflight (last inventory78, busy1;
+TimeoutError also recorded). No shared reload or goal-continuity verification ran.
+Do not report the already deployed participant fix as a completed connection refresh.
+
+Cleanup retired only this approval/profile/caller relation and transient monitors;
+permission policy exactly equals its pre-operation content, with revision history
+retained. Original receipt, callback submission and checkpoint archive remain
+private. Fresh process census shows no remaining operation monitors. A read-only
+native per-thread reload probe is unsupported by the running daemon. No expiry
+renewal, automatic retry, forced interruption, new reload, or host-clock change.
+Loaded connections can pick up installed fixes on normal reconnect; another global
+idle wait requires a new explicit operational decision. Memory forbidden.
