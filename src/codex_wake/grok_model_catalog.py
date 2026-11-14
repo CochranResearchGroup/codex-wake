@@ -236,7 +236,7 @@ class GrokModels:
             catalog = self.catalog(account)
             selections.extend(catalog['selections'])
             revisions.append([account, catalog['sourceRevision']])
-            providers['grok__' + account] = dict(name=self.accounts._record(account)['label'],
+            providers['grok__' + account] = dict(name='Grok',
                 base_url='https://cli-chat-proxy.grok.com/v1', wire_api='grok',
                 auth=dict(command=str(executable), args=['--wake-root', str(self.root.absolute()),
                     'grok', 'auth', 'token', account], timeout_ms=25000,

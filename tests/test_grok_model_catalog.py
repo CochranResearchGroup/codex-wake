@@ -70,6 +70,7 @@ class GrokModelCatalogTest(unittest.TestCase):
                 self.assertEqual(native['selections'][0], selection['selection'])
                 provider = native['providers']['grok__personal']
                 self.assertEqual(provider['wire_api'], 'grok')
+                self.assertEqual(provider['name'], 'Grok')
                 self.assertEqual(provider['base_url'], 'https://cli-chat-proxy.grok.com/v1')
                 self.assertEqual(provider['auth']['args'][-4:], ['grok', 'auth', 'token', 'personal'])
                 self.assertNotIn(str(auth), json.dumps(native))
