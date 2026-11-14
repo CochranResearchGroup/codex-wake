@@ -11,10 +11,10 @@ Base: e8c79a79da0b0482e2403e634394c70f5c66e333
 ## Current State
 
 All six implementation tickets #611–#616 are CLOSED. One two-axis review and one
-bounded TDD remediation resolved all seven findings. Source delivery is complete
-in PR #618; merge, deployed-monitor qualification and production schedules remain
-separate gates. See persistent-wake-validation.md and persistent-wake-review.md.
-No production schedules or deployment were changed.
+bounded TDD remediation resolved all seven findings. PR #618 merged as a16b4de4;
+0.22.0.dev20 is installed with compatible supervised scheduling heartbeats.
+See persistent-wake-deployment.md for exact evidence and live-provider limits.
+No production schedules were created.
 
 ## Problem Statement
 
