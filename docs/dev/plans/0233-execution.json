@@ -124,10 +124,13 @@
         "Wake model/account catalog and qualified defaults",
         "Focused public selection acceptance"
       ],
-      "checkout_custody": "Exclusive delegated writer for existing Wake integration checkout and native lane; primary read-only until completion.",
+      "checkout_custody": "Wake writer returned to primary; native checkout/schema/cache remains exclusive worker until final T4 result.",
       "worker_wake_branch": "feat/p233-qualified-selection",
       "worker_wake_base": "03fe5335fed71429195898fdebdadaef8f14651c",
-      "worker_wake_parent_branch": "feat/grok-native-provider"
+      "worker_wake_parent_branch": "feat/grok-native-provider",
+      "wake_result_sha": "c489aa9703019206e44df6c66f09ef1fd4888764",
+      "wake_integrated_sha": "c489aa9703019206e44df6c66f09ef1fd4888764",
+      "wake_validation": "Primary fast-forwarded exact worker commit; model catalog public CLI/API/MCP1PASS3.740s; original auth8PASS1.009s. Native final source/schema acceptance pending."
     },
     {
       "key": "T5",
