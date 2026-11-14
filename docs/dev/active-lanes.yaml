@@ -1,6 +1,20 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: native-grok-workers-621
+    owner: primary / ecochran76
+    objective: Native Grok delegation through modded Codex Wake tools
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/621]
+    plan: docs/dev/plans/0232-2026-11-14-native-grok-workers.md
+    branch: feat/native-grok-workers
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE
+    dependencies: [native Grok sign-in]
+    overlaps: [P200, P231]
+    updated_at: 2026-11-14
+    disposition: Native owner and installed skill routing configured; actual create refused native_auth_required before provider work; live acceptance pending
+
   - id: persistent-wakes-610
     owner: root / ecochran76
     objective: Explicit wake session modes and durable recurring schedules

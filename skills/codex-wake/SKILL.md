@@ -1,6 +1,6 @@
 ---
 name: codex-wake
-description: Use Codex Wake for resource allowances and optional existing-native-goal supervision. Honor numeric ceilings and the operator-selected manual or supervised mode; reading a handoff continues already-authorized work without reset, repeated approval or optional enrollment. When external supervision is selected, register token/time limits through MCP; an independent watcher requests checkpoint then pauses the goal and interrupts its exact active turn. Dedicated host-approved executors provide separate memory/CPU controls. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, self-refresh of MCP resources through an approved selected-thread reload, or skill/MCP resources through approved client replacement or shared reload after idle checks, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
+description: Use Codex Wake for resource allowances and optional existing-native-goal supervision. Honor numeric ceilings and the operator-selected manual or supervised mode; reading a handoff continues already-authorized work without reset, repeated approval or optional enrollment. When external supervision is selected, register token/time limits through MCP; an independent watcher requests checkpoint then pauses the goal and interrupts its exact active turn. Dedicated host-approved executors provide separate memory/CPU controls. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, self-refresh of MCP resources through an approved selected-thread reload, or skill/MCP resources through approved client replacement or shared reload after idle checks, fresh-context handoff, and scheduled follow-ups. Also use it to delegate to native Grok CLI workers through an explicit owned ACP profile, retaining original creation and prompt handles. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
 ---
 
 # Codex Wake
@@ -11,6 +11,7 @@ registration, delivery, enforcement or refresh.
 
 | Request | Required reference |
 | --- | --- |
+| Delegate to a native Grok CLI worker from Codex | [Native Grok workers](references/grok-workers.md) |
 | Token/time allowance for the existing native `/goal`; enrollment or held enforcement | [Existing goal limits](references/existing-goal-limits.md) |
 | Controller maintenance or real-agent acceptance | [Operator maintenance and acceptance](references/controller-maintenance.md) |
 | Memory, swap, CPU or task controls in a dedicated executor | [Resource limits](references/resource-limits.md) |
