@@ -43,3 +43,17 @@ human verification information. Default native-store observation was logged
 out; no actual login was initiated. Native `login --help` and `models --help`
 were inspected without account/provider activity. Refresh delegation through
 `models` is still an investigation, not implemented or qualified.
+
+Sanitized status is now wired into native MCP and protected HTTP from one tool
+schema. Exact account-target grants are checked before credential I/O; a broad
+host observation grant is insufficient. Private token and registration commands
+are absent from public schemas. Focused public owner suite: five PASS. Existing
+account observation regression: six PASS. Existing profile transport parity:
+four PASS. A guessed `test_mcp_server.py` selection collected zero and is not
+reported as validation. `ruff` is absent from the existing project environment;
+`git diff --check` passes.
+
+An official device login was initiated through the new sanitized CLI bridge.
+The operator received the native verification link/code; account confirmation
+and real provider readiness remain pending. No model inference was requested.
+Device codes and links are intentionally excluded from this tracked receipt.

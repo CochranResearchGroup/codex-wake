@@ -66,3 +66,26 @@ class GrokSessionTest(unittest.TestCase):
             result = login(executable, Path(directory) / 'auth.json', emit=events.append)
             self.assertEqual(result['authentication'], 'logged_out')
             self.assertNotIn('private-provider-secret', json.dumps(events + [result]))
+
+    def test_public_status_requires_exact_account_grant_before_credentials(self):
+        from codex_wake.grok_provider_auth import GrokAccounts, observe
+        from codex_wake.controller_auth import Actor, AuthError
+        with tempfile.TemporaryDirectory() as directory:
+            auth = Path(directory) / 'auth.json'
+            auth.write_text(json.dumps({'https://auth.x.ai': {
+                'key': 'private-secret', 'auth_mode': 'oidc', 'user_id': 'one'}}))
+            auth.chmod(0o600)
+            root = Path(directory) / 'wake'
+            accounts = GrokAccounts(root)
+            accounts.register('personal', 'Personal', auth)
+            target = accounts.target('personal')
+            arguments = dict(account='personal', expected_target=target)
+            actor = Actor('subject', 'agent', 'client', 'grant', 'issuer', 'resource',
+                          frozenset({'account.observe'}), [{'host': target['host']}], 4000000000)
+            auth.unlink()
+            with self.assertRaises(AuthError):
+                observe(root, arguments, actor=actor, authorize=lambda: actor)
+            actor = Actor('subject', 'agent', 'client', 'grant', 'issuer', 'resource',
+                          frozenset({'account.observe'}), [target], 4000000000)
+            result = observe(root, arguments, actor=actor, authorize=lambda: actor)
+            self.assertEqual(result['result']['authentication']['authentication'], 'logged_out')

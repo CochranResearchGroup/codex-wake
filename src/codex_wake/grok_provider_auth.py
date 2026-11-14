@@ -122,7 +122,7 @@ def command(args, root):
         print(json.dumps(accounts.register(args.account, args.label, args.auth_path), sort_keys=True))
         return 0
     if args.grok_auth_command == 'status':
-        print(json.dumps(accounts.status(args.account), sort_keys=True))
+        print(json.dumps(dict(target=accounts.target(args.account), **accounts.status(args.account)), sort_keys=True))
         return 0
     if sys.stdout.isatty():
         print('private_channel_required', file=sys.stderr)
@@ -191,6 +191,17 @@ class GrokAccounts:
             raise ValueError('invalid_grok_registration')
         return record
 
+    def target(self, account):
+        import socket
+        record = self._record(account)
+        home = Path(record['auth_path']).parent
+        info = home.stat()
+        target = dict(host=socket.gethostname(), environment=os.environ.get('WSL_DISTRO_NAME') or os.name,
+                      provider='grok', account=record['account'], home=str(home),
+                      home_generation=f'{info.st_dev}:{info.st_ino}',
+                      configuration_revision=hashlib.sha256(json.dumps(record, sort_keys=True).encode()).hexdigest())
+        return target
+
     def status(self, account):
         record = self._record(account)
         session = GrokSession(record['auth_path'], record['identity_binding'])
@@ -228,6 +239,7 @@ def login(executable, auth_path, *, emit, timeout=600):
     buffer = b''
     sent = set()
     awaiting_user_code = False
+    awaiting_verification_uri = False
     with selectors.DefaultSelector() as selector:
         selector.register(process.stderr, selectors.EVENT_READ)
         try:
@@ -247,6 +259,9 @@ def login(executable, auth_path, *, emit, timeout=600):
                         if len(line) > 4096:
                             continue
                         candidate = line.decode('utf-8', errors='replace').strip()
+                        if candidate == 'To sign in, open this URL in your browser:':
+                            awaiting_verification_uri = True
+                            continue
                         if candidate in ('Confirm this code in your browser:', 'Then enter this code:'):
                             awaiting_user_code = True
                             continue
@@ -255,6 +270,9 @@ def login(executable, auth_path, *, emit, timeout=600):
                             if re.fullmatch(r'[A-Za-z0-9-]{1,32}', candidate):
                                 emit(dict(status='login_pending', user_code=candidate))
                             continue
+                        if not candidate or not awaiting_verification_uri:
+                            continue
+                        awaiting_verification_uri = False
                         try:
                             url = urlsplit(candidate)
                             port = url.port
@@ -286,3 +304,39 @@ def login(executable, auth_path, *, emit, timeout=600):
                 process.wait()
     result = GrokSession(auth_path).status()
     return dict(status='login_finished' if process.returncode == 0 else 'login_failed', **result)
+
+
+def tool_specs():
+    return {'wake_grok_auth_status': ('grok-provider-auth', 'grok_auth.status',
+        'Inspect sanitized native Grok account authentication; presence does not qualify entitlement or inference. Requires an exact account grant.',
+        {'account': {'type': 'string', 'pattern': '^[a-z0-9][a-z0-9_-]{0,63}$'},
+         'expected_target': {'type': 'object'}}, ['account', 'expected_target'], True)}
+
+
+def observe(root, arguments, *, actor, authorize):
+    """Admit an exact account grant before opening its native credential file."""
+    from .controller_auth import Actor, AuthError
+    from .managed_inventory import InventoryError
+    if set(arguments) != {'account', 'expected_target'}:
+        raise InventoryError('invalid_argument', 'Exact Grok account target required.')
+    accounts = GrokAccounts(root)
+    target = accounts.target(arguments['account'])
+    fields = set(target)
+    def guard():
+        current = authorize()
+        if (not isinstance(actor, Actor) or current != actor or 'account.observe' not in actor.scopes
+                or not any(fields <= scope.keys() and all(target.get(k) == v for k, v in scope.items())
+                           for scope in actor.targets)):
+            raise AuthError('insufficient_scope')
+        if arguments['expected_target'] != target:
+            raise InventoryError('stale_target', 'Grok account target changed.')
+    guard()
+    result = accounts.status(arguments['account'])
+    guard()
+    return dict(schema_version=1, operation='grok_auth.status', status='completed',
+                result=dict(target=target, authentication=result))
+
+
+def protected_observe(root, arguments):
+    from .operation_commands import local_actor
+    return observe(root, arguments, actor=local_actor(root), authorize=lambda: local_actor(root))
