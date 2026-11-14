@@ -66,12 +66,12 @@ class FlowDefinition:
                 flow_error('invalid_flow', 'node IDs must be unique')
             kind = node.get('type')
             fields = {
-                'call': {'id', 'type', 'operation', 'arguments', 'next', 'retry'},
+                'call': {'id', 'type', 'operation', 'arguments', 'next', 'retry', 'failure'},
                 'branch': {'id', 'type', 'condition', 'then', 'else', 'unknown', 'error', 'timeout'},
                 'function': {'id', 'type', 'function', 'version', 'arguments', 'limits', 'next', 'unknown', 'error', 'timeout'},
                 'select': {'id', 'type', 'cases', 'default', 'unknown', 'error', 'timeout'},
                 'while': {'id', 'type', 'condition', 'body', 'max_iterations', 'next', 'unknown', 'error', 'timeout', 'exhausted'},
-                'wait': {'id', 'type', 'operation_id', 'timeout', 'next', 'operation'},
+                'wait': {'id', 'type', 'operation_id', 'timeout', 'next', 'operation', 'failure'},
                 'foreach': {'id', 'type', 'items', 'mode', 'profile', 'expected_target', 'prompt', 'parallelism', 'join', 'next', 'limits'},
                 'end': {'id', 'type', 'value'},
             }
@@ -86,6 +86,8 @@ class FlowDefinition:
             if kind == 'select':
                 from .controller_flow_structures import validate_select
                 validate_select(node)
+            if kind in ('call','wait') and node.get('failure','stop') not in ('stop','continue'):
+                flow_error('invalid_flow','explicit failure policy must be stop or continue')
             if kind == 'call':
                 from .controller_flow_retry import policy
                 policy(node)
@@ -602,8 +604,12 @@ class ControllerFlows:
         value = self.invoke('operations.result', {'operation_id': state['child_operation_id']},
             authorize=lambda: self._step_guard(actor, run_id, attempt))
         child = value.get('result', {}).get('operation', {})
-        if child.get('phase') != 'terminal' or child.get('execution') != 'completed':
-            return self.projection(state)
+        if child.get('phase') != 'terminal':return self.projection(state)
+        if child.get('execution') != 'completed':
+            plan=state.get('execution_definition') or self._definition(state['flow_id'],state['version']).as_dict()
+            node=next(item for item in plan['nodes'] if item['id']==state['cursor'])
+            if 'failure' not in node or child.get('execution') not in ('failed','cancelled','not_started'):return self.projection(state)
+            value=dict(value,status='failed')
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             latest = self._owned(actor, self._load(run_id, db), 'control')
@@ -613,7 +619,8 @@ class ControllerFlows:
             node = next(item for item in definition['nodes'] if item['id'] == latest['cursor'])
             latest['steps'][node['id']] = value
             selected = node.get('next')
-            latest.update(cursor=selected, phase='ready' if selected is not None else 'completed', reason=None)
+            stopped=node.get('failure')=='stop' and value.get('status')=='failed'
+            latest.update(cursor=selected, phase='failed' if stopped else 'ready' if selected is not None else 'completed', reason='child_failed' if stopped else None)
             latest['completed_steps'] += 1
             latest.pop('attempt', None)
             latest.pop('executing_node', None)
@@ -664,6 +671,10 @@ class ControllerFlows:
                 latest['condition_usage']=state['condition_usage'];latest['condition_trace']=state['condition_trace'];latest['elapsed_clock']=state.get('elapsed_clock')
                 self._write(db,latest)
         def semantic(function,args,bounds,tokens,receipt):
+            from .unified_connectors import check_action
+            current=self._step_guard(actor,run_id,attempt)
+            check_action(current,'sessions.wait')
+            if not receipt.get('native_operation_id'):check_action(current,'sessions.prompt')
             from .controller_condition_native import invoke,recover
             if receipt.get('native_operation_id'):
                 return recover(self.root,actor,receipt,authorize=lambda:self._step_guard(actor,run_id,attempt))
@@ -834,7 +845,7 @@ class ControllerFlows:
                     operation_id = self._resolve(node.get('operation_id'), state)
                     arguments = _UNKNOWN if operation_id is _UNKNOWN else {'operation_id': operation_id, 'timeout': node.get('timeout', 0)}
                     operation = node.get('operation', 'operations.wait')
-                    if operation not in ('operations.wait', 'sessions.wait'):
+                    if operation not in ('operations.wait', 'sessions.wait', 'environment.conversations.input.result'):
                         flow_error('unsupported_operation', 'wait operation is unsupported')
                 else:
                     arguments = self._resolve(node.get('arguments', {}), state)
@@ -905,10 +916,22 @@ class ControllerFlows:
                 if latest.get('attempt') != attempt:
                     return self.projection(latest)
                 child = value.get('result',{}).get('operation',{})
-                if child.get('phase') in ('uncertain','executing'):
+                if child.get('phase') in ('uncertain','executing','dispatching'):
                     latest['steps'][node['id']] = value
                     latest.update(phase='uncertain',reason='child_effect_uncertain')
                     self._write(db,latest)
+                    return self.projection(latest)
+                if 'failure' in node and (value.get('status')=='failed' or child.get('phase')=='terminal' and child.get('execution') in ('failed','cancelled','not_started')):
+                    from .controller_flow_retry import should_retry
+                    code=value.get('error',{}).get('code') or child.get('reason') or 'child_failed'
+                    if node['type']=='call' and not latest['cancellation'] and should_retry(node,code,count):
+                        latest.setdefault('attempt_history',{}).setdefault(node['id'],[]).append(dict(attempt=count,error=code,operation_id=child_id))
+                        latest.update(phase='ready',reason='retry_scheduled');latest.pop('attempt',None);latest.pop('executing_node',None)
+                        self._write(db,latest);return self.projection(latest)
+                    latest['steps'][node['id']]=value;latest['completed_steps']+=1
+                    selected=node.get('next');latest.update(cursor=selected,phase='failed' if node['failure']=='stop' else 'ready' if selected else 'completed',reason='child_failed')
+                    latest.pop('attempt',None);latest.pop('executing_node',None);self._write(db,latest)
+                    if latest['phase']=='ready':continue
                     return self.projection(latest)
                 if value.get('status') in ('failed', 'held'):
                     from .controller_flow_retry import should_retry
@@ -920,7 +943,7 @@ class ControllerFlows:
                     latest.pop('attempt', None)
                     self._write(db, latest)
                     return self.projection(latest)
-                if node['type'] == 'wait' and value.get('result', {}).get('wait', {}).get('status') == 'timeout':
+                if node['type'] == 'wait' and (value.get('result', {}).get('wait', {}).get('status') == 'timeout' or child.get('phase')=='waiting'):
                     latest.update(phase='waiting', reason='wait_timeout', waiting_on=arguments['operation_id'], waiting_operation=operation)
                     latest.pop('attempt', None)
                     latest.pop('executing_node', None)
