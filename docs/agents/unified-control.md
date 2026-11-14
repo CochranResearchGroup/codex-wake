@@ -130,3 +130,10 @@ not live provider, working-host deployment, native push or Windows ownership pro
 
 Regenerate with `scripts/generate_unified_contract.py` and
 `scripts/generate_command_reference.py`; their `--check` modes reject drift.
+
+Delegated credentials require this compatible reader. Codes are stored separately
+and access/refresh kinds are versioned so an older controller cannot redeem or
+accept them while ignoring restrictions. The authority migrates old pre-release
+delegated codes and invalidates unfenced delegated tokens; ordinary existing grants
+are preserved. Exact historical-reader qualification is tested against the recorded
+Git baseline, with code exchange, access authentication and refresh all refusing.

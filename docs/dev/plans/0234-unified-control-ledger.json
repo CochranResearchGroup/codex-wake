@@ -169,7 +169,7 @@
         9
       ],
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "worker": "unified_programs_625",
       "owned_scope": "bulk/program composition owner and operation reconciliation",
       "packet": "docs/dev/plans/0234-unified-control-tickets/10.md",
@@ -180,7 +180,7 @@
       "base": "4c819ea68ece85c4040efa0d64c05969c6c9d2ad",
       "result_sha": "e97dd8f6e370ee8fedc790cfc57531b102b5df3f",
       "integrated_sha": "a9d7ec5f",
-      "validation": "Worker52PASS47.911s+26affectedPASS22.464s; integration bulk/program/transport selectedPASS; stable derived top/nested domain keys, actual wake registration and uncertain-original recovery"
+      "validation": "Worker52PASS47.911s+26affectedPASS22.464s; integration bulk/program/transport13PASS13.519s; stable derived top/nested domain keys, actual wake registration and uncertain-original recovery"
     },
     "11": {
       "title": "Deliver connector discovery documentation and acceptance",
@@ -214,5 +214,22 @@
     "Managed agents and invoking-session discovery retain distinct canonical paths.",
     "Native self-limit aliases retain existing attested native owner.",
     "Connector grant administration is protected-transport-only; CLI forwards authenticated requests."
+  ],
+  "validation": [
+    {
+      "tier": "presubmit",
+      "source": "dfcfb7c61e1c134fcd86bcc9b8ff342fef112033",
+      "selection": "75modules/471cases",
+      "result": "PASS471.078s; wall472.671s/600s",
+      "receipt": "~/.local/state/codex-wake/unified-0234/presubmit-result.json",
+      "limitation": "Before causally subsequent delegated-credential compatibility fix; not a full-suite or final-head blanket claim"
+    },
+    {
+      "tier": "compatibility remediation before final review",
+      "risk": "Old OAuth readers dropped new grant action attenuation",
+      "baseline": "1aa498674a4907f93b5216a4a98dd75a22c6ecec",
+      "red": "old-auth-contract-red.log: exact legacy code redemption incorrectly accepted; independent probe showed old access authentication ignored actions",
+      "green": "20auth/connector/bulk/transportsPASS21.966s; old reader refuses code/access/refresh; new reader retains attenuation and inherited revocation"
+    }
   ]
 }

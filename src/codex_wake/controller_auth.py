@@ -69,6 +69,7 @@ class OAuthAuthority:
                 CREATE TABLE IF NOT EXISTS delegation_intents (intent TEXT PRIMARY KEY, fingerprint TEXT, result TEXT);
                 CREATE TABLE IF NOT EXISTS delegations (grant_id TEXT PRIMARY KEY, parent_id TEXT, expires REAL, actions TEXT);
                 CREATE TABLE IF NOT EXISTS codes (hash TEXT PRIMARY KEY, grant_id TEXT, redirect TEXT, challenge TEXT, expires REAL, used INTEGER DEFAULT 0);
+                CREATE TABLE IF NOT EXISTS delegated_codes (hash TEXT PRIMARY KEY, grant_id TEXT, redirect TEXT, challenge TEXT, expires REAL, used INTEGER DEFAULT 0);
                 CREATE TABLE IF NOT EXISTS tokens (hash TEXT PRIMARY KEY, grant_id TEXT, kind TEXT, expires REAL, used INTEGER DEFAULT 0);
                 CREATE TABLE IF NOT EXISTS revocations (grant_id TEXT PRIMARY KEY, pending INTEGER, result TEXT, attempts INTEGER NOT NULL DEFAULT 0);
             ''')
@@ -78,6 +79,10 @@ class OAuthAuthority:
             if previous and previous != (issuer, resource):
                 raise ValueError('authority issuer/resource changed; explicit new authority required')
             db.execute('INSERT OR IGNORE INTO authority VALUES(1,?,?)', (issuer, resource))
+            # Old readers must never redeem or authenticate attenuated grants.
+            db.execute('INSERT OR IGNORE INTO delegated_codes SELECT * FROM codes WHERE grant_id IN (SELECT grant_id FROM delegations)')
+            db.execute('DELETE FROM codes WHERE grant_id IN (SELECT grant_id FROM delegations)')
+            db.execute("UPDATE tokens SET used=1 WHERE grant_id IN (SELECT grant_id FROM delegations) AND kind IN ('access','refresh')")
         self.recover_revocations()
 
     def connect(self):
@@ -114,7 +119,7 @@ class OAuthAuthority:
         return value
 
     def authorize(self, *, subject, principal_kind, client_id, redirect_uri, resource,
-                  scopes, targets, code_challenge):
+                  scopes, targets, code_challenge, _delegation=None):
         if resource != self.resource: raise AuthError('invalid_target')
         if not isinstance(subject, str) or not subject or principal_kind not in ('owner', 'service'):
             raise AuthError('invalid_request')
@@ -146,7 +151,12 @@ class OAuthAuthority:
             if not row or redirect_uri not in json.loads(row[0])['redirect_uris']: raise AuthError('invalid_client')
             db.execute('INSERT INTO grants(id,subject,kind,client,scopes,targets) VALUES(?,?,?,?,?,?)',
                        (grant, subject, principal_kind, client_id, json.dumps(sorted(scopes)), json.dumps(targets)))
-            db.execute('INSERT INTO codes(hash,grant_id,redirect,challenge,expires) VALUES(?,?,?,?,?)',
+            table='codes'
+            if _delegation is not None:
+                parent,until,actions=_delegation
+                db.execute('INSERT INTO delegations VALUES(?,?,?,?)',(grant,parent,until,None if actions is None else json.dumps(sorted(actions))))
+                table='delegated_codes'
+            db.execute('INSERT INTO '+table+'(hash,grant_id,redirect,challenge,expires) VALUES(?,?,?,?,?)',
                        (digest(code), grant, redirect_uri, code_challenge, self.now() + 120))
         return code
 
@@ -156,14 +166,18 @@ class OAuthAuthority:
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             if grant_type == 'authorization_code':
+                table='codes'
                 row = db.execute('SELECT grant_id,redirect,challenge,expires,used FROM codes WHERE hash=?', (digest(args.get('code', '')),)).fetchone()
+                if row is None:
+                    table='delegated_codes'
+                    row=db.execute('SELECT grant_id,redirect,challenge,expires,used FROM delegated_codes WHERE hash=?',(digest(args.get('code','')),)).fetchone()
                 verifier = args.get('code_verifier', '')
                 challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
                 if not row or row[4] or row[3] <= self.now() or row[1] != args.get('redirect_uri') or not re.fullmatch(r'[A-Za-z0-9._~-]{43,128}', verifier) or not secrets.compare_digest(row[2], challenge):
                     raise AuthError('invalid_grant')
                 grant = row[0]
             elif grant_type == 'refresh_token':
-                row = db.execute('SELECT grant_id,expires,used FROM tokens WHERE hash=? AND kind="refresh"', (digest(args.get('refresh_token', '')),)).fetchone()
+                row = db.execute("SELECT grant_id,expires,used FROM tokens WHERE hash=? AND kind IN ('refresh','delegated_refresh_v1')", (digest(args.get('refresh_token', '')),)).fetchone()
                 if not row or row[1] <= self.now(): raise AuthError('invalid_grant')
                 grant = row[0]
                 if row[2]:
@@ -176,11 +190,12 @@ class OAuthAuthority:
             boundary, unused_actions = self.delegation(grant, db=db)
             if not current or current[2] or current[0] != args.get('client_id'): raise AuthError('invalid_grant')
             if grant_type == 'authorization_code':
-                db.execute('UPDATE codes SET used=1 WHERE hash=?', (digest(args['code']),))
+                db.execute('UPDATE '+table+' SET used=1 WHERE hash=?', (digest(args['code']),))
             # Rotation invalidates old access and refresh credentials, not operation identity.
             db.execute('UPDATE tokens SET used=1 WHERE grant_id=?', (grant,))
             access, refresh = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
-            for secret, kind, lifetime in ((access, 'access', 600), (refresh, 'refresh', 86400)):
+            delegated=db.execute('SELECT 1 FROM delegations WHERE grant_id=?',(grant,)).fetchone() is not None
+            for secret, kind, lifetime in ((access, 'delegated_access_v1' if delegated else 'access', 600), (refresh, 'delegated_refresh_v1' if delegated else 'refresh', 86400)):
                 db.execute('INSERT INTO tokens VALUES(?,?,?,?,0)', (digest(secret), grant, kind, min(self.now() + lifetime,boundary)))
             return dict(access_token=access, refresh_token=refresh, token_type='Bearer', expires_in=min(600,boundary-self.now()),
                         scope=' '.join(json.loads(current[1])))
@@ -189,7 +204,7 @@ class OAuthAuthority:
         with self.connect() as db:
             row = db.execute('''SELECT g.subject,g.kind,g.client,g.id,g.scopes,g.targets,t.expires
                 FROM tokens t JOIN grants g ON g.id=t.grant_id
-                WHERE t.hash=? AND t.kind='access' AND t.used=0 AND g.revoked=0''', (digest(token),)).fetchone()
+                WHERE t.hash=? AND t.kind IN ('access','delegated_access_v1') AND t.used=0 AND g.revoked=0''', (digest(token),)).fetchone()
         if not row or row[6] <= self.now(): raise AuthError()
         unused_expiry,actions=self.delegation(row[3])
         return Actor(*row[:4], self.issuer, self.resource, frozenset(json.loads(row[4])), json.loads(row[5]), row[6],actions,self.is_delegated(row[3]))
@@ -233,12 +248,12 @@ class OAuthAuthority:
             targets=intersect_targets(actor.targets,targets);actions=canonical_actions(actions)
             if actor.actions is not None and not actions<=actor.actions:raise AuthError('insufficient_scope')
         else:raise AuthError('invalid_request')
+        until=min(actor.expires_at,self.now()+expires_in)
         code=self.authorize(subject=actor.subject,principal_kind='service',client_id=client_id,
-            redirect_uri=redirect_uri,resource=self.resource,scopes=scopes,targets=targets,code_challenge=code_challenge)
+            redirect_uri=redirect_uri,resource=self.resource,scopes=scopes,targets=targets,code_challenge=code_challenge,
+            _delegation=(actor.grant_id,until,actions))
         with self.connect() as db:
-            grant=db.execute('SELECT grant_id FROM codes WHERE hash=?',(digest(code),)).fetchone()[0]
-            until=min(actor.expires_at,self.now()+expires_in)
-            db.execute('INSERT INTO delegations VALUES(?,?,?,?)',(grant,actor.grant_id,until,None if actions is None else json.dumps(sorted(actions))))
+            grant=db.execute('SELECT grant_id FROM delegated_codes WHERE hash=?',(digest(code),)).fetchone()[0]
         return dict(code=code,grant_id=grant,expires_at=until,principal_kind='service',scopes=sorted(scopes),targets=targets,
             actions=None if actions is None else sorted(actions),mode=mode)
 
@@ -272,7 +287,7 @@ class OAuthAuthority:
         with self.connect() as db:
             row=db.execute('SELECT subject,kind,client,scopes,targets,revoked FROM grants WHERE id=?',
                 (principal['grant_id'],)).fetchone()
-            issued=db.execute("SELECT 1 FROM tokens WHERE grant_id=? AND kind='access' AND expires=? LIMIT 1",
+            issued=db.execute("SELECT 1 FROM tokens WHERE grant_id=? AND kind IN ('access','delegated_access_v1') AND expires=? LIMIT 1",
                 (principal['grant_id'],expires)).fetchone()
         if not row or not issued or row[5] or (row[0],row[1],row[2])!=(principal['subject'],authorization['principal_kind'],principal['client_id']):
             raise AuthError()

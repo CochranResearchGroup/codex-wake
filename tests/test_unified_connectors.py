@@ -128,3 +128,35 @@ class ConnectorTests(unittest.TestCase):
             read=owner.route(dict(args,operation='flows.definition',arguments=dict(flow_id='owned',version=1),operation_id='read',idempotency_key='read'),actor=actor)
             self.assertEqual(read['route']['result']['result']['definition'],definition)
             with self.assertRaises(AuthError):owner.route(dict(args,operation='flows.publish',operation_id='denied',idempotency_key='denied'),actor=replace(actor,actions=frozenset({'programs.definitions.show'})))
+
+class DelegatedCredentialCompatibilityTests(unittest.TestCase):
+    def test_published_legacy_reader_refuses_new_code_access_and_refresh_credentials(self):
+        # Exercise the actual immutable prior public reader, not a current-schema proxy.
+        import subprocess
+        import sys
+        import types
+        baseline='1aa498674a4907f93b5216a4a98dd75a22c6ecec'
+        try:
+            source=subprocess.check_output(['git','-C',str(Path(__file__).resolve().parents[1]),'show',baseline+':src/codex_wake/controller_auth.py'],text=True,stderr=subprocess.DEVNULL)
+        except (subprocess.CalledProcessError,FileNotFoundError):
+            self.skipTest('Historical-reader qualification requires the recorded Git baseline.')
+        module=types.ModuleType('wake_legacy_auth_reader');sys.modules[module.__name__]=module
+        exec(compile(source,'git:'+baseline,'exec'),module.__dict__)
+        with tempfile.TemporaryDirectory() as directory:
+            auth=OAuthAuthority(Path(directory)/'auth.sqlite',issuer='https://wake.test',resource='https://wake.test/controller')
+            parent=ConnectorTests().token(auth,['observe','control','admin'],[dict(host='h',environment='e')])
+            client=auth.register({'redirect_uris':['http://localhost/callback']});verifier='z'*43
+            challenge=base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+            child=auth.delegate(auth.authenticate(parent),client_id=client['client_id'],redirect_uri=client['redirect_uris'][0],code_challenge=challenge,mode='subset',scopes=['observe'],targets=[dict(host='h',environment='e')],actions=['inventory.resolve'])
+            legacy=module.OAuthAuthority(auth.path,issuer=auth.issuer,resource=auth.resource)
+            args=dict(grant_type='authorization_code',client_id=client['client_id'],code=child['code'],redirect_uri=client['redirect_uris'][0],code_verifier=verifier,resource=auth.resource)
+            with self.assertRaises(module.AuthError):legacy.token(args)
+            tokens=auth.token(args)
+            self.assertEqual(auth.authenticate(tokens['access_token']).actions,frozenset({'environment.resources.resolve'}))
+            with self.assertRaises(module.AuthError):legacy.authenticate(tokens['access_token'])
+            refresh=dict(grant_type='refresh_token',client_id=client['client_id'],refresh_token=tokens['refresh_token'],resource=auth.resource)
+            with self.assertRaises(module.AuthError):legacy.token(refresh)
+            renewed=auth.token(refresh)
+            self.assertEqual(auth.authenticate(renewed['access_token']).actions,frozenset({'environment.resources.resolve'}))
+            auth.revoke_grant(auth.authenticate(parent).grant_id)
+            with self.assertRaises(AuthError):auth.authenticate(renewed['access_token'])
