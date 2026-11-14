@@ -241,7 +241,7 @@ class ScheduleStore:
         health = read_monitor_health(self.root) or {}
         reader = probe_managed_reader_capability(self.root)
         ready = bool(reader and 8 in reader.schema_versions and health.get('mode') == 'loop'
-                     and 'recurring_schedules_v1' in health.get('reader_capabilities', []))
+                     and all(c in health.get('reader_capabilities', []) for c in ('recurring_schedules_v1', 'wake_session_modes_v1')))
         return dict(value, session_mode=value['request']['session_mode'],
             armed=ready and value['state'] == 'enabled',
             scheduling_status='armed' if ready and value['state']=='enabled' else 'retained_unmonitored' if not ready and value['state']=='enabled' else value['state'],

@@ -120,7 +120,9 @@ def _receipt(args, record, path, deduplicated):
     reader = probe_managed_reader_capability(root)
     from .monitor import read_monitor_health
     health = read_monitor_health(root) or {}
-    monitored = reader is not None and record['schema_version'] in reader.schema_versions and health.get('mode') == 'loop'
+    required_capabilities = ['wake_session_modes_v1'] if record.get('target', {}).get('session_mode') else []
+    monitored = (reader is not None and record['schema_version'] in reader.schema_versions and health.get('mode') == 'loop'
+                 and all(c in health.get('reader_capabilities', []) for c in required_capabilities))
     if getattr(args, 'require_monitor', False) and not monitored:
         raise WakeError(f"schema{record['schema_version']} intent retained as {record['id']}; active compatible worker unavailable; upgrade or enroll the owning monitor")
     intent = record['scheduling_intent']
@@ -130,7 +132,7 @@ def _receipt(args, record, path, deduplicated):
     value = {"id": record["id"], "path": str(path), "status": record["status"],
              "time_recovery": record["time_recovery"], "deduplicated": deduplicated,
              "automatic_recovery": recovery, "requires_original_clock_evidence": unanchored,
-             "requires_worker_schema": record["schema_version"], "wake_policy": record.get("wake_policy")}
+             "requires_worker_schema": record["schema_version"], "requires_worker_capabilities": required_capabilities, "wake_policy": record.get("wake_policy")}
     projection = schedule_projection(record)
     if record.get("target", {}).get("session_mode"):
         value["session_mode"] = record["target"]["session_mode"]

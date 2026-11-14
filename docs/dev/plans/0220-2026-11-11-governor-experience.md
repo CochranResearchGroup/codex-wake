@@ -1,6 +1,7 @@
 # LOCAL-P220 | Usable governor and native /wake
 
-State: CLOSED. Owner: primary/ecochran76. Spec:#570. Tickets:#571–574.
+State: CLOSED
+Owner: primary/ecochran76. Spec:#570. Tickets:#571–574.
 Branch:feat/governor-experience. Frozen base/review point:3f8a18fa196037fa9efe00bf2ad36b05c61f2a3c.
 
 ## Current State

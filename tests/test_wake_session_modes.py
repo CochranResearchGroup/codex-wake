@@ -39,3 +39,15 @@ class WakeSessionModes(unittest.TestCase):
         from codex_wake.harness_mcp import tool_specs
         for verb in ("after", "at", "file"):
             self.assertIn("session_mode", tool_specs()["wake_native_" + verb][4])
+    def test_old_monitor_does_not_claim_support_for_explicit_modes(self):
+        from codex_wake.monitor import write_monitor_health
+        with tempfile.TemporaryDirectory() as d, patch.dict(os.environ, {'XDG_STATE_HOME':d}):
+            root=Path(d)/'wake'
+            write_monitor_health(wake_root=root,source='old-worker',mode='loop',extra={'reader_capabilities':['signal_records_v2']})
+            output=io.StringIO()
+            with patch('codex_wake.sessions.observe',return_value={'complete':False,'sessions':[]}), patch('codex_wake.native_clock.snapshot',return_value=CLOCK),contextlib.redirect_stdout(output):
+                run(['--wake-root',str(root),'native','after','--json','--session-mode','background','--idempotency-key','compat','--codex-path',sys.executable,THREAD,'1h','--','check'])
+            value=json.loads(output.getvalue())
+            self.assertFalse(value['armed'])
+            self.assertEqual(value['requires_worker_capabilities'],['wake_session_modes_v1'])
+            self.assertEqual(value['wake_policy']['session_mode'],'background')
