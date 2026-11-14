@@ -82,3 +82,43 @@ Installed native version reports `1.0.70 (f50904eaee6c)`, stable. That revision
 was not resolvable in the public source repository (422); source review alone
 does not prove installed behavior. Live refresh interoperability remains an
 explicit acceptance gate.
+
+## T1 integrated implementation acceptance
+
+The frozen spec explicitly assigns joined real-account proof to the qualification
+stage. T1's independent source slice is accepted on the approved CLI/API/MCP and
+private command-auth seam; it does not claim a qualified Grok account or coding
+turn. The initiated device flow terminated without sign-in. It was not retried.
+
+At implementation commit `6bbb4efad2535e901b7fd523692a1002afcd3f49`, the focused
+suite was extended to invoke the real CLI parser/dispatch for register, public
+status and private token emission. Only the external qualified-time adapter is
+substituted; the real broker reads synthetic owner-only native credentials.
+Public output omits the token and private command stdout equals the bare bearer.
+The exact-grant scenario now invokes both protected HTTP operations and native
+MCP CommandRunner and verifies their public result payloads agree. The initial
+API assertion incorrectly compared transport attribution with an owner-only
+result; the expectation was corrected to compare the public result payload.
+No product change was needed for that assertion failure.
+
+Command:
+`PYTHONPATH=src /home/ecochran76/workspace.local/codex-wake/.venv/bin/python -m unittest discover -s tests -p test_grok_provider_auth.py`
+Result: eight PASS, 0.828 seconds. No hosted CI runs. Shared local venv is used;
+the hosted environment may install declared dependencies afresh.
+
+Acceptance mapping:
+
+- Official sign-in initiated through sanitized Wake CLI; native owns OAuth and
+  persistence. A successful process exit alone is never interpreted as sign-in.
+- Real CLI/private token boundary exercised; public CLI/API/MCP cannot request
+  bearer output. Exact account grant admission precedes native credential I/O.
+- Official pinned metadata utility owns shared refresh writes; Wake's private
+  read takes compatible flock/inode checks and rereads. Identity substitution,
+  unknown expiry, expiry, insecure state and uncertain refresh hold. Uncertain
+  attempts are not replayed; rotation from the native writer is adopted.
+- Public status separates authentication presence, unverified freshness,
+  entitlement and inference. No implicit API-key selection is implemented.
+
+Remaining joined T8 gates: real account sign-in, installed official refresh
+interoperability, real model entitlement and coding inference, complete isolated
+native package qualification. These remain OPEN, not implied by T1 acceptance.
