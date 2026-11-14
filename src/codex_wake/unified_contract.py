@@ -4,6 +4,7 @@ import argparse
 
 FAMILIES=('environment','wakes','programs','accounts','harnesses','operations','connectors')
 PREFIXES=(('tabs.session.','environment.sessions.'),('tabs.','environment.tabs.'),
+ ('local.governor.','programs.governor.'),('local.self_limits.','programs.limits.'),
  ('local.','environment.conversations.'),('inventory.','environment.resources.'),
  ('agent_sessions.','environment.discovery.'),('agents.','environment.agents.'),('history.','environment.conversations.history.'),
  ('sessions.','programs.sessions.'),('flows.','programs.flows.'),
@@ -11,7 +12,11 @@ PREFIXES=(('tabs.session.','environment.sessions.'),('tabs.','environment.tabs.'
  ('configuration.','accounts.configuration.'),('stores.','accounts.stores.'),('accounts.','accounts.profiles.'),
  ('builds.','harnesses.builds.'),('daemons.','harnesses.runtimes.'),
  ('hosts.','connectors.hosts.'),('grants.','connectors.grants.'),
- ('native.','wakes.intents.'),('schedules.','wakes.schedules.'))
+ ('native.','wakes.intents.'),('schedules.','wakes.schedules.'),
+ ('grok.','harnesses.grok.'),('health.','environment.health.'),
+ ('notices.','operations.notices.'),('recovery.','harnesses.recovery.'),
+ ('migration.','accounts.migration.'),('governor.','programs.governor.'),
+ ('runtime.','harnesses.runtime_controls.'))
 # Whole legacy parser owners are reused, including their validation and root rules.
 CLI_ALIASES={('environment','sessions'):('tabs','sessions'),
  ('environment','tabs'):('tabs',),('environment','agents'):('agents',),
@@ -132,8 +137,14 @@ def apply_cli(parser):
         if verb=='children':item.add_argument('resource_id')
     action.add_parser('capabilities',help='discover canonical operation contracts and transport capabilities')
     from .local_control_service import definitions
-    for operation,(tool,description,schema,handler,readonly) in definitions().items():
-        if not operation.startswith(('environment.','wakes.','connectors.')) or _parser(parser,operation.split('.')) is not None:continue
+    entries=dict(definitions())
+    from .controller_http import TOOLS
+    for tool,(legacy,schema) in TOOLS.items():
+        operation=canonical(legacy)
+        if operation not in entries:
+            entries[operation]=(tool,'Authenticated canonical controller operation.',schema,None,False)
+    for operation,(tool,description,schema,handler,readonly) in entries.items():
+        if operation.split('.')[0] not in FAMILIES or _parser(parser,operation.split('.')) is not None:continue
         parent=parser
         parts=operation.split('.')
         for part in parts[:-1]:
@@ -144,7 +155,7 @@ def apply_cli(parser):
         parser._unified_direct_paths.add(tuple(parts))
         item.set_defaults(_unified_operation=operation,_unified_fields=list(schema['properties']))
         item.add_argument('--arguments',type=__import__('json').loads,default={})
-        if operation.startswith('connectors.grants.'):
+        if handler is None or operation.startswith('connectors.grants.'):
             item.set_defaults(_unified_route='protected')
             item.add_argument('--controller-endpoint',required=True)
             item.add_argument('--controller-token-file',type=__import__('pathlib').Path,required=True)

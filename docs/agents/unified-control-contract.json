@@ -162,6 +162,77 @@
         "supported_registration": true
       }
     },
+    "accounts.migration.apply": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_accounts_migration_apply",
+        "required_scope": "admin",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
+              "type": "object"
+            },
+            "expected_target": {
+              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
+              "type": "object"
+            }
+          },
+          "required": [
+            "expected_target",
+            "_request"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "accounts.migration.preview": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_accounts_migration_preview",
+        "required_scope": "migration.observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {},
+          "required": [],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "accounts.migration.rollback": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_accounts_migration_rollback",
+        "required_scope": "admin",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
+              "type": "object"
+            },
+            "expected_target": {
+              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
+              "type": "object"
+            },
+            "receipt_id": {
+              "description": "Exact prior migration receipt for a qualified rollback.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "expected_target",
+            "receipt_id",
+            "_request"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
     "accounts.profiles.create": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
@@ -793,274 +864,6 @@
               "type": "string"
             },
             "profile": {
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        }
-      }
-    },
-    "environment.conversations.governor.activate": {
-      "local": {
-        "admission": "same_user_private_connection",
-        "available": true,
-        "mcp": "wake_environment_conversations_governor_activate",
-        "readonly": false,
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "time_limit_seconds": {
-              "minimum": 1,
-              "type": "integer"
-            },
-            "token_limit": {
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          "required": [
-            "token_limit",
-            "time_limit_seconds"
-          ],
-          "type": "object"
-        }
-      }
-    },
-    "environment.conversations.governor.advisory": {
-      "local": {
-        "admission": "same_user_private_connection",
-        "available": true,
-        "mcp": "wake_environment_conversations_governor_advisory",
-        "readonly": false,
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "resume": {
-              "type": "boolean"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        }
-      }
-    },
-    "environment.conversations.governor.disable": {
-      "local": {
-        "admission": "same_user_private_connection",
-        "available": true,
-        "mcp": "wake_environment_conversations_governor_disable",
-        "readonly": false,
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "resume": {
-              "type": "boolean"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        }
-      }
-    },
-    "environment.conversations.governor.extend": {
-      "local": {
-        "admission": "same_user_private_connection",
-        "available": true,
-        "mcp": "wake_environment_conversations_governor_extend",
-        "readonly": false,
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "add_seconds": {
-              "minimum": 1,
-              "type": "integer"
-            },
-            "add_tokens": {
-              "minimum": 1,
-              "type": "integer"
-            },
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "resume": {
-              "type": "boolean"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        }
-      }
-    },
-    "environment.conversations.governor.reset": {
-      "local": {
-        "admission": "same_user_private_connection",
-        "available": true,
-        "mcp": "wake_environment_conversations_governor_reset",
-        "readonly": false,
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "resume": {
-              "type": "boolean"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "time_limit_seconds": {
-              "minimum": 1,
-              "type": "integer"
-            },
-            "token_limit": {
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          "required": [],
-          "type": "object"
-        }
-      }
-    },
-    "environment.conversations.governor.resume": {
-      "local": {
-        "admission": "same_user_private_connection",
-        "available": true,
-        "mcp": "wake_environment_conversations_governor_resume",
-        "readonly": false,
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        }
-      }
-    },
-    "environment.conversations.governor.status": {
-      "local": {
-        "admission": "same_user_private_connection",
-        "available": true,
-        "mcp": "wake_environment_conversations_governor_status",
-        "readonly": true,
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "selector": {
-              "maxLength": 4096,
               "minLength": 1,
               "type": "string"
             }
@@ -2208,67 +2011,6 @@
         }
       }
     },
-    "environment.conversations.self_limits.set": {
-      "local": {
-        "admission": "same_user_private_connection",
-        "available": true,
-        "mcp": "wake_environment_conversations_self_limits_set",
-        "readonly": false,
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "time_limit_seconds": {
-              "minimum": 1,
-              "type": "integer"
-            },
-            "token_limit": {
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          "required": [
-            "token_limit",
-            "time_limit_seconds"
-          ],
-          "type": "object"
-        }
-      }
-    },
-    "environment.conversations.self_limits.show": {
-      "local": {
-        "admission": "same_user_private_connection",
-        "available": true,
-        "mcp": "wake_environment_conversations_self_limits_show",
-        "readonly": true,
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        }
-      }
-    },
     "environment.conversations.slash.cancel": {
       "local": {
         "admission": "same_user_private_connection",
@@ -2593,6 +2335,128 @@
             "selector",
             "command",
             "idempotency_key",
+            "expected_target"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "environment.health.observe": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_environment_health_observe",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "expected_target": {
+              "additionalProperties": false,
+              "properties": {
+                "backend_id": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "build_sha256": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "channel": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "connection_generation": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "conversation_id": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "environment": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "home": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "host": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "namespace": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "process": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "boot_id": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "pid": {
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "start_ticks": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "pid",
+                    "start_ticks",
+                    "boot_id"
+                  ],
+                  "type": "object"
+                },
+                "provider": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "runtime": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "host",
+                "environment",
+                "runtime",
+                "namespace",
+                "build_sha256",
+                "conversation_id",
+                "home",
+                "provider",
+                "backend_id",
+                "channel",
+                "process",
+                "connection_generation"
+              ],
+              "type": "object"
+            },
+            "timeout": {
+              "maximum": 5,
+              "minimum": 0.05,
+              "type": "number"
+            }
+          },
+          "required": [
             "expected_target"
           ],
           "type": "object"
@@ -6192,527 +6056,6 @@
         "supported_registration": true
       }
     },
-    "governor.activate": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_governor_activate",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "time_limit_seconds": {
-              "minimum": 1,
-              "type": "integer"
-            },
-            "token_limit": {
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          "required": [
-            "token_limit",
-            "time_limit_seconds"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "governor.advisory": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_governor_advisory",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "resume": {
-              "type": "boolean"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "governor.disable": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_governor_disable",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "resume": {
-              "type": "boolean"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "governor.extend": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_governor_extend",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "add_seconds": {
-              "minimum": 1,
-              "type": "integer"
-            },
-            "add_tokens": {
-              "minimum": 1,
-              "type": "integer"
-            },
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "resume": {
-              "type": "boolean"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "governor.reset": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_governor_reset",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "resume": {
-              "type": "boolean"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "time_limit_seconds": {
-              "minimum": 1,
-              "type": "integer"
-            },
-            "token_limit": {
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          "required": [],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "governor.resume": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_governor_resume",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "expected_revision": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "request_id": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "governor.status": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_governor_status",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "endpoint": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            },
-            "selector": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "grok.cancel": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_grok_cancel",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "operation_id": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "operation_id"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "grok.capabilities": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_grok_capabilities",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "expected_target": {
-              "type": "object"
-            },
-            "profile": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "profile",
-            "expected_target"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "grok.checkpoint": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_grok_checkpoint",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "expected_target": {
-              "type": "object"
-            },
-            "profile": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "profile",
-            "expected_target"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "grok.create": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_grok_create",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "type": "object"
-            },
-            "expected_target": {
-              "type": "object"
-            },
-            "profile": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "profile",
-            "expected_target",
-            "_request"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "grok.fork": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_grok_fork",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "type": "object"
-            },
-            "expected_target": {
-              "type": "object"
-            },
-            "profile": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "profile",
-            "expected_target",
-            "_request"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "grok.health": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_grok_health",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "expected_target": {
-              "type": "object"
-            },
-            "profile": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "profile",
-            "expected_target"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "grok.load": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_grok_load",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "type": "object"
-            },
-            "expected_target": {
-              "type": "object"
-            },
-            "profile": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "profile",
-            "expected_target",
-            "_request"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "grok.prompt": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_grok_prompt",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "type": "object"
-            },
-            "expected_target": {
-              "type": "object"
-            },
-            "profile": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            },
-            "prompt": {
-              "maxLength": 32768,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "profile",
-            "expected_target",
-            "_request",
-            "prompt"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "grok.wait": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_grok_wait",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "operation_id": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            },
-            "timeout": {
-              "maximum": 30,
-              "minimum": 0,
-              "type": "number"
-            }
-          },
-          "required": [
-            "operation_id"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
     "harnesses.builds.build": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
@@ -7378,1283 +6721,10 @@
         "supported_registration": true
       }
     },
-    "harnesses.runtimes.list": {
+    "harnesses.grok.cancel": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_harnesses_runtimes_list",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "channel": {
-              "description": "Registered native build channel (default: modded).",
-              "enum": [
-                "stock",
-                "modded"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "harnesses.runtimes.restart": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_harnesses_runtimes_restart",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
-              "type": "object"
-            },
-            "account": {
-              "description": "Account name or configured alias.",
-              "type": "string"
-            },
-            "channel": {
-              "description": "Registered native build channel (default: modded).",
-              "enum": [
-                "stock",
-                "modded"
-              ],
-              "type": "string"
-            },
-            "confirm": {
-              "description": "Confirm the displayed scoped effect; does not override a changed target.",
-              "type": "boolean"
-            },
-            "expected_target": {
-              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
-              "type": "object"
-            }
-          },
-          "required": [
-            "account",
-            "expected_target",
-            "_request"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "harnesses.runtimes.start": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_harnesses_runtimes_start",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
-              "type": "object"
-            },
-            "account": {
-              "description": "Account name or configured alias.",
-              "type": "string"
-            },
-            "channel": {
-              "description": "Registered native build channel (default: modded).",
-              "enum": [
-                "stock",
-                "modded"
-              ],
-              "type": "string"
-            },
-            "confirm": {
-              "description": "Confirm the displayed scoped effect; does not override a changed target.",
-              "type": "boolean"
-            },
-            "expected_target": {
-              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
-              "type": "object"
-            }
-          },
-          "required": [
-            "account",
-            "expected_target",
-            "_request"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "harnesses.runtimes.status": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_harnesses_runtimes_status",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "account": {
-              "description": "Account name or configured alias.",
-              "type": "string"
-            },
-            "channel": {
-              "description": "Registered native build channel (default: modded).",
-              "enum": [
-                "stock",
-                "modded"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "account"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "harnesses.runtimes.stop": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_harnesses_runtimes_stop",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
-              "type": "object"
-            },
-            "account": {
-              "description": "Account name or configured alias.",
-              "type": "string"
-            },
-            "channel": {
-              "description": "Registered native build channel (default: modded).",
-              "enum": [
-                "stock",
-                "modded"
-              ],
-              "type": "string"
-            },
-            "confirm": {
-              "description": "Confirm the displayed scoped effect; does not override a changed target.",
-              "type": "boolean"
-            },
-            "expected_target": {
-              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
-              "type": "object"
-            }
-          },
-          "required": [
-            "account",
-            "expected_target",
-            "_request"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "harnesses.runtimes.update": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_harnesses_runtimes_update",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
-              "type": "object"
-            },
-            "account": {
-              "description": "Account name or configured alias.",
-              "type": "string"
-            },
-            "channel": {
-              "description": "Registered native build channel (default: modded).",
-              "enum": [
-                "stock",
-                "modded"
-              ],
-              "type": "string"
-            },
-            "confirm": {
-              "description": "Confirm the displayed scoped effect; does not override a changed target.",
-              "type": "boolean"
-            },
-            "expected_target": {
-              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
-              "type": "object"
-            }
-          },
-          "required": [
-            "account",
-            "expected_target",
-            "_request"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "health.observe": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_health_observe",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "expected_target": {
-              "additionalProperties": false,
-              "properties": {
-                "backend_id": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "build_sha256": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "channel": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "connection_generation": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "conversation_id": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "environment": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "home": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "host": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "namespace": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "process": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "boot_id": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "pid": {
-                      "minimum": 1,
-                      "type": "integer"
-                    },
-                    "start_ticks": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "pid",
-                    "start_ticks",
-                    "boot_id"
-                  ],
-                  "type": "object"
-                },
-                "provider": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "runtime": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                }
-              },
-              "required": [
-                "host",
-                "environment",
-                "runtime",
-                "namespace",
-                "build_sha256",
-                "conversation_id",
-                "home",
-                "provider",
-                "backend_id",
-                "channel",
-                "process",
-                "connection_generation"
-              ],
-              "type": "object"
-            },
-            "timeout": {
-              "maximum": 5,
-              "minimum": 0.05,
-              "type": "number"
-            }
-          },
-          "required": [
-            "expected_target"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "migration.apply": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_migration_apply",
-        "required_scope": "admin",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
-              "type": "object"
-            },
-            "expected_target": {
-              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
-              "type": "object"
-            }
-          },
-          "required": [
-            "expected_target",
-            "_request"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "migration.preview": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_migration_preview",
-        "required_scope": "migration.observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {},
-          "required": [],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "migration.rollback": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_migration_rollback",
-        "required_scope": "admin",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
-              "type": "object"
-            },
-            "expected_target": {
-              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
-              "type": "object"
-            },
-            "receipt_id": {
-              "description": "Exact prior migration receipt for a qualified rollback.",
-              "type": "string"
-            }
-          },
-          "required": [
-            "expected_target",
-            "receipt_id",
-            "_request"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "notices.list": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_notices_list",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "cursor": {
-              "maximum": 10000,
-              "minimum": 0,
-              "type": "integer"
-            },
-            "expected_target": {
-              "additionalProperties": false,
-              "properties": {
-                "backend_id": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "build_sha256": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "channel": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "connection_generation": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "conversation_id": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "environment": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "home": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "host": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "namespace": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "process_boot_id": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "process_pid": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "process_start_ticks": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "provider": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "runtime": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                }
-              },
-              "required": [
-                "backend_id",
-                "build_sha256",
-                "channel",
-                "connection_generation",
-                "conversation_id",
-                "environment",
-                "home",
-                "host",
-                "namespace",
-                "process_boot_id",
-                "process_pid",
-                "process_start_ticks",
-                "provider",
-                "runtime"
-              ],
-              "type": "object"
-            }
-          },
-          "required": [
-            "expected_target"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "notices.publish": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_notices_publish",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "additionalProperties": false,
-              "properties": {
-                "binding": {
-                  "maxLength": 200,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "correlation_id": {
-                  "maxLength": 200,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "idempotency_key": {
-                  "maxLength": 200,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "operation_id": {
-                  "maxLength": 200,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "target": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "backend_id": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "build_sha256": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "channel": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "connection_generation": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "conversation_id": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "environment": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "home": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "host": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "namespace": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "process_boot_id": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "process_pid": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "process_start_ticks": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "provider": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    },
-                    "runtime": {
-                      "maxLength": 4096,
-                      "minLength": 1,
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "backend_id",
-                    "build_sha256",
-                    "channel",
-                    "connection_generation",
-                    "conversation_id",
-                    "environment",
-                    "home",
-                    "host",
-                    "namespace",
-                    "process_boot_id",
-                    "process_pid",
-                    "process_start_ticks",
-                    "provider",
-                    "runtime"
-                  ],
-                  "type": "object"
-                }
-              },
-              "required": [
-                "operation_id",
-                "idempotency_key",
-                "correlation_id",
-                "binding",
-                "target"
-              ],
-              "type": "object"
-            },
-            "expected_target": {
-              "additionalProperties": false,
-              "properties": {
-                "backend_id": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "build_sha256": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "channel": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "connection_generation": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "conversation_id": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "environment": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "home": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "host": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "namespace": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "process_boot_id": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "process_pid": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "process_start_ticks": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "provider": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "runtime": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                }
-              },
-              "required": [
-                "backend_id",
-                "build_sha256",
-                "channel",
-                "connection_generation",
-                "conversation_id",
-                "environment",
-                "home",
-                "host",
-                "namespace",
-                "process_boot_id",
-                "process_pid",
-                "process_start_ticks",
-                "provider",
-                "runtime"
-              ],
-              "type": "object"
-            },
-            "source_operation_id": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "expected_target",
-            "source_operation_id",
-            "_request"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "notices.reconcile": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_notices_reconcile",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "expected_target": {
-              "additionalProperties": false,
-              "properties": {
-                "backend_id": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "build_sha256": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "channel": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "connection_generation": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "conversation_id": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "environment": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "home": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "host": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "namespace": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "process_boot_id": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "process_pid": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "process_start_ticks": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "provider": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "runtime": {
-                  "maxLength": 4096,
-                  "minLength": 1,
-                  "type": "string"
-                }
-              },
-              "required": [
-                "backend_id",
-                "build_sha256",
-                "channel",
-                "connection_generation",
-                "conversation_id",
-                "environment",
-                "home",
-                "host",
-                "namespace",
-                "process_boot_id",
-                "process_pid",
-                "process_start_ticks",
-                "provider",
-                "runtime"
-              ],
-              "type": "object"
-            },
-            "operation_id": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "expected_target",
-            "operation_id"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "operations.cancel": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_operations_cancel",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "operation_id": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "operation_id"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "operations.rebind": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_operations_rebind",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "binding": {
-              "type": "string"
-            },
-            "operation_id": {
-              "type": "string"
-            },
-            "successor": {
-              "type": "object"
-            }
-          },
-          "required": [
-            "operation_id",
-            "successor",
-            "binding"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "operations.result": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_operations_result",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "operation_id": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "operation_id"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "operations.send": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_operations_send",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "_request": {
-              "type": "object"
-            },
-            "backend": {
-              "enum": [
-                "mailbox",
-                "job"
-              ]
-            },
-            "body": {
-              "maxLength": 32768,
-              "type": "string"
-            },
-            "delivery": {
-              "enum": [
-                "inbox",
-                "notify"
-              ]
-            },
-            "expected_target": {
-              "type": "object"
-            },
-            "job_profile": {
-              "type": "string"
-            },
-            "queue": {
-              "type": "boolean"
-            },
-            "response_requested": {
-              "type": "boolean"
-            },
-            "sender_binding": {
-              "type": "string"
-            },
-            "ttl": {
-              "type": "number"
-            },
-            "wait_timeout": {
-              "maximum": 30,
-              "minimum": 0,
-              "type": "number"
-            }
-          },
-          "required": [
-            "_request",
-            "sender_binding",
-            "expected_target"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "operations.stream": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_operations_stream",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "cursor": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "limit": {
-              "maximum": 100,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "operation_id": {
-              "type": "string"
-            },
-            "timeout": {
-              "maximum": 30,
-              "minimum": 0,
-              "type": "number"
-            }
-          },
-          "required": [
-            "operation_id"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "operations.wait": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_operations_wait",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "operation_id": {
-              "type": "string"
-            },
-            "timeout": {
-              "maximum": 30,
-              "minimum": 0,
-              "type": "number"
-            }
-          },
-          "required": [
-            "operation_id"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "programs.definitions.propose": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_definitions_propose",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "definition": {
-              "type": "object"
-            }
-          },
-          "required": [
-            "definition"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "programs.definitions.publish": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_definitions_publish",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "definition": {
-              "type": "object"
-            }
-          },
-          "required": [
-            "definition"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "programs.definitions.show": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_definitions_show",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "flow_id": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            },
-            "version": {
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          "required": [
-            "flow_id",
-            "version"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "programs.runs.advance": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_runs_advance",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "run_id": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "run_id"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "programs.runs.cancel": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_runs_cancel",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "run_id": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "run_id"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "programs.runs.reconcile": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_runs_reconcile",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "run_id": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "run_id"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "programs.runs.show": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_runs_show",
-        "required_scope": "observe",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "run_id": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "required": [
-            "run_id"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "programs.runs.start": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_runs_start",
-        "required_scope": "control",
-        "schema": {
-          "additionalProperties": false,
-          "properties": {
-            "binding": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            },
-            "flow_id": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            },
-            "inputs": {
-              "type": "object"
-            },
-            "intent": {
-              "maxLength": 200,
-              "minLength": 1,
-              "type": "string"
-            },
-            "version": {
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          "required": [
-            "flow_id",
-            "version",
-            "inputs",
-            "intent",
-            "binding"
-          ],
-          "type": "object"
-        },
-        "supported_registration": true
-      }
-    },
-    "programs.sessions.cancel": {
-      "protected": {
-        "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_sessions_cancel",
+        "mcp": "wake_harnesses_grok_cancel",
         "required_scope": "control",
         "schema": {
           "additionalProperties": false,
@@ -8673,10 +6743,10 @@
         "supported_registration": true
       }
     },
-    "programs.sessions.capabilities": {
+    "harnesses.grok.capabilities": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_sessions_capabilities",
+        "mcp": "wake_harnesses_grok_capabilities",
         "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
@@ -8699,10 +6769,10 @@
         "supported_registration": true
       }
     },
-    "programs.sessions.checkpoint": {
+    "harnesses.grok.checkpoint": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_sessions_checkpoint",
+        "mcp": "wake_harnesses_grok_checkpoint",
         "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
@@ -8725,10 +6795,10 @@
         "supported_registration": true
       }
     },
-    "programs.sessions.create": {
+    "harnesses.grok.create": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_sessions_create",
+        "mcp": "wake_harnesses_grok_create",
         "required_scope": "control",
         "schema": {
           "additionalProperties": false,
@@ -8755,18 +6825,15 @@
         "supported_registration": true
       }
     },
-    "programs.sessions.fork": {
+    "harnesses.grok.fork": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_sessions_fork",
+        "mcp": "wake_harnesses_grok_fork",
         "required_scope": "control",
         "schema": {
           "additionalProperties": false,
           "properties": {
             "_request": {
-              "type": "object"
-            },
-            "checkpoint": {
               "type": "object"
             },
             "expected_target": {
@@ -8781,18 +6848,73 @@
           "required": [
             "profile",
             "expected_target",
-            "_request",
-            "checkpoint"
+            "_request"
           ],
           "type": "object"
         },
         "supported_registration": true
       }
     },
-    "programs.sessions.prompt": {
+    "harnesses.grok.health": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_sessions_prompt",
+        "mcp": "wake_harnesses_grok_health",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "expected_target": {
+              "type": "object"
+            },
+            "profile": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "profile",
+            "expected_target"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "harnesses.grok.load": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_harnesses_grok_load",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "type": "object"
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "profile": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "profile",
+            "expected_target",
+            "_request"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "harnesses.grok.prompt": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_harnesses_grok_prompt",
         "required_scope": "control",
         "schema": {
           "additionalProperties": false,
@@ -8825,10 +6947,10 @@
         "supported_registration": true
       }
     },
-    "programs.sessions.wait": {
+    "harnesses.grok.wait": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_programs_sessions_wait",
+        "mcp": "wake_harnesses_grok_wait",
         "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
@@ -8852,10 +6974,10 @@
         "supported_registration": true
       }
     },
-    "recovery.apply": {
+    "harnesses.recovery.apply": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_recovery_apply",
+        "mcp": "wake_harnesses_recovery_apply",
         "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
@@ -9093,10 +7215,10 @@
         "supported_registration": true
       }
     },
-    "recovery.check": {
+    "harnesses.recovery.check": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_recovery_check",
+        "mcp": "wake_harnesses_recovery_check",
         "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
@@ -9334,10 +7456,10 @@
         "supported_registration": true
       }
     },
-    "recovery.configure": {
+    "harnesses.recovery.configure": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_recovery_configure",
+        "mcp": "wake_harnesses_recovery_configure",
         "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
@@ -9676,10 +7798,10 @@
         "supported_registration": true
       }
     },
-    "recovery.disable": {
+    "harnesses.recovery.disable": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_recovery_disable",
+        "mcp": "wake_harnesses_recovery_disable",
         "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
@@ -9917,10 +8039,10 @@
         "supported_registration": true
       }
     },
-    "recovery.enable": {
+    "harnesses.recovery.enable": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_recovery_enable",
+        "mcp": "wake_harnesses_recovery_enable",
         "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
@@ -10158,10 +8280,10 @@
         "supported_registration": true
       }
     },
-    "recovery.list": {
+    "harnesses.recovery.list": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_recovery_list",
+        "mcp": "wake_harnesses_recovery_list",
         "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
@@ -10267,10 +8389,10 @@
         "supported_registration": true
       }
     },
-    "recovery.reconcile": {
+    "harnesses.recovery.reconcile": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_recovery_reconcile",
+        "mcp": "wake_harnesses_recovery_reconcile",
         "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
@@ -10382,10 +8504,10 @@
         "supported_registration": true
       }
     },
-    "recovery.show": {
+    "harnesses.recovery.show": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_recovery_show",
+        "mcp": "wake_harnesses_recovery_show",
         "required_scope": "observe",
         "schema": {
           "additionalProperties": false,
@@ -10497,10 +8619,10 @@
         "supported_registration": true
       }
     },
-    "recovery.tick": {
+    "harnesses.recovery.tick": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "mcp": "wake_recovery_tick",
+        "mcp": "wake_harnesses_recovery_tick",
         "required_scope": "recovery",
         "schema": {
           "additionalProperties": false,
@@ -10732,6 +8854,1870 @@
             "expected_target",
             "policy_id",
             "_request"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "harnesses.runtimes.list": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_harnesses_runtimes_list",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "channel": {
+              "description": "Registered native build channel (default: modded).",
+              "enum": [
+                "stock",
+                "modded"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "harnesses.runtimes.restart": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_harnesses_runtimes_restart",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
+              "type": "object"
+            },
+            "account": {
+              "description": "Account name or configured alias.",
+              "type": "string"
+            },
+            "channel": {
+              "description": "Registered native build channel (default: modded).",
+              "enum": [
+                "stock",
+                "modded"
+              ],
+              "type": "string"
+            },
+            "confirm": {
+              "description": "Confirm the displayed scoped effect; does not override a changed target.",
+              "type": "boolean"
+            },
+            "expected_target": {
+              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
+              "type": "object"
+            }
+          },
+          "required": [
+            "account",
+            "expected_target",
+            "_request"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "harnesses.runtimes.start": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_harnesses_runtimes_start",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
+              "type": "object"
+            },
+            "account": {
+              "description": "Account name or configured alias.",
+              "type": "string"
+            },
+            "channel": {
+              "description": "Registered native build channel (default: modded).",
+              "enum": [
+                "stock",
+                "modded"
+              ],
+              "type": "string"
+            },
+            "confirm": {
+              "description": "Confirm the displayed scoped effect; does not override a changed target.",
+              "type": "boolean"
+            },
+            "expected_target": {
+              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
+              "type": "object"
+            }
+          },
+          "required": [
+            "account",
+            "expected_target",
+            "_request"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "harnesses.runtimes.status": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_harnesses_runtimes_status",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "account": {
+              "description": "Account name or configured alias.",
+              "type": "string"
+            },
+            "channel": {
+              "description": "Registered native build channel (default: modded).",
+              "enum": [
+                "stock",
+                "modded"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "account"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "harnesses.runtimes.stop": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_harnesses_runtimes_stop",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
+              "type": "object"
+            },
+            "account": {
+              "description": "Account name or configured alias.",
+              "type": "string"
+            },
+            "channel": {
+              "description": "Registered native build channel (default: modded).",
+              "enum": [
+                "stock",
+                "modded"
+              ],
+              "type": "string"
+            },
+            "confirm": {
+              "description": "Confirm the displayed scoped effect; does not override a changed target.",
+              "type": "boolean"
+            },
+            "expected_target": {
+              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
+              "type": "object"
+            }
+          },
+          "required": [
+            "account",
+            "expected_target",
+            "_request"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "harnesses.runtimes.update": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_harnesses_runtimes_update",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "description": "Durable request metadata: operation_id, idempotency_key, correlation_id, binding and exact target.",
+              "type": "object"
+            },
+            "account": {
+              "description": "Account name or configured alias.",
+              "type": "string"
+            },
+            "channel": {
+              "description": "Registered native build channel (default: modded).",
+              "enum": [
+                "stock",
+                "modded"
+              ],
+              "type": "string"
+            },
+            "confirm": {
+              "description": "Confirm the displayed scoped effect; does not override a changed target.",
+              "type": "boolean"
+            },
+            "expected_target": {
+              "description": "Exact target JSON from the corresponding resolve, list or status command; replacement is refused.",
+              "type": "object"
+            }
+          },
+          "required": [
+            "account",
+            "expected_target",
+            "_request"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "operations.cancel": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_operations_cancel",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "operation_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "operations.notices.list": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_operations_notices_list",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "cursor": {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "expected_target": {
+              "additionalProperties": false,
+              "properties": {
+                "backend_id": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "build_sha256": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "channel": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "connection_generation": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "conversation_id": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "environment": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "home": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "host": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "namespace": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "process_boot_id": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "process_pid": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "process_start_ticks": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "provider": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "runtime": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "backend_id",
+                "build_sha256",
+                "channel",
+                "connection_generation",
+                "conversation_id",
+                "environment",
+                "home",
+                "host",
+                "namespace",
+                "process_boot_id",
+                "process_pid",
+                "process_start_ticks",
+                "provider",
+                "runtime"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "expected_target"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "operations.notices.publish": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_operations_notices_publish",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "additionalProperties": false,
+              "properties": {
+                "binding": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "correlation_id": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "idempotency_key": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "operation_id": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "target": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "backend_id": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "build_sha256": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "channel": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "connection_generation": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "conversation_id": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "environment": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "home": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "host": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "namespace": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "process_boot_id": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "process_pid": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "process_start_ticks": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "provider": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "runtime": {
+                      "maxLength": 4096,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "backend_id",
+                    "build_sha256",
+                    "channel",
+                    "connection_generation",
+                    "conversation_id",
+                    "environment",
+                    "home",
+                    "host",
+                    "namespace",
+                    "process_boot_id",
+                    "process_pid",
+                    "process_start_ticks",
+                    "provider",
+                    "runtime"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "operation_id",
+                "idempotency_key",
+                "correlation_id",
+                "binding",
+                "target"
+              ],
+              "type": "object"
+            },
+            "expected_target": {
+              "additionalProperties": false,
+              "properties": {
+                "backend_id": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "build_sha256": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "channel": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "connection_generation": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "conversation_id": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "environment": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "home": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "host": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "namespace": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "process_boot_id": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "process_pid": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "process_start_ticks": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "provider": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "runtime": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "backend_id",
+                "build_sha256",
+                "channel",
+                "connection_generation",
+                "conversation_id",
+                "environment",
+                "home",
+                "host",
+                "namespace",
+                "process_boot_id",
+                "process_pid",
+                "process_start_ticks",
+                "provider",
+                "runtime"
+              ],
+              "type": "object"
+            },
+            "source_operation_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "expected_target",
+            "source_operation_id",
+            "_request"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "operations.notices.reconcile": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_operations_notices_reconcile",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "expected_target": {
+              "additionalProperties": false,
+              "properties": {
+                "backend_id": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "build_sha256": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "channel": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "connection_generation": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "conversation_id": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "environment": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "home": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "host": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "namespace": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "process_boot_id": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "process_pid": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "process_start_ticks": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "provider": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "runtime": {
+                  "maxLength": 4096,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "backend_id",
+                "build_sha256",
+                "channel",
+                "connection_generation",
+                "conversation_id",
+                "environment",
+                "home",
+                "host",
+                "namespace",
+                "process_boot_id",
+                "process_pid",
+                "process_start_ticks",
+                "provider",
+                "runtime"
+              ],
+              "type": "object"
+            },
+            "operation_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "expected_target",
+            "operation_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "operations.rebind": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_operations_rebind",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "binding": {
+              "type": "string"
+            },
+            "operation_id": {
+              "type": "string"
+            },
+            "successor": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "operation_id",
+            "successor",
+            "binding"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "operations.result": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_operations_result",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "operation_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "operations.send": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_operations_send",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "type": "object"
+            },
+            "backend": {
+              "enum": [
+                "mailbox",
+                "job"
+              ]
+            },
+            "body": {
+              "maxLength": 32768,
+              "type": "string"
+            },
+            "delivery": {
+              "enum": [
+                "inbox",
+                "notify"
+              ]
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "job_profile": {
+              "type": "string"
+            },
+            "queue": {
+              "type": "boolean"
+            },
+            "response_requested": {
+              "type": "boolean"
+            },
+            "sender_binding": {
+              "type": "string"
+            },
+            "ttl": {
+              "type": "number"
+            },
+            "wait_timeout": {
+              "maximum": 30,
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "_request",
+            "sender_binding",
+            "expected_target"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "operations.stream": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_operations_stream",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "cursor": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "limit": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "operation_id": {
+              "type": "string"
+            },
+            "timeout": {
+              "maximum": 30,
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "operations.wait": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_operations_wait",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "operation_id": {
+              "type": "string"
+            },
+            "timeout": {
+              "maximum": 30,
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.definitions.propose": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_definitions_propose",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "definition": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "definition"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.definitions.publish": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_definitions_publish",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "definition": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "definition"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.definitions.show": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_definitions_show",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "flow_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "version": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "flow_id",
+            "version"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.governor.activate": {
+      "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
+        "mcp": "wake_programs_governor_activate",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "time_limit_seconds": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "token_limit": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "token_limit",
+            "time_limit_seconds"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_governor_activate",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "time_limit_seconds": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "token_limit": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "token_limit",
+            "time_limit_seconds"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.governor.advisory": {
+      "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
+        "mcp": "wake_programs_governor_advisory",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resume": {
+              "type": "boolean"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_governor_advisory",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resume": {
+              "type": "boolean"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.governor.disable": {
+      "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
+        "mcp": "wake_programs_governor_disable",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resume": {
+              "type": "boolean"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_governor_disable",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resume": {
+              "type": "boolean"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.governor.extend": {
+      "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
+        "mcp": "wake_programs_governor_extend",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "add_seconds": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "add_tokens": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resume": {
+              "type": "boolean"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_governor_extend",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "add_seconds": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "add_tokens": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resume": {
+              "type": "boolean"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.governor.reset": {
+      "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
+        "mcp": "wake_programs_governor_reset",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resume": {
+              "type": "boolean"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "time_limit_seconds": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "token_limit": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_governor_reset",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "resume": {
+              "type": "boolean"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "time_limit_seconds": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "token_limit": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.governor.resume": {
+      "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
+        "mcp": "wake_programs_governor_resume",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_governor_resume",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_revision": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.governor.status": {
+      "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
+        "mcp": "wake_programs_governor_status",
+        "readonly": true,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_governor_status",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.limits.set": {
+      "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
+        "mcp": "wake_programs_limits_set",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "time_limit_seconds": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "token_limit": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "token_limit",
+            "time_limit_seconds"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    "programs.limits.show": {
+      "local": {
+        "admission": "same_user_private_connection",
+        "available": true,
+        "mcp": "wake_programs_limits_show",
+        "readonly": true,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            "selector": {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [],
+          "type": "object"
+        }
+      }
+    },
+    "programs.runs.advance": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_runs_advance",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.runs.cancel": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_runs_cancel",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.runs.reconcile": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_runs_reconcile",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.runs.show": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_runs_show",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.runs.start": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_runs_start",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "binding": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "flow_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "inputs": {
+              "type": "object"
+            },
+            "intent": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "version": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "flow_id",
+            "version",
+            "inputs",
+            "intent",
+            "binding"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.sessions.cancel": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_sessions_cancel",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "operation_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.sessions.capabilities": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_sessions_capabilities",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "expected_target": {
+              "type": "object"
+            },
+            "profile": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "profile",
+            "expected_target"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.sessions.checkpoint": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_sessions_checkpoint",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "expected_target": {
+              "type": "object"
+            },
+            "profile": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "profile",
+            "expected_target"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.sessions.create": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_sessions_create",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "type": "object"
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "profile": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "profile",
+            "expected_target",
+            "_request"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.sessions.fork": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_sessions_fork",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "type": "object"
+            },
+            "checkpoint": {
+              "type": "object"
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "profile": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "profile",
+            "expected_target",
+            "_request",
+            "checkpoint"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.sessions.prompt": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_sessions_prompt",
+        "required_scope": "control",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "_request": {
+              "type": "object"
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "profile": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "prompt": {
+              "maxLength": 32768,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "profile",
+            "expected_target",
+            "_request",
+            "prompt"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
+    "programs.sessions.wait": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "mcp": "wake_programs_sessions_wait",
+        "required_scope": "observe",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "operation_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "timeout": {
+              "maximum": 30,
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "operation_id"
           ],
           "type": "object"
         },
