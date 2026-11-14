@@ -135,6 +135,9 @@ from .governor_commands import schemas as governor_schemas
 TOOLS.update({'wake_governor_' + verb: ('governor.' + verb, schema) for verb, schema in governor_schemas().items()})
 
 
+from .unified_connectors import protected_operations
+PROTECTED_ADAPTERS=protected_operations()
+TOOLS.update({tool:(operation,schema) for operation,(tool,schema,required,handler) in PROTECTED_ADAPTERS.items()})
 from .unified_contract import api_aliases
 api_aliases(TOOLS)
 
@@ -212,6 +215,8 @@ class ProtectedOperations:
 
     READ_POLICIES.update({'governor.' + verb: ('observe' if verb == 'status' else 'control', None, None) for verb in governor_schemas()})
 
+    READ_POLICIES.update({operation:(required,None,None) for operation,(tool,schema,required,handler) in PROTECTED_ADAPTERS.items()})
+
     def __init__(self, authority, operations):
         self.authority, self.operations = authority, operations
 
@@ -219,6 +224,9 @@ class ProtectedOperations:
         from .unified_contract import original
         operation = original(operation, self.READ_POLICIES.keys() | {"runtime.input", "runtime.recover", "grants.revoke"})
         actor = self.authority.authenticate(token)
+        from .unified_connectors import check_action,check_legacy_content
+        check_action(actor,operation)
+        check_legacy_content(actor,operation)
         policy = self.READ_POLICIES.get(operation)
         required = policy[0] if policy else {'runtime.input': 'control', 'runtime.recover': 'recovery',
                     'grants.revoke': 'admin'}.get(operation)
@@ -227,7 +235,9 @@ class ProtectedOperations:
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
         from .profile_operations import OPERATIONS as profile_operations
-        if operation.startswith('governor.'):
+        if operation in PROTECTED_ADAPTERS:
+            result=PROTECTED_ADAPTERS[operation][3](self.authority,self.operations,token,operation,arguments)
+        elif operation.startswith('governor.'):
             from .governor_commands import protected_execute
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'Host governor owner unavailable.')
@@ -449,6 +459,8 @@ class ProtectedOperations:
                 result['result'][policy[1]] = [row for row in result['result'][policy[1]] if allowed(row)]
             elif not allowed(result['result'][policy[2]]):
                 raise AuthError('insufficient_scope')
+        if operation=='connectors.grants.revoke' and arguments.get('grant_id')==actor.grant_id:
+            return result
         current = self.authority.authenticate(token)
         if current.grant_id != actor.grant_id:
             raise AuthError()
