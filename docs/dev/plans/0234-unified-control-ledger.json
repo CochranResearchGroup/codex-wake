@@ -12,7 +12,7 @@
       "title": "Canonical hierarchical contract and compatibility",
       "blockers": [],
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "worker": "root",
       "owned_scope": "canonical registry, shared CLI/API/MCP hooks, contract generation",
       "packet": "docs/dev/plans/0234-unified-control-tickets/01.md",
@@ -55,13 +55,14 @@
       "blockers": [
         1
       ],
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "worker": "root",
       "owned_scope": "environment resource owner and tab/session inventory adapters",
       "packet": "docs/dev/plans/0234-unified-control-tickets/04.md",
       "issue": 627,
-      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/627"
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/627",
+      "validation": "Environment projection plus existing contract/bot-family/terminal16PASS3.657s; public saved-session and independent ancestry test red->green"
     },
     "5": {
       "title": "Delegate connector access and route to the owning host",

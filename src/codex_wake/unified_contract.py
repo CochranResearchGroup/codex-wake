@@ -52,6 +52,8 @@ def api_aliases(tools):
     return tools
 
 def local_aliases(definitions):
+    from .unified_environment import definitions as environment_definitions
+    definitions.update(environment_definitions())
     for operation,(tool,description,schema,handler,readonly) in list(definitions.items()):
         alias=canonical(operation)
         if alias==operation:continue
@@ -110,6 +112,10 @@ def apply_cli(parser):
         action=_subs(parent) or parent.add_subparsers(dest='_unified_action',required=True)
         if path[-1] not in action.choices:action.add_parser(path[-1],parents=[source],add_help=False)
     environment=_parser(parser,('environment',));action=_subs(environment)
+    for verb in ('snapshot','children'):
+        item=action.add_parser(verb)
+        item.set_defaults(_unified_operation='environment.'+verb)
+        if verb=='children':item.add_argument('resource_id')
     action.add_parser('capabilities',help='discover canonical operation contracts and transport capabilities')
     return parser
 

@@ -2833,7 +2833,7 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         return 0
     parser = build_parser()
     args = parser.parse_args(argv)
-    if (args.command in ('accounts', 'stores', 'configuration', 'history', 'builds', 'daemons', 'migration', 'tabs')
+    if (args.command in ('accounts', 'stores', 'configuration', 'history', 'builds', 'daemons', 'migration', 'tabs', 'environment')
             and not (args.command == 'configuration' and args.account_verb == 'default-root')):
         from .shortcut_store import default_root
         try:
@@ -2854,6 +2854,11 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
         from .time_inspection import time_command
         return time_command(args)
     root = resolve_root(args)
+    if getattr(args, "_unified_operation", None):
+        from .local_control_service import LocalOperations
+        payload = {"resource_id": args.resource_id} if hasattr(args, "resource_id") else {}
+        print(json.dumps(LocalOperations(root).execute(args._unified_operation, payload), sort_keys=True))
+        return 0
     if args.command == "schedules":
         from .recurring_commands import command as schedule_command
         return schedule_command(args, root)
