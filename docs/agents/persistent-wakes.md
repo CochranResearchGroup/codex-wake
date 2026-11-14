@@ -77,3 +77,14 @@ future checks. Acknowledging a notice never grants permission or replays work.
 No path changes existing resource allowances or task authority. Keep installed
 runtime, source qualification, monitor readiness, accepted delivery and completed
 checks separate when reporting acceptance.
+
+Ordinary monitor polling jitter within the delivery window does not make a check
+a missed run. Qualified monitor/coordinator generation identifies restart recovery;
+a shared supervisor's helper-worker rotation does not itself mean restart. A
+previously admitted overlap queue keeps its separate policy. Large recovery
+batches finish bounded enumeration before applying missed-run selection.
+
+Past terminal peer evidence is retained privately, bound to the exact original
+submission and recipient. Admission does at most one bounded remote reconciliation
+and a five-second local history scan; unknown history holds rather than bypassing
+execution exclusion. Terminal evidence never grants new task/effect authority.

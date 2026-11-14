@@ -206,19 +206,9 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
         try:
             record['permission_check']=check_route(root,record,route)
             submitted=selected.submit(recipient,prompt)
-            if not isinstance(submitted,RuntimeSubmission):raise WakeError('invalid submission result')
-            if submitted.state=='accepted':
-                if submitted.evidence_kind == 'native_queue_acceptance':
-                    UUID(submitted.receipt_id)
-                elif (submitted.evidence_kind != 'native_turn_acceptance' or route != 'background'
-                      or record['target'].get('session_mode') != 'background'
-                      or not isinstance(submitted.receipt_id, str) or not submitted.receipt_id
-                      or len(submitted.receipt_id) > 256
-                      or not isinstance(submitted.evidence, dict)
-                      or submitted.evidence.get('thread_id') != record['target']['thread_id']
-                      or submitted.evidence.get('turn_id') != submitted.receipt_id
-                      or submitted.evidence.get('source') != 'native_turn'):
-                    raise WakeError('native acceptance not verified')
+            from .runtime_delivery import validate_native_submission
+            validate_native_submission(submitted, record['target']['thread_id'],
+                allow_background=route == 'background' and record['target'].get('session_mode') == 'background')
         except PermissionDenied as exc:
             submitted=RuntimeSubmission('not_sent',reason=exc.code,pre_io=True)
         except Exception:

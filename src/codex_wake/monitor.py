@@ -56,6 +56,8 @@ def write_monitor_health(
     current = now or utc_now()
     pid = os.getpid()
     identity = process_identity(pid) or {}
+    from .recurring_schedules import scheduler_generation
+    recurring_generation = scheduler_generation()
     generation = identity.get("start_time_ticks")
     if not isinstance(generation, int) or generation < 1:
         generation = pid
@@ -72,6 +74,7 @@ def write_monitor_health(
         "reader_id": f"{source}:{pid}",
         "reader_generation": generation,
         "reader_schema_versions": schema_summary()['read_versions'],
+        "recurring_monitor_generation": recurring_generation,
         "reader_capabilities": ["signal_records_v2", "emergency_control_v1", "recurring_schedules_v1", "wake_session_modes_v1"],
         "checked_at": format_utc(current),
         "poll_result": poll_result or {},

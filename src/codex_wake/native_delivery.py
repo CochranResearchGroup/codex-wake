@@ -231,20 +231,8 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
     replace_record(root, found, record)
     try:
         submitted = adapter.submit(recipient, prompt)
-        if not isinstance(submitted, RuntimeSubmission):
-            raise WakeError('invalid runtime submission outcome')
-        if submitted.state == 'accepted':
-            if submitted.evidence_kind == 'native_queue_acceptance':
-                UUID(submitted.receipt_id)
-            elif (submitted.evidence_kind != 'native_turn_acceptance'
-                  or not target.get('session_mode') == 'background'
-                  or not isinstance(submitted.receipt_id, str) or not submitted.receipt_id
-                  or len(submitted.receipt_id) > 256
-                  or not isinstance(submitted.evidence, dict)
-                  or submitted.evidence.get('thread_id') != target['thread_id']
-                  or submitted.evidence.get('turn_id') != submitted.receipt_id
-                  or submitted.evidence.get('source') != 'native_turn'):
-                raise WakeError('runtime evidence does not confirm native acceptance')
+        from .runtime_delivery import validate_native_submission
+        validate_native_submission(submitted, target['thread_id'], allow_background=target.get('session_mode') == 'background')
     except Exception as exc:
         submitted = RuntimeSubmission(
             'uncertain', reason='runtime_adapter_exception', exception_type=type(exc).__name__,

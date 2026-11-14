@@ -155,7 +155,7 @@ class HarnessCallerTests(unittest.TestCase):
             denied, failed = runner.call('wake_native_after', body)
             self.assertTrue(failed)
             self.assertFalse(all_records(root))
-            with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+            with patch('codex_wake.sessions.observe', return_value={'complete':False,'sessions':[]}), patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
                     'codex_wake.native_clock.snapshot', return_value={'utc': None, 'counter': None}):
                 value, failed = runner.call('wake_native_after', body, native_context=META)
             self.assertFalse(failed, value)
@@ -176,7 +176,7 @@ class HarnessCallerTests(unittest.TestCase):
                 runner = CommandRunner(wake_root=root)
                 body = dict(caller_thread_id=THREAD, trigger=delay, ttl='24h', prompt='Read-only review',
                     idempotency_key='future-fixture', session_mode='reopen_live', wake_lifetime='persistent', recipient_startup='create_load_run')
-                with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+                with patch('codex_wake.sessions.observe', return_value={'complete':False,'sessions':[]}), patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
                         'codex_wake.native_clock.snapshot', return_value=clock):
                     value, failed = runner.call('wake_native_after', body, native_context=META)
                 self.assertFalse(failed, value)
@@ -200,7 +200,7 @@ class HarnessCallerTests(unittest.TestCase):
             body = dict(caller_thread_id=THREAD, trigger='3650d', ttl='24h', prompt='Read-only review',
                 idempotency_key='future-monitor-fixture', session_mode='background', wake_lifetime='persistent')
             write_monitor_health(wake_root=root, source='qualification-fixture', mode='once')
-            with patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+            with patch('codex_wake.sessions.observe', return_value={'complete':False,'sessions':[]}), patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
                     'codex_wake.native_clock.snapshot', return_value=clock):
                 first, failed = runner.call('wake_native_after', body, native_context=META)
                 self.assertFalse(failed, first)

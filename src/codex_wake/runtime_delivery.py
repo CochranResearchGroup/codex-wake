@@ -73,3 +73,23 @@ class RuntimeAdapter(Protocol):
     def observe(self, recipient: RuntimeRecipient) -> RuntimeObservation: ...
     def submit(self, recipient: RuntimeRecipient, prompt: str) -> RuntimeSubmission: ...
     def reconcile(self, recipient: RuntimeRecipient, prompt: str) -> RuntimeReconciliation: ...
+
+
+def validate_native_submission(submitted, thread_id, *, allow_background=False):
+    """Validate receipt identity consistently on permissioned and legacy routes."""
+    from uuid import UUID
+    from .records import WakeError
+    if not isinstance(submitted, RuntimeSubmission):
+        raise WakeError('invalid runtime submission outcome')
+    if submitted.state != 'accepted':
+        return
+    if submitted.evidence_kind == 'native_queue_acceptance':
+        UUID(submitted.receipt_id)
+        return
+    evidence = submitted.evidence
+    if (allow_background and submitted.evidence_kind == 'native_turn_acceptance'
+            and isinstance(submitted.receipt_id, str) and 0 < len(submitted.receipt_id) <= 256
+            and isinstance(evidence, dict) and evidence.get('source') == 'native_turn'
+            and evidence.get('thread_id') == thread_id and evidence.get('turn_id') == submitted.receipt_id):
+        return
+    raise WakeError('runtime evidence does not confirm native acceptance')

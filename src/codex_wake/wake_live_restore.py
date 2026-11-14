@@ -93,7 +93,7 @@ class LiveWakeRestorer:
             raise RuntimeTargetError('unavailable', 'live_restore_workspace_unverified')
         state = thread.get('status', {}).get('type')
         if state == 'active':
-            raise RuntimeTargetError('unavailable', 'live_restore_background_check_running')
+            raise RuntimeTargetError('busy', 'live_restore_background_check_running')
         if state not in ('idle', 'notLoaded'):
             raise RuntimeTargetError('unavailable', 'live_restore_runtime_state_unverified')
         check_operation(self.root, 'wake.new_tab', principal, target=target['thread_id'],

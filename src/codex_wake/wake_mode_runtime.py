@@ -2,7 +2,7 @@
 from functools import wraps
 from pathlib import Path
 
-from .records import WakeLifecycleLock, all_records, replace_record
+from .records import WakeLifecycleLock, replace_record
 from .runtime_delivery import RuntimeCapability, RuntimeObservation, RuntimeSubmission, RuntimeTargetError
 
 
@@ -165,32 +165,87 @@ class ModeRuntimeAdapter:
         return self.adapter.reconcile(recipient, prompt)
 
 
+def _terminal_evidence(evidence):
+    return (isinstance(evidence, dict) and evidence.get('source') == 'native_turn'
+        and evidence.get('execution') in ('turn_completed', 'turn_failed', 'turn_interrupted')
+        and all(isinstance(evidence.get(key), str) and 0 < len(evidence[key]) <= 4096
+                for key in ('turn_id', 'user_message_id', 'client_message_id')))
+
+
+def _terminal_receipt(root, peer, evidence=None):
+    """Retain a verified past fact bound to its original submission, never a grant."""
+    import hashlib
+    import json
+    from .wake_policy import _read, _write
+    from .records import WakeError
+    delivery = peer['native_delivery']
+    binding = dict(wake_id=peer['id'], target=peer['target'],
+                   submission_id=delivery.get('submission_id'), prompt_sha256=delivery.get('prompt_sha256'))
+    digest = hashlib.sha256(json.dumps(binding, sort_keys=True).encode()).hexdigest()
+    path = Path(root) / 'terminal-wake-evidence' / (digest + '.json')
+    if evidence is not None:
+        compact = {key:evidence[key] for key in ('source', 'execution', 'turn_id', 'user_message_id', 'client_message_id')}
+        _write(path, dict(version=1, binding_sha256=digest, evidence=compact))
+        return compact
+    if _terminal_evidence(delivery.get('evidence')):
+        return delivery['evidence']
+    try:
+        value = _read(path)
+        if value.get('version') == 1 and value.get('binding_sha256') == digest and _terminal_evidence(value.get('evidence')):
+            return value['evidence']
+    except (WakeError, OSError, ValueError, TypeError, AttributeError):
+        pass
+    return None
+
+
+def _peer_records(root, deadline):
+    """Read lazily so local history traversal shares the admission deadline."""
+    import json
+    import time
+    from .records import ACTIVE_STATUS_DIRS
+    for status in (*ACTIVE_STATUS_DIRS, 'archive'):
+        for path in (Path(root) / status).glob('*.json'):
+            if time.monotonic() >= deadline:
+                raise RuntimeTargetError('unavailable', 'peer_history_deadline')
+            with path.open() as source:
+                raw = source.read(4 * 1024 * 1024 + 1)
+            if len(raw) > 4 * 1024 * 1024:
+                raise RuntimeTargetError('unavailable', 'peer_history_unavailable')
+            value = json.loads(raw)
+            if isinstance(value, dict):
+                yield value
+
+
 def _pending_peer(root, record, adapter):
+    import time
     from .native_delivery import native_prompt
     target = record['target']
     background_owned = False
-    for found in all_records(root, include_archive=True):
-        peer = found.record
-        other = peer.get('target', {})
-        if peer.get('id') == record['id'] or other.get('thread_id') != target['thread_id']:
-            continue
-        if other.get('transport') != 'native' or other.get('endpoint') != target['endpoint']:
-            continue
-        delivery = peer.get('native_delivery', {})
-        if delivery.get('state') not in ('accepted', 'uncertain'):
-            continue
-        try:
-            recipient = adapter.resolve(other)
-            evidence = adapter.reconcile(recipient, native_prompt(root, peer)).evidence
-            if (recipient.runtime == 'codex' and recipient.session_id == target['thread_id']
-                    and evidence and evidence.get('source') == 'native_turn'
-                    and all(isinstance(evidence.get(key), str) and evidence[key]
-                            for key in ('turn_id', 'user_message_id', 'client_message_id'))
-                    and evidence.get('execution') in ('turn_completed', 'turn_failed', 'turn_interrupted')):
-                background_owned = background_owned or delivery.get('route') == 'background'
+    deadline = time.monotonic() + 5
+    remote_reads = 0
+    try:
+        for peer in _peer_records(root, deadline):
+            other = peer.get('target', {})
+            if peer.get('id') == record['id'] or other.get('thread_id') != target['thread_id']:
                 continue
-        except Exception:
-            pass
+            if other.get('transport') != 'native' or other.get('endpoint') != target['endpoint']:
+                continue
+            delivery = peer.get('native_delivery', {})
+            if delivery.get('state') not in ('accepted', 'uncertain'):
+                continue
+            evidence = _terminal_receipt(root, peer)
+            if evidence is None:
+                if remote_reads >= 1 or time.monotonic() >= deadline:
+                    return True, background_owned
+                remote_reads += 1
+                recipient = adapter.resolve(other)
+                evidence = adapter.reconcile(recipient, native_prompt(root, peer)).evidence
+                if recipient.runtime != 'codex' or recipient.session_id != target['thread_id'] or not _terminal_evidence(evidence):
+                    return True, background_owned
+                _terminal_receipt(root, peer, evidence)
+            background_owned = (background_owned or delivery.get('route') == 'background'
+                or other.get('session_mode') == 'background' and bool(delivery.get('turn_id')))
+    except Exception:
         return True, background_owned
     return False, background_owned
 

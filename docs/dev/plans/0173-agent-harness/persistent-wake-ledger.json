@@ -4,21 +4,25 @@
   "branch": "docs/persistent-wake-design",
   "base": "e8c79a79da0b0482e2403e634394c70f5c66e333",
   "review_fixed_point": "e8c79a79da0b0482e2403e634394c70f5c66e333",
-  "review_runs": 0,
-  "remediation_passes": 0,
+  "review_runs": 1,
+  "remediation_passes": 1,
   "tickets": {
     "611": {
       "state": "validated",
       "blockers": [],
       "worker": "root",
-      "result_sha": "53aac91d8b0dfb993f380b4d2c8cd6f36ff4b052"
+      "result_sha": "53aac91d8b0dfb993f380b4d2c8cd6f36ff4b052",
+      "tracker_state": "CLOSED",
+      "pr": 618
     },
     "612": {
       "state": "validated",
       "blockers": [
         611
       ],
-      "worker": "root"
+      "worker": "root",
+      "tracker_state": "CLOSED",
+      "pr": 618
     },
     "613": {
       "state": "validated",
@@ -30,7 +34,9 @@
       "base": "53aac91d",
       "result_sha": "9e84816f507352585689e8622d88411fd3a9eea6",
       "integrated_sha": "aaaa5372",
-      "validation": "5 live restoration seam tests pass on integrated branch; prior existing resume4/protocol7 pass"
+      "validation": "5 live restoration seam tests pass on integrated branch; prior existing resume4/protocol7 pass",
+      "tracker_state": "CLOSED",
+      "pr": 618
     },
     "614": {
       "state": "validated",
@@ -42,7 +48,9 @@
       "base": "53aac91d",
       "result_sha": "365c3defd90153f4935945d722e0075f7d8801f0",
       "integrated_sha": "bf877aef",
-      "validation": "7 mode/native-dispatch tests passed on integrated branch"
+      "validation": "7 mode/native-dispatch tests passed on integrated branch",
+      "tracker_state": "CLOSED",
+      "pr": 618
     },
     "615": {
       "state": "validated",
@@ -53,17 +61,21 @@
       "branch": "feat/persistent-wake-clock-615",
       "result_sha": "3f6a9dbf7a1a05406f91dc5df610266baa7e5a1f",
       "integrated_sha": "a14887c7",
-      "validation": "4 clock +3 interval tests passed on integrated branch"
+      "validation": "4 clock +3 interval tests passed on integrated branch",
+      "tracker_state": "CLOSED",
+      "pr": 618
     },
     "616": {
-      "state": "implemented",
+      "state": "validated",
       "blockers": [
         612,
         613,
         614,
         615
       ],
-      "worker": "root"
+      "worker": "root",
+      "tracker_state": "CLOSED",
+      "pr": 618
     }
   },
   "validation": [
@@ -116,6 +128,14 @@
       "red": "large32k prompt/130-occurrence backlog made retained schedule exceed private reader size bound",
       "green": "test_recurring_schedules.py:6 pass after persisting per-revision context once",
       "scope": "no new fixture project; public schedule registration/poll/show"
+    },
+    {
+      "tier": "focused remediation",
+      "command": "PYTHONPATH=src:tests /tmp/codex-wake-persistent-610-env/bin/python -m unittest test_recurring_schedules test_recurring_calendar test_wake_live_restore test_wake_mode_runtime test_wake_policy test_wake_session_modes test_wake_route_permissions test_native_delivery test_runtime_policies test_harness_callers test_wake_control_mcp -q",
+      "result": "90 passed in19.768s",
+      "red": "remediation-red.log:5failures/1error before fixes",
+      "first_green_diagnostic": "Initial subprocess revision test3-second bound hit external discovery; reused unchanged exact binding, isolated child XDG and used10-second public-entrypoint budget; final green clean",
+      "environment": "Python3.12.13 isolated task development prefix; source via PYTHONPATH; no private/provider inputs"
     }
   ],
   "contracts": {
@@ -128,9 +148,21 @@
     "runtime_routing": "ModeRuntimeAdapter(root, adapter); #614 owns native_delivery hooks. #613 LiveWakeRestorer(root).prepare(target) returns exact verified target or RuntimeTargetError; #614 invokes for reopen_live. No shared edits by workers."
   },
   "integration_main_merge": "2548f7da956115cd11149e72152586cdaf193209",
-  "review_fixed_point_requested": "optional narrower comparison c919ec99; approved packet already records e8c79a79 as fixed point",
   "validation_notes": [
     "Inherited0220/0224 CLOSED headers split from Owner fields so canonical audit can parse unchanged terminal states.",
     "Host Python3.12.13 only; no hosted3.11 matrix or working-host deployment."
-  ]
+  ],
+  "review_report": "persistent-wake-review.json",
+  "source_validation_pending": "Finish remaining full-suite test IDs from short-suite timeout; do not repeat passed prefix except affected regressions.",
+  "worker_checkout_cleanup": {
+    "before": 123,
+    "after": 120,
+    "removed": [
+      "persistent-wake-live",
+      "persistent-wake-background",
+      "persistent-wake-clock"
+    ],
+    "custody": "Exact worker tips read back on matching origin worker refs before ordinary clean worktree removal",
+    "retained": "persistent-wake-design integration checkout for PR618/final acceptance"
+  }
 }

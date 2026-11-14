@@ -105,3 +105,46 @@ class RecurringSchedules(unittest.TestCase):
             saved=self.cli(root,'show',registered['id'])
             self.assertEqual(len(saved['occurrences']),130)
             self.assertEqual(saved['request']['prompt'],'x'*32000)
+    def test_ordinary_poll_jitter_does_not_turn_skip_policy_into_skip_every_check(self):
+        from codex_wake.recurring_schedules import poll_schedules
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); spec=root/'request.json';value=request(cadence=dict(kind='interval',seconds=60,start_at='2033-05-18T03:34:20Z'),missed=dict(policy='skip',max_lateness_seconds=300));spec.write_text(json.dumps(value))
+            saved=self.cli(root,'register','--request',str(spec),'--codex-path',sys.executable)
+            def clock(now):return {'utc':{'lower':now,'upper':now,'status':'network','sources':['a','b']},'counter':None}
+            poll_schedules(root,clock(2000000000))
+            poll_schedules(root,clock(2000000060.1))
+            self.assertEqual(self.cli(root,'show',saved['id'])['occurrences'][0]['state'],'pending')
+    def test_missed_latest_does_not_coalesce_an_on_time_overlap_queue(self):
+        from codex_wake.recurring_schedules import poll_schedules
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);spec=root/'request.json';spec.write_text(json.dumps(request(cadence=dict(kind='interval',seconds=60,start_at='2033-05-18T03:33:20Z'),end=dict(kind='count',count=4),missed=dict(policy='latest',max_lateness_seconds=600),delivery_window_seconds=600)))
+            saved=self.cli(root,'register','--request',str(spec),'--codex-path',sys.executable)
+            for now in (2000000000,2000000060,2000000120):
+                poll_schedules(root,{'utc':{'lower':now,'upper':now,'status':'network','sources':['a','b']},'counter':None})
+            self.assertEqual([x['state'] for x in self.cli(root,'show',saved['id'])['occurrences']],['pending','queued','queued'])
+    def test_revising_to_old_one_second_cadence_is_bounded(self):
+        import subprocess
+        from codex_wake.recurring_schedules import poll_schedules
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);spec=root/'request.json';spec.write_text(json.dumps(request()))
+            saved=self.cli(root,'register','--request',str(spec),'--codex-path',sys.executable)
+            poll_schedules(root,{'utc':{'lower':2000000000,'upper':2000000000,'status':'network','sources':['a','b']},'counter':None})
+            value=request(cadence=dict(kind='interval',seconds=1,start_at='2000-01-01T00:00:00Z'));spec.write_text(json.dumps(value))
+            import os
+            env=dict(os.environ)
+            for key in ('HOME','CODEX_HOME','XDG_CONFIG_HOME','XDG_STATE_HOME','XDG_RUNTIME_DIR'):
+                directory=root/key.lower();directory.mkdir();env[key]=str(directory)
+            env.pop('TMUX',None);env.pop('CODEX_THREAD_ID',None)
+            result=subprocess.run([sys.executable,'-m','codex_wake','--wake-root',str(root),'schedules','revise',saved['id'],'--request',str(spec),'--expected-revision','1','--codex-path',sys.executable],env=env,capture_output=True,text=True,timeout=10)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertEqual(json.loads(result.stdout)['next_due_at'],'2033-05-18T03:33:21Z')
+    def test_confirmed_monitor_restart_applies_skip_to_a_missed_occurrence(self):
+        from codex_wake.recurring_schedules import poll_schedules
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);spec=root/'request.json';spec.write_text(json.dumps(request(cadence=dict(kind='interval',seconds=60,start_at='2033-05-18T03:34:20Z'),missed=dict(policy='skip',max_lateness_seconds=300))))
+            saved=self.cli(root,'register','--request',str(spec),'--codex-path',sys.executable)
+            def clock(now):return {'utc':{'lower':now,'upper':now,'status':'network','sources':['a','b']},'counter':None}
+            poll_schedules(root,clock(2000000000))
+            with patch('codex_wake.process.process_identity',return_value={'boot_id':'new-monitor-boot','start_time_ticks':123}):
+                poll_schedules(root,clock(2000000061))
+            self.assertEqual(self.cli(root,'show',saved['id'])['occurrences'][0]['state'],'skipped')

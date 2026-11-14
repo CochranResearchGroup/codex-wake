@@ -105,6 +105,11 @@ class LiveWakeRestoreTests(unittest.TestCase):
             with patch('codex_wake.sessions.observe', side_effect=observe), patch('codex_wake.sessions.revalidate_attachment', return_value=True), patch('codex_wake.shared_app_server.SharedAppServerReader') as reader, patch('codex_wake.session_lifecycle.subprocess.run', side_effect=terminal):
                 reader.return_value.__enter__.return_value.read_thread.return_value = thread
                 reader.return_value.__enter__.return_value.server_metadata = metadata
+                thread['status'] = {'type':'active'}
+                with self.assertRaises(RuntimeTargetError) as busy:
+                    LiveWakeRestorer(root, now=time.time).prepare(target)
+                self.assertEqual(busy.exception.state, 'busy')
+                self.assertEqual(commands, [])
                 thread['status'] = {'type':'unknown'}
                 with self.assertRaisesRegex(RuntimeTargetError, 'live_restore_runtime_state_unverified'):
                     LiveWakeRestorer(root, now=time.time).prepare(target)

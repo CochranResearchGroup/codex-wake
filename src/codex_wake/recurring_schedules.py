@@ -172,7 +172,7 @@ class ScheduleStore:
             policy = content.get('wake_policy')
             value = dict(version=1, id=identifier, root=str(self.root), revision=1, state='enabled',
                 request=request, target=content['target'], wake_policy=policy,
-                next_due_at=iso(due), next_index=0, occurrences=[], revisions=[])
+                next_due_at=iso(due), next_index=0, occurrences=[], revisions=[], last_poll_generation=monitor_generation(self.root))
             self.save(value)
             return self.receipt(value)
 
@@ -211,10 +211,24 @@ class ScheduleStore:
                 due = timestamp(value['next_due_at'])
             elif value['occurrences']:
                 latest = max(timestamp(o['due_at']) for o in value['occurrences'])
-                while due <= latest:
-                    due = next_due(request['cadence'], due)
+                if due <= latest:
+                    if request['cadence']['kind'] == 'interval':
+                        step = timedelta(seconds=request['cadence']['seconds'])
+                        due += ((latest - due) // step + 1) * step
+                    else:
+                        due = next_due(request['cadence'], latest)
             args = self.native_args(request, due, 'schedule-revision:' + identifier + ':' + str(expected_revision+1), codex_path, endpoint)
             args._permission_principal = principal
+            from .app_server import resolve_codex_cmd
+            if (request['session_mode'] == value['request']['session_mode']
+                    and endpoint == value['target']['endpoint']
+                    and resolve_codex_cmd(codex_path, required=True, preserve_launcher=True) == value['target']['codex_cmd']):
+                # A cadence/end edit keeps the exact existing binding. Recheck
+                # permissions below, without new runtime discovery or rebinding.
+                from .wake_session_modes import STARTUP
+                args._schedule_target = dict(value['target'])
+                args.wake_lifetime = 'persistent'
+                args.recipient_startup = STARTUP[request['session_mode']]
             from .native_intents import _request
             _, content, *_ = _request(args, self.root)
             value['revisions'].append(dict(revision=value['revision'], request=value['request'], target=value['target'], wake_policy=value['wake_policy']))
@@ -291,6 +305,7 @@ def poll_schedules(root, clock, *, runtime_adapter=None):
         return []
     now = clock['utc']['lower']
     results = []
+    generation = scheduler_generation()
     with WakeLifecycleLock(store.root, 'recurring-schedules'):
         wakes = {w.record['id']: w.record for w in all_records(store.root, include_archive=True)}
         for value in store.records():
@@ -312,6 +327,8 @@ def poll_schedules(root, clock, *, runtime_adapter=None):
                 value['attention'] = 'session_owner_unverified'
                 store.save(value)
                 continue
+            recovering = value.get('last_poll_generation') is None or value.get('last_poll_generation') != generation
+            value['last_poll_generation'] = generation
             for item in value['occurrences']:
                 wake = wakes.get(item.get('wake_id'))
                 if wake and item['state'] not in ('completed', 'turn_failed', 'turn_interrupted'):
@@ -363,7 +380,7 @@ def poll_schedules(root, clock, *, runtime_adapter=None):
                 index = value['next_index']
                 occurrence = dict(id=f"{value['id']}:{value['revision']}:{index}", revision=value['revision'], index=index,
                     due_at=iso(due), expires_at=iso(due+timedelta(seconds=request['delivery_window_seconds'])),
-                    state='queued', request=deepcopy(request), target=deepcopy(value['target']), wake_policy=deepcopy(value['wake_policy']))
+                    state='queued', arrival_pending=True, recovered=recovering, request=deepcopy(request), target=deepcopy(value['target']), wake_policy=deepcopy(value['wake_policy']))
                 value['occurrences'].append(occurrence)
                 newly_due.append(occurrence)
                 value['next_index'] += 1
@@ -384,17 +401,35 @@ def poll_schedules(root, clock, *, runtime_adapter=None):
                     item['state'] = 'expired'
                 else:
                     eligible.append(item)
-            missed = request['missed']
-            behind = [item for item in newly_due if item in eligible and timestamp(item['due_at']).timestamp() < now]
-            if missed['policy'] == 'skip':
-                for item in behind:
-                    item['state'] = 'skipped'
-            elif missed['policy'] == 'latest' and len(eligible) > 1:
-                for item in eligible[:-1]:
-                    item['state'] = 'coalesced'
-            elif missed['policy'] == 'catch_up':
-                for item in eligible[:-missed['limit']]:
-                    item['state'] = 'skipped'
+            caught_up = value['state'] == 'exhausted' or timestamp(value['next_due_at']).timestamp() > now
+            if not caught_up:
+                store.save(value)
+                continue
+            # Classify only newly arrived/recovered occurrences. An overlap queue
+            # has already passed its missed-run decision and must keep that choice.
+            arrivals = [item for item in eligible if item.get('arrival_pending')]
+            groups = {}
+            for item in arrivals:
+                groups.setdefault(item['revision'], []).append(item)
+            for group in groups.values():
+                missed = store.context(value, group[0])['request']['missed']
+                recovered = any(item.get('recovered') for item in group)
+                behind = [item for item in group if timestamp(item['due_at']).timestamp() < now]
+                if not recovered and len(group) <= 1:
+                    behind = []  # ordinary polling jitter within the window
+                elif not recovered:
+                    behind = group[:-1]
+                if missed['policy'] == 'skip':
+                    for item in behind:
+                        item['state'] = 'skipped'
+                elif missed['policy'] == 'latest' and len(group) > 1:
+                    for item in group[:-1]:
+                        item['state'] = 'coalesced'
+                elif missed['policy'] == 'catch_up':
+                    for item in group[:-missed['limit']]:
+                        item['state'] = 'skipped'
+                for item in group:
+                    item['arrival_pending'] = False
             pending = [item for item in value['occurrences'] if item['state'] == 'queued']
             active = any(item['state'] in ('pending', 'firing', 'submitted') for item in value['occurrences'])
             overlap = request['overlap']
@@ -440,3 +475,29 @@ def publish_attention(store, value, occurrence, now):
         occurrence['attention_id'] = AttentionQueue(store.root, now=lambda: now).request(principal, request)['request_id']
     except (WakeError, OSError, ValueError, KeyError) as exc:
         occurrence['attention_error'] = str(exc)
+
+
+def scheduler_generation():
+    import multiprocessing
+    import os
+    from .process import process_identity
+    parent = multiprocessing.parent_process()
+    pid = parent.pid if parent is not None else os.getpid()
+    identity = process_identity(pid)
+    return dict(pid=pid, identity=identity) if identity else None
+
+
+def monitor_generation(root):
+    from .monitor import read_monitor_health
+    from .signal_records import probe_managed_reader_capability
+    from .process import process_identity
+    health = read_monitor_health(root) or {}
+    generation = health.get('recurring_monitor_generation')
+    if not isinstance(generation, dict) or type(generation.get('pid')) is not int:
+        return None
+    identity = process_identity(generation['pid'])
+    if (probe_managed_reader_capability(root) and health.get('mode') == 'loop'
+            and 'recurring_schedules_v1' in health.get('reader_capabilities', [])
+            and identity and identity == generation.get('identity')):
+        return generation
+    return None
