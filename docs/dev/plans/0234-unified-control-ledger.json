@@ -118,7 +118,7 @@
         4
       ],
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "worker": "unified_observation_626",
       "owned_scope": "local prompt/slash/lifecycle adapters and session mode routing",
       "packet": "docs/dev/plans/0234-unified-control-tickets/07.md",
@@ -176,7 +176,8 @@
       "issue": 642,
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/642",
       "branch": "feat/unified-bulk-642",
-      "worktree": "unified-programs-625 reused clean"
+      "worktree": "unified-programs-625 reused clean",
+      "base": "4c819ea68ece85c4040efa0d64c05969c6c9d2ad"
     },
     "11": {
       "title": "Deliver connector discovery documentation and acceptance",
