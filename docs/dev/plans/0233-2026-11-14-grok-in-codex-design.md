@@ -226,3 +226,47 @@ requirements. Primary takes auth ticketT1; native providerT2 and retirementT3 ar
 initially independent delegated tickets. Preserve unified-control design0234 and
 its unrelated glossary edits. No implementation or new provider login/inference
 has started in this packet.
+
+## T4 implementation contract | model and account selection
+
+T4 reuses the native model picker, `model/list`, ordinary `thread/start` config
+overrides and remote thread configuration. Wake supplies a sanitized account/model
+catalog through an explicitly configured bounded command source. That public JSON
+channel is separate from the existing private account-pinned bearer command.
+The catalog command performs no sign-in, native refresh or inference.
+
+Model metadata, registered account identity, authentication freshness and independent
+entitlement/inference qualification remain separate evidence. A model listing or a
+present credential cannot produce `qualified`. Missing required streaming, terminal,
+file-edit and MCP capability holds the coding choice; unsupported optional features
+remain individually identified. Freshness is evaluated by Wake using qualified time,
+not a guest wall clock. Operator-imported qualification receipts retain exact source,
+account binding, model, capability evidence and validity bounds for T8 reconciliation.
+Public read/resolve operations require exact account grants; qualification admission
+and default changes remain local operator operations.
+
+Each resolved inference selection carries its provider configuration ID, exact
+registered account ID/label/binding revision, model ID, catalog/qualification source
+revisions and stable selection ID. An explicit per-account default must resolve to a
+currently qualified coding choice. It does not replace the global OpenAI default.
+Native thread creation resolves the exact selection against fresh catalog evidence,
+uses its existing command-backed Grok provider and supported native model metadata,
+and retains the immutable selection snapshot for dependent worker/continuation work.
+
+T4 selects new conversations only. It does not replace an active conversation,
+carry history, implement safe-boundary staging or create a linked handoff; those
+remain T6. T5 owns inheritance/admission and cumulative allowances. Native model/account
+selection and local seam evidence do not claim real-account or installed readiness.
+
+T4 selection wire contract (version 1):
+
+- Operator metadata admission: `grok models import ACCOUNT --metadata FILE` binds model identifiers, display labels, context windows, boolean capabilities, sanitized source attribution and validity interval to the existing exact account registration revision. It does not qualify access. `grok models qualify ACCOUNT --receipt FILE` admits separately attributable account/catalog/model-bound entitlement, inference and required coding capability evidence; evidence is retained by content digest. This is an operator admission operation, not a provider test. T8 still owes real evidence. `grok models default ACCOUNT MODEL` succeeds only for a currently qualified model. No sole-model implicit default exists.
+- Public reads: `grok models list ACCOUNT`; `grok models resolve ACCOUNT [--model MODEL | --selection-id ID]`. HTTP operations `grok_models.list` and `grok_models.resolve`, MCP `wake_grok_models_list` and `wake_grok_models_resolve`, use the existing `account.observe` scope and the complete exact `expected_target` from the account registration. Public operations cannot register accounts, qualify models, set defaults, request bearer values, refresh, log in or run inference.
+- Native config: `inference_catalog_command = { command = ABSOLUTE_EXECUTABLE, args = [...], cwd = ABSOLUTE_DIRECTORY, timeoutMs = 1000 }`. The operator chooses the Wake executable and arguments `--wake-root ROOT grok models native-catalog --wake-executable ABSOLUTE_WAKE_EXECUTABLE`. Its bounded public JSON contains `schemaVersion`, `sourceRevision`, `selections` and account-keyed `providers`. This is distinct from the existing bare-bearer auth command. The generated provider uses only the official Grok session proxy and the account-pinned private Wake auth command.
+- Existing native `model/list` returns OpenAI entries and account-qualified Grok entries; each Grok entry has `inferenceSelection`. That snapshot contains `selection`, `providerRevision`, `sourceRevision` and `revision`. `selection` preserves `providerId`, `accountId`, `accountRevision`, `modelId`, `catalogRevision`, `evidenceRevision`, `selectionId`, exact `accountLabel`, `displayName`, `contextWindow`, `readiness`, `reasons`, `capabilities`, `disabledFeatures`, `defaultForAccount` and sanitized `source`. Revisions hash canonical public source/provider data; no bearer value participates. Per-account defaults do not replace OpenAI's default marker.
+- Existing `thread/start` accepts the snapshot through ordinary `config.inference_selection`. Native configuration admission reruns the explicitly configured source, requires an exact current snapshot and independently qualified required capabilities, then binds that provider and model. Managed provider requirements and conflicting explicit model/provider overrides hold. Client-supplied `qualified` bits cannot establish readiness. No provider inference is run by resolution.
+- The TUI carries that same snapshot from the existing model response through the existing new-conversation path. Held rows are disabled; qualified rows explicitly start a new conversation. Accountless `/model MODEL` arguments cannot choose a Grok account. Existing conversation history is not transferred or staged by T4.
+- Remote `SessionThreadConfig` retains optional `inference_catalog_command_json` (protobuf field 4) and `inference_selection_json` (field 5), decoded to the same typed structures and ordinary attributed session config layer. Native `Config.inference_selection` retains the admitted immutable snapshot. This is the inheritance input contract for T5 and continuation identity input for T6; neither worker allowance behavior nor staged/linked handoff is implemented here.
+- Qualification requires qualified time, current metadata, current bound native auth without refresh, and independent unexpired entitlement/inference/coding evidence. Missing text/streaming/terminal/file editing/MCP support blocks readiness. Image generation, web search and reasoning summaries are individually disabled by this native adapter regardless of advertised provider metadata. Source readiness does not establish installed package or real-account acceptance.
+
+The native snapshot is constructed by `model/list`, not by the Python resolver: its source revision additionally binds the configured catalog command, arguments, working directory and timeout, and its provider revision binds the accepted provider definition. A Wake `resolve` result is an authority readback; callers select the corresponding native entry by its exact selection ID and submit that native snapshot. A changed source command, provider, account binding, metadata, evidence or readiness holds a stale native snapshot. This pins configuration/source identity, not an installed executable hash; exact installed runtime/package proof remains T8. Client-settings native embedded and remote transports use the existing thread-start override. Hosted transports whose settings owner is the server hold this selection explicitly, rather than silently starting that server's default model.

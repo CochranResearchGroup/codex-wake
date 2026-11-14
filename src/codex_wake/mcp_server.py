@@ -74,6 +74,8 @@ SPECS = {
 }
 from .grok_provider_auth import tool_specs as grok_auth_tool_specs
 SPECS.update(grok_auth_tool_specs())
+from .grok_model_catalog import tool_specs as grok_model_specs
+SPECS.update(grok_model_specs())
 from .permission_commands import tool_specs as permission_tool_specs
 SPECS.update(permission_tool_specs())
 for _name in ('wake_sessions_refresh','wake_sessions_configuration'):
@@ -359,6 +361,13 @@ class CommandRunner:
             from .local_control_lifecycle import root_for
             from types import SimpleNamespace
             local_root = root_for(SimpleNamespace(wake_root=None))
+        if group == 'grok-models':
+            try:
+                from .grok_model_catalog import protected_observe
+                from .shortcut_store import default_root
+                return protected_observe(default_root(self.wake_root), verb, arguments), False
+            except (ValueError, OSError) as error:
+                return {'error': {'code': getattr(error, 'code', 'model_selection_held'), 'message': 'Grok model selection unavailable.'}}, True
         if group == 'grok-provider-auth':
             try:
                 from .grok_provider_auth import protected_observe

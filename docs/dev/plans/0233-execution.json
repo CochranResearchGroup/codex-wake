@@ -124,7 +124,10 @@
         "Wake model/account catalog and qualified defaults",
         "Focused public selection acceptance"
       ],
-      "checkout_custody": "Exclusive delegated writer for existing Wake integration checkout and native lane; primary read-only until completion."
+      "checkout_custody": "Exclusive delegated writer for existing Wake integration checkout and native lane; primary read-only until completion.",
+      "worker_wake_branch": "feat/p233-qualified-selection",
+      "worker_wake_base": "03fe5335fed71429195898fdebdadaef8f14651c",
+      "worker_wake_parent_branch": "feat/grok-native-provider"
     },
     {
       "key": "T5",

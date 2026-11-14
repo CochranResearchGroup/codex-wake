@@ -214,6 +214,8 @@ def add_grok_parser(subparsers):
     commands=group.add_subparsers(dest='grok_command',required=True)
     from .grok_provider_auth import register_parser as register_auth
     register_auth(commands)
+    from .grok_model_catalog import register_parser as register_models
+    register_models(commands)
     from .grok_commands import register_verbs
     register_verbs(commands)
     from .grok_stdio_host import register_host
@@ -246,6 +248,9 @@ def add_grok_parser(subparsers):
 
 
 def command(args,root):
+    if args.grok_command == 'models':
+        from .grok_model_catalog import command as models_command
+        return models_command(args, root)
     if args.grok_command == 'auth':
         from .grok_provider_auth import command as auth_command
         return auth_command(args,root)
