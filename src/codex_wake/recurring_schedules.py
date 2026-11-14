@@ -128,7 +128,24 @@ class ScheduleStore:
         return [self.read(p.stem) for p in sorted(self.directory.glob('schedule_*.json'))]
 
     def save(self, value):
-        _write(self.path(value['id']), value)
+        stored = deepcopy(value)
+        # Revision context is retained once. Repeating a large prompt for every
+        # missed occurrence would make a healthy schedule exceed store capacity.
+        for item in stored['occurrences']:
+            for field in ('request', 'target', 'wake_policy'):
+                item.pop(field, None)
+        _write(self.path(value['id']), stored)
+
+    @staticmethod
+    def context(value, occurrence):
+        if 'request' in occurrence:
+            return occurrence
+        if occurrence['revision'] == value['revision']:
+            return value
+        for revision in value['revisions']:
+            if revision['revision'] == occurrence['revision']:
+                return revision
+        raise WakeError('occurrence_revision_context_missing')
 
     def register(self, request, *, codex_path='codex', endpoint='unix://', principal=None):
         request = validate_request(request)
@@ -249,12 +266,13 @@ class ScheduleStore:
 
     def emit(self, value, occurrence, clock):
         due = timestamp(occurrence['due_at'])
-        request = occurrence['request']
-        target = occurrence['target']
+        context = self.context(value, occurrence)
+        request = context['request']
+        target = context['target']
         args = self.native_args(request, due, occurrence['id'], target['codex_cmd'], target['endpoint'])
         args._schedule_clock = clock
         args._schedule_target = target
-        args._schedule_wake_policy = occurrence['wake_policy']
+        args._schedule_wake_policy = context['wake_policy']
         from .native_intents import retain
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
@@ -362,7 +380,7 @@ def poll_schedules(root, clock, *, runtime_adapter=None):
                 if item['state'] != 'queued':
                     continue
                 lateness = now - timestamp(item['due_at']).timestamp()
-                if now >= timestamp(item['expires_at']).timestamp() or lateness > item['request']['missed']['max_lateness_seconds']:
+                if now >= timestamp(item['expires_at']).timestamp() or lateness > store.context(value, item)['request']['missed']['max_lateness_seconds']:
                     item['state'] = 'expired'
                 else:
                     eligible.append(item)
@@ -405,7 +423,7 @@ def publish_attention(store, value, occurrence, now):
     """A notice grants no resume authority; failure remains inspectable in schedule."""
     from .attention_queue import AttentionQueue
     from .session_permissions import Principal, PermissionStore
-    context = (occurrence.get('wake_policy') or {}).get('permission_context') or {}
+    context = (store.context(value, occurrence).get('wake_policy') or {}).get('permission_context') or {}
     principal = Principal(context.get('subject', value['request']['thread_id']), context.get('role', 'session'), tuple(context.get('tasks', [])))
     permissions = PermissionStore(store.root)
     try:

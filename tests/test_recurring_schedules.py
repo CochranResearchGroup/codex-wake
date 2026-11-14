@@ -94,3 +94,14 @@ class RecurringSchedules(unittest.TestCase):
             othermeta=dict(threadId=other,sessionId=other,callId='peer',**{'x-codex-turn-metadata':dict(thread_id=other,session_id=other,turn_id='test-turn')})
             denied,failed=runner.call('wake_schedules_show',dict(caller_thread_id=other,schedule_id=value['id']),native_context=othermeta)
             self.assertTrue(failed,denied)
+    def test_large_prompt_backlog_remains_inspectable_without_copying_prompt_per_occurrence(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); spec=root/'request.json'
+            value=request(prompt='x'*32000,cadence=dict(kind='interval',seconds=1,start_at='2033-05-18T03:33:20Z'),end=dict(kind='count',count=130),missed=dict(policy='latest',max_lateness_seconds=600),delivery_window_seconds=600)
+            spec.write_text(json.dumps(value))
+            registered=self.cli(root,'register','--request',str(spec),'--codex-path',sys.executable)
+            from codex_wake.recurring_schedules import poll_schedules
+            poll_schedules(root,{'utc':{'lower':2000000129,'upper':2000000129,'status':'network','sources':['a','b']},'counter':None})
+            saved=self.cli(root,'show',registered['id'])
+            self.assertEqual(len(saved['occurrences']),130)
+            self.assertEqual(saved['request']['prompt'],'x'*32000)

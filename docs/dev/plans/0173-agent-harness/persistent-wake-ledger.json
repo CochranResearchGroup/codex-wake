@@ -103,6 +103,19 @@
       "red": "pre-feature installeddev14 reader classified new mode record native_intent_v6; old-monitor registration claimed armed",
       "green": "same installed reader now classifies hold; 3 mode seam tests pass",
       "implementation": "frozen policy session_mode extension and advertised worker feature requirement"
+    },
+    {
+      "tier": "comprehensive diagnostics",
+      "result": "initial partition1 and original full run invalidated by validation setup: nested TMPDIR exceeds Unix socket path limit",
+      "evidence": "/tmp/codex-wake-persistent-610-validation/first-error.log",
+      "reproduction": "first failure test_bot_family_placement: File name too long; use short isolated temp roots",
+      "classification": "setup failure, not a passing retry or product flake"
+    },
+    {
+      "ticket": 612,
+      "red": "large32k prompt/130-occurrence backlog made retained schedule exceed private reader size bound",
+      "green": "test_recurring_schedules.py:6 pass after persisting per-revision context once",
+      "scope": "no new fixture project; public schedule registration/poll/show"
     }
   ],
   "contracts": {
@@ -115,7 +128,7 @@
     "runtime_routing": "ModeRuntimeAdapter(root, adapter); #614 owns native_delivery hooks. #613 LiveWakeRestorer(root).prepare(target) returns exact verified target or RuntimeTargetError; #614 invokes for reopen_live. No shared edits by workers."
   },
   "integration_main_merge": "2548f7da956115cd11149e72152586cdaf193209",
-  "review_fixed_point_requested": "current origin/main c919ec99 (operator reply pending)",
+  "review_fixed_point_requested": "optional narrower comparison c919ec99; approved packet already records e8c79a79 as fixed point",
   "validation_notes": [
     "Inherited0220/0224 CLOSED headers split from Owner fields so canonical audit can parse unchanged terminal states.",
     "Host Python3.12.13 only; no hosted3.11 matrix or working-host deployment."
