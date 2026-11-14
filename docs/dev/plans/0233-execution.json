@@ -18,8 +18,8 @@
       "title": "Reuse native Grok sign-in through Wake",
       "blocked_by": [],
       "owner": "primary",
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "acceptance": [
         "Operator can initiate or reuse the official account session through sanitized Wake controls.",
         "Existing native provider authentication obtains credentials over its private command channel; tokens never appear in public status or worker configuration.",
@@ -38,8 +38,10 @@
         "private bearer interface",
         "focused account-auth tests"
       ],
-      "progress": "Account-pinned private bearer, sanitized official device login, exact-grant public status and official metadata-based refresh delegation implemented; seven focused local tests pass. Real sign-in/refresh acceptance pending.",
-      "checkpoint_sha": "15190e1b"
+      "progress": "Independent integrated source slice accepted. Device login ended without sign-in; no retry. Live proof remains joined qualification, as frozen spec requires.",
+      "checkpoint_sha": "69ccc88d",
+      "result_sha": "69ccc88d",
+      "validation": "Real CLI register/status/private bearer; protected HTTP/native MCP parity; eight focused tests pass. Joined real-account and installed refresh proof remain T8 gates."
     },
     {
       "key": "T2",
