@@ -67,8 +67,8 @@
       "title": "Retire the superseded separate CLI-worker path",
       "blocked_by": [],
       "owner": "worker-retirement",
-      "state": "running",
-      "tracker_state": "OPEN",
+      "state": "validated",
+      "tracker_state": "CLOSED",
       "acceptance": [
         "Preserve original issue/PR/source, runtime and skill custody plus the original terminal native_auth_required operation.",
         "Reconcile exact task-owned unit/process/profile effects before reversible retirement; partial discovery does not establish quiescence.",
@@ -82,7 +82,10 @@
       "dependencies_published": "native",
       "worker": "/root/p233_runtime_custody",
       "worker_branch": "feat/p233-cli-retirement",
-      "worker_base": "8fffdec2a3875331022e71cedaa8b062cb61d0b8"
+      "worker_base": "8fffdec2a3875331022e71cedaa8b062cb61d0b8",
+      "result_sha": "528de0c57f9543392df2cbe73f6fecd905a45f8f",
+      "integrated_sha": "97c4fe5d",
+      "validation": "exact unit absent/inactive PID0; public Grok discovery complete empty/noholds; installed routing hashes match source; original refusal/rollback evidence retained"
     },
     {
       "key": "T4",
