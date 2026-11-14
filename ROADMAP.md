@@ -1720,13 +1720,12 @@ own exact-record reconciliation and applicable authority.
 
 ## Persistent wakes | Explicit session modes and recurring schedules
 
-Status: OPEN
-Work item: #610; children #611–#616
+Status: CLOSED (source delivery; PR #618)
+Work item: #610; children #611–#616 CLOSED
 Plan: [Persistent wake specification](docs/dev/plans/0173-agent-harness/persistent-wake-spec.md)
-Current State: Operator approved the design and six-ticket graph. Source slices
-are integrated on `docs/persistent-wake-design`; final local validation, one
-review/remediation and tracker closure remain. Production acceptance/deployment
-are distinct and are not initiated by this lane.
+Current State: Explicit three-mode scheduling and durable recurrence implemented.
+One review and one bounded remediation resolved seven findings; local validation
+recorded. Merge, installed runtime acceptance and deployment remain separate gates.
 
 ## P230 | Native mailbox first contact and bindings
 

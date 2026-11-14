@@ -1,6 +1,6 @@
 # Persistent wakes and Wake-owned recurring schedules
 
-State: OPEN
+State: CLOSED
 Owner: ecochran76
 Design: confirmed by operator 2026-11-13
 Implementation: authorized; ticket breakdown and test seams approved
@@ -10,9 +10,11 @@ Base: e8c79a79da0b0482e2403e634394c70f5c66e333
 
 ## Current State
 
-All six implementation slices are integrated locally. Focused public-interface
-checks pass; final local validation, ticket closure, the single broad review and
-bounded remediation remain. No production schedules or deployment were changed.
+All six implementation tickets #611–#616 are CLOSED. One two-axis review and one
+bounded TDD remediation resolved all seven findings. Source delivery is complete
+in PR #618; merge, deployed-monitor qualification and production schedules remain
+separate gates. See persistent-wake-validation.md and persistent-wake-review.md.
+No production schedules or deployment were changed.
 
 ## Problem Statement
 

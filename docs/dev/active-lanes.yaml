@@ -9,12 +9,12 @@ lanes:
     branch: docs/persistent-wake-design
     worker_branches: [feat/persistent-wake-live-613, feat/persistent-wake-background-614]
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE
+    plan_state: CLOSED
+    custody_state: INTEGRATION_READY
     dependencies: []
     overlaps: [HF-20, HF-18]
     updated_at: 2026-11-13
-    disposition: Approved spec and six tickets; primary owns integration and shared contracts
+    disposition: Six tickets closed; PR618 source handoff; review1/remediation1 resolved7; no deployment; owned checkouts retire after verified remote custody
 
   - id: P231
     owner: primary / ecochran76

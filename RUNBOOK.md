@@ -9762,3 +9762,17 @@ Placement/display worker checkouts were removed after remote custody/clean check
 Two reused integration checkouts retire after this docs-only closeout receipt's
 verified merge; root anchors remain main, unrelated checkouts unchanged. Memory
 forbidden by explicit-request-only developer boundary; zero Graphiti writes.
+
+## Turn | 2026-11-13 | Persistent wake source closeout
+
+Tickets #611–#616 CLOSED; parent #610 retains specification discussion. PR618
+contains explicit session_only/reopen_live/background and durable interval/clock
+recurrence, revision/cancel/recovery controls. One review and one TDD remediation
+resolved seven findings. Final code a32da00c; validation and limits recorded in
+[validation](docs/dev/plans/0173-agent-harness/persistent-wake-validation.md).
+Coverage assembled across bounded continuations:2564 cases/2546 unique IDs,
+no missing IDs; no single full-suite-at-final-SHA claim. Disposable final wheel
+register/show/revise/cancel passed, armed=false. No hosted CI or live deployment.
+Three worker checkouts removed after matching remote-tip readback; integration
+checkout retires after final clean remote custody. Branch refs remain preserved.
+Memory disposition forbidden: developer explicit-request-only boundary, no write.

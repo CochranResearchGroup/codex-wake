@@ -136,6 +136,12 @@
       "red": "remediation-red.log:5failures/1error before fixes",
       "first_green_diagnostic": "Initial subprocess revision test3-second bound hit external discovery; reused unchanged exact binding, isolated child XDG and used10-second public-entrypoint budget; final green clean",
       "environment": "Python3.12.13 isolated task development prefix; source via PYTHONPATH; no private/provider inputs"
+    },
+    {
+      "tier": "final local coverage",
+      "result": "2564 discovered cases /2546 unique IDs covered across bounded continuations and affected regressions; no missing IDs",
+      "receipt": "coverage.json",
+      "limitation": "Not one uninterrupted full-suite pass at a single commit; Python3.12 Linux only"
     }
   ],
   "contracts": {
@@ -153,7 +159,6 @@
     "Host Python3.12.13 only; no hosted3.11 matrix or working-host deployment."
   ],
   "review_report": "persistent-wake-review.json",
-  "source_validation_pending": "Finish remaining full-suite test IDs from short-suite timeout; do not repeat passed prefix except affected regressions.",
   "worker_checkout_cleanup": {
     "before": 123,
     "after": 120,
@@ -163,9 +168,9 @@
       "persistent-wake-clock"
     ],
     "custody": "Exact worker tips read back on matching origin worker refs before ordinary clean worktree removal",
-    "retained": "persistent-wake-design integration checkout for PR618/final acceptance"
+    "retained": "none after final PR custody; integration checkout retires at closeout"
   },
-  "validated_source_tip": "adf8568bbe861364ea8c89c413c1583f17b65dcf",
+  "validated_source_tip": "a32da00c5315a8db04a6aa1949e1045f02a1b558",
   "validation_repairs": [
     {
       "kind": "environment",
@@ -198,5 +203,6 @@
     "result": "Exact baseline source classifies new mode record hold; current reader classifies native_intent_v6",
     "receipt": "baseline-compatibility.json",
     "limit": "Source compatibility, not installed legacy/production qualification"
-  }
+  },
+  "final_validation": "persistent-wake-validation.md"
 }

@@ -85,5 +85,6 @@
   ],
   "red_receipt": "/tmp/codex-wake-persistent-610-validation/remediation-red.log",
   "green_receipt": "/tmp/codex-wake-persistent-610-validation/remediation-green-final.log",
-  "green_result": "90 tests passed; two additional focused critical-regression checks added after this command"
+  "green_result": "90 tests passed; two additional focused critical-regression checks added after this command",
+  "final_validation": "persistent-wake-validation.md"
 }
