@@ -407,6 +407,8 @@ for _verb in ('status','inspect','enable','pause','resume','rollback','reenable'
 
 from .terminal_session_contract import specs as _terminal_specs
 _SPECS.update(_terminal_specs())
+from .bot_family_contract import specs as _family_specs
+_SPECS.update(_family_specs())
 _SPECS['wake_tabs_group_save'][3]['labels']={'type':'array','maxItems':32,'items':{'type':'string'}}
 
 _FIELD_HELP = {

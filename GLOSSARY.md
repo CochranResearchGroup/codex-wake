@@ -380,6 +380,26 @@ makes affected evidence uncertain without changing the tab's identity or appeara
 A named or criteria-based collection of terminal attachments. Group membership
 alone does not move attachments or change their conversations.
 
+**Worker tab**:
+A terminal tab presenting an agent carrying out work delegated by another agent.
+Its placement is separate from the identity and lifetime of that work.
+
+**Bot**:
+A persistent specialist identity shared across its clients. Its identity survives
+individual conversations, runtimes and terminal attachments.
+_Avoid_: Tab, conversation or client as synonyms for bot.
+
+**Sub-bot**:
+A bot supervised by a parent bot, with a specialization inherited and further
+focused from that parent.
+
+**Bot family**:
+A root bot and all its descendant sub-bots. A sub-bot's immediate parent and
+its family root can be different bots.
+
+**Workers session**:
+A terminal session collecting worker tabs from one or more bot families.
+
 **Tab view**:
 A filtered and ordered presentation of terminal attachments and their traits.
 Updating a view is separate from physically rearranging the attachments.
@@ -470,3 +490,18 @@ If that path is a stable symlink, subsequent operator-selected builds may replac
 its target without changing the registered launcher. An explicit release path
 remains a release pin; missing historical pins do not authorize account fallback
 or rewriting existing scheduling intent.
+
+**Mailbox first contact**:
+A host-delegated sender's initial message to a verified native recipient in an
+already enrolled root. The recipient need not poll first; provisioning preserves
+existing root grants, revocation and cross-root restrictions.
+
+**Pending-recipient discovery**:
+An operator opt-in that reconciles a pending authorized notification's exact
+recipient with its current live tmux client. It refreshes delivery binding only,
+without enrollment, actor reauthorization, client launch or notification replay.
+
+**StableTime-required mailbox**:
+A mailbox whose persisted time policy requires the configured StableTime service's
+finite authenticated UTC evidence, without guest-clock or plain-NTP fallback.
+Existing mailbox instances observe activation at their next transaction.

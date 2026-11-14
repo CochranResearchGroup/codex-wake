@@ -1,0 +1,13 @@
+..usage: codex-wake [-h] [--version] [--wake-root WAKE_ROOT]
+                  {completion,control,self-limits,governor,pause,resume,pause-status,interrupt,time,sessions,controller,accounts,stores,configuration,builds,daemons,history,migration,hosts,health,notices,recovery,flow-sessions,flows,operations,profiles,native,grok,wake-policy,task-briefs,agents,resources,attention,acceptance,jobs,tabs,interactions,a2a,messages,goal-limits,permissions,after,at,app,openclaw,openclaw-plugin,file,changed,filesystem,process-exit,systemd-unit,github-ci,http-json,github-webhook,pid,list,status,show,cancel,archive,cleanup,support,schema,service,monitor,supervisor,hook,doctor,product-readiness,open}
+                  ...
+codex-wake: error: unrecognized arguments: --retire-source
+usage: codex-wake [-h] [--version] [--wake-root WAKE_ROOT]
+                  {completion,control,self-limits,governor,pause,resume,pause-status,interrupt,time,sessions,controller,accounts,stores,configuration,builds,daemons,history,migration,hosts,health,notices,recovery,flow-sessions,flows,operations,profiles,native,grok,wake-policy,task-briefs,agents,resources,attention,acceptance,jobs,tabs,interactions,a2a,messages,goal-limits,permissions,after,at,app,openclaw,openclaw-plugin,file,changed,filesystem,process-exit,systemd-unit,github-ci,http-json,github-webhook,pid,list,status,show,cancel,archive,cleanup,support,schema,service,monitor,supervisor,hook,doctor,product-readiness,open}
+                  ...
+codex-wake: error: unrecognized arguments: --force
+.............................................................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 287 tests in 127.423s
+
+OK

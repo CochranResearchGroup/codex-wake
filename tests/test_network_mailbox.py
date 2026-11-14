@@ -28,6 +28,74 @@ class NetworkMailboxTests(unittest.TestCase):
         Mailbox.activate_network_time(self.bus,self.operator,provider=lambda:self.reading)
         self.mailbox=Mailbox(self.bus,time_provider=lambda:self.reading)
 
+    def test_stable_time_mailbox_ignores_guest_clock_steps(self):
+        self.reading = TimeDecision('network', ('stable-time:cloudflare', 'stable-time:netnod'), 1000, 1000.1)
+        Mailbox.activate_network_time(self.bus, self.operator, provider=lambda: self.reading,
+                                     require_stable_time=True)
+        mailbox = Mailbox(self.bus, time_provider=lambda: self.reading,
+                          clock=lambda: -1000000, monotonic=lambda: -1000000)
+        sent = mailbox.send(self.actors[0], self.identities[1], body='fixture',
+                            idempotency_key='stable-request', ttl=60)
+        self.assertEqual(sent['message']['created_at'], 1000.1)
+        self.assertEqual(sent['message']['expires_at'], 1060.1)
+        self.assertEqual(mailbox.read(self.actors[1], sent['message']['message_id'])['body'], 'fixture')
+
+
+    def test_required_stable_time_rejects_plain_network_and_missing_configuration(self):
+        from unittest.mock import patch
+        self.reading = TimeDecision('network', ('stable-time:cloudflare', 'stable-time:netnod'), 1000, 1000.1)
+        Mailbox.activate_network_time(self.bus, self.operator, provider=lambda: self.reading,
+                                     require_stable_time=True)
+        self.reading = TimeDecision('network', ('plain-a', 'plain-b'), 1001, 1001.1)
+        mailbox = Mailbox(self.bus, time_provider=lambda: self.reading)
+        with self.assertRaises(BusError) as denied:
+            mailbox.send(self.actors[0], self.identities[1], body='fixture', idempotency_key='plain-denied')
+        self.assertEqual(denied.exception.code, 'time_uncertain')
+        with patch('codex_wake.time_inspection.stable_time_config', return_value=None), \
+             patch('codex_wake.time_inspection.network_time_decision') as fallback:
+            with self.assertRaises(BusError):
+                Mailbox(self.bus).send(self.actors[0], self.identities[1], body='fixture', idempotency_key='missing-config')
+        fallback.assert_not_called()
+
+    def test_stable_time_transition_preserves_settled_legacy_checkpoint(self):
+        legacy = Mailbox(self.bus, clock=lambda: 1000, monotonic=lambda: 1000)
+        sent = legacy.send(self.actors[0], self.identities[1], body='fixture',
+                           idempotency_key='legacy-work', delivery='inbox')['message']['message_id']
+        self.reading = TimeDecision('network', ('stable-time:cloudflare', 'stable-time:netnod'), 2000, 2000.1)
+        with self.assertRaises(BusError) as pending:
+            Mailbox.activate_network_time(self.bus, self.operator, provider=lambda: self.reading,
+                                         require_stable_time=True)
+        self.assertEqual(pending.exception.code, 'migration_busy')
+        legacy.ack(self.actors[1], sent, outcome='accepted')
+        legacy.ack(self.actors[1], sent, outcome='completed')
+        with self.bus.connection(read_only=True) as db:
+            before = db.execute("SELECT value FROM meta WHERE key='mail_clock'").fetchone()[0]
+        Mailbox.activate_network_time(self.bus, self.operator, provider=lambda: self.reading,
+                                     require_stable_time=True)
+        with self.bus.connection(read_only=True) as db:
+            self.assertEqual(db.execute("SELECT value FROM meta WHERE key='mail_clock_before_network'").fetchone()[0], before)
+        shown = Mailbox(self.bus, time_provider=lambda: self.reading).show(self.actors[0], sent)
+        self.assertEqual(shown['state']['recipient'], 'completed')
+        self.assertEqual(shown['created_at'], 1000)
+
+    def test_existing_mailbox_instance_observes_stable_time_policy_activation(self):
+        old_reader = Mailbox(self.bus, time_provider=lambda: TimeDecision('network', ('plain-a','plain-b'), 1001, 1001.1))
+        stable = TimeDecision('network', ('stable-time:cloudflare','stable-time:netnod'), 1000, 1000.1)
+        Mailbox.activate_network_time(self.bus, self.operator, provider=lambda: stable,
+                                     require_stable_time=True)
+        with self.assertRaises(BusError) as held:
+            old_reader.send(self.actors[0], self.identities[1], body='fixture', idempotency_key='old-instance')
+        self.assertEqual(held.exception.code, 'time_uncertain')
+
+    def test_authenticated_policy_cannot_silently_downgrade(self):
+        self.reading = TimeDecision('network', ('stable-time:cloudflare', 'stable-time:netnod'), 1000, 1000.1)
+        Mailbox.activate_network_time(self.bus, self.operator, provider=lambda: self.reading,
+                                     require_stable_time=True)
+        with self.assertRaises(BusError) as downgrade:
+            Mailbox.activate_network_time(self.bus, self.operator, provider=lambda: self.reading)
+        self.assertEqual(downgrade.exception.code, 'unsupported_time_policy')
+
+
     def test_reply_waits_for_another_bounded_network_acquisition(self):
         from concurrent.futures import ThreadPoolExecutor
         from threading import Event, Timer

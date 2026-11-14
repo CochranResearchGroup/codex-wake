@@ -1,5 +1,23 @@
 # Codex Wake Runbook
 
+## Turn | 2026-11-13 | P231 packages deployed
+
+Operator explicitly authorized PR/review/merge/deploy after source closeout. Wake
+dev19 deployed from282dcf02; Bots compatibility PR80 mergedc7fe3a1 adds only the
+qualified exact Codex0.169.0/Wakedev19 versions. Original broadreview/remediation
+remain1/1. Installed17family checks and11dependency/docs checks passed; exact
+package identities and boundaries are in
+[deployment evidence](docs/dev/evidence/plan0231/deployment.md).
+
+Wake monitor refreshed with unchanged settings; native daemon remained running.
+Bots package and explicit family adapter are live; separate messaging worker code
+is unchanged and its process was retained. Final anonymous protection401 and
+authenticated app/health200 verified exact source/build and Codex/RemoteView.
+Four roots registered, three restored exact bindings adopted to preserve placement;
+one pre-existing Grok input_unknown hold retained. Protected native child move
+remains unproven; no provider/model turn, input reset or daemon upgrade. Private
+rollback preimages and per-attempt receipts retained outside Git.
+
 ## Turn | 2026-11-12 | P225 reviewed, merged and deployed
 
 Operator authorized PR/review/merge/deploy. Independent reviewer
@@ -9605,3 +9623,142 @@ Integration branch `docs/persistent-wake-design`; execution ledger and source sp
 [spec](docs/dev/plans/0173-agent-harness/persistent-wake-spec.md). Current status:
 source slices integrated; final validation/review and tracker closure pending.
 No production registration, provider action or deployment.
+
+## Turn | 2026-11-13 | LOCAL-P230 systemic mailbox lifecycle repair
+
+Operator clarified WebB was a symptom, not the product scope. Existing bootstrap
+harness reproduced original recipient authorization refusal without its first-poll
+workaround; missing-binding dispatcher regression separately reproduced zero-send
+capability_unavailable. Source now provisions a verified native recipient under
+existing host delegation, and opt-in workers discover/rebind pending tmux recipients.
+No implicit enrollment, revoked-grant renewal or uncertain notification replay.
+
+114 distinct focused tests pass; source CLI option, policy wiring, active-goal audit
+and whitespace pass. See docs/dev/evidence/plan0230/qualification.md for exact commands,
+red/green evidence and environment limitations. Branch fix/notification-binding-lifecycle
+from e8c79a79 is uncommitted, retained in its isolated review worktree; root main and
+unrelated worktrees preserved. No source commit, merge or installed-service activation
+authorized/performed. Next review point is source review and explicit integration.
+Memory disposition forbidden: no external memory write authorized for this slice.
+
+## Turn | 2026-11-13 | LOCAL-P230 review and candidate qualification
+
+Operator continued source delivery. Standards0/Spec1(resolved): native lookup
+unavailability now defers rather than stopping the notification worker. Regression
+observed red then green. Exact dev15 wheel324payload files equal source; source115
+PASS65.018s and installed115PASS50.126s, installed source-registry smoke PASS.
+Wheel0aaa823ec71210f33d8112f4c9c7f71dc711961b78404501c21d504f54c8a57d.
+
+Broader installed mailbox smoke FAILED clock_anomaly during retention. Fresh6second
+host sampling shows wall-minus-monotonic step -5.677s to+5.173s; guard held correctly.
+First failure preserved, no blind retry/checkpoint reset/clock adjustment. P230
+BLOCKED on clock continuity and original installed-smoke acceptance. Candidate prefix
+is unused; stable entrypoints and running services unchanged. Draft publication
+only; no runtime-qualified/merge-ready claim. Worktree retained for gated review,
+not abandoned. See plan0230/qualification.md and review.md. Memory forbidden;
+no external memory write authorized.
+
+P230 publication: source commit f54ac9f1f385ef62fff01271cd7f914c37eb6942 pushed and
+read back on origin/fix/notification-binding-lifecycle. Draft PR600 read back OPEN,
+draft=true, exact head matches. No merge. Active clocksource tsc; host offers
+hyperv_clocksource_tsc_page, hyperv_clocksource_msr and acpi_pm alternatives. Global
+clocksource change is a separate host operation, not performed under source scope.
+Clean task checkout can close after this custody update; immutable candidate and
+wheel remain user-scoped for the original smoke once host continuity is restored.
+
+## Turn | 2026-11-13 | LOCAL-P230 StableTime correction
+
+Operator chose StableTime. Actual service and installed adapter qualified NTS UTC;
+production bus was already network mode, while the failing smoke used a fresh
+legacy bus. Corrected that conflation; no host-clock change. Added explicit pinned
+StableTime mailbox mode and same-smoke qualification option. Preserves checkpoint,
+holds pending legacy migration, denies fallback/downgrade and old readers; stale
+in-memory pin regression observed red then fixed under transaction lock.
+
+Final immutable dev16-r2 candidate324payload files match source, wheelbf192632cf31b05b67670ad8287063541dd6a79231e5fb73ac813d1b3a62eeaa.
+Installed163focusedPASS102.398s and StableTime mailbox workflow PASS with clean
+connections/children/temp-root receipts. Prior failures retained. No production
+bus migration or shared-MCP reload. PR600 source update follows; runtime integration
+remains separate from these fixture-backed source qualifications. Memory forbidden.
+
+## Turn | 2026-11-13 | P230 real native acceptance and wrapped footer
+
+PR600 mergedeac0d01e; qualifieddev16 activated for five Wake entrypoints and exact
+participant worker with automatic discovery. Existing bus/grants/network time
+policy preserved, no sharedMCP reload or host clock change. Real new native sender
+contacted actor-free/unpolled recipient, which was auto-bound/notified/read/claimed/
+completed. Private deployment receipt owns exact synthetic message/runtime handles.
+
+Client replacement automatically changed PID/binding generation; second notice
+then exposed reproducible narrow-footer composer_protected. Captured title wrapping
+adds one footer row. Regression red then metadata-scoped fix green; exact installed
+dev17candidate25PASS5.543s,324payload files match. Private real pane passes only
+with matching native title. Branchfix/p230-wrapped-footer requires integration,
+then reconcile same unsent notice. See plan0230/wrapped-footer.md. No historical
+uncaptured-state claim or guard relaxation. Memory forbidden.
+
+## Turn | 2026-11-13 | P230 final composer call-site correction
+
+PR605 merged45a66b19 anddev17 activated; real native flow then exposed a third
+pre-submit composer check without metadata. Queue was never entered. The old
+notice exhausted its safe3attempt bound and remains failed, not reset/replayed.
+New full dispatcher/native-queue regression red explicit_not_sent then green after
+passing metadata at final guard. Exact installeddev18candidate26PASS4.435s,324payload
+files match; wheel5e2628144087730f55e8dbcaaea199df95d66fe508a5c74e864491aae7d860de.
+Bounded branchfix/p230-final-composer-check integrates the missing argument and
+correct-seam regression. Existing safety and StableTime configuration retained.
+
+## Turn | 2026-11-13 | P230 installed native acceptance complete
+
+PR606 merged17e2c3fe. Qualifieddev18 activated for five Wake entrypoints and exact
+participant worker, automatic discovery retained. Real native fresh actor-free
+recipient first contact completed. Final narrow-client replacement changed PID/
+binding generation and fresh post-fix notification completed, independently read
+back. Prior proven-unsent failed attempt preserved; cancellation refused as already
+terminal, no replay. Two new diagnostic actors retired, owned tab/binding removed;
+conversation and receipt history retained. StableTime selected through existing
+network adapter; no clocksource change, time-policy migration or sharedMCP reload.
+
+See docs/dev/evidence/plan0230/runtime-acceptance.md. Baseline163installed tests and
+StableTime smoke plus final26affected checks pass; no combined/full-suite claim.
+Loaded MCP61older-prefix processes require normal reconnect; effective refresh.shared
+permission approval_required, separately presented. Core P230 CLOSED with that
+rollout boundary explicit. Final source checkout closes after acceptance-note remote
+custody; unused candidate directories removed only when no process references them.
+Memory forbidden; non-write receipt retained outside Git.
+
+
+## Turn | 2026-11-13 | P231 bot families delivered and five tickets closed
+
+Operator invoked to-spec/to-tickets/implement-spec with bounded delegation, then
+exactly one broad review and one TDD remediation. Spec601 published with five native
+subissues and5blocking edges. Primary owned Wake602; /root/bot_family_model owned
+Bots75 then76; /root/family_placement owned603; /root/family_display owned604.
+Workers returned coherent SHAs/acceptance; primary integrated serially and unlocked
+only from validated code. Execution ledger preserves bases/results/custody.
+
+Concurrent mailbox P230 required carrying17e2c3fe into our branch;18nonoverlapping
+upstream files compared byte-for-byte at pinned SHA. This program became P231,
+source versiondev19, with unchanged ticket IDs/review limits. Initial moving-ref
+carry probe and transient joined-CLI syntax failure retained; fixed-source join
+passed. Wake PR607merged88aca4fc and Bots77merged78501a84 closed all5implementation
+tickets. Parent spec601 deliberately remains open under to-tickets instruction.
+
+One Standards/Spec review accepted3Bots findings: child desktop/private-auth holds,
+connected peer guidance freshness, null model inheritance. Primary verified causal
+source and delegated one bounded TDD pass. Each regression observed red then green;
+primary focused5PASS0SKIP1.176s and syntax/diff checks. Corrective Bots78mergeda9e868fd.
+No second broad review, fixture framework, unrelated hardening or live effect.
+
+Wake selected287PASS127.423s plus carried mailbox/family76PASS23.883s; source CLI
+replay5PASS2.111s. Bots focused46PASS4optionalbrowserSKIP plus actual source WakeCLI/
+private tmux/native ownership1PASS7.53s. Local pinned Ruff, policy, compilation and
+diff checks PASS. Python3.12/Node24/Linux; no paid hosted/full-unrelated/3.11/provider
+qualification claim. No live install/account enrollment/grants/daemon rebuild.
+Provider-qualified child routes remain prerequisite; unknown moved-TUI recovery
+is held. Exact scope/results in docs/dev/evidence/plan0231 and linked Bot plans.
+
+Placement/display worker checkouts were removed after remote custody/clean checks.
+Two reused integration checkouts retire after this docs-only closeout receipt's
+verified merge; root anchors remain main, unrelated checkouts unchanged. Memory
+forbidden by explicit-request-only developer boundary; zero Graphiti writes.

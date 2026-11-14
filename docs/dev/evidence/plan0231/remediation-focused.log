@@ -1,0 +1,14 @@
+✔ SPEC-1 connected child peer delivery refreshes inherited next-turn guidance and settings without replay (343.667535ms)
+▶ STD-1 parent supervision respects child conversation and authentication holds before recording effects
+  ✔ operator (319.460331ms)
+  ✔ authentication (246.57489ms)
+✔ STD-1 parent supervision respects child conversation and authentication holds before recording effects (568.050564ms)
+✔ SPEC-2 null child model inherits nearest nonnull lineage setting while retaining local reasoning (47.07002ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1176.44474

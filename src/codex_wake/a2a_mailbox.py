@@ -41,6 +41,8 @@ class Mailbox:
         self.boot_id = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
         with bus.connection() as database:
             self._schema(database)
+            policy = database.execute("SELECT value FROM meta WHERE key='mail_time_policy'").fetchone()
+            self.require_stable_time = bool(policy and json.loads(policy[0]).get('authentication') == 'stable-time-nts-required')
 
     def pending_thread_work(self, thread_id: str) -> list[dict]:
         """Inspect lifecycle blockers without reading message bodies or expiring work."""
@@ -73,7 +75,9 @@ class Mailbox:
             raise BusError('unsupported_mailbox_schema', 'mailbox domain requires an explicit supported migration')
         if version == NETWORK_MAILBOX_SCHEMA:
             policy = database.execute("SELECT value FROM meta WHERE key='mail_time_policy'").fetchone()
-            if not policy or json.loads(policy[0]) != dict(version=1,mode='network-first',authentication='plain-ntp-explicit-opt-in'):
+            if not policy or json.loads(policy[0]) not in [
+                    dict(version=1,mode='network-first',authentication=auth) for auth in
+                    ('plain-ntp-explicit-opt-in', 'stable-time-nts-required')]:
                 raise BusError('unsupported_time_policy','network time policy is missing or unsupported')
 
     @classmethod
@@ -135,26 +139,48 @@ class Mailbox:
             return receipt
 
     @classmethod
-    def activate_network_time(cls, bus, operator_capability, *, provider=None):
+    def activate_network_time(cls, bus, operator_capability, *, provider=None, require_stable_time=False):
         """Explicit schema migration; never resets an anomalous legacy checkpoint."""
         mailbox = cls(bus, time_provider=provider)
+        mailbox.require_stable_time = require_stable_time
+        authentication = 'stable-time-nts-required' if require_stable_time else 'plain-ntp-explicit-opt-in'
         with mailbox.transaction() as database:
             bus.operator(database, operator_capability)
             if bus.recovery_held(database):
                 raise BusError('recovery_hold','time-policy migration is held during recovery')
-            if mailbox._network_mode(database):
-                database.execute('ROLLBACK')
-                return 'already_current'
+            was_network = mailbox._network_mode(database)
+            if was_network:
+                existing = json.loads(database.execute("SELECT value FROM meta WHERE key='mail_time_policy'").fetchone()[0])
+                if existing['authentication'] == authentication:
+                    database.execute('ROLLBACK')
+                    return 'already_current'
+                if not require_stable_time:
+                    raise BusError('unsupported_time_policy', 'StableTime cannot be downgraded to unauthenticated time')
             decision = mailbox._accepted_time()
             if database.execute("SELECT 1 FROM mail_leases WHERE lease_until>?",(decision.lower,)).fetchone() or database.execute("SELECT 1 FROM mail_attempts WHERE state IN ('dispatching','uncertain')").fetchone():
                 raise BusError('migration_busy','quiescent mailbox required for time-policy migration')
             if decision.status != 'network':
                 raise BusError('time_uncertain','network consensus required to establish the time policy')
+            if was_network:
+                mailbox._check_network_checkpoint(database, decision)
+                database.execute("UPDATE meta SET value=? WHERE key='mail_time_policy'",
+                    (encoded(dict(version=1,mode='network-first',authentication=authentication)),))
+                receipt = bus.event(database,'operator','require_stable_time',dict(previous_policy=existing))
+                mailbox._finish(database,receipt_id=receipt)
+                return receipt
             previous = database.execute("SELECT value FROM meta WHERE key='mail_clock'").fetchone()
             if previous:
-                legacy_now = mailbox._now(database)
-                if legacy_now < decision.lower-1 or legacy_now > decision.upper+1:
-                    raise BusError('clock_anomaly','legacy clock and network consensus disagree; checkpoint retained')
+                if require_stable_time:
+                    # No guest checkpoint can qualify an outstanding legacy deadline.
+                    # A new authenticated domain is allowed only after legacy work settles.
+                    pending = database.execute("SELECT 1 FROM mail_state WHERE admission='accepted' AND recipient NOT IN ('completed','failed','declined') LIMIT 1").fetchone()
+                    notifications = database.execute("SELECT 1 FROM mail_outbox WHERE kind='notification' AND status IN ('pending','published','deferred','dispatching','uncertain') LIMIT 1").fetchone()
+                    if pending or notifications:
+                        raise BusError('migration_busy', 'pending legacy work requires reconciliation before StableTime activation')
+                else:
+                    legacy_now = mailbox._now(database)
+                    if legacy_now < decision.lower-1 or legacy_now > decision.upper+1:
+                        raise BusError('clock_anomaly','legacy clock and network consensus disagree; checkpoint retained')
                 database.execute('INSERT INTO meta VALUES (?,?)',('mail_clock_before_network',previous[0]))
             ddl = database.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='mail_receipts'").fetchone()[0]
             triggers = database.execute("SELECT sql FROM sqlite_master WHERE type='trigger' AND tbl_name='mail_receipts'").fetchall()
@@ -165,9 +191,9 @@ class Mailbox:
             for trigger in triggers:
                 database.execute(trigger[0])
             database.execute("UPDATE meta SET value=? WHERE key='mailbox_schema'",(encoded(NETWORK_MAILBOX_SCHEMA),))
-            database.execute('INSERT INTO meta VALUES (?,?)',('mail_time_policy',encoded(dict(version=1,mode='network-first',authentication='plain-ntp-explicit-opt-in'))))
+            database.execute('INSERT INTO meta VALUES (?,?)',('mail_time_policy',encoded(dict(version=1,mode='network-first',authentication=authentication))))
             database.execute('INSERT INTO meta VALUES (?,?)',('mail_network_clock',encoded(dict(lower=decision.lower,upper=decision.upper,sources=decision.sources,status=decision.status))))
-            receipt = bus.event(database,'operator','activate_network_time',dict(from_version=MAILBOX_SCHEMA,to_version=NETWORK_MAILBOX_SCHEMA,previous_checkpoint_preserved=bool(previous)))
+            receipt = bus.event(database,'operator','activate_network_time',dict(from_version=MAILBOX_SCHEMA,to_version=NETWORK_MAILBOX_SCHEMA,previous_checkpoint_preserved=bool(previous),authentication=authentication))
             if database.execute('PRAGMA foreign_key_check').fetchone():
                 raise BusError('store_unavailable','time-policy migration failed foreign-key proof')
             mailbox._finish(database,receipt_id=receipt)
@@ -182,7 +208,18 @@ class Mailbox:
         from .time_inspection import network_time_decision
         from .time_provider import require_time_decision
         try:
-            decision = require_time_decision((self.time_provider or network_time_decision)())
+            provider = self.time_provider
+            if self.require_stable_time and provider is None:
+                from .time_inspection import stable_time_config
+                from .stable_time import service_time_decision
+                config = stable_time_config()
+                if not config:
+                    raise BusError('time_uncertain', 'required StableTime configuration is unavailable')
+                provider = lambda: service_time_decision(config)
+            decision = require_time_decision((provider or network_time_decision)())
+            if self.require_stable_time and (decision.status != 'network' or len(decision.sources) < 2
+                    or any(not source.startswith('stable-time:') for source in decision.sources)):
+                raise BusError('time_uncertain', 'qualified authenticated StableTime is required')
         except (OSError,ValueError,TypeError) as error:
             raise BusError('time_uncertain','bounded time unavailable; retry original intent') from error
         self._time_context.decision = decision
@@ -233,6 +270,9 @@ class Mailbox:
                     # an admission/effect; legacy stores retain their 1s bound.
                     database.execute('PRAGMA busy_timeout=30000')
                 database.execute('BEGIN IMMEDIATE')
+                policy = database.execute("SELECT value FROM meta WHERE key='mail_time_policy'").fetchone()
+                self.require_stable_time = self.require_stable_time or bool(
+                    policy and json.loads(policy[0]).get('authentication') == 'stable-time-nts-required')
                 if actor is not None:
                     self.bus.validate_actor(database, actor, permission=permission)
                 yield database

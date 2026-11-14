@@ -30,6 +30,30 @@ class FormattingMonitorTests(unittest.TestCase):
     def tmux(self,*args,check=True):
         return subprocess.run(['tmux','-S',self.socket,*args],text=True,capture_output=True,check=check,timeout=5).stdout
 
+    def test_monitor_family_overlay_is_bound_and_rollback_remains_effective(self):
+        from codex_wake.bot_families import BotFamilies
+        from codex_wake.tab_format_monitor import refresh_formatting
+        registry=BotFamilies(self.root,tabs=self.tabs)
+        state=registry.state()
+        registry.register(dict(bot_id='root',name='Product',scope_kind='specialist'),state)
+        registry.register(dict(bot_id='account',parent_bot_id='root',name='Acme',scope_kind='account',scope_ref='billing'),state)
+        registry.bind(dict(bot_id='account',client_id='test',workspace='work',window_id='@0',pane_id='%0'),state)
+        # Use a raw observation: monitor does not call the public tabs.list path.
+        observed=self.tabs.execute('tabs.list',{})
+        for row in observed['resources']:row.pop('bot_family',None)
+        self.assertEqual(refresh_formatting(self.root,observed,tabs=self.tabs)['status'],'completed')
+        rendered=self.tmux('display-message','-p','-t','@0','#{E:window-status-format}')
+        self.assertIn('account:Acme billing',rendered)
+        self.assertIn('kept name',rendered)
+        # A retained observation must lose its family label when binding proof
+        # disappears, even when ordinary trait evidence did not change.
+        state=registry.state();state['bots']['account']['bindings']={};registry.save(state)
+        refresh_formatting(self.root,observed,tabs=self.tabs)
+        self.assertNotIn('account:Acme',self.tmux('display-message','-p','-t','@0','#{E:window-status-format}'))
+        self.tabs.execute('tabs.format.rollback',dict(workspace='work'))
+        refresh_formatting(self.root,observed,tabs=self.tabs)
+        self.assertEqual(self.tmux('show-options','-w','-v','-t','@0','window-status-format'),'')
+
     def test_publisher_lease_expires_dynamic_cue_without_dimming_type_or_name(self):
         from codex_wake.tab_format_expiry import expiring_options
         from codex_wake.tab_format_projection import project

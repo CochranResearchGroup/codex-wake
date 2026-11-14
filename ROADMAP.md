@@ -1,5 +1,17 @@
 # Codex Wake Roadmap
 
+## P231 | Specialist bot families
+
+Delivered source: Wake607/Bots77 plus corrective Bots78; five implementation
+tickets closed; one review and one bounded remediation complete. Spec #601 stays
+open. Durable specialist/account/task
+hierarchy and inherited guidance in codex-bots; Wake supplies exact tab bindings,
+background family placement, reversible accents/navigation and accepted temporary
+worker cleanup. Execution: [Plan0231](docs/dev/plans/0231-2026-11-13-bot-tab-hierarchy.md)
+and its ticket ledger. Subsequent authorized installation deployed Wakedev19 and
+Bots c7fe3a1; see [deployment evidence](docs/dev/evidence/plan0231/deployment.md)
+for actual acceptance and preserved holds. No provider/account grant expansion.
+
 ## P229 | Reconnect failures
 
 Issue #596 delivered: PR597 merged6150e5a5; dev14 monitor deployed and actual
@@ -1715,3 +1727,8 @@ Current State: Operator approved the design and six-ticket graph. Source slices
 are integrated on `docs/persistent-wake-design`; final local validation, one
 review/remediation and tracker closure remain. Production acceptance/deployment
 are distinct and are not initiated by this lane.
+
+## P230 | Native mailbox first contact and bindings
+
+CLOSED (merged/deployed; native first-contact and reconnect accepted): [LOCAL-P230](docs/dev/plans/0230-2026-11-13-mailbox-first-contact-bindings.md).
+One source lane; remove first-poll prerequisite and qualify opt-in client rebinding.

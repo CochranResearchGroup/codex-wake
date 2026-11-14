@@ -21,6 +21,8 @@ from .a2a_identity import BusError, RuntimeIdentity
 from .a2a_mailbox import encoded
 from .a2a_scheduler import MailScheduler
 from .process import process_start_time_ticks, boot_id_value
+from .shared_app_server import SharedSourceError
+from .sessions import SelectionError
 
 MAX_FRAME = 8192
 
@@ -223,14 +225,44 @@ def bind_client(path, socket_path, identity: RuntimeIdentity):
 
 
 class NotificationDispatcher:
-    def __init__(self, scheduler: MailScheduler, bindings_file, *, receipt_gate=None):
+    def __init__(self, scheduler: MailScheduler, bindings_file, *, receipt_gate=None, discover_tmux_socket=None):
         self.scheduler, self.bindings_file = scheduler, Path(bindings_file)
         self.receipt_gate = receipt_gate
+        self.discover_tmux_socket = discover_tmux_socket
+
+    def _current_binding(self, job, binding):
+        if self.discover_tmux_socket is None or (binding is not None and binding.transport != 'tmux_notification_v1'):
+            return binding
+        if binding is not None:
+            try:
+                binding.locate()
+                return binding
+            except BusError as error:
+                if error.code != 'client_offline':
+                    raise
+        # Only an admitted, currently authorized notification permits discovery.
+        # No actor issuance, enrollment, prompt submission or attempt replay here.
+        self.scheduler.notification_context(job)
+        namespace, thread_id = json.loads(job['recipient_key'])
+        from .a2a_cli import resolve_identity
+        from .a2a_tmux_delivery import bind_tmux
+        identity = resolve_identity('thread:' + thread_id, allow_offline=True)
+        with self.scheduler.mailbox.bus.connection(read_only=True) as db:
+            actor = db.execute('SELECT root FROM actors WHERE namespace=? AND thread_id=?',
+                               (namespace, thread_id)).fetchone()
+        if (identity.namespace != namespace or identity.thread_id != thread_id or not actor
+                or not Path(identity.cwd).is_relative_to(Path(actor['root']))):
+            raise BusError('identity_changed', 'notification recipient differs from its original authority')
+        bind_tmux(self.bindings_file, self.discover_tmux_socket, identity)
+        return load_bindings(self.bindings_file).get(job['recipient_key'])
 
     def tick(self, *, limit=10):
         if self.receipt_gate is not None:
             self.receipt_gate.tick()
-        bindings = load_bindings(self.bindings_file)  # revocation/rebinding is observed every tick
+        # An opted-in worker can start before its first recipient is discovered.
+        bindings = ({} if self.discover_tmux_socket is not None
+                    and not self.bindings_file.exists() and not self.bindings_file.is_symlink()
+                    else load_bindings(self.bindings_file))
         scheduler = self.scheduler
         dispatcher = scheduler.acquire()
         if dispatcher is None:
@@ -255,8 +287,16 @@ class NotificationDispatcher:
                         raise BusError('stale_lease', 'dispatcher ownership changed')
                     binding = bindings.get(job['recipient_key'])
                     try:
+                        binding = self._current_binding(job, binding)
+                        if binding is not None:
+                            bindings[job['recipient_key']] = binding
                         probe = binding.probe() if binding else dict(status='deferred', reason='capability_unavailable')
-                    except (BusError, OSError):
+                    except BusError as error:
+                        probe = dict(status='deferred', reason=error.code if error.code in
+                            ('authorization_denied', 'identity_changed') else 'offline')
+                    except (SharedSourceError, SelectionError):
+                        probe = dict(status='deferred', reason='runtime_unavailable')
+                    except OSError:
                         probe = dict(status='deferred', reason='offline')
                     if binding is not None and probe.get('reason') == 'offline':
                         from .a2a_saved_delivery import SavedRecipientBinding

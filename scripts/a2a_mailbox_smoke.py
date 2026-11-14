@@ -13,7 +13,7 @@ import threading
 from websockets.sync.server import unix_serve
 
 
-def smoke(cli: str, *, scheduler=False, operations=False):
+def smoke(cli: str, *, scheduler=False, operations=False, stable_time=False):
     methods, closed = [], []
     with tempfile.TemporaryDirectory(prefix='wake-mailbox-smoke-') as temporary:
         root=Path(temporary)
@@ -70,6 +70,8 @@ def smoke(cli: str, *, scheduler=False, operations=False):
                     value=invoke(['a2a','enroll',str(cwd),'--thread','thread:'+identifier,
                                   '--app-server','unix://'+str(socket_path),'--operator-capability',operator])
                     capabilities.append(value['actor_capability_file'])
+                if stable_time:
+                    invoke(['a2a','network-time','--require-stable-time','--operator-capability',operator])
                 def message(actor,arguments,expected=0):
                     return invoke(['messages',*arguments],actor=actor,capability=capabilities[actor],expected=expected)
                 admission=message(0,['send','--to','thread:'+thread_ids[1],'--body-file',str(request_body),
@@ -145,7 +147,7 @@ def smoke(cli: str, *, scheduler=False, operations=False):
         assert children_after==children_before
     assert set(methods)<={'initialize','initialized','thread/loaded/list','thread/read'}
     assert len(closed)==methods.count('initialize')
-    return dict(schema_version=1,status='accepted_provider_free',mode='inbox_and_projection' if scheduler else 'inbox_only',requests=2 if scheduler else 1,replies=1,
+    return dict(schema_version=1,status='accepted_provider_free',time_authority='stable-time-required' if stable_time else 'legacy-guest',mode='inbox_and_projection' if scheduler else 'inbox_only',requests=2 if scheduler else 1,replies=1,
                 scheduler_projections=len(projected),scheduler_dispatches=0,operator_operations=operations,
                 received_receipts=len(received_ids),explicit_completion_claim=True,cross_root_policy='explicit',
                 wrong_actor_denied=True,runtime_effect_methods=0,connections_closed=len(closed),
@@ -153,5 +155,5 @@ def smoke(cli: str, *, scheduler=False, operations=False):
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--cli',required=True);parser.add_argument('--scheduler',action='store_true');parser.add_argument('--operations',action='store_true');args=parser.parse_args()
-    print(json.dumps(smoke(args.cli,scheduler=args.scheduler,operations=args.operations),sort_keys=True))
+    parser=argparse.ArgumentParser();parser.add_argument('--cli',required=True);parser.add_argument('--scheduler',action='store_true');parser.add_argument('--operations',action='store_true');parser.add_argument('--stable-time',action='store_true');args=parser.parse_args()
+    print(json.dumps(smoke(args.cli,scheduler=args.scheduler,operations=args.operations,stable_time=args.stable_time),sort_keys=True))

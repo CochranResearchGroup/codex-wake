@@ -15,6 +15,21 @@ lanes:
     overlaps: [HF-20, HF-18]
     updated_at: 2026-11-13
     disposition: Approved spec and six tickets; primary owns integration and shared contracts
+
+  - id: P231
+    owner: primary / ecochran76
+    objective: Deliver persistent bot families and identifiable worker tabs
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/601]
+    plan: docs/dev/plans/0231-2026-11-13-bot-tab-hierarchy.md
+    branch: feat/bot-family-hierarchy
+    worker_branches: [feat/bot-family-placement, feat/bot-family-display]
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [P211, P216]
+    updated_at: 2026-11-13
+    disposition: Wake607/Bots77 merged and five tickets closed; one review/one TDD remediation fixed3findings via Bots78; no live deployment; closeout checkouts retire after receipt merge
   - id: P229
     owner: primary / ecochran76
     objective: Detect reconnect errors above editable drafts and deploy the monitor

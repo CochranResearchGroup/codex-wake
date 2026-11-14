@@ -27,5 +27,6 @@ class DestinationScopeTests(unittest.TestCase):
                 raise AssertionError('Profile launch reached effect owner without account authority')
         tabs=SimpleNamespace(profile_owner=lambda:SimpleNamespace(authorization_target=lambda profile:account))
         facade=AuthorizedTabs(SimpleNamespace(authenticate=lambda token:actor),tabs,Runtime())
-        with self.assertRaises(AuthError):
-            facade.execute('token','tabs.create',dict(workspace='source',expected_target=source,name='tab',profile='other'))
+        for operation in ('tabs.create','tabs.family.open'):
+            with self.subTest(operation=operation), self.assertRaises(AuthError):
+                facade.execute('token',operation,dict(workspace='source',expected_target=source,name='tab',profile='other'))

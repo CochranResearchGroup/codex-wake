@@ -1,0 +1,213 @@
+{
+  "spec": "docs/dev/plans/0231-bot-family-spec.md",
+  "parent_spec": "https://github.com/CochranResearchGroup/codex-wake/issues/601",
+  "integration_branch": "feat/bot-family-hierarchy",
+  "bases": {
+    "wake": "e8c79a79da0b0482e2403e634394c70f5c66e333",
+    "bots": "1e315c3fddce194321e9587080091af1e36a1682"
+  },
+  "review_limit": 1,
+  "remediation_limit": 1,
+  "review_runs": 1,
+  "remediation_runs": 1,
+  "tickets": [
+    {
+      "key": "T1",
+      "repo": "CochranResearchGroup/codex-bots",
+      "number": 75,
+      "id": 6380126571,
+      "url": "https://github.com/CochranResearchGroup/codex-bots/issues/75",
+      "title": "Bot families: create durable specialist descendants with inherited guidance",
+      "blocked_by": [],
+      "state": "validated",
+      "worker": "/root/bot_family_model",
+      "result_sha": "8889cbc37932ced0dad79616bfa717e65905faf1",
+      "worktree": "codex-bots-standalone/bot-family-hierarchy",
+      "validation": "service13PASS2optionalbrowserSKIP;handoff16PASS1optionalbrowserSKIP;src/bot-family service/settings/native guidance",
+      "tracker_state": "CLOSED"
+    },
+    {
+      "key": "T2",
+      "repo": "CochranResearchGroup/codex-wake",
+      "number": 602,
+      "id": 6380127005,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/602",
+      "title": "Bot families: register lineage and exact client tab bindings",
+      "blocked_by": [],
+      "state": "validated",
+      "worker": "/root",
+      "owned_paths": [
+        "src/codex_wake/bot_families.py",
+        "src/codex_wake/bot_family_contract.py",
+        "public tab API/CLI registration",
+        "tests/test_bot_families.py"
+      ],
+      "result_sha": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
+      "validation": "4public family tests PASS1.705s;17affected contract/destination/profile tests PASS11.919s;RuffPASS",
+      "tracker_state": "CLOSED"
+    },
+    {
+      "key": "T3",
+      "repo": "CochranResearchGroup/codex-wake",
+      "number": 603,
+      "id": 6380127433,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/603",
+      "title": "Bot families: open grouped background tabs and clean accepted temporary workers",
+      "blocked_by": [
+        2
+      ],
+      "state": "validated",
+      "worker": "/root/family_placement",
+      "worker_branch": "feat/bot-family-placement",
+      "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
+      "result_sha": "75da46b635fed0a65ac8ad6cd41b0b4ebf6b7fd1",
+      "integrated_sha": "d01e5d06",
+      "validation": "worker25PASS19.725s;coordinator joined16PASS10.068s",
+      "tracker_state": "CLOSED"
+    },
+    {
+      "key": "T4",
+      "repo": "CochranResearchGroup/codex-wake",
+      "number": 604,
+      "id": 6380127819,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/604",
+      "title": "Bot families: show specialization labels and reversible muted family colors",
+      "blocked_by": [
+        2
+      ],
+      "state": "validated",
+      "worker": "/root/family_display",
+      "worker_branch": "feat/bot-family-display",
+      "worker_base": "ee592e5dfbf7e1dc3bedc1463845ad90aed43557",
+      "result_sha": "480756dd91373cc4959661d303b7aa46122d4fcd",
+      "integrated_sha": "e86a7aa6",
+      "validation": "worker73affectedPASS; binding-loss3PASS; coordinator registry/display6PASS",
+      "tracker_state": "CLOSED"
+    },
+    {
+      "key": "T5",
+      "repo": "CochranResearchGroup/codex-bots",
+      "number": 76,
+      "id": 6380128323,
+      "url": "https://github.com/CochranResearchGroup/codex-bots/issues/76",
+      "title": "Bot families: supervise children and hand exact attachments to Wake",
+      "blocked_by": [
+        1,
+        2,
+        3
+      ],
+      "state": "validated",
+      "integration_requirements": [
+        "Reuse parent delegable execution settings without default-reset friction; provider grants remain provider-owned.",
+        "Wake movement must preserve native Bot binding and session-switch ownership checks currently tied to codex-bots session."
+      ],
+      "worker": "/root/bot_family_model",
+      "worker_branch": "feat/bot-family-hierarchy",
+      "worker_base": "8889cbc37932ced0dad79616bfa717e65905faf1",
+      "owned_paths": [
+        "Bots service/MCP supervision",
+        "native exact session bindings",
+        "explicit Wake adapter",
+        "delegable execution context"
+      ],
+      "result_sha": "7e16e59c9f4358e3b8f79e0e5967bada8359f289",
+      "validation": "46PASS4optionalSKIP;actual Wake sourceCLI/tmux/native proof1PASS7.53s",
+      "limitations": [
+        "Provider-qualified child enrollment required; no new provider grants.",
+        "Unknown failed moved-TUI auto-recovery remains held."
+      ],
+      "tracker_state": "CLOSED"
+    }
+  ],
+  "wake_validation": {
+    "selected_suite": {
+      "tests": 287,
+      "seconds": 127.423,
+      "result": "PASS",
+      "source": "4a121aa5 product code; descriptor label refresh delta a33b19dc focused6PASS1.072s"
+    },
+    "lint": "Ruff0.14.2F821/F822/F823 allsrc/scripts/tests/hooks PASS",
+    "compile": "PASS",
+    "policy_wiring": "PASS",
+    "hosted_ci": "SKIPPED costpolicy",
+    "environment": "Linux Python3.12.13; no3.11orfullunrelatedsuite claim"
+  },
+  "program_id": "P231",
+  "previous_local_design_id": "P230; renumbered after concurrent mailbox plan0230 entered main",
+  "review_bases": {
+    "wake": "17e2c3fe57592fa8f071a30c6f885a9cc48258df",
+    "bots": "1e315c3fddce194321e9587080091af1e36a1682"
+  },
+  "upstream_reconciliation": {
+    "upstream": "17e2c3fe57592fa8f071a30c6f885a9cc48258df",
+    "product_version": "0.22.0.dev19",
+    "preserved_upstream_files": 18,
+    "validation": "76family/mailbox/bootstrap checks PASS23.883s; compile/policy/diff PASS",
+    "note": "initial verification used moving origin/main and was replaced by pinned-SHA comparison; source unaffected"
+  },
+  "review_targets": {
+    "wake": "aaf21dfaadf708fd04ba954ad996d44ec3f52c04",
+    "bots": "7e16e59c9f4358e3b8f79e0e5967bada8359f289"
+  },
+  "review_workers": {
+    "standards": "/root/p231_standards_review",
+    "spec": "/root/p231_spec_review"
+  },
+  "merged_implementation": {
+    "wake": {
+      "pr": 607,
+      "sha": "88aca4fc2f8cbfe0c7363a1715c9e682968ea111"
+    },
+    "bots": {
+      "pr": 77,
+      "sha": "78501a8458fec3dec27d29ca915c3f7b27abf1e7"
+    }
+  },
+  "review_result": {
+    "standards": {
+      "accepted": 1,
+      "highest": "P1",
+      "ids": [
+        "STD-1"
+      ]
+    },
+    "spec": {
+      "accepted": 2,
+      "highest": "P1",
+      "ids": [
+        "SPEC-1",
+        "SPEC-2"
+      ]
+    },
+    "wake_blockers": 0
+  },
+  "remediation": {
+    "worker": "/root/bot_family_model",
+    "branch": "fix/bot-family-review",
+    "scope": "accepted three Bots findings only",
+    "state": "validated",
+    "result_sha": "19129412f10e60e3ab547df74c9a44a2f1fc4899",
+    "merge_sha": "a9e868fd9539c593e3c5ca1b06516bb8e1f041ce",
+    "pr": 78,
+    "verification": "5PASS0FAIL0SKIP1.176s; syntax/diffPASS"
+  },
+  "status": "all five implementation tickets CLOSED; review1/remediation1 complete; operator-authorized installed follow-up recorded separately",
+  "remaining_accepted_blockers": [],
+  "parent_spec_state": "OPEN per to-tickets instruction; no parent closure",
+  "cleanup": "original worker/integration checkouts and later Bots deployment checkout removed normally after verified remote custody; root local policy commits and unrelated checkouts preserved",
+  "deployment_evidence": "docs/dev/evidence/plan0231/deployment.md",
+  "deployment": {
+    "authorization": "subsequent operator instruction: pr review merge deploy",
+    "wake_source": "282dcf02cda3aa9ddd88ce2ac86de48e4bed7d92",
+    "wake_version": "0.22.0.dev19",
+    "bots_source": "c7fe3a1ad8691201b47c130d73f257b70f145261",
+    "bots_candidate": "556d9a220ebe8305da814ccb53643c84d44aa4ea309facb7973d9086a09126cb",
+    "families_registered": 4,
+    "exact_root_bindings": 3,
+    "preserved_hold": "grok-bots input_unknown; unbound",
+    "native_child_move": "retained/tab_protected; live movement unproven",
+    "authenticated_app_health": "200/200; exact identity; Codex and RemoteView connected",
+    "native_daemon_restarted": false,
+    "model_turns": 0
+  }
+}

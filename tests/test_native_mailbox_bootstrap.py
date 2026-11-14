@@ -97,6 +97,54 @@ class NativeMailboxBootstrapTests(unittest.TestCase):
         self.assertFalse(error,value);self.assertEqual(value['body'],'Fixture answer.')
         self.assertNotEqual(message,reply)
 
+    def test_first_contact_does_not_require_recipient_to_poll_before_receiving(self):
+        sender, recipient = self.ids
+        value, error = self.call(sender, 'send', to='thread:' + recipient,
+            body='First contact', idempotency_key='first-contact', delivery='inbox')
+        self.assertFalse(error, value)
+        value, error = self.call(recipient, 'read', message_id=value['message']['message_id'])
+        self.assertFalse(error, value)
+        self.assertEqual(value['body'], 'First contact')
+
+    def test_first_contact_preserves_recipient_revocation_and_receive_denial(self):
+        sender, recipient = self.ids
+        self.assertFalse(self.call(recipient)[1])
+        with self.bus.connection() as db:
+            db.execute('UPDATE actors SET revoked=1 WHERE thread_id=?', (recipient,)); db.commit()
+        value, error = self.call(sender, 'send', to='thread:' + recipient,
+            body='Refused', idempotency_key='revoked-contact', delivery='inbox')
+        self.assertTrue(error, value)
+        self.assertEqual(value['error']['code'], 'authorization_denied')
+        with self.bus.connection(read_only=True) as db:
+            self.assertEqual(db.execute('SELECT revoked FROM actors WHERE thread_id=?', (recipient,)).fetchone()[0], 1)
+        self.bus.enroll(self.project, self.operator, receive=False)
+        value, error = self.call(sender, 'send', to='thread:' + recipient,
+            body='Refused', idempotency_key='receive-disabled', delivery='inbox')
+        self.assertTrue(error, value)
+
+    def test_first_contact_preserves_cross_root_denial_before_issuance(self):
+        sender, recipient = self.ids
+        other = self.root / 'other'; other.mkdir()
+        self.bus.enroll(other, self.operator)
+        self.identities[recipient] = RuntimeIdentity('fixture-runtime', recipient, str(other))
+        value, error = self.call(sender, 'send', to='thread:' + recipient,
+            body='Refused', idempotency_key='cross-root-contact', delivery='inbox')
+        self.assertTrue(error, value)
+        self.assertEqual(value['error']['code'], 'cross_root_denied')
+        with self.bus.connection(read_only=True) as db:
+            self.assertIsNone(db.execute('SELECT actor_id FROM actors WHERE thread_id=?', (recipient,)).fetchone())
+
+    def test_first_contact_never_enrolls_outside_recipient_root(self):
+        sender, recipient = self.ids
+        outside = self.root / 'outside'; outside.mkdir()
+        self.identities[recipient] = RuntimeIdentity('fixture-runtime', recipient, str(outside))
+        value, error = self.call(sender, 'send', to='thread:' + recipient,
+            body='Refused', idempotency_key='outside-contact', delivery='inbox')
+        self.assertTrue(error, value)
+        self.assertEqual(value['error']['code'], 'mailbox_root_not_enrolled')
+        with self.bus.connection(read_only=True) as db:
+            self.assertIsNone(db.execute('SELECT actor_id FROM actors WHERE thread_id=?', (recipient,)).fetchone())
+
     def test_missing_or_contradictory_native_context_cannot_issue_actor(self):
         for context in (None,self.context(self.ids[1])):
             value,error=self.runner.call('wake_messages_inbox',
