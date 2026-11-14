@@ -196,13 +196,15 @@
         9,
         10
       ],
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "worker": "root",
       "owned_scope": "generated docs, connector journey, integration validation and closeout",
       "packet": "docs/dev/plans/0234-unified-control-tickets/11.md",
       "issue": 643,
-      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/643"
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/643",
+      "validation": "471-case selected presubmit at dfcf +45-case causal auth gate at a7; exact wheel344member match; generated docs and public transport journey PASS",
+      "receipt": "docs/dev/evidence/plan0234/validation.md"
     }
   },
   "concurrency": "maximum three substantive implementation lanes: primary plus two workers; remaining workers queued",
