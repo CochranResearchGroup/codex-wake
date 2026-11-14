@@ -48,7 +48,7 @@
       "title": "Run a Grok coding turn inside Codex",
       "blocked_by": [],
       "owner": "worker-native-provider",
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "acceptance": [
         "A Grok-native provider streams text and fragmented function calls into the existing Codex loop, executes existing terminal/file/MCP tools and continues with their results.",
@@ -64,7 +64,10 @@
       "worker": "/root/p233_native_seams",
       "worker_branch": "feat/p233-native-provider-t2",
       "worker_worktree": "/home/ecochran76/workspace.local/.worktrees/codex/p233-native-provider-t2",
-      "worker_base": "f986f6ed53d6b324aedbd7e32991e0185eacae14"
+      "worker_base": "f986f6ed53d6b324aedbd7e32991e0185eacae14",
+      "result_sha": "7699650e005abe2bcedc138434c59aa95bfbf044",
+      "source_manifest": "runtime/grok-native-233/t2-source-manifest.json",
+      "validation": "Native Grok+2 OpenAI regressions3PASS; API274PASS; remote1PASS; proto byte equal; focused API lint and touched formatting pass; primary19file hashes/patch tree/bundle verified. Joined live/package qualification remains T8."
     },
     {
       "key": "T3",
