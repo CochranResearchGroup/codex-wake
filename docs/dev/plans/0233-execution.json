@@ -1,0 +1,231 @@
+{
+  "program": "P233",
+  "phase": "implementation",
+  "spec": "docs/dev/plans/0233-grok-in-codex-spec.md",
+  "design": "docs/dev/plans/0233-2026-11-14-grok-in-codex-design.md",
+  "integration_branch": "feat/grok-native-provider",
+  "bases": {
+    "wake": "1aa498674a4907f93b5216a4a98dd75a22c6ecec",
+    "native": "f986f6ed53d6b324aedbd7e32991e0185eacae14"
+  },
+  "review_limit": 1,
+  "remediation_limit": 1,
+  "review_runs": 0,
+  "remediation_runs": 0,
+  "tickets": [
+    {
+      "key": "T1",
+      "title": "Reuse native Grok sign-in through Wake",
+      "blocked_by": [],
+      "owner": "primary",
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "acceptance": [
+        "Operator can initiate or reuse the official account session through sanitized Wake controls.",
+        "Existing native provider authentication obtains credentials over its private command channel; tokens never appear in public status or worker configuration.",
+        "Shared refresh honors compatible locking/rotation; logged-out, expired, unknown or incompatible state is explicit.",
+        "Readiness distinguishes sign-in, entitlement and usable inference; no silent API-key route."
+      ],
+      "number": 629,
+      "id": 6394424075,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/629",
+      "parent_link": "native_sub_issue",
+      "dependencies_published": "native"
+    },
+    {
+      "key": "T2",
+      "title": "Run a Grok coding turn inside Codex",
+      "blocked_by": [],
+      "owner": "worker-native-provider",
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "acceptance": [
+        "A Grok-native provider streams text and fragmented function calls into the existing Codex loop, executes existing terminal/file/MCP tools and continues with their results.",
+        "Configuration and remote/native protocol serialization support the Grok-specific transport without re-enabling the removed generic chat provider.",
+        "The existing private command-auth interface supplies bearer credentials; session authentication and model routing headers are bound to each request.",
+        "Incomplete streams, malformed calls and unknown results cannot become successful completion or repeated tool effects; OpenAI behavior remains compatible."
+      ],
+      "number": 630,
+      "id": 6394424463,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/630",
+      "parent_link": "native_sub_issue",
+      "dependencies_published": "native"
+    },
+    {
+      "key": "T3",
+      "title": "Retire the superseded separate CLI-worker path",
+      "blocked_by": [],
+      "owner": "worker-retirement",
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "acceptance": [
+        "Preserve original issue/PR/source, runtime and skill custody plus the original terminal native_auth_required operation.",
+        "Reconcile exact task-owned unit/process/profile effects before reversible retirement; partial discovery does not establish quiescence.",
+        "Remove only the task-owned idle setup and its misleading installed routing, preserving unrelated skills, native homes, browser Grok and other sessions.",
+        "The superseded intake/draft points to the native-provider specification; retirement does not claim native-provider acceptance."
+      ],
+      "number": 632,
+      "id": 6394424816,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/632",
+      "parent_link": "native_sub_issue",
+      "dependencies_published": "native"
+    },
+    {
+      "key": "T4",
+      "title": "Select qualified Grok models and accounts",
+      "blocked_by": [
+        "T1",
+        "T2"
+      ],
+      "owner": "pending",
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "acceptance": [
+        "A unified native picker and public model operations distinguish qualified, unavailable, stale and unverified choices.",
+        "Exact account labels, model capabilities and an explicit validated default resolve one inference selection before work.",
+        "Unsupported optional features are individually explained; required-capability failure blocks ready status.",
+        "Current OpenAI defaults remain unchanged, and provider/model/account identity is attributable rather than inferred from display labels."
+      ],
+      "number": 633,
+      "id": 6394425400,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/633",
+      "parent_link": "native_sub_issue",
+      "dependencies_published": "native"
+    },
+    {
+      "key": "T5",
+      "title": "Delegate mixed-provider workers under one allowance",
+      "blocked_by": [
+        "T4"
+      ],
+      "owner": "pending",
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "acceptance": [
+        "An OpenAI parent can explicitly select a Grok worker and vice versa through normal Codex worker controls.",
+        "Workers inherit the exact inference selection unless overridden; provider-only Grok requests use the validated account default.",
+        "Accepted work pins its selection and retains the original permissions, parent identity and cumulative Wake allowance.",
+        "Reported usage is attributable across the mixed tree; missing provider usage remains unknown and cannot grant free work."
+      ],
+      "number": 634,
+      "id": 6394426093,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/634",
+      "parent_link": "native_sub_issue",
+      "dependencies_published": "native"
+    },
+    {
+      "key": "T6",
+      "title": "Continue across provider or account changes",
+      "blocked_by": [
+        "T5"
+      ],
+      "owner": "pending",
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "acceptance": [
+        "Changing selection during a turn stages the next safe boundary without implicitly stopping work.",
+        "Cross-provider or account changes create an automatic linked continuation carrying bounded portable context and completed tool results.",
+        "Source history, provider-private state, permissions and cumulative allowance remain preserved and attributable without extra confirmation.",
+        "A handoff that cannot preserve required objective/constraints/attribution/allowance holds; resume never replays uncertain actions."
+      ],
+      "number": 636,
+      "id": 6394426731,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/636",
+      "parent_link": "native_sub_issue",
+      "dependencies_published": "native"
+    },
+    {
+      "key": "T7",
+      "title": "Stop, revoke and recover mixed-provider work safely",
+      "blocked_by": [
+        "T1",
+        "T2",
+        "T5",
+        "T6"
+      ],
+      "owner": "pending",
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "acceptance": [
+        "Stop prevents further owned local tool scheduling and reports provider completion/usage uncertainty separately.",
+        "Shared logout/revocation blocks new Grok turns and interrupts only owned Grok work while OpenAI work remains untouched.",
+        "Auth/quota/provider failures become actionable held states; authorized parent reassignment is explicit.",
+        "Strict-budget work stays held on missing accounting; durable recovery retains unknown actions and does not reset allowances."
+      ],
+      "number": 637,
+      "id": 6394427294,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/637",
+      "parent_link": "native_sub_issue",
+      "dependencies_published": "native"
+    },
+    {
+      "key": "T8",
+      "title": "Qualify the native-provider release candidate",
+      "blocked_by": [
+        "T3",
+        "T7"
+      ],
+      "owner": "pending",
+      "state": "pending",
+      "tracker_state": "OPEN",
+      "acceptance": [
+        "The complete exact native package passes the existing isolated upgrade/rollback, history, multi-client and failed-start gates.",
+        "A bounded disposable-workspace workflow verifies real account sign-in/entitlement, streaming coding tools, MCP, mixed workers, handoff, Stop/resume and usage readiness.",
+        "Adverse auth/logout checks remain isolated from everyday sessions; no credentials or private histories are copied into fixtures.",
+        "Exact source/artifact identities, rollback custody and first-profile activation readiness are recorded; required failures remain blockers."
+      ],
+      "number": 639,
+      "id": 6394428407,
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/639",
+      "parent_link": "native_sub_issue",
+      "dependencies_published": "native"
+    }
+  ],
+  "initial_ready": [
+    "T1",
+    "T2",
+    "T3"
+  ],
+  "shared_contracts": {
+    "auth": "Existing ModelProviderAuthInfo command/args, bounded timeout, private stdout bearer token and sanitized stderr; public CLI/API/MCP never return credentials. T1 owns Wake implementation; T2 consumes existing native interface.",
+    "native_events": "Grok-specific native wire/remote-config support normalizes into existing ResponseEvent/tool loop; T2 owns this contract.",
+    "selection": "Catalog readiness and exact provider/account/model selection from T4, consumed by T5/T6/T7.",
+    "closure_order": "Close implementation children from validated integrated acceptance, then one broad review and one bounded remediation. Requalify causally affected exact package after corrections; merge/deploy is a subsequent program stage, not a premature ticket-closure claim."
+  },
+  "discovery_workers": [
+    {
+      "handle": "/root/p233_native_seams",
+      "status": "complete_readonly",
+      "accepted": "native provider/remote serialization/event-stream seams and existing tests"
+    },
+    {
+      "handle": "/root/p233_runtime_custody",
+      "status": "complete_readonly",
+      "accepted": "exact stale profile, terminal refusal and unit/skill custody; empty partial discovery is not quiescence"
+    }
+  ],
+  "remaining_program_stages": [
+    "one broad Standards/Spec review",
+    "one bounded TDD remediation of accepted findings",
+    "focused regression and causally affected package qualification",
+    "authorized PR merge and one-profile deployment",
+    "final exact runtime readbacks and task worktree cleanup"
+  ],
+  "unrelated_work": [
+    "concurrent unified-control design0234",
+    "Byobu environment glossary edits",
+    "existing native source branches/worktrees"
+  ],
+  "review_fixed_points": {
+    "wake": "1aa498674a4907f93b5216a4a98dd75a22c6ecec",
+    "native": "f986f6ed53d6b324aedbd7e32991e0185eacae14"
+  },
+  "integration_worktree": "/home/ecochran76/workspace.local/.worktrees/codex-wake/grok-native-provider",
+  "forge_actor": "ecochran76",
+  "parent_spec": {
+    "number": 628,
+    "id": 6394423909,
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/628"
+  },
+  "spec_frozen": true
+}
