@@ -1193,6 +1193,22 @@
           ],
           "type": "object"
         }
+      },
+      "protected": {
+        "mcp": "wake_environment_conversations_input_result",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "operation_id": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "type": "object"
+        }
       }
     },
     "environment.conversations.input.submit": {
@@ -1235,6 +1251,45 @@
             "prompt",
             "policy",
             "idempotency_key"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "mcp": "wake_environment_conversations_input_submit",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "expected_target": {
+              "type": "object"
+            },
+            "idempotency_key": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "policy": {
+              "enum": [
+                "reject",
+                "queue",
+                "steer",
+                "interrupt_then_submit"
+              ]
+            },
+            "prompt": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "selector": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "selector",
+            "prompt",
+            "policy",
+            "idempotency_key",
+            "expected_target"
           ],
           "type": "object"
         }
@@ -1586,6 +1641,270 @@
         }
       }
     },
+    "environment.conversations.presentation.background": {
+      "local": {
+        "mcp": "wake_environment_conversations_presentation_background",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "destination": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "endpoint": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_destination": {
+              "type": "object"
+            },
+            "expected_presentation": {
+              "type": "object"
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "force": {
+              "type": "boolean"
+            },
+            "idempotency_key": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "receipt_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "route": {
+              "enum": [
+                "park_live"
+              ],
+              "type": "string"
+            },
+            "selector": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "window": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "workspace": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "selector",
+            "expected_target",
+            "workspace",
+            "window",
+            "expected_presentation",
+            "destination",
+            "expected_destination",
+            "idempotency_key",
+            "route"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "mcp": "wake_environment_conversations_presentation_background",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "destination": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_destination": {
+              "type": "object"
+            },
+            "expected_presentation": {
+              "type": "object"
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "force": {
+              "type": "boolean"
+            },
+            "idempotency_key": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "receipt_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "route": {
+              "enum": [
+                "park_live"
+              ],
+              "type": "string"
+            },
+            "selector": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "window": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "workspace": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "selector",
+            "expected_target",
+            "workspace",
+            "window",
+            "expected_presentation",
+            "destination",
+            "expected_destination",
+            "idempotency_key",
+            "route"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    "environment.conversations.presentation.foreground": {
+      "local": {
+        "mcp": "wake_environment_conversations_presentation_foreground",
+        "readonly": false,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "destination": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "endpoint": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_destination": {
+              "type": "object"
+            },
+            "expected_presentation": {
+              "type": "object"
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "force": {
+              "type": "boolean"
+            },
+            "idempotency_key": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "receipt_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "route": {
+              "enum": [
+                "restore_live"
+              ],
+              "type": "string"
+            },
+            "selector": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "window": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "workspace": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "selector",
+            "expected_target",
+            "workspace",
+            "window",
+            "expected_presentation",
+            "destination",
+            "expected_destination",
+            "idempotency_key",
+            "route",
+            "receipt_id"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "mcp": "wake_environment_conversations_presentation_foreground",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "destination": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_destination": {
+              "type": "object"
+            },
+            "expected_presentation": {
+              "type": "object"
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "force": {
+              "type": "boolean"
+            },
+            "idempotency_key": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "receipt_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "route": {
+              "enum": [
+                "restore_live"
+              ],
+              "type": "string"
+            },
+            "selector": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "window": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "workspace": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "selector",
+            "expected_target",
+            "workspace",
+            "window",
+            "expected_presentation",
+            "destination",
+            "expected_destination",
+            "idempotency_key",
+            "route",
+            "receipt_id"
+          ],
+          "type": "object"
+        }
+      }
+    },
     "environment.conversations.prompt": {
       "local": {
         "mcp": "wake_environment_conversations_prompt",
@@ -1817,6 +2136,22 @@
           ],
           "type": "object"
         }
+      },
+      "protected": {
+        "mcp": "wake_environment_conversations_slash_cancel",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "interaction_id": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "interaction_id"
+          ],
+          "type": "object"
+        }
       }
     },
     "environment.conversations.slash.list": {
@@ -1851,6 +2186,26 @@
           },
           "required": [
             "selector"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "mcp": "wake_environment_conversations_slash_list",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "expected_target": {
+              "type": "object"
+            },
+            "selector": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "selector",
+            "expected_target"
           ],
           "type": "object"
         }
@@ -1892,6 +2247,32 @@
           ],
           "type": "object"
         }
+      },
+      "protected": {
+        "mcp": "wake_environment_conversations_slash_respond",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "idempotency_key": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "interaction_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "interaction_id",
+            "value",
+            "idempotency_key"
+          ],
+          "type": "object"
+        }
       }
     },
     "environment.conversations.slash.result": {
@@ -1915,6 +2296,22 @@
               ],
               "type": "string"
             },
+            "operation_id": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "mcp": "wake_environment_conversations_slash_result",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
             "operation_id": {
               "minLength": 1,
               "type": "string"
@@ -1981,6 +2378,39 @@
             "selector",
             "command",
             "idempotency_key"
+          ],
+          "type": "object"
+        }
+      },
+      "protected": {
+        "mcp": "wake_environment_conversations_slash_run",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "type": "string"
+            },
+            "command": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "expected_target": {
+              "type": "object"
+            },
+            "idempotency_key": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "selector": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "selector",
+            "command",
+            "idempotency_key",
+            "expected_target"
           ],
           "type": "object"
         }

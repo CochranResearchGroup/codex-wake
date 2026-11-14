@@ -117,7 +117,7 @@
         3,
         4
       ],
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "worker": "unified_observation_626",
       "owned_scope": "local prompt/slash/lifecycle adapters and session mode routing",
@@ -126,7 +126,10 @@
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/638",
       "branch": "feat/unified-session-control-638",
       "worktree": "unified-observation-626 reused clean",
-      "base": "20972d32fe4d2d348b245d2b911933717affec6d"
+      "base": "20972d32fe4d2d348b245d2b911933717affec6d",
+      "result_sha": "de6f6a49cadc3dd5d398f0bae0bdf23d7f122b7e",
+      "integrated_sha": "ef5aa640",
+      "validation": "Worker input/presentation9PASS3.083s and slash5PASS41.983s; integrated input/presentation/contract/connectors17PASS4.506s; actual private tmux placement with injected native binding, explicit park_live/restore_live route"
     },
     "8": {
       "title": "Unify account harness and conversation-history controls",
@@ -165,13 +168,15 @@
         7,
         9
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
-      "worker": "pending",
+      "worker": "unified_programs_625",
       "owned_scope": "bulk/program composition owner and operation reconciliation",
       "packet": "docs/dev/plans/0234-unified-control-tickets/10.md",
       "issue": 642,
-      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/642"
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/642",
+      "branch": "feat/unified-bulk-642",
+      "worktree": "unified-programs-625 reused clean"
     },
     "11": {
       "title": "Deliver connector discovery documentation and acceptance",

@@ -62,6 +62,8 @@ def local_aliases(definitions):
     definitions.update(terminal_definitions())
     from .unified_session_input import definitions as input_definitions
     definitions.update(input_definitions())
+    from .unified_session_presentation import definitions as presentation_definitions
+    definitions.update(presentation_definitions())
     from .unified_connectors import definitions as connector_definitions
     definitions.update(connector_definitions())
     for operation,(tool,description,schema,handler,readonly) in list(definitions.items()):
