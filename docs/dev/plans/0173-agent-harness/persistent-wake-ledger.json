@@ -164,5 +164,39 @@
     ],
     "custody": "Exact worker tips read back on matching origin worker refs before ordinary clean worktree removal",
     "retained": "persistent-wake-design integration checkout for PR618/final acceptance"
+  },
+  "validated_source_tip": "adf8568bbe861364ea8c89c413c1583f17b65dcf",
+  "validation_repairs": [
+    {
+      "kind": "environment",
+      "evidence": "first-error.log",
+      "cause": "Unix socket paths exceeded OS bound under nested validation TMPDIR",
+      "resolution": "short isolated temp roots"
+    },
+    {
+      "kind": "environment",
+      "evidence": "remaining-1.log",
+      "cause": "Isolated HOME hid installed rustup toolchain; synthetic release preflight failed rustc --version before package stage",
+      "resolution": "Explicit existing RUSTUP_HOME for version-only fixture preflight; no new toolchain or provider build"
+    },
+    {
+      "kind": "existing_async_test_readiness",
+      "evidence": "continued-2.log",
+      "cause": "Publication test broke on resource_count before requiring fresh asynchronous snapshot",
+      "resolution": "Wait for both3rows and fresh using the same original3-second deadline; module7passed, no product change"
+    },
+    {
+      "kind": "native_only_contract",
+      "cause": "Shared policy properties accidentally advertised unsupported session modes on Grok tools",
+      "red": "test_unsupported_grok_modes_are_not_advertised_or_silently_ignored failed on exposed session_mode",
+      "resolution": "Only native Codex tools advertise mode; legacy Grok fields preserved; mode/Grok/policy23tests passed"
+    }
+  ],
+  "compatibility_qualification": {
+    "baseline": "e8c79a79da0b0482e2403e634394c70f5c66e333",
+    "baseline_version": "0.22.0.dev14",
+    "result": "Exact baseline source classifies new mode record hold; current reader classifies native_intent_v6",
+    "receipt": "baseline-compatibility.json",
+    "limit": "Source compatibility, not installed legacy/production qualification"
   }
 }

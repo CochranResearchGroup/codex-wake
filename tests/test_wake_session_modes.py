@@ -51,3 +51,7 @@ class WakeSessionModes(unittest.TestCase):
             self.assertFalse(value['armed'])
             self.assertEqual(value['requires_worker_capabilities'],['wake_session_modes_v1'])
             self.assertEqual(value['wake_policy']['session_mode'],'background')
+    def test_unsupported_grok_modes_are_not_advertised_or_silently_ignored(self):
+        from codex_wake.mcp_server import SPECS
+        for verb in ('after','at','file'):
+            self.assertNotIn('session_mode', SPECS['wake_grok_'+verb][3])
