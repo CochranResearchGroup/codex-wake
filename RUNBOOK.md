@@ -9795,3 +9795,17 @@ native per-thread reload probe is unsupported by the running daemon. No expiry
 renewal, automatic retry, forced interruption, new reload, or host-clock change.
 Loaded connections can pick up installed fixes on normal reconnect; another global
 idle wait requires a new explicit operational decision. Memory forbidden.
+
+## Turn | 2026-11-13 | Persistent wakes merged and deployed
+
+Operator review/merge/deploy authorized. PR618 mergeda16b4de4; preserved both
+runbook intents in documentation conflict. Existing review1/remediation1 retained.
+Merged focused39PASS; UID1017 installed39PASS; all332Python members and31deps
+verified. dev20installed,9launchers switched, tab monitor and supervisor refreshed;
+fresh heartbeat advertises recurring/session modes, no new reconciliation holds.
+Final35native processes preserved. First transient-helper guard and cached-operation
+rollback diagnostic retained with corrected unique IDs and verified final cutover.
+No native upgrade, terminal input or production schedules; MCP imports refresh on
+normal reconnect. Exact proof/limits: [deployment](docs/dev/plans/0173-agent-harness/persistent-wake-deployment.md).
+Owned integration checkout retires after verified closeout remote custody; unrelated
+worktrees preserved. Memory forbidden, zero writes.
