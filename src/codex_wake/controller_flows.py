@@ -67,13 +67,25 @@ class FlowDefinition:
             kind = node.get('type')
             fields = {
                 'call': {'id', 'type', 'operation', 'arguments', 'next', 'retry'},
-                'branch': {'id', 'type', 'condition', 'then', 'else', 'unknown'},
+                'branch': {'id', 'type', 'condition', 'then', 'else', 'unknown', 'error', 'timeout'},
+                'function': {'id', 'type', 'function', 'version', 'arguments', 'limits', 'next', 'unknown', 'error', 'timeout'},
+                'select': {'id', 'type', 'cases', 'default', 'unknown', 'error', 'timeout'},
+                'while': {'id', 'type', 'condition', 'body', 'max_iterations', 'next', 'unknown', 'error', 'timeout', 'exhausted'},
                 'wait': {'id', 'type', 'operation_id', 'timeout', 'next', 'operation'},
                 'foreach': {'id', 'type', 'items', 'mode', 'profile', 'expected_target', 'prompt', 'parallelism', 'join', 'next', 'limits'},
                 'end': {'id', 'type', 'value'},
             }
             if kind not in fields or set(node) - fields[kind]:
                 flow_error('unsupported_flow_node', 'node type or fields are unsupported')
+            if kind == 'function':
+                from .controller_conditions import validate_condition
+                validate_condition({key:node[key] for key in ('function','version','arguments','limits') if key in node})
+            if kind == 'while':
+                from .controller_flow_structures import validate_while
+                validate_while(node)
+            if kind == 'select':
+                from .controller_flow_structures import validate_select
+                validate_select(node)
             if kind == 'call':
                 from .controller_flow_retry import policy
                 policy(node)
@@ -105,9 +117,9 @@ class FlowDefinition:
                 return
             active.add(identifier)
             node = by_id[identifier]
-            paths = ('then', 'else', 'unknown') if node['type'] == 'branch' else ('next',)
-            for path in paths:
-                visit(node.get(path))
+            from .controller_flow_structures import edges
+            for selected in edges(node):
+                visit(selected)
             active.remove(identifier)
             visited.add(identifier)
         for identifier in by_id:
@@ -275,14 +287,16 @@ class ControllerFlows:
         definition = compiled.as_dict()
         from .controller_conditions import Conditions,limits
         configured_limits=limits(definition.get('limits',{}))
-        arbitrary=any(node['type'] in ('call','foreach') for node in definition['nodes'])
+        from .controller_flow_structures import expand as expand_structures
+        structured=expand_structures(definition)
+        arbitrary=any(node['type'] in ('call','foreach') for node in structured['nodes'])
         from .controller_flow_retry import READ_OPERATIONS
-        unmetered=any(node['type']=='call' and node['operation'] not in READ_OPERATIONS for node in definition['nodes'])
+        unmetered=any(node['type']=='call' and node['operation'] not in READ_OPERATIONS for node in structured['nodes'])
         if arbitrary and (('max_tokens' in definition.get('limits',{}) and (configured_limits['metering']!='estimate_opt_in' or unmetered)) or ('max_seconds' in definition.get('limits',{}) and configured_limits['metering']!='estimate_opt_in')):
             flow_error('unsupported_flow_limits','native exact or unestimated arbitrary-operation token bounds are unqualified; rejected before effects')
         def named(value):
             return isinstance(value,dict) and ('function' in value or any(named(v) for v in value.values())) or isinstance(value,list) and any(named(v) for v in value)
-        uses_registry=any(named(node.get('condition')) for node in definition['nodes'])
+        uses_registry=any(node['type']=='function' or named(node.get('condition')) or node['type'] in ('select','while') and named(node) for node in definition['nodes'])
         registry=Conditions(self.root) if uses_registry else Conditions(self.root,registry={})
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -307,7 +321,7 @@ class ControllerFlows:
             if not isinstance(sample['boot_id'],str) or not sample['boot_id'] or type(counter) not in (int,float) or not math.isfinite(counter):raise ValueError()
         except (KeyError,OSError,TypeError,ValueError):flow_error('flow_clock_unavailable','host elapsed continuity is unavailable; no run admitted')
         state['elapsed_clock']=dict(boot_id=sample['boot_id'],start=counter,latest=counter,wall_latest=state['created_at'],elapsed=0)
-        for node in definition['nodes']:
+        for node in structured['nodes']:
             if node['type'] == 'foreach':
                 capabilities = self.invoke('sessions.capabilities',
                     dict(profile=node['profile'], expected_target=node['expected_target']),
@@ -318,7 +332,7 @@ class ControllerFlows:
                 if type(maximum) is not int or not 1<=maximum<=8 or node.get('parallelism',1)>maximum:
                     flow_error('unsupported_parallelism','requested foreach parallelism exceeds the negotiated runtime capability')
         from .controller_flow_foreach import expand
-        execution, memberships = expand(definition, state, self._resolve, _UNKNOWN)
+        execution, memberships = expand(structured, state, self._resolve, _UNKNOWN)
         state.update(execution_definition=execution, memberships=memberships, cursor=execution['entry'])
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -628,8 +642,8 @@ class ControllerFlows:
         if state['phase']!='ready' and not (resume and state['phase'] in ('executing','uncertain') and state.get('condition_attempt')):return self.projection(state) if resume else None
         definition=state.get('execution_definition') or self._definition(state['flow_id'],state['version']).as_dict()
         node=next(item for item in definition['nodes'] if item['id']==state['cursor'])
-        condition=node.get('condition')
-        if node['type']!='branch' or type(condition) is bool or ('function' not in condition and condition.get('op') not in ('and','or')):return None
+        condition={key:node[key] for key in ('function','version','arguments','limits') if key in node} if node['type']=='function' else node.get('condition')
+        if node['type'] not in ('branch','function') or node['type']=='branch' and (type(condition) is bool or ('function' not in condition and condition.get('op') not in ('and','or'))):return None
         snapshot=state.get('condition_registry_snapshot')
         registry=Conditions(self.root,registry=snapshot) if isinstance(snapshot,dict) else Conditions(self.root) if state.get('condition_registry_used') else Conditions(self.root,registry={})
         if registry.revision!=state.get('condition_registry_revision'):
@@ -671,7 +685,7 @@ class ControllerFlows:
         try:
             outcome=registry.evaluate(condition,state,resolve=lambda value:self._resolve(value,state),
                 compare=lambda value:self._condition(value,state),save=save,now=lambda:self._clock_value(state),semantic=semantic,
-                evaluation_id=node['id'],resume=resume)
+                evaluation_id=node['id'],resume=resume,predicate=node['type']!='function')
         except ConditionPending as pending:
             with self.connect() as db:
                 db.execute('BEGIN IMMEDIATE')
@@ -694,8 +708,9 @@ class ControllerFlows:
             latest['condition_usage']=state['condition_usage'];latest['condition_trace']=state['condition_trace'];latest['elapsed_clock']=state.get('elapsed_clock')
             latest['steps'][node['id']]=outcome
             value=outcome['value'] if outcome['status']=='known' else None
-            selected=node.get('unknown') if value is None else node['then'] if value else node['else']
-            latest.update(cursor=selected,phase='held' if value is None and selected is None else 'ready' if selected is not None else 'completed',
+            unresolved=outcome['status']!='known'
+            selected=(node.get(outcome['status'],node.get('unknown')) if unresolved else node.get('next')) if node['type']=='function' else node.get(outcome['status'],node.get('unknown')) if value is None else node['then'] if value else node['else']
+            latest.update(cursor=selected,phase='held' if unresolved and selected is None else 'ready' if selected is not None else 'completed',
                           reason='condition_'+outcome['status'] if value is None else None)
             latest['completed_steps']+=1
             for key in ('attempt','executing_node','condition_attempt'):latest.pop(key,None)
@@ -798,6 +813,17 @@ class ControllerFlows:
                     state['completed_steps'] += 1
                     self._write(db, state)
                     continue
+                if node['type'] == 'hold':
+                    state.update(phase='held',reason=node['reason'])
+                    self._write(db,state)
+                    return self.projection(state)
+                if node['type'] == 'value':
+                    value=self._resolve(node.get('value'),state)
+                    if value is _UNKNOWN:
+                        state.update(phase='held',reason='output_unknown');self._write(db,state);return self.projection(state)
+                    state['steps'][node['id']]=value
+                    selected=node.get('next');state.update(cursor=selected,phase='ready' if selected else 'completed')
+                    state['completed_steps']+=1;self._write(db,state);continue
                 if node['type'] == 'end':
                     value = self._resolve(node.get('value'), state)
                     state.update(phase='held' if value is _UNKNOWN else 'completed',
