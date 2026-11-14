@@ -2827,11 +2827,11 @@ def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
 
 def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     from .unified_contract import expand_cli, metadata
-    argv, discover = expand_cli(argv)
+    parser = build_parser()
+    argv, discover = expand_cli(argv, parser)
     if discover:
         print(json.dumps(metadata(), sort_keys=True))
         return 0
-    parser = build_parser()
     args = parser.parse_args(argv)
     if (args.command in ('accounts', 'stores', 'configuration', 'history', 'builds', 'daemons', 'migration', 'tabs', 'environment')
             and not (args.command == 'configuration' and args.account_verb == 'default-root')):
@@ -2856,7 +2856,11 @@ def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
     root = resolve_root(args)
     if getattr(args, "_unified_operation", None):
         from .local_control_service import LocalOperations
-        payload = {"resource_id": args.resource_id} if hasattr(args, "resource_id") else {}
+        payload = dict(getattr(args, 'arguments', {}))
+        for key in getattr(args, '_unified_fields', ['resource_id']):
+            if hasattr(args, key):
+                if key in payload:raise WakeError('duplicate_unified_argument')
+                payload[key] = getattr(args, key)
         print(json.dumps(LocalOperations(root).execute(args._unified_operation, payload), sort_keys=True))
         return 0
     if args.command == "schedules":

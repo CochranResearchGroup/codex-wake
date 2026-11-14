@@ -57,6 +57,10 @@ def local_aliases(definitions):
     definitions.update(environment_definitions())
     from .unified_wakes import definitions as wake_definitions
     definitions.update(wake_definitions())
+    from .unified_terminal import definitions as terminal_definitions
+    definitions.update(terminal_definitions())
+    from .unified_session_input import definitions as input_definitions
+    definitions.update(input_definitions())
     for operation,(tool,description,schema,handler,readonly) in list(definitions.items()):
         alias=canonical(operation)
         if alias==operation:continue
@@ -106,6 +110,7 @@ def _parser(parser,path):
     return parser
 
 def apply_cli(parser):
+    parser._unified_direct_paths = set()
     sources={path:deepcopy(_parser(parser,source)) for path,source in CLI_ALIASES.items() if _parser(parser,source)}
     for path,source in sorted(sources.items(),key=lambda item:len(item[0])):
         parent=parser
@@ -120,9 +125,41 @@ def apply_cli(parser):
         item.set_defaults(_unified_operation='environment.'+verb)
         if verb=='children':item.add_argument('resource_id')
     action.add_parser('capabilities',help='discover canonical operation contracts and transport capabilities')
+    from .local_control_service import definitions
+    for operation,(tool,description,schema,handler,readonly) in definitions().items():
+        if not operation.startswith(('environment.','wakes.')) or _parser(parser,operation.split('.')) is not None:continue
+        parent=parser
+        parts=operation.split('.')
+        for part in parts[:-1]:
+            children=_subs(parent) or parent.add_subparsers(dest='_unified_'+part,required=True)
+            parent=children.choices.get(part) or children.add_parser(part)
+        children=_subs(parent) or parent.add_subparsers(dest='_unified_action',required=True)
+        item=children.add_parser(parts[-1],help=description)
+        parser._unified_direct_paths.add(tuple(parts))
+        item.set_defaults(_unified_operation=operation,_unified_fields=list(schema['properties']))
+        item.add_argument('--arguments',type=__import__('json').loads,default={})
+        for field,prop in schema['properties'].items():
+            if field=='arguments':continue
+            options=dict(default=argparse.SUPPRESS,dest=field)
+            kind=prop.get('type')
+            if kind in ('object','array'):options['type']=__import__('json').loads
+            elif kind=='integer':options['type']=int
+            elif kind=='number':options['type']=float
+            elif kind=='boolean':options['action']=argparse.BooleanOptionalAction
+            if 'enum' in prop:options['choices']=prop['enum']
+            item.add_argument('--'+field.replace('_','-'),**options)
+    def update_usage(node,prog):
+        node.prog=prog
+        children=_subs(node)
+        if children is not None:
+            children._prog_prefix=prog
+            for name,child in children.choices.items():update_usage(child,prog+' '+name)
+    for path in CLI_ALIASES:
+        node=_parser(parser,path)
+        if node is not None:update_usage(node,parser.prog+' '+' '.join(path))
     return parser
 
-def expand_cli(argv):
+def expand_cli(argv,parser=None):
     import sys
     args=list(sys.argv[1:] if argv is None else argv);offset=0
     # Preserve global options; do not rewrite text in option values or prompts.
@@ -132,6 +169,8 @@ def expand_cli(argv):
         else:break
     rest=args[offset:]
     if rest==['environment','capabilities']:return args,True
+    for path in getattr(parser, '_unified_direct_paths', ()):
+        if rest[:len(path)]==list(path):return args,False
     for path,legacy in sorted(CLI_ALIASES.items(),key=lambda item:-len(item[0])):
         if rest[:len(path)]==list(path):return args[:offset]+list(legacy)+rest[len(path):],False
     return args,False

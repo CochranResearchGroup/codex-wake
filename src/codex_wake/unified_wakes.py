@@ -12,6 +12,7 @@ class WakeControls:
         if self.authorize is not None:self.authorize(operation,args)
         if self.principal is None:raise InventoryError('permission_identity_unverified','Wake owner requires a verified principal.')
         store=ScheduleStore(self.root);verb=operation.rsplit('.',1)[-1]
+        delegated=(lambda thread:self.authorize(operation,dict(thread_id=thread))) if self.authorize is not None else None
         if operation.startswith('wakes.intents.'):
             if verb not in ('after','at','file'):raise InventoryError('unsupported_operation','Unsupported intent operation.')
             request=dict(thread_id=args['thread_id'],prompt=args['prompt'],session_mode=args['session_mode'],delivery_window_seconds=args['delivery_window_seconds'])
@@ -20,14 +21,14 @@ class WakeControls:
             native.native_command=verb;native.trigger=args['trigger'];native._permission_principal=self.principal
             return retain(native,self.root)
         if operation not in definitions():raise InventoryError('unsupported_operation','Unsupported Wake operation.')
-        if verb=='register':return store.register(args['request'],codex_path=self.codex_path,endpoint=self.endpoint,principal=self.principal)
-        if verb=='revise':return store.revise(args['schedule_id'],args['request'],args['expected_revision'],principal=self.principal,codex_path=self.codex_path,endpoint=self.endpoint)
-        if verb=='cancel':return store.cancel(args['schedule_id'],args['expected_revision'],principal=self.principal)
+        if verb=='register':return store.register(args['request'],codex_path=self.codex_path,endpoint=self.endpoint,principal=self.principal,authorize=delegated)
+        if verb=='revise':return store.revise(args['schedule_id'],args['request'],args['expected_revision'],principal=self.principal,codex_path=self.codex_path,endpoint=self.endpoint,authorize=delegated)
+        if verb=='cancel':return store.cancel(args['schedule_id'],args['expected_revision'],principal=self.principal,authorize=delegated)
         if verb=='show':
-            value=store.read(args['schedule_id']);store.authorize(value,self.principal);return store.receipt(value)
+            value=store.read(args['schedule_id']);store.authorize(value,self.principal,delegated);return store.receipt(value)
         values=[]
         for value in store.records():
-            try:store.authorize(value,self.principal)
+            try:store.authorize(value,self.principal,delegated)
             except ValueError:continue
             values.append(store.receipt(value))
         return values
@@ -52,3 +53,29 @@ def definitions():
         props=dict(thread_id=text,prompt=text,trigger=text,idempotency_key=text,session_mode={'enum':['session_only','reopen_live','background']},delivery_window_seconds={'type':'integer','minimum':1})
         result[operation]=('wake_'+operation.replace('.','_'),'Retain one explicit-mode native intent; retained readiness is not execution.',dict(type='object',properties=props,required=list(props),additionalProperties=False),partial(local_invoke,operation),False)
     return result
+
+
+def protected_execute(authority,operations,token,operation,args):
+    from .unified_connectors import protected_callback
+    from .session_permissions import Principal
+    from .controller_auth import AuthError
+    actor=authority.authenticate(token)
+    if operations.inventory is None:raise InventoryError('configuration_unavailable','Host Wake root is unavailable.')
+    root=operations.inventory.root
+    guard=protected_callback(authority,token,operations)
+    scope='content.observe' if operation.endswith(('.list','.show')) else 'control'
+    def authorize(verb,values):
+        authority.authenticate(token)
+        thread=values.get('thread_id') or values.get('request',{}).get('thread_id')
+        if thread is None and 'schedule_id' in values:thread=ScheduleStore(root).read(values['schedule_id'])['request']['thread_id']
+        if thread is not None:guard(dict(host=operations.host,environment=operations.environment,conversation_id=thread),scope)
+        elif verb!='wakes.schedules.list':raise AuthError('insufficient_scope')
+    # This is an attested delegated controller, never a native caller/operator claim.
+    owner=WakeControls(root,principal=Principal(actor.subject,'controller'),authorize=authorize)
+    value=owner.execute(operation,args)
+    authority.authenticate(token)
+    return dict(schema_version=1,operation=operation,status='completed',result=value)
+
+def protected_operations():
+    return {operation:(tool,schema,'content.observe' if readonly else 'control',protected_execute)
+            for operation,(tool,description,schema,handler,readonly) in definitions().items()}

@@ -93,7 +93,7 @@
         1,
         4
       ],
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "worker": "unified_observation_626",
       "owned_scope": "terminal observation/input owners and existing tab transport",
@@ -102,7 +102,10 @@
       "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/635",
       "branch": "feat/unified-terminal-635",
       "worktree": "unified-observation-626 reused clean",
-      "base": "bd5588066d63ecc96d6686f650637c9d14516821"
+      "base": "bd5588066d63ecc96d6686f650637c9d14516821",
+      "result_sha": "e2e2d05e35c4b8e88cbdea74065c269033924005",
+      "integrated_sha": "20972d32fe4d2d348b245d2b911933717affec6d",
+      "validation": "Worker real private tmux literal LF/noimplicitEnter/key behavior fixed and13PASS; integrated terminal/environment/input7PASS0.975s; registry-family18PASS1.350s"
     },
     "7": {
       "title": "Control prompts, slash interactions and presentation lifecycle",
@@ -111,13 +114,16 @@
         3,
         4
       ],
-      "state": "pending",
+      "state": "running",
       "tracker_state": "OPEN",
-      "worker": "pending",
+      "worker": "unified_observation_626",
       "owned_scope": "local prompt/slash/lifecycle adapters and session mode routing",
       "packet": "docs/dev/plans/0234-unified-control-tickets/07.md",
       "issue": 638,
-      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/638"
+      "issue_url": "https://github.com/CochranResearchGroup/codex-wake/issues/638",
+      "branch": "feat/unified-session-control-638",
+      "worktree": "unified-observation-626 reused clean",
+      "base": "20972d32fe4d2d348b245d2b911933717affec6d"
     },
     "8": {
       "title": "Unify account harness and conversation-history controls",
