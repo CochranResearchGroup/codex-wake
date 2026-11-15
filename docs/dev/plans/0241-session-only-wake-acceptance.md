@@ -68,17 +68,31 @@ script's native connection closed. The original default tmux session was retaine
 Two initial standalone temporary-directory trust entries created by this lane
 were removed exactly; other trust entries were preserved.
 
-Small repair proposal for the integration owner: inspect `bind_mode` in
-`wake_session_modes.py`, which calls broad `sessions.observe` with a five-second
-bound. Exact-thread native evidence plus the supported tmux inventory was
-sufficient to match the recipient, while the protected registration failed its
-owner check. Narrow owner observation to the exact recipient while preserving
-complete tmux evidence, process birth, native name and working directory checks.
-This is a diagnosis proposal, not proof of the refusal's internal cause. Do not
-inject a session owner, native principal or mock snapshot to satisfy acceptance.
-Re-run this same owned conversation after any repair is separately qualified.
+The initial exact-thread narrowing repair proposal is withdrawn: it could hide
+other loaded conversations with matching names/directories and weaken ambiguity
+checks. A shared repair requires causal evidence while preserving full candidate
+uniqueness and process ownership fences. No product change is justified yet.
 Detachment survival, closure cancellation and past-due non-delivery remain
 unverified because registration did not complete.
 
 Memory disposition: `forbidden`; the coordinator explicitly prohibited memory
 writes. A private non-write receipt records this boundary outside Git.
+
+## Same-recipient read-only diagnostic
+
+Private receipt `session-only-diagnostic-1d489be6.json` retains the full real
+snapshots. The same archived disposable recipient was restored using a persistent
+native connection and an owned default-server tmux session. The diagnostic used
+the connector service's PATH and no TMUX variable. No grant or schedule was created.
+
+Full `sessions.observe` against the resolved endpoint succeeded at timeout five
+seconds (elapsed 5.82 seconds) and thirty seconds (elapsed 5.52 seconds). Both
+sources were available, inventory was complete, and the target had exactly one
+`metadata_matched` attachment. Thus the proposed five-second deadline cause is
+not established. Read-only `bind_mode` on a copied target bound the exact endpoint;
+a subsequent copied target using `unix://` failed `session_owner_unverified`.
+Post-cleanup the same locator resolved to the identical endpoint and raw daemon
+version returned success. This sequential difference does not prove an endpoint
+bug or exclude intermittent observation failure. Further diagnosis must retain
+full source availability and candidate ambiguity evidence, without a fake owner.
+Cleanup again archived the same thread and removed only its owned session.
