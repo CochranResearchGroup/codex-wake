@@ -26,6 +26,10 @@ def main():
     parser.add_argument('--receipt', type=Path, required=True)
     args = parser.parse_args()
     os.umask(0o077)
+    args.receipt.parent.mkdir(parents=True, exist_ok=True)
+    # Reserve exclusively before any live effects; preserve every prior receipt.
+    with args.receipt.open('x'):
+        pass
     from codex_wake.external_connector import load_config
     from codex_wake.controller_auth import OAuthAuthority
     from codex_wake.local_sessions import discover
@@ -98,7 +102,18 @@ def main():
             readonly = grant(['observe'], scope_target, 'read-only')
             observed = tool(readonly, 'wake_environment_snapshot', {})
             assert observed.get('status') == 'completed', dict(stage='allowed read', result=observed.get('status'))
+            snapshot = observed['result']
+            assert snapshot['host'] == config['host'] and snapshot['environment'] == config['environment']
+            # This is a terminal-placement projection, not a native-thread list.
+            # A conversation-only grant has no terminal resources or content.
+            for collection in ('sessions', 'unplaced_tabs', 'agents', 'bindings', 'unavailable'):
+                assert snapshot[collection] == [], dict(stage='metadata isolation', collection=collection)
             report['checks']['allowed_scoped_read'] = True
+            report['checks']['snapshot_ungranted_resources_absent'] = True
+            content_request = dict(selector='thread:'+thread_id, turn_id='cw671-denied-content', expected_target=target)
+            no_content = tool(readonly, 'wake_environment_conversations_observe', content_request)
+            assert no_content.get('error') == 'insufficient_scope', dict(stage='metadata-only content refusal', status=no_content.get('status'), error=no_content.get('error'))
+            report['checks']['target_content_without_content_scope_refused'] = 'insufficient_scope'
             request = dict(selector='thread:'+thread_id, prompt='CW671 denied input must not execute', policy='queue', idempotency_key='cw671-denied-'+thread_id, expected_target=target)
             denied = tool(readonly, 'wake_environment_conversations_input_submit', request)
             assert denied.get('error') == 'insufficient_scope', dict(stage='read-only write refusal', result=denied)
@@ -108,6 +123,10 @@ def main():
             outside = tool(limited_control, 'wake_environment_conversations_input_submit', request)
             assert outside.get('error') == 'insufficient_scope', dict(stage='target refusal', result=outside)
             report['checks']['outside_target_refused'] = 'insufficient_scope'
+            other_content = grant(['observe', 'content.observe'], other_scope, 'other-target-content')
+            outside_content = tool(other_content, 'wake_environment_conversations_observe', content_request)
+            assert outside_content.get('error') == 'insufficient_scope', dict(stage='outside-target content refusal', status=outside_content.get('status'), error=outside_content.get('error'))
+            report['checks']['outside_target_content_refused'] = 'insufficient_scope'
             control = grant(['observe', 'control'], scope_target, 'stale-generation')
             stale_target = dict(target, socket_generation='stale-cw671-generation')
             stale = tool(control, 'wake_environment_conversations_input_submit', dict(request, expected_target=stale_target))
