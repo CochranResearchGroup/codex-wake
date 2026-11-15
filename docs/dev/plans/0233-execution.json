@@ -182,7 +182,7 @@
         "T5"
       ],
       "owner": "worker-native-continuation",
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "acceptance": [
         "Changing selection during a turn stages the next safe boundary without implicitly stopping work.",
@@ -205,12 +205,16 @@
         "Continuation identity/permissions/cumulative allowance preservation",
         "Focused native public continuation acceptance and causally required schemas"
       ],
-      "checkout_custody": "Worker returns both existing checkout writer leases on final handoff; primary owns serial integration and next T7/T8 use. No worktree removal; retain for exact native source integration and remaining package qualification.",
+      "checkout_custody": "Both writer leases returned; primary integration accepted; existing checkouts retained for newly ready T7 and required T8 package qualification.",
       "worker_wake_base": "0e61e8c7855fb80d011c373319ac8572760f4ef9",
-      "progress": "Worker source checks complete: public3, actual tool/authority2, ordinary8MiB TUI3, legacy provider-policy3, stable+experimental writers/Python SDK and schema consistency4 PASS. Canonical Wake usage90/2threads; missing-usage adverse unknown/null. Native39file hashes, reconstructed tree and private bundle verified. Awaiting primary custody/integration/closure; no installed/live-provider claim.",
+      "progress": "Primary independently verified39native/6Wake hashes, exact reconstructed tree/bundle,5terminalPASS jobs and actual unchanged canonical90/adverseunknown; fast-forwarded worker source. Tracker closure follows published readback.",
       "native_result_sha": "977af9d6c5bf2c5d59de1a46009ffa9a34f00b22",
       "source_manifest": "runtime/grok-native-233/t6-source-manifest.json",
-      "local_acceptance": "docs/dev/evidence/plan0233/t6-provider-continuations-acceptance.md"
+      "local_acceptance": "docs/dev/evidence/plan0233/t6-provider-continuations-acceptance.md",
+      "result_sha": "977af9d6c5bf2c5d59de1a46009ffa9a34f00b22",
+      "wake_result_sha": "9051270a9a51578a8268ee0e09fc5fb13c6af76b",
+      "wake_integrated_sha": "9051270a9a51578a8268ee0e09fc5fb13c6af76b",
+      "validation": "Public3, native tool/authority2, standard8MiB TUI3, legacy policy3, schema4+writers/SDK PASS; exact causal inputs retained; primary canonical observer90/2threads and missingusageunknown/null PASS."
     },
     {
       "key": "T7",

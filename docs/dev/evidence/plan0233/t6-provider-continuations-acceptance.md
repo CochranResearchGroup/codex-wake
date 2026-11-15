@@ -65,3 +65,10 @@ T7 owns Stop/revocation/recovery; T8 owns real sign-in/entitlement and complete 
 isolated-package qualification at UID1017. Source readiness does not establish live
 provider or deployment readiness. Parent628 stays open; primary owns custody,
 integration and closure of636. Broad review/remediation counters remain0.
+
+Primary custody and integration: verified all39 native and6 Wake changed-file
+hashes, all5 exact final terminal job receipts, tracked-clean tips, exact patch
+reconstruction and bundle digest/verification. Fast-forwarded worker Wake source
+9051270a onto the integration branch. Independently reconsumed the unchanged final
+native capture: qualified90 across2threads; existing adverse copy yields
+unknown/null/response_usage_missing. No duplicate Cargo build was started.

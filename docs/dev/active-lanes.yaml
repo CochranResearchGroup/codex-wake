@@ -14,7 +14,7 @@ lanes:
     dependencies: []
     overlaps: [P231, P234]
     updated_at: 2026-11-15
-    disposition: T1 T2 T3 T4 T5 closed; T6 delegated native continuation, worker exclusive custody of existing P233 checkouts; primary read-only until return; live and package qualification remain T8; review0 remediation0
+    disposition: T1 T2 T3 T4 T5 closed; T6 source validated and integrated, closure pending published readback; T7 next; live and package qualification remain T8; review0 remediation0
 
   - id: persistent-wakes-610
     owner: root / ecochran76

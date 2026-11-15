@@ -9820,3 +9820,14 @@ pass. Earlier fixture failures remain classified and retained. Evidence:
 [acceptance](docs/dev/evidence/plan0233/t5-mixed-workers-acceptance.md).
 T5 tracker closure follows published source readback. Parent628 remains open;
 T6 is next, review0/remediation0, no native installation or live provider calls.
+
+## 2026-11-15 | P233 T6 provider continuation acceptance
+
+Worker native977af9d6 and Wake9051270a accepted after independent exact source,
+patch/tree/bundle and terminal-receipt verification. Safe-boundary native handoff,
+portable context, original active/pending authority and cumulative90 are qualified
+through public native/UI and existing Wake accounting seams. Existing adverse
+missing usage remains unknown. Source integrated;636 closes after published
+readback,637 becomes ready. Parent628 stays open, review0/remediation0; no native
+installation or real-account qualification. Evidence:
+[T6 acceptance](docs/dev/evidence/plan0233/t6-provider-continuations-acceptance.md).
