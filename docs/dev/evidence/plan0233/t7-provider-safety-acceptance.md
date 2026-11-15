@@ -113,3 +113,11 @@ WebSocket warmup attempt remains a historical limitation; no zero-historical-
 connection or real-account-qualified claim is made. Memory disposition is
 `forbidden`: this delegated source/evidence slice does not write external program
 memory; primary retains program closeout authority.
+
+Primary acceptance: independently verified all13 native/15 Wake commit-file hashes,
+tracked-clean tips, exact patch reconstruction and bundle digest/verification,
+terminal native13 receipt and unchanged protocol/schema/SDK inputs. Fast-forwarded
+worker source6e6de81c into the integration branch. Repeated Wake auth12/catalog1/
+usage16 checks successfully. Independently reconsumed all unchanged canonical
+captures: known8 and90 remain qualified; seven adverse Stop/failure captures are
+unknown/null. No duplicate native build or real-provider effect was initiated.

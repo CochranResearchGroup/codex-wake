@@ -9831,3 +9831,14 @@ missing usage remains unknown. Source integrated;636 closes after published
 readback,637 becomes ready. Parent628 stays open, review0/remediation0; no native
 installation or real-account qualification. Evidence:
 [T6 acceptance](docs/dev/evidence/plan0233/t6-provider-continuations-acceptance.md).
+
+## 2026-11-15 | P233 T7 source acceptance
+
+Nativeabc2ce28/Wake6e6de81c accepted after primary exact source/patch/tree/bundle
+and native13 receipt verification. Repeated Wake auth12/catalog1/usage16 and all
+actual canonical captures: known8/90 and seven unknown/null adverse outcomes.
+Cold strict spending stays held without original live allowance authority;
+provider cancellation/logout is unconfirmed. T7 closes after published readback,
+T8 exact isolated package and real-account qualification next. Parent628 open,
+review0/remediation0. Evidence:
+[T7 acceptance](docs/dev/evidence/plan0233/t7-provider-safety-acceptance.md).

@@ -228,7 +228,7 @@
         "T6"
       ],
       "owner": "worker-provider-safety",
-      "state": "implemented",
+      "state": "validated",
       "tracker_state": "OPEN",
       "acceptance": [
         "Stop prevents further owned local tool scheduling and reports provider completion/usage uncertainty separately.",
@@ -251,14 +251,16 @@
         "Private shared-session revocation/readiness source handling",
         "Focused public mixed-provider failure/recovery/allowance acceptance and causal schemas"
       ],
-      "checkout_custody": "Exclusive writer custody of both existing P233 native and Wake checkouts transfers to /root/p233_native_seams at dispatch; primary read-only until returned.",
+      "checkout_custody": "Both leases returned; primary accepted source; existing checkouts retained for required T8 exact package qualification.",
       "worker_wake_base": "592c97d13b98b784a8067a26fc5c71f85e5caeac",
-      "progress": "Worker source/mock acceptance complete; primary custody/integration and issue closure pending. No installed/live provider claim.",
+      "progress": "Primary source acceptance integrated; tracker closure after published readback. Cold strict spending holds without original live authority; provider cancellation/logout remains unconfirmed.",
       "result_sha": "abc2ce28469ca57e584ef33cf71b4ad172f8bb26",
       "native_result_sha": "abc2ce28469ca57e584ef33cf71b4ad172f8bb26",
       "source_manifest": "runtime/grok-native-233/t7-source-manifest.json",
       "local_acceptance": "docs/dev/evidence/plan0233/t7-provider-safety-acceptance.md",
-      "validation": "Native public13PASS standard8MiB; actual canonical known8/mixed90 and7 adverse unknown/null; Wake auth12/catalog1/usage16PASS; Rustfmt13PASS; publicschemas/SDK unchanged; exact13file patch/tree/privatebundle verified."
+      "validation": "Primary verified13native/15Wake hashes, exact patch/tree/bundle, terminal native13PASS; independently repeated auth12/catalog1/usage16 and actual known8/mixed90 plus7unknown/null captures; protocol/schema/SDK unchanged.",
+      "wake_result_sha": "6e6de81cd7b9dff6ebb52875c4e7fabfde24037a",
+      "wake_integrated_sha": "6e6de81cd7b9dff6ebb52875c4e7fabfde24037a"
     },
     {
       "key": "T8",
