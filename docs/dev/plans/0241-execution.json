@@ -147,7 +147,7 @@
           "cleanup": "bothschedulescancelled/threadarchived/TUIgone/grantrevoked401/noticesclosedwithaudit"
         }
       ],
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "live_state": "sole_live_slot_monitor_ready",
       "result_sha": "6d5e65c37bfc2e53bfedfba77c37c5530f14f57f"
     },
@@ -207,12 +207,28 @@
       "issue": 672,
       "title": "Verify original operation continuity across connector restart",
       "blockers": [],
-      "state": "running",
+      "state": "validated",
       "worker": "connector_restart_continuity",
       "owned_paths": [],
-      "validation": [],
+      "validation": [
+        {
+          "outcome": "PASS",
+          "installed": "0.22.0.dev30",
+          "boundary": "actualinflight nativeop +connectorrestart +freshpublicMCP",
+          "same_grant": true,
+          "same_intent": true,
+          "same_operation": true,
+          "native_input_count": 1,
+          "native_preserved": "PID2082/startticks2000/endpoint/executable",
+          "unrelated_loaded_preserved": 62,
+          "reply": "RESTART_CONTINUITY_CONFIRMED",
+          "cleanup": "threadarchived/grantrevoked401/ownshells0",
+          "first_run": "INCOMPLETE startup502; knowncleanup/revocationverified separately"
+        }
+      ],
       "tracker_state": "OPEN",
-      "live_state": "preparation_only"
+      "live_state": "preparation_only",
+      "result_sha": "d8c3a647e572296fa5d71451316e12e66990f125"
     }
   ],
   "worker_worktree_cleanup": {
@@ -221,7 +237,7 @@
   },
   "live_resource_schedule": {
     "serial": true,
-    "current_worker": "connector_restart_continuity",
+    "current_worker": null,
     "next_worker": null,
     "reason": "Repeated native setup/readiness failures under parallel probes; one exact owned target per bounded run"
   },
