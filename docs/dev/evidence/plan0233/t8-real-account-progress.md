@@ -165,3 +165,29 @@ one Grok inference request, zero OpenAI requests, zero tools, 120seconds,
 no retry and no refresh, after explicit operator approval and fresh account/expiry
 and package-hash checks. No additional live request is scheduled or dispatched.
 T8 #639 and parent #628 remain OPEN; broad review/remediation counters remain0.
+
+## Header-enabled live diagnostic: stream reached; usage held
+
+The operator approved one fresh text-only request against the qualified header
+package. It exited in4.597s without HTTP426, reached a Grok stream reporting
+`grok-4.7-build`, then held on inconsistent usage. No tools, retries or refresh
+occurred. There is still no accepted completion or qualified aggregate usage;
+unknown remains null, and the held session is not replayed. The one-request
+approval is consumed. This is evidence that the request progressed beyond the
+prior version-gating failure, not completed coding or account readiness.
+
+The displayed OpenAI cyber/fallback warning is not independent Grok moderation
+evidence: the current Core `maybe_warn_on_server_model_mismatch` constructs that
+specific warning and `HighRiskCyberActivity` reason for every differing server
+model label. The Grok adapter emits the observed model as `ServerModel`, reaching
+that shared path. An existing public Grok worker test is being extended with an
+observed model alias to reproduce the false classification. Existing OpenAI
+moderation behavior must remain intact; real provider refusals remain held.
+
+The inconsistent-usage error currently omits the numeric counts needed to assess
+the provider accounting contract. A small existing API-stream test extension
+requires numeric-only diagnostic evidence while still rejecting inconsistent
+usage and omitting opaque provider data. No accounting rule is relaxed and no
+missing counts are invented. The exact provider counts were not retained by the
+current diagnostic; their relationship remains unknown. Local RED checks are
+running before production changes, with no additional live request authorized.

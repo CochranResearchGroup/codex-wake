@@ -297,7 +297,7 @@
       ],
       "checkout_custody": "Both writer leases returned; primary owns remaining real-account gate and source integration. Existing checkouts/package retained for required final qualification and causal post-review checks.",
       "worker_wake_base": "1f8fd14b33faad7e145919a6861daa5a36bc2b16",
-      "progress": "Header-enabled native b77a743f/fc9439b4 completepackage accepted:5 terminaljobs PASS/all6source+UIDhashes and28additionalinstalled/receipthashes verified; freshcensus protected13/owned0. Headerfix still unproven live; priorone-requestapproval consumed. Concrete newone-requestdiagnostic gate awaitingoperator. T8 OPEN.",
+      "progress": "Separately approved one-request probe passed priorHTTP426 barrier, streamed observedgrok-4.7-build then held inconsistentusage4.597s/no tools/retry/refresh. Core genericmodelmismatch falsely emitsOpenAIcyberreason; numericusagecounts notretained. Bounded localregressions for truthfulGrokwarning and numeric-only diagnostic REDrunning; no furtherliveauthority. T8 OPEN.",
       "native_result_sha": "b77a743f7e07edbc5e2f7c30d4e20a56ea4f3df8",
       "package_manifest": "runtime/grok-native-233/t8-version-header-package-manifest.json",
       "package_entrypoint_sha256": "fc9439b45efc5e1005911d54260b0bc47e0e7b4842ba8bfcecf07d15a0a65f74",
