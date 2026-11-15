@@ -113,3 +113,14 @@ no queue expiry field, capability or bounded Wake admission is active yet.
 The release-tag lockfile required normalization of173 local workspace versions
 from0.0.0 to0.169.0. Parsed comparison verified no dependency-pin changes.
 Following stages use --locked. No native package or service has been replaced.
+
+## Compatibility guard
+
+Native bounded enqueue must use a distinct versioned method (proposed
+thread/queue/addBounded), not merely an extra expiresAt field on legacy add:
+older native deserializers can ignore unknown fields and otherwise enqueue
+unbounded input. The legacy method remains unbounded. Wake negotiates support
+before I/O and bounded submission never falls back to legacy add. The new method
+requires original expiresAt, and read-only reconciliation reports the same queue,
+client and terminal turn identities. CLI/API/MCP share this distinction while
+keeping existing explicit unbounded operator inputs usable.
