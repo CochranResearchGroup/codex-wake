@@ -297,7 +297,7 @@
       ],
       "checkout_custody": "Both writer leases returned; primary owns remaining real-account gate and source integration. Existing checkouts/package retained for required final qualification and causal post-review checks.",
       "worker_wake_base": "1f8fd14b33faad7e145919a6861daa5a36bc2b16",
-      "progress": "Consolidatedpackage212d798546/bdc780c8 accepted:all6source+34UIDhashchecks/fivejobsPASS/freshprotected13owned0. Authprivatereadvalidwithoutrefresh. Remainingboundedrealaccountpacketprepared; no liveauthority yet. Priorunknownhistoriesheld, T8 OPEN.",
+      "progress": "Real native codingPASS4Grokresponses/4tools/3unittests/MCPecho, Wakeactualusagequalified40555cacheinclusive. Actualmetadata+boundqualification/native model-listPASS. Selectedturn rejectedbeforeinference: private driverwrongtop-levelselection; supportedconfig.inference_selection read-onlystart verified. Packetstopped,0OpenAIworkers; handoff/Stopunproved. No newsourcefix/buildneeded; T8OPEN.",
       "native_result_sha": "212d798546aabffe65129464a61905e810fed248",
       "package_manifest": "runtime/grok-native-233/t8-usage-routing-package-manifest.json",
       "package_entrypoint_sha256": "bdc780c81a0f62619b5b38037963e2f603e9b902c82211c37251bcad05ef1a8a",

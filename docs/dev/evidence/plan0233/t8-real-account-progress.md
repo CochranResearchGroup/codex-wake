@@ -293,3 +293,44 @@ remain separate from inference evidence. Prior held trees/unknown usage are
 retained; this packet creates no reset or assertion that they cost zero.
 No live request is scheduled or authorized until the operator approves the packet.
 T8 #639 and parent #628 remain OPEN with reserved review/remediation0.
+
+## Approved live packet: coding PASS, selected-turn gate held
+
+The operator approved the prepared12Grok/2OpenAI/16tool/15minute packet. Exact
+native package hashes were checked, and a new synthetic coding workspace/home
+used existing auth by reference. The native coding turn completed successfully:
+file contents were read, the negative-count bug was fixed through the native
+terminal tool, all three unittests passed, and local MCP echo returned the exact
+probe. Four local tool calls and four Grok responses were observed. Native
+`apply_patch` was requested but the agent used a terminal file edit instead;
+this proves file editing through the native tool loop, not a distinct apply_patch
+invocation. No worker or external business-data task was performed.
+
+Wake's public observer qualified all four actual response records at40555
+cache-inclusive tokens,28779 fresh and11776 cached input. These are this packet's
+known charges; earlier held histories remain unknown and are not counted as zero.
+Official authenticated model metadata supplied the actual grok-4.7 identifier,
+label and256000 context window. Only demonstrated text/streaming/terminal/file
+editing/MCP capability evidence was admitted to a bound qualification receipt,
+and an explicit default was set. Actual native model/list returned the qualified
+account/model snapshot alongside normal OpenAI models.
+
+The next selected-turn submission was rejected before inference with
+`selected account identity unavailable`. Primary diagnosed an error in the private
+qualification driver: it sent an unsupported top-level `inferenceSelection` field
+instead of the documented existing `config.inference_selection` override. The
+initial short-lived client had also disconnected before an empty session could
+materialize; its rejected submission was not retried as inference. Corrected
+read-only model/list and thread/start using the supported config override passed,
+without submitting another turn. No product source change or package rebuild is
+needed for that driver correction.
+
+The packet stopped at this failed admission as agreed. No OpenAI worker response,
+linked handoff or final Stop proof was obtained, and no inference was replayed.
+Owned qualification app-server processes exited; production daemons/profiles
+were not replaced. No credential/history copy, login retry, refresh or provider
+logout occurred. The budget receipt retains4/12 Grok responses and4/16 tools used,
+0/2 OpenAI responses, original monotonic deadline and all prior unknown usage.
+Continuation requires explicit operator direction under the remaining allocation;
+no automatic renewal/reset is scheduled. T8 and parent remain OPEN,7/8 children
+closed, broad review/remediation counters0.
