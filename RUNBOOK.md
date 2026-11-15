@@ -9842,3 +9842,14 @@ provider cancellation/logout is unconfirmed. T7 closes after published readback,
 T8 exact isolated package and real-account qualification next. Parent628 open,
 review0/remediation0. Evidence:
 [T7 acceptance](docs/dev/evidence/plan0233/t7-provider-safety-acceptance.md).
+
+## 2026-11-15 | P233 T8 isolated package accepted; real-account gate remains
+
+Native sourceabc2ce28 unchanged. Complete package entrya54f0739 and all six files
+verified in original and UID1017 copies. Supported upgrade/rollback/history,
+multiclient/reconnect/private ownership and actual failed-start recovery pass;
+installed Wake checks pass. Primary verified worker source2d8a4a39 and receipts.
+T8 remains OPEN because real account sign-in/entitlement/coding proof has not run.
+Fresh Grok status native_auth_missing; prior failed device flow requires operator
+participation before another flow. Corrected gate CLI argument/order documentation.
+No deployment, login retry or real-provider request; review0/remediation0.

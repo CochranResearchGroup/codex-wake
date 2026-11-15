@@ -39,9 +39,12 @@ authority. This packet authorizes none of those effects by itself.
 
 ## Bounded primary workflow
 
-- With operator participation and exact identity binding, use the installed Wake
-  CLI: `grok auth register ACCOUNT --label LABEL --auth-path AUTH_PATH
-  --executable OFFICIAL`, then the explicitly approved `grok auth login ACCOUNT`.
+- With operator participation and the exact official executable/auth-path binding,
+  use the installed Wake CLI: `grok auth login --executable OFFICIAL
+  --auth-path AUTH_PATH`. This command has no account positional argument.
+  After successful official sign-in creates the native store, bind that existing
+  identity with `grok auth register ACCOUNT --label LABEL --auth-path AUTH_PATH
+  --executable OFFICIAL`. Registration cannot precede a missing native store.
   Wake invokes official device auth; keep verification data private. Use sanitized
   status and the reviewed native refresh owner. Do not add API-key fallback or
   copy tokens. The private bearer command remains account/revision pinned:

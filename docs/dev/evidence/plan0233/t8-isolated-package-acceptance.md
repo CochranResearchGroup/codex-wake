@@ -113,3 +113,14 @@ installation/restart/deployment, native push to OpenAI or hosted CI occurred.
 T8 is not complete and #639 must not close from this packet. Broad review and
 bounded remediation counters remain zero. Memory disposition is forbidden:
 this delegated source/evidence slice does not write external program memory.
+
+Primary verification: all six original package and UID1017 candidate-file hashes
+match independently. Worker source six-file hashes and Git bundle verified;
+full-index zero-context patch independently reconstructs the exact Wake tree.
+All twelve job outcomes reconciled, including each required runtime success.
+Fresh UID1017 OS readback still shows the thirteen pre-existing persistent
+processes; no task-owned process was added. Local Grok auth is freshly observed
+unavailable/native_auth_missing; the real-account gate remains unexecuted. The
+installed official CLI has changed since historical T1; its current digest and
+network-isolated device-login help inspection are retained privately. No login,
+refresh, provider request or working-profile installation was initiated.
