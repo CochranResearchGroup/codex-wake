@@ -5,7 +5,7 @@
   "spec": "docs/dev/plans/0241-connector-acceptance-spec.md",
   "integration_branch": "feat/connector-acceptance",
   "base": "882aae8007e71cc2641c66a742e340e6cf007310",
-  "tip": "013e5898a0a1fc2827af0f024130dd30e2fb574a",
+  "tip": "fead4f42685269709b144eb4784311f3b054854c",
   "review_fixed_point": "882aae8007e71cc2641c66a742e340e6cf007310",
   "review_runs": 0,
   "remediation_passes": 0,
@@ -121,12 +121,26 @@
       "issue": 668,
       "title": "Verify re-open-session-live wake restoration",
       "blockers": [],
-      "state": "blocked",
-      "worker": "connector_visible_wake",
+      "state": "validated",
+      "worker": "visible_restore_completion",
       "owned_paths": [],
-      "validation": [],
-      "tracker_state": "OPEN",
-      "blocker": "Host restore bindings and global common permission policy absent; operator scope decision pending. No policy activated."
+      "validation": [
+        {
+          "outcome": "PASS recovered read-only from immutable actual run",
+          "installed": "0.22.0.dev34",
+          "boundary": "deployed HTTPS OAuth/MCP + real native TUI/new_tab due wake",
+          "same_conversation": true,
+          "same_harness_cwd": true,
+          "native_inputs_after_closure": 1,
+          "completed_reply": "CW668_VISIBLE_RESTORATION",
+          "probe_failure": "local import error after actual completed turn; original receipt preserved, separate read-only qualification; no replay",
+          "cleanup": "own schedule/tab/process/thread/grant/profile/binding cleaned; agents suppressed; monitor stopped; common policy adopted, temporary recovery authority withdrawn rev5"
+        }
+      ],
+      "tracker_state": "CLOSED",
+      "blocker": "Host restore bindings and global common permission policy absent; operator scope decision pending. No policy activated.",
+      "result_sha": "169fcb31e9189bbcf70f99ac1472309d8534befe",
+      "integration_commit": "fead4f42"
     },
     {
       "issue": 669,
@@ -237,18 +251,20 @@
   },
   "live_resource_schedule": {
     "serial": true,
-    "current_worker": "visible_restore_completion",
+    "current_worker": null,
     "next_worker": null,
     "reason": "Repeated native setup/readiness failures under parallel probes; one exact owned target per bounded run"
   },
   "owned_monitor": {
-    "unit": "cw241-acceptance-monitor-dev34.service",
-    "pid": 3077958,
+    "unit": "cw241-acceptance-monitor-dev34-trace.service",
+    "pid": 3211775,
     "prefix": "0.22.0.dev34-c3cf1d1",
     "health": "loop and managed reader verified",
     "max_seconds": 1200,
-    "cleanup_pending": true,
-    "diagnostic": false
+    "cleanup_pending": false,
+    "diagnostic": "Original observe/_codex calls logged/returned unchanged, no injected evidence",
+    "process_absent": true,
+    "termination": "Root stopped after zero pending/firing census; accepted native records preserved"
   },
   "shared_repairs": [
     {
@@ -308,8 +324,8 @@
     }
   ],
   "state": "active",
-  "remaining_gate": "Actual visible restoration acceptance and cleanup for #668; approved common-policy adoption completed",
-  "review_gate": "User requested review/TDD after ticket closure; #668 remains open",
+  "remaining_gate": "One Standards/Spec code review, then one bounded TDD remediation pass",
+  "review_gate": "All nine child tickets CLOSED; requested final review/remediation now unblocked",
   "local_presubmit": {
     "command": "PYTHONPATH=src:tests installed-dev30-Python -m unittest test_tty_inventory_batch test_sessions test_wake_session_modes test_wake_mode_runtime test_unified_session_input test_native_input_reconciliation test_external_oauth_connector test_connector_busy_policies test_recurring_schedules test_controller_schedule_auth -q",
     "tests": 64,
@@ -328,5 +344,11 @@
     "version": "0.22.0.dev34",
     "wheel_sha256": "c3cf1d17d0fd4c95557f3fba9efc5c52e19ff5cb61df47ad9e0fbc0fa2288458",
     "merged_source": "c36e29e38642ce438dc630839ead5e0343df0219"
+  },
+  "common_policy": {
+    "revision": 5,
+    "adopted": true,
+    "temporary_recovery_permission": "withdrawn; resolves approval_required",
+    "history_preserved": true
   }
 }

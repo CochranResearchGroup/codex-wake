@@ -1774,4 +1774,4 @@ PR661 deployed as dev28; original ChatGPT round-trip result now reports complete
 
 ## P241 | External connector acceptance
 
-Status: ACTIVE; operator approved host-wide common policy adoption for #668 visible restoration. Spec #663; childtickets #664–#672, eightclosed with actualdeployed evidence. Integration plan [0241](docs/dev/plans/0241-2026-11-14-connector-acceptance.md). PR673/675 repairs deployeddev30. Exactlyone finalreview/TDDremediation remains pending afterremainingticket closure.
+Status: ACTIVE final review/remediation; all nine childtickets #664–#672 closed from actual deployed acceptance, including same-recipient visible restoration. Spec #663; plan [0241](docs/dev/plans/0241-2026-11-14-connector-acceptance.md). Qualified repairs through PR680 deployeddev34. Exactlyone review/TDDremediation now unblocked.
