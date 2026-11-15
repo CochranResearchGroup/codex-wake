@@ -101,7 +101,7 @@
       "validation": [],
       "tracker_state": "OPEN",
       "result_sha": "fbc440237a254bdb59db84d58f4d4e994e7c0907",
-      "blocker": "Registration refused session_owner_unverified; full exact 5s/30s observation succeeded, locator differential inconclusive; causal investigation pending, no unsafe narrowing fix",
+      "blocker": null,
       "live_state": "sole_live_slot_retest_after_qualified_repair"
     },
     {
@@ -201,14 +201,14 @@
     "reason": "Repeated native setup/readiness failures under parallel probes; one exact owned target per bounded run"
   },
   "owned_monitor": {
-    "unit": "cw241-acceptance-monitor-dev29.service",
-    "pid": 2186230,
-    "prefix": "0.22.0.dev29-ab59956",
+    "unit": "cw241-acceptance-monitor-dev30.service",
+    "pid": 2318910,
+    "prefix": "0.22.0.dev30-c7d7279",
     "preexisting_records": 0,
     "health": "loop; managed reader verified",
     "max_seconds": 1200,
     "cleanup_pending": true,
-    "previous_unit": "cw241-acceptance-monitor.service stopped"
+    "previous_unit": "dev29 monitor stopped, cancelled own record only"
   },
   "shared_repairs": [
     {
@@ -220,6 +220,15 @@
       "wheel_sha256": "ab599569ede436531160a54b4a806a49ae5aefae4f5b3e4339870f979b8aab56",
       "checks": "22 UID1017 + handoff regression1;339payloadmembers; real45panes3sFAIL\u2192.11sPASS",
       "scope": "batch process census; no cache/deadline/ambiguity relaxation"
+    },
+    {
+      "pr": 675,
+      "source": "2906926c",
+      "state": "deployed",
+      "version": "0.22.0.dev30",
+      "wheel_sha256": "c7d7279a6a57c0f66045eba8833adabb10eba35c1f3d50680dc6a792d5b420a3",
+      "checks": "36source+36UID1017 PASS;339payloads equal mergedmain/install",
+      "cause": "Captured real native loadedmetadata TimeoutError5.395s with fasttmux; shared15s fullobservation budget, no partial/ambiguous acceptance"
     }
   ]
 }
