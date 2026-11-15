@@ -1,6 +1,20 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: native-expiry-695
+    owner: root / ecochran76
+    objective: Enforce original absolute expiry at native queue admission
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/695]
+    plan: docs/dev/plans/0248-2026-11-15-native-queue-expiry.md
+    branch: feat/native-expiry-695
+    target: origin/main
+    plan_state: ACTIVE
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-15
+    disposition: Clock authority selection pending; preserve native provider lane and working daemon
+
   - id: native-queue-694
     owner: root / ecochran76
     objective: Qualify native busy queue cancellation and expiry capability boundary

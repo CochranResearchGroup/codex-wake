@@ -1825,3 +1825,11 @@ No live DST/provider/clock-auth claim.
 Status COMPLETE (qualification). Issue #694; plan [0247](docs/dev/plans/0247-2026-11-15-native-queue-boundary.md).
 Cancellation and control dequeue passed under actual busy execution. Native expiry
 remains unqualified; enforcement tracked in #695. Evidence0247. No native upgrade.
+
+
+## P248 | Native bounded queue expiry
+
+Status ACTIVE. Issue #695; plan [0248](docs/dev/plans/0248-2026-11-15-native-queue-expiry.md).
+Persist original expiry and outcomes; enforce at core admission using qualified
+host time. Unknown time holds. Preserve unbounded operator inputs and keep Wake
+bounded busy queue refused until separate-UID native qualification passes.
