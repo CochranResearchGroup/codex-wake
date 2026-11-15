@@ -26,13 +26,19 @@ def decode(result):
 
 
 async def main(options):
+    directory=Path.home()/'.local/state/codex-wake/connector-background-continuity'
+    output=options.receipt or directory/('result-'+secrets.token_hex(8)+'.json')
+    output.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
+    # Reserve custody before discovery, connection, or any native effect. Only
+    # this invocation may update its checkpoints; prior receipts stay intact.
+    with output.open('x'):
+        pass
+    output.chmod(0o600)
     config=json.loads((Path.home()/'.config/codex-wake/external-connector.json').read_text())
     root=Path(config['wake_root']);issuer=config['issuer'];endpoint=locate_shared_endpoint(timeout=10)
     authority=OAuthAuthority(root/'external-oauth/authority.sqlite',issuer=issuer,resource=issuer+'/mcp')
-    output=Path.home()/'.local/state/codex-wake/connector-background-continuity/result.json'
-    output.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
     grant=None;thread=None;tmux=None;tui_pid=None
-    receipt=dict(ticket=666,status='running',boundary='deployed HTTPS OAuth/MCP')
+    receipt=dict(ticket=666,status='running',boundary='deployed HTTPS OAuth/MCP',receipt_path=str(output))
     from websockets.sync.client import unix_connect
     connection_context=unix_connect(endpoint[7:],open_timeout=10,close_timeout=1,compression=None,max_size=32*1024*1024)
     connection=connection_context.__enter__()
@@ -156,4 +162,5 @@ async def main(options):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--reuse-owned-thread')
+    parser.add_argument('--receipt',type=Path,help='Fresh per-run receipt; existing paths are refused')
     asyncio.run(main(parser.parse_args()))
