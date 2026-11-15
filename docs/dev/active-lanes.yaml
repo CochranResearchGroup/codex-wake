@@ -8,12 +8,12 @@ lanes:
     plan: docs/dev/plans/0241-2026-11-14-connector-acceptance.md
     branch: feat/connector-acceptance
     target: origin/main
-    plan_state: IN_PROGRESS
-    custody_state: ACTIVE
+    plan_state: BLOCKED
+    custody_state: CHECKPOINTED
     dependencies: []
     overlaps: []
     updated_at: 2026-11-14
-    disposition: Root owns duplicate acceptance; bounded one-ticket workers under execution ledger
+    disposition: Eightclosed;668requiresroot-widepermissiondecision; remotecheckpoint retained
 
   - id: native-input-reconciliation-0240
     owner: root / ecochran76

@@ -226,7 +226,7 @@
           "first_run": "INCOMPLETE startup502; knowncleanup/revocationverified separately"
         }
       ],
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "live_state": "preparation_only",
       "result_sha": "d8c3a647e572296fa5d71451316e12e66990f125"
     }
@@ -248,8 +248,10 @@
     "preexisting_records": 0,
     "health": "loop; managed reader verified",
     "max_seconds": 1200,
-    "cleanup_pending": true,
-    "previous_unit": "dev29 monitor stopped, cancelled own record only"
+    "cleanup_pending": false,
+    "previous_unit": "dev29 monitor stopped, cancelled own record only",
+    "process_absent": true,
+    "termination": "Verified journal RuntimeMaxSec reached21:37:50Central; no pending/firing records; accepted submitted proof retained"
   },
   "shared_repairs": [
     {
@@ -271,5 +273,21 @@
       "checks": "36source+36UID1017 PASS;339payloads equal mergedmain/install",
       "cause": "Captured real native loadedmetadata TimeoutError5.395s with fasttmux; shared15s fullobservation budget, no partial/ambiguous acceptance"
     }
-  ]
+  ],
+  "state": "blocked",
+  "remaining_gate": "Operator decision: adopt root-wide restrictive common permission policy for visible restore, or preserve permissions and leave #668 open",
+  "review_gate": "User requested review/TDD after ticket closure; #668 remains open",
+  "local_presubmit": {
+    "command": "PYTHONPATH=src:tests installed-dev30-Python -m unittest test_tty_inventory_batch test_sessions test_wake_session_modes test_wake_mode_runtime test_unified_session_input test_native_input_reconciliation test_external_oauth_connector test_connector_busy_policies test_recurring_schedules test_controller_schedule_auth -q",
+    "tests": 64,
+    "seconds": 36.168,
+    "outcome": "PASS",
+    "environment": "Linux Python3.12 sharedkernel; hosted3.11 matrix notrun; no paidCI"
+  },
+  "worker_configuration": {
+    "requested_model": "inherited default",
+    "effective_model": "not reported by collaboration runtime",
+    "nested_delegation": false,
+    "one_ticket_per_worker": true
+  }
 }

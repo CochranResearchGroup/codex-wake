@@ -1771,3 +1771,7 @@ PR658/659 integrated; dev27 deployed; real ChatGPT greeting queued to exact nati
 
 Status: DONE. Local ticket CW-0240. Plan: [Native input reconciliation](docs/dev/plans/0240-2026-11-14-native-input-result-reconciliation.md).
 PR661 deployed as dev28; original ChatGPT round-trip result now reports completed with exact answer.
+
+## P241 | External connector acceptance
+
+Status: BLOCKED on operator scope decision for #668 visible restoration. Spec #663; childtickets #664–#672, eightclosed with actualdeployed evidence. Integration plan [0241](docs/dev/plans/0241-2026-11-14-connector-acceptance.md). PR673/675 repairs deployeddev30. Exactlyone finalreview/TDDremediation remains pending afterremainingticket closure.
