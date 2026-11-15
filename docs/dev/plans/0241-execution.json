@@ -112,7 +112,7 @@
           "cleanup": "schedulecancelled/grantrevoked/threadarchived/ownTUIandPTYclientabsent"
         }
       ],
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "result_sha": "8b510c4949d3c991515da489adae66c949a77a67",
       "blocker": null,
       "live_state": "sole_live_slot_retest_after_qualified_repair"
@@ -132,12 +132,24 @@
       "issue": 669,
       "title": "Verify background wake routing with and without a live tab",
       "blockers": [],
-      "state": "running",
+      "state": "validated",
       "worker": "connector_background_wakes",
       "owned_paths": [],
-      "validation": [],
+      "validation": [
+        {
+          "outcome": "PASS",
+          "installed": "0.22.0.dev30",
+          "boundary": "actualarmed duewakes publicOAuth/MCP",
+          "same_conversation": true,
+          "live": "existing_tab,1input,correlatedfinal",
+          "closed": "background,1input,correlatedfinal,0attachments",
+          "total_inputs": 2,
+          "cleanup": "bothschedulescancelled/threadarchived/TUIgone/grantrevoked401/noticesclosedwithaudit"
+        }
+      ],
       "tracker_state": "OPEN",
-      "live_state": "sole_live_slot_monitor_ready"
+      "live_state": "sole_live_slot_monitor_ready",
+      "result_sha": "6d5e65c37bfc2e53bfedfba77c37c5530f14f57f"
     },
     {
       "issue": 670,
@@ -209,8 +221,8 @@
   },
   "live_resource_schedule": {
     "serial": true,
-    "current_worker": "connector_background_wakes",
-    "next_worker": "connector_restart_continuity",
+    "current_worker": "connector_restart_continuity",
+    "next_worker": null,
     "reason": "Repeated native setup/readiness failures under parallel probes; one exact owned target per bounded run"
   },
   "owned_monitor": {
