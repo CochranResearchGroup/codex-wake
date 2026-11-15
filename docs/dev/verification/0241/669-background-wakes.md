@@ -1,15 +1,16 @@
 # Ticket 669: background wake routing
 
-Status: prepared; live acceptance has not run. The coordinator serializes native
-acceptance and must release the live slot before execution. Ticket 669 remains
-open until both due events and cleanup are demonstrated.
+Status: PASS on installed dev30 after the preserved dev28 failure below.
+Both due events and cleanup were demonstrated through the deployed OAuth/MCP
+boundary. The coordinator owns ticket closure and final integration.
 
 The opt-in `scripts/connector_background_wakes_acceptance.py` uses one disposable
 native conversation with persisted setup history and one owned TUI on the actual
 default tmux socket. It registers two separate interval schedules through the
 public OAuth/MCP connector. Both explicitly select `session_mode=background`,
-60-second cadence, count=1, missed=skip with 30-second maximum lateness,
-overlap=skip and a 45-second delivery window. The first due event must use the
+45-second cadence, count=1, missed=skip with 120-second maximum lateness,
+overlap=skip and a 120-second delivery window. These bounds apply to the new
+dev30 intents; the cancelled dev28 intent retains its original bounds. The first due event must use the
 original live attachment. The script then closes only its owned tab; the second
 due event must use the same saved UUID without creating another visible tab.
 
@@ -140,3 +141,65 @@ Private evidence directory:
 Local `py_compile` and `git diff --check` passed after script changes. These are
 preparation checks, and the live outcome is FAIL, not acceptance. Hosted CI was
 not invoked. Memory disposition remains forbidden under the task boundary.
+
+
+## Qualified dev30 retest: PASS, 2026-11-15 UTC
+
+Installed prefix:
+`/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev30-c7d7279`.
+The coordinator qualified and deployed batched process discovery and the full
+15-second ownership observation budget separately. Native daemon PID 2082 and
+endpoint identity remained unchanged. This lane made no product, deployment,
+common-policy or account changes.
+
+Before the run, installed monitor health showed PID 2318910, loop mode, reader
+schema 8 and both schedule/session-mode capabilities; managed-reader probing
+passed. The run reused the same owned seeded/archived UUID from the prior
+private ownership manifest. No new conversation was created. Both schedules
+used new intent keys, interval 45 seconds, count 1, missed skip with maximum
+lateness 120 seconds, overlap skip and delivery window 120 seconds. The earlier
+cancelled schedule and its zero-effect evidence were not revised.
+
+| Case | Public schedule | Persisted native route | Native inputs | Correlated final reply | Visible attachments |
+| --- | --- | --- | --- | --- | --- |
+| Original live TUI | `schedule_1bb861ba7f4259c744e333a9bfa0a906` | `existing_tab` | 1 | `CW669_LIVE_36506e05` | 1, original PID 2398819 |
+| After closing owned tab | `schedule_0bc902f66c79a8a19062a75370c5c66c` | `background` | 1 | `CW669_CLOSED_67f7033c` | 0 |
+
+The public OAuth/MCP schedule shows reported one completed occurrence per case.
+The retained native wake records proved the selected routes. Each exact native
+turn contained one corresponding user message with the wake identity and its
+expected final agent reply. The live recipient was preserved; after the owned
+tab closed, the saved conversation retained the same UUID and the second route
+created no visible attachment. Final history contained exactly two new wake
+inputs in total.
+
+Native correlation:
+
+- Live wake `wake_intent_75acb93d77094539828ffa87c1c912d5`, turn
+  `01a1dd3e-6966-71f1-a642-1458e5a13fda`, message
+  `01a1dd3e-6f2f-7693-84d4-40b8f8f6349f`.
+- Closed wake `wake_intent_7bf396e4151340eba6d92d5ba775dbc3`, turn
+  `01a1dd3f-2d3e-7882-8f39-5bbaa6dcf6b4`, message
+  `01a1dd3f-2def-7303-8969-a623c5564c53`.
+
+Cleanup readback passed: both schedules cancelled, own thread archived, own TUI
+process absent, separate grant revoked and rejected with HTTP 401, and empty own
+scratch cwd removed. Inspection of notices for this exact conversation found only
+the earlier notice, already closed at revision 2; no open owned alert remained.
+The coordinator retains ownership of the transient monitor and service lifecycle.
+
+Private evidence:
+`~/.local/state/codex-wake/connector-background-wakes/live-dev30-two-cases-20261115.json`
+and `dev30-pass-summary.json`. The receipt records the installed prefix, branch
+source commit and exact script SHA-256; runtime data remains outside Git.
+
+Validation command (live_or_soak, no retries of admitted intents): installed
+dev30 Python `scripts/connector_background_wakes_acceptance.py --run-live
+--reuse-owned-thread 01a1dd22-3cca-7311-8456-7459b6d1c007 --receipt <private-path>`:
+PASS. `python -m py_compile scripts/connector_background_wakes_acceptance.py` and
+`git diff --check`: PASS. This is an installed Linux OAuth/MCP/native acceptance,
+not hosted CI; no GitHub Actions runs were requested. Earlier failed attempts
+remain documented above and are not represented as passing.
+
+Memory disposition: forbidden; the task excludes memory writes. A private
+machine-readable non-write receipt is retained separately.

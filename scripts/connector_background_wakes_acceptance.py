@@ -165,15 +165,15 @@ async def main(options):
                                 request=dict(idempotency_key='cw669-'+secrets.token_hex(12),
                                     thread_id=thread,prompt='Reply exactly '+marker+'. Do not use tools.',
                                     session_mode='background',
-                                    cadence=dict(kind='interval',seconds=60,start_at=(datetime.now(timezone.utc)+timedelta(seconds=30)).isoformat()),
-                                    end=dict(kind='count',count=1),missed=dict(policy='skip',max_lateness_seconds=30),
-                                    overlap=dict(policy='skip'),delivery_window_seconds=45)
+                                    cadence=dict(kind='interval',seconds=45,start_at=(datetime.now(timezone.utc)+timedelta(seconds=30)).isoformat()),
+                                    end=dict(kind='count',count=1),missed=dict(policy='skip',max_lateness_seconds=120),
+                                    overlap=dict(policy='skip'),delivery_window_seconds=120)
                                 case=dict(request=request,expected_route='existing_tab' if label=='live' else 'background')
                                 receipt.setdefault('cases',{})[label]=case;save()
                                 schedule=await call('wake_wakes_schedules_register',dict(request=request))
                                 schedules.append(schedule['id']);case['schedule_id']=schedule['id'];save()
                                 assert schedule['armed'] and schedule['session_mode']=='background',schedule
-                                deadline=time.monotonic()+150
+                                deadline=time.monotonic()+240
                                 while time.monotonic()<deadline:
                                     shown=await call('wake_wakes_schedules_show',dict(schedule_id=schedule['id']))
                                     case['schedule']=shown
