@@ -145,7 +145,7 @@
       ],
       "owner": "primary",
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "acceptance": [
         "An OpenAI parent can explicitly select a Grok worker and vice versa through normal Codex worker controls.",
         "Workers inherit the exact inference selection unless overridden; provider-only Grok requests use the validated account default.",
@@ -166,12 +166,14 @@
         "Canonical selection and cumulative usage attribution",
         "Focused public worker/auth/usage checks"
       ],
-      "progress": "Source acceptance integrated; tracker closure pending exact published source readback.",
+      "progress": "Source acceptance published and #634 closed; no live/package claim.",
       "progress_evidence": "docs/dev/evidence/plan0233/t5-mixed-workers-acceptance.md",
       "result_sha": "45169bbc996d8baf1da130f2f11ac9f09d05ba2f",
       "native_result_sha": "45169bbc996d8baf1da130f2f11ac9f09d05ba2f",
       "source_manifest": "runtime/grok-native-233/t5-source-manifest.json",
-      "validation": "Native worker5PASS; actual canonical mixed trees qualified45 each and missing-child-usage unknown/None; shared-budget/role12PASS; schemas/SDK generation+4consistencyPASS; auth9/catalog1/usage13PASS; exact13file patch/tree/bundle custody verified."
+      "validation": "Native worker5PASS; actual canonical mixed trees qualified45 each and missing-child-usage unknown/None; shared-budget/role12PASS; schemas/SDK generation+4consistencyPASS; auth9/catalog1/usage13PASS; exact13file patch/tree/bundle custody verified.",
+      "integrated_sha": "efa78d04fe0e7bd64ff4973b1511d7a1d9cf5386",
+      "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/634#issuecomment-6888547031"
     },
     {
       "key": "T6",
@@ -179,8 +181,8 @@
       "blocked_by": [
         "T5"
       ],
-      "owner": "pending",
-      "state": "pending",
+      "owner": "worker-native-continuation",
+      "state": "running",
       "tracker_state": "OPEN",
       "acceptance": [
         "Changing selection during a turn stages the next safe boundary without implicitly stopping work.",
@@ -192,7 +194,18 @@
       "id": 6394426731,
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/636",
       "parent_link": "native_sub_issue",
-      "dependencies_published": "native"
+      "dependencies_published": "native",
+      "worker": "/root/p233_native_seams",
+      "worker_branch": "feat/p233-provider-continuations",
+      "worker_base": "45169bbc996d8baf1da130f2f11ac9f09d05ba2f",
+      "worker_worktree": "/home/ecochran76/workspace.local/.worktrees/codex/p233-native-provider-t2",
+      "worker_wake_branch": "feat/p233-provider-continuations",
+      "owned_paths": [
+        "Native safe-boundary selection staging and linked portable continuation",
+        "Continuation identity/permissions/cumulative allowance preservation",
+        "Focused native public continuation acceptance and causally required schemas"
+      ],
+      "checkout_custody": "Exclusive writer custody of both existing P233 native and Wake checkouts granted to /root/p233_native_seams after primary dispatch; primary read-only until T6 return."
     },
     {
       "key": "T7",
