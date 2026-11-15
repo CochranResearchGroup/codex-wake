@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import secrets
 import subprocess
+import sys
 import time
 
 
@@ -43,7 +44,9 @@ async def run(options):
     root = Path(config['wake_root']); issuer = config['issuer'].rstrip('/')
     endpoint = locate_shared_endpoint(timeout=10)
     authority = OAuthAuthority(root/'external-oauth/authority.sqlite', issuer=issuer, resource=issuer+'/mcp')
-    receipt = dict(ticket=672, verdict='INCOMPLETE', boundary='deployed HTTPS OAuth/MCP', checks={}, cleanup={})
+    receipt = dict(ticket=672, verdict='INCOMPLETE', boundary='deployed HTTPS OAuth/MCP', checks={}, cleanup={},
+                   python_executable=sys.executable, installed_auth_module=__import__('codex_wake.controller_auth',fromlist=['__file__']).__file__)
+    receipt['script_source_commit'] = subprocess.run(['git','-C',str(Path(__file__).resolve().parent.parent),'rev-parse','HEAD'],check=True,capture_output=True,text=True).stdout.strip()
     thread = grant = token = None
     def save(name='result.json'):
         path = options.output/name
@@ -76,6 +79,13 @@ async def run(options):
     connection.send(json.dumps(dict(method='initialized')))
     async def read():
         return (await asyncio.to_thread(native,'thread/read',dict(threadId=thread,includeTurns=True)))['thread']
+    def loaded():
+        identifiers = []; cursor = None
+        for _ in range(100):
+            page = native('thread/loaded/list',dict(limit=100,cursor=cursor))
+            identifiers.extend(page['data']); cursor = page.get('nextCursor')
+            if not cursor: return identifiers
+        raise AssertionError('loaded-session census exceeded 10000 entries')
     @asynccontextmanager
     async def client():
         async with httpx.AsyncClient(headers={'Authorization':'Bearer '+token},timeout=70) as transport:
@@ -93,7 +103,7 @@ async def run(options):
         return [item for turn in history['turns'] for item in turn.get('items',[]) if item.get('type')=='userMessage' and item.get('clientId')==identifier]
     try:
         receipt['native_before'] = native_identity(); receipt['connector_pid_before'] = connector_pid()
-        before = native('thread/loaded/list', {})['data']; receipt['unrelated_loaded_before'] = before
+        before = loaded(); receipt['unrelated_loaded_before'] = before
         created = native('thread/start',dict(cwd=str(options.output),ephemeral=False,approvalPolicy='never',sandbox='danger-full-access',developerInstructions='Disposable restart acceptance. Execute only the specifically requested local sleep command. Do not access other files, services, agents, configuration or schedules.'))
         thread = created['thread']['id']; receipt['thread_id'] = thread; save()
         native('thread/name/set',dict(threadId=thread,name='CW672-restart-continuity'))
@@ -158,7 +168,7 @@ async def run(options):
             history = await read(); assert len(inputs(history,identifier))==1
             receipt['checks'].update(native_input_count=1, correlated_final_reply=True,native_daemon_preserved=True)
             receipt['answer'] = final['answer']; receipt['execution'] = final['execution']
-        after = native('thread/loaded/list',{})['data']; receipt['unrelated_loaded_after'] = after
+        after = loaded(); receipt['unrelated_loaded_after'] = after
         assert set(before).issubset(after), 'unrelated loaded session disappeared'
         receipt['checks']['unrelated_loaded_sessions_preserved'] = True
         receipt['verdict'] = 'PASS'
