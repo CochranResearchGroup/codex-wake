@@ -212,3 +212,28 @@ terminal result. The next accounting regression should exercise public
 harness. The temporary private-State numeric diagnostic test is not the desired
 maintained public seam. Existing held histories and no-further-live-call boundary
 remain unchanged.
+
+## Demonstrated regressions; focused correction validation pending
+
+The previous exact RED job compiled successfully, then reproduced both public
+Grok worker cases emitting the false OpenAI cyber classification. It also
+reproduced missing numeric diagnostics at a temporary internal seam; that new
+internal test was removed in favor of a maintained public `GrokClient` stream
+regression using xAI's independent documented32/9/94/135 example. The public
+regression compiled and failed because no canonical completion was produced.
+All original stream-unit coverage remains retained.
+
+Current source normalizes separately reported reasoning only when explicit
+nonnegative fields reconcile with the reported total. Already-inclusive output
+is retained without double charging; cached input remains a bounded subset of
+full input. Bad totals, overflow and invalid details still hold. Errors include
+numeric counts only, excluding arbitrary provider metadata. A Grok-only model
+mismatch warning reports the requested and observed labels without inventing a
+moderation reason; the existing OpenAI branch remains unchanged.
+
+Focused GREEN is pending: public Grok client cases, existing stream-unit cases,
+existing mixed-worker cases with documented reasoning/cache counts in canonical
+history, and existing OpenAI safety-routing regressions. New disposable canonical
+captures will feed the unchanged Wake usage observer after success; a missing
+child usage record must remain unknown/null. No package or live readiness is
+claimed before those results. No new paid request, login, refresh or replay.
