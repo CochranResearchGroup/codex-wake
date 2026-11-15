@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "plan": "0241",
+  "spec_issue": "https://github.com/CochranResearchGroup/codex-wake/issues/663",
+  "spec": "docs/dev/plans/0241-connector-acceptance-spec.md",
+  "integration_branch": "feat/connector-acceptance",
+  "base": "882aae8007e71cc2641c66a742e340e6cf007310",
+  "tip": "882aae8007e71cc2641c66a742e340e6cf007310",
+  "review_fixed_point": "882aae8007e71cc2641c66a742e340e6cf007310",
+  "review_runs": 0,
+  "remediation_passes": 0,
+  "wip_limit": 3,
+  "owner": "ecochran76",
+  "tickets": [
+    {
+      "issue": 664,
+      "title": "Prove duplicate input protection",
+      "blockers": [],
+      "state": "running",
+      "worker": "root",
+      "owned_paths": [],
+      "validation": [],
+      "tracker_state": "OPEN"
+    },
+    {
+      "issue": 665,
+      "title": "Qualify all four busy-input policies",
+      "blockers": [],
+      "state": "running",
+      "worker": "connector_busy_policies",
+      "owned_paths": [],
+      "validation": [],
+      "tracker_state": "OPEN"
+    },
+    {
+      "issue": 666,
+      "title": "Prove conversation continuity after tab closure",
+      "blockers": [],
+      "state": "pending",
+      "worker": null,
+      "owned_paths": [],
+      "validation": [],
+      "tracker_state": "OPEN"
+    },
+    {
+      "issue": 667,
+      "title": "Verify this-session-only wake lifetime",
+      "blockers": [],
+      "state": "pending",
+      "worker": null,
+      "owned_paths": [],
+      "validation": [],
+      "tracker_state": "OPEN"
+    },
+    {
+      "issue": 668,
+      "title": "Verify re-open-session-live wake restoration",
+      "blockers": [],
+      "state": "pending",
+      "worker": null,
+      "owned_paths": [],
+      "validation": [],
+      "tracker_state": "OPEN"
+    },
+    {
+      "issue": 669,
+      "title": "Verify background wake routing with and without a live tab",
+      "blockers": [],
+      "state": "pending",
+      "worker": null,
+      "owned_paths": [],
+      "validation": [],
+      "tracker_state": "OPEN"
+    },
+    {
+      "issue": 670,
+      "title": "Demonstrate structured slash discovery and result retrieval",
+      "blockers": [],
+      "state": "pending",
+      "worker": null,
+      "owned_paths": [],
+      "validation": [],
+      "tracker_state": "OPEN"
+    },
+    {
+      "issue": 671,
+      "title": "Verify read-only and target-restricted connector grants",
+      "blockers": [],
+      "state": "running",
+      "worker": "connector_permissions",
+      "owned_paths": [],
+      "validation": [],
+      "tracker_state": "OPEN"
+    },
+    {
+      "issue": 672,
+      "title": "Verify original operation continuity across connector restart",
+      "blockers": [],
+      "state": "pending",
+      "worker": null,
+      "owned_paths": [],
+      "validation": [],
+      "tracker_state": "OPEN"
+    }
+  ]
+}
