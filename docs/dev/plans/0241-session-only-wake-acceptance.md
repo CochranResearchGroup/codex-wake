@@ -96,3 +96,28 @@ version returned success. This sequential difference does not prove an endpoint
 bug or exclude intermittent observation failure. Further diagnosis must retain
 full source availability and candidate ambiguity evidence, without a fake owner.
 Cleanup again archived the same thread and removed only its owned session.
+
+## Dev29 public retry and actual binder failure capture
+
+The qualified dev29 process-scan batching repair did not complete #667. Running
+the opt-in public acceptance with the dev29 installed Python on the same owned
+conversation again proved its real attachment and missing-mode refusal, then
+received `session_owner_unverified` on complete registration. Private receipt:
+`session-only-664d786b.json`. No schedule was admitted; its grant was revoked,
+owned session removed, and conversation archived.
+
+A subsequent private recording wrapper ran the real binder on copied arguments
+in an AnyIO worker thread, using the connector's full environment and home working
+directory. It returned the original inventory unchanged and stopped on the first
+refusal. Receipt `session-only-thread-diagnostic-aad9fa08.json` captured the actual
+failing observation: elapsed 5.395 seconds, `complete=false`, no target row,
+app-server source unavailable with `SharedSourceError`, and tmux source available.
+The real reader's `loaded_threads` exception was
+`shared metadata read failed: TimeoutError`. This proves the immediate failing
+boundary was full native metadata collection; tmux collection succeeded. It does
+not prove why the native metadata read exceeded its bound or select a repair.
+The child loaded before a proposed lock-comparison edit, so this particular
+capture did **not** hold the recurring-schedules lock. No lock-cause claim follows.
+No grants, schedules, model turns, new conversations or source changes were made
+by the recording diagnostic. The same recipient was archived and its session
+removed again. The integration owner retains repair and deployment authority.
