@@ -7,14 +7,14 @@ lanes:
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/628]
     plan: docs/dev/plans/0233-grok-in-codex-spec.md
     branch: feat/grok-native-provider
-    worker_branches: [feat/p233-provider-continuations]
+    worker_branches: [feat/p233-provider-safety]
     target: origin/main
     plan_state: IN_PROGRESS
     custody_state: CHECKPOINTED
     dependencies: []
     overlaps: [P231, P234]
     updated_at: 2026-11-15
-    disposition: T1 T2 T3 T4 T5 closed; T6 source validated and integrated, closure pending published readback; T7 next; live and package qualification remain T8; review0 remediation0
+    disposition: T1 T2 T3 T4 T5 T6 closed; T7 delegated source Stop/revocation/recovery, worker exclusive custody of both existing P233 checkouts; primary read-only until return; T8 qualification remains; review0 remediation0
 
   - id: persistent-wakes-610
     owner: root / ecochran76

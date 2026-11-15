@@ -183,7 +183,7 @@
       ],
       "owner": "worker-native-continuation",
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "acceptance": [
         "Changing selection during a turn stages the next safe boundary without implicitly stopping work.",
         "Cross-provider or account changes create an automatic linked continuation carrying bounded portable context and completed tool results.",
@@ -207,14 +207,16 @@
       ],
       "checkout_custody": "Both writer leases returned; primary integration accepted; existing checkouts retained for newly ready T7 and required T8 package qualification.",
       "worker_wake_base": "0e61e8c7855fb80d011c373319ac8572760f4ef9",
-      "progress": "Primary independently verified39native/6Wake hashes, exact reconstructed tree/bundle,5terminalPASS jobs and actual unchanged canonical90/adverseunknown; fast-forwarded worker source. Tracker closure follows published readback.",
+      "progress": "Primary source acceptance published; #636 closed. No installed or real-account qualification claim.",
       "native_result_sha": "977af9d6c5bf2c5d59de1a46009ffa9a34f00b22",
       "source_manifest": "runtime/grok-native-233/t6-source-manifest.json",
       "local_acceptance": "docs/dev/evidence/plan0233/t6-provider-continuations-acceptance.md",
       "result_sha": "977af9d6c5bf2c5d59de1a46009ffa9a34f00b22",
       "wake_result_sha": "9051270a9a51578a8268ee0e09fc5fb13c6af76b",
       "wake_integrated_sha": "9051270a9a51578a8268ee0e09fc5fb13c6af76b",
-      "validation": "Public3, native tool/authority2, standard8MiB TUI3, legacy policy3, schema4+writers/SDK PASS; exact causal inputs retained; primary canonical observer90/2threads and missingusageunknown/null PASS."
+      "validation": "Public3, native tool/authority2, standard8MiB TUI3, legacy policy3, schema4+writers/SDK PASS; exact causal inputs retained; primary canonical observer90/2threads and missingusageunknown/null PASS.",
+      "integrated_sha": "016d144f7b79cea583a1f055829b79757e483b4d",
+      "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/636#issuecomment-6892852698"
     },
     {
       "key": "T7",
@@ -225,8 +227,8 @@
         "T5",
         "T6"
       ],
-      "owner": "pending",
-      "state": "pending",
+      "owner": "worker-provider-safety",
+      "state": "running",
       "tracker_state": "OPEN",
       "acceptance": [
         "Stop prevents further owned local tool scheduling and reports provider completion/usage uncertainty separately.",
@@ -238,7 +240,18 @@
       "id": 6394427294,
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/637",
       "parent_link": "native_sub_issue",
-      "dependencies_published": "native"
+      "dependencies_published": "native",
+      "worker": "/root/p233_native_seams",
+      "worker_branch": "feat/p233-provider-safety",
+      "worker_base": "977af9d6c5bf2c5d59de1a46009ffa9a34f00b22",
+      "worker_wake_branch": "feat/p233-provider-safety",
+      "worker_worktree": "/home/ecochran76/workspace.local/.worktrees/codex/p233-native-provider-t2",
+      "owned_paths": [
+        "Native owned Stop/revocation/recovery and unknown-completion behavior",
+        "Private shared-session revocation/readiness source handling",
+        "Focused public mixed-provider failure/recovery/allowance acceptance and causal schemas"
+      ],
+      "checkout_custody": "Exclusive writer custody of both existing P233 native and Wake checkouts transfers to /root/p233_native_seams at dispatch; primary read-only until returned."
     },
     {
       "key": "T8",
