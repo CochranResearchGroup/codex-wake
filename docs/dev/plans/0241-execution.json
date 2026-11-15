@@ -87,7 +87,7 @@
           "cleanup": "own threadarchived/grantrevoked/socketgone/processgone"
         }
       ],
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "result_sha": "1de611fa91a6a17114b2d0ea82920f45c5b880a7",
       "integration_commit": "f0c3e165"
     },
@@ -101,7 +101,7 @@
       "validation": [],
       "tracker_state": "OPEN",
       "result_sha": "fbc440237a254bdb59db84d58f4d4e994e7c0907",
-      "blocker": "Public session_owner_unverified despite exact observed native attachment; read-only causal diagnostic active"
+      "blocker": "Registration refused session_owner_unverified; full exact 5s/30s observation succeeded, locator differential inconclusive; causal investigation pending, no unsafe narrowing fix"
     },
     {
       "issue": 668,
@@ -123,7 +123,7 @@
       "owned_paths": [],
       "validation": [],
       "tracker_state": "OPEN",
-      "live_state": "preparation_only"
+      "live_state": "sole_live_slot_monitor_ready"
     },
     {
       "issue": 670,
@@ -195,8 +195,17 @@
   },
   "live_resource_schedule": {
     "serial": true,
-    "current_worker": "connector_background_continuity",
-    "next_worker": "connector_session_only_wake",
+    "current_worker": "connector_background_wakes",
+    "next_worker": "connector_restart_continuity",
     "reason": "Repeated native setup/readiness failures under parallel probes; one exact owned target per bounded run"
+  },
+  "owned_monitor": {
+    "unit": "cw241-acceptance-monitor.service",
+    "pid": 2023716,
+    "prefix": "0.22.0.dev28-1fb9180",
+    "preexisting_records": 0,
+    "health": "loop; managed reader verified",
+    "max_seconds": 1200,
+    "cleanup_pending": true
   }
 }
