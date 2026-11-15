@@ -297,18 +297,19 @@
       ],
       "checkout_custody": "Both writer leases returned; primary owns remaining real-account gate and source integration. Existing checkouts/package retained for required final qualification and causal post-review checks.",
       "worker_wake_base": "1f8fd14b33faad7e145919a6861daa5a36bc2b16",
-      "progress": "FalseGrok/OpenAIwarning publicRED2cases confirmed; publicGrokClient usagecontract RED confirmed againstofficial32/9/94/135 example. MinimaltruthfulGrokbranch and explicitreasoning/cache normalization GREENjob212527 running, with canonicalcapture/OpenAIregressions. No package/liveacceptanceyet or additionalpaidcalls. T8 OPEN.",
+      "progress": "Consolidatednative212d798546 validated20focusedchecks, actualnative->Wakecanonicalusage285/405cacheinclusive withchildrecords; bothmissingchildcopiesunknownNone. Exactsourcecustodyverified; existingworker ownsONEcausalcompletepackage/UID1017qualification. Realinference/tools/billingunqualified; no furtherliveauthority. T8 OPEN.",
       "native_result_sha": "b77a743f7e07edbc5e2f7c30d4e20a56ea4f3df8",
       "package_manifest": "runtime/grok-native-233/t8-version-header-package-manifest.json",
       "package_entrypoint_sha256": "fc9439b45efc5e1005911d54260b0bc47e0e7b4842ba8bfcecf07d15a0a65f74",
       "local_acceptance": "docs/dev/evidence/plan0233/t8-isolated-package-acceptance.md",
       "primary_gate": "docs/dev/evidence/plan0233/t8-real-account-gate.md",
       "validation": "Complete5exec+metadata/current4firstpartybuild PASS1048.585s; UID1017 upgrade/rollback/history/multiclient63.880s, failed-start repair/rollback64.439s, saved-history14.222s, private-owner7.793s PASS; installed auth/catalog13+usage16 PASS8.016s; all336 module hashes match; installed candidate+rollback all6filehashes verified; owned0/preexisting13 preserved.",
-      "package_state": "version_header_package_validated_isolated_uid1017_live_pending",
+      "package_state": "usage_routing_source_validated_package_pending",
       "wake_result_sha": "2d8a4a390063d5b42fff7cc0c571c5bc92fb5421",
       "live_progress": "docs/dev/evidence/plan0233/t8-real-account-progress.md",
       "diagnostic_source_manifest": "runtime/grok-native-233/t8-source-manifest.json",
-      "version_header_source_manifest": "runtime/grok-native-233/t8-version-header-source-manifest.json"
+      "version_header_source_manifest": "runtime/grok-native-233/t8-version-header-source-manifest.json",
+      "usage_routing_source_manifest": "runtime/grok-native-233/t8-usage-routing-source-manifest.json"
     }
   ],
   "initial_ready": [

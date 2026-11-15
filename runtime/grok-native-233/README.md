@@ -69,3 +69,11 @@ remains a separate primary gate; #639 is not closed by package qualification.
 See `docs/dev/evidence/plan0233/t8-isolated-package-acceptance.md` and
 `t8-real-account-gate.md`. No T8 Rust/public schema change or working installation
 is included, and broad review/remediation counters remain zero.
+
+T8 incremental source corrections apply after the T7 native source in this order:
+`t8-http-diagnostic.patch`, `t8-version-header.patch`, then `t8-usage-routing.patch`.
+Each adjacent source manifest pins the exact prerequisite commit, resulting tree
+and file hashes. Apply the full-index zero-context patches with
+`git apply --unidiff-zero`. Source correction acceptance does not establish a
+qualified installed package or real-provider readiness; consult the exact T8
+package manifest and live evidence separately.

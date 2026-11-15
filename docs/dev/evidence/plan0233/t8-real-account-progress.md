@@ -237,3 +237,27 @@ history, and existing OpenAI safety-routing regressions. New disposable canonica
 captures will feed the unchanged Wake usage observer after success; a missing
 child usage record must remain unknown/null. No package or live readiness is
 claimed before those results. No new paid request, login, refresh or replay.
+
+## Consolidated usage/warning source accepted
+
+Native `212d798546aabffe65129464a61905e810fed248`, tree
+`0ec65313faf6a60f74149da89e85be7f7a5ebb6f`, contains the four-file correction.
+Exact source hashes, reconstructible patch and private bundle digest are in
+`runtime/grok-native-233/t8-usage-routing-source-manifest.json`. Tested source
+fingerprints match the committed files. Protocol/app-server/SDK schemas are
+unchanged, so no generation is required.
+
+The focused GREEN job passed5 public client checks,4 existing stream checks,
+and11 Core checks including unchanged OpenAI safety routing,1043.295s total.
+Test execution was0.85s,0.00s and3.500s respectively; compilation dominated.
+Actual native captures joined through Wake's public usage observer qualify285
+cache-inclusive tokens for Grok→OpenAI and405 for Grok→Grok, with child-owned
+records present. Removing child numeric usage from copies makes both observations
+unknown/null with `response_usage_missing`. Original captures remain retained.
+This verifies accounting across the native/Wake boundary, not real-provider
+inference, tools or billing. Historical live unknown totals remain unknown.
+
+One complete package build and isolated UID1017 runtime qualification is now
+assigned to the existing worker for these consolidated changes. Earlier complete
+packages/rollback are preserved. No further live request, login, refresh or replay
+is authorized, and T8/parent remain OPEN with reserved review/remediation0.
