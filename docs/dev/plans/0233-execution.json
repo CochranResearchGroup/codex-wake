@@ -297,7 +297,7 @@
       ],
       "checkout_custody": "Both writer leases returned; primary owns remaining real-account gate and source integration. Existing checkouts/package retained for required final qualification and causal post-review checks.",
       "worker_wake_base": "1f8fd14b33faad7e145919a6861daa5a36bc2b16",
-      "progress": "Official sign-in and model listing succeeded. Live probe exposed official0644 nonsecret lock incompatibility: public CLI regression RED then auth12/catalog1 GREEN; real private no-refresh bearer read valid. Second native inference attempt outcome unknown, tree held/no replay/no tools. Local HTTP-status diagnostic pending; T8 remains OPEN; changed Wake wheel requires causal auth requalification.",
+      "progress": "Sign-in/model listing succeed; real inference outcome unknown/held, no replay. Official lock0644 auth fix a8a9e0c6 passed installed wheel336 hashes/auth13+usage16. Native HTTP diagnostic df4a89bbd7 validated RED then GREEN4; exact patch reconstructs source tree. Existing worker owns causal complete package/UID1017 requalification only. T8 still OPEN, no additional live dispatch.",
       "native_result_sha": "abc2ce28469ca57e584ef33cf71b4ad172f8bb26",
       "package_manifest": "runtime/grok-native-233/t8-package-manifest.json",
       "package_entrypoint_sha256": "a54f0739611354fcdd535f5a6a391197c4c0fe92615ade9f4bfd6bb725713792",
@@ -306,7 +306,8 @@
       "validation": "Complete5exec+metadata/current4firstpartybuild PASS1048.585s; UID1017 upgrade/rollback/history/multiclient63.880s, failed-start repair/rollback64.439s, saved-history14.222s, private-owner7.793s PASS; installed auth/catalog13+usage16 PASS8.016s; all336 module hashes match; installed candidate+rollback all6filehashes verified; owned0/preexisting13 preserved.",
       "package_state": "validated_isolated_uid1017",
       "wake_result_sha": "2d8a4a390063d5b42fff7cc0c571c5bc92fb5421",
-      "live_progress": "docs/dev/evidence/plan0233/t8-real-account-progress.md"
+      "live_progress": "docs/dev/evidence/plan0233/t8-real-account-progress.md",
+      "diagnostic_source_manifest": "runtime/grok-native-233/t8-source-manifest.json"
     }
   ],
   "initial_ready": [

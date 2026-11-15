@@ -42,3 +42,29 @@ profile installation, restart, deployment, provider logout or automatic login re
 
 Private execution receipts are under the existing p233-t8 state directory;
 raw synthetic histories and process/job identifiers remain workstation-local.
+
+## Diagnostic source accepted; changed package pending
+
+Native commit `df4a89bbd7df49691df280674130e3f5e8eedc7e` retains numeric HTTP
+status for generic HTTP failures without provider bodies, headers, URLs or token
+material. Unknown outcome and no automatic replay remain explicit. Local RED
+compiled successfully and failed the missing-status assertion; GREEN passed all
+four focused Grok client cases in 32.688s including compilation, 0.20s execution.
+The exact patch reconstructs native tree
+`bf1976b51b6f5a270696d4a9eb509eaad3463dce`; source hashes and private bundle digest
+are retained in `runtime/grok-native-233/t8-source-manifest.json`.
+
+The Wake auth fix was built from `a8a9e0c65cc7ab1c456ec787484b0467921eb8f1` into
+wheel SHA256 `5d94731b6e5d00d8b69e41db12ca88f2b090996c1c546c4bc323922bf7d0ddc9`.
+Installed under the existing isolated UID1017 prefix, all 336 module/resource
+files match that exact wheel. Installed auth/catalog13 PASS7.253s and usage16
+PASS1.057s. Initial installer invocation failed due to an inaccessible working
+checkout; checks against the still-old installation correctly failed and are
+retained. Corrected installation used the same declared environment, offline,
+from an accessible directory with config discovery disabled. No working-profile
+installation occurred.
+
+The existing worker owns one causal complete-package rebuild and UID1017
+runtime requalification using existing fixtures, preserving the prior immutable
+package and rollback. No further provider request or replay is scheduled.
+These local checks qualify the diagnostic change, not Grok inference readiness.
