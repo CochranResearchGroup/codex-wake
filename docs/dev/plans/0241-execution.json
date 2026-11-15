@@ -16,12 +16,22 @@
       "issue": 664,
       "title": "Prove duplicate input protection",
       "blockers": [],
-      "state": "running",
+      "state": "validated",
       "worker": "root",
       "owned_paths": [
         "scripts/connector_duplicate_acceptance.py"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "command": "installed dev28 Python scripts/connector_duplicate_acceptance.py",
+          "outcome": "PASS",
+          "native_inputs": 1,
+          "same_operation": true,
+          "conflict": "idempotency_conflict",
+          "result": "completed",
+          "cleanup": "archived thread; revoked own grant"
+        }
+      ],
       "tracker_state": "OPEN"
     },
     {
