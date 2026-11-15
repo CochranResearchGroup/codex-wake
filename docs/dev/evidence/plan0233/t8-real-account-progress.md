@@ -191,3 +191,24 @@ usage and omitting opaque provider data. No accounting rule is relaxed and no
 missing counts are invented. The exact provider counts were not retained by the
 current diagnostic; their relationship remains unknown. Local RED checks are
 running before production changes, with no additional live request authorized.
+
+## Offline accounting contract evidence
+
+The [official xAI Chat Completions reference](https://docs.x.ai/developers/rest-api-reference/inference/chat-completions)
+contains a successful example with prompt32, completion9, reasoning94 and
+reported total135; cached6 is a subset of prompt32. The current adapter rejects
+this documented example because it checks32+9 against135 without accounting for
+separately reported reasoning. This supplies an independent expected result for
+a public native-stream regression without another paid probe. A corresponding
+canonical representation would retain input32 (including cached6), output103
+(including reasoning94), total135. Missing, negative, overflowing or otherwise
+unreconciled counts must continue to hold; the reported total must reconcile to
+explicit observed fields, not an invented residual. The actual previous live
+usage numbers remain unknown, so this does not prove that precise live cause.
+
+Current Cargo job remains in progress; native sources stay frozen until its
+terminal result. The next accounting regression should exercise public
+`GrokClient` stream events using the documented example, keeping the existing
+harness. The temporary private-State numeric diagnostic test is not the desired
+maintained public seam. Existing held histories and no-further-live-call boundary
+remain unchanged.
