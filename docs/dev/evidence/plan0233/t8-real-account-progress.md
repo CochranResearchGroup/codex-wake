@@ -137,3 +137,31 @@ local header construction, not the live HTTP426 hypothesis.
 The existing worker owns one new complete-package build and required UID1017
 qualification, with the prior packages and rollback preserved. No additional
 live request, retry, login or refresh is authorized. T8 remains OPEN.
+
+## Header-enabled complete package accepted; live gate remains pending
+
+The complete package at native `b77a743f7e` is qualified under isolated UID1017.
+Entrypoint SHA256 is
+`fc9439b45efc5e1005911d54260b0bc47e0e7b4842ba8bfcecf07d15a0a65f74`;
+content digest is
+`cdd772c6ace5f248452530b1ad3454d0abb3c956eaa25da112b74e9340715174`.
+Exact inventory and job/receipt hashes are retained in
+`runtime/grok-native-233/t8-version-header-package-manifest.json`.
+
+One complete build passed881.851s. UID1017 upgrade/history/multiclient/reconnect/
+rollback passed107.393s; failed-start repair/rollback108.029s; saved-history20.362s;
+private ownership/refusal8.257s. Primary independently verified all six source
+and isolated package hashes, 28 additional installed-package/receipt hashes,
+and all five terminal jobs with their receipt digests. A fresh OS census showed
+the original13 protected persistent processes and no owned leftovers. Prior
+packages and complete rollback remain preserved; worker writer leases returned.
+The unchanged Wake runtime's installed336 hashes/auth13+usage16 acceptance is
+reused, rather than repeated.
+
+This acceptance does not establish live HTTP426 resolution. The one-request
+live diagnostic authorization has been consumed, with its held session retained.
+A concrete fresh text-only diagnostic is prepared against this exact package:
+one Grok inference request, zero OpenAI requests, zero tools, 120seconds,
+no retry and no refresh, after explicit operator approval and fresh account/expiry
+and package-hash checks. No additional live request is scheduled or dispatched.
+T8 #639 and parent #628 remain OPEN; broad review/remediation counters remain0.
