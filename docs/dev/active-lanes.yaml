@@ -8,12 +8,12 @@ lanes:
     plan: docs/dev/plans/0241-2026-11-14-connector-acceptance.md
     branch: feat/connector-acceptance
     target: origin/main
-    plan_state: BLOCKED
+    plan_state: ACTIVE
     custody_state: ACTIVE
     dependencies: []
     overlaps: []
     updated_at: 2026-11-14
-    disposition: Eightclosed;668requiresroot-widepermissiondecision; remotecheckpoint retained
+    disposition: Eight closed; approved common policy adopted; real visible restore diagnosis active
 
   - id: native-input-reconciliation-0240
     owner: root / ecochran76
