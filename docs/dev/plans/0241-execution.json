@@ -38,14 +38,32 @@
       "issue": 665,
       "title": "Qualify all four busy-input policies",
       "blockers": [],
-      "state": "running",
+      "state": "validated",
       "worker": "connector_busy_policies",
       "owned_paths": [
-        "scripts/connector_busy_policies_acceptance.py"
+        "scripts/connector_busy_policies.py",
+        "tests/test_connector_busy_policies.py",
+        "docs/dev/verification/connector_busy_policies.md"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "outcome": "PASS",
+          "boundary": "deployed OAuth/MCP",
+          "policies": [
+            "reject",
+            "queue",
+            "steer",
+            "interrupt_then_submit"
+          ],
+          "correlated_answers": true,
+          "stale_turn": "focused public-submit seam regression",
+          "cleanup": "own thread archived/grant revoked/zero owned sleep shells"
+        }
+      ],
       "tracker_state": "OPEN",
-      "worker_branch": "test/connector-busy-policies"
+      "worker_branch": "test/connector-busy-policies",
+      "result_sha": "d9b36fcce5522fcb3fa50e740c49180971d1bb05",
+      "integration_commit": "b8965671"
     },
     {
       "issue": 666,
@@ -61,8 +79,8 @@
       "issue": 667,
       "title": "Verify this-session-only wake lifetime",
       "blockers": [],
-      "state": "pending",
-      "worker": null,
+      "state": "running",
+      "worker": "connector_session_only_wake",
       "owned_paths": [],
       "validation": [],
       "tracker_state": "OPEN"
@@ -118,7 +136,7 @@
           "stale_diagnostic": "daemon_unavailable; intended generation guard regressions2PASS"
         }
       ],
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "worker_branch": "feat/connector-permissions",
       "result_sha": "44ffd501b9db13a25f20df30facba5ce036c299c",
       "integration_commits": [
