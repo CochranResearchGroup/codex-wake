@@ -1,0 +1,9 @@
+{
+  "state": "incomplete_not_qualified",
+  "base": "d32063f96c2dff1dc96af839b3952abb6acfeda4",
+  "source_commit": "1d3ab7898146487a4653af29933e0c552a7de173",
+  "patch_sha256": "4f4580ac68bb1ac471938145d23188d271f3a1027c515a761dd520d2b1d3313c",
+  "implemented": "bounded persistence and canceled/expired/admitted terminal selection",
+  "validation": "10 queue persistence tests PASS; native admission and live qualification pending",
+  "working_installation_authorized": false
+}

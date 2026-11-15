@@ -93,3 +93,23 @@ The first compile attempt could not locate cargo in the Cargo Signal process
 PATH; retry uses its absolute installed executable. The first source compile on
 0.167 demonstrated the missing methods but was invalidated as release evidence.
 The identical state behavior test is rerun on the pinned0.169 tag before green.
+
+## Implementation checkpoint
+
+Clock reader process added in native_queue_clock.py, using an explicit absolute
+Stable Time configuration with no plain-NTP fallback. Missing-config process
+contract failed before implementation and passed afterward; existing native clock
+validation5 tests pass. Real service read returned qualified finite bounds.
+
+Native0.169 persistence now carries original immutable expires_at and terminal
+canceled/expired/admitted outcomes with exact admitted turn ID. Immediate SQLite
+transactions select one winner across connections and prevent terminal replay;
+selection compares the original payload and expiry. Public queue persistence
+selection10 tests passed after observed red cycles. This is storage proof, not
+native deadline enforcement. Current patch in patches/codex/0248-native-expiry.patch
+is explicitly incomplete and not qualified. Core guard red is compiling next;
+no queue expiry field, capability or bounded Wake admission is active yet.
+
+The release-tag lockfile required normalization of173 local workspace versions
+from0.0.0 to0.169.0. Parsed comparison verified no dependency-pin changes.
+Following stages use --locked. No native package or service has been replaced.
