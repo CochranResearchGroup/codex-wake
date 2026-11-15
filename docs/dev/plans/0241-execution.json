@@ -5,10 +5,10 @@
   "spec": "docs/dev/plans/0241-connector-acceptance-spec.md",
   "integration_branch": "feat/connector-acceptance",
   "base": "882aae8007e71cc2641c66a742e340e6cf007310",
-  "tip": "fead4f42685269709b144eb4784311f3b054854c",
+  "tip": "cb9d1eaf1b94fb3cd02f2bacb962727ac8f3ace7",
   "review_fixed_point": "882aae8007e71cc2641c66a742e340e6cf007310",
-  "review_runs": 0,
-  "remediation_passes": 0,
+  "review_runs": 1,
+  "remediation_passes": 1,
   "wip_limit": 3,
   "owner": "ecochran76",
   "tickets": [
@@ -323,15 +323,17 @@
       "cause": "tmux creation acknowledged before frontend attachment; bounded original-intent reconciliation, no relaunch/deadline extension"
     }
   ],
-  "state": "active",
-  "remaining_gate": "One Standards/Spec code review, then one bounded TDD remediation pass",
-  "review_gate": "All nine child tickets CLOSED; requested final review/remediation now unblocked",
+  "state": "complete",
+  "remaining_gate": null,
+  "review_gate": "Completed once, then bounded TDD remediation once; no blockers remain",
   "local_presubmit": {
-    "command": "PYTHONPATH=src:tests installed-dev30-Python -m unittest test_tty_inventory_batch test_sessions test_wake_session_modes test_wake_mode_runtime test_unified_session_input test_native_input_reconciliation test_external_oauth_connector test_connector_busy_policies test_recurring_schedules test_controller_schedule_auth -q",
-    "tests": 64,
-    "seconds": 36.168,
+    "command": "PYTHONPATH=src:tests installed-dev34-Python -m unittest -q [18 named modules in private final-presubmit log]",
+    "tier": "selected presubmit",
+    "tests": 107,
+    "seconds": 43.533,
     "outcome": "PASS",
-    "environment": "Linux Python3.12 sharedkernel; hosted3.11 matrix notrun; no paidCI"
+    "environment": "Linux Python3.12 shared kernel; hosted3.11 matrix and comprehensive suite notrun; no paidCI",
+    "other_checks": "pinnedruff0.14.2 F821/F822/F823, compileall, policywiring, diffcheck PASS"
   },
   "worker_configuration": {
     "requested_model": "inherited default",
@@ -350,5 +352,27 @@
     "adopted": true,
     "temporary_recovery_permission": "withdrawn; resolves approval_required",
     "history_preserved": true
+  },
+  "review_frozen_tip": "fe449f35c1b812a0d674c7ed3a13dc832a0434e6",
+  "review_report": "docs/dev/evidence/0241-final-review.md",
+  "final_review": {
+    "standards": {
+      "resolved_blocking": 1,
+      "nonblocking_backlog": 1
+    },
+    "spec": {
+      "resolved_blocking": 2
+    },
+    "broad_review_runs": 1,
+    "bounded_remediation_passes": 1,
+    "receipt_regression": "red unsupported per-run receipt contract -> green existingpathrefused prior bytespreserved beforeliveconfig",
+    "live_read_isolation": "PASS followup4grantsrevoked queue0 config/operatorgrantsunchanged",
+    "existing_chatgpt_readback": "PASS freshUItoolactivity and actualcompleted/owner_observed/round-trip confirmed; rawRPCnotexposed"
+  },
+  "publication": {
+    "pr": 676,
+    "state": "review ready",
+    "native_product": "deployeddev34 exactmergedmainc36e29e3",
+    "acceptance_artifacts": "published integration branch; no provider rerun for documentation"
   }
 }
