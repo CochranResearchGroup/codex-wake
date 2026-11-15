@@ -242,9 +242,9 @@
     "reason": "Repeated native setup/readiness failures under parallel probes; one exact owned target per bounded run"
   },
   "owned_monitor": {
-    "unit": "cw241-acceptance-monitor-dev32.service",
-    "pid": 2967598,
-    "prefix": "0.22.0.dev32-3bdc3a8",
+    "unit": "cw241-acceptance-monitor-dev33.service",
+    "pid": 3019902,
+    "prefix": "0.22.0.dev33-68d3ef0",
     "health": "loop and managed reader verified",
     "max_seconds": 1200,
     "cleanup_pending": true,
@@ -287,6 +287,15 @@
       "version": "0.22.0.dev32",
       "checks": "36 source+36 UID1017 PASS;349package members parity",
       "cause": "Saved exact recipient excluded by loaded-only selector after last frontend disconnects; complete absence now observable, ambiguity refused"
+    },
+    {
+      "pr": 679,
+      "source": "85d03617",
+      "merged_main": "4e414089",
+      "state": "deployed",
+      "version": "0.22.0.dev33",
+      "checks": "37 source+37 UID1017 PASS;349package members parity",
+      "cause": "Guest-clock samples validated against trusted authority; now uses authoritative owner clock uniformly"
     }
   ],
   "state": "active",
@@ -307,8 +316,8 @@
   },
   "scope_extension": "Operator approved host-wide common-policy adoption; supported revision1 activated, existing named defaults preserved, exact disposable recovery grant only.",
   "installed": {
-    "version": "0.22.0.dev32",
-    "wheel_sha256": "3bdc3a86f4a71589b50e9d34d7989af85048ff5db3dc5f0ef1a391ed9fccd98e",
-    "merged_source": "ad01c65164aa5ff0c328ba6f4a980c9b466efb1d"
+    "version": "0.22.0.dev33",
+    "wheel_sha256": "68d3ef01737a615db29712c40596e6d9832bc04bc5b0653d3b3a0a26153480e8",
+    "merged_source": "4e41408979e0e4fe70b4d89310d85351695aa127"
   }
 }
