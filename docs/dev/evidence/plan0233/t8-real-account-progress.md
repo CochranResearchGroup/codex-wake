@@ -116,3 +116,24 @@ to require an explicit reviewed wire-compatibility version and a distinct
 `codex-wake-native` client identifier. The adapter must not claim to execute
 the official Grok CLI or inherit ambient OpenAI headers. Local RED is pending;
 no production header change or additional live request has been made.
+
+## Version header source accepted; package qualification pending
+
+Native `b77a743f7e07edbc5e2f7c30d4e20a56ea4f3df8` adds an explicit reviewed
+Grok Build wire-compatibility profile (`1.0.77`) and the distinct
+`codex-wake-native` client identifier. Codex product version/User-Agent remains
+unchanged, and ambient provider headers are still excluded. This profile matches
+the pinned official auth client used in this qualification; it is not a claim
+that Codex runs the official Grok CLI. Profile changes require renewed protocol,
+package and real-account qualification.
+
+The existing native request/continuation test failed before the fix because the
+version header was absent (three other cases passed). With the fix, all four
+focused client cases passed in 20.469s including compilation, 0.21s execution.
+Exact source patch/tree/file hashes and bundle digest are retained in
+`runtime/grok-native-233/t8-version-header-source-manifest.json`. This proves
+local header construction, not the live HTTP426 hypothesis.
+
+The existing worker owns one new complete-package build and required UID1017
+qualification, with the prior packages and rollback preserved. No additional
+live request, retry, login or refresh is authorized. T8 remains OPEN.

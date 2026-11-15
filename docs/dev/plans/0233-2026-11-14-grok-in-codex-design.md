@@ -423,3 +423,13 @@ charges in canonical history. A fully observed `session_budget_exceeded` outcome
 can retain its known charge subject to the existing response/usage-record checks.
 Source mock acceptance does not confirm provider-side cancellation/logout, real
 entitlement, package installation or live-account recovery; those remain T8 gates.
+
+T8 wire-profile correction: a separately approved one-request native diagnostic
+returned HTTP426. Official sampler revision `2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8`
+uses `x-grok-client-version` for proxy version gating. The native adapter now
+constructs this header from its explicit reviewed `1.0.77` wire-compatibility
+profile and identifies itself as `codex-wake-native`; its Codex product version
+and User-Agent remain unchanged. Ambient OpenAI/provider headers remain excluded.
+The profile is a reviewed protocol dependency, not readiness evidence or a claim
+to execute the official CLI. Header regression passes locally; exact package and
+real-account qualification remain required before claiming live interoperability.
