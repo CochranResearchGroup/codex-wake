@@ -1,105 +1,107 @@
 # Visible wake restoration: #668
 
-Status: **acceptance incomplete; keep issue open**. Plan 0241 / issue #663
-owns the contract. This bounded lane starts from source
-`882aae8007e71cc2641c66a742e340e6cf007310` and changes only an opt-in
-probe plus this evidence/proposal document.
+**Acceptance passed from retained live evidence and a separate read-only
+qualification.** The final probe process itself failed on a local Python import
+error after the actual delivery completed. Its original receipt remains
+unchanged; the qualification does not relabel that failed process as passing.
+Plan 0241 / issue #663 owns the contract.
 
-## Observed boundary
+## Actual accepted outcome
 
-The probe used the installed `0.22.0.dev28-1fb9180` Python and deployed
-protected HTTPS OAuth/MCP endpoint. Three disposable setup attempts failed
-before public authorization or schedule registration. Attempt 1 reached a real
-remote Codex TUI folder-trust prompt, but no native metadata-matched attachment
-was verified. Attempts 2 and 3 failed on native `thread/read` during setup
-(shared reader, then direct native request). These are failed setup observations,
-not due-wake refusals or proof of visible restoration. No fourth fresh attempt
-was made. The final script adds explicit opt-in, unique session names, preserved
-receipt paths, stage reporting and cancellation cleanup; those final changes
-were checked locally but were not rerun live.
+The sixth bounded due event used installed `0.22.0.dev34-c3cf1d1`, deployed from
+PR #680 / main `c36e29e3`, through the protected HTTPS OAuth/MCP connector. The
+recipient was a third disposable conversation with a unique synthetic name.
+The experiment restored that exact recipient UUID; it did not substitute a
+new conversation at delivery time. Each recipient had one real setup turn and
+saved history before scheduling.
 
-Private contemporaneous receipts and logs are in the user-scoped
-`connector-acceptance-spec` state directory: `visible-wake-attempt1.json`,
-`visible-wake-attempt2.json`, `visible-wake-live.json`, and
-`visible-wake-probe{,2,3}.log`. The early receipts did not retain thread IDs;
-there is no reconstructed identity claim. Each reports own session absent and
-own thread archived. All attempts stopped before grant/schedule creation.
-Final terminal inventory contained only the existing `default` session.
-No operator terminal, native daemon, account authentication or permission policy
-was changed. No restoration config was written.
+The persisted request explicitly selected `reopen_live`, interval 30 seconds
+starting 60 seconds later, count one, skip missed occurrences with maximum
+lateness 120 seconds, skip overlap, and a 120 second delivery window. A missing
+mode was explicitly refused. Common-policy context revision 3 and the
+`existing_tab`, `new_tab` routes were persisted separately from scheduling
+policy. The coordinator owned common-policy adoption and temporary recovery
+authority; the disposable OAuth grant addressed only the selected recipient.
 
-## Installed configuration gate
+The real original recipient window closed before the due time. A separate
+owned keeper retained its uniquely named default-socket tmux container. The
+scheduled restore owner created a new visible window, restoring the same UUID
+with its verified native executable and scratch working directory. The original
+TUI PID was 3213979; the restored PID was 3242081. A complete native/terminal
+snapshot before cleanup showed exactly one metadata-matched attachment in
+`@153` / `%153`, with the expected cwd. The resume journal recorded `resumed`,
+one effect, and that same process generation. The profile executable matched
+the previously discovered native executable; no permission overrides were
+added to the real remote TUI command.
 
-Readback of the connector's configured controller root found:
+Exactly one added native user input contained both the retained wake ID and
+its native submission ID. Its turn completed and returned exactly
+`CW668_VISIBLE_RESTORATION`. There were two native user inputs in total: one
+setup input and one wake input. The schedule recorded one completed occurrence.
+These are independent native result and identity checks, rather than an
+inference from admission, terminal visibility, or message count alone.
 
-- `wake-live-restore.json`: absent.
-- `controller-tabs.json`: absent.
-- Managed inventory: zero agents; `self_enrollment`, empty selected list.
-- Common permission policy: inactive; no policy/routing/adoption files.
+The coordinator's temporary monitor recorded exceptions and actual inventory
+returns around existing owners, then returned/rethrew the original values. It
+supplied no fake readiness, identity, policy, clock, result or acknowledgment.
+This recording instrumentation is a material difference from the normal
+unwrapped monitor and is retained in the evidence.
 
-`LiveWakeRestorer._configuration` needs an exact conversation binding to a
-host-owned named profile and managed agent. `_restore` verifies saved native cwd,
-profile cwd and managed root agree. `AgentResume._permission` additionally
-requires active common policy. Adding only disposable binding/profile files
-cannot satisfy that gate. Reattaching a frontend directly is useful setup but
-is not a substitute for qualifying the scheduled restore owner.
+## Evidence and failed attempts
 
-## Reviewable restrictive adoption proposal (not applied)
+Private artifacts are under
+`~/.local/state/codex-wake/connector-visible-668/`, outside Git:
 
-This is a proposed input to the existing `PermissionStore.configure` owner,
-not a hand-written policy journal. Replace `OWN_THREAD_UUID` with the verified
-disposable conversation and set its exact profile binding separately:
+- `live-dev34-trace.json`: original process-failure receipt; includes the
+  accepted wake, completed occurrence, one added native input, real restored
+  screen, full relevant pre-cleanup target row, raw owned pane fields, and
+  automatic schedule/tab/thread/grant cleanup.
+- `live-dev34-trace-qualified.json`: separate read-only qualification, bound
+  to the original receipt's SHA-256; contains archived native history,
+  completed final turn, before/after attachments and resumed journal.
+- `live-dev34-correlation.json`: exact wake/submission IDs matched to the
+  single added native user input and its completed turn/reply.
+- `final-cleanup.json`: supported inventory suppression and exact-hash
+  removal of temporary binding/profile, retaining private evidence copies.
+- `live-dev31.json`, `live-dev31-diagnostic.json`, `live-dev32.json`,
+  `live-dev33.json`, `live-dev34.json`: five earlier actual due failures.
+  Their native delivery did not occur; their cleanup and journals remain
+  attributable. The older d7b1be68 preparation failures also remain in Git
+  history and their original private receipts.
 
-```json
-{
-  "version": 1,
-  "global": {"default": "deny"},
-  "sessions": {
-    "OWN_THREAD_UUID": {
-      "actions": {
-        "session.inspect": {"decision": "allow", "relationships": ["self"], "targets": ["OWN_THREAD_UUID"]},
-        "wake.existing_tab": {"decision": "allow", "relationships": ["self"], "targets": ["OWN_THREAD_UUID"]},
-        "wake.new_tab": {"decision": "allow", "relationships": ["self"], "targets": ["OWN_THREAD_UUID"]},
-        "resume.self": {"decision": "allow", "relationships": ["self"], "targets": ["OWN_THREAD_UUID"]}
-      }
-    }
-  }
-}
-```
+Observed product repairs were owned, locally regression-tested, qualified as
+exact packages under UID 1017, merged and deployed by the coordinator: trusted
+controller schedule admission, exact saved-but-unloaded inventory observation,
+a consistent authoritative observation clock, and bounded same-intent
+post-launch readiness reconciliation. The failed starting/uncertain journals
+were never manually cleared or replayed. After exact owned cleanup, their
+managed enrollments were suppressed through the supported owner before the
+coordinator authorized another disposable recipient.
 
-The supported owner requires an operator principal and expected revision zero;
-it creates `session-permissions/policy.json` and `adopted.json` with revision,
-issuer and history. No OAuth grant is broadened by this proposed document.
-However, activation selects the common resolver for the entire controller root.
-The restrictive default would deny other root consumers, and merely selecting
-one session does not isolate adoption to that profile. Existing unrelated
-controller consumers must be inventoried and their explicit policy decision
-reviewed before activation. A default-permissive policy is not proposed.
-Removing adoption afterward is not a demonstrated rollback mechanism.
+Manual diagnostics were setup evidence only. The first omitted tmux's `-c`
+and could not qualify attachment ownership; its unavailable observation is not
+product evidence. Corrected diagnostics mirrored the actual new-window argv,
+cwd and trusted clock and established real readiness without a model turn.
+The final successful due used the unchanged dev34 package.
 
-Other required host-owned setup would be an exclusive-created private profile
-file (`version`, `profiles`, optional exact `callers`), a matching
-`wake-live-restore.json` binding (`version:1`, `bindings[UUID]` containing
-`profiles`, `managed_agent_id`, `profile`), and qualified terminal-server
-configuration when creating an absent session. These must come from actual
-native metadata/attachment observation and the real trusted executable/home;
-no fake ready observation, copied credential or fabricated identity is valid.
-Any temporary file must have recorded ownership/hash and be removed only if
-unchanged. This proposal supplies no activation authority.
+## Validation and cleanup
 
-## Validation and remaining criteria
+Focused checks passed: `python -m py_compile
+scripts/connector_visible_wake_acceptance.py`, installed dev34 Python
+`scripts/connector_visible_wake_acceptance.py --help`, and `git diff --check`.
+After the final provider run, the probe's misplaced local `observe` import was
+fixed and checked locally. The fixed script was not rerun against the provider;
+actual acceptance comes from the separately qualified retained evidence. No
+hosted GitHub CI was started, per the operator's cost policy.
 
-Focused local checks: `python -m py_compile
-scripts/connector_visible_wake_acceptance.py` passed; installed Python
-`--help` passed. No hosted GitHub Actions were used under the CI cost policy.
-These checks validate script syntax/CLI only. No product code changed, no
-fixture platform was added and no provider-free test is represented as live
-acceptance.
+The exact successful schedule was cancelled through OAuth/MCP; the owned
+container was removed, recipient archived and disposable grant revoked. All
+three owned managed enrollments were suppressed through the supported owner.
+The binding was removed only after its custody hash matched; the active
+profile was removed with a private evidence copy retained. The empty owned
+scratch cwd was removed. Historical restore journals remain unchanged. The
+coordinator owns removal of its temporary recovery rule and monitor; durable
+common permission adoption remains active. Operator sessions, native daemon,
+authentication and existing grants were preserved.
 
-Required remaining proof: explicit persisted policies, real recipient tab
-closure, actual due wake visibly restoring that same conversation with the last
-verified harness/cwd, one correlated native delivery and completed result, and
-exact schedule/tab/process/grant cleanup. The probe deliberately cannot mark
-acceptance passed from message count alone.
-
-Memory disposition: `forbidden`; no explicit memory write was requested.
+Memory disposition: `forbidden`; this task explicitly prohibits memory writes.
