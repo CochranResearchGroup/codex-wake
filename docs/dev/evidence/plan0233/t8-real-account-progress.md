@@ -95,3 +95,24 @@ calls and two minutes, subject to explicit operator authorization. It retains
 prior unknown usage and the held tree; it does not resume or reset them. Auth
 must validate without refresh before dispatch. Any renewed uncertainty holds.
 T8 and parent remain OPEN, with broad review/remediation counters zero.
+
+## One authorized text-only diagnostic: HTTP 426, held
+
+The operator approved one fresh text-only request, capped at two minutes with
+no tools or retries. All six exact package hashes and account-bound bearer
+expiry were checked before dispatch, without refresh. The standalone fresh
+session exited in 3.786s with HTTP426 and explicit unknown outcome/no replay.
+No coding tool, worker or assistant completion was observed. Aggregate usage
+remains unknown/null. The previous held histories are untouched; this result
+neither resets their usage nor authorizes another request.
+
+Official sampler source at revision
+`2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8` sends
+[`x-grok-client-version` for proxy version gating](https://github.com/xai-org/grok-build/blob/2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8/crates/codegen/xai-grok-sampler/src/client.rs#L524).
+The native adapter currently omits that header. This is a concrete request
+contract gap and the leading explanation for HTTP426; a live correction has
+not been demonstrated. A focused regression extends the existing request test
+to require an explicit reviewed wire-compatibility version and a distinct
+`codex-wake-native` client identifier. The adapter must not claim to execute
+the official Grok CLI or inherit ambient OpenAI headers. Local RED is pending;
+no production header change or additional live request has been made.

@@ -297,7 +297,7 @@
       ],
       "checkout_custody": "Both writer leases returned; primary owns remaining real-account gate and source integration. Existing checkouts/package retained for required final qualification and causal post-review checks.",
       "worker_wake_base": "1f8fd14b33faad7e145919a6861daa5a36bc2b16",
-      "progress": "Primary accepted changed diagnostic native package df4a89bbd7/e69b170e: all6 hashes,34 isolated-user file/receipt hashes,5 terminal jobs verified; UID1017 runtime gates PASS, fresh process census protected13/owned0. Wake authfix wheel336 hashes/auth13+usage16 verified. Real inference remains unknown/held; earlier live allocation expired, next text-only diagnostic gate requires explicit authority. T8 OPEN.",
+      "progress": "Diagnostic package requalified. One separately approved text-only request returned HTTP426 in3.786s/no tools/no retries/no refresh, usage unknown held. Official sampler uses version-gating header omitted by native adapter: focused request-header regression RED running; live hypothesis unproven. No further paid calls authorized; T8 OPEN.",
       "native_result_sha": "df4a89bbd7df49691df280674130e3f5e8eedc7e",
       "package_manifest": "runtime/grok-native-233/t8-http-package-manifest.json",
       "package_entrypoint_sha256": "e69b170edb1ab87d7f398796746833bc43538bca34013c9420b6a92b0a0c8d6a",
