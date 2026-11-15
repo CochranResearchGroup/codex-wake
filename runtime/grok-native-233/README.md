@@ -51,3 +51,12 @@ identity, permissions, goal and cumulative allowance; cold or uncertain authorit
 holds. See docs/dev/evidence/plan0233/t6-provider-continuations-acceptance.md.
 Worker source checks passed; primary custody/integration and issue closure remain
 pending. This does not qualify live accounts, installation, Stop or recovery.
+
+T7 adds owned Stop, exact-account registration revocation and durable request/
+accounting fences. Apply `t7-provider-safety.patch` at its exact T6 manifest base
+with `git apply --unidiff-zero`. All13 file hashes and reconstructed complete tree
+match native abc2ce28469ca57e584ef33cf71b4ad172f8bb26. Public protocol/SDK bytes
+are unchanged. Source mock checks passed; primary custody/closure and T8 complete
+package/live-account qualification remain separate. See
+`docs/dev/evidence/plan0233/t7-provider-safety-acceptance.md`, including the
+conservative cold strict-allowance hold and provider completion/logout uncertainty.

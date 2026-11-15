@@ -372,7 +372,7 @@ class CommandRunner:
             try:
                 from .grok_provider_auth import protected_observe
                 from .shortcut_store import default_root
-                return protected_observe(default_root(self.wake_root), arguments), False
+                return protected_observe(default_root(self.wake_root), arguments, operation=verb), False
             except (ValueError, OSError) as error:
                 return {'error': {'code': getattr(error, 'code', 'grok_auth_unavailable'), 'message': 'Grok account observation unavailable.'}}, True
         if group == 'local':

@@ -150,6 +150,7 @@ class ProtectedOperations:
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
         'grok_auth.status': ('account.observe', None, None),
+        'grok_auth.revoke': ('account.revoke', None, None),
         'grok_models.list': ('account.observe', None, None),
         'grok_models.resolve': ('account.observe', None, None),
         **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait','checkpoint') else 'control', None, None)
@@ -245,12 +246,12 @@ class ProtectedOperations:
             result = execute(self.operations.inventory.root, operation, arguments,
                 accounts=self.operations.accounts, actor=actor,
                 authorize=lambda: self.authority.authenticate(token))
-        elif operation == 'grok_auth.status':
+        elif operation in ('grok_auth.status', 'grok_auth.revoke'):
             from .grok_provider_auth import observe
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'Host Grok account owner unavailable.')
             result = observe(self.operations.inventory.root, arguments, actor=actor,
-                authorize=lambda: self.authority.authenticate(token))
+                authorize=lambda: self.authority.authenticate(token), operation=operation)
         elif operation.startswith('grok_models.'):
             from .grok_model_catalog import observe
             if self.operations.inventory is None:

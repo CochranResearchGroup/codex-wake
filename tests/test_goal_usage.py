@@ -47,6 +47,51 @@ class GoalUsageTests(unittest.TestCase):
         self.addCleanup(scratch.cleanup)
         self.home = Path(scratch.name)
 
+    def test_interrupted_grok_session_keeps_unobserved_usage_unknown(self):
+        from codex_wake.goal_usage import observe_session_usage
+        for prior_usage in (False, True):
+            rows = []
+            if prior_usage:
+                rows += [event('task_started', turn_id='before'),
+                         response('root', 'before', 'known', 40),
+                         event('task_complete', turn_id='before')]
+            rows += [event('task_started', turn_id='uncertain'),
+                     event('turn_aborted', turn_id='uncertain', reason='interrupted')]
+            rollout(self.home, 'root', rows, model_provider='grok__personal')
+            result = observe_session_usage(self.home, 'root', token_accounting='cache_inclusive')
+            self.assertEqual(result['state'], 'unknown', result)
+            self.assertIsNone(result['used_tokens'])
+            self.assertEqual(result['reason'], 'provider_completion_unconfirmed')
+
+    def test_failed_grok_request_keeps_unobserved_usage_unknown(self):
+        from codex_wake.goal_usage import observe_session_usage
+        for prior_usage in (False, True):
+            rows = []
+            if prior_usage:
+                rows += [event('task_started', turn_id='before'),
+                         response('root', 'before', 'known', 40),
+                         event('task_complete', turn_id='before')]
+            rows += [event('task_started', turn_id='uncertain'),
+                     event('task_complete', turn_id='uncertain', error={
+                         'message': 'Grok work held: request completion unobserved',
+                         'codex_error_info': 'other'})]
+            rollout(self.home, 'root', rows, model_provider='grok__personal')
+            result = observe_session_usage(self.home, 'root', token_accounting='cache_inclusive')
+            self.assertEqual(result['state'], 'unknown', result)
+            self.assertIsNone(result['used_tokens'])
+            self.assertEqual(result['reason'], 'provider_completion_unconfirmed')
+
+    def test_observed_grok_budget_hold_retains_known_charge(self):
+        from codex_wake.goal_usage import observe_session_usage
+        rollout(self.home, 'root', [event('task_started', turn_id='known'),
+                response('root', 'known', 'charged', 40),
+                event('task_complete', turn_id='known', error={
+                    'message': 'shared rollout token budget exhausted',
+                    'codex_error_info': 'session_budget_exceeded'})], model_provider='grok__personal')
+        result = observe_session_usage(self.home, 'root', token_accounting='cache_inclusive')
+        self.assertEqual(result['state'], 'qualified', result)
+        self.assertEqual(result['used_tokens'], 40)
+
     def test_tool_payload_volume_does_not_exhaust_accounting_evidence_budget(self):
         rollout(self.home,'root',[goal(),event('task_started',turn_id='work'),
             row('response_item',dict(type='message',content='x'*12000)),

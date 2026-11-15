@@ -368,3 +368,58 @@ Before spawning, a handoff validates active and pending task leases together.
 Different lease IDs for the same scope hold with conflicting ownership; neither
 lease is cancelled or silently replaced. Distinct ancestor and successor scopes
 retain their original identities through normal governed admission.
+
+## T7 implementation contract (in progress)
+
+The existing account-auth owner accepts `grok auth revoke ACCOUNT
+--expected-target JSON`, protected `grok_auth.revoke`, and
+`wake_grok_auth_revoke`. API/MCP requires `account.revoke` and the exact current
+registered account target; observation grants and host-only scope do not grant
+revocation. The durable registration fence invalidates accepted account revisions
+and denies private bearer issuance. It retains the official credential store and
+reports provider completion/logout unconfirmed, with owned native interruption
+pending observation. It does not invoke provider logout, clear unrelated accounts
+or treat credential-file absence as an explicit logout event. Native owned-work
+interruption consumes the registered account revision and explicit revocation
+reason; source acceptance is recorded separately from installed qualification.
+
+Native request intent is a private version1 scheduling fence under
+`CODEX_HOME/provider_safety/THREAD.json`, written before Grok provider I/O. It
+retains original session/thread/turn and selection attribution, request/known-tool/
+completed/held state, provider-completion observation and usage uncertainty. It
+contains no credential or numeric spending ledger. A pending intent without its
+original live turn holds on recovery; local Stop preserves that intent rather
+than authorizing replay. Required unknown accounting additionally fences the
+original shared root, retaining its existing allowance instead of constructing
+a fresh budget. Known completed response charges stay in canonical usage records.
+Strict Grok tool admission waits for the response's accounting observation and
+the original shared controller's budget decision;
+Stop/cancellation still uses the existing native task and tool cancellation path.
+Normal successful completion flushes canonical history before retiring its
+intent. Local compaction uses the same pre-I/O intent and post-budget observation
+fence; Grok remote compaction remains unsupported. No public native protocol or
+SDK type changes are introduced by T7.
+
+Each active catalog-bound Grok turn observes public account metadata once per
+second. Only the selected account's registration generation or explicit
+`authentication_revoked` reason interrupts its exact owned turn. A change in
+global catalog revision does not cancel peers. An unreadable source or missing
+credential file is not proof of provider logout. The monitor does not fetch a
+bearer, copy credentials or kill unrelated processes/sessions. New requests and
+local tool dispatch retain their admission checks in addition to monitoring.
+
+A completed strict Grok history may be read after unload/restart, but further
+spending requires the same original live `LocalAgentRuntime` allowance authority.
+If that authority is absent or different, recovery holds; changing a launch limit
+does not establish a new zero-spend authority. T7 retains the original controller
+identity rather than reconstructing a second numeric ledger from UI counters.
+Unknown request/action history is never replayed. A failed request yields an
+actionable held error and explicit reconciliation/reassignment requirement; no
+automatic provider/account fallback is authorized.
+
+The existing Wake usage observer reports interrupted or failed registered Grok
+requests as unknown with null aggregate usage, retaining any prior observed
+charges in canonical history. A fully observed `session_budget_exceeded` outcome
+can retain its known charge subject to the existing response/usage-record checks.
+Source mock acceptance does not confirm provider-side cancellation/logout, real
+entitlement, package installation or live-account recovery; those remain T8 gates.

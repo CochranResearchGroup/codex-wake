@@ -228,7 +228,7 @@
         "T6"
       ],
       "owner": "worker-provider-safety",
-      "state": "running",
+      "state": "implemented",
       "tracker_state": "OPEN",
       "acceptance": [
         "Stop prevents further owned local tool scheduling and reports provider completion/usage uncertainty separately.",
@@ -251,7 +251,14 @@
         "Private shared-session revocation/readiness source handling",
         "Focused public mixed-provider failure/recovery/allowance acceptance and causal schemas"
       ],
-      "checkout_custody": "Exclusive writer custody of both existing P233 native and Wake checkouts transfers to /root/p233_native_seams at dispatch; primary read-only until returned."
+      "checkout_custody": "Exclusive writer custody of both existing P233 native and Wake checkouts transfers to /root/p233_native_seams at dispatch; primary read-only until returned.",
+      "worker_wake_base": "592c97d13b98b784a8067a26fc5c71f85e5caeac",
+      "progress": "Worker source/mock acceptance complete; primary custody/integration and issue closure pending. No installed/live provider claim.",
+      "result_sha": "abc2ce28469ca57e584ef33cf71b4ad172f8bb26",
+      "native_result_sha": "abc2ce28469ca57e584ef33cf71b4ad172f8bb26",
+      "source_manifest": "runtime/grok-native-233/t7-source-manifest.json",
+      "local_acceptance": "docs/dev/evidence/plan0233/t7-provider-safety-acceptance.md",
+      "validation": "Native public13PASS standard8MiB; actual canonical known8/mixed90 and7 adverse unknown/null; Wake auth12/catalog1/usage16PASS; Rustfmt13PASS; publicschemas/SDK unchanged; exact13file patch/tree/privatebundle verified."
     },
     {
       "key": "T8",

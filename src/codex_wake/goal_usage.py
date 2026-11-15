@@ -311,6 +311,21 @@ def observe_usage(codex_home, thread_id, goal_created_at, *, reset_anchor=None, 
         charged = set()
         for identity in owned:
             meta, history = sessions[identity]
+            provider = meta.get('model_provider', '')
+            if (isinstance(provider, str) and (provider == 'grok' or provider.startswith('grok__'))
+                    and any(r.get('type') == 'event_msg'
+                            and r['payload'].get('turn_id') in turns
+                            and ((r['payload'].get('type') == 'turn_aborted'
+                                  and r['payload'].get('reason') == 'interrupted')
+                                 or (r['payload'].get('type') == 'task_complete'
+                                     and isinstance(r['payload'].get('error'), dict)
+                                     and r['payload']['error'].get('codex_error_info')
+                                         != 'session_budget_exceeded'))
+                            for r in history)):
+                # Local Stop or a failed request is not provider-side completion/usage evidence.
+                # Earlier observed charges remain retained; do not qualify an
+                # uncertain later request as zero or as only those prior charges.
+                raise ValueError('provider_completion_unconfirmed')
             if meta.get('history_base') or (identity == thread_id and meta.get('forked_from_id')):
                 raise ValueError('referenced_or_root_fork_history_unqualified')
             if meta.get('session_id') != sessions[thread_id][0].get('session_id'):

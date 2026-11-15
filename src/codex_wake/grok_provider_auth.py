@@ -56,14 +56,14 @@ class GrokSession:
             if not credential.get('expires_at'):
                 reason = 'native_expiry_unknown'
         except FileNotFoundError:
-            authentication = 'logged_out'
+            authentication, reason = 'unavailable', 'native_auth_missing'
         except ValueError as error:
             authentication = 'account_changed' if str(error) == 'account_changed' else 'unavailable'
             reason = str(error) if str(error) in ('account_changed', 'insecure_native_auth', 'invalid_native_auth', 'native_session_missing_or_ambiguous') else 'native_auth_unavailable'
         except OSError:
             authentication = 'unavailable'
         return dict(authentication=authentication, entitlement='unverified', inference='unverified',
-                    freshness='unverified', reason=reason)
+                    freshness='unverified', reason=reason, provider_logout='unconfirmed')
 
     def bearer(self, qualified_upper):
         """Return a private token only before its expiry's conservative boundary.
@@ -111,6 +111,9 @@ def register_parser(commands):
     login_parser = verbs.add_parser('login', help='operator-only official device login with sanitized progress')
     login_parser.add_argument('--executable', type=Path, required=True)
     login_parser.add_argument('--auth-path', type=Path, required=True)
+    revoke = verbs.add_parser('revoke', help='revoke this harness account admission; provider completion remains unknown')
+    revoke.add_argument('account')
+    revoke.add_argument('--expected-target', type=json.loads, required=True)
     for verb in ('status', 'token'):
         command = verbs.add_parser(verb)
         command.add_argument('account')
@@ -132,6 +135,9 @@ def command(args, root):
     if args.grok_auth_command == 'status':
         print(json.dumps(dict(target=accounts.target(args.account), **accounts.status(args.account)), sort_keys=True))
         return 0
+    if args.grok_auth_command == 'revoke':
+        print(json.dumps(accounts.revoke(args.account, args.expected_target), sort_keys=True))
+        return 0
     if sys.stdout.isatty():
         print('private_channel_required', file=sys.stderr)
         return 3
@@ -150,7 +156,7 @@ def command(args, root):
     except (OSError, ValueError) as error:
         # Native Codex includes command stderr in its own diagnostics. Never emit
         # provider exceptions, native login output, paths or credential contents.
-        reason = ':account_registration_changed' if str(error) == 'account_registration_changed' else ''
+        reason = ':' + str(error) if str(error) in ('account_registration_changed', 'account_revoked') else ''
         print('grok_auth_unavailable' + reason, file=sys.stderr)
         return 3
     sys.stdout.write(token)
@@ -223,14 +229,61 @@ class GrokAccounts:
                       configuration_revision=hashlib.sha256(json.dumps(record, sort_keys=True).encode()).hexdigest())
         return target
 
+    def revoke(self, account, expected_target):
+        """Fence harness access without deleting or rewriting the official store."""
+        import tempfile
+        lock_path = self._path(account).with_suffix('.revoke.lock')
+        fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+        with os.fdopen(fd, 'r+') as lock:
+            info = os.fstat(lock.fileno())
+            if info.st_uid != os.getuid() or info.st_mode & 0o077 or not stat.S_ISREG(info.st_mode):
+                raise ValueError('insecure_grok_revocation_lock')
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            current = os.stat(lock_path, follow_symlinks=False)
+            if (info.st_dev, info.st_ino) != (current.st_dev, current.st_ino):
+                raise ValueError('grok_revocation_lock_replaced')
+            record = self._record(account)
+            if record.get('revoked'):
+                if expected_target != record.get('revocation_target'):
+                    raise ValueError('stale_grok_account_target')
+            else:
+                if expected_target != self.target(account):
+                    raise ValueError('stale_grok_account_target')
+                record.update(revoked=True, revocation_target=expected_target)
+                descriptor, temporary = tempfile.mkstemp(dir=self.directory, prefix='.revoke-')
+                try:
+                    with os.fdopen(descriptor, 'w') as stream:
+                        json.dump(record, stream, sort_keys=True)
+                        stream.flush()
+                        os.fsync(stream.fileno())
+                    os.replace(temporary, self._path(account))
+                    directory = os.open(self.directory, os.O_RDONLY | os.O_DIRECTORY)
+                    try:
+                        os.fsync(directory)
+                    finally:
+                        os.close(directory)
+                finally:
+                    if os.path.exists(temporary):
+                        os.unlink(temporary)
+            return dict(account=account, authentication='revoked', target=self.target(account),
+                        provider_completion='unknown', provider_logout='unconfirmed',
+                        owned_work_interruption='pending_native_observation')
+
     def status(self, account):
         record = self._record(account)
+        if record.get('revoked'):
+            return dict(account=account, label=record['label'],
+                        registration_revision=registration_revision(record), authentication='revoked',
+                        entitlement='unverified', inference='unverified', freshness='unverified',
+                        reason='account_revoked', provider_logout='unconfirmed')
         session = GrokSession(record['auth_path'], record['identity_binding'])
         return dict(account=account, label=record['label'],
                     registration_revision=registration_revision(record), **session.status())
 
     def bearer(self, account, qualified_upper, *, refresh=True, expected_revision=None):
         record = self._record(account)
+        if record.get('revoked'):
+            raise ValueError('account_revoked')
         if expected_revision is not None and registration_revision(record) != expected_revision:
             raise ValueError('account_registration_changed')
         session = GrokSession(record['auth_path'], record['identity_binding'])
@@ -341,36 +394,47 @@ def tool_specs():
     return {'wake_grok_auth_status': ('grok-provider-auth', 'grok_auth.status',
         'Inspect sanitized native Grok account authentication; presence does not qualify entitlement or inference. Requires an exact account grant.',
         {'account': {'type': 'string', 'pattern': '^[a-z0-9][a-z0-9_-]{0,63}$'},
-         'expected_target': {'type': 'object'}}, ['account', 'expected_target'], True)}
+         'expected_target': {'type': 'object'}}, ['account', 'expected_target'], True),
+        'wake_grok_auth_revoke': ('grok-provider-auth', 'grok_auth.revoke',
+        'Revoke one exact registered Grok account for this harness. Provider completion/logout remain unconfirmed; owned native interruption is observed separately.',
+        {'account': {'type': 'string', 'pattern': '^[a-z0-9][a-z0-9_-]{0,63}$'},
+         'expected_target': {'type': 'object'}}, ['account', 'expected_target'], False)}
 
 
-def observe(root, arguments, *, actor, authorize):
+def observe(root, arguments, *, actor, authorize, operation="grok_auth.status"):
     """Admit an exact account grant before opening its native credential file."""
     from .controller_auth import Actor, AuthError
     from .managed_inventory import InventoryError
     if set(arguments) != {'account', 'expected_target'}:
         raise InventoryError('invalid_argument', 'Exact Grok account target required.')
+    if operation not in ('grok_auth.status', 'grok_auth.revoke'):
+        raise InventoryError('unsupported_operation', 'Unsupported Grok account operation.')
+    required = 'account.revoke' if operation == 'grok_auth.revoke' else 'account.observe'
     accounts = GrokAccounts(root)
     target = accounts.target(arguments['account'])
     fields = set(target)
-    def guard():
+    def guard(readback=target):
         current = authorize()
-        if (not isinstance(actor, Actor) or current != actor or 'account.observe' not in actor.scopes
+        if (not isinstance(actor, Actor) or current != actor or required not in actor.scopes
                 or not any(fields <= scope.keys() and all(target.get(k) == v for k, v in scope.items())
                            for scope in actor.targets)):
             raise AuthError('insufficient_scope')
-        if arguments['expected_target'] != target:
+        if arguments['expected_target'] != target or accounts.target(arguments['account']) != readback:
             raise InventoryError('stale_target', 'Grok account target changed.')
     guard()
+    if operation == 'grok_auth.revoke':
+        result = accounts.revoke(arguments['account'], target)
+        guard(result['target'])
+        return dict(schema_version=1, operation=operation, status='completed', result=result)
     result = accounts.status(arguments['account'])
     guard()
     return dict(schema_version=1, operation='grok_auth.status', status='completed',
                 result=dict(target=target, authentication=result))
 
 
-def protected_observe(root, arguments):
+def protected_observe(root, arguments, operation="grok_auth.status"):
     from .operation_commands import local_actor
-    return observe(root, arguments, actor=local_actor(root), authorize=lambda: local_actor(root))
+    return observe(root, arguments, actor=local_actor(root), authorize=lambda: local_actor(root), operation=operation)
 
 
 def executable_digest(path):

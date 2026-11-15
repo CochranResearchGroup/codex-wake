@@ -64,7 +64,7 @@ class GrokSessionTest(unittest.TestCase):
             executable.chmod(0o700)
             events = []
             result = login(executable, Path(directory) / 'auth.json', emit=events.append)
-            self.assertEqual(result['authentication'], 'logged_out')
+            self.assertEqual(result['authentication'], 'unavailable')
             self.assertNotIn('private-provider-secret', json.dumps(events + [result]))
 
     def test_public_status_requires_exact_account_grant_before_credentials(self):
@@ -88,7 +88,7 @@ class GrokSessionTest(unittest.TestCase):
             actor = Actor('subject', 'agent', 'client', 'grant', 'issuer', 'resource',
                           frozenset({'account.observe'}), [target], 4000000000)
             result = observe(root, arguments, actor=actor, authorize=lambda: actor)
-            self.assertEqual(result['result']['authentication']['authentication'], 'logged_out')
+            self.assertEqual(result['result']['authentication']['authentication'], 'unavailable')
             from types import SimpleNamespace
             from unittest.mock import patch
             from codex_wake.controller_http import ProtectedOperations
@@ -180,3 +180,111 @@ class GrokSessionTest(unittest.TestCase):
             value['key'] = 'rotated-secret'
             auth.write_text(json.dumps({'https://auth.x.ai': value}))
             self.assertEqual(accounts.bearer('personal', 1800000000, expected_revision=revision), 'rotated-secret')
+
+    def test_cli_revocation_blocks_only_selected_account_and_retains_native_store(self):
+        from contextlib import redirect_stdout, redirect_stderr
+        import io
+        from unittest.mock import patch
+        from codex_wake.cli import run
+        from codex_wake.time_provider import TimeDecision
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / 'wake'
+            prefix = ['--wake-root', str(root), 'grok', 'auth']
+            stores, targets = {}, {}
+            for account in ('personal', 'work'):
+                home = Path(directory) / account
+                home.mkdir(mode=0o700)
+                auth = home / 'auth.json'
+                auth.write_text(json.dumps({'https://auth.x.ai': {
+                    'key': 'synthetic-private-' + account, 'auth_mode': 'oidc',
+                    'user_id': account, 'expires_at': '2030-01-01T00:00:00Z'}}))
+                auth.chmod(0o600)
+                stores[auth] = auth.read_bytes()
+                public = io.StringIO()
+                with redirect_stdout(public):
+                    self.assertEqual(run(prefix + ['register', account, '--label', account,
+                                                   '--auth-path', str(auth)]), 0)
+                    self.assertEqual(run(prefix + ['status', account]), 0)
+                targets[account] = json.loads(public.getvalue().splitlines()[-1])['target']
+            public = io.StringIO()
+            with redirect_stdout(public):
+                self.assertEqual(run(prefix + ['revoke', 'personal', '--expected-target',
+                                               json.dumps(targets['personal'])]), 0)
+                self.assertEqual(run(prefix + ['status', 'personal']), 0)
+                self.assertEqual(run(prefix + ['status', 'work']), 0)
+            rows = [json.loads(line) for line in public.getvalue().splitlines()]
+            self.assertEqual(rows[-2]['authentication'], 'revoked')
+            self.assertEqual(rows[-1]['authentication'], 'present')
+            self.assertEqual(rows[0]['provider_completion'], 'unknown')
+            self.assertNotIn('synthetic-private-', public.getvalue())
+            decision = TimeDecision('network', ('stable-time:cloudflare', 'stable-time:netnod'),
+                                    1800000000, 1800000001)
+            for account, expected in [('personal', 3), ('work', 0)]:
+                private, errors = io.StringIO(), io.StringIO()
+                with patch('codex_wake.time_inspection.stable_time_config', return_value='configured'), \
+                     patch('codex_wake.stable_time.service_time_decision', return_value=decision), \
+                     redirect_stdout(private), redirect_stderr(errors):
+                    self.assertEqual(run(prefix + ['token', account]), expected)
+                if account == 'personal':
+                    self.assertEqual(private.getvalue(), '')
+                    self.assertIn('account_revoked', errors.getvalue())
+                else:
+                    self.assertEqual(private.getvalue(), 'synthetic-private-work')
+            for path, original in stores.items():
+                self.assertEqual(path.read_bytes(), original)
+
+    def test_public_revocation_requires_exact_account_grant_and_exposes_no_bearer(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from codex_wake.grok_provider_auth import GrokAccounts
+        from codex_wake.controller_auth import Actor, AuthError
+        from codex_wake.controller_http import ProtectedOperations
+        from codex_wake.mcp_server import CommandRunner
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / 'wake'
+            accounts = GrokAccounts(root)
+            targets = {}
+            for account in ('api', 'mcp'):
+                home = Path(directory) / account
+                home.mkdir(mode=0o700)
+                auth = home / 'auth.json'
+                auth.write_text(json.dumps({'https://auth.x.ai': {
+                    'key': 'synthetic-private-' + account, 'auth_mode': 'oidc',
+                    'user_id': account, 'expires_at': '2030-01-01T00:00:00Z'}}))
+                auth.chmod(0o600)
+                accounts.register(account, account, auth)
+                targets[account] = accounts.target(account)
+            def actor(scope, target):
+                return Actor('subject', 'agent', 'client', 'grant', 'issuer', 'resource',
+                             frozenset({scope}), [target], 4000000000)
+            current = [actor('account.revoke', targets['api'])]
+            api = ProtectedOperations(SimpleNamespace(authenticate=lambda _: current[0]),
+                                      SimpleNamespace(inventory=SimpleNamespace(root=root)))
+            result = api.execute('synthetic-host-token', 'grok_auth.revoke',
+                                 dict(account='api', expected_target=targets['api']))
+            self.assertEqual(result['status'], 'completed')
+            self.assertEqual(result['result']['authentication'], 'revoked')
+            self.assertNotIn('synthetic-private-', json.dumps(result))
+            current[0] = actor('account.observe', targets['mcp'])
+            with self.assertRaises(AuthError):
+                api.execute('synthetic-host-token', 'grok_auth.revoke',
+                            dict(account='mcp', expected_target=targets['mcp']))
+            current[0] = actor('account.revoke', {'host': targets['mcp']['host']})
+            with self.assertRaises(AuthError):
+                api.execute('synthetic-host-token', 'grok_auth.revoke',
+                            dict(account='mcp', expected_target=targets['mcp']))
+            self.assertEqual(accounts.status('mcp')['authentication'], 'present')
+            current[0] = actor('account.revoke', targets['mcp'])
+            with patch('codex_wake.operation_commands.local_actor', return_value=current[0]):
+                result, failed = CommandRunner(wake_root=str(root)).call('wake_grok_auth_revoke',
+                    dict(account='mcp', expected_target=targets['mcp']))
+            self.assertFalse(failed, result)
+            self.assertEqual(result['result']['authentication'], 'revoked')
+            self.assertNotIn('synthetic-private-', json.dumps(result))
+
+    def test_missing_native_store_is_unavailable_not_confirmed_logout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = GrokSession(Path(directory) / 'auth.json').status()
+            self.assertEqual(result['authentication'], 'unavailable')
+            self.assertEqual(result['reason'], 'native_auth_missing')
+            self.assertEqual(result['provider_logout'], 'unconfirmed')

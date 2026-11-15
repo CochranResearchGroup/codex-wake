@@ -118,3 +118,17 @@ class GrokModelCatalogTest(unittest.TestCase):
                 self.assertEqual(catalog['selections'][0]['readiness'], 'unavailable')
                 self.assertIn('required_capability_missing:terminal', catalog['selections'][0]['reasons'])
                 self.assertEqual(invoke(['models', 'default', 'personal', 'grok-build'])[0], 3)
+                # Shared revocation is an account event, not a model/capability claim.
+                previous_revision = catalog['selections'][0]['accountRevision']
+                _, status = invoke(['auth', 'status', 'personal'])
+                self.assertEqual(invoke(['auth', 'revoke', 'personal', '--expected-target',
+                                         json.dumps(status['target'])])[0], 0)
+                code, revoked = invoke(['models', 'native-catalog', '--wake-executable', '/operator/bin/codex-wake'])
+                self.assertEqual(code, 0)
+                choice = revoked['selections'][0]
+                self.assertEqual(choice['readiness'], 'unavailable')
+                self.assertEqual(choice['reasons'], ['authentication_revoked'])
+                self.assertNotEqual(choice['accountRevision'], previous_revision)
+                self.assertEqual(choice['accountLabel'], 'Personal Grok')
+                self.assertEqual(revoked['providers']['grok__personal']['auth']['args'][-1], choice['accountRevision'])
+                self.assertNotIn('synthetic-private-bearer', json.dumps(revoked))
