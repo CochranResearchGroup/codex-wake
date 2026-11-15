@@ -32,7 +32,7 @@
           "cleanup": "archived thread; revoked own grant"
         }
       ],
-      "tracker_state": "OPEN"
+      "tracker_state": "CLOSED"
     },
     {
       "issue": 665,
@@ -51,8 +51,8 @@
       "issue": 666,
       "title": "Prove conversation continuity after tab closure",
       "blockers": [],
-      "state": "pending",
-      "worker": null,
+      "state": "running",
+      "worker": "connector_background_continuity",
       "owned_paths": [],
       "validation": [],
       "tracker_state": "OPEN"
@@ -91,8 +91,8 @@
       "issue": 670,
       "title": "Demonstrate structured slash discovery and result retrieval",
       "blockers": [],
-      "state": "pending",
-      "worker": null,
+      "state": "running",
+      "worker": "connector_slash_roundtrip",
       "owned_paths": [],
       "validation": [],
       "tracker_state": "OPEN"
@@ -101,14 +101,30 @@
       "issue": 671,
       "title": "Verify read-only and target-restricted connector grants",
       "blockers": [],
-      "state": "running",
+      "state": "validated",
       "worker": "connector_permissions",
       "owned_paths": [
-        "scripts/connector_permissions_acceptance.py"
+        "scripts/connector_permissions_acceptance.py",
+        "docs/dev/evidence/connector-permissions/README.md"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "outcome": "PASS",
+          "boundary": "deployed OAuth/MCP",
+          "scoped_read": true,
+          "denied_writes": true,
+          "grant_cleanup": "3 revoked/401",
+          "target_cleanup": "archived",
+          "stale_diagnostic": "daemon_unavailable; intended generation guard regressions2PASS"
+        }
+      ],
       "tracker_state": "OPEN",
-      "worker_branch": "test/connector-permissions"
+      "worker_branch": "feat/connector-permissions",
+      "result_sha": "44ffd501b9db13a25f20df30facba5ce036c299c",
+      "integration_commits": [
+        "57546817",
+        "a67f445d"
+      ]
     },
     {
       "issue": 672,
