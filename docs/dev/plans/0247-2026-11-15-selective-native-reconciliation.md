@@ -1,4 +1,4 @@
-# Plan0246 | Selective native reconciliation
+# Plan0247 | Selective native reconciliation
 
 State: OPEN
 Owner: root/native-reconcile-discovery
@@ -27,7 +27,7 @@ One serial owner: captured red loop, ranked hypotheses, single-variable probes,
 source regression red, minimal adapter repair, focused green, original read-only
 native replay, PR. No new scheduler, timer retry, native input, daemon build,
 manual completion receipt, production-state edit, service restart or installation.
-See [evidence0246](../evidence/0246-selective-native-reconciliation.md).
+See [evidence0247](../evidence/0247-selective-native-reconciliation.md).
 
 Cleanup: normal checkout removal after integrated source/evidence custody;
 preserve every other owner. Private lane.json records workstation inventory,

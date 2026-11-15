@@ -9,7 +9,7 @@
     "verdict": "Existing adapter, total budget and native evidence contract preserved; no new public workflow or persisted schema."
   },
   "spec": {
-    "sources": ["GitHub issue690", "docs/dev/plans/0246-2026-11-15-selective-native-reconciliation.md"],
+    "sources": ["GitHub issue690", "docs/dev/plans/0247-2026-11-15-selective-native-reconciliation.md"],
     "blocking": [],
     "verdict": "Only exact candidate turns are hydrated; summary/full identity, turn ownership, unique items and bounded pagination are checked. Original native completion observed without input;144 focused checks passed."
   },
