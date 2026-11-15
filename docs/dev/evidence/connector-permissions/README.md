@@ -68,3 +68,51 @@ PYTHONPATH=src:tests "$CONNECTOR_PREFIX/bin/python" -m unittest \
 The first refuses a changed pinned target; the second exercises real CLI/Unix
 peer discovery and rejects stale generation. These establish the intended
 identity guard separately from the less precise live registry refusal above.
+
+## Final read-isolation remediation — 2026-11-14
+
+Source baseline: `fe449f35c1b812a0d674c7ed3a13dc832a0434e6` plus the
+script changes in this commit. The deployed boundary was
+`/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev34-c3cf1d1`;
+this acceptance-only change required no installation or service restart.
+
+The earlier snapshot-success assertion did not prove read isolation. The
+expanded public HTTPS MCP check inspects the returned projection: host and
+environment match the grant, and `sessions`, `unplaced_tabs`, `agents`,
+`bindings`, and `unavailable` are empty. This projection describes terminal
+placement, so a conversation-only grant exposes no terminal resources; it does
+not enumerate the granted native conversation. Two actual content-read calls
+through `wake_environment_conversations_observe` now establish the independent
+fences: the owned conversation with only `observe` returns `insufficient_scope`,
+and the same conversation under a different-conversation grant containing
+`content.observe` also returns `insufficient_scope`. The disposable thread has
+no turns, so these denied calls use a bounded turn selector and never create a
+model turn or admitted observation.
+
+The live run passed all checks, including `stale_target` for the changed
+socket generation (superseding the older less precise live diagnostic above),
+zero native queued inputs, idle state before/after, unchanged existing operator
+grants/config, four temporary grants revoked with HTTP401 readback, and owned
+thread archival. The receipt is private and preserved at
+`~/.local/state/codex-wake/acceptance/671-read-isolation-final-20261114.json`.
+Receipt destinations are now reserved exclusively before live effects; an
+existing receipt fails instead of being overwritten.
+
+Commands and results:
+
+```sh
+/home/ecochran76/.local/share/codex-wake/releases/0.22.0.dev34-c3cf1d1/bin/python \
+  scripts/connector_permissions_acceptance.py \
+  --config /home/ecochran76/.config/codex-wake/external-connector.json \
+  --receipt /home/ecochran76/.local/state/codex-wake/acceptance/671-read-isolation-final-20261114.json
+python3 -m compileall -q scripts/connector_permissions_acceptance.py
+git diff --check
+```
+
+The opt-in `live_or_soak` selection passed once with no retry; focused syntax
+and whitespace checks passed. No hosted CI was used under the cost policy;
+the material environment difference is that this opt-in check uses the actual
+installed connector and public OAuth/MCP service rather than hermetic source
+fixtures. No product behavior changed, so no additional test framework or
+unit fixture was added. Memory disposition: `forbidden` by this task's explicit
+no-memory-write boundary.
