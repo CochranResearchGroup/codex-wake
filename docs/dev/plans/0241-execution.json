@@ -242,13 +242,13 @@
     "reason": "Repeated native setup/readiness failures under parallel probes; one exact owned target per bounded run"
   },
   "owned_monitor": {
-    "unit": "cw241-acceptance-monitor-dev31-diagnostic.service",
-    "pid": 2913759,
-    "prefix": "0.22.0.dev31-b6dcb3f",
+    "unit": "cw241-acceptance-monitor-dev32.service",
+    "pid": 2967598,
+    "prefix": "0.22.0.dev32-3bdc3a8",
     "health": "loop and managed reader verified",
     "max_seconds": 1200,
     "cleanup_pending": true,
-    "diagnostic": "exception-only wrappers log and rethrow at original owners; no behavior substitution"
+    "diagnostic": false
   },
   "shared_repairs": [
     {
@@ -278,6 +278,15 @@
       "version": "0.22.0.dev31",
       "checks": "23 source+23 UID1017 PASS;349 package members exact parity",
       "cause": "Trusted OAuth controller erroneously rejected before explicit route permission evaluation; session exact-self retained"
+    },
+    {
+      "pr": 678,
+      "source": "eae247d6",
+      "merged_main": "ad01c651",
+      "state": "deployed",
+      "version": "0.22.0.dev32",
+      "checks": "36 source+36 UID1017 PASS;349package members parity",
+      "cause": "Saved exact recipient excluded by loaded-only selector after last frontend disconnects; complete absence now observable, ambiguity refused"
     }
   ],
   "state": "active",
@@ -298,8 +307,8 @@
   },
   "scope_extension": "Operator approved host-wide common-policy adoption; supported revision1 activated, existing named defaults preserved, exact disposable recovery grant only.",
   "installed": {
-    "version": "0.22.0.dev31",
-    "wheel_sha256": "b6dcb3fdcd220dd6152b1914f60c52bd8fc506e168a1321f0bf7f6875ea19690",
-    "merged_source": "9b73e30758e271324a99b00643ef5115c55b6afa"
+    "version": "0.22.0.dev32",
+    "wheel_sha256": "3bdc3a86f4a71589b50e9d34d7989af85048ff5db3dc5f0ef1a391ed9fccd98e",
+    "merged_source": "ad01c65164aa5ff0c328ba6f4a980c9b466efb1d"
   }
 }
