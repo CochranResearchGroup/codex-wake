@@ -261,3 +261,35 @@ One complete package build and isolated UID1017 runtime qualification is now
 assigned to the existing worker for these consolidated changes. Earlier complete
 packages/rollback are preserved. No further live request, login, refresh or replay
 is authorized, and T8/parent remain OPEN with reserved review/remediation0.
+
+## Consolidated complete package accepted; remaining live packet prepared
+
+Native source `212d798546` produced complete package entrypoint SHA256
+`bdc780c81a0f62619b5b38037963e2f603e9b902c82211c37251bcad05ef1a8a` and content
+digest `6172ec680e095f56dd35b476f3d2eec9a5f0af497f90c655684c1dfb82fb1cd5`.
+Exact inventory and job receipts are retained in
+`runtime/grok-native-233/t8-usage-routing-package-manifest.json`.
+
+One build passed877.387s; required UID1017 upgrade/history/multiclient/reconnect/
+rollback102.699s, failed-start repair/rollback102.221s, saved-history19.730s and
+private ownership/refusal9.638s passed. Primary independently verified all six
+source hashes,34 isolated-user package/receipt hashes, all five terminal jobs,
+and matching native source. Fresh OS readback showed only the original13
+protected processes. Prior packages and complete rollback remain preserved.
+Unchanged installed Wake runtime checks are reused. A fresh private Grok auth
+read remains valid without refresh, but does not qualify entitlement/inference.
+
+The next proposed packet covers the remaining real-account acceptance in one
+bounded run: at most12 Grok responses,2 OpenAI worker responses,16 local tool
+calls and15 minutes, stopping at the first failure or uncertain accounting.
+Use only the synthetic coding workspace and local MCP echo, then admitted native
+model selection, mixed workers/linked handoff, known usage and a final owned
+Stop/unknown-usage hold. Verify supported launch isolation and reuse current
+OpenAI auth in place; do not copy credentials or private history, replace a
+daemon, or alter working profiles. At most one reviewed official metadata refresh
+is proposed if actually required; never repeat an uncertain attempt or retry
+login. Qualified metadata reads and independent public qualification receipts
+remain separate from inference evidence. Prior held trees/unknown usage are
+retained; this packet creates no reset or assertion that they cost zero.
+No live request is scheduled or authorized until the operator approves the packet.
+T8 #639 and parent #628 remain OPEN with reserved review/remediation0.
