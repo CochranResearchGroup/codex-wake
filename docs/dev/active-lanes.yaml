@@ -1,6 +1,20 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: connector-acceptance-0241
+    owner: root / ecochran76
+    objective: Qualify external connector session control and close tickets
+    work_items: [664, 665, 666, 667, 668, 669, 670, 671, 672]
+    plan: docs/dev/plans/0241-2026-11-14-connector-acceptance.md
+    branch: feat/connector-acceptance
+    target: origin/main
+    plan_state: IN_PROGRESS
+    custody_state: ACTIVE
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-14
+    disposition: Root owns duplicate acceptance; bounded one-ticket workers under execution ledger
+
   - id: native-input-reconciliation-0240
     owner: root / ecochran76
     objective: Reconcile stale cancelled input with exact native completion

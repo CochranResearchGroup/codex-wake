@@ -1,6 +1,6 @@
 # External connector session-control acceptance
 
-Draft for seam and ticket-breakdown review. Publication target: GitHub Issues, CochranResearchGroup/codex-wake. Category enhancement; state ready-for-agent. This work qualifies existing product behavior and fixes demonstrated defects; it does not assume the capabilities are missing.
+Operator-approved spec, published as #663. Publication target: GitHub Issues, CochranResearchGroup/codex-wake. Category enhancement; state ready-for-agent. This work qualifies existing product behavior and fixes demonstrated defects; it does not assume the capabilities are missing.
 
 ## Problem Statement
 
