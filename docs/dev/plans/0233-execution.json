@@ -295,7 +295,15 @@
         "Isolated UID1017 upgrade/rollback/history/multiclient/reconnect/failed-start qualification",
         "Qualification evidence and bounded real-account readiness gate; primary retains live effect authority"
       ],
-      "checkout_custody": "Exclusive writer custody of both existing P233 native and Wake checkouts at dispatch; primary source read-only until returned. Working-profile install/restart and live account effects not delegated."
+      "checkout_custody": "Exclusive writer custody of both existing P233 native and Wake checkouts at dispatch; primary source read-only until returned. Working-profile install/restart and live account effects not delegated.",
+      "worker_wake_base": "1f8fd14b33faad7e145919a6861daa5a36bc2b16",
+      "progress": "Complete exact native package and required UID1017 isolated qualification PASS. Primary real-account sign-in/entitlement/inference/tools/MCP/mixed-worker/handoff/Stop/usage gate remains; T8 NOT complete, #639 OPEN.",
+      "native_result_sha": "abc2ce28469ca57e584ef33cf71b4ad172f8bb26",
+      "package_manifest": "runtime/grok-native-233/t8-package-manifest.json",
+      "package_entrypoint_sha256": "a54f0739611354fcdd535f5a6a391197c4c0fe92615ade9f4bfd6bb725713792",
+      "local_acceptance": "docs/dev/evidence/plan0233/t8-isolated-package-acceptance.md",
+      "primary_gate": "docs/dev/evidence/plan0233/t8-real-account-gate.md",
+      "validation": "Complete5exec+metadata/current4firstpartybuild PASS1048.585s; UID1017 upgrade/rollback/history/multiclient63.880s, failed-start repair/rollback64.439s, saved-history14.222s, private-owner7.793s PASS; installed auth/catalog13+usage16 PASS8.016s; all336 module hashes match; installed candidate+rollback all6filehashes verified; owned0/preexisting13 preserved."
     }
   ],
   "initial_ready": [

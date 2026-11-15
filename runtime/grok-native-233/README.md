@@ -60,3 +60,12 @@ are unchanged. Source mock checks passed; primary custody/closure and T8 complet
 package/live-account qualification remain separate. See
 `docs/dev/evidence/plan0233/t7-provider-safety-acceptance.md`, including the
 conservative cold strict-allowance hold and provider completion/logout uncertainty.
+
+T8's complete GNU/dev-small native package is identified by
+`t8-package-manifest.json` (five executables and package metadata). The exact
+package passed UID1017 upgrade/rollback, public history/multiclient/reconnect,
+failed-start repair and private-client ownership checks. Real-account acceptance
+remains a separate primary gate; #639 is not closed by package qualification.
+See `docs/dev/evidence/plan0233/t8-isolated-package-acceptance.md` and
+`t8-real-account-gate.md`. No T8 Rust/public schema change or working installation
+is included, and broad review/remediation counters remain zero.
