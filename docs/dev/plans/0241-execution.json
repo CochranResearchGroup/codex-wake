@@ -237,21 +237,18 @@
   },
   "live_resource_schedule": {
     "serial": true,
-    "current_worker": null,
+    "current_worker": "visible_restore_completion",
     "next_worker": null,
     "reason": "Repeated native setup/readiness failures under parallel probes; one exact owned target per bounded run"
   },
   "owned_monitor": {
-    "unit": "cw241-acceptance-monitor-dev30.service",
-    "pid": 2318910,
-    "prefix": "0.22.0.dev30-c7d7279",
-    "preexisting_records": 0,
-    "health": "loop; managed reader verified",
+    "unit": "cw241-acceptance-monitor-dev31-diagnostic.service",
+    "pid": 2913759,
+    "prefix": "0.22.0.dev31-b6dcb3f",
+    "health": "loop and managed reader verified",
     "max_seconds": 1200,
-    "cleanup_pending": false,
-    "previous_unit": "dev29 monitor stopped, cancelled own record only",
-    "process_absent": true,
-    "termination": "Verified journal RuntimeMaxSec reached21:37:50Central; no pending/firing records; accepted submitted proof retained"
+    "cleanup_pending": true,
+    "diagnostic": "exception-only wrappers log and rethrow at original owners; no behavior substitution"
   },
   "shared_repairs": [
     {
@@ -272,10 +269,19 @@
       "wheel_sha256": "c7d7279a6a57c0f66045eba8833adabb10eba35c1f3d50680dc6a792d5b420a3",
       "checks": "36source+36UID1017 PASS;339payloads equal mergedmain/install",
       "cause": "Captured real native loadedmetadata TimeoutError5.395s with fasttmux; shared15s fullobservation budget, no partial/ambiguous acceptance"
+    },
+    {
+      "pr": 677,
+      "source": "9d842651",
+      "merged_main": "9b73e307",
+      "state": "deployed",
+      "version": "0.22.0.dev31",
+      "checks": "23 source+23 UID1017 PASS;349 package members exact parity",
+      "cause": "Trusted OAuth controller erroneously rejected before explicit route permission evaluation; session exact-self retained"
     }
   ],
   "state": "active",
-  "remaining_gate": "Operator decision: adopt root-wide restrictive common permission policy for visible restore, or preserve permissions and leave #668 open",
+  "remaining_gate": "Actual visible restoration acceptance and cleanup for #668; approved common-policy adoption completed",
   "review_gate": "User requested review/TDD after ticket closure; #668 remains open",
   "local_presubmit": {
     "command": "PYTHONPATH=src:tests installed-dev30-Python -m unittest test_tty_inventory_batch test_sessions test_wake_session_modes test_wake_mode_runtime test_unified_session_input test_native_input_reconciliation test_external_oauth_connector test_connector_busy_policies test_recurring_schedules test_controller_schedule_auth -q",
