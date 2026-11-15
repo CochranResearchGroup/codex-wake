@@ -95,12 +95,25 @@
       "issue": 667,
       "title": "Verify this-session-only wake lifetime",
       "blockers": [],
-      "state": "running",
+      "state": "validated",
       "worker": "connector_session_only_wake",
       "owned_paths": [],
-      "validation": [],
+      "validation": [
+        {
+          "outcome": "PASS",
+          "installed": "0.22.0.dev30",
+          "boundary": "deployed OAuth/MCP +realownedTTYclient",
+          "armed": true,
+          "missingmode": "explicit_schedule_fields_required",
+          "detachment": "realownPTYclient1\u21920; scheduleenabled",
+          "closure": "cancelled:session_closed",
+          "past_due_inputs": 0,
+          "occurrences": [],
+          "cleanup": "schedulecancelled/grantrevoked/threadarchived/ownTUIandPTYclientabsent"
+        }
+      ],
       "tracker_state": "OPEN",
-      "result_sha": "fbc440237a254bdb59db84d58f4d4e994e7c0907",
+      "result_sha": "8b510c4949d3c991515da489adae66c949a77a67",
       "blocker": null,
       "live_state": "sole_live_slot_retest_after_qualified_repair"
     },
@@ -196,8 +209,8 @@
   },
   "live_resource_schedule": {
     "serial": true,
-    "current_worker": "connector_session_only_wake",
-    "next_worker": "connector_background_wakes",
+    "current_worker": "connector_background_wakes",
+    "next_worker": "connector_restart_continuity",
     "reason": "Repeated native setup/readiness failures under parallel probes; one exact owned target per bounded run"
   },
   "owned_monitor": {
