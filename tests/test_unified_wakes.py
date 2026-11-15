@@ -1,4 +1,5 @@
 """Canonical schedule controls retain stable public schedule identities."""
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -40,7 +41,7 @@ class UnifiedWakeTests(unittest.TestCase):
         from codex_wake.controller_auth import OAuthAuthority,AuthError
         from codex_wake.controller_http import ProtectedOperations
         from test_unified_connectors import ConnectorTests
-        with tempfile.TemporaryDirectory() as d,patch('codex_wake.sessions.observe',return_value={'complete':False,'sessions':[]}):
+        with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'CODEX_WAKE_CODEX_CMD':'/bin/true'}),patch('codex_wake.sessions.observe',return_value={'complete':False,'sessions':[]}):
             auth=OAuthAuthority(Path(d)/'auth.sqlite',issuer='https://wake.test',resource='https://wake.test/controller')
             token=ConnectorTests().token(auth,['control','content.observe'],[dict(host='h',environment='e')])
             owner=ProtectedOperations(auth,SimpleNamespace(host='h',environment='e',inventory=SimpleNamespace(root=Path(d))))
