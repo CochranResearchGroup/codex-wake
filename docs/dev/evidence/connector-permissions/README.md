@@ -32,10 +32,10 @@ A first run stopped before credential issuance because an empty native
 supported yet`. The same error reproduced while retaining the creator websocket;
 retaining that connection is therefore not a remedy. This script instead uses
 the applicable native empty-thread metadata and queue observations. It sends no
-setup/model prompt and never addresses the operator's conversation. The initial
-empty target and bounded raw-error probe were separately archived; a repeated
-archive refusal for an already unavailable preliminary target was retained in
-private diagnostic output rather than retried destructively.
+setup/model prompt and never addresses the operator's conversation. The bounded raw-error probe was separately archived. Archiving an earlier
+preliminary target was refused; a complete native loaded-thread listing then
+verified it was absent. That refusal is retained in private diagnostics rather
+than hidden or retried destructively.
 
 ## Reproduction
 
@@ -56,3 +56,15 @@ Focused checks: `python3 -m compileall -q scripts/connector_permissions_acceptan
 and `git diff --check` passed. Hosted CI was not run under repository cost policy.
 No connector restart, native daemon restart, plugin change or account alteration
 occurred. Memory disposition: `forbidden` — no explicit memory write requested.
+
+Existing generation-guard regressions also passed (2 tests, 36.055s):
+
+```sh
+PYTHONPATH=src:tests "$CONNECTOR_PREFIX/bin/python" -m unittest \
+  test_pinned_native_lookup.PinnedNativeLookupTests.test_changed_target_cannot_use_fast_path \
+  test_local_sessions -q
+```
+
+The first refuses a changed pinned target; the second exercises real CLI/Unix
+peer discovery and rejects stale generation. These establish the intended
+identity guard separately from the less precise live registry refusal above.
