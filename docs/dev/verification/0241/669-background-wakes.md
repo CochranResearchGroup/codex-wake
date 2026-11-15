@@ -113,7 +113,11 @@ The actual public OAuth/MCP background schedule was armed with the monitor ready
 Cleanup was verified: public schedule cancelled, wake cancelled, disposable
 thread archived, owned TUI absent, and temporary OAuth grant revoked with HTTP
 401 readback. The product also emitted its own attention notice
-`attention_46edc7d7954e489488e4732df150b076`; this lane has not acknowledged it.
+`attention_46edc7d7954e489488e4732df150b076`; under explicit coordinator authority,
+this exact owned notice was closed through the installed `AttentionQueue.close`
+owner method with revision/fingerprint checks and a cancellation/zero-input
+reason. Readback confirmed status `closed`, revision 2, and retained history
+events `requested`, `closed`. No other notice changed.
 The closed-tab due case did not run after the live-path failure. Ticket 669 stays
 open. The coordinator stopped further baseline probes and owns the product
 repair, qualification and deployment before retest.
@@ -130,6 +134,8 @@ Private evidence directory:
 - `live-authoritative-readiness-20261115.json`: actual armed due case and cleanup.
 - `live-failure-reconciliation-20261115.json`: exact wake, zero native inputs and
   cleanup readback.
+- `attention-cleanup-20261115.json`: exact owned notice before/after/readback;
+  original audit history retained.
 
 Local `py_compile` and `git diff --check` passed after script changes. These are
 preparation checks, and the live outcome is FAIL, not acceptance. Hosted CI was
