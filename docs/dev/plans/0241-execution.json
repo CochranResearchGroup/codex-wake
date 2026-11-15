@@ -242,9 +242,9 @@
     "reason": "Repeated native setup/readiness failures under parallel probes; one exact owned target per bounded run"
   },
   "owned_monitor": {
-    "unit": "cw241-acceptance-monitor-dev33.service",
-    "pid": 3019902,
-    "prefix": "0.22.0.dev33-68d3ef0",
+    "unit": "cw241-acceptance-monitor-dev34.service",
+    "pid": 3077958,
+    "prefix": "0.22.0.dev34-c3cf1d1",
     "health": "loop and managed reader verified",
     "max_seconds": 1200,
     "cleanup_pending": true,
@@ -296,6 +296,15 @@
       "version": "0.22.0.dev33",
       "checks": "37 source+37 UID1017 PASS;349package members parity",
       "cause": "Guest-clock samples validated against trusted authority; now uses authoritative owner clock uniformly"
+    },
+    {
+      "pr": 680,
+      "source": "17a80476",
+      "merged_main": "c36e29e3",
+      "state": "deployed",
+      "version": "0.22.0.dev34",
+      "checks": "38source+38UID1017PASS;349package members parity",
+      "cause": "tmux creation acknowledged before frontend attachment; bounded original-intent reconciliation, no relaunch/deadline extension"
     }
   ],
   "state": "active",
@@ -316,8 +325,8 @@
   },
   "scope_extension": "Operator approved host-wide common-policy adoption; supported revision1 activated, existing named defaults preserved, exact disposable recovery grant only.",
   "installed": {
-    "version": "0.22.0.dev33",
-    "wheel_sha256": "68d3ef01737a615db29712c40596e6d9832bc04bc5b0653d3b3a0a26153480e8",
-    "merged_source": "4e41408979e0e4fe70b4d89310d85351695aa127"
+    "version": "0.22.0.dev34",
+    "wheel_sha256": "c3cf1d17d0fd4c95557f3fba9efc5c52e19ff5cb61df47ad9e0fbc0fa2288458",
+    "merged_source": "c36e29e38642ce438dc630839ead5e0343df0219"
   }
 }

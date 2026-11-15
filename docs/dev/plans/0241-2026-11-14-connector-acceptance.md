@@ -7,7 +7,7 @@ Finish by validating each integrated ticket, closing accepted child tickets whil
 Cleanup trigger: ticket integrated and remote custody established; close worker checkouts promptly. Integration checkout retained until review and final validated handoff. Memory disposition forbidden: no explicit memory write request.
 
 
-## Current checkpoint
+## Superseded checkpoint before authorized continuation
 
 Eight child tickets closed from actual deployed acceptance: #664, #665, #666, #667, #669, #670, #671, #672. #668 remains open; no visible due restoration proof is claimed. The proposed restrictive policy is reviewable in docs/dev/evidence/0241-visible-wake-668.md. It would activate the common resolver for the whole controller root, beyond disposable profile configuration. No such policy was activated.
 
@@ -15,7 +15,7 @@ Two real prerequisites were repaired through merged PR673 and PR675: one process
 
 Exactly one broad Standards/Spec review and one bounded TDD remediation pass remain pending, following the operator's requested order after tickets close. Neither pass has run. Root must not silently count targeted prerequisite checks as that review or mark the parent issue closed.
 
-## Resume
+## Historical resume instructions before authorization
 
 1. Recover exact remote feat/connector-acceptance tip and 0241-execution.json. Preserve unrelated dirty primary checkout; recreate the owned integration checkout only if needed.
 2. Read the operator's scope decision before touching common-policy adoption. Root-wide adoption is not isolated to one profile; use the reviewed restrictive proposal only under that authority. Worker connector_visible_wake retains #668 ownership and remote checkpoint test/connector-visible-wake d7b1be68; its prior setup failures are not acceptance.
@@ -35,3 +35,6 @@ Visible due attempts on dev31 did not pass: the first held unknown ownership, th
 
 
 The actual dev32 due attempt reached the repaired observer but held `observation_stale`, again zero launch/native-input effects. Read-only measured guest wall time about0.5s ahead of the qualified trusted upper bound: SavedRuntime's observer used guest time while AgentResume validated trusted time. PR679 propagates the authoritative owner clock through SavedRuntime and the live-wake subclass. No clock adjustment, skew allowance, freshness relaxation or fabricated observation was introduced. Existing public restore regression with guest time60s ahead failed observation_stale before fix;37 source PASS7.202s,37 UID1017 PASS7.509s. Exact immutable dev33 SHA25668d3ef01737a615db29712c40596e6d9832bc04bc5b0653d3b3a0a26153480e8,349package members equal source/UID/working/mergedmain4e414089. Normal dev33 monitor qualified before same-recipient due retest. All prior failures retained separately.
+
+
+The dev33 due created one owned frontend but sampled before it attached; its starting journal and original expiry remain untouched. Cleanup's exact OS census confirms that frontend is absent, the prior recipient is archived and its managed agent suppressed through the supported owner; no native input was submitted. A new disposable recipient was prepared for the next bounded acceptance and common policy revision2 replaces rather than unions the old recovery target. PR680 adds bounded same-intent reconciliation in LiveWakeRestorer, within the named profile timeout and original wake expiry. AgentResume's journal prevents another launch, including after uncertain responses. Public regression red `resume_binding_not_confirmed` before fix;38sourcePASS6.727s,38UID1017PASS7.483s. Exact dev34 wheel SHA256c3cf1d17d0fd4c95557f3fba9efc5c52e19ff5cb61df47ad9e0fbc0fa2288458 has349payloads equal source/UID/working/mergedmainc36e29e3. Native2082 retained. Normal dev34 monitor ready before actual due activation; failed attempts never count as acceptance.
