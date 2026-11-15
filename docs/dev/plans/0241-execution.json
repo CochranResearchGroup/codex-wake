@@ -89,11 +89,12 @@
       "issue": 668,
       "title": "Verify re-open-session-live wake restoration",
       "blockers": [],
-      "state": "running",
+      "state": "blocked",
       "worker": "connector_visible_wake",
       "owned_paths": [],
       "validation": [],
-      "tracker_state": "OPEN"
+      "tracker_state": "OPEN",
+      "blocker": "Host restore bindings and global common permission policy absent; operator scope decision pending. No policy activated."
     },
     {
       "issue": 669,
@@ -125,7 +126,7 @@
           "cleanup": "grant revoked/401; thread archived"
         }
       ],
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "result_sha": "ead71ac9e164917aa7901661cb00b71597143897"
     },
     {
@@ -171,5 +172,11 @@
   "worker_worktree_cleanup": {
     "connector_permissions": "removed by worker after exact remote custody",
     "connector_busy_policies": "removed by coordinator after clean status and exact remote SHA d9b36fcc"
+  },
+  "live_resource_schedule": {
+    "serial": true,
+    "current_worker": "connector_background_continuity",
+    "next_worker": "connector_session_only_wake",
+    "reason": "Repeated native setup/readiness failures under parallel probes; one exact owned target per bounded run"
   }
 }
