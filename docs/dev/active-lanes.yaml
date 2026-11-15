@@ -9,7 +9,7 @@ lanes:
     branch: feat/connector-acceptance
     target: origin/main
     plan_state: BLOCKED
-    custody_state: CHECKPOINTED
+    custody_state: ACTIVE
     dependencies: []
     overlaps: []
     updated_at: 2026-11-14
