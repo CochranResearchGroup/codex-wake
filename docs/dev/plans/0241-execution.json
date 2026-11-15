@@ -5,7 +5,7 @@
   "spec": "docs/dev/plans/0241-connector-acceptance-spec.md",
   "integration_branch": "feat/connector-acceptance",
   "base": "882aae8007e71cc2641c66a742e340e6cf007310",
-  "tip": "882aae8007e71cc2641c66a742e340e6cf007310",
+  "tip": "013e5898a0a1fc2827af0f024130dd30e2fb574a",
   "review_fixed_point": "882aae8007e71cc2641c66a742e340e6cf007310",
   "review_runs": 0,
   "remediation_passes": 0,
@@ -60,7 +60,7 @@
           "cleanup": "own thread archived/grant revoked/zero owned sleep shells"
         }
       ],
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "worker_branch": "test/connector-busy-policies",
       "result_sha": "d9b36fcce5522fcb3fa50e740c49180971d1bb05",
       "integration_commit": "b8965671"
@@ -154,5 +154,9 @@
       "validation": [],
       "tracker_state": "OPEN"
     }
-  ]
+  ],
+  "worker_worktree_cleanup": {
+    "connector_permissions": "removed by worker after exact remote custody",
+    "connector_busy_policies": "removed by coordinator after clean status and exact remote SHA d9b36fcc"
+  }
 }
