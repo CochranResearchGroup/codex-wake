@@ -89,8 +89,8 @@
       "issue": 668,
       "title": "Verify re-open-session-live wake restoration",
       "blockers": [],
-      "state": "pending",
-      "worker": null,
+      "state": "running",
+      "worker": "connector_visible_wake",
       "owned_paths": [],
       "validation": [],
       "tracker_state": "OPEN"
@@ -109,11 +109,24 @@
       "issue": 670,
       "title": "Demonstrate structured slash discovery and result retrieval",
       "blockers": [],
-      "state": "running",
+      "state": "validated",
       "worker": "connector_slash_roundtrip",
-      "owned_paths": [],
-      "validation": [],
-      "tracker_state": "OPEN"
+      "owned_paths": [
+        "scripts/connector_slash_roundtrip_acceptance.py",
+        "docs/dev/verification/0241/670-slash-roundtrip.md"
+      ],
+      "validation": [
+        {
+          "state": "worker_live_pass_pending_integration",
+          "boundary": "deployed OAuth/MCP",
+          "slash": "/status",
+          "model_submission": false,
+          "unsupported": "/model refused",
+          "cleanup": "grant revoked/401; thread archived"
+        }
+      ],
+      "tracker_state": "OPEN",
+      "result_sha": "ead71ac9e164917aa7901661cb00b71597143897"
     },
     {
       "issue": 671,
