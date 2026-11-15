@@ -13,7 +13,7 @@ lanes:
     dependencies: []
     overlaps: []
     updated_at: 2026-11-15
-    disposition: Clock authority selection pending; preserve native provider lane and working daemon
+    disposition: Stable Time selected; bounded persistence red/green active; preserve native provider lane and working daemon
 
   - id: native-queue-694
     owner: root / ecochran76

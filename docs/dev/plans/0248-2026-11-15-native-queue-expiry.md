@@ -21,8 +21,8 @@ At the model-turn admission boundary, independently qualified UTC bounds decide:
 upper < expiresAt permits admission; lower >= expiresAt expires; a straddling
 interval or unavailable/stale/untrusted evidence holds. Equality never permits
 start. Obtain time from host-owned authority, never prompt/sender metadata or
-an arbitrary subscriber's currentTime/read response. Proposed authority is the
-existing Stable Time service; operator clock-source selection is pending.
+an arbitrary subscriber's currentTime/read response. Authority is the existing Stable Time service, explicitly selected by the
+operator on 2026-11-15.
 No wall-clock fallback. Clock rollback, changed counter epoch or unavailable
 post-restart evidence holds rather than extending the deadline.
 
@@ -34,9 +34,13 @@ crash after admission before resend: no exactly-once claim from delete-after-sta
 
 ## Discovered implementation boundaries
 
-Modified Codex source f986f6ed53d6b324aedbd7e32991e0185eacae14 has queue API;
-upstream main inspected bdd282f3bb lacks that same extension. Current provider
-lane is a separate active checkout and must not be edited or silently adopted.
+The initial saved modified source f986f6ed53d6b324aedbd7e32991e0185eacae14
+is version0.167 and is not the installed0.169 source. Correct native baseline is
+upstream release tag rust-v0.169.0, peeled commit
+d32063f96c2dff1dc96af839b3952abb6acfeda4. Its queue schema includes the
+responsesapiClientMetadata field observed in installed0.169. The unrelated
+provider lane remains untouched. Initial0.167 state-test compile is retained as
+an invalidated input attempt; no0.167 build may qualify a0.169 installation.
 Native ext/queue/service owns process-local dispatch lock and queue selection;
 thread-store QueueStore and state queue runtime own persistence. Existing dispatch
 starts a turn and only subsequently deletes the queued item. A superficial
@@ -65,3 +69,27 @@ UTC bounds for this safety contract.
 No mock-only native claims, synthetic qualified clock in live acceptance,
 production policy changes, incidental provider changes or fixture framework.
 Memory writes forbidden absent explicit user request.
+
+## Stable Time integration decision (operator selected)
+
+Use the existing audited Stable Time client validation rather than a second
+interpretation of NTS/host-counter bounds. Native may invoke a pinned, host-owned
+clock reader independently of Wake scheduling; no watcher heartbeat or queued
+sender payload supplies clock authority. The native startup configuration owns
+an absolute executable/config path. No shell, prompt interpolation or RPC-supplied
+command. Missing reader/config, invalid output, timeout, changed epoch or stale
+bounds holds bounded work. Existing snapshot fallback to plain NTP must never be
+used by this reader. Bound output and elapsed transport time; account for time
+between sampling, native reception and admission conservatively.
+
+Persistence test seam: SqliteQueueStore public methods, real private SQLite,
+reopen through StateRuntime; protects immutable original expiry and terminal
+cancellation, not actual native model admission. Native admission seam: public
+thread/queue methods plus actual core input history; protects expiry/hold/control
+and restart reconciliation. Separate-UID live scenario is still required even
+when both focused seams pass.
+
+The first compile attempt could not locate cargo in the Cargo Signal process
+PATH; retry uses its absolute installed executable. The first source compile on
+0.167 demonstrated the missing methods but was invalidated as release evidence.
+The identical state behavior test is rerun on the pinned0.169 tag before green.
