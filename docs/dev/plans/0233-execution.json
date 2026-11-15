@@ -144,7 +144,7 @@
         "T4"
       ],
       "owner": "primary",
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "acceptance": [
         "An OpenAI parent can explicitly select a Grok worker and vice versa through normal Codex worker controls.",
@@ -166,8 +166,12 @@
         "Canonical selection and cumulative usage attribution",
         "Focused public worker/auth/usage checks"
       ],
-      "progress": "Account revision pinning source slice green (auth9/catalog1/native selection1); native mixed-worker selection/inheritance and canonical usage acceptance remain unfinished.",
-      "progress_evidence": "docs/dev/evidence/plan0233/t5-account-pinning-progress.md"
+      "progress": "Source acceptance integrated; tracker closure pending exact published source readback.",
+      "progress_evidence": "docs/dev/evidence/plan0233/t5-mixed-workers-acceptance.md",
+      "result_sha": "45169bbc996d8baf1da130f2f11ac9f09d05ba2f",
+      "native_result_sha": "45169bbc996d8baf1da130f2f11ac9f09d05ba2f",
+      "source_manifest": "runtime/grok-native-233/t5-source-manifest.json",
+      "validation": "Native worker5PASS; actual canonical mixed trees qualified45 each and missing-child-usage unknown/None; shared-budget/role12PASS; schemas/SDK generation+4consistencyPASS; auth9/catalog1/usage13PASS; exact13file patch/tree/bundle custody verified."
     },
     {
       "key": "T6",

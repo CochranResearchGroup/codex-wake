@@ -9809,3 +9809,14 @@ No native upgrade, terminal input or production schedules; MCP imports refresh o
 normal reconnect. Exact proof/limits: [deployment](docs/dev/plans/0173-agent-harness/persistent-wake-deployment.md).
 Owned integration checkout retires after verified closeout remote custody; unrelated
 worktrees preserved. Memory forbidden, zero writes.
+
+## 2026-11-15 | P233 T5 mixed workers source acceptance
+
+Normal mixed worker controls and pinned account/model inheritance are validated.
+Actual disposable native histories qualify in Wake at45 tokens across parent and
+child; missing child usage holds unknown. Native source45169bbc is preserved by
+exact patch/tree/hash custody; focused worker5, allowance/role12 and schema4 checks
+pass. Earlier fixture failures remain classified and retained. Evidence:
+[acceptance](docs/dev/evidence/plan0233/t5-mixed-workers-acceptance.md).
+T5 tracker closure follows published source readback. Parent628 remains open;
+T6 is next, review0/remediation0, no native installation or live provider calls.

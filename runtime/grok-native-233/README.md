@@ -32,3 +32,11 @@ Source deltas omit unchanged context; apply them with `git apply --unidiff-zero`
 against their exact manifest base. This avoids meaningless trailing-space
 context records inside tracked patch data. Each delta was independently applied
 in an isolated Git index and verified against its complete expected source tree.
+
+T5 adds normal mixed-provider worker selection and durable attributed accounting.
+After the exact T2 and T4 deltas, apply `t5-mixed-workers.patch` at its manifest's
+T4 base with `git apply --unidiff-zero`. Its thirteen changed-file hashes and
+complete reconstructed tree are independently verified. Wake private command
+support at ec2d7cda or later is required for accepted-account revision pinning.
+See docs/dev/evidence/plan0233/t5-mixed-workers-acceptance.md for focused local
+acceptance and the remaining continuation, revocation, live and package gates.
