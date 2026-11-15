@@ -40,3 +40,14 @@ complete reconstructed tree are independently verified. Wake private command
 support at ec2d7cda or later is required for accepted-account revision pinning.
 See docs/dev/evidence/plan0233/t5-mixed-workers-acceptance.md for focused local
 acceptance and the remaining continuation, revocation, live and package gates.
+
+T6 adds safe-boundary native provider/account continuations. After T5, apply
+`t6-provider-continuations.patch` at its exact manifest base with
+`git apply --unidiff-zero`. All 39 changed-file hashes and the reconstructed
+complete tree match native 977af9d6c5bf2c5d59de1a46009ffa9a34f00b22.
+The existing thread/fork pathway accepts optional boolean `providerContinuation`;
+Grok provider/account transitions imply it. Linked successors retain original
+identity, permissions, goal and cumulative allowance; cold or uncertain authority
+holds. See docs/dev/evidence/plan0233/t6-provider-continuations-acceptance.md.
+Worker source checks passed; primary custody/integration and issue closure remain
+pending. This does not qualify live accounts, installation, Stop or recovery.

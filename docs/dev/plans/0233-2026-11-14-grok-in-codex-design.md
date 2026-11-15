@@ -270,3 +270,101 @@ T4 selection wire contract (version 1):
 - Qualification requires qualified time, current metadata, current bound native auth without refresh, and independent unexpired entitlement/inference/coding evidence. Missing text/streaming/terminal/file editing/MCP support blocks readiness. Image generation, web search and reasoning summaries are individually disabled by this native adapter regardless of advertised provider metadata. Source readiness does not establish installed package or real-account acceptance.
 
 The native snapshot is constructed by `model/list`, not by the Python resolver: its source revision additionally binds the configured catalog command, arguments, working directory and timeout, and its provider revision binds the accepted provider definition. A Wake `resolve` result is an authority readback; callers select the corresponding native entry by its exact selection ID and submit that native snapshot. A changed source command, provider, account binding, metadata, evidence or readiness holds a stale native snapshot. This pins configuration/source identity, not an installed executable hash; exact installed runtime/package proof remains T8. Client-settings native embedded and remote transports use the existing thread-start override. Hosted transports whose settings owner is the server hold this selection explicitly, rather than silently starting that server's default model.
+
+## T6 worker source contract (primary custody pending)
+
+The public continuation pathway is native `thread/fork`, using the existing
+provider/model overrides and exact `config.inference_selection` snapshot. A
+provider or account change uses portable context automatically. An additive,
+default-false `providerContinuation` intent distinguishes the native picker's
+same-account selection from an ordinary independent `/fork`; analytics labels
+must not carry authorization semantics.
+
+Native Codex stages a continuation without interrupting the current task. A
+native-owned durable handoff record fences future source admission while the
+current task finishes and while successor creation is unresolved. Recovery of
+an unresolved record holds instead of replaying actions or reopening the source
+with a new allowance. The record contains public identity/revision/status only,
+not credentials, provider-private state, or a second spending ledger.
+
+The successor retains canonical `parent_thread_id` and `forked_from_id` pointing
+to the source, plus its original `session_id` and shared agent controller. Live
+permissions, instructions, environment bindings, original cumulative allowance
+and governor guards are inherited from the source. Only the admitted inference
+selection changes. Source response/completion/usage records are retained there;
+copying them into the successor would double-charge the shared task.
+
+Portable context contains objective/constraints and bounded public working
+context plus inert records of completed tools and source/checkpoint references.
+It contains no executable tool-call history, encrypted reasoning, auth config,
+or provider metadata. Missing required context, unmatched/unknown actions,
+stale account binding or unpreservable authority holds the transition. Existing
+ordinary OpenAI model updates retain their normal in-thread behavior.
+
+These are implementation obligations for #636, not completed acceptance. T8
+still owns real-account and installed-package proof.
+
+The T6 intent supersedes T4's temporary new-conversation picker behavior. The
+existing public `thread/fork` accepts `providerContinuation: true`, `model`,
+`modelProvider` and the admitted `config.inference_selection`. Grok provider or
+account transitions imply the intent even when the flag is omitted. Ordinary
+known Responses-provider forks retain their existing independent-fork semantics.
+A cold registered/configured Grok transition holds because the original live
+controller cannot be established; reopening history never grants a new allowance.
+The response retains `thread.sessionId` from the original task and sets both
+`thread.parentThreadId` and `thread.forkedFromId` to the source. The TUI verifies
+those fields against a source read, plus the exact requested provider/model,
+before adopting the successor. An older server's independent fork is not adopted.
+
+The native version-1 record is
+`CODEX_HOME/provider_continuations/SOURCE_THREAD_ID.json`, private and owned,
+with `source`, `successor`, `session_id`, source/target provider and selection,
+`state`, `authority_revision`, `context_revision` and optional `held_reason`.
+States are `staged`, `preparing`, `ready` and `held`. The original live runtime's
+actual shared budget/admission/registry objects are required; matching display
+IDs do not qualify a new controller. An unresolved or cold record holds future
+work. This is a lifecycle fence, not a second spending ledger or a recovery grant.
+The Rust host completes its existing goal transfer through
+`ThreadManager::complete_provider_continuation(source, successor)` before the
+successor admits work. Goal identity, objective, original budget, spent tokens,
+active time and status must match the source; an intentionally deferred goal
+stays deferred. Otherwise an inherited active goal continues without another
+user turn. T7 owns explicit recovery/revocation behavior; this record does not
+authorize reconstructing lost allowance or replaying actions.
+
+The bounded model-visible checkpoint contains `sourceThreadId`,
+`objectiveAndConstraints`, `recentPublicContext` and `completedToolResults`.
+Completed records retain original `sourceThreadId`, `callId`, tool name, result,
+full-result revision and truncation marker. Subsequent handoffs restore this
+strictly typed native checkpoint and flatten its inert results, preserving
+attribution across provider/account roundtrips. They do not reinterpret arbitrary
+developer messages as completion proof. Objectives/constraints are bounded to
+32 KiB, recent public commentary to eight 2-KiB entries, results to 128 2-KiB
+entries and the complete checkpoint to 64 KiB; required context that cannot fit
+holds instead of disappearing. Executable calls, encrypted reasoning and opaque
+provider metadata remain in the source. Unmatched/ambiguous actions, unfinished
+descendants, background terminal actions or uncertain source completion hold.
+No current task is implicitly interrupted by selecting another account/model.
+
+A live empty chat first materializes its canonical source metadata before the
+handoff reads history; it does not invent user input or replace the controller.
+Input admission keeps managed provider requirements in force and revalidates an
+exact qualified Grok snapshot against its bound catalog. A selected Grok thread
+can therefore accept input while OpenAI remains the default. The reverse OpenAI
+route is admitted only from a ready native record with the original live runtime
+and allowance; an account label or copied ID is insufficient. Other retained
+routes keep the existing current-profile mismatch checks. The proof is derived
+from existing native lineage/journal state, so no client-supplied authorization
+flag or new remote schema field is introduced.
+
+Source settings-owned next-turn guards and captured task leases occupy their
+existing separate extension-data scopes. Normal governed/goal admission combines
+them, preserving pending constraints instead of overwriting one with the other;
+unrelated new operator turns retain the original task-family semantics. This
+preserves existing cancellation/allowance authority and does not implement T7
+Stop, logout or recovery operations.
+
+Before spawning, a handoff validates active and pending task leases together.
+Different lease IDs for the same scope hold with conflicting ownership; neither
+lease is cancelled or silently replaced. Distinct ancestor and successor scopes
+retain their original identities through normal governed admission.
