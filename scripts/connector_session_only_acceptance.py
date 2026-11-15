@@ -37,7 +37,7 @@ async def main(reuse_thread=None):
     import os
     os.umask(0o077)
     output=Path.home()/'.local/state/codex-wake/connector-acceptance-spec'/('session-only-'+secrets.token_hex(4)+'.json')
-    grant=None;thread=None;created_tmux=False;receipt=dict(ticket=667,status='running',boundary='deployed HTTPS OAuth/MCP')
+    grant=None;thread=None;created_tmux=False;attach_pid=None;pty_master=None;receipt=dict(ticket=667,status='running',boundary='deployed HTTPS OAuth/MCP')
     from websockets.sync.client import unix_connect
     connection=unix_connect(endpoint[7:],open_timeout=10,close_timeout=1,compression=None,max_size=32*1024*1024)
     sequence=0
@@ -105,6 +105,33 @@ async def main(reuse_thread=None):
             receipt['native_attachment_snapshot']=snap
             assert len(rows)==1,'native attachment missing'
             receipt['attachment']=rows[0]['attachments'][0]
+            def clients():
+                command=subprocess.Popen(['tmux','list-clients','-F','#{client_pid}\t#{session_name}\t#{client_tty}'],stdout=subprocess.PIPE,text=True)
+                stdout,_=command.communicate(timeout=5)
+                assert command.returncode==0
+                found=[dict(zip(('pid','session','tty'),line.split('\t'))) for line in stdout.splitlines() if len(line.split('\t'))==3 and line.split('\t')[1]==tmux_name]
+                # tmux includes its transient command client; exclude only this exact owned PID.
+                return [row for row in found if row['pid']!=str(command.pid)]
+            receipt['clients_before_attach']=clients()
+            import pty
+            import os
+            attach_pid,pty_master=pty.fork()
+            if attach_pid==0:
+                os.environ.pop('TMUX',None);os.environ['TERM']='xterm-256color'
+                os.execvp('tmux',['tmux','attach-session','-t',tmux_name])
+            os.set_blocking(pty_master,False)
+            deadline=time.monotonic()+10
+            while time.monotonic()<deadline:
+                try:os.read(pty_master,65536)
+                except BlockingIOError:pass
+                attached_clients=clients()
+                if any(row['pid']==str(attach_pid) for row in attached_clients):break
+                await asyncio.sleep(.1)
+            owned_clients=[row for row in attached_clients if row['pid']==str(attach_pid)]
+            assert len(owned_clients)==1 and owned_clients[0]['tty'],attached_clients
+            receipt['attached_client']=owned_clients[0]
+            receipt['other_clients_while_attached']=[row for row in attached_clients if row['pid']!=str(attach_pid)]
+
 
             verifier=secrets.token_urlsafe(48);challenge=base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
             redirect=config['redirect_uris'][0]
@@ -134,8 +161,14 @@ async def main(reuse_thread=None):
                             assert registered.get('status')=='completed',registered
                             schedule=registered['result'];receipt['schedule_id']=schedule['id']
                             assert schedule['armed'],schedule
-                            # A detached tmux session retains its recipient client/pane.
-                            assert subprocess.check_output(['tmux','display-message','-p','-t',tmux_name,'#{session_attached}'],text=True).strip()=='0'
+                            # Detach only the real PTY client created by this process.
+                            assert [row for row in clients() if row['pid']==str(attach_pid)]==[receipt['attached_client']]
+                            subprocess.run(['tmux','detach-client','-t',receipt['attached_client']['tty']],check=True)
+                            os.waitpid(attach_pid,0);attach_pid=None
+                            os.close(pty_master);pty_master=None
+                            receipt['clients_after_detach']=clients()
+                            assert not any(row['pid']==receipt['attached_client']['pid'] for row in receipt['clients_after_detach'])
+                            receipt['attached_client_transition']='1_to_0'
                             await asyncio.sleep(3)
                             shown=decode(await session.call_tool('wake_wakes_schedules_show',dict(schedule_id=schedule['id'])))['result']
                             assert shown['state']=='enabled',shown
@@ -155,6 +188,12 @@ async def main(reuse_thread=None):
                             receipt.update(status='passed',native_inputs_after_closure=0,observed_past_due=True)
 
     finally:
+        if attach_pid is not None:
+            attached=receipt.get('attached_client')
+            if attached:subprocess.run(['tmux','detach-client','-t',attached['tty']],capture_output=True)
+            try:os.waitpid(attach_pid,0)
+            except ChildProcessError:pass
+        if pty_master is not None:os.close(pty_master)
         if receipt.get('schedule_id'):
             try:
                 from codex_wake.recurring_schedules import ScheduleStore

@@ -5,7 +5,7 @@ acceptance script and this evidence summary. The integration owner maintains
 ledger 0241, product repairs, deployment and issue closure.
 
 Source base: `882aae8007e71cc2641c66a742e340e6cf007310`.
-Installed acceptance prefix:
+Initial installed acceptance prefix:
 `~/.local/share/codex-wake/releases/0.22.0.dev28-1fb9180`.
 
 The script addresses one newly seeded native conversation, resumes its exact
@@ -30,7 +30,7 @@ PREFIX/bin/python scripts/connector_session_only_acceptance.py --run-live
 
 ## Evidence status
 
-Live acceptance is **BLOCKED**, not passed. Ticket #667 remains open. Initial attempts exposed setup
+Historical dev28/dev29 status was **BLOCKED**, not passed; the dev30 acceptance below supersedes that status. Initial attempts exposed setup
 constraints rather than proving scheduler behavior: native attachment requires
 matching native conversation name and actual pane working directory; remote
 resume must not override permissions. Two initial unattached-recipient attempts
@@ -72,8 +72,8 @@ The initial exact-thread narrowing repair proposal is withdrawn: it could hide
 other loaded conversations with matching names/directories and weaken ambiguity
 checks. A shared repair requires causal evidence while preserving full candidate
 uniqueness and process ownership fences. No product change is justified yet.
-Detachment survival, closure cancellation and past-due non-delivery remain
-unverified because registration did not complete.
+At that checkpoint, detachment survival, closure cancellation and past-due
+non-delivery were unverified because registration did not complete.
 
 Memory disposition: `forbidden`; the coordinator explicitly prohibited memory
 writes. A private non-write receipt records this boundary outside Git.
@@ -121,3 +121,54 @@ capture did **not** hold the recurring-schedules lock. No lock-cause claim follo
 No grants, schedules, model turns, new conversations or source changes were made
 by the recording diagnostic. The same recipient was archived and its session
 removed again. The integration owner retains repair and deployment authority.
+
+## Final dev30 acceptance: PASS
+
+The same owned archived recipient was reused after the coordinator qualified and
+deployed dev30. Product source `c7d7279` was exercised through the actual protected
+connector and its ready owned monitor. Installed prefix:
+`~/.local/share/codex-wake/releases/0.22.0.dev30-c7d7279`.
+The acceptance script ran from the lane at `f3deb05f` plus the now-committed PTY
+client observation/detachment refinement. Exact command:
+
+```sh
+~/.local/share/codex-wake/releases/0.22.0.dev30-c7d7279/bin/python scripts/connector_session_only_acceptance.py --run-live --reuse-thread OWNED_UUID
+```
+
+`OWNED_UUID` is retained in the private ownership receipts. No new conversation
+or setup model turn was created during this final run. Private passing receipt:
+`session-only-d71140b7.json` under the receipt directory above.
+
+- Missing session mode was refused before registration.
+- Complete explicit policies registered schedule
+  `schedule_641e3d3ba737f8b7ee5fe5499bd21618` as **armed**.
+- One real PTY tmux client was created and mapped by its exact PID and nonempty
+  terminal name. Detaching only that client proved its attached count changed
+  from one to zero; the recipient remained alive and the schedule stayed enabled.
+  Other client observations were preserved. In particular, transient command
+  clients must not be mistaken for the owned interactive client.
+- Destroying only `cw667-session-only` ended the real recipient TUI. The ready
+  monitor canceled the schedule with reason `session_closed`.
+- Observation through five seconds past the first due time
+  `2026-11-15T03:24:54.474551Z` showed `occurrences=[]` and zero new native user
+  inputs. The original setup input remained the sole native user message.
+- Final cleanup retained a canceled schedule, revoked the temporary grant,
+  archived the same test conversation, reaped the owned PTY client, closed its
+  file descriptor and removed the owned session. No monitor was started by this
+  lane. No occurrence or wake delivery existed to create an owned delivery notice.
+  Fresh process/session readback found no owned acceptance/attach process and
+  only the retained operator default tmux session. Root-owned services remained
+  running under the coordinator's custody.
+
+Two earlier dev30 script checks stopped after armed admission and were cleaned up:
+`session-only-76b61715.json` exposed an ambiguous tmux display target, and
+`session-only-97d48ff3.json` exposed a transient command-client count. The subsequent
+`session-only-9da39732.json` stopped before scheduling while inspecting clients.
+These failures remain retained; they are not hidden by the final pass.
+
+Focused checks `python -m py_compile scripts/connector_session_only_acceptance.py`
+and `git diff --check` passed. The opt-in deployed acceptance above exited zero.
+No default test suite behavior or product source changed in this lane; hosted CI
+was skipped under the CI cost policy. The installed Python supplies the actual
+connector dependencies and native runtime, unlike system Python or hosted CI.
+The integration owner owns ledger reconciliation and ticket closure.
