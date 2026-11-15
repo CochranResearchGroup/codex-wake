@@ -69,21 +69,39 @@
       "issue": 666,
       "title": "Prove conversation continuity after tab closure",
       "blockers": [],
-      "state": "running",
+      "state": "validated",
       "worker": "connector_background_continuity",
-      "owned_paths": [],
-      "validation": [],
-      "tracker_state": "OPEN"
+      "owned_paths": [
+        "scripts/connector_background_continuity_acceptance.py",
+        "docs/dev/evidence/connector-background-continuity/README.md"
+      ],
+      "validation": [
+        {
+          "outcome": "PASS",
+          "boundary": "deployed OAuth/MCP after realTUIclosure",
+          "same_conversation": true,
+          "visible_tab_recreated": false,
+          "answer": "BACKGROUND_CONTINUITY_CONFIRMED",
+          "saved_history": true,
+          "native_loaded_distinct": true,
+          "cleanup": "own threadarchived/grantrevoked/socketgone/processgone"
+        }
+      ],
+      "tracker_state": "OPEN",
+      "result_sha": "1de611fa91a6a17114b2d0ea82920f45c5b880a7",
+      "integration_commit": "f0c3e165"
     },
     {
       "issue": 667,
       "title": "Verify this-session-only wake lifetime",
       "blockers": [],
-      "state": "running",
+      "state": "blocked",
       "worker": "connector_session_only_wake",
       "owned_paths": [],
       "validation": [],
-      "tracker_state": "OPEN"
+      "tracker_state": "OPEN",
+      "result_sha": "fbc440237a254bdb59db84d58f4d4e994e7c0907",
+      "blocker": "Public session_owner_unverified despite exact observed native attachment; read-only causal diagnostic active"
     },
     {
       "issue": 668,
@@ -100,11 +118,12 @@
       "issue": 669,
       "title": "Verify background wake routing with and without a live tab",
       "blockers": [],
-      "state": "pending",
-      "worker": null,
+      "state": "running",
+      "worker": "connector_background_wakes",
       "owned_paths": [],
       "validation": [],
-      "tracker_state": "OPEN"
+      "tracker_state": "OPEN",
+      "live_state": "preparation_only"
     },
     {
       "issue": 670,
@@ -162,11 +181,12 @@
       "issue": 672,
       "title": "Verify original operation continuity across connector restart",
       "blockers": [],
-      "state": "pending",
-      "worker": null,
+      "state": "running",
+      "worker": "connector_restart_continuity",
       "owned_paths": [],
       "validation": [],
-      "tracker_state": "OPEN"
+      "tracker_state": "OPEN",
+      "live_state": "preparation_only"
     }
   ],
   "worker_worktree_cleanup": {
