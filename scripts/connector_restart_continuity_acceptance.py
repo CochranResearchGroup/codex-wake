@@ -60,7 +60,7 @@ async def run(options):
         value = subprocess.run(['systemctl','--user','show','codex-wake-connector.service','--property=MainPID','--value'], check=True, capture_output=True, text=True).stdout.strip()
         assert int(value)>0, 'connector service has no running PID'
         return int(value)
-    connection_context = unix_connect(endpoint[7:], open_timeout=10, close_timeout=1, compression=None, max_size=32*1024*1024)
+    connection_context = unix_connect(endpoint[7:], open_timeout=10, close_timeout=1, ping_interval=None, compression=None, max_size=32*1024*1024)
     connection = connection_context.__enter__(); sequence = 0
     def native(method, params):
         nonlocal sequence
