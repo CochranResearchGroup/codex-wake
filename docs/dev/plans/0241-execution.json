@@ -289,5 +289,12 @@
     "effective_model": "not reported by collaboration runtime",
     "nested_delegation": false,
     "one_ticket_per_worker": true
+  },
+  "status": "active",
+  "scope_extension": "Operator approved host-wide common-policy adoption; supported revision1 activated, existing named defaults preserved, exact disposable recovery grant only.",
+  "installed": {
+    "version": "0.22.0.dev31",
+    "wheel_sha256": "b6dcb3fdcd220dd6152b1914f60c52bd8fc506e168a1321f0bf7f6875ea19690",
+    "merged_source": "9b73e30758e271324a99b00643ef5115c55b6afa"
   }
 }
