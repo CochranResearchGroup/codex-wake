@@ -78,7 +78,10 @@ class GrokSession:
         fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
         with os.fdopen(fd, 'r+') as lock:
             info = os.fstat(lock.fileno())
-            if info.st_uid != os.getuid() or info.st_mode & 0o077 or not stat.S_ISREG(info.st_mode):
+            # Official Grok creates this nonsecret synchronization file as 0644.
+            # Readers cannot replace or mutate it; reject other-user writes,
+            # retain exact owner/type/inode and the official flock protocol.
+            if info.st_uid != os.getuid() or info.st_mode & 0o022 or not stat.S_ISREG(info.st_mode):
                 raise ValueError('insecure_native_lock')
             try:
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)

@@ -151,12 +151,24 @@ class GrokSessionTest(unittest.TestCase):
                 self.assertEqual(run(prefix + ['register', 'personal', '--label', 'Personal', '--auth-path', str(auth)]), 0)
                 self.assertEqual(run(prefix + ['status', 'personal']), 0)
             self.assertNotIn('synthetic-private-bearer', public.getvalue())
+            # Official Grok 1.0.77 creates a nonsecret lock with mode 0644.
+            # Keep its inode/mode unchanged while using the same flock.
+            lock = auth.with_name('auth.json.lock')
+            lock.touch(mode=0o644)
+            lock.chmod(0o644)
+            lock_inode = lock.stat().st_ino
             accepted_revision = json.loads(public.getvalue().splitlines()[-1])['registration_revision']
             private = io.StringIO()
             time = TimeDecision('network', ('stable-time:cloudflare', 'stable-time:netnod'), 1800000000, 1800000001)
             with patch('codex_wake.time_inspection.stable_time_config', return_value='configured'), patch('codex_wake.stable_time.service_time_decision', return_value=time), redirect_stdout(private):
                 self.assertEqual(run(prefix + ['token', 'personal', '--expected-account-revision', accepted_revision]), 0)
             self.assertEqual(private.getvalue(), 'synthetic-private-bearer')
+            self.assertEqual(lock.stat().st_ino, lock_inode)
+            self.assertEqual(lock.stat().st_mode & 0o777, 0o644)
+            lock.chmod(0o666)
+            with self.assertRaisesRegex(ValueError, 'insecure_native_lock'):
+                GrokSession(auth).bearer(1800000001)
+            lock.chmod(0o644)
             rejected, errors = io.StringIO(), io.StringIO()
             with patch('codex_wake.time_inspection.stable_time_config', return_value='configured'), patch('codex_wake.stable_time.service_time_decision', return_value=time), redirect_stdout(rejected), redirect_stderr(errors):
                 self.assertEqual(run(prefix + ['token', 'personal', '--expected-account-revision', 'stale']), 3)
