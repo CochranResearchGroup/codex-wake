@@ -68,3 +68,30 @@ The existing worker owns one causal complete-package rebuild and UID1017
 runtime requalification using existing fixtures, preserving the prior immutable
 package and rollback. No further provider request or replay is scheduled.
 These local checks qualify the diagnostic change, not Grok inference readiness.
+
+## Changed package requalified and verified by primary
+
+The complete diagnostic package at native `df4a89bbd7` has entrypoint SHA256
+`e69b170edb1ab87d7f398796746833bc43538bca34013c9420b6a92b0a0c8d6a` and content
+digest `5443b8cf21ca6be7c6b613916b91f30bc8658e3d7b155934eaaacedeb4596c46`.
+The original package and rollback remain preserved. Its immutable portable
+inventory and job results are in `runtime/grok-native-233/t8-http-package-manifest.json`.
+
+One serialized build passed in 1114.847s. Required UID1017 gates passed:
+upgrade/history/multiclient/reconnect/rollback88.068s, failed-start repair and
+rollback88.960s, saved-history22.856s, and private ownership/refusal10.102s.
+Primary independently verified all six source-package hashes, 34 isolated-user
+package/receipt file hashes, and all five terminal job results. A fresh OS
+process readback matched the 13 protected persistent processes; no owned process
+remained. Worker cache/artifact custody returned without repository edits.
+The previously verified changed Wake wheel and its installed checks are reused.
+
+This qualifies the changed package in the isolated environment, not live Grok
+inference. The earlier manual live window expired at 20:00:25Z. No later provider
+request, automatic replay, login, refresh or allowance reset was performed.
+The next proposed gate is one new text-only diagnostic request using this exact
+package, at most one Grok inference request, zero OpenAI responses, zero tool
+calls and two minutes, subject to explicit operator authorization. It retains
+prior unknown usage and the held tree; it does not resume or reset them. Auth
+must validate without refresh before dispatch. Any renewed uncertainty holds.
+T8 and parent remain OPEN, with broad review/remediation counters zero.
