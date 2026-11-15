@@ -44,6 +44,19 @@ async def main(options):
     receipt=dict(ticket=669,status='running',boundary='deployed HTTPS OAuth/MCP',
         installed_prefix=sys.prefix, source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), prior_art='1de611fa91a6a17114b2d0ea82920f45c5b880a7')
+    from codex_wake.monitor import read_monitor_health
+    from codex_wake.signal_records import probe_managed_reader_capability
+    health=read_monitor_health(root) or {}
+    reader=probe_managed_reader_capability(root)
+    ready=bool(reader and 8 in reader.schema_versions and health.get('mode')=='loop'
+        and all(c in health.get('reader_capabilities',[]) for c in ('recurring_schedules_v1','wake_session_modes_v1')))
+    receipt['monitor_preflight']=dict(health=health,managed_reader_present=reader is not None,ready=ready)
+    if not ready:
+        receipt.update(status='blocked',reason='persistent_monitor_not_ready',native_targets_created=0,
+            grants_created=0,schedules_created=0,memory_disposition='forbidden',
+            memory_reason='Task prohibits memory writes without explicit user request')
+        output.write_text(json.dumps(receipt,indent=2));output.chmod(0o600)
+        raise RuntimeError('Persistent monitor unavailable; no global worker activation authorized')
     from websockets.sync.client import unix_connect
     connection_context=unix_connect(endpoint[7:],open_timeout=10,close_timeout=1,compression=None,max_size=32*1024*1024)
     connection=connection_context.__enter__()
