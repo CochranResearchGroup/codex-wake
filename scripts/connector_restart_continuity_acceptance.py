@@ -148,6 +148,20 @@ async def run(options):
         while not (options.output/'restart-complete').exists() and time.monotonic()<deadline:
             await asyncio.sleep(.25)
         assert (options.output/'restart-complete').exists(), 'controller restart release deadline exceeded'
+        # systemctl returning does not prove the public reverse-proxy upstream
+        # is ready. Observe metadata only; do not retry operation submissions.
+        deadline = time.monotonic()+60
+        readiness = []
+        async with httpx.AsyncClient(timeout=5) as http:
+            while time.monotonic()<deadline:
+                try:
+                    response = await http.get(issuer+'/.well-known/oauth-protected-resource/mcp')
+                    readiness.append(response.status_code)
+                    if response.status_code==200 and response.json().get('resource')==issuer+'/mcp': break
+                except (httpx.HTTPError,ValueError): readiness.append('transport_unavailable')
+                await asyncio.sleep(.25)
+            else: raise AssertionError('public metadata did not become ready after restart')
+        receipt['post_restart_readiness'] = readiness
         receipt['native_after'] = native_identity(); receipt['connector_pid_after'] = connector_pid()
         assert receipt['native_after']==receipt['native_before'], 'native daemon identity changed'
         assert receipt['connector_pid_after']!=receipt['connector_pid_before'], 'connector PID did not change'
