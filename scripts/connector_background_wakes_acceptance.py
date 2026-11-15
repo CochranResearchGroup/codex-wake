@@ -24,6 +24,7 @@ from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 from codex_wake.controller_auth import OAuthAuthority
 from codex_wake.local_sessions import discover
+from codex_wake.sessions import observe
 from codex_wake.shared_app_server import locate_shared_endpoint
 
 
@@ -58,11 +59,13 @@ async def main(options):
         output.write_text(json.dumps(receipt,indent=2));output.chmod(0o600)
         raise RuntimeError('Persistent monitor unavailable; no global worker activation authorized')
     from websockets.sync.client import unix_connect
-    connection_context=unix_connect(endpoint[7:],open_timeout=10,close_timeout=1,compression=None,max_size=32*1024*1024)
+    connection_context=unix_connect(endpoint[7:],open_timeout=10,close_timeout=1,compression=None,ping_interval=None,max_size=32*1024*1024)
     connection=connection_context.__enter__()
     sequence=0
     def native(method,args):
         nonlocal sequence
+        receipt['native_method']=method
+        output.write_text(json.dumps(receipt,indent=2));output.chmod(0o600)
         sequence+=1;identifier=sequence;connection.send(json.dumps(dict(id=identifier,method=method,params=args)))
         deadline=time.monotonic()+60
         while time.monotonic()<deadline:
@@ -91,6 +94,8 @@ async def main(options):
                 resumed=native('thread/resume',dict(threadId=thread))['thread']
                 assert resumed['id']==thread and resumed.get('name')=='CW669-background-wakes'
                 cwd=Path(resumed['cwd']);receipt['preparation']='reused exact owned seeded conversation'
+                assert cwd.parent==scratch and cwd.name.startswith('cw669-'),'owned scratch cwd required'
+                cwd.mkdir(exist_ok=True)
             else:
                 thread=native('thread/start',dict(cwd=str(cwd),ephemeral=False,approvalPolicy='never',sandbox='read-only'))['thread']['id']
                 receipt['thread_id']=thread;save()
@@ -118,14 +123,21 @@ async def main(options):
             while time.monotonic()<deadline:
                 screen=subprocess.run(tmux+['capture-pane','-p','-t',tmux_name+':continuity'],capture_output=True,text=True).stdout
                 if 'trust this' in screen.lower():raise AssertionError('pretrusted cwd unexpectedly requires trust; no global trust change authorized')
-                rows=discover(root,endpoint,socket_path=socket,thread_id=thread)['sessions']
-                if len(rows)==1 and rows[0].get('binding_status')=='metadata_matched' and len(rows[0]['attachments'])==1:
+                discovery=observe(endpoint=endpoint,socket_path=socket,timeout=10)
+                receipt['attachment_discovery']=dict(complete=discovery.get('complete'),sources=discovery.get('sources'),sessions=[r for r in discovery['sessions'] if r.get('thread_id')==thread or thread in r.get('candidates',[])])
+                receipt['owned_pane_metadata']=subprocess.run(tmux+['list-panes','-t',tmux_name+':continuity','-F','#{pane_id}|#{pane_title}|#{pane_current_path}|#{pane_pid}'],capture_output=True,text=True).stdout
+                save()
+                rows=[r for r in discovery['sessions'] if r.get('thread_id')==thread]
+                if discovery.get('complete') and len(rows)==1 and rows[0].get('binding_status')=='metadata_matched' and len(rows[0]['attachments'])==1:
                     attached=rows[0];break
                 screen=subprocess.run(tmux+['capture-pane','-p','-t',tmux_name+':continuity'],capture_output=True,text=True).stdout
                 if 'Do you trust' in screen or 'trust this' in screen.lower():raise AssertionError('unexpected trust dialog')
                 await asyncio.sleep(1)
             if attached is None:
                 receipt['owned_tui_screen']=screen[-1600:]
+                snapshot=observe(endpoint=endpoint,timeout=10)
+                receipt['failed_attachment_sources']=dict(complete=snapshot.get('complete'),sources=snapshot.get('sources'),rows=[r for r in snapshot.get('sessions',[]) if r.get('thread_id')==thread or thread in r.get('candidates',[])])
+                save()
             assert attached is not None,'owned TUI did not establish exact native attachment'
             tui_pid=attached['attachments'][0]['client_pid'];receipt['live_tab_before']=True
             receipt['tui_pid']=tui_pid;receipt['initial_attachment']=attached;save()
@@ -194,7 +206,10 @@ async def main(options):
                                 case.update(native_input_count=1,native_turn_id=turn['id'],answer=replies[-1],same_conversation=True)
                                 # Require persisted dispatch route evidence, not mode inference.
                                 assert delivery.get('route')==case['expected_route'],delivery
-                                current=discover(root,endpoint,thread_id=thread)['sessions']
+                                snapshot=observe(endpoint=endpoint,timeout=10)
+                                case['final_observation_sources']=dict(complete=snapshot.get('complete'),sources=snapshot.get('sources'))
+                                assert snapshot.get('complete'),snapshot.get('sources')
+                                current=[r for r in snapshot['sessions'] if r.get('thread_id')==thread]
                                 attachments=[a for row in current for a in row.get('attachments',[])]
                                 if label=='live':
                                     assert len(current)==1 and current[0].get('binding_status')=='metadata_matched',current
