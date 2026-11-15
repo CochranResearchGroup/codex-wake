@@ -54,3 +54,20 @@ intentionally skipped under the operator's CI cost policy. No hosted environment
 is used; the eventual opt-in run must identify the installed prefix and receipt.
 
 Memory disposition: forbidden; the task explicitly excludes memory writes.
+
+## Live-slot preflight, 2026-11-15 UTC
+
+The coordinator released the sole live slot with dev28 unchanged. Installed
+`read_monitor_health(controller)` returned no health record (`{}`), and
+`probe_managed_reader_capability(controller)` returned `None`. The script now
+checks the same readiness fields used by schedule receipts before creating any
+native target or grant. Its opt-in invocation exited with
+`persistent_monitor_not_ready`; zero targets, grants and schedules were created.
+The private receipt is
+`~/.local/state/codex-wake/connector-background-wakes/live-preflight-20261115.json`.
+
+This is an unmet runtime prerequisite, not a demonstrated background routing
+failure. Neither due case ran. No global worker was started because doing so
+could dispatch unrelated pending wakes. The coordinator owns monitor activation
+and any service restart. No session-observation timeout defect is established
+by this preflight.
