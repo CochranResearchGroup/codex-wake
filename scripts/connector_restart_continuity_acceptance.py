@@ -156,8 +156,11 @@ async def run(options):
             while time.monotonic()<deadline:
                 try:
                     response = await http.get(issuer+'/.well-known/oauth-protected-resource/mcp')
-                    readiness.append(response.status_code)
-                    if response.status_code==200 and response.json().get('resource')==issuer+'/mcp': break
+                    if response.status_code==200 and response.json().get('resource')==issuer+'/mcp':
+                        anonymous = await http.post(issuer+'/mcp',json={'jsonrpc':'2.0','id':1,'method':'initialize','params':{'protocolVersion':'2025-03-26','capabilities':{},'clientInfo':{'name':'cw672-readiness','version':'1'}}})
+                        readiness.append(dict(metadata=response.status_code,anonymous_mcp=anonymous.status_code))
+                        if anonymous.status_code==401: break
+                    else: readiness.append(dict(metadata=response.status_code))
                 except (httpx.HTTPError,ValueError): readiness.append('transport_unavailable')
                 await asyncio.sleep(.25)
             else: raise AssertionError('public metadata did not become ready after restart')
