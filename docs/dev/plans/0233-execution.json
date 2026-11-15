@@ -229,7 +229,7 @@
       ],
       "owner": "worker-provider-safety",
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "acceptance": [
         "Stop prevents further owned local tool scheduling and reports provider completion/usage uncertainty separately.",
         "Shared logout/revocation blocks new Grok turns and interrupts only owned Grok work while OpenAI work remains untouched.",
@@ -253,14 +253,16 @@
       ],
       "checkout_custody": "Both leases returned; primary accepted source; existing checkouts retained for required T8 exact package qualification.",
       "worker_wake_base": "592c97d13b98b784a8067a26fc5c71f85e5caeac",
-      "progress": "Primary source acceptance integrated; tracker closure after published readback. Cold strict spending holds without original live authority; provider cancellation/logout remains unconfirmed.",
+      "progress": "Primary source acceptance published; #637 closed. T8 real-account/exact-package qualification remains.",
       "result_sha": "abc2ce28469ca57e584ef33cf71b4ad172f8bb26",
       "native_result_sha": "abc2ce28469ca57e584ef33cf71b4ad172f8bb26",
       "source_manifest": "runtime/grok-native-233/t7-source-manifest.json",
       "local_acceptance": "docs/dev/evidence/plan0233/t7-provider-safety-acceptance.md",
       "validation": "Primary verified13native/15Wake hashes, exact patch/tree/bundle, terminal native13PASS; independently repeated auth12/catalog1/usage16 and actual known8/mixed90 plus7unknown/null captures; protocol/schema/SDK unchanged.",
       "wake_result_sha": "6e6de81cd7b9dff6ebb52875c4e7fabfde24037a",
-      "wake_integrated_sha": "6e6de81cd7b9dff6ebb52875c4e7fabfde24037a"
+      "wake_integrated_sha": "6e6de81cd7b9dff6ebb52875c4e7fabfde24037a",
+      "integrated_sha": "ae6d955971ac1a5c59859d1125491d718a130bf4",
+      "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/637#issuecomment-6894260067"
     },
     {
       "key": "T8",
@@ -269,8 +271,8 @@
         "T3",
         "T7"
       ],
-      "owner": "pending",
-      "state": "pending",
+      "owner": "worker-release-qualification",
+      "state": "running",
       "tracker_state": "OPEN",
       "acceptance": [
         "The complete exact native package passes the existing isolated upgrade/rollback, history, multi-client and failed-start gates.",
@@ -282,7 +284,18 @@
       "id": 6394428407,
       "url": "https://github.com/CochranResearchGroup/codex-wake/issues/639",
       "parent_link": "native_sub_issue",
-      "dependencies_published": "native"
+      "dependencies_published": "native",
+      "worker": "/root/p233_native_seams",
+      "worker_branch": "feat/p233-release-qualification",
+      "worker_base": "abc2ce28469ca57e584ef33cf71b4ad172f8bb26",
+      "worker_wake_branch": "feat/p233-release-qualification",
+      "worker_worktree": "/home/ecochran76/workspace.local/.worktrees/codex/p233-native-provider-t2",
+      "owned_paths": [
+        "Exact complete native package assembly and hashes",
+        "Isolated UID1017 upgrade/rollback/history/multiclient/reconnect/failed-start qualification",
+        "Qualification evidence and bounded real-account readiness gate; primary retains live effect authority"
+      ],
+      "checkout_custody": "Exclusive writer custody of both existing P233 native and Wake checkouts at dispatch; primary source read-only until returned. Working-profile install/restart and live account effects not delegated."
     }
   ],
   "initial_ready": [
