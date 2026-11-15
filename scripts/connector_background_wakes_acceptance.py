@@ -222,6 +222,8 @@ async def main(options):
     finally:
         try:
             if tmux:subprocess.run(tmux+['kill-session','-t',tmux_name],capture_output=True)
+            deadline=time.monotonic()+10
+            while tui_pid and Path('/proc',str(tui_pid)).exists() and time.monotonic()<deadline:await asyncio.sleep(.1)
             receipt['owned_tui_absent']=tui_pid is None or not Path('/proc',str(tui_pid)).exists()
             receipt['schedules_cleaned']=not schedules
             receipt['memory_disposition']='forbidden'
@@ -236,7 +238,7 @@ async def main(options):
                         receipt['revoked_grant_http']=rejected.status_code
                         assert rejected.status_code==401,'revoked grant remained accepted'
             finally:
-                if receipt['status']=='running':receipt['status']='failed'
+                if receipt['status']=='running' or not receipt.get('owned_tui_absent') or not receipt.get('schedules_cleaned') or receipt.get('temporary_grant')!='revoked' or receipt.get('owned_thread')!='archived':receipt['status']='failed'
                 save();connection_context.__exit__(None,None,None);print(json.dumps(dict(status=receipt['status'],receipt=str(output))))
 
 
