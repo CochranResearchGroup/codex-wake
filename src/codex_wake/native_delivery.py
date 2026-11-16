@@ -336,12 +336,12 @@ def reconcile_native(root, found, now, *, force=False, runtime_adapter: RuntimeA
 def reconcile_accepted_completion(root, record, read_codex_path=None):
     """Inspect terminal history without changing accepted intent or submitting input."""
     from .wake_mode_runtime import _peer_read_target, _terminal_evidence, _terminal_receipt
-    if _terminal_receipt(root, record) is not None:
-        return dict(state='resolved', reason='terminal_evidence_already_recorded')
     prompt = native_prompt(root, record)
     expected = record['native_delivery'].get('prompt_sha256')
     if expected and expected != hashlib.sha256(prompt.encode()).hexdigest():
         return dict(state='unresolved', reason='native_submission_payload_changed')
+    if _terminal_receipt(root, record) is not None:
+        return dict(state='resolved', reason='terminal_evidence_already_recorded')
     try:
         target = record['target']
         if read_codex_path is not None:

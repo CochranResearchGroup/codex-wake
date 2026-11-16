@@ -456,6 +456,28 @@ class NativeDeliveryTests(unittest.TestCase):
                     self.assertEqual(run(command), 0)
             self.assertEqual(all_records(root)[0].path.read_bytes(), original)
 
+    def test_cached_completion_does_not_bypass_changed_submission_payload(self):
+        import contextlib
+        import io
+        import json
+        from codex_wake.records import replace_record
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.native_record(root, root / 'must-not-run')
+            found = all_records(root)[0]
+            record = dict(found.record, status='submitted', native_delivery={
+                'state': 'accepted', 'prompt_sha256': '0' * 64,
+                'evidence': dict(source='native_turn', execution='turn_completed',
+                    turn_id='turn', user_message_id='message', client_message_id='client')})
+            replace_record(root, found, record)
+            original = all_records(root)[0].path.read_bytes()
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(run(['--wake-root', str(root), 'native', 'reconcile', record['id']]), 0)
+            self.assertEqual(json.loads(output.getvalue())['terminal_reconciliation'],
+                dict(state='unresolved', reason='native_submission_payload_changed'))
+            self.assertEqual(all_records(root)[0].path.read_bytes(), original)
+
     def test_explicit_missing_resume_uses_same_thread_without_opening_a_tab(self):
         thread='01a1227e-a041-7b72-9c36-18349e7dd22c'
         queue='01a12280-80ef-7772-a00a-c68bd32ecbba'
