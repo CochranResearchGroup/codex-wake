@@ -1827,9 +1827,15 @@ Cancellation and control dequeue passed under actual busy execution. Native expi
 remains unqualified; enforcement tracked in #695. Evidence0247. No native upgrade.
 
 
-## P248 | Native bounded queue expiry
+## P248-native | Native bounded queue expiry (#695)
 
 Status ACTIVE. Issue #695; plan [0248](docs/dev/plans/0248-2026-11-15-native-queue-expiry.md).
 Persist original expiry and outcomes; enforce at core admission using qualified
 host time. Unknown time holds. Preserve unbounded operator inputs and keep Wake
 bounded busy queue refused until separate-UID native qualification passes.
+
+## P248-peer | Accepted peer-history reconciliation (#703)
+
+[Plan0248](docs/dev/plans/0248-2026-11-16-accepted-wake-reconciliation.md):
+PR703 integrated; dev41 exact-wheel qualification and working deployment
+accepted. No bulk historical wake migration. See Plan0248 deployment evidence.

@@ -8,13 +8,41 @@ lanes:
     plan: docs/dev/plans/0248-2026-11-15-native-queue-expiry.md
     branch: feat/native-expiry-695
     target: origin/main
-    plan_state: ACTIVE
+    plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
     dependencies: []
     overlaps: []
     updated_at: 2026-11-15
-    disposition: Stable Time selected; bounded persistence red/green active; preserve native provider lane and working daemon
+    disposition: Native source3695947e81/package2 retained; UID1017 real clock enrolled under explicit operator exception. Transport and native runtime qualification remain open. Preserve deployed Grok/clock/peer-history features.
 
+
+  - id: monitor-clock-702
+    owner: root / ecochran76
+    objective: Release qualified Stable Time monitor freshness
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/702]
+    plan: docs/dev/plans/0249-2026-11-16-monitor-clock-release.md
+    branch: fix/monitor-clock-release-702
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [native-expiry-695]
+    updated_at: 2026-11-16
+    disposition: PR704 merged and dev40 deployed; exact wheel and real-clock CLI qualified; temporary checkout retiring after evidence custody. Native expiry695 remains open.
+  - id: P233
+    owner: primary / ecochran76
+    objective: Use native Grok models inside the modded Codex tool and worker loop
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/628]
+    plan: docs/dev/plans/0233-grok-in-codex-spec.md
+    branch: feat/grok-native-provider
+    worker_branches: [feat/p233-release-qualification]
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [P231, P234]
+    updated_at: 2026-11-15
+    disposition: PR700 merged; dev39 CLI and one independent modded native profile deployed/verified; all8 children closed and review1 remediation1 complete. Grok auth currently unavailable pending operator refresh; no inference submitted. Parent628 remains open; native source checkout retained under preservation instruction.
   - id: native-queue-694
     owner: root / ecochran76
     objective: Qualify native busy queue cancellation and expiry capability boundary
@@ -1637,3 +1665,17 @@ lanes:
     overlaps: [P216, P222]
     updated_at: 2026-11-11
     disposition: PR587 merged e16bc4d2; dev10 installed; same43pane processes retained; formatting/startup remain disabled and unit pins fixed code
+
+  - id: accepted-wake-reconciliation
+    owner: root / ecochran76
+    objective: Proactively reconcile accepted native completion without replay
+    work_items: [LOCAL-WAKE-ACCEPTED-RECONCILIATION]
+    plan: docs/dev/plans/0248-2026-11-16-accepted-wake-reconciliation.md
+    branch: fix/accepted-wake-reconciliation
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [P247]
+    updated_at: 2026-11-16
+    disposition: PR703 merged96f85564; dev41 exact-wheel UID1017 qualification and working rollout accepted;40 completion receipts retained; task checkout retires after evidence custody

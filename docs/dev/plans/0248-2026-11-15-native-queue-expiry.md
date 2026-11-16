@@ -25,8 +25,10 @@ missing/changed evidence is stale and legacy snapshots do not regain authority.
 The original wall-rollback reproduction and a private real-service background
 monitor pass; changed-surface checks pass44 on Python3.11 and16 on Python3.12.
 This does not migrate all formatting/routing timers or qualify native dispatch.
-Real test-user clock enrollment awaits the explicit credential-policy exception,
-and suspend-safe helper-to-admission clock transport remains unqualified.
+Operator approved the narrow credential-policy exception on2026-11-16. UID1017
+is enrolled and a real-service read returned authenticated UTC/counter evidence;
+no credential values or hashes were logged. The working clock service did not
+change. Helper-to-admission elapsed transport remains unqualified.
 No working daemon replacement, merge, deployment or ticket closure is claimed.
 
 ## Scope and contract

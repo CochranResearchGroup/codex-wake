@@ -9830,6 +9830,56 @@ normal reconnect. Exact proof/limits: [deployment](docs/dev/plans/0173-agent-har
 Owned integration checkout retires after verified closeout remote custody; unrelated
 worktrees preserved. Memory forbidden, zero writes.
 
+## 2026-11-15 | P233 T5 mixed workers source acceptance
+
+Normal mixed worker controls and pinned account/model inheritance are validated.
+Actual disposable native histories qualify in Wake at45 tokens across parent and
+child; missing child usage holds unknown. Native source45169bbc is preserved by
+exact patch/tree/hash custody; focused worker5, allowance/role12 and schema4 checks
+pass. Earlier fixture failures remain classified and retained. Evidence:
+[acceptance](docs/dev/evidence/plan0233/t5-mixed-workers-acceptance.md).
+T5 tracker closure follows published source readback. Parent628 remains open;
+T6 is next, review0/remediation0, no native installation or live provider calls.
+
+## 2026-11-15 | P233 T6 provider continuation acceptance
+
+Worker native977af9d6 and Wake9051270a accepted after independent exact source,
+patch/tree/bundle and terminal-receipt verification. Safe-boundary native handoff,
+portable context, original active/pending authority and cumulative90 are qualified
+through public native/UI and existing Wake accounting seams. Existing adverse
+missing usage remains unknown. Source integrated;636 closes after published
+readback,637 becomes ready. Parent628 stays open, review0/remediation0; no native
+installation or real-account qualification. Evidence:
+[T6 acceptance](docs/dev/evidence/plan0233/t6-provider-continuations-acceptance.md).
+
+## 2026-11-15 | P233 T7 source acceptance
+
+Nativeabc2ce28/Wake6e6de81c accepted after primary exact source/patch/tree/bundle
+and native13 receipt verification. Repeated Wake auth12/catalog1/usage16 and all
+actual canonical captures: known8/90 and seven unknown/null adverse outcomes.
+Cold strict spending stays held without original live allowance authority;
+provider cancellation/logout is unconfirmed. T7 closes after published readback,
+T8 exact isolated package and real-account qualification next. Parent628 open,
+review0/remediation0. Evidence:
+[T7 acceptance](docs/dev/evidence/plan0233/t7-provider-safety-acceptance.md).
+
+## 2026-11-15 | P233 T8 isolated package accepted; real-account gate remains
+
+Native sourceabc2ce28 unchanged. Complete package entrya54f0739 and all six files
+verified in original and UID1017 copies. Supported upgrade/rollback/history,
+multiclient/reconnect/private ownership and actual failed-start recovery pass;
+installed Wake checks pass. Primary verified worker source2d8a4a39 and receipts.
+T8 remains OPEN because real account sign-in/entitlement/coding proof has not run.
+Fresh Grok status native_auth_missing; prior failed device flow requires operator
+participation before another flow. Corrected gate CLI argument/order documentation.
+No deployment, login retry or real-provider request; review0/remediation0.
+
+
+## 2026-11-15 | P233 eight children closed; single review/remediation complete
+
+T8#639 closed from exact isolated native1a2fb1/e8eb package and real official-account/coding/MCP/mixed-worker/linked-handoff/local-Stop proof. Wakebc7a9 observer fix follows continuation journals as locators and validates canonical lineage; actual interrupted tree now unknown/null rather than qualified zero. Isolated updated wheel1ed42101 has336 matching installed files and75 selected checks covered; source62PASS. Missing test-helper and sudo umask fixture failures are retained, final affected8PASS with private umask077. No private histories/credentials copied into UID1017 fixtures.
+
+Exactly one broad Standards/Spec review and one bounded TDD remediation completed after all8 children closed. One documentation contract mismatch corrected in native7cdb5404; no confirmed Spec blocker. Documentation-only delta does not invalidate qualified binaries/wheel; no rebuild/provider retry issued. Parent628 remains OPEN; no working-profile activation/deployment. Existing two source lanes retained primary-owned for subsequent integration/activation, next review at that stage; current registered inventories Wake124/native21, no new checkout created by this slice. Memoryforbidden, no explicit memory-write request. See [final qualification](docs/dev/evidence/plan0233/t8-final-qualification.md) and [review/remediation](docs/dev/evidence/plan0233/review-and-remediation.md).
 ## Turn | 2026-11-14 | Unified connector control implementation begins
 
 Operator approved Plan0234, public operation seam, eleven-ticket graph and fixed
@@ -10113,3 +10163,92 @@ Clock repair commit9a670307 is fast-forwarded into feat/native-expiry-695 and
 verified at the matching remote ref. The temporary checkout was removed normally
 after accounting for disposable caches. MONITOR-CLOCK-01 source repair is DONE;
 #695 remains OPEN with its retained full-suite and native qualification gates.
+
+## 2026-11-16 | P233 PR700 merged and one profile deployed
+
+Merged12345152/dev39 preserves currentmain/dev38 behavior and P233 Grok controls. Combined92tests/static/policy checks pass; exactwheel351file hashes match UID1017 and working prefix,92installedchecks covered with PATH fixture correction,14working-stage checks pass. Nine CLI launchers selectdev39; selected independent codex-ecochran76 native daemon runs exact e8eb511a and six package files match. Strict config and native model/list pass; Grok4.7 correctlyunavailable/native_auth_not_current. No inference/login/refresh/replay or allowance reset. Original settings/other builds/rollback preserved; shared Wake services not restarted. Parent628 remains OPEN; children8/8CLOSED,review1/remediation1complete. See [deployment](docs/dev/evidence/plan0233/integration-and-deployment.md). Memoryforbidden,zero writes.
+
+
+## Turn | 2026-11-16 | #702 clock-only release preparation
+
+[Plan0249](docs/dev/plans/0249-2026-11-16-monitor-clock-release.md) carries the
+reviewed monitor repair onto main without unqualified #695 native-expiry changes.
+Review base29c6424d through efd4a70d: Standards0 and Spec0 accepted findings;
+reviewer handles clock_release_standards_review and clock_release_spec_review.
+Operator authorized review, merge and deployment. Versiondev40 preserves dev39
+Grok controls. Source/package/installed acceptance and release readback pending;
+no native update, inference or credential copy is authorized by this packet.
+
+Python3.12 affected66 PASS92.540s. Python3.11 initial66 failed one shared-refresh
+expiry assertion after a guest-wall step stretched a two-second test deadline.
+Correct only the injected test clock to advance its original anchor by elapsed
+time; no production shared-refresh change. Original failure retained. Both runbook
+intents survived a docs-only rebase over the concurrent P233 deployment closeout;
+source and tests were byte-identical immediately after that rebase. Post-correction
+validation pending. No paid hosted checks were requested.
+
+The second Python3.11 run passed65/66 and failed the policy generation check.
+A focused actual-worker probe identified paused/clock_regressed: production safety
+behavior was correct. Preserve it in the test rather than assuming the policy
+always stays enabled; normal ticks retain generation, clock-regression pauses
+advance it once. Policy8 checks PASS on both versions; shared-refresh14 checks
+PASS on3.12 after its clock-injection repair. Original failures remain retained.
+This is affected validation with focused corrections, not a clean full matrix.
+
+
+## Turn | 2026-11-16 | #702 dev40 deployed and observed
+
+PR704 sourcea4b2a977 entered main before building exact wheel e9b746afc899.
+UID1017/Python3.12.3 installed16 checks PASS12.294s,341 package-module hashes
+match, and no candidate processes remain. Working Python3.12.13 preserves31
+runtime dependency versions and9 launcher targets; controller/connector readers
+refresh to dev40. Installed CLI private monitor start/read/stop reports fresh
+stable_time_counter age upper0.279s and leaves no process. Metadata200 and
+anonymous MCP/controller401 verify access boundaries. Dev39 rollback retained.
+No native update/restart/inference or production credential copy. Native daemon
+1879 remains unchanged;22/23 baseline native generations remain, one standalone
+process exited with cause unestablished. Preserve that uncertainty. #702 complete,
+#695 OPEN; [evidence](docs/dev/evidence/issue0702/deployment.json). No full-suite or
+paid-CI claim. Memory forbidden under this packet; no memory write requested.
+
+
+## Turn P248 | 2026-11-16 | Accepted wake peer-history recovery
+
+Plan0248 / LOCAL-WAKE-ACCEPTED-RECONCILIATION: public native reconcile now
+verifies accepted completion and writes bound terminal receipts while preserving
+original history. Explicit qualified read transport covers removed historical
+pins. Regression red/green and33 focused tests pass; lint/policy/compile/diff pass.
+Bounded live repair verified40 historical completions across two conversations;
+readiness held to ready, original hashes unchanged, no dispatch or package
+installation. PR703 holds source and qualification details; integration and
+installed adoption remain separate. Memory disposition unavailable: qualified
+project routing unresolved by bounded discovery; service itself is healthy.
+
+
+## Turn P248 deployment | 2026-11-16
+
+Operator requested review/merge/deployment. PR703 merged96f85564 after fixing
+one cache/digest validation finding; Standards0, Spec1remediated. Exact dev41
+wheel89663969063d:61 UID1017 installed checks and351 package-file hashes pass;
+dev40 rollback/re-upgrade preserves synthetic wake history. Working34 checks
+pass;31 dependencies preserved;9 launchers and controller/connector selectdev41.
+Cached reconciliation and4 harness checks pass; original wake hash unchanged,
+zero replay/input. Metadata200, anonymous protected routes401. Supervisor unchanged;
+4/4 immediate native generations preserved, one earlier snapshot exit unexplained.
+No native update, provider canary or full-suite claim. Local checks replace hostedCI.
+Deployment evidence under plan0248. Memory unavailable: project routing unresolved.
+
+
+## Turn | 2026-11-16 | #695 resumed, real clock enrollment and main reconciliation
+
+The operator said ok go after the prerequisite credential-policy exception was
+explained. Execute only the prepared UID1017 read-only Stable Time enrollment,
+using child stdin and private owner-only files. Real read returns authenticated
+UTC and counter evidence; no values/hashes logged, working service unchanged.
+Native3695947e81/package2 still unqualified; no working native update.
+
+Reconcile deployed Grok, dev40 clock and dev41 accepted peer-history source from
+main4bcba85e into the existing #695 lane. Preserve all three append-only catalog/
+roadmap/runbook intents; disambiguate the two P248 roadmap labels by native/peer
+suffixes without renaming canonical plan files. Source auto-merges; verify focused
+carry behavior before completing merge. No second broad review is requested.
