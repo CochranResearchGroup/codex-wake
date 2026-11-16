@@ -1,6 +1,6 @@
 {
   "program": "P233",
-  "phase": "implementation",
+  "phase": "implementation_closed_review_remediation_complete",
   "spec": "docs/dev/plans/0233-grok-in-codex-spec.md",
   "design": "docs/dev/plans/0233-2026-11-14-grok-in-codex-design.md",
   "integration_branch": "feat/grok-native-provider",
@@ -11,7 +11,7 @@
   "review_limit": 1,
   "remediation_limit": 1,
   "review_runs": 1,
-  "remediation_runs": 0,
+  "remediation_runs": 1,
   "tickets": [
     {
       "key": "T1",
@@ -297,7 +297,7 @@
       ],
       "checkout_custody": "Worker explicitly returned Cargo/cache/artifact custody; primary owns current source diagnosis and remaining live qualification. Existing source checkouts retained.",
       "worker_wake_base": "1f8fd14b33faad7e145919a6861daa5a36bc2b16",
-      "progress": "All8implementationchildrenCLOSED;exactnative/Wakeinstalledandrealqualificationaccepted. Exactlyonebroadreview started at fixedheadsWake487ba576/native1a2fb1; boundedremediation reserved. Parent628OPEN; no workingdeployment.",
+      "progress": "All8childrenCLOSED;native/Wakeinstalled+realqualificationaccepted;singlebroadreview1complete,Spec0accepted,Standards1nonblockingdocdrift correctedinsingleTDDpass1. Parent628OPEN; no workingdeployment.",
       "native_result_sha": "1a2fb1df4cefdef9782cd82d8cceef8c70e1c05c",
       "package_manifest": "runtime/grok-native-233/t8-portable-worker-package-manifest.json",
       "package_entrypoint_sha256": "e8eb511af74de41d0d336a0afc6715df15cbd15583977996eb661981de3aea1d",
@@ -343,11 +343,8 @@
     }
   ],
   "remaining_program_stages": [
-    "one broad Standards/Spec review",
-    "one bounded TDD remediation of accepted findings",
-    "focused regression and causally affected package qualification",
-    "authorized PR merge and one-profile deployment",
-    "final exact runtime readbacks and task worktree cleanup"
+    "authorized PR integration/merge and one-profile deployment",
+    "final exact working runtime readbacks and task worktree cleanup"
   ],
   "unrelated_work": [
     "concurrent unified-control design0234",
@@ -375,5 +372,8 @@
   "review_frozen_heads": {
     "wake": "487ba576",
     "native": "1a2fb1df4cefdef9782cd82d8cceef8c70e1c05c"
-  }
+  },
+  "review_result": "docs/dev/evidence/plan0233/review-and-remediation.md",
+  "remediation_native_source": "7cdb5404a247bec03a4a8bb244eb4da84e9c1917",
+  "remediation_scope": "documentation_only; qualified executable/package and Wake wheel unchanged"
 }
