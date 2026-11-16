@@ -26,6 +26,12 @@ operator on 2026-11-15.
 No wall-clock fallback. Clock rollback, changed counter epoch or unavailable
 post-restart evidence holds rather than extending the deadline.
 
+Operator decision, 2026-11-15: recheck the original expiry before model execution.
+Earlier queue selection does not preserve eligibility across a suspension or
+delayed turn preparation. Unknown time holds, proven expiry is terminal, and
+expired input must not leak into a subsequent turn through retained history.
+The early core idle-reservation check alone does not satisfy this boundary.
+
 Expiry/cancellation/admission selection must share the authoritative state
 transition. Keep durable inspectable canceled/expired/admitted outcomes, including
 original identities and reason, with already-admitted distinguishable from
@@ -178,9 +184,9 @@ The Stable Time helper currently advances bounds to its own Windows-QPC
 observation, but native has not qualified elapsed transport between that sample
 and admission. Tokio's two-second timeout alone does not prove a suspend-safe
 bound. Production activation remains forbidden until this gap is resolved.
-The operator has been asked whether expiry governs atomic queue selection or
-must be rechecked before model execution after a suspension. No answer has
-been assumed, and the existing conservative contract remains authoritative.
+The operator selected a final recheck before model execution after suspension.
+The earlier queue-selection check is insufficient. The helper transport interval
+still requires qualification; this decision does not qualify a clock source.
 
 Read-only delegated discovery identified that permission_wake already persists
 a submission UUID before I/O but does not forward it or the original deadline;
@@ -191,3 +197,47 @@ and expiry_clock_bounds returned source-grounded recommendations; neither made
 edits, runtime effects or a formal review. Source and package qualification,
 shared adoption, the requested formal review/TDD findings pass and issue closure
 remain incomplete. No working runtime changed.
+
+
+## Final model-send check implementation
+
+Native e1832b9895 moves bounded admission from early idle reservation to the
+HTTP/WebSocket request send path, after request preparation and authentication.
+Pending input and hook-derived response items stay in a turn-local staging area,
+outside reusable/persisted model history. The first request uses the staged
+projection; eligible native admission is recorded with its original turn ID,
+then staged history is published after the stream attempt. Refusal discards the
+staged projection. TurnStarted denotes preparation, not admitted input.
+
+The public queue/model-request regression failed before this change: expiry
+raised by a real prompt hook still allowed a model request. It now passes and
+proves no expired prompt or derived hook context in either the next control
+turn or a reloaded session's control turn. Earlier held-admission coverage was
+updated to wait for prepared-turn completion rather than equating preparation
+with model admission. All21 queue tests PASS at e1832b9895; receipts retained in
+final-execution-red, final-execution-green1 (compile error),
+final-execution-green2, final-gate-regression1 (old assertion),
+final-gate-regression2, final-execution-replay (test harness compile error),
+final-execution-replay2 and final-gate-regression3. No failures were discarded.
+
+The complete candidate package is assembling through maintained package binary
+selection and the supported prebuilt-artifact overrides. Its target is host GNU
+rather than the working baseline's musl; qualification must cover this material
+runtime dependency difference. No package is installed on the working account.
+
+The pinned clock-reader wheel returns real qualified Stable Time under UID1000.
+UID1017 has readable private clock config/CA/token but its old fixture endpoint
+localhost36609 refuses connections; it correctly holds. No production credential
+was copied. Installed Stable Time0.2.0 CLI exposes inspect/analyze/mcp, with no
+consumer issuance command. Dedicated real test-user consumer provisioning remains
+unresolved; current authority health is NTS-verified and finite. Read-only
+Graphiti atlas discovery found no reviewed source cloud. This is not clock
+qualification. The source reader-to-native elapsed interval also remains an open
+qualification requirement. Production bounded Wake delivery stays disabled.
+
+The bounded_wake_adapter worker owns only shared Wake runtime source/tests,
+propagating original expiry and stable client identity without unbounded fallback.
+Counter-only intents without a qualified absolute deadline must hold. Historical
+already-submitted unbounded work retains its original reconciliation path and is
+never resent as a bounded replacement. Formal review and its TDD findings pass
+remain reserved; #695 remains OPEN.

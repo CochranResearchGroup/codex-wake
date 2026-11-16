@@ -10028,3 +10028,18 @@ SessionInputs.queue is separate. Run01 timing failure preserved, minimal runner
 correction and fresh run02 passed. Focused lint/syntax/help/policy/diff PASS.
 Both owned terminals and scratch directories retired; independent process/config/
 native-hash audit PASS. Evidence0247. No deployment. Memory disposition forbidden.
+
+
+## Turn | 2026-11-15 | #695 final model-send expiry
+
+Operator selected Stable Time and a final expiry recheck before model execution.
+Native e1832b9895 stages pending model history and gates HTTP/WebSocket send after
+preparation/authentication. The hook-expiry regression was RED before this change;
+all21 queue tests now PASS, including absence of expired prompt/derived context
+after session reload. Exact attempts and retained failures are under the private
+native-expiry-0248 receipt root; plan0248 and the apply-ready native patch retain
+source custody. Complete GNU package assembly is running; baseline remains musl.
+The separate test user's stale clock fixture endpoint correctly holds; dedicated
+real consumer and sample-to-native elapsed qualification remain unresolved.
+Shared Wake adapter implementation continues in its bounded worker. #695 stays
+OPEN; no working daemon change, deployment or bounded queue activation occurred.

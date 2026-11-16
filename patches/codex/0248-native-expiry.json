@@ -1,13 +1,15 @@
 {
   "state": "incomplete_not_qualified",
   "base": "d32063f96c2dff1dc96af839b3952abb6acfeda4",
-  "source_commit": "23b3ff6af3d1ba6192f2fe15e129536cdcec1484",
-  "patch_sha256": "ff7d1dae837827b5856045da824ed35468c1c2d0444873190b37b0497e500414",
-  "validation": "server handler build PASS after held-admission error mapping; microsecond persistence14 and experimental protocol/export PASS; latest queue regression running",
+  "source_commit": "e1832b9895190eda8ab406bf06bd8605dafe5baf",
+  "patch_sha256": "49276487333ea19a922e917fc9585e1d2348e5d81950a423a3be1c3f7585eb56",
+  "validation": "21 native queue tests PASS at e1832b9895; hook-expiry regression and reloaded-history control PASS; complete package assembling, not qualified",
   "native_api": "thread/queue/bounded/{add,list,read,delete,capabilities}",
   "expiry_field": "expiresAtUnixMicros",
   "clock_authority": "Stable Time",
   "wake_busy_queue_enabled": false,
   "working_installation_authorized": false,
-  "clock_transport_qualification": "unqualified: helper sample-to-native admission elapsed bounds remain unresolved"
+  "clock_transport_qualification": "unqualified: helper sample-to-native admission elapsed bounds unresolved",
+  "native_expiry_boundary": "final HTTP/WebSocket send after preparation/auth; staged pending model history",
+  "test_uid_clock": "held: stale private fixture endpoint localhost36609; dedicated real consumer unresolved"
 }

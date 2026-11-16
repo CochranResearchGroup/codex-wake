@@ -8906,8 +8906,379 @@ index 6a69cc899d..7ff130e470 100644
                      NotSubmittedReason::ServerDraining => {
                          return Err(crate::error_code::server_draining_error());
                      }
+diff --git a/codex-rs/core/src/client.rs b/codex-rs/core/src/client.rs
+index 425967e392..f1a157ae41 100644
+--- a/codex-rs/core/src/client.rs
++++ b/codex-rs/core/src/client.rs
+@@ -313,6 +313,9 @@ pub struct ModelClient {
+     required_cyber_access_programs: Option<Arc<cyber_access_program::RequiredCyberAccessPrograms>>,
+ }
+ 
++pub(crate) type RequestAdmission =
++    Arc<dyn Fn() -> futures::future::BoxFuture<'static, bool> + Send + Sync>;
++
+ /// A turn-scoped streaming session created from a [`ModelClient`].
+ ///
+ /// The session establishes a Responses WebSocket connection lazily and reuses it across multiple
+@@ -328,6 +331,7 @@ pub struct ModelClient {
+ /// the previous turn's sticky-routing token into the next turn, which violates the client/server
+ /// contract and can cause routing bugs.
+ pub struct ModelClientSession {
++    request_admission: Option<RequestAdmission>,
+     client: ModelClient,
+     websocket_session: WebsocketSession,
+     /// Turn state for sticky routing.
+@@ -347,6 +351,7 @@ pub struct ModelClientSession {
+ /// Executes HTTP Responses requests without owning a turn's WebSocket state.
+ pub(crate) struct ResponsesHttpExecutor<'a> {
+     client: &'a ModelClient,
++    request_admission: Option<RequestAdmission>,
+ }
+ 
+ #[derive(Debug, Clone)]
+@@ -754,6 +759,7 @@ impl ModelClient {
+             websocket_session.auth_owner = auth_owner;
+         }
+         ModelClientSession {
++            request_admission: None,
+             client: self.clone(),
+             websocket_session,
+             turn_state: Arc::new(OnceLock::new()),
+@@ -1616,7 +1622,15 @@ impl ModelClientSession {
+ 
+ impl<'a> ResponsesHttpExecutor<'a> {
+     pub(crate) fn new(client: &'a ModelClient) -> Self {
+-        Self { client }
++        Self {
++            client,
++            request_admission: None,
++        }
++    }
++
++    fn with_request_admission(mut self, admission: Option<RequestAdmission>) -> Self {
++        self.request_admission = admission;
++        self
+     }
+ 
+     #[allow(clippy::too_many_arguments)]
+@@ -2099,6 +2113,13 @@ impl ResponsesHttpExecutor<'_> {
+                 client_setup.api_auth,
+             )
+             .with_telemetry(Some(request_telemetry), Some(sse_telemetry));
++            if let Some(admit) = &self.request_admission
++                && !admit().await
++            {
++                return Err(CodexErr::Fatal(
++                    "bounded queue execution not admitted".to_string(),
++                ));
++            }
+             let stream_result = client.stream_request(request, options).await;
+ 
+             match stream_result {
+@@ -2447,6 +2468,14 @@ impl ModelClientSession {
+                     ),
+                 ],
+             );
++            if !warmup
++                && let Some(admit) = &self.request_admission
++                && !admit().await
++            {
++                return Err(CodexErr::Fatal(
++                    "bounded queue execution not admitted".to_string(),
++                ));
++            }
+             let stream_result = websocket_connection
+                 .stream_request(
+                     ws_request,
+@@ -2594,6 +2623,10 @@ impl ModelClientSession {
+     /// fall back to the HTTP Responses API transport otherwise. The trace context may be enabled or
+     /// disabled, but is always explicit so transport paths do not need separate trace/no-trace
+     /// branches.
++    pub(crate) fn set_request_admission(&mut self, admission: Option<RequestAdmission>) {
++        self.request_admission = admission;
++    }
++
+     pub async fn stream(
+         &mut self,
+         prompt: &Prompt,
+@@ -2633,6 +2666,7 @@ impl ModelClientSession {
+                 }
+ 
+                 ResponsesHttpExecutor::new(&self.client)
++                    .with_request_admission(self.request_admission.clone())
+                     .stream_responses_http(
+                         &self.turn_state,
+                         /*expected_auth_owner*/ None,
+diff --git a/codex-rs/core/src/session/mod.rs b/codex-rs/core/src/session/mod.rs
+index ce93060cd4..44d746d553 100644
+--- a/codex-rs/core/src/session/mod.rs
++++ b/codex-rs/core/src/session/mod.rs
+@@ -276,6 +276,7 @@ mod mcp_runtime;
+ mod model_catalog_settings;
+ pub(crate) mod multi_agents;
+ mod plugin_selection;
++mod queued_input;
+ mod realtime_history;
+ mod retained_context;
+ mod review;
+@@ -4044,6 +4045,38 @@ impl Session {
+     }
+ 
+     async fn record_prepared_conversation_items(
++        &self,
++        turn_context: &TurnContext,
++        model_info: &ModelInfo,
++        items: Vec<ResponseItemEnvelope>,
++        image_preparations: Vec<ImagePreparationMetadata>,
++    ) {
++        {
++            let mut bounded = turn_context.queued_input.lock().await;
++            match &mut bounded.stage {
++                queued_input::Stage::Pending(batches)
++                | queued_input::Stage::Authorized(batches) => {
++                    batches.push(queued_input::Batch {
++                        model_info: model_info.clone(),
++                        items,
++                        image_preparations,
++                    });
++                    return;
++                }
++                queued_input::Stage::Rejected => return,
++                queued_input::Stage::Admitted => {}
++            }
++        }
++        self.record_admitted_conversation_items(
++            turn_context,
++            model_info,
++            items,
++            image_preparations,
++        )
++        .await;
++    }
++
++    async fn record_admitted_conversation_items(
+         &self,
+         turn_context: &TurnContext,
+         model_info: &ModelInfo,
+diff --git a/codex-rs/core/src/session/queued_input.rs b/codex-rs/core/src/session/queued_input.rs
+new file mode 100644
+index 0000000000..61d3af9ffd
+--- /dev/null
++++ b/codex-rs/core/src/session/queued_input.rs
+@@ -0,0 +1,112 @@
++//! Bounded input stays out of reusable history until native model admission.
++use super::session::Session;
++use super::turn_context::TurnContext;
++use crate::context_manager::ContextManager;
++use codex_analytics::ImagePreparationMetadata;
++use codex_history::ResponseItemEnvelope;
++use codex_protocol::openai_models::ModelInfo;
++use codex_protocol::turn_input::QueueAdmissionGuard;
++
++pub(super) struct Batch {
++    pub(super) model_info: ModelInfo,
++    pub(super) items: Vec<ResponseItemEnvelope>,
++    pub(super) image_preparations: Vec<ImagePreparationMetadata>,
++}
++
++#[derive(Default)]
++pub(super) enum Stage {
++    Pending(Vec<Batch>),
++    Authorized(Vec<Batch>),
++    #[default]
++    Admitted,
++    Rejected,
++}
++
++#[derive(Default)]
++pub(crate) struct QueuedInput {
++    pub(super) stage: Stage,
++    guard: Option<QueueAdmissionGuard>,
++}
++
++impl QueuedInput {
++    pub(super) fn pending(guard: QueueAdmissionGuard) -> Self {
++        Self {
++            stage: Stage::Pending(Vec::new()),
++            guard: Some(guard),
++        }
++    }
++    pub(super) fn is_pending(&self) -> bool {
++        matches!(self.stage, Stage::Pending(_) | Stage::Authorized(_))
++    }
++}
++
++impl Session {
++    pub(super) async fn clone_history_for_turn(&self, turn: &TurnContext) -> ContextManager {
++        let mut history = self.clone_history().await;
++        let staged = turn.queued_input.lock().await;
++        if let Stage::Pending(batches) | Stage::Authorized(batches) = &staged.stage {
++            for batch in batches {
++                let mut items = batch.items.clone();
++                history
++                    .record_annotated_items(&mut items, batch.model_info.truncation_policy.into());
++            }
++        }
++        history
++    }
++
++    pub(super) async fn admit_queued_input(&self, turn: &TurnContext) -> bool {
++        let mut staged = turn.queued_input.lock().await;
++        match staged.stage {
++            Stage::Admitted | Stage::Authorized(_) => return true,
++            Stage::Rejected => return false,
++            Stage::Pending(_) => {}
++        }
++        let Some(guard) = staged.guard.take() else {
++            return false;
++        };
++        let accepted = tokio::time::timeout(
++            std::time::Duration::from_secs(15),
++            guard.consume(turn.sub_id.clone()),
++        )
++        .await
++        .unwrap_or(false);
++        if !accepted {
++            staged.stage = Stage::Rejected;
++            return false;
++        }
++        let Stage::Pending(batches) = std::mem::replace(&mut staged.stage, Stage::Rejected) else {
++            return false;
++        };
++        staged.stage = Stage::Authorized(batches);
++        true
++    }
++
++    pub(super) async fn publish_queued_input(&self, turn: &TurnContext) {
++        let mut staged = turn.queued_input.lock().await;
++        if !matches!(staged.stage, Stage::Authorized(_)) {
++            return;
++        }
++        let Stage::Authorized(batches) = std::mem::replace(&mut staged.stage, Stage::Admitted)
++        else {
++            return;
++        };
++        // Keep later writes behind this batch until all accepted items are published.
++        for batch in batches {
++            self.record_admitted_conversation_items(
++                turn,
++                &batch.model_info,
++                batch.items,
++                batch.image_preparations,
++            )
++            .await;
++        }
++    }
++}
++
++impl std::fmt::Debug for QueuedInput {
++    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
++        f.debug_struct("QueuedInput")
++            .field("pending", &self.is_pending())
++            .finish_non_exhaustive()
++    }
++}
+diff --git a/codex-rs/core/src/session/turn.rs b/codex-rs/core/src/session/turn.rs
+index d775099466..6513ca9574 100644
+--- a/codex-rs/core/src/session/turn.rs
++++ b/codex-rs/core/src/session/turn.rs
+@@ -504,7 +504,9 @@ pub(crate) async fn run_turn(
+         .await;
+     }
+ 
+-    if super::async_compaction::enabled(&turn_context) {
++    if super::async_compaction::enabled(&turn_context)
++        && !turn_context.queued_input.lock().await.is_pending()
++    {
+         let token_status = super::context_window::context_window_token_status(
+             sess.as_ref(),
+             turn_context.as_ref(),
+@@ -640,7 +642,7 @@ pub(crate) async fn run_turn(
+ 
+             // Construct the input that we will send to the model.
+             let sampling_request_input = sess
+-                .clone_history()
++                .clone_history_for_turn(&turn_context)
+                 .instrument(trace_span!("run_turn.prepare_sampling_request_input"))
+                 .await;
+ 
+@@ -1938,7 +1940,7 @@ async fn run_sampling_request(
+         let history = if let Some(input) = initial_input.take() {
+             input
+         } else {
+-            sess.clone_history().await
++            sess.clone_history_for_turn(&turn_context).await
+         };
+         let input_item_count = history.raw_items().len();
+         let sampling_step_context = Arc::new(StepContext {
+@@ -2993,8 +2995,17 @@ async fn try_run_sampling_request(
+         None
+     };
+     let mut resampling = crate::guardian::ResponseResampling::new(&sess);
++    if turn_context.queued_input.lock().await.is_pending() {
++        let admission_session = Arc::clone(&sess);
++        let admission_turn = Arc::clone(&turn_context);
++        client_session.set_request_admission(Some(Arc::new(move || {
++            let sess = Arc::clone(&admission_session);
++            let turn = Arc::clone(&admission_turn);
++            Box::pin(async move { sess.admit_queued_input(&turn).await })
++        })));
++    }
+     let mut stream_request = async |prompt: &Prompt| {
+-        client_session
++        let result = client_session
+             .stream(
+                 prompt,
+                 &step_context.settings.model_info,
+@@ -3006,7 +3017,9 @@ async fn try_run_sampling_request(
+                 &inference_trace,
+             )
+             .instrument(trace_span!("stream_request"))
+-            .await
++            .await;
++        sess.publish_queued_input(&turn_context).await;
++        result
+     };
+     let stream = stream_request(&prompt)
+         .or_cancel(&cancellation_token)
+diff --git a/codex-rs/core/src/session/turn_context.rs b/codex-rs/core/src/session/turn_context.rs
+index 2fe58d9dab..1d8d619540 100644
+--- a/codex-rs/core/src/session/turn_context.rs
++++ b/codex-rs/core/src/session/turn_context.rs
+@@ -399,6 +399,7 @@ pub struct TurnContext {
+     pub(crate) extension_data: Arc<codex_extension_api::ExtensionData>,
+     pub(crate) turn_timing_state: Arc<TurnTimingState>,
+     pub(crate) terminal_error: Arc<Mutex<Option<ErrorEvent>>>,
++    pub(crate) queued_input: Arc<Mutex<super::queued_input::QueuedInput>>,
+     /// Shares the session-owned store; session approvals remain live across turns.
+     session_grants: Arc<StdMutex<HashMap<String, AdditionalPermissionProfile>>>,
+     /// Retained by background cells so a later active turn cannot replace their grants.
+@@ -488,6 +489,7 @@ impl TurnContext {
+             extension_data,
+             turn_timing_state: Arc::new(TurnTimingState::default()),
+             terminal_error: Arc::new(Mutex::new(None)),
++            queued_input: Arc::default(),
+             session_grants: Arc::clone(&self.session_grants),
+             turn_grants: Arc::default(),
+             server_model_warning_emitted: AtomicBool::new(false),
+@@ -928,6 +930,7 @@ impl TurnContext {
+             extension_data: Arc::clone(&self.extension_data),
+             turn_timing_state: Arc::clone(&self.turn_timing_state),
+             terminal_error: Arc::clone(&self.terminal_error),
++            queued_input: Arc::clone(&self.queued_input),
+             session_grants: Arc::clone(&self.session_grants),
+             turn_grants: Arc::clone(&self.turn_grants),
+             server_model_warning_emitted: AtomicBool::new(
+@@ -1198,6 +1201,7 @@ impl Session {
+             extension_data,
+             turn_timing_state: Arc::new(TurnTimingState::default()),
+             terminal_error: Arc::new(Mutex::new(None)),
++            queued_input: Arc::default(),
+             session_grants,
+             turn_grants: Arc::default(),
+             server_model_warning_emitted: AtomicBool::new(false),
 diff --git a/codex-rs/core/src/session/turn_input.rs b/codex-rs/core/src/session/turn_input.rs
-index fb7575936d..e2fae161f2 100644
+index fb7575936d..1dd781c067 100644
 --- a/codex-rs/core/src/session/turn_input.rs
 +++ b/codex-rs/core/src/session/turn_input.rs
 @@ -254,6 +254,11 @@ pub(super) async fn handle(
@@ -8930,27 +9301,16 @@ index fb7575936d..e2fae161f2 100644
          thread_settings,
          start,
          additional_context,
-@@ -615,6 +621,20 @@ async fn start_if_idle(
+@@ -631,6 +637,9 @@ async fn start_if_idle(
              return Err(error);
          }
      };
 +    if let Some(guard) = queue_admission {
-+        let admitted = tokio::time::timeout(
-+            std::time::Duration::from_secs(/*secs*/ 15),
-+            guard.consume(submission_id.clone()),
-+        )
-+        .await
-+        .unwrap_or(false);
-+        if !admitted {
-+            session.clear_reserved_idle_turn(&turn_state).await;
-+            return Ok(TurnInputSubmission::NotSubmitted {
-+                reason: NotSubmittedReason::QueueAdmissionHeld,
-+            });
-+        }
++        *turn_context.queued_input.lock().await = super::queued_input::QueuedInput::pending(guard);
 +    }
-     let turn_context = match settings
-         .apply_started(session, submission_id.clone(), kind)
-         .await
+     turn_context
+         .turn_metadata_state
+         .update_responsesapi_client_metadata(responsesapi_client_metadata);
 diff --git a/codex-rs/ext/queue/Cargo.toml b/codex-rs/ext/queue/Cargo.toml
 index 4b5e5d04f4..abcafe5e09 100644
 --- a/codex-rs/ext/queue/Cargo.toml
@@ -9097,7 +9457,7 @@ index 47fa504595..e115cd0f60 100644
  pub use service::QueuedItem;
  pub use service::QueuedItemService;
 diff --git a/codex-rs/ext/queue/src/service.rs b/codex-rs/ext/queue/src/service.rs
-index 12671a0ef7..c67cf9ea87 100644
+index 12671a0ef7..5de31cc389 100644
 --- a/codex-rs/ext/queue/src/service.rs
 +++ b/codex-rs/ext/queue/src/service.rs
 @@ -1,3 +1,5 @@
@@ -9286,7 +9646,7 @@ index 12671a0ef7..c67cf9ea87 100644
              };
              let queued_item_id = record.id.clone();
  
-@@ -508,6 +619,118 @@ impl QueuedItemService {
+@@ -508,6 +619,127 @@ impl QueuedItemService {
          }
      }
  
@@ -9353,6 +9713,7 @@ index 12671a0ef7..c67cf9ea87 100644
 +            let queue = Arc::clone(&self.queue);
 +            let clock = Arc::clone(&self.clock);
 +            let item_id = record.id.clone();
++            let event_sink = Arc::clone(&self.event_sink);
 +            let guard = QueueAdmissionGuard::new(move |turn_id| {
 +                Box::pin(async move {
 +                    let expected_turn = turn_id.clone();
@@ -9363,6 +9724,14 @@ index 12671a0ef7..c67cf9ea87 100644
 +                            Box::new(move || Box::pin(async move { clock.sample().await })),
 +                        )
 +                        .await;
++                    if matches!(&result, Ok(Some(_))) {
++                        event_sink.emit(Event {
++                            id: Uuid::now_v7().to_string(),
++                            msg: EventMsg::ThreadQueueChanged(ThreadQueueChangedEvent {
++                                thread_id,
++                            }),
++                        });
++                    }
 +                    matches!(result, Ok(Some(BoundedQueueStatus::Admitted { turn_id })) if turn_id == expected_turn)
 +                })
 +            });
@@ -9405,7 +9774,7 @@ index 12671a0ef7..c67cf9ea87 100644
      async fn wake_if_loaded(&self, thread_id: ThreadId) {
          let Some(manager) = self.thread_manager.upgrade() else {
              return;
-@@ -631,6 +854,7 @@ impl TryFrom<QueuedUserSubmissionRecord> for QueuedItem {
+@@ -631,6 +863,7 @@ impl TryFrom<QueuedUserSubmissionRecord> for QueuedItem {
              .transpose()?;
          Ok(QueuedItem {
              id: record.id,
@@ -9414,10 +9783,10 @@ index 12671a0ef7..c67cf9ea87 100644
              responsesapi_client_metadata,
          })
 diff --git a/codex-rs/ext/queue/tests/queue_service.rs b/codex-rs/ext/queue/tests/queue_service.rs
-index e2a4cd43b7..2b1c57532a 100644
+index e2a4cd43b7..507056752d 100644
 --- a/codex-rs/ext/queue/tests/queue_service.rs
 +++ b/codex-rs/ext/queue/tests/queue_service.rs
-@@ -1201,3 +1201,214 @@ async fn resumed_idle_dispatches_input_without_a_loaded_manager() -> anyhow::Res
+@@ -1201,3 +1201,368 @@ async fn resumed_idle_dispatches_input_without_a_loaded_manager() -> anyhow::Res
      assert_eq!(metadata["client_type"], "ios_app");
      Ok(())
  }
@@ -9438,12 +9807,12 @@ index e2a4cd43b7..2b1c57532a 100644
 +                .with_queue_admission(guard),
 +        )
 +        .await?;
-+    assert_eq!(
-+        held,
-+        StartIfIdleSubmission::NotSubmitted {
-+            reason: NotSubmittedReason::QueueAdmissionHeld
-+        }
-+    );
++    // Turn preparation starts before the final model-request admission check.
++    assert!(matches!(held, StartIfIdleSubmission::Started { .. }));
++    wait_for_event_match(test.codex.as_ref(), |event| {
++        matches!(event, EventMsg::TurnComplete(_)).then_some(())
++    })
++    .await;
 +    assert!(response.requests().is_empty());
 +    let control = test
 +        .codex
@@ -9630,6 +9999,160 @@ index e2a4cd43b7..2b1c57532a 100644
 +            .status,
 +        codex_thread_store::BoundedQueueStatus::Admitted { .. }
 +    ));
++    Ok(())
++}
++
++struct HookExpiryClock(std::path::PathBuf);
++impl codex_queue_extension::QueueClock for HookExpiryClock {
++    fn sample(&self) -> codex_queue_extension::QueueClockFuture<'_> {
++        Box::pin(async move {
++            let lower = if self.0.is_file() { 200.0 } else { 100.0 };
++            Some(codex_thread_store::BoundedQueueClockSample {
++                lower,
++                upper: lower + 1.0,
++                evidence: r#"{"source":"controlled-hook-clock"}"#.to_string(),
++            })
++        })
++    }
++}
++
++fn write_expiring_prompt_hook(home: &Path) {
++    let script = home.join("expire_before_model.py");
++    let marker = home.join("bounded_expired");
++    std::fs::write(&script, format!(
++        "import json,sys\nfrom pathlib import Path\np=json.load(sys.stdin)\nif p['prompt']=='bounded prompt expired during preparation':\n    Path({:?}).touch()\n    print(json.dumps({{'hookSpecificOutput':{{'hookEventName':'UserPromptSubmit','additionalContext':'derived bounded context must expire'}}}}))\n",
++        marker.to_string_lossy(),
++    )).unwrap();
++    let python = if cfg!(windows) {
++        "python.exe"
++    } else {
++        "python3"
++    };
++    std::fs::write(
++        home.join("hooks.json"),
++        serde_json::json!({
++            "hooks": {"UserPromptSubmit": [{"hooks": [{
++                "type": "command", "command": format!(r#"{python} "{}""#, script.display())
++            }]}]}
++        })
++        .to_string(),
++    )
++    .unwrap();
++}
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn bounded_expiry_during_preparation_never_reaches_a_model_or_later_turn()
++-> anyhow::Result<()> {
++    let server = start_mock_server().await;
++    let replies = responses::mount_sse_sequence(
++        &server,
++        vec![
++            responses::sse_completed("control-turn"),
++            responses::sse_completed("resumed-control-turn"),
++        ],
++    )
++    .await;
++    let response = replies;
++    let test = test_codex()
++        .with_pre_build_hook(write_expiring_prompt_hook)
++        .with_windows_cmd_shell()
++        .with_config(trust_discovered_hooks)
++        .with_config(|config| config.include_environment_context = false)
++        .build_with_auto_env(&server)
++        .await?;
++    let thread_id = test.session_configured.thread_id;
++    let queue = loaded_thread_queue(&test)?;
++    let clock = Arc::new(HookExpiryClock(test.home.path().join("bounded_expired")));
++    let staging = QueuedItemService::new(
++        Arc::clone(&queue),
++        Weak::new(),
++        Arc::new(NoopExtensionEventSink),
++    )
++    .with_clock(clock.clone());
++    let item = staging
++        .enqueue_bounded(
++            thread_id,
++            user_input("bounded prompt expired during preparation"),
++            None,
++            150_000_000,
++        )
++        .await?;
++    let live = QueuedItemService::new(
++        queue,
++        Arc::downgrade(&test.thread_manager),
++        Arc::new(NoopExtensionEventSink),
++    )
++    .with_clock(clock);
++    emit_idle(&live, thread_id).await;
++    wait_for_event_match(test.codex.as_ref(), |event| match event {
++        EventMsg::HookCompleted(hook) => hook
++            .run
++            .entries
++            .iter()
++            .any(|entry| entry.text == "derived bounded context must expire")
++            .then_some(()),
++        _ => None,
++    })
++    .await;
++    wait_for_event_match(test.codex.as_ref(), |event| {
++        matches!(event, EventMsg::TurnComplete(_)).then_some(())
++    })
++    .await;
++    assert!(
++        test.home.path().join("bounded_expired").is_file(),
++        "prompt hook must run"
++    );
++    assert!(
++        response.requests().is_empty(),
++        "expiry during preparation must prevent the model request"
++    );
++    assert_eq!(
++        live.bounded_outcome(thread_id, item.id)
++            .await?
++            .unwrap()
++            .status,
++        codex_thread_store::BoundedQueueStatus::Expired
++    );
++    live.enqueue(thread_id, user_input("unbounded control after expiry"))
++        .await?;
++    emit_idle(&live, thread_id).await;
++    wait_for_event_match(test.codex.as_ref(), |event| {
++        matches!(event, EventMsg::TurnComplete(_)).then_some(())
++    })
++    .await;
++    assert_eq!(response.requests().len(), 1);
++    let body = response.requests()[0].body_json().to_string();
++    assert!(body.contains("unbounded control after expiry"));
++    assert!(!body.contains("bounded prompt expired during preparation"));
++    assert!(!body.contains("derived bounded context must expire"));
++    let rollout = test.codex.rollout_path().context("rollout path missing")?;
++    test.codex.shutdown_and_wait().await?;
++    test.thread_manager.remove_thread(&thread_id).await;
++    let resumed = test
++        .thread_manager
++        .resume_legacy_thread_from_rollout(
++            test.config.clone(),
++            rollout,
++            test.thread_manager.auth_manager(),
++            None,
++            Default::default(),
++        )
++        .await?;
++    resumed
++        .thread
++        .start_turn_if_idle(TurnInputRequest::new(user_input(
++            "resumed control after expiry",
++        )))
++        .await?;
++    wait_for_event_match(resumed.thread.as_ref(), |event| {
++        matches!(event, EventMsg::TurnComplete(_)).then_some(())
++    })
++    .await;
++    assert_eq!(response.requests().len(), 2);
++    let body = response.requests()[1].body_json().to_string();
++    assert!(body.contains("resumed control after expiry"));
++    assert!(!body.contains("bounded prompt expired during preparation"));
++    assert!(!body.contains("derived bounded context must expire"));
 +    Ok(())
 +}
 diff --git a/codex-rs/protocol/src/turn_input.rs b/codex-rs/protocol/src/turn_input.rs
