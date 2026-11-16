@@ -299,6 +299,11 @@ print('preflight:'+target+':'+nonce+':'+digest)
                     method=req['method'];params=req.get('params',{});methods.append(method)
                     tid=params.get('threadId',target)
                     if method=='initialize':value={'userAgent':'fixture'}
+                    elif method=='thread/turns/list':
+                        # This server models the older full-history protocol.
+                        ws.send(json.dumps(dict(id=req['id'], error=dict(
+                            code=-32601, message='method unavailable on older server'))))
+                        continue
                     elif method=='thread/loaded/list':value={'data':[tid for tid in threads
                         if not (unloaded_source and tid==source and respawns)],'nextCursor':None}
                     elif method=='thread/start':threads[target]={'name':'','turns':[]};value={'thread':{'id':target}}
@@ -441,17 +446,17 @@ print('preflight:'+target+':'+nonce+':'+digest)
             if common_permissions:
                 argv+=['--bus-root',str(permission_bus.root),'--operator-capability',str(permission_capability),'--trigger','context_limit']
             # Preserve the exact readiness observation if the aggregate guard fails.
-            from codex_wake.sessions import observe, revalidate_attachment, tmux_inventory, codex_client_identity_for_tty
+            from codex_wake.sessions import observe, revalidate_attachment, tmux_inventory, codex_client_identities_for_ttys
             readiness = {}
             readiness_deferrals = 0
             inventory_diagnostics = []
             budget_miss = dict(injected=False, base=0.0, offset=0.0, armed=False)
-            def timed_identity(tty):
+            def timed_identity(ttys):
                 started = time.monotonic()
                 try:
-                    return codex_client_identity_for_tty(tty)
+                    return codex_client_identities_for_ttys(ttys)
                 finally:
-                    inventory_diagnostics.append(dict(kind='identity', tty=tty, elapsed=time.monotonic()-started))
+                    inventory_diagnostics.append(dict(kind='identity', elapsed=time.monotonic()-started))
                     if budget_miss['armed']:
                         budget_miss.update(injected=True, armed=False, offset=2.0)
             def diagnosed_inventory(*args, **kwargs):
@@ -488,7 +493,7 @@ print('preflight:'+target+':'+nonce+':'+digest)
                         return_value=clock),patch('codex_wake.sessions.observe',side_effect=observed_readiness),patch(
                         'codex_wake.sessions.revalidate_attachment',side_effect=revalidated_readiness),patch(
                         'codex_wake.sessions.tmux_inventory',side_effect=diagnosed_inventory),patch(
-                        'codex_wake.sessions.codex_client_identity_for_tty',side_effect=timed_identity):
+                        'codex_wake.sessions.codex_client_identities_for_ttys',side_effect=timed_identity):
                     for _ in range(3 if pending_usage or correction or stale_title else 2):
                         output=StringIO()
                         if changed_defaults and _==1:

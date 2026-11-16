@@ -26,7 +26,7 @@ def _endpoints(root, endpoint):
     return sorted(set(values))
 
 
-def discover(root, endpoint='unix://', socket_path=None):
+def discover(root, endpoint='unix://', socket_path=None, *, thread_id=None):
     rows=[];holds=[]
     try:panes=tmux_inventory(socket_path,3)
     except (ValueError,OSError,subprocess.SubprocessError):
@@ -45,7 +45,7 @@ def discover(root, endpoint='unix://', socket_path=None):
                 from .controller_health import _image_hash
                 digest=_image_hash(pid)
                 info=reader.path.stat();generation=f'{info.st_dev}:{info.st_ino}'
-                threads=reader.loaded_threads(maximum=1000)
+                threads=reader.loaded_threads(maximum=1000, **({'selected_thread_id':thread_id} if thread_id is not None else {}))
                 snapshot=build_snapshot(threads,panes,{'app_server':{'availability':'available'},'tmux':{'availability':'available'}})
                 for row in snapshot['sessions']:
                     if not row.get('thread_id'):continue
@@ -59,13 +59,26 @@ def discover(root, endpoint='unix://', socket_path=None):
 
 def resolve(root, selector, expected_target=None, *, endpoint='unix://', socket_path=None):
     if not isinstance(selector,str) or not selector or len(selector)>1024 or any(ord(c)<32 for c in selector):raise InventoryError('invalid_selector','bounded session selector required')
-    view=discover(root,endpoint,socket_path)
     def matches(row):
         if selector.startswith('thread:'):return row['thread_id']==selector[7:]
         if selector==row['thread_id'] or selector==row.get('name'):return True
         for pane in row.get('attachments',[]):
             if selector in ('pane:'+pane['pane_id'],'window:'+pane['window_id'],pane['window_name'],pane['pane_title']):return True
         return False
+    selected_id=expected_target.get('conversation_id') if isinstance(expected_target,dict) else None
+    selection={'thread_id':selected_id} if selected_id and selector in (selected_id,'thread:'+selected_id) else {}
+    # A complete pinned identity can resolve through the host-selected shared
+    # endpoint without depending on discovery of unrelated registered accounts.
+    # Explicit discovery retains peer ownership and process/socket fencing.
+    if endpoint == 'unix://' and expected_target is not None:
+        try:shared=locate_shared_endpoint(timeout=3)
+        except (ValueError,OSError):shared=None
+        if shared and shared != 'unix://':
+            pinned=[row for row in discover(root,shared,socket_path,**selection)['sessions']
+                    if matches(row) and row['target']==expected_target]
+            if len(pinned)==1:return pinned[0]
+            if len(pinned)>1:raise InventoryError('ambiguous_target','pinned identity matches multiple owned sessions')
+    view=discover(root,endpoint,socket_path,**selection)
     rows=[row for row in view['sessions'] if matches(row)]
     if len(rows)>1:raise InventoryError('ambiguous_target','selector matches multiple owned sessions; use an exact thread UUID')
     if not rows:raise InventoryError('target_unavailable','no owned live session matches the selector')

@@ -9,7 +9,7 @@ import subprocess
 import time
 from typing import Any
 
-from .records import WakeError, _canonical_tmux_title, codex_client_identity_for_tty
+from .records import WakeError, _canonical_tmux_title, codex_client_identity_for_tty, codex_client_identities_for_ttys
 from .shared_app_server import SharedAppServerReader, SharedSourceError, locate_shared_endpoint
 
 
@@ -23,6 +23,24 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def explicit_terminal_absent(socket_path: str | None) -> bool:
+    """Qualify absence only at an explicit address in a physical private directory."""
+    if socket_path is None:
+        return False
+    path = Path(socket_path)
+    if not path.is_absolute() or '..' in path.parts:
+        raise SharedSourceError('explicit terminal socket must be absolute')
+    try:
+        path.lstat()
+        return False  # Existing, stale, symlinked and inaccessible sockets are not absence.
+    except FileNotFoundError:
+        parent = path.parent.resolve(strict=True)
+        info = parent.stat()
+        if parent != path.parent or info.st_uid != os.geteuid() or info.st_mode & 0o077:
+            raise SharedSourceError('missing terminal requires a physical owned private directory')
+        return True
+
+
 def tmux_inventory(socket_path: str | None, timeout: float, *, shell_metadata: bool = False) -> list[dict[str, Any]]:
     deadline = time.monotonic() + timeout
     command = ['tmux'] + (['-S', socket_path] if socket_path else [])
@@ -30,22 +48,25 @@ def tmux_inventory(socket_path: str | None, timeout: float, *, shell_metadata: b
               'pane_id', 'pane_index', 'pane_title', 'pane_current_path', 'pane_tty']
     if shell_metadata:
         fields += ['pane_current_command', 'pane_pid']
-    result = subprocess.run(command + ['list-panes', '-a', '-F', '\t'.join('#{' + x + '}' for x in fields)],
-                            capture_output=True, text=True, timeout=timeout, check=True)
+    try:
+        result = subprocess.run(command + ['list-panes', '-a', '-F', '\t'.join('#{' + x + '}' for x in fields)],
+                                capture_output=True, text=True, timeout=timeout, check=True)
+    except subprocess.CalledProcessError as error:
+        if error.returncode == 1 and explicit_terminal_absent(socket_path):
+            return []
+        raise
     rows = []
-    for line in result.stdout.splitlines():
+    parsed = [line.split('\t') for line in result.stdout.splitlines()]
+    if any(len(values) != len(fields) for values in parsed):
+        raise SharedSourceError('tmux metadata cannot be parsed unambiguously')
+    identities = codex_client_identities_for_ttys(values[fields.index('pane_tty')] for values in parsed)
+    for values in parsed:
         if time.monotonic() >= deadline:
             raise SharedSourceError('tmux observation timed out')
-        values = line.split('\t')
-        if len(values) != len(fields):
-            raise SharedSourceError('tmux metadata cannot be parsed unambiguously')
         row = dict(zip(fields, values))
         row['socket'] = socket_path
         row['pane_title'] = _canonical_tmux_title(row['pane_title'])
-        try:
-            identity = codex_client_identity_for_tty(row['pane_tty'])
-        except WakeError:
-            identity = None
+        identity = identities.get(row['pane_tty'])
         row['client_pid'] = identity[0] if identity else None
         row['client_start_time_ticks'] = identity[1] if identity else None
         row['evidence'] = 'process_generation' if identity else 'no_unique_codex_client'

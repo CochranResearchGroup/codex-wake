@@ -1,5 +1,25 @@
 # Codex Wake Runbook
 
+## Turn | 2026-11-15 | Native reconciliation discovery / #690
+
+Closed after operator-authorized review/merge/deploy and actual delivery proof.
+PR692/85428109 is installed as dev38;144 source and144 UID1017 exact-wheel checks
+pass,349 files match. Original installed peer recovery3.34s; the single fresh
+MCP time wake reached this same conversation with1attempt on existing_tab and
+matching native submission. Both services and CLI use the qualified prefix;
+shared native daemon generation unchanged. See evidence0247 deployment acceptance.
+Original source-only observations below are retained as history.
+
+Root owns Plan0247/fix/native-reconcile-discovery from91b80b09. Original installed
+and current full-page source both timed out observing this completed retrieval
+wake, blocking subsequent wakes. New adapter searches summaries and hydrates
+only exact matching turns, preserving full-item identities and the10s budget.
+Original native read-only replay PASS1.09s. No input, production state changes,
+manual receipt, service restart or installation. Compatibility checks are
+file-backed; first failures retained. See evidence0247. The primary's dirty
+Grok/control work and all other owners are preserved; local lane.json owns
+checkout inventory/cleanup details. No duplicate notification is scheduled.
+
 ## Turn | 2026-11-13 | P231 packages deployed
 
 Operator explicitly authorized PR/review/merge/deploy after source closeout. Wake
@@ -9860,3 +9880,201 @@ No deployment, login retry or real-provider request; review0/remediation0.
 T8#639 closed from exact isolated native1a2fb1/e8eb package and real official-account/coding/MCP/mixed-worker/linked-handoff/local-Stop proof. Wakebc7a9 observer fix follows continuation journals as locators and validates canonical lineage; actual interrupted tree now unknown/null rather than qualified zero. Isolated updated wheel1ed42101 has336 matching installed files and75 selected checks covered; source62PASS. Missing test-helper and sudo umask fixture failures are retained, final affected8PASS with private umask077. No private histories/credentials copied into UID1017 fixtures.
 
 Exactly one broad Standards/Spec review and one bounded TDD remediation completed after all8 children closed. One documentation contract mismatch corrected in native7cdb5404; no confirmed Spec blocker. Documentation-only delta does not invalidate qualified binaries/wheel; no rebuild/provider retry issued. Parent628 remains OPEN; no working-profile activation/deployment. Existing two source lanes retained primary-owned for subsequent integration/activation, next review at that stage; current registered inventories Wake124/native21, no new checkout created by this slice. Memoryforbidden, no explicit memory-write request. See [final qualification](docs/dev/evidence/plan0233/t8-final-qualification.md) and [review/remediation](docs/dev/evidence/plan0233/review-and-remediation.md).
+## Turn | 2026-11-14 | Unified connector control implementation begins
+
+Operator approved Plan0234, public operation seam, eleven-ticket graph and fixed
+review base1aa49867. Spec623 and children624/625/626/627/631/635/638/640/641/642/643
+published with native blockers and subissue links. Primary624, workers625/626.
+Integration feat/unified-control-0234; no live effects. One final broad two-axis
+review and one bounded TDD remediation pass reserved. Reuse existing test harness.
+
+## Turn | 2026-11-14 | Unified connector control source delivery
+
+Plan0234 child tickets624/625/626/627/631/635/638/640/641/642/643 CLOSED; parent623
+remains open for integration. Primary canonical/environment/accounts/wakes lane
+integrated two individually assigned workers, each reusing its checkout for ready
+successors. All seven CLI/API/MCP roots retain owner authority and compatibility.
+One broad two-axis review at bf4b5e00 accepted Standards2/highestP1 and
+Spec3/highestP1. One bounded TDD pass resolved all three unique blockers and the
+duplication heuristic: content attenuation, original wait custody and uncertainty
+projection. [Review](docs/dev/evidence/plan0234/review.md) and
+[validation](docs/dev/evidence/plan0234/validation.md) preserve exact source/check
+mapping and disclosed unsupported/native/provider boundaries. Selected471-case
+presubmit and causal45-case auth acceptance pass; final affected checks and rebuilt
+candidate qualification recorded there. No full-suite/matrix/live claim.
+Worker checkouts removed after exact remote custody. Integration checkout retires
+on final remote readback; topic/worker refs retained. No merge, deployment or live
+provider effects. Memory disposition forbidden: developer permits memory updates
+only on explicit user request; none was made.
+
+## Turn | 2026-11-14 | Unified control merged and deployed
+
+Operator review/merge/deploy authorized. PR644 merged8e5f6f7c; prior one broad
+review/one TDD pass retained after published head/base readback. Exact merged wheel
+qualified under UID1017 (41tests,1skip,22.950s);344Python members and31dependencies
+match. dev21 installed;9launchers, tab monitor, supervisor and local HTTP controller
+refreshed. Fresh actual stdio MCP lists511tools; old connections await normal
+reconnect. Exact interrupted-poll lifecycle hold inspected/reconciled without replay;
+two older holds preserved.24native processes matched at cutover; later one exited,
+with no native control issued. [Deployment evidence](docs/dev/evidence/plan0234/deployment.md).
+No new production schedule/grant/provider turn, native upgrade or shared MCP reload.
+Task checkout retires after remote custody; unrelated dirty root preserved.
+Memory forbidden by explicit-request-only developer boundary.
+
+## Turn | 2026-11-14 | External OAuth connector implementation
+
+Operator requested external OAuth MCP using existing Previews/LitScout examples.
+Issue646 / Plan0235 owns the lane. Reuse OAuthAuthority and ProtectedOperations;
+o ambient stdio forwarding, new executor or credential cryptography. Official MCP2.2
+serves stateless HTTP with current bearer context and canonical scoped tools.
+Cooper Authelia owner rechecks, one-use browser flow/cookie/origin and explicit
+operator/subset/scopes/actions protect consent. Existing webhook8820 stays intact;
+proposed exact OAuth/MCP backend37186. Installed dev21 stdio511tools and authorized
+read PASS. Source focused33PASS29.809s; later UI/IdP acceptance retained separately.
+Human client-installation scope/owner consent remains separate from server readiness.
+
+Plan0235 runtime proposal now pins8821, outside the warned ephemeral range; webhook
+8820 unchanged. Installed candidate UID1017 seven tests PASS7.661s. Source33PASS
+30.319s; public source PR647 and exact ingress packet remain gated on shared Cooper
+Authelia restart approval. No live routing/auth/account change performed.
+
+Final availability probe found8821 already occupied; final pinned backend8822 is
+available. No existing listener was changed. Exact route/runtime candidates updated;
+source package bytes and installed qualification remain unchanged.
+
+## 2026-11-14 | P235 approved deployment
+
+Operator approved shared-auth impact; merged PR647/ingressPR13 and deployed separate
+dev22 connector on8822. Exact ingress/routes and Cooper rule adopted; public
+metadata200, MCP401, nonowner403. No owner grant or client linking performed.
+[Deployment receipt](docs/dev/evidence/plan0235/deployment.md). Task checkout retires
+after documentation integration; unrelated root changes remain preserved.
+
+## 2026-11-14 | P236 delegated setup repair
+
+#650 records operator-authorized agent consent incorrectly denied by an
+owner-only check. Named, exact-client, expiring private delegations preserve
+separate IdP identity and grant subject, scope/target/mode ceilings and actual
+consenter audit. Regression initially403 instead of200; source repair green.
+Existing browser connection retained; no implicit mode or grant creation.
+
+P236 deployed: PR651/fa9ae165, dev23-a22e27d connector service confirmed active.
+Preserved historical649 shutdown settings and all historical module payloads.
+Live Cooper agent now reaches ChatGPT consent, both authority modes unchecked.
+No production grant selected or minted. Bug650 closes; client linking awaits
+explicit mode per operator spec. Root/browser/core state preserved.
+
+## 2026-11-14 | P238 real-browser consent Origin
+
+Operator selected act-as-me. Chrome rejected POST before grant creation because
+no-referrer suppresses Origin. Real Chrome fixture confirms null versus actual
+origin after same-origin policy; keep strict Origin checking unchanged.
+
+P238 closeout: final dev25-5a801f9 active after PR656/ac60ad7d. Strict Origin and
+exact callback CSP qualified in Chrome. Actual operator consent, token exchange
+and one read-only ChatGPT acceptance completed (cooper/posix/completed). Existing
+plugin identity preserved; blocked prior grant revoked. Private bindings/expiry
+and receipts remain outside Git; no core/native/IdP/browser restart.
+
+## 2026-11-14 | P239 ChatGPT native greeting
+
+Pinned native lookup bypasses unrelated account discovery only after complete target equality. Loaded membership remains complete; metadata reads narrow to the exact pinned thread. PR658/659 integrated; dev27 qualified under UID1017 (18 checks), 339 payload members match source and installations. Only connector service restarted. Real ChatGPT tool call admitted and queued the authorized greeting with original idempotency key. Consumption awaits active-turn completion. No native daemon, grant or account changes. Memory disposition forbidden: no explicit memory write requested.
+
+## 2026-11-14 | P240 stale native input cancellation
+
+Captured replay reproduces cached cancelled result despite exact native turn reporting completed. Terminal early return prevented fresh observation. PR661/bfb0a1d0 allows read-only completion correction only with original turn/client/input match and records prior cancellation in a correction event. Version dev28 qualified under UID1017: 14 focused checks, 339 payload members matched. Real ChatGPT reread reports completed / owner_observed / exact reply for original operation, no new prompt. Initial interrupted snapshot origin remains unestablished. Only connector restarted. Memory disposition forbidden: no explicit memory write requested.
+
+## 2026-11-14 | P241 connector acceptance checkpoint
+
+Published spec663 and nineapproved vertical tickets. Root owned664; one-ticket workers handledothers under threelane cap and serializedlive resources. Eightclosed from actualOAuth/MCP/native evidence. Sourcecensus repair PR673 and complete-native-observation budget PR675 qualifiedunderUID1017 and deployeddev30; same native daemon2082 preserved. Localconsolidated64checksPASS36.168s. No paidCI.
+
+668 remains open: visible restore requires hostbindings and commonpermissionpolicy adoption, which is root-wide and outside approved permissionboundary. Restrictive proposal retained; no policy activated. Operatorquestionpending. Finalreview0/TDDremediation0 pendingorderedclosuregate. Task-ownedmonitor reached its declaredruntime limit; processabsent, no pending/firing wakes. Accepted submittedrecords preserved without syntheticack. Temporarytestgrants revoked and ownedTUI/process cleanup verified. Parent663 unchanged. Memorydisposition forbidden: no explicitmemorywriterequest.
+
+
+## 2026-11-14 | P241 complete acceptance and final review
+
+Operator approved host-wide common-policy adoption. Root used supported migration/CAS owners, preserved named defaults/history and withdrew the exact temporary recoveryallow atrev5. PR677–680 repair trusted-controller admission, saved recipient observation, clock-domain alignment and bounded original-intent readiness reconciliation; exactdev34 source/package qualified underUID1017 before working installation. Native2082 preserved. Actualdue visibly restored sameownedconversation/harness/cwd, one correlatednativeinput/completedreply; probe importfailure preserved and recoveredread-only proof supplied withoutreplay. Earlier held/uncertainjournals remainunchanged; allownedruntime cleaned, acceptedsubmittedrecords retained/noack.
+
+Allninechildren664–672 closed; parent663 unchanged. Exactlyone Standards/Spec review plusone boundedTDDremediation completed. ReceiptCLIred/green protectspriorfailurefiles; live scoped-read checks and fresh existingChatGPTreadback fill accepted evidencegaps. Local selectedpresubmit107PASS43.533s; pinnedruff/policywiring/compileall/diffPASS. No hostedpaidCI/comprehensiveclaim. Productdeployeddev34; PR676 publishesreview-readyacceptanceartifacts. Nonblockingtransportduplicationmaintenance remainsoutsideboundedtask. Memorydispositionforbidden; no explicit memorywrite requested.
+
+
+## 2026-11-15 | P242 deployed bounded history repair
+
+PR682 merged8009ce7c. Product source9829b1c0, exactdev35 wheel c92742ef52e89d35a6d34bbcb6a357462b75e1b300cb58cf4c7389a36297ddf7. Source119checksPASS102.736s and realUID1017 installed119checksPASS82.075s; source/wheel/UID/merged-main/working-install349file parity passes. Required undefined-name lint, compileall, policy wiring and diff checks pass. Independentreview1 and bounded red/greenidentity remediation1 complete. Onlyconnector restarted toPID1921906 with both unitpins selectingdev35; native2082/browser379435/unrelatedtestdaemon3287769 preserved. Publicmetadata200/anonymousMCP401. Actualinstalled longhistory5fullpages3.027s recoveredexactoriginalturn/message/client and20byteagentMessage outputcoverage with0inputcalls. #674 closed; originalincidentjournal untouched. Freshunsaved/archived nativehistory refusals retained as refusals, not success. UIDtemporaryserver stopped and qualificationtree removed afterreceipts retained. No nativeupgrade, paidCI, or memorywrite. Evidence0242.
+
+
+## 2026-11-15 | P243 actual whole-container and monitor recovery
+
+Run02 exposed missing-terminal observation/launch gaps with0effects. PR683/f9c953e4 repairs explicit private-address absence, atomic saved-session creation, native notLoaded and independent prior-generation-death guards. Review's unlinked-live-TUI finding reproducedred/green and closed; supersededdev36 neverdeployed. Exactdev37 wheel df30d4f8439dafd41f526072b4347eedf76f160395972da029c99833ecdbd27b qualified source155PASS102.382s/UID155PASS112.008s; all349files matchmergedsource andinstall. Onlyconnector restartedPID2121223; ingressready200/401 afterstartup.
+
+Run03 independently accepts actual completeprivatecontainer loss: sameUUID/harness/cwd restored, onecorrelatedinput/completedCW681_1_COMPLETED. Its secondaxis hit a test-runner transientunit recreation error. Retainedfailures; fixedrunner to atomicsystemctlrestart and reran onlyremainingaxis fresh. Run04PASS: monitorPID/generation changed, sameTUI retained, originalrequest/target/due/expiry unchanged, onecorrelatedinput/completedCW681_2_COMPLETED. Cleanups0errors, ownedmonitors inactive, no liveprivatesockets, recipientsarchived/enrollmentssuppressed/isolatedauthoritydenied. Native2082/browser379435/testnative3287769/all44operatorpanes/productionconfig+policyhashes unchanged. Originaljournals/acceptedsubmittedrecords retained, nosyntheticack/no replay. Dead run01socket retained asnonliveforensicartifact. Evidence0243; repeatedcadence/missed/overlap andhostreboot notclaimed. Memory dispositionforbidden.
+
+
+## 2026-11-15 | P244 installed recurrence acceptance (#685)
+
+Existing dev37, no product package or shared runtime change. Three interval30s
+occurrences each matched one native input/completed expected reply and original
+anchors; count exhausted at3. Three real-clock initial-downtime missed policies
+and three pending-overlap policies matched bounded expected states with0added
+native inputs. Fresh installed processes verified cancellation/anchors for all7.
+Original run01 remains failed only for redundant final stop of an already-stopped
+transient monitor. Independent read-only reconciliation proves original monitor
+gone/unitinactive, private terminal gone,7cancellations/defaultdeny policies and
+no pending/firing wakes. Accepted submitted records/journals retained; no replay
+or syntheticack. Runner stop custody/exception capture fixed after Standards P2;
+Spec0findings. Original3daemon/browser generations,43baseline operatorpanes and
+production config/policy hashes preserved. Focused pinnedlint/compile/help/policy/
+diff checks PASS. No new fixture tests, core-suite rerun, paid CI or package
+installation. Evidence0244; native busy-turn queue/calendar/reboot/soak excluded.
+Memory disposition forbidden; no memorywrite requested.
+
+
+## 2026-11-15 | P245 actual native busy-turn overlap (#688)
+
+Existing dev37; no package/shared service change. Actual native inProgress turn
+and scoped live command PID/argv/generation held through later due slots, with
+exactly one native input while busy. Skip accepted from original run02 via
+read-only final-answer reconciliation; latest/queue passed run03, completed
+input totals1/2/3 with exact wake/submission/turn identities and original anchors.
+Empty setup timeout and two runner assumptions retained; no unknown submission
+replay. Ongoing command evidence differs from persisted completed tool records;
+commentary differs from final-answer phase. Required focused checks PASS; no
+fixture framework, broad suite/UID reinstall or paidCI. Owned monitors/servers/
+TUI/7command generations gone, policies defaultdeny/schedules canceled, no
+pending/firing. Native/browser/testdaemon and production config/policy preserved.
+Default operator panes43→41, two other-project panes disappeared with cause
+unestablished; all task terminal mutations private, native commands only owned
+wait.py. No blanket global-preservation claim or unrelated restoration action.
+Evidence0245. Review Standards0, Spec2/P2 corrected; attribution needs evidence.
+Memory disposition forbidden.
+
+
+## 2026-11-15 | P246 installed calendar/DST replay (#691)
+
+Existingdev37/tzdb2026e, no package/shared runtime change. Twelve valid cases
+cover local08/20 versus43200s across spring/fall, gap/fold choices, repeated-hour
+UTC ordering, gap collision deduplication and inclusive absolute start bounds.
+Eight invalid explicit choices rejected without schedules. Thirty-six occurrence
+anchors retained through153fresh-interpreter steps with alternating childTZ;
+boundary repeats/re-registration did not duplicate or rearm. No native endpoint,
+monitor or dispatcher; synthetic clock shape explicitly replay-only. All13roots
+canceled/denied on cleanup. First vector's UTC/local-midnight expectation failed
+and is retained; minimal correction plus separate UTC-bound case passed.
+Review Standards0/Spec1P2 resolved; focused lint/syntax/help/policy/diff/replay PASS,
+no broad suite/UID reinstall/paidCI. Guide clarifies clock versus interval and
+absolute start bounds; prior operator pane-closure confirmation propagated to0245.
+Evidence0246; liveDST/authenticatedclock/provider coverage remains separate.
+Memory disposition forbidden.
+
+
+## 2026-11-15 | P247 native busy queue boundary (#694)
+
+Installeddev37/native0.169 unchanged. Real bounded busy command, three accepted
+queue entries, two exact deletions before idle, one naturally dequeued completed
+control. No canceled input delivered. Native schema has no expiry field; host-only
+deadline observation does not qualify native expiry. Enforcement #695 remains
+open; bounded Wake busy admission retains pre-I/O refusal. Unbounded operator
+SessionInputs.queue is separate. Run01 timing failure preserved, minimal runner
+correction and fresh run02 passed. Focused lint/syntax/help/policy/diff PASS.
+Both owned terminals and scratch directories retired; independent process/config/
+native-hash audit PASS. Evidence0247. No deployment. Memory disposition forbidden.
