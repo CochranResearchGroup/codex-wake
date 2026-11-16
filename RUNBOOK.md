@@ -10310,3 +10310,15 @@ protection is unchanged. Two document checks and29 refresh controls pass on311;
 36 affected module checks pass on312 in48.912s; the51-test preflight module
 passes145.032s. Original full-suite preflight failure remains unexplained, not
 reclassified as clean or quarantined. #695 remains OPEN.
+
+
+## Turn | 2026-11-16 | #695 bounded preflight order diagnostic
+
+A private runner repeats only the original ordered prefix through the recorded
+preflight failure, with immediate assertion traces and a360-second cap. First
+attempt is invalid setup: missing repo-root import path causes a tests-package
+import error before target. Preserve it; exact-marker processes0 and temp removed.
+Corrected runner checks discovery errors before execution. At20acef34 it passes
+214 tests including the target,186.405s; not a full-suite result. Temp and all
+marker-owned processes are gone. The original full-suite failure remains open,
+not explained by these passes. Working daemon/hash unchanged; #695 remains OPEN.

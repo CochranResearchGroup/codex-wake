@@ -40,8 +40,10 @@ coverage, a malformed CLOSED annotation in the peer plan header, and refresh tes
 reading operator wake roots through inherited XDG_CONFIG_HOME. Generated coverage
 and the deterministic header are repaired; refresh tests now isolate their config,
 with29 controls passing onPython3.11 and36 affected module checks onPython3.12.
-The original preflight subcase passes alone and its51-test module passes145.032s,
-but its earlier full-suite failure remains unexplained and is not erased.
+The original preflight subcase passes alone and its 51-test module passes in
+145.032 seconds. The corrected original-order prefix also passes 214 tests,
+including that case, in 186.405 seconds. Its earlier full-suite failure remains
+unexplained and is not erased.
 Retain all failures; no full-green claim.
 Working daemon1879 retains its original hash. #695 remains OPEN; no working native
 installation, merge, deployment or closure is claimed.
