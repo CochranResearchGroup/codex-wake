@@ -10,7 +10,7 @@
   },
   "review_limit": 1,
   "remediation_limit": 1,
-  "review_runs": 0,
+  "review_runs": 1,
   "remediation_runs": 0,
   "tickets": [
     {
@@ -273,7 +273,7 @@
       ],
       "owner": "primary-real-account-qualification",
       "state": "validated",
-      "tracker_state": "OPEN",
+      "tracker_state": "CLOSED",
       "acceptance": [
         "The complete exact native package passes the existing isolated upgrade/rollback, history, multi-client and failed-start gates.",
         "A bounded disposable-workspace workflow verifies real account sign-in/entitlement, streaming coding tools, MCP, mixed workers, handoff, Stop/resume and usage readiness.",
@@ -297,7 +297,7 @@
       ],
       "checkout_custody": "Worker explicitly returned Cargo/cache/artifact custody; primary owns current source diagnosis and remaining live qualification. Existing source checkouts retained.",
       "worker_wake_base": "1f8fd14b33faad7e145919a6861daa5a36bc2b16",
-      "progress": "Accepted exact native package/UID1017 plus actual real coding/MCP/mixed worker/linked handoff/local Stop. Corrected Wake observer actual unknown/null and installed336hashes/75selectedchecks accepted; earlierfixturefailures retained. Ready to close639; parent628OPEN; broadreview/remediation0.",
+      "progress": "All8implementationchildrenCLOSED;exactnative/Wakeinstalledandrealqualificationaccepted. Exactlyonebroadreview started at fixedheadsWake487ba576/native1a2fb1; boundedremediation reserved. Parent628OPEN; no workingdeployment.",
       "native_result_sha": "1a2fb1df4cefdef9782cd82d8cceef8c70e1c05c",
       "package_manifest": "runtime/grok-native-233/t8-portable-worker-package-manifest.json",
       "package_entrypoint_sha256": "e8eb511af74de41d0d336a0afc6715df15cbd15583977996eb661981de3aea1d",
@@ -315,7 +315,8 @@
       "agent_notification_source_manifest": "runtime/grok-native-233/t8-agent-notification-source-manifest.json",
       "portable_worker_source_manifest": "runtime/grok-native-233/t8-portable-worker-source-manifest.json",
       "wake_runtime_source": "bc7a9e110db41ed20c30e7c944b6c86b7b988508",
-      "installed_wake_wheel_sha256": "1ed42101dff3679c18331b88cd4499afe22499d7bc80647370b3d3922c9d53ba"
+      "installed_wake_wheel_sha256": "1ed42101dff3679c18331b88cd4499afe22499d7bc80647370b3d3922c9d53ba",
+      "closure_comment": "https://github.com/CochranResearchGroup/codex-wake/issues/639#issuecomment-6907198588"
     }
   ],
   "initial_ready": [
@@ -370,5 +371,9 @@
     "workers": 2,
     "maximum_workers": 3,
     "serialize": "native cargo cache and overlapping generated/schema edits"
+  },
+  "review_frozen_heads": {
+    "wake": "487ba576",
+    "native": "1a2fb1df4cefdef9782cd82d8cceef8c70e1c05c"
   }
 }
