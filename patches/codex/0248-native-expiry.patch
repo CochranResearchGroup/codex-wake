@@ -1,5 +1,5 @@
 diff --git a/codex-rs/Cargo.lock b/codex-rs/Cargo.lock
-index d719a520b7..41b3c11f6a 100644
+index d719a520b7..32044c1130 100644
 --- a/codex-rs/Cargo.lock
 +++ b/codex-rs/Cargo.lock
 @@ -287,7 +287,7 @@ checksum = "2a4385e2e34eb35d6b3efe798b9eb88096925d87726c0798709bf56d9ed84af3"
@@ -975,7 +975,12 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "codex-core",
-@@ -4724,7 +4724,7 @@ dependencies = [
+@@ -4720,11 +4720,12 @@ dependencies = [
+  "tokio",
+  "tracing",
+  "uuid",
++ "wiremock",
+ ]
  
  [[package]]
  name = "codex-realtime-webrtc"
@@ -984,7 +989,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "codex-build-info",
-@@ -4743,7 +4743,7 @@ dependencies = [
+@@ -4743,7 +4744,7 @@ dependencies = [
  
  [[package]]
  name = "codex-response-debug-context"
@@ -993,7 +998,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "base64 0.22.1",
   "codex-api",
-@@ -4754,7 +4754,7 @@ dependencies = [
+@@ -4754,7 +4755,7 @@ dependencies = [
  
  [[package]]
  name = "codex-responses-api-proxy"
@@ -1002,7 +1007,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "bytes",
-@@ -4778,7 +4778,7 @@ dependencies = [
+@@ -4778,7 +4779,7 @@ dependencies = [
  
  [[package]]
  name = "codex-rmcp-client"
@@ -1011,7 +1016,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "axum",
-@@ -4830,7 +4830,7 @@ dependencies = [
+@@ -4830,7 +4831,7 @@ dependencies = [
  
  [[package]]
  name = "codex-rollout"
@@ -1020,7 +1025,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "chrono",
-@@ -4863,7 +4863,7 @@ dependencies = [
+@@ -4863,7 +4864,7 @@ dependencies = [
  
  [[package]]
  name = "codex-rollout-trace"
@@ -1029,7 +1034,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "codex-code-mode",
-@@ -4880,7 +4880,7 @@ dependencies = [
+@@ -4880,7 +4881,7 @@ dependencies = [
  
  [[package]]
  name = "codex-runtime-agent-instance"
@@ -1038,7 +1043,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "base64 0.22.1",
   "bytes",
-@@ -4909,7 +4909,7 @@ dependencies = [
+@@ -4909,7 +4910,7 @@ dependencies = [
  
  [[package]]
  name = "codex-sandboxing"
@@ -1047,7 +1052,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "codex-mxc-sandbox",
-@@ -4937,7 +4937,7 @@ dependencies = [
+@@ -4937,7 +4938,7 @@ dependencies = [
  
  [[package]]
  name = "codex-secrets"
@@ -1056,7 +1061,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "age",
   "anyhow",
-@@ -4958,7 +4958,7 @@ dependencies = [
+@@ -4958,7 +4959,7 @@ dependencies = [
  
  [[package]]
  name = "codex-shell-command"
@@ -1065,7 +1070,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "base64 0.22.1",
-@@ -4981,7 +4981,7 @@ dependencies = [
+@@ -4981,7 +4982,7 @@ dependencies = [
  
  [[package]]
  name = "codex-skills"
@@ -1074,7 +1079,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-protocol",
   "codex-shell-command",
-@@ -4998,7 +4998,7 @@ dependencies = [
+@@ -4998,7 +4999,7 @@ dependencies = [
  
  [[package]]
  name = "codex-skills-extension"
@@ -1083,7 +1088,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "assert_matches",
   "blake3",
-@@ -5038,7 +5038,7 @@ dependencies = [
+@@ -5038,7 +5039,7 @@ dependencies = [
  
  [[package]]
  name = "codex-state"
@@ -1092,7 +1097,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "chrono",
-@@ -5067,7 +5067,7 @@ dependencies = [
+@@ -5067,7 +5068,7 @@ dependencies = [
  
  [[package]]
  name = "codex-stdio-to-uds"
@@ -1101,7 +1106,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "codex-uds",
-@@ -5079,7 +5079,7 @@ dependencies = [
+@@ -5079,7 +5080,7 @@ dependencies = [
  
  [[package]]
  name = "codex-tcp-tunnel"
@@ -1110,7 +1115,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "base64 0.22.1",
-@@ -5101,7 +5101,7 @@ dependencies = [
+@@ -5101,7 +5102,7 @@ dependencies = [
  
  [[package]]
  name = "codex-terminal-detection"
@@ -1119,7 +1124,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "pretty_assertions",
   "tracing",
-@@ -5109,7 +5109,7 @@ dependencies = [
+@@ -5109,7 +5110,7 @@ dependencies = [
  
  [[package]]
  name = "codex-test-binary-support"
@@ -1128,7 +1133,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-arg0",
   "tempfile",
-@@ -5117,7 +5117,7 @@ dependencies = [
+@@ -5117,7 +5118,7 @@ dependencies = [
  
  [[package]]
  name = "codex-thread-manager-sample"
@@ -1137,7 +1142,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "clap",
-@@ -5128,7 +5128,7 @@ dependencies = [
+@@ -5128,7 +5129,7 @@ dependencies = [
  
  [[package]]
  name = "codex-thread-store"
@@ -1146,7 +1151,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "caseless",
   "chrono",
-@@ -5161,7 +5161,7 @@ dependencies = [
+@@ -5161,7 +5162,7 @@ dependencies = [
  
  [[package]]
  name = "codex-tools"
@@ -1155,7 +1160,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "bitflags 2.13.1",
   "codex-attachment-store",
-@@ -5187,7 +5187,7 @@ dependencies = [
+@@ -5187,7 +5188,7 @@ dependencies = [
  
  [[package]]
  name = "codex-tui"
@@ -1164,7 +1169,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "app_test_support",
-@@ -5319,7 +5319,7 @@ dependencies = [
+@@ -5319,7 +5320,7 @@ dependencies = [
  
  [[package]]
  name = "codex-uds"
@@ -1173,7 +1178,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "async-io",
   "libc",
-@@ -5333,7 +5333,7 @@ dependencies = [
+@@ -5333,7 +5334,7 @@ dependencies = [
  
  [[package]]
  name = "codex-user-verification"
@@ -1182,7 +1187,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "base64 0.22.1",
   "block2",
-@@ -5354,7 +5354,7 @@ dependencies = [
+@@ -5354,7 +5355,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-absolute-path"
@@ -1191,7 +1196,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "dirs",
   "dunce",
-@@ -5368,14 +5368,14 @@ dependencies = [
+@@ -5368,14 +5369,14 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-approval-presets"
@@ -1208,7 +1213,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "base64 0.22.1",
   "codex-protocol",
-@@ -5389,7 +5389,7 @@ dependencies = [
+@@ -5389,7 +5390,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-cache"
@@ -1217,7 +1222,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "lru",
   "sha1 0.10.6",
-@@ -5398,7 +5398,7 @@ dependencies = [
+@@ -5398,7 +5399,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-cargo-bin"
@@ -1226,7 +1231,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "assert_cmd",
   "runfiles",
-@@ -5407,7 +5407,7 @@ dependencies = [
+@@ -5407,7 +5408,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-cli"
@@ -1235,7 +1240,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "clap",
   "codex-protocol",
-@@ -5419,22 +5419,22 @@ dependencies = [
+@@ -5419,22 +5420,22 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-critical-path"
@@ -1262,7 +1267,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-git-utils",
   "codex-utils-absolute-path",
-@@ -5447,14 +5447,14 @@ dependencies = [
+@@ -5447,14 +5448,14 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-head-tail-buffer"
@@ -1279,7 +1284,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-utils-absolute-path",
   "dirs",
-@@ -5464,7 +5464,7 @@ dependencies = [
+@@ -5464,7 +5465,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-image"
@@ -1288,7 +1293,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "base64 0.22.1",
   "codex-utils-cache",
-@@ -5478,7 +5478,7 @@ dependencies = [
+@@ -5478,7 +5479,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-json-to-toml"
@@ -1297,7 +1302,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "pretty_assertions",
   "serde_json",
-@@ -5487,7 +5487,7 @@ dependencies = [
+@@ -5487,7 +5488,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-model-facing-id"
@@ -1306,7 +1311,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "blake3",
   "pretty_assertions",
-@@ -5500,7 +5500,7 @@ dependencies = [
+@@ -5500,7 +5501,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-oss"
@@ -1315,7 +1320,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-core",
   "codex-lmstudio",
-@@ -5510,7 +5510,7 @@ dependencies = [
+@@ -5510,7 +5511,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-output-truncation"
@@ -1324,7 +1329,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-protocol",
   "codex-utils-string",
-@@ -5520,7 +5520,7 @@ dependencies = [
+@@ -5520,7 +5521,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-path"
@@ -1333,7 +1338,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-utils-absolute-path",
   "dunce",
-@@ -5531,7 +5531,7 @@ dependencies = [
+@@ -5531,7 +5532,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-path-uri"
@@ -1342,7 +1347,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "base64 0.22.1",
   "codex-utils-absolute-path",
-@@ -5547,7 +5547,7 @@ dependencies = [
+@@ -5547,7 +5548,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-plugins"
@@ -1351,7 +1356,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-exec-server",
   "codex-exec-server-protocol",
-@@ -5561,7 +5561,7 @@ dependencies = [
+@@ -5561,7 +5562,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-process"
@@ -1360,7 +1365,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "pretty_assertions",
   "tokio",
-@@ -5569,7 +5569,7 @@ dependencies = [
+@@ -5569,7 +5570,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-pty"
@@ -1369,7 +1374,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "codex-utils-cargo-bin",
-@@ -5588,7 +5588,7 @@ dependencies = [
+@@ -5588,7 +5589,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-readiness"
@@ -1378,7 +1383,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "assert_matches",
   "thiserror 2.0.18",
-@@ -5598,7 +5598,7 @@ dependencies = [
+@@ -5598,7 +5599,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-redacted-string"
@@ -1387,7 +1392,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "schemars 0.8.22",
   "serde",
-@@ -5606,14 +5606,14 @@ dependencies = [
+@@ -5606,14 +5607,14 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-rustls-provider"
@@ -1404,7 +1409,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-protocol",
   "codex-utils-absolute-path",
-@@ -5623,7 +5623,7 @@ dependencies = [
+@@ -5623,7 +5624,7 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-sleep-inhibitor"
@@ -1413,7 +1418,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "core-foundation 0.9.4",
   "libc",
-@@ -5633,14 +5633,14 @@ dependencies = [
+@@ -5633,14 +5634,14 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-stream-parser"
@@ -1430,7 +1435,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "pretty_assertions",
   "regex-lite",
-@@ -5650,14 +5650,14 @@ dependencies = [
+@@ -5650,14 +5651,14 @@ dependencies = [
  
  [[package]]
  name = "codex-utils-template"
@@ -1447,7 +1452,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "pretty_assertions",
   "v8",
-@@ -5665,7 +5665,7 @@ dependencies = [
+@@ -5665,7 +5666,7 @@ dependencies = [
  
  [[package]]
  name = "codex-voice-host"
@@ -1456,7 +1461,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "codex-install-context",
-@@ -5692,7 +5692,7 @@ dependencies = [
+@@ -5692,7 +5693,7 @@ dependencies = [
  
  [[package]]
  name = "codex-web-search-extension"
@@ -1465,7 +1470,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-api",
   "codex-core",
-@@ -5716,7 +5716,7 @@ dependencies = [
+@@ -5716,7 +5717,7 @@ dependencies = [
  
  [[package]]
  name = "codex-websocket-auth"
@@ -1474,7 +1479,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "base64 0.22.1",
-@@ -5735,7 +5735,7 @@ dependencies = [
+@@ -5735,7 +5736,7 @@ dependencies = [
  
  [[package]]
  name = "codex-websocket-client"
@@ -1483,7 +1488,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-http-client",
   "codex-utils-rustls-provider",
-@@ -5751,7 +5751,7 @@ dependencies = [
+@@ -5751,7 +5752,7 @@ dependencies = [
  
  [[package]]
  name = "codex-windows-sandbox"
@@ -1492,7 +1497,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "base64 0.22.1",
-@@ -5782,7 +5782,7 @@ dependencies = [
+@@ -5782,7 +5783,7 @@ dependencies = [
  
  [[package]]
  name = "codex-windows-sandbox-service"
@@ -1501,7 +1506,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "codex-cloud-config",
-@@ -5800,14 +5800,14 @@ dependencies = [
+@@ -5800,14 +5801,14 @@ dependencies = [
  
  [[package]]
  name = "codex-windows-sandbox-test-support"
@@ -1518,7 +1523,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "codex-http-client",
   "pretty_assertions",
-@@ -5822,7 +5822,7 @@ dependencies = [
+@@ -5822,7 +5823,7 @@ dependencies = [
  
  [[package]]
  name = "codex-worktree"
@@ -1527,7 +1532,7 @@ index d719a520b7..41b3c11f6a 100644
  dependencies = [
   "anyhow",
   "codex-git-utils",
-@@ -6075,7 +6075,7 @@ dependencies = [
+@@ -6075,7 +6076,7 @@ dependencies = [
  
  [[package]]
  name = "core_test_support"
@@ -8907,7 +8912,7 @@ index 6a69cc899d..7ff130e470 100644
                          return Err(crate::error_code::server_draining_error());
                      }
 diff --git a/codex-rs/core/src/client.rs b/codex-rs/core/src/client.rs
-index 425967e392..f1a157ae41 100644
+index 425967e392..ac786fcba0 100644
 --- a/codex-rs/core/src/client.rs
 +++ b/codex-rs/core/src/client.rs
 @@ -313,6 +313,9 @@ pub struct ModelClient {
@@ -8961,10 +8966,24 @@ index 425967e392..f1a157ae41 100644
      }
  
      #[allow(clippy::too_many_arguments)]
-@@ -2099,6 +2113,13 @@ impl ResponsesHttpExecutor<'_> {
-                 client_setup.api_auth,
-             )
-             .with_telemetry(Some(request_telemetry), Some(sse_telemetry));
+@@ -2093,12 +2107,21 @@ impl ResponsesHttpExecutor<'_> {
+                 request.input = input;
+             }
+             inference_trace_attempt.record_started(&request);
+-            let client = ApiResponsesClient::new(
+-                transport,
+-                client_setup.api_provider,
+-                client_setup.api_auth,
+-            )
+-            .with_telemetry(Some(request_telemetry), Some(sse_telemetry));
++            let mut api_provider = client_setup.api_provider;
++            // Opaque transport retries cannot bypass a bounded request's fresh host check.
++            // The outer request/recovery path owns retries and calls admission each time.
++            if self.request_admission.is_some() {
++                api_provider.retry.max_attempts = 1;
++            }
++            let client = ApiResponsesClient::new(transport, api_provider, client_setup.api_auth)
++                .with_telemetry(Some(request_telemetry), Some(sse_telemetry));
 +            if let Some(admit) = &self.request_admission
 +                && !admit().await
 +            {
@@ -8975,7 +8994,7 @@ index 425967e392..f1a157ae41 100644
              let stream_result = client.stream_request(request, options).await;
  
              match stream_result {
-@@ -2447,6 +2468,14 @@ impl ModelClientSession {
+@@ -2447,6 +2470,14 @@ impl ModelClientSession {
                      ),
                  ],
              );
@@ -8990,7 +9009,7 @@ index 425967e392..f1a157ae41 100644
              let stream_result = websocket_connection
                  .stream_request(
                      ws_request,
-@@ -2594,6 +2623,10 @@ impl ModelClientSession {
+@@ -2594,6 +2625,10 @@ impl ModelClientSession {
      /// fall back to the HTTP Responses API transport otherwise. The trace context may be enabled or
      /// disabled, but is always explicit so transport paths do not need separate trace/no-trace
      /// branches.
@@ -9001,7 +9020,7 @@ index 425967e392..f1a157ae41 100644
      pub async fn stream(
          &mut self,
          prompt: &Prompt,
-@@ -2633,6 +2666,7 @@ impl ModelClientSession {
+@@ -2633,6 +2668,7 @@ impl ModelClientSession {
                  }
  
                  ResponsesHttpExecutor::new(&self.client)
@@ -9062,11 +9081,12 @@ index ce93060cd4..44d746d553 100644
          model_info: &ModelInfo,
 diff --git a/codex-rs/core/src/session/queued_input.rs b/codex-rs/core/src/session/queued_input.rs
 new file mode 100644
-index 0000000000..61d3af9ffd
+index 0000000000..8a1f86deaf
 --- /dev/null
 +++ b/codex-rs/core/src/session/queued_input.rs
-@@ -0,0 +1,112 @@
+@@ -0,0 +1,129 @@
 +//! Bounded input stays out of reusable history until native model admission.
++use super::daemon_recovery::RecordedTurnInput;
 +use super::session::Session;
 +use super::turn_context::TurnContext;
 +use crate::context_manager::ContextManager;
@@ -9125,11 +9145,26 @@ index 0000000000..61d3af9ffd
 +    pub(super) async fn admit_queued_input(&self, turn: &TurnContext) -> bool {
 +        let mut staged = turn.queued_input.lock().await;
 +        match staged.stage {
-+            Stage::Admitted | Stage::Authorized(_) => return true,
++            Stage::Admitted => return true,
++            Stage::Authorized(_) => {
++                let permitted = match &staged.guard {
++                    Some(guard) => tokio::time::timeout(
++                        std::time::Duration::from_secs(15),
++                        guard.recheck(turn.sub_id.clone()),
++                    )
++                    .await
++                    .unwrap_or(false),
++                    None => false,
++                };
++                if !permitted {
++                    staged.stage = Stage::Rejected;
++                }
++                return permitted;
++            }
 +            Stage::Rejected => return false,
 +            Stage::Pending(_) => {}
 +        }
-+        let Some(guard) = staged.guard.take() else {
++        let Some(guard) = staged.guard.clone() else {
 +            return false;
 +        };
 +        let accepted = tokio::time::timeout(
@@ -9168,6 +9203,7 @@ index 0000000000..61d3af9ffd
 +            )
 +            .await;
 +        }
++        turn.extension_data.insert(RecordedTurnInput);
 +    }
 +}
 +
@@ -9179,7 +9215,7 @@ index 0000000000..61d3af9ffd
 +    }
 +}
 diff --git a/codex-rs/core/src/session/turn.rs b/codex-rs/core/src/session/turn.rs
-index d775099466..6513ca9574 100644
+index d775099466..d9f0305f59 100644
 --- a/codex-rs/core/src/session/turn.rs
 +++ b/codex-rs/core/src/session/turn.rs
 @@ -504,7 +504,9 @@ pub(crate) async fn run_turn(
@@ -9193,7 +9229,20 @@ index d775099466..6513ca9574 100644
          let token_status = super::context_window::context_window_token_status(
              sess.as_ref(),
              turn_context.as_ref(),
-@@ -640,7 +642,7 @@ pub(crate) async fn run_turn(
+@@ -565,8 +567,10 @@ pub(crate) async fn run_turn(
+             break;
+         }
+ 
+-        // Input and turn-start injections are recorded before recovery can continue this turn.
+-        turn_context.extension_data.insert(RecordedTurnInput);
++        // Bounded input remains staged until model admission publishes it.
++        if !turn_context.queued_input.lock().await.is_pending() {
++            turn_context.extension_data.insert(RecordedTurnInput);
++        }
+         let window_id = sess.current_window_id().await;
+         super::rollout_budget::maybe_record_reminder(
+             sess.as_ref(),
+@@ -640,7 +644,7 @@ pub(crate) async fn run_turn(
  
              // Construct the input that we will send to the model.
              let sampling_request_input = sess
@@ -9202,7 +9251,7 @@ index d775099466..6513ca9574 100644
                  .instrument(trace_span!("run_turn.prepare_sampling_request_input"))
                  .await;
  
-@@ -1938,7 +1940,7 @@ async fn run_sampling_request(
+@@ -1938,7 +1942,7 @@ async fn run_sampling_request(
          let history = if let Some(input) = initial_input.take() {
              input
          } else {
@@ -9211,7 +9260,7 @@ index d775099466..6513ca9574 100644
          };
          let input_item_count = history.raw_items().len();
          let sampling_step_context = Arc::new(StepContext {
-@@ -2993,8 +2995,17 @@ async fn try_run_sampling_request(
+@@ -2993,8 +2997,17 @@ async fn try_run_sampling_request(
          None
      };
      let mut resampling = crate::guardian::ResponseResampling::new(&sess);
@@ -9230,13 +9279,15 @@ index d775099466..6513ca9574 100644
              .stream(
                  prompt,
                  &step_context.settings.model_info,
-@@ -3006,7 +3017,9 @@ async fn try_run_sampling_request(
+@@ -3006,7 +3019,11 @@ async fn try_run_sampling_request(
                  &inference_trace,
              )
              .instrument(trace_span!("stream_request"))
 -            .await
 +            .await;
-+        sess.publish_queued_input(&turn_context).await;
++        if result.is_ok() {
++            sess.publish_queued_input(&turn_context).await;
++        }
 +        result
      };
      let stream = stream_request(&prompt)
@@ -9312,7 +9363,7 @@ index fb7575936d..1dd781c067 100644
          .turn_metadata_state
          .update_responsesapi_client_metadata(responsesapi_client_metadata);
 diff --git a/codex-rs/ext/queue/Cargo.toml b/codex-rs/ext/queue/Cargo.toml
-index 4b5e5d04f4..abcafe5e09 100644
+index 4b5e5d04f4..f1a889f3fb 100644
 --- a/codex-rs/ext/queue/Cargo.toml
 +++ b/codex-rs/ext/queue/Cargo.toml
 @@ -20,7 +20,7 @@ codex-protocol = { workspace = true }
@@ -9324,6 +9375,11 @@ index 4b5e5d04f4..abcafe5e09 100644
  tracing = { workspace = true }
  uuid = { workspace = true, features = ["v7"] }
  
+@@ -32,3 +32,4 @@ core_test_support = { workspace = true }
+ pretty_assertions = { workspace = true }
+ tempfile = { workspace = true }
+ tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
++wiremock = { workspace = true }
 diff --git a/codex-rs/ext/queue/src/clock.rs b/codex-rs/ext/queue/src/clock.rs
 new file mode 100644
 index 0000000000..95f02b0daa
@@ -9457,7 +9513,7 @@ index 47fa504595..e115cd0f60 100644
  pub use service::QueuedItem;
  pub use service::QueuedItemService;
 diff --git a/codex-rs/ext/queue/src/service.rs b/codex-rs/ext/queue/src/service.rs
-index 12671a0ef7..5de31cc389 100644
+index 12671a0ef7..b46c6d0bfd 100644
 --- a/codex-rs/ext/queue/src/service.rs
 +++ b/codex-rs/ext/queue/src/service.rs
 @@ -1,3 +1,5 @@
@@ -9646,7 +9702,7 @@ index 12671a0ef7..5de31cc389 100644
              };
              let queued_item_id = record.id.clone();
  
-@@ -508,6 +619,127 @@ impl QueuedItemService {
+@@ -508,6 +619,149 @@ impl QueuedItemService {
          }
      }
  
@@ -9714,6 +9770,9 @@ index 12671a0ef7..5de31cc389 100644
 +            let clock = Arc::clone(&self.clock);
 +            let item_id = record.id.clone();
 +            let event_sink = Arc::clone(&self.event_sink);
++            let retry_queue = Arc::clone(&queue);
++            let retry_clock = Arc::clone(&clock);
++            let retry_record = record.clone();
 +            let guard = QueueAdmissionGuard::new(move |turn_id| {
 +                Box::pin(async move {
 +                    let expected_turn = turn_id.clone();
@@ -9733,6 +9792,25 @@ index 12671a0ef7..5de31cc389 100644
 +                        });
 +                    }
 +                    matches!(result, Ok(Some(BoundedQueueStatus::Admitted { turn_id })) if turn_id == expected_turn)
++                })
++            }).with_recheck(move |turn_id| {
++                let queue = Arc::clone(&retry_queue);
++                let clock = Arc::clone(&retry_clock);
++                let expected = retry_record.clone();
++                Box::pin(async move {
++                    let Ok(Some(outcome)) = queue.bounded_outcome(expected.thread_id, expected.id.clone()).await else { return false; };
++                    if outcome.record != expected || !matches!(outcome.status, BoundedQueueStatus::Admitted { turn_id: ref actual } if *actual == turn_id) {
++                        return false;
++                    }
++                    let Some(sample) = clock.sample().await else { return false; };
++                    let Some(expiry) = expected.expires_at else { return false; };
++                    if !sample.lower.is_finite() || !sample.upper.is_finite() || sample.lower > sample.upper
++                        || (sample.upper * 1_000_000.0).ceil() as i128 >= expiry as i128 { return false; }
++                    let prior: Option<serde_json::Value> = outcome.clock_evidence.as_ref().and_then(|value| serde_json::from_str(value).ok());
++                    let fresh: Option<serde_json::Value> = serde_json::from_str(&sample.evidence).ok();
++                    let prior_epoch = prior.as_ref().and_then(|value| value.pointer("/authority/counter/epoch")).and_then(|value| value.as_str());
++                    let fresh_epoch = fresh.as_ref().and_then(|value| value.pointer("/counter/epoch")).and_then(|value| value.as_str());
++                    prior_epoch.is_some() && prior_epoch == fresh_epoch
 +                })
 +            });
 +            let result = thread
@@ -9774,7 +9852,7 @@ index 12671a0ef7..5de31cc389 100644
      async fn wake_if_loaded(&self, thread_id: ThreadId) {
          let Some(manager) = self.thread_manager.upgrade() else {
              return;
-@@ -631,6 +863,7 @@ impl TryFrom<QueuedUserSubmissionRecord> for QueuedItem {
+@@ -631,6 +885,7 @@ impl TryFrom<QueuedUserSubmissionRecord> for QueuedItem {
              .transpose()?;
          Ok(QueuedItem {
              id: record.id,
@@ -9783,10 +9861,10 @@ index 12671a0ef7..5de31cc389 100644
              responsesapi_client_metadata,
          })
 diff --git a/codex-rs/ext/queue/tests/queue_service.rs b/codex-rs/ext/queue/tests/queue_service.rs
-index e2a4cd43b7..507056752d 100644
+index e2a4cd43b7..6ca9e91137 100644
 --- a/codex-rs/ext/queue/tests/queue_service.rs
 +++ b/codex-rs/ext/queue/tests/queue_service.rs
-@@ -1201,3 +1201,368 @@ async fn resumed_idle_dispatches_input_without_a_loaded_manager() -> anyhow::Res
+@@ -1201,3 +1201,540 @@ async fn resumed_idle_dispatches_input_without_a_loaded_manager() -> anyhow::Res
      assert_eq!(metadata["client_type"], "ios_app");
      Ok(())
  }
@@ -9797,9 +9875,21 @@ index e2a4cd43b7..507056752d 100644
 +    let server = start_mock_server().await;
 +    let response =
 +        responses::mount_sse_once(&server, responses::sse_completed("control-turn")).await;
-+    let test = test_codex().build_with_auto_env(&server).await?;
-+    let guard =
-+        codex_protocol::turn_input::QueueAdmissionGuard::new(|_turn_id| Box::pin(async { false }));
++    let (installed, extensions) = registered_queue_extensions();
++    let test = test_codex()
++        .with_extensions(extensions)
++        .build_with_auto_env(&server)
++        .await?;
++    let queue = install_registered_queue(&test, installed.as_ref())?;
++    let (checking, checked) = oneshot::channel();
++    let (release, released) = oneshot::channel();
++    let guard = codex_protocol::turn_input::QueueAdmissionGuard::new(move |_turn_id| {
++        Box::pin(async move {
++            let _ = checking.send(());
++            let _ = released.await;
++            false
++        })
++    });
 +    let held = test
 +        .codex
 +        .start_turn_if_idle(
@@ -9809,18 +9899,26 @@ index e2a4cd43b7..507056752d 100644
 +        .await?;
 +    // Turn preparation starts before the final model-request admission check.
 +    assert!(matches!(held, StartIfIdleSubmission::Started { .. }));
++    checked.await?;
++    let pending_recovery = test.codex.interrupted_turn().await;
++    let _ = release.send(());
 +    wait_for_event_match(test.codex.as_ref(), |event| {
 +        matches!(event, EventMsg::TurnComplete(_)).then_some(())
 +    })
 +    .await;
++    assert!(
++        pending_recovery.is_none(),
++        "unrecorded bounded input must not become daemon recovery work"
++    );
 +    assert!(response.requests().is_empty());
-+    let control = test
-+        .codex
-+        .start_turn_if_idle(codex_core::TurnInputRequest::new(user_input(
-+            "unbounded control",
-+        )))
++    // Completion notification precedes idle cleanup. The registered queue
++    // lifecycle starts this control only after the real idle transition.
++    queue
++        .enqueue(
++            test.session_configured.thread_id,
++            user_input("unbounded control"),
++        )
 +        .await?;
-+    assert!(matches!(control, StartIfIdleSubmission::Started { .. }));
 +    wait_for_event_match(test.codex.as_ref(), |event| {
 +        matches!(event, EventMsg::TurnComplete(_)).then_some(())
 +    })
@@ -10155,8 +10253,160 @@ index e2a4cd43b7..507056752d 100644
 +    assert!(!body.contains("derived bounded context must expire"));
 +    Ok(())
 +}
++
++// Explicit unit-boundary clock, not service/runtime qualification.
++struct AuthRecoveryClock(std::path::PathBuf);
++impl codex_queue_extension::QueueClock for AuthRecoveryClock {
++    fn sample(&self) -> codex_queue_extension::QueueClockFuture<'_> {
++        Box::pin(async move {
++            let mode = std::fs::read_to_string(&self.0).unwrap_or_default();
++            if mode == "unknown" {
++                return None;
++            }
++            let lower = if mode == "expired" { 200.0 } else { 100.0 };
++            Some(codex_thread_store::BoundedQueueClockSample {
++                lower, upper: lower + 1.0,
++                evidence: serde_json::json!({
++                    "source":"controlled-auth-clock", "contract_version":1, "state":"qualified",
++                    "lower":lower,"upper":lower+1.0,
++                    "counter":{"epoch":"11111111-1111-4111-8111-111111111111","counter":1,"frequency":10000000,"rate_ppm":5000}
++                }).to_string(),
++            })
++        })
++    }
++}
++
++#[cfg(unix)]
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn expired_bounded_input_is_not_retried_after_authentication_recovery() -> anyhow::Result<()>
++{
++    assert_bounded_auth_recovery("expired", 1, false).await
++}
++
++#[cfg(unix)]
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn unknown_time_does_not_authorize_retry_after_authentication_recovery() -> anyhow::Result<()>
++{
++    assert_bounded_auth_recovery("unknown", 1, false).await
++}
++
++#[cfg(unix)]
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn eligible_bounded_input_can_retry_after_authentication_recovery() -> anyhow::Result<()> {
++    assert_bounded_auth_recovery("eligible", 2, true).await
++}
++
++#[cfg(unix)]
++async fn assert_bounded_auth_recovery(
++    after_rejection: &'static str,
++    expected_attempts: usize,
++    expect_history: bool,
++) -> anyhow::Result<()> {
++    let server = start_mock_server().await;
++    let auth_home = tempfile::tempdir()?;
++    let token = auth_home.path().join("synthetic-provider-token");
++    let marker = auth_home.path().join("clock-expired");
++    let script = auth_home.path().join("read_synthetic_token.py");
++    std::fs::write(&token, "first-fixture-token")?;
++    std::fs::write(
++        &script,
++        "from pathlib import Path\nimport sys\nprint(Path(sys.argv[1]).read_text())\n",
++    )?;
++    let calls = Arc::new(std::sync::atomic::AtomicUsize::new(0));
++    let observed = Arc::clone(&calls);
++    let handler_token = token.clone();
++    let handler_marker = marker.clone();
++    let response = responses::mount_response_handler(&server, move |_| {
++        if observed.fetch_add(1, Ordering::SeqCst) == 0 {
++            std::fs::write(&handler_token, "second-fixture-token").unwrap();
++            std::fs::write(&handler_marker, after_rejection).unwrap();
++            wiremock::ResponseTemplate::new(401).set_body_string("synthetic auth recovery")
++        } else {
++            responses::sse_response(responses::sse_completed("after-auth-recovery"))
++        }
++    })
++    .await;
++    let auth_cwd = auth_home.path().to_path_buf();
++    let test = test_codex()
++        .with_config(move |config| {
++            config.model_provider.requires_openai_auth = false;
++            config.model_provider.supports_websockets = false;
++            config.model_provider.auth = Some(
++                serde_json::from_value(serde_json::json!({
++                    "command":"python3", "args":[script,token], "cwd":auth_cwd,
++                    "timeout_ms":5000, "refresh_interval_ms":60000
++                }))
++                .expect("valid synthetic provider auth command"),
++            );
++        })
++        .build_with_auto_env(&server)
++        .await?;
++    let thread_id = test.session_configured.thread_id;
++    let queue = loaded_thread_queue(&test)?;
++    let clock = Arc::new(AuthRecoveryClock(marker));
++    let staged = QueuedItemService::new(
++        Arc::clone(&queue),
++        Weak::new(),
++        Arc::new(NoopExtensionEventSink),
++    )
++    .with_clock(clock.clone());
++    let item = staged
++        .enqueue_bounded(
++            thread_id,
++            user_input("bounded prompt expired during auth recovery"),
++            None,
++            150_000_000,
++        )
++        .await?;
++    let live = QueuedItemService::new(
++        queue,
++        Arc::downgrade(&test.thread_manager),
++        Arc::new(NoopExtensionEventSink),
++    )
++    .with_clock(clock);
++    emit_idle(&live, thread_id).await;
++    wait_for_event_match(test.codex.as_ref(), |event| {
++        matches!(event, EventMsg::TurnComplete(_)).then_some(())
++    })
++    .await;
++    assert_eq!(
++        response.requests().len(),
++        expected_attempts,
++        "each retry must use current qualified time and the original deadline"
++    );
++    assert!(
++        matches!(
++            live.bounded_outcome(thread_id, item.id)
++                .await?
++                .unwrap()
++                .status,
++            codex_thread_store::BoundedQueueStatus::Admitted { .. }
++        ),
++        "the first attempt remains recorded, not falsely undone"
++    );
++    live.enqueue(
++        thread_id,
++        user_input("ordinary control after rejected retry"),
++    )
++    .await?;
++    emit_idle(&live, thread_id).await;
++    wait_for_event_match(test.codex.as_ref(), |event| {
++        matches!(event, EventMsg::TurnComplete(_)).then_some(())
++    })
++    .await;
++    assert_eq!(response.requests().len(), expected_attempts + 1);
++    let body = response.requests()[expected_attempts]
++        .body_json()
++        .to_string();
++    assert!(body.contains("ordinary control after rejected retry"));
++    assert_eq!(
++        body.contains("bounded prompt expired during auth recovery"),
++        expect_history
++    );
++    Ok(())
++}
 diff --git a/codex-rs/protocol/src/turn_input.rs b/codex-rs/protocol/src/turn_input.rs
-index 93fa948cdb..ee983d95c9 100644
+index 93fa948cdb..792428eb17 100644
 --- a/codex-rs/protocol/src/turn_input.rs
 +++ b/codex-rs/protocol/src/turn_input.rs
 @@ -59,6 +59,8 @@ pub struct ResponseItemAnnotations {
@@ -10168,7 +10418,7 @@ index 93fa948cdb..ee983d95c9 100644
      /// Optional host-assigned UUID for the Responses message created from [`TurnInput::UserInput`].
      /// Ignored for all other inputs, including raw user-role Responses items.
      pub user_item_uuid: Option<uuid::Uuid>,
-@@ -72,6 +74,40 @@ pub struct TurnInputRequest {
+@@ -72,6 +74,62 @@ pub struct TurnInputRequest {
      pub trace: Option<W3cTraceContext>,
  }
  
@@ -10176,9 +10426,13 @@ index 93fa948cdb..ee983d95c9 100644
 +/// Clones share consumption. The assigned turn ID is recorded by the host before
 +/// input is accepted; refusal or timeout must leave model input untouched.
 +#[derive(Clone)]
-+pub struct QueueAdmissionGuard(std::sync::Arc<std::sync::Mutex<Option<QueueAdmissionCallback>>>);
++pub struct QueueAdmissionGuard {
++    admission: std::sync::Arc<std::sync::Mutex<Option<QueueAdmissionCallback>>>,
++    recheck: Option<std::sync::Arc<QueueRetryCallback>>,
++}
 +type QueueAdmissionFuture = std::pin::Pin<Box<dyn std::future::Future<Output = bool> + Send>>;
 +type QueueAdmissionCallback = Box<dyn FnOnce(String) -> QueueAdmissionFuture + Send + Sync>;
++type QueueRetryCallback = dyn Fn(String) -> QueueAdmissionFuture + Send + Sync;
 +
 +impl std::fmt::Debug for QueueAdmissionGuard {
 +    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -10188,14 +10442,32 @@ index 93fa948cdb..ee983d95c9 100644
 +
 +impl QueueAdmissionGuard {
 +    pub fn new(admit: impl FnOnce(String) -> QueueAdmissionFuture + Send + Sync + 'static) -> Self {
-+        Self(std::sync::Arc::new(std::sync::Mutex::new(Some(Box::new(
-+            admit,
-+        )))))
++        Self {
++            admission: std::sync::Arc::new(std::sync::Mutex::new(Some(Box::new(admit)))),
++            recheck: None,
++        }
++    }
++
++    /// A fresh host check for retries before a provider has accepted a stream.
++    /// Missing retry authority refuses another attempt rather than reusing admission.
++    pub fn with_recheck(
++        mut self,
++        check: impl Fn(String) -> QueueAdmissionFuture + Send + Sync + 'static,
++    ) -> Self {
++        self.recheck = Some(std::sync::Arc::new(check));
++        self
++    }
++
++    pub async fn recheck(&self, turn_id: String) -> bool {
++        match &self.recheck {
++            Some(check) => check(turn_id).await,
++            None => false,
++        }
 +    }
 +
 +    pub async fn consume(self, turn_id: String) -> bool {
 +        let admit = self
-+            .0
++            .admission
 +            .lock()
 +            .unwrap_or_else(std::sync::PoisonError::into_inner)
 +            .take();
@@ -10209,7 +10481,7 @@ index 93fa948cdb..ee983d95c9 100644
  /// An optional replacement followed by a patch to the turn's client metadata.
  #[derive(Clone, Debug, Default)]
  pub struct ResponsesApiClientMetadataUpdate {
-@@ -124,6 +160,7 @@ impl TurnInputRequest {
+@@ -124,6 +182,7 @@ impl TurnInputRequest {
      pub fn new(input: TurnInput) -> Self {
          Self {
              input,
@@ -10217,7 +10489,7 @@ index 93fa948cdb..ee983d95c9 100644
              user_item_uuid: None,
              user_input_extension_data: BTreeMap::new(),
              thread_settings: ThreadSettingsOverrides::default(),
-@@ -134,6 +171,12 @@ impl TurnInputRequest {
+@@ -134,6 +193,12 @@ impl TurnInputRequest {
          }
      }
  
@@ -10230,7 +10502,7 @@ index 93fa948cdb..ee983d95c9 100644
      /// Creates ordinary user input without a client-provided message id.
      pub fn user_input(content: Vec<UserInput>) -> Self {
          Self::new(TurnInput::UserInput {
-@@ -312,6 +355,9 @@ pub enum SteerSubmission {
+@@ -312,6 +377,9 @@ pub enum SteerSubmission {
  /// Why Core did not accept submitted turn input for turn processing.
  #[derive(Clone, Debug, Eq, PartialEq)]
  pub enum NotSubmittedReason {
@@ -10463,7 +10735,7 @@ index ae7ec0c0bd..48ba28c6c3 100644
      }
  }
 diff --git a/codex-rs/state/src/runtime/queued_items.rs b/codex-rs/state/src/runtime/queued_items.rs
-index 9a6b387522..5750af835e 100644
+index 9a6b387522..2d1275c106 100644
 --- a/codex-rs/state/src/runtime/queued_items.rs
 +++ b/codex-rs/state/src/runtime/queued_items.rs
 @@ -80,29 +80,62 @@ impl SqliteQueueStore {
@@ -10558,7 +10830,7 @@ index 9a6b387522..5750af835e 100644
               FROM queued_items
               WHERE thread_id = ?
               ORDER BY queue_order LIMIT ? OFFSET ?",
-@@ -128,39 +161,298 @@ impl SqliteQueueStore {
+@@ -128,39 +161,244 @@ impl SqliteQueueStore {
              .collect()
      }
  
@@ -10734,60 +11006,6 @@ index 9a6b387522..5750af835e 100644
 +        }
 +    }
 +
-+    /// Atomically select this unchanged bounded entry once, across connections.
-+    /// False means no selection occurred; inspect pending state/outcome, never resend.
-+    pub async fn settle_bounded(
-+        &self,
-+        expected: &QueuedUserSubmissionRecord,
-+        status: crate::BoundedQueueStatus,
-+    ) -> anyhow::Result<bool> {
-+        let expires_at = expected
-+            .expires_at
-+            .ok_or_else(|| anyhow::anyhow!("unbounded queue entry"))?;
-+        let (status, turn_id) = match status {
-+            crate::BoundedQueueStatus::Canceled => ("canceled", None),
-+            crate::BoundedQueueStatus::Expired => ("expired", None),
-+            crate::BoundedQueueStatus::Admitted { turn_id } => {
-+                anyhow::ensure!(
-+                    !turn_id.is_empty(),
-+                    "admitted queue entry requires its original turn ID"
-+                );
-+                ("admitted", Some(turn_id))
-+            }
-+        };
-+        let mut transaction = self.pool.begin_immediate().await?;
-+        let selected = sqlx::query(
-+            "DELETE FROM bounded_pending_items WHERE thread_id = ? AND id = ?
-+             AND payload_json = ? AND expires_at = ?",
-         )
-+        .bind(expected.thread_id.to_string())
-+        .bind(&expected.id)
-+        .bind(&expected.payload)
-+        .bind(expires_at)
-+        .execute(transaction.as_mut())
-+        .await?
-+        .rows_affected()
-+            == 1;
-+        if selected {
-+            sqlx::query(
-+                "INSERT INTO bounded_queue_outcomes
-+                 (id, thread_id, payload_json, expires_at, status, recorded_at_ms, turn_id)
-+                 VALUES (?, ?, ?, ?, ?, ?, ?)",
-+            )
-+            .bind(&expected.id)
-+            .bind(expected.thread_id.to_string())
-+            .bind(&expected.payload)
-+            .bind(expires_at)
-+            .bind(status)
-+            .bind(datetime_to_epoch_millis(Utc::now()))
-+            .bind(turn_id)
-+            .execute(transaction.as_mut())
-+            .await?;
-+        }
-+        transaction.commit().await?;
-+        Ok(selected)
-+    }
-+
 +    /// Decide bounded admission under the same write transaction as selection.
 +    /// The host callback must only read its independent clock and must be bounded;
 +    /// it cannot mutate this queue. None or uncertain evidence leaves work pending.
@@ -10812,7 +11030,7 @@ index 9a6b387522..5750af835e 100644
 +        let unchanged: i64 = sqlx::query_scalar(
 +            "SELECT COUNT(*) FROM bounded_pending_items
 +             WHERE thread_id = ? AND id = ? AND payload_json = ? AND expires_at = ?",
-+        )
+         )
 +        .bind(expected.thread_id.to_string())
 +        .bind(&expected.id)
 +        .bind(&expected.payload)
@@ -10874,7 +11092,7 @@ index 9a6b387522..5750af835e 100644
      }
  
      pub async fn reorder(&self, thread_id: ThreadId, ordered_ids: &[String]) -> anyhow::Result<()> {
-@@ -203,12 +495,21 @@ impl SqliteQueueStore {
+@@ -203,12 +441,21 @@ impl SqliteQueueStore {
      }
  
      pub(crate) async fn delete_thread_queue(&self, thread_id: ThreadId) -> anyhow::Result<bool> {
@@ -10903,7 +11121,7 @@ index 9a6b387522..5750af835e 100644
  }
  
 diff --git a/codex-rs/state/src/runtime/queued_items_tests.rs b/codex-rs/state/src/runtime/queued_items_tests.rs
-index 3f97eb3bde..7b9788cc13 100644
+index 3f97eb3bde..0b10767b61 100644
 --- a/codex-rs/state/src/runtime/queued_items_tests.rs
 +++ b/codex-rs/state/src/runtime/queued_items_tests.rs
 @@ -65,6 +65,7 @@ async fn migrating_existing_queue_backfills_thread_revisions() {
@@ -10914,7 +11132,7 @@ index 3f97eb3bde..7b9788cc13 100644
      };
      sqlx::query(
          "INSERT INTO queued_items
-@@ -276,3 +277,338 @@ async fn concurrent_inserts_enforce_the_queue_limit() {
+@@ -276,3 +277,369 @@ async fn concurrent_inserts_enforce_the_queue_limit() {
              .len()
      );
  }
@@ -10985,7 +11203,7 @@ index 3f97eb3bde..7b9788cc13 100644
 +        .unwrap();
 +    let item = runtime
 +        .thread_queue()
-+        .enqueue_bounded(thread_id, "original", 1794800000000000)
++        .enqueue_bounded(thread_id, "original", 100_000_000)
 +        .await
 +        .unwrap();
 +    let admission = crate::BoundedQueueStatus::Admitted {
@@ -10994,12 +11212,19 @@ index 3f97eb3bde..7b9788cc13 100644
 +    let (admitted, canceled) = tokio::join!(
 +        runtime
 +            .thread_queue()
-+            .settle_bounded(&item, admission.clone()),
++            .admit_bounded(&item, "owned-turn".to_string(), || async {
++                Some(crate::BoundedQueueClockSample {
++                    lower: 98.0,
++                    upper: 99.0,
++                    evidence: r#"{"source":"controlled-unit-clock"}"#.to_string(),
++                })
++            }),
 +        other.thread_queue().delete(thread_id, &item.id),
 +    );
 +    let admitted = admitted.unwrap();
 +    let canceled = canceled.unwrap();
-+    assert_ne!(admitted, canceled);
++    assert_ne!(admitted.is_some(), canceled);
++    assert!(admitted.is_none() || admitted == Some(admission.clone()));
 +    let outcome = runtime
 +        .thread_queue()
 +        .bounded_outcome(thread_id, &item.id)
@@ -11009,18 +11234,29 @@ index 3f97eb3bde..7b9788cc13 100644
 +    assert_eq!(outcome.record, item);
 +    assert_eq!(
 +        outcome.status,
-+        if admitted {
-+            admission.clone()
++        if admitted.is_some() {
++            admission
 +        } else {
 +            crate::BoundedQueueStatus::Canceled
 +        }
 +    );
-+    assert!(
-+        !other
++    if admitted.is_some() {
++        let evidence: serde_json::Value =
++            serde_json::from_str(outcome.clock_evidence.as_ref().unwrap()).unwrap();
++        assert_eq!(evidence["lower"], 98.0);
++        assert_eq!(evidence["upper"], 99.0);
++    } else {
++        assert_eq!(outcome.clock_evidence, None);
++    }
++    assert_eq!(
++        other
 +            .thread_queue()
-+            .settle_bounded(&item, admission)
++            .admit_bounded(&item, "late-turn".to_string(), || async {
++                panic!("terminal outcome must prevent another clock read")
++            })
 +            .await
-+            .unwrap()
++            .unwrap(),
++        None
 +    );
 +    assert_eq!(
 +        other
@@ -11037,30 +11273,47 @@ index 3f97eb3bde..7b9788cc13 100644
 +    let (runtime, thread_id) = runtime_with_thread().await;
 +    let item = runtime
 +        .thread_queue()
-+        .enqueue_bounded(thread_id, "expired", 1794800000000000)
++        .enqueue_bounded(thread_id, "expired", 100_000_000)
 +        .await
 +        .unwrap();
-+    assert!(
++    assert_eq!(
 +        runtime
 +            .thread_queue()
-+            .settle_bounded(&item, crate::BoundedQueueStatus::Expired)
++            .admit_bounded(&item, "never-started".to_string(), || async {
++                Some(crate::BoundedQueueClockSample {
++                    lower: 100.0,
++                    upper: 101.0,
++                    evidence: r#"{"source":"controlled-unit-clock"}"#.to_string(),
++                })
++            })
 +            .await
-+            .unwrap()
++            .unwrap(),
++        Some(crate::BoundedQueueStatus::Expired)
 +    );
++    let outcome = runtime
++        .thread_queue()
++        .bounded_outcome(thread_id, &item.id)
++        .await
++        .unwrap()
++        .unwrap();
++    assert_eq!(outcome.record, item);
++    assert_eq!(outcome.status, crate::BoundedQueueStatus::Expired);
++    let evidence: serde_json::Value =
++        serde_json::from_str(outcome.clock_evidence.as_ref().unwrap()).unwrap();
++    assert_eq!(evidence["lower"], 100.0);
++    assert_eq!(evidence["upper"], 101.0);
 +    let reopened = StateRuntime::init(runtime.sqlite().clone(), "test-provider".to_string())
 +        .await
 +        .unwrap();
-+    assert!(
-+        !reopened
++    assert_eq!(
++        reopened
 +            .thread_queue()
-+            .settle_bounded(
-+                &item,
-+                crate::BoundedQueueStatus::Admitted {
-+                    turn_id: "late-turn".to_string()
-+                }
-+            )
++            .admit_bounded(&item, "late-turn".to_string(), || async {
++                panic!("persisted expiry must prevent another clock read")
++            })
 +            .await
-+            .unwrap()
++            .unwrap(),
++        None
 +    );
 +    assert_eq!(
 +        reopened
@@ -11068,11 +11321,7 @@ index 3f97eb3bde..7b9788cc13 100644
 +            .bounded_outcome(thread_id, &item.id)
 +            .await
 +            .unwrap(),
-+        Some(crate::BoundedQueueOutcome {
-+            record: item,
-+            status: crate::BoundedQueueStatus::Expired,
-+            clock_evidence: None,
-+        })
++        Some(outcome)
 +    );
 +}
 +

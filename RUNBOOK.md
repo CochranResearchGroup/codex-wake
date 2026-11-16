@@ -10058,3 +10058,26 @@ retaining bounded completion notes and unresolved caveats; this does not
 requalify earlier runtime claims. The before-audit lists all14 exact errors.
 Runtime/control regressions and release prerequisites remain under focused repair.
 No installed service or production clock credential changed.
+
+
+## Turn | 2026-11-16 | #695 source custody and automatic-resume readback
+
+[Plan0248](docs/dev/plans/0248-2026-11-15-native-queue-expiry.md) remains OPEN.
+Native3695947e81 and its exact binary patch are preserved; reverse-apply check
+passes and a private verified bundle retains the source. Native queue24 PASS;
+one formal review and one findings-remediation pass completed. Complete GNU
+package2 assembled, not qualified. Python3.11 comprehensive validation ran2661
+and failed one monitor-publication freshness assertion (one skip); Python3.12
+correctly did not start. Focused repetition reproduced that single failure.
+No repeated broad review or working-runtime update occurred. The exact session-only
+file wake armed with a ready monitor and subsequently reached this conversation;
+this proves observed automatic continuation for the current attachment, not
+recovery of the earlier unbound state or general daemon qualification. The
+persisted delivery journal still reports acknowledgment/execution not observed;
+keep that tracker evidence separate from the receiving conversation's observation.
+
+Focused diagnosis captured a negative6.9s snapshot age with matching live owner
+and no error. Stale was the correct product result after a wall-clock reversal;
+the cadence test's unconditional freshness assertions were invalid. Preserve
+write/tick/cadence assertions and existing clock-controlled freshness coverage.
+All11 monitor tests PASS after this test-only correction; full matrix pending.

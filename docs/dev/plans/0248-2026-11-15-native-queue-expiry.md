@@ -8,13 +8,21 @@ qualification and applicable installation authorization is established.
 
 ## Current State
 
-Native final-send/quarantine implementation has21 passing queue tests and an
-assembled complete package, but the single review's authentication-retry finding
-still blocks acceptance. The unused clockless admission path is removed with14
-state tests passing. Shared Wake adapter source is implemented; full local Python
-validation exposed planning metadata and runtime/control failures under repair.
-Real test-user Stable Time enrollment awaits the explicit credential-policy
-exception; time-transport qualification and working-host activation remain closed.
+Native3695947e81 has24 passing public queue tests. The one formal review and
+one TDD findings pass are complete: the unused clockless path is removed, and
+authentication recovery rechecks the original deadline before retry. A separate
+public regression reproduced premature daemon recovery of unpublished bounded
+input; marker publication is corrected and the24-test queue suite passes.
+Complete GNU package2 is assembled from this source, but not runtime-qualified.
+Shared Wake source is implemented with production bounded delivery still refused.
+The corrected Python3.11 full run completed2661 tests with one stale-monitor
+assertion failure and one skip; Python3.12 was not started after that failure.
+The monitor failure reproduced a negative wall-clock age (-6.9s) with a live
+matching owner. The process cadence test now retains its monotonic write/tick
+checks without requiring wall-clock freshness; the11 monitor tests pass. Earlier
+failures remain retained, and the full matrix still requires a passing readback. Real test-user clock enrollment awaits the explicit credential-policy
+exception, and suspend-safe helper-to-admission clock transport remains unqualified.
+No working daemon replacement, merge, deployment or ticket closure is claimed.
 
 ## Scope and contract
 
