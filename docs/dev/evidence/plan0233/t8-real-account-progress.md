@@ -467,3 +467,42 @@ qualification. This is source acceptance, not repaired live-parent acceptance.
 Cumulative counters retain8/12 completed Grok responses,1/2 completed OpenAI worker
 responses plus the earlier failed HTTP400 attempt with unconfirmed usage,8/16
 tools and one official refresh. No historical unknown charge is zeroed.
+
+
+## Exact notification package and real mixed-worker accounting PASS
+
+Nativeee0e/tree034e package entrypoint
+99447ea05fae83235988bbe37c11689231a5c061ff5b1464751f2c0b039ed03e passed all five
+isolated runtime gates. A fresh preflight process baseline was captured before
+fixtures on the current boot; expected/protected/owned/unattributed counts are
+all0 at final same-boot verification. The earlier13-process snapshot is preserved
+separately. Primary independently verified six source package files,30 UID files,
+two actual runtime receipt hashes and all five terminal job receipts. The initial
+failed-start fixture exceeded the UNIX socket path bound (109bytes); its failed
+receipt is retained, and a shorter private fixture label passed without source
+change or rebuild. Previous packages and rollback remain intact.
+
+The real normal mixed-worker workflow now completes: parent `MIXED_WORKER_OK`,
+OpenAI child `OPENAI_WORKER_OK`. Wake's public observer qualifies the actual
+parent/child tree at223610 cache-inclusive tokens (143738 fresh,79872 cached),
+using four actual numeric response records. This is real-account evidence.
+Older failed histories remain unknown and are not reset or folded in as zero.
+
+A subsequent public provider handoff rejected the child's completed plaintext
+notification because the portable-context converter had no AgentMessage arm.
+It held locally before any provider request. No inference was replayed, and the
+owned qualification server exited. Positive handoff and final Stop remain open.
+A minimal portable-context fix now retains only wholly plaintext notifications
+as bounded, attributed, explicitly untrusted recent public context, not objective
+authority. Opaque and credential-bearing content stays held. The actual public
+failure serves as RED; a redundant standalone RED compile was intentionally
+stopped while awaiting the shared artifact lock (retained exit143, not a behavior
+failure). Exact `job-20261116T032223Z-2713407d75fe` runs one focused Core unit for
+attribution, unchanged constraints, roundtrip context and ciphertext rejection.
+No passing source or package claim is made for this pending fix.
+
+Cumulative counters retain11/12 completed Grok responses,2/2 completed OpenAI
+worker responses plus the earlier failed HTTP400 attempt with unknown usage,
+10/16 tools and one refresh. The known numeric sum550569 is not a qualified
+aggregate campaign total. T8 and parent remain OPEN,7/8 children closed, with
+broad review/remediation counters0.
