@@ -332,6 +332,25 @@ def reconcile_native(root, found, now, *, force=False, runtime_adapter: RuntimeA
     return DispatchResult('submitted', 'native acceptance reconciled')
 
 
+def reconcile_accepted_completion(root, record):
+    """Inspect terminal history without changing accepted intent or submitting input."""
+    from .wake_mode_runtime import _terminal_evidence, _terminal_receipt
+    if _terminal_receipt(root, record) is not None:
+        return dict(state='resolved', reason='terminal_evidence_already_recorded')
+    prompt = native_prompt(root, record)
+    expected = record['native_delivery'].get('prompt_sha256')
+    if expected and expected != hashlib.sha256(prompt.encode()).hexdigest():
+        return dict(state='unresolved', reason='native_submission_payload_changed')
+    try:
+        evidence, _ = native_evidence(record['target'], prompt)
+    except Exception:
+        return dict(state='unresolved', reason='native_evidence_unavailable')
+    if not _terminal_evidence(evidence):
+        return dict(state='unresolved', reason='native_terminal_evidence_unavailable')
+    _terminal_receipt(root, record, evidence)
+    return dict(state='resolved', reason='native_terminal_evidence_verified')
+
+
 def reconcile_command(args, root):
     from .records import WakeLifecycleLock, find_record
     # Time recovery is a separate no-dispatch operation from submission recovery.
@@ -349,6 +368,13 @@ def reconcile_command(args, root):
         found = find_record(root, args.wake_id)
         if found.record.get('target', {}).get('transport') != 'native':
             raise WakeError('reconciliation requires a native wake')
+        if found.record.get('native_delivery', {}).get('state') == 'accepted':
+            completion = reconcile_accepted_completion(root, found.record)
+            print(json.dumps(dict(wake_id=args.wake_id,
+                result='completion_reconciled' if completion['state'] == 'resolved' else 'skipped',
+                status=found.record['status'], native_delivery=found.record['native_delivery'],
+                terminal_reconciliation=completion, dispatch_attempted=False), sort_keys=True))
+            return 0
         if time_reconciled and not found.record.get('native_delivery'):
             from .native_intents import schedule_projection
             print(json.dumps(dict(wake_id=args.wake_id, result='time_reconciled',

@@ -405,6 +405,48 @@ class NativeDeliveryTests(unittest.TestCase):
             self.assertEqual(recovered['native_delivery']['evidence']['turn_id'],'turn-exact')
             self.assertEqual(recovered['native_delivery']['acknowledgment'],'not_observed')
 
+    def test_explicit_reconcile_clears_accepted_peer_hold_without_rewriting_history(self):
+        from codex_wake.records import replace_record
+        from codex_wake.wake_mode_runtime import registration_harness_readiness
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.native_record(root, root / 'must-not-submit')
+            found = all_records(root)[0]
+            record = dict(found.record, status='submitted', native_delivery={
+                'state': 'accepted', 'execution': 'not_observed'})
+            replace_record(root, found, record)
+            original = all_records(root)[0].path.read_bytes()
+            prompt = f"WAKE_TRIGGER_ID={record['id']}\nWAKE_TRIGGER_ROOT={root.resolve()}\nExecute the task"
+            observed_status = 'inProgress'
+            observed_thread = record['target']['thread_id']
+            def native(endpoint, codex, method, params, timeout):
+                if method == 'thread/queue/list':
+                    return {'data': [], 'nextCursor': None}
+                if method == 'thread/read':
+                    return {'thread': {'id': observed_thread, 'status': {'type': 'idle'}}}
+                if method == 'thread/turns/list':
+                    return {'data': [{'id': 'turn-exact', 'status': observed_status, 'itemsView': 'full',
+                        'items': [{'type': 'userMessage', 'id': 'message-exact', 'clientId': 'client-exact',
+                                   'content': [{'type': 'text', 'text': prompt}]}]}], 'nextCursor': None}
+                raise AssertionError('unexpected native operation: ' + method)
+            current = dict(id='new-wake', target=record['target'])
+            with patch('codex_wake.native_protocol.native_request', side_effect=native), patch(
+                    'codex_wake.native_delivery.native_request', side_effect=native):
+                self.assertEqual(registration_harness_readiness(root, current)['state'], 'held')
+                command = ['--wake-root', str(root), 'native', 'reconcile', record['id']]
+                self.assertEqual(run(command), 0)
+                self.assertEqual(registration_harness_readiness(root, current)['state'], 'held')
+                observed_status = 'completed'
+                observed_thread = 'wrong-conversation'
+                self.assertEqual(run(command), 0)
+                observed_thread = record['target']['thread_id']
+                self.assertEqual(registration_harness_readiness(root, current)['state'], 'held')
+                self.assertEqual(run(command), 0)
+                self.assertEqual(registration_harness_readiness(root, current)['state'], 'ready')
+                with patch('codex_wake.native_delivery.native_request', side_effect=AssertionError('receipt must be reused')):
+                    self.assertEqual(run(command), 0)
+            self.assertEqual(all_records(root)[0].path.read_bytes(), original)
+
     def test_explicit_missing_resume_uses_same_thread_without_opening_a_tab(self):
         thread='01a1227e-a041-7b72-9c36-18349e7dd22c'
         queue='01a12280-80ef-7772-a00a-c68bd32ecbba'
