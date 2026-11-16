@@ -211,9 +211,16 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
             record = append_event(record, 'native_time_held', verdict['reason'], None)
             replace_record(root, found, record)
             return DispatchResult('failed' if record['status'] == 'failed' else 'requeued', verdict['reason'])
+    from .runtime_delivery import original_submission_expiry, submission_envelope, submit_bounded
+    try:
+        original_expiry = original_submission_expiry(record)
+    except (ValueError, TypeError, KeyError):
+        record.update(status='pending', policy_outcome=dict(state='held', reason='bounded_native_absolute_expiry_unavailable'))
+        replace_record(root, found, record)
+        return DispatchResult('requeued', 'bounded_native_absolute_expiry_unavailable')
     # Persist ambiguity BEFORE making the external effect. A crashed caller must
     # never assume the queue did not accept its submission.
-    record['native_delivery'] = {'state': 'uncertain', 'execution': 'not_observed',
+    record['native_delivery'] = {'expires_at_unix_micros': original_expiry, 'state': 'uncertain', 'execution': 'not_observed',
                                  'acknowledgment': 'not_observed',
                                  'submission_id': str(uuid4())}
     if target.get('session_mode'):
@@ -230,7 +237,7 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
     record = append_event(record, 'native_submission_started', 'native queue submission started', now)
     replace_record(root, found, record)
     try:
-        submitted = adapter.submit(recipient, prompt)
+        submitted = submit_bounded(adapter, recipient, prompt, submission_envelope(record))
         from .runtime_delivery import validate_native_submission
         validate_native_submission(submitted, target['thread_id'], allow_background=target.get('session_mode') == 'background')
     except Exception as exc:
@@ -252,6 +259,11 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
         record = append_event(record, 'native_uncertain', record['last_error'], now)
         replace_record(root, found, record)
         return DispatchResult('skipped', record['last_error'])
+    if 'expires_at_unix_micros' in record['native_delivery']:
+        record['native_delivery'].update(queue_id=submitted.receipt_id, queue_accepted=True)
+        record = append_event(record, 'native_bounded_pending', 'bounded queue accepted; admission not yet observed', now)
+        replace_record(root, found, record)
+        return DispatchResult('skipped', 'bounded native pending; reconcile before delivery')
     record['status'] = 'submitted'
     receipt_field = 'turn_id' if submitted.evidence_kind == 'native_turn_acceptance' else 'queue_id'
     record['native_delivery'].update(state='accepted', **{receipt_field: submitted.receipt_id}, accepted_at=None if intent else format_utc(now))
@@ -287,14 +299,16 @@ def reconcile_native(root, found, now, *, force=False, runtime_adapter: RuntimeA
     try:
         if delivery.get('prompt_sha256') and delivery['prompt_sha256'] != hashlib.sha256(prompt.encode()).hexdigest():
             raise WakeError('native submission payload changed')
-        if runtime_adapter is None:
+        if runtime_adapter is None and 'expires_at_unix_micros' not in delivery:
             evidence, reason = native_evidence(record['target'], prompt)
         else:
+            runtime_adapter = runtime_adapter or _codex_adapter()
             recipient = runtime_adapter.resolve(record['target'])
             if (recipient.version != 1 or recipient.runtime != 'codex'
                     or recipient.session_id != record['target']['thread_id']):
                 raise WakeError('reconciliation recipient changed')
-            observed = runtime_adapter.reconcile(recipient, prompt)
+            from .runtime_delivery import reconcile_submission
+            observed = reconcile_submission(runtime_adapter, recipient, prompt, record)
             if not isinstance(observed, RuntimeReconciliation):
                 raise WakeError('invalid runtime reconciliation outcome')
             evidence, reason = observed.evidence, observed.reason
@@ -308,6 +322,13 @@ def reconcile_native(root, found, now, *, force=False, runtime_adapter: RuntimeA
                 raise WakeError('incomplete native acceptance evidence')
     except Exception as exc:
         evidence, reason = None, 'native_evidence_unavailable:' + type(exc).__name__
+    if evidence is None and 'expires_at_unix_micros' in delivery and reason in ('bounded_native_expired', 'bounded_native_canceled'):
+        record.update(status='expired' if reason == 'bounded_native_expired' else 'cancelled')
+        delivery['reconciliation'] = dict(state='resolved', reason=reason)
+        record['native_delivery'] = delivery
+        record = append_event(record, 'native_bounded_terminal', reason + '; no replay', now)
+        replace_record(root, found, record)
+        return DispatchResult('failed', reason)
     if evidence is None:
         previous_reason = delivery.get('reconciliation', {}).get('reason')
         delivery.update(reconciliation=dict(state='unresolved', reason=reason, checked_at=format_utc(now) if now else None),

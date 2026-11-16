@@ -53,7 +53,8 @@ def submission_failure(reason, result, error):
                 stderr=output_summary(getattr(source, 'stderr', None), inspect=True))
 
 class CodexRuntimeAdapter:
-    def __init__(self, *, read_thread, request, run, project_failure, monotonic=None, busy_policy="wait"):
+    def __init__(self, *, read_thread, request, run, project_failure, monotonic=None, busy_policy="wait", bounded_adapter=None):
+        self._bounded_adapter = bounded_adapter
         self.busy_policy = busy_policy
         self._read_thread = read_thread
         self._request = request
@@ -120,6 +121,28 @@ class CodexRuntimeAdapter:
             return RuntimeObservation("unavailable", "recipient_not_loaded_or_unknown", capabilities, resumed)
         except Exception:
             return RuntimeObservation("unavailable", "runtime_observation_unavailable", capabilities, resumed)
+
+    def submit_bounded(self, recipient, prompt, envelope):
+        # This host-owned injection is deliberately absent from production wiring.
+        # An RPC capability advertisement is not package/runtime qualification.
+        if self._bounded_adapter is None:
+            return RuntimeSubmission('not_sent', reason='bounded_native_backend_not_qualified', pre_io=True)
+        return self._bounded_adapter.submit_bounded(recipient, prompt, envelope)
+
+    def reconcile_bounded(self, recipient, prompt, envelope):
+        if self._bounded_adapter is None:
+            return RuntimeReconciliation(None, 'bounded_native_backend_not_qualified')
+        observed = self._bounded_adapter.reconcile_bounded(recipient, prompt, envelope)
+        admission = observed.evidence
+        if admission is None or admission.get('source') != 'bounded_native_admission':
+            return observed
+        exact = self.reconcile(recipient, prompt)
+        evidence = exact.evidence
+        if (not isinstance(evidence, dict) or evidence.get('source') != 'native_turn'
+                or evidence.get('turn_id') != admission['turn_id']
+                or evidence.get('client_message_id') != envelope.client_user_message_id):
+            return RuntimeReconciliation(None, 'bounded_native_admitted_execution_unconfirmed')
+        return exact
 
     def submit(self, recipient: RuntimeRecipient, prompt: str) -> RuntimeSubmission:
         if self.busy_policy != "wait":
