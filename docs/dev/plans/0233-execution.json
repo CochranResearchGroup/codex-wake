@@ -272,7 +272,7 @@
         "T7"
       ],
       "owner": "primary-real-account-qualification",
-      "state": "running",
+      "state": "validated",
       "tracker_state": "OPEN",
       "acceptance": [
         "The complete exact native package passes the existing isolated upgrade/rollback, history, multi-client and failed-start gates.",
@@ -297,14 +297,14 @@
       ],
       "checkout_custody": "Worker explicitly returned Cargo/cache/artifact custody; primary owns current source diagnosis and remaining live qualification. Existing source checkouts retained.",
       "worker_wake_base": "1f8fd14b33faad7e145919a6861daa5a36bc2b16",
-      "progress": "Native1a2fb1 exact package/UID1017 accepted; actual linked handoff and local Stop pass. Public observer RED zero-versus-unknown fixed via native journal locators/canonical identity;62 affected tests pass. Updated Wake wheel installed qualification pending; no further provider calls. T8/parentOPEN7of8; review/remediation0.",
+      "progress": "Accepted exact native package/UID1017 plus actual real coding/MCP/mixed worker/linked handoff/local Stop. Corrected Wake observer actual unknown/null and installed336hashes/75selectedchecks accepted; earlierfixturefailures retained. Ready to close639; parent628OPEN; broadreview/remediation0.",
       "native_result_sha": "1a2fb1df4cefdef9782cd82d8cceef8c70e1c05c",
-      "package_manifest": "runtime/grok-native-233/t8-agent-notification-package-manifest.json",
-      "package_entrypoint_sha256": "99447ea05fae83235988bbe37c11689231a5c061ff5b1464751f2c0b039ed03e",
-      "local_acceptance": "docs/dev/evidence/plan0233/t8-isolated-package-acceptance.md",
+      "package_manifest": "runtime/grok-native-233/t8-portable-worker-package-manifest.json",
+      "package_entrypoint_sha256": "e8eb511af74de41d0d336a0afc6715df15cbd15583977996eb661981de3aea1d",
+      "local_acceptance": "docs/dev/evidence/plan0233/t8-final-qualification.md",
       "primary_gate": "docs/dev/evidence/plan0233/t8-real-account-gate.md",
-      "validation": "Complete5exec+metadata/current4firstpartybuild PASS1048.585s; UID1017 upgrade/rollback/history/multiclient63.880s, failed-start repair/rollback64.439s, saved-history14.222s, private-owner7.793s PASS; installed auth/catalog13+usage16 PASS8.016s; all336 module hashes match; installed candidate+rollback all6filehashes verified; owned0/preexisting13 preserved.",
-      "package_state": "native_qualified_wake_observer_installed_qualification_pending",
+      "validation": "Exact native6+UID30+runtime2+jobs5 independently verified; actual real account/coding/MCP/mixed223610/linked roundtrip/localStop; actual observer unknown/null; source62PASS,installed75covered/336hashes,fixturefailures retained; freshsameboot0to0. No workingactivation.",
+      "package_state": "implementation_qualified",
       "wake_result_sha": "2d8a4a390063d5b42fff7cc0c571c5bc92fb5421",
       "live_progress": "docs/dev/evidence/plan0233/t8-real-account-progress.md",
       "diagnostic_source_manifest": "runtime/grok-native-233/t8-source-manifest.json",
@@ -313,7 +313,9 @@
       "plaintext_message_source_manifest": "runtime/grok-native-233/t8-plaintext-message-source-manifest.json",
       "previous_package_native_source": "212d798546aabffe65129464a61905e810fed248",
       "agent_notification_source_manifest": "runtime/grok-native-233/t8-agent-notification-source-manifest.json",
-      "portable_worker_source_manifest": "runtime/grok-native-233/t8-portable-worker-source-manifest.json"
+      "portable_worker_source_manifest": "runtime/grok-native-233/t8-portable-worker-source-manifest.json",
+      "wake_runtime_source": "bc7a9e110db41ed20c30e7c944b6c86b7b988508",
+      "installed_wake_wheel_sha256": "1ed42101dff3679c18331b88cd4499afe22499d7bc80647370b3d3922c9d53ba"
     }
   ],
   "initial_ready": [
