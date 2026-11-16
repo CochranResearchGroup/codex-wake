@@ -520,3 +520,10 @@ and the private bundle verify. No public schema shape changed.
 The source fix awaits one causal exact package/UID1017 qualification before the
 remaining live handoff and Stop checks. Actual mixed-worker success and all older
 unknown histories remain preserved. No new provider request was issued.
+
+
+Exact native1a2fb1 complete package passed all five isolated UID1017 gates; primary independently verified six source files, thirty UID candidate/installed/rollback hashes, two runtime receipts and five terminal jobs. Current same-boot process census was zero before and after. No working-profile activation occurred.
+
+Real native Grok→OpenAI→Grok linked handoff preserved session identity, parent/fork lineage, permissions and bounded operator-authored inert context. No OpenAI inference was issued. One final Grok stream was locally interrupted after an actual text delta; native state is interrupted/held, completion unconfirmed and replay forbidden. This proves local Stop, not provider-side cancellation. Original unknown histories and cumulative allowance remain retained.
+
+The final public Wake observer exposed a real accounting defect: SQLite omits provider-fork edges, so it returned qualified zero for an interrupted descendant. The observer now uses private native continuation journals only as locators and verifies canonical rollout session/parent/fork identity. Missing ready successors, conflicting lineage and unconfirmed completion hold usage unknown; staged successors that have not materialized preserve current-source accounting. The public regression demonstrated qualified0 versus unknown; the corrected actual captured Stop reports unknown/null/provider_completion_unconfirmed. Focused local `PYTHONPATH=src:tests python -m unittest test_goal_usage test_self_limits test_goal_supervision -q`:62 PASS,19.354s, no retries. No further provider requests were issued. The updated Wake wheel still requires isolated installed qualification; native source/package gates remain causally unchanged. T8 and parent stay OPEN,7/8 children closed; broad review/remediation0.
