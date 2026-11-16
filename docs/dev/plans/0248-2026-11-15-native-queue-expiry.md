@@ -117,10 +117,50 @@ Following stages use --locked. No native package or service has been replaced.
 ## Compatibility guard
 
 Native bounded enqueue must use a distinct versioned method (proposed
-thread/queue/addBounded), not merely an extra expiresAt field on legacy add:
+thread/queue/bounded/add), not merely an extra expiresAt field on legacy add:
 older native deserializers can ignore unknown fields and otherwise enqueue
 unbounded input. The legacy method remains unbounded. Wake negotiates support
 before I/O and bounded submission never falls back to legacy add. The new method
 requires original expiresAt, and read-only reconciliation reports the same queue,
 client and terminal turn identities. CLI/API/MCP share this distinction while
 keeping existing explicit unbounded operator inputs usable.
+
+## Downlevel storage safety gate
+
+Before native bounded enqueue is exposed, quarantine bounded pending entries from
+legacy queue readers. Merely adding an expires_at column to queued_items is
+insufficient: older binaries ignore that column and could drain an expired entry
+after rollback. The current storage primitive patch is therefore not activatable.
+Implement a separate bounded pending partition (or an equally demonstrated
+fail-closed downlevel representation), retain original IDs/outcomes, and qualify
+actual old-binary non-delivery. Legacy unbounded queue inputs must remain usable.
+Do not weaken this gate to a client capability probe or watcher-side timer.
+
+## Native API checkpoint
+
+Core queue regression20 PASS; persistence14 PASS after adding atomic lookup by
+original client message ID across pending and terminal entries. Lookup reports
+ambiguity rather than guessing or resubmitting. The native API family is
+thread/queue/bounded/{add,list,read,delete,capabilities}. Read/delete share a named
+inspection model. The first schema export detected a nested-response definition
+collision; the inspection DTO correction is under regeneration.
+
+Native public expiry is required expiresAtUnixMicros, preserving the original
+accepted wake's microsecond precision without rounding or renewal. Storage
+migration0008 converts the unactivated prototype's second values to microseconds
+without changing their absolute instants, rejecting overflow. UTC bounds remain
+seconds and are conservatively converted for integer-microsecond comparison.
+The microsecond persistence regression14 PASS. The distinct-method protocol test
+failed before implementation and passed afterward. No runtime/package changed.
+
+Remaining: finish schema generation and compile RPC handlers; qualify complete
+package/rollback in UID1017 with real Stable Time, then adopt the backend through
+shared Wake CLI/API/MCP paths, review, merge and close695. Bounded Wake delivery
+remains disabled. Current source patch is a recovery checkpoint, not a release.
+
+Experimental schema export PASS after the shared inspection DTO correction.
+Native source checkpoint7a8335c0a6 is preserved as an apply-ready binary patch
+against d32063f96c and a private incremental Git bundle. Native server handler
+build is running through Cargo Signal (not yet passing). Session-only build wake
+registration was held with session_owner_unverified; no unattended continuation
+is armed and no lifetime fallback was selected. Working runtime unchanged.

@@ -1,9 +1,12 @@
 {
   "state": "incomplete_not_qualified",
   "base": "d32063f96c2dff1dc96af839b3952abb6acfeda4",
-  "source_commit": "1d3ab7898146487a4653af29933e0c552a7de173",
-  "patch_sha256": "4f4580ac68bb1ac471938145d23188d271f3a1027c515a761dd520d2b1d3313c",
-  "implemented": "bounded persistence and canceled/expired/admitted terminal selection",
-  "validation": "10 queue persistence tests PASS; native admission and live qualification pending",
+  "source_commit": "7a8335c0a69295f988747a2316c446cc5e4d51db",
+  "patch_sha256": "bf710bec41cf007a27a337bce5183be84d4e0e03ff1223774e5886c287877ceb",
+  "validation": "native queue20; microsecond persistence14; protocol decode and experimental export PASS; server handlers build running",
+  "native_api": "thread/queue/bounded/{add,list,read,delete,capabilities}",
+  "expiry_field": "expiresAtUnixMicros",
+  "clock_authority": "Stable Time",
+  "wake_busy_queue_enabled": false,
   "working_installation_authorized": false
 }

@@ -33,7 +33,9 @@ def main():
         print(json.dumps(held))
         return 0
     print(json.dumps(dict(contract_version=1, state='qualified',
-                         lower=utc['lower'], upper=utc['upper'], counter=counter)))
+                         lower=math.nextafter(utc['lower'] - 0.000001, -math.inf),
+                         upper=math.nextafter(utc['upper'] + 0.000001, math.inf),
+                         counter=counter)))
     return 0
 
 
