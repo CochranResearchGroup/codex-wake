@@ -61,10 +61,9 @@
   "working_native_changed": false,
   "production_bounded_delivery_enabled": false,
   "remaining": [
+    "Known asynchronous transport delays after native admission: HTTP authentication/preparation and WS lock/send command queue; requires native remediation",
+    "Strict remote model-start vs final native transport-send guarantee requires operator decision",
     "production restart/cooperative upgrade protocol",
-    "default/shared history layouts and uninterrupted reconnect qualification",
-    "arbitrary host suspension and final counter-read-to-write boundary",
-    "shared native pending cancellation integration",
     "full Python validation, including unreconciled full-suite preflight failure"
   ],
   "prepared_expiry": {
@@ -129,7 +128,9 @@
     "prepared_v1": "Hook review prompt prevented readiness; no bounded writes. Exact owned hook trust accepted in v2.",
     "rollback_v1": "Invalid generated script; compile preflight failed; no runtime effects.",
     "rollback_v2": "Transient thread/turns/list SQLite readiness; read-only bounded readiness retry in v3.",
-    "rollback_v3": "Qualification TUI Enter selected default Resume goal before asynchronous dialog was detected. V4 waits for dialog, chooses Leave paused, and asserts paused status."
+    "rollback_v3": "Qualification TUI Enter selected default Resume goal before asynchronous dialog was detected. V4 waits for dialog, chooses Leave paused, and asserts paused status.",
+    "default_v1": "Long disposable HOME created150-byte UNIX counter socket path; trusted clock unavailable, so native held. Short HOME only change authenticatedUTC, defaultv2 passes.",
+    "shared_v2": "Setup-only directory collision before native start; sharedv3 accepts already-created owned shared directory."
   },
   "private_client_ownership": {
     "state": "passed",
@@ -160,5 +161,56 @@
     "working_native_changed": false,
     "first_attempt": "Private-owner refusal passed; qualifier attempted second Ctrl-C after first had already exited owner. v2 sends one interrupt, waits for owner exit, then launches replacement.",
     "limitations": "Account private backend only; normal exit recovery; does not qualify forced crash, default/shared histories, production cooperation or interrupted reconnect."
+  },
+  "default_history": {
+    "state": "passed",
+    "uid": 1017,
+    "candidate_sha256": "44f25dea7c6fc65c1745dcbb94782ebd4da404dad1ddff838aa658ba6ff23f5b",
+    "provider_requests": 2,
+    "stop_exit_code": 0,
+    "supported_stopped_rollback_and_reupgrade": true,
+    "native_goals_and_budgets_preserved": true,
+    "failed_start_repair_passed": true,
+    "qualified_history_layouts": [
+      "default"
+    ],
+    "default_home_selected_without_codex_home": true,
+    "default_history_prefixes_preserved": true,
+    "seconds": 120.172
+  },
+  "legacy_shared_history": {
+    "state": "passed",
+    "uid": 1017,
+    "candidate_sha256": "44f25dea7c6fc65c1745dcbb94782ebd4da404dad1ddff838aa658ba6ff23f5b",
+    "provider_requests": 2,
+    "stop_exit_code": 0,
+    "supported_stopped_rollback_and_reupgrade": true,
+    "native_goals_and_budgets_preserved": true,
+    "failed_start_repair_passed": true,
+    "qualified_history_layouts": [
+      "legacy_shared_native_home"
+    ],
+    "explicit_shared_codex_home": true,
+    "shared_history_prefixes_preserved": true,
+    "old_clients_reconnected_after_stopped_rollback": true,
+    "seconds": 62.753,
+    "scope": "Native explicit shared home only; does not authorize concurrent controller mutable stores."
+  },
+  "installed_cancel_reconnect": {
+    "state": "passed",
+    "uid": 1017,
+    "candidate_sha256": "44f25dea7c6fc65c1745dcbb94782ebd4da404dad1ddff838aa658ba6ff23f5b",
+    "direct_cancel": true,
+    "lost_reply_reconciled_without_second_delete": true,
+    "already_admitted_not_canceled": true,
+    "canceled_inputs_absent_from_provider": true,
+    "provider_requests": 3,
+    "installed_helper_source": "89c639f9",
+    "wheel_sha256": "9f465233dcae78a3557f699719fd2439e1e8c220e1ed88a34d72ba9b071ea72a",
+    "existing_client_reconnect_prompt_reached_provider": true,
+    "reconnect_notice_observed": true,
+    "cancel_tombstone_survives_restart": true,
+    "stop_exit_code": 0,
+    "seconds": 41.51
   }
 }

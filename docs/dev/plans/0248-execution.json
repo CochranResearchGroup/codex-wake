@@ -1,0 +1,49 @@
+{
+  "parent": 695,
+  "base": "f8e879c291c172add80211b83de2b3c581fa2295",
+  "branch": "feat/native-expiry-695",
+  "wip_limit": 3,
+  "tickets": {
+    "695-QUAL": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [],
+      "job_dir": "/home/ecochran76/.local/state/codex-wake/native-expiry-0248/uid1017-default-package4/job-20261116T230603Z-821e69ff7cb1",
+      "validation": "Actual Native075 package4: default120.172s, legacyshared62.753s, same-client reconnect with real provider prompt41.510s; original budgets/history retained.",
+      "tracker_resolution": "DONE repo-local; parent695 remains OPEN"
+    },
+    "695-ADAPTER": {
+      "owner": "pending_cancel_695",
+      "state": "validated",
+      "dependencies": [],
+      "activation_blockers": [
+        "695-QUAL",
+        "695-TIMING"
+      ],
+      "worker": "/root/pending_cancel_695",
+      "branch": "fix/issue-695-pending-cancel",
+      "base": "f8e879c291c172add80211b83de2b3c581fa2295",
+      "result_sha": "97f6dca73a1ccb68177beeddc12bc8e293d5e928",
+      "integration_sha": "89c639f9",
+      "validation": "Source31133PASS/3129PASS; rootintegration9PASS; wheel9f465233 actual UID1017 Native075 cancellation/lostreply/admitted/restart41.510s PASS.",
+      "tracker_resolution": "DONE repo-local source and isolated installed seam; production activation blocked"
+    },
+    "695-TIMING": {
+      "owner": "send_boundary_695",
+      "state": "blocked",
+      "dependencies": [],
+      "worker": "/root/send_boundary_695",
+      "write_scope": "private source-boundary proposal; no edits authorized yet",
+      "blocker": "Guarantee boundary requires operator decision: strict remote model execution vs final application transport-send admission. HTTP async auth and WS lock/command queue remain after core checks.",
+      "evidence": "private ticket-695-timing/boundary-blocker.json"
+    }
+  },
+  "review": {
+    "prior_cycle": "completed retained",
+    "new_batch_fixed_point": "pending_user_selection",
+    "max_broad_reviews": 1,
+    "max_remediation_passes": 1,
+    "new_batch_status": "pending until blocked695-TIMING is resolved; no additional broad review or remediation pass consumed"
+  },
+  "integration_tip": "89c639f9"
+}

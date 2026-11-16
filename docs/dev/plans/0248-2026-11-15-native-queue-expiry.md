@@ -1,7 +1,8 @@
 # 0248 — Native bounded queue expiry (#695)
 
 State: OPEN
-Owner root/ecochran76; WIP1. Branch feat/native-expiry-695.
+Owner root/ecochran76; substantive WIP ceiling3 for the remaining-ticket batch.
+Branch feat/native-expiry-695.
 Parent #610. Preserve unrelated work and the working daemon. No working-host
 native upgrade until exact complete package and rollback pass separate-UID
 qualification and applicable installation authorization is established.
@@ -29,9 +30,18 @@ and canceled inputs never reached model/history; controls did. All case-owned
 processes stopped. This does not qualify arbitrary suspend/send delay or the
 remaining upgrade gates.
 The approved read-only clock enrollment and pinned helper remain unchanged.
-Production bounded Wake delivery stays refused; shared native cancellation and
-remaining installed preparation/send, ownership, failed-start and rollback gates
-remain open. One formal review and TDD findings pass are retained, not repeated.
+Production bounded Wake delivery stays refused. Installed preparation expiry,
+private-owner normal-exit recovery, stopped account/default/shared native-home
+rollback, failed-start repair and same-client reconnect now pass. Shared pending
+cancellation source and isolated installed adapter seam also pass; production
+factory remains disabled. The remaining precise native blocker is transport:
+HTTP asynchronous auth/preparation and WS task/lock/send-command queue can delay
+actual sending after core admission. See transport-boundary-blocker.json.
+Literal remote model-start timing versus final native transport-send admission
+needs an operator decision; no weaker guarantee is silently adopted.
+One earlier formal review/TDD cycle is retained. The newly requested final batch
+cycle remains pending until the blocked timing ticket resolves.
+
 
 Full matrixv4 atWakeaf1c8dde exceeded2400seconds onPython3.11; four assertions
 failed before timeout, andPython3.12 did not start. Exact orphan unittest child
@@ -351,3 +361,52 @@ and musl hash unchanged. Curated package4-partial-acceptance.json retains all
 remaining gates. Default/shared layouts, private-owner locks, uninterrupted
 reconnect, production cooperation, suspend boundary and full Python validation
 remain unqualified. Production bounded adapter remains disabled; #695 OPEN.
+
+
+## Implementation batch | 2026-11-16 | remaining #695 acceptance
+
+Integration branch feat/native-expiry-695; frozen batch base f8e879c291c172add80211b83de2b3c581fa2295.
+Owner ecochran76; coordinator root. WIP limit3 disjoint tickets; UID1017 native
+runtime is serialized with root as sole owner. Existing broad review/TDD remain
+recorded; new requested final review fixed point pending operator selection.
+No missing blocker IDs or dependency cycles. Parent695 closure requires all
+acceptance, including retained unresolved Python failure; passing subsets do
+not close it. No deployment or production bounded activation in this batch.
+
+| Local ticket | Owner | State | Dependencies | Scope and acceptance |
+| --- | --- | --- | --- | --- |
+| 695-QUAL | root | running | none | Actual UID1017 default/shared history and reconnect qualification using immutable package4; preserve budgets and working services. |
+| 695-ADAPTER | pending_cancel_695 | running | none for source; activation depends 695-QUAL and 695-TIMING | Shared native pending cancellation and exact original identities, grants, no unbounded fallback; focused public-contract tests. |
+| 695-TIMING | send_boundary_695 | running | none | Establish final execution timing guarantee or reproduce precise native blocker; source proposal only pending serialized ownership. |
+
+Root owns plan/RUNBOOK/evidence/active-lanes and integration. Workers report
+owned checkout/base/result SHA and validation; only root marks integrated or
+validated. Worker report alone is not ticket closure. Unblocked tasks are
+assigned one per worker; blocked activation stays pending. No renewed full
+Python matrix, duplicate package build or prior broad review in execution.
+
+
+### Remaining-ticket batch result | 2026-11-16
+
+Root695-QUAL and worker695-ADAPTER are validated and DONE as repo-local tickets,
+not parent closure. Ledger:0248-execution.json. Frozen batch basef8e879c2; adapter
+worker97f6dca7 integrated as89c639f9. Worker branch has verified remote custody;
+its clean checkout removed, Wake inventory125→124. Native inventory21 unchanged.
+Root/default native home with CODEX_HOME unset passes120.172s. Legacy explicit
+shared native home passes62.753s; this does not admit concurrent controller
+shared mutable stores. Histories and paused native budgets survive supported
+stopped rollback/re-upgrade; failed-start permission repair passes.
+
+A new isolated helper wheel9f465233 from89c639f9, preserving the approved af1
+helper and existing credential references, passes actual Native075 cancellation
+and reconnect41.510s. Exact pending cancellation, actual lost-delete reply
+followed by tombstone reconciliation without second delete, admitted refusal,
+tombstone persistence through restart, visible reconnect notice and original
+client's new prompt reaching owned provider all pass. Final owned processes0;
+working PID1879/hash unchanged. Source31133/3129 checks plus rootintegration9
+pass. No full-suite success or production activation is claimed.
+
+Worker695-TIMING remains blocked with exact source anchors and minimal transport
+remediation scope. No native code/build changed. User decision pending on strict
+remote-start versus final native transport-send admission. The requested new
+final review/remediation cycle is not consumed before this gate resolves.

@@ -10383,3 +10383,34 @@ receipt. V2 passes; scoped final processes0; working PID1879/hash unchanged.
 Curated package4 partial evidence updated. This qualifies normal-exit private
 lock recovery, not forced-crash handling, default/shared histories or reconnect.
 No source behavior changed; #695 remains OPEN and not installable.
+
+
+## Turn | 2026-11-16 | #695 delegated implementation and installed acceptance
+
+Root took695-QUAL, pending_cancel_695 took695-ADAPTER, send_boundary_695 took
+695-TIMING; one ticket each, three-lane ceiling, root alone owns UID1017 runtime.
+Adapter public cancel red (held rather than canceled)→green, worker97f6dca7
+remote verified and integrated89c639f9. Source31133PASS39.450s,3129PASS7.278s,
+rootintegration9PASS3.787s. Exact original payload/client/deadline and queue ID
+required; ambiguous/legacy/admitted outcomes hold; lost reply never claims local
+success or resubmits. Production factory remains disabled.
+
+Default home qualification first failed safely held:150-byte counter socket
+under the long disposable HOME could not provide trusted evidence. A short
+private HOME alone returns authenticatedUTC,87-byte path; actual default-home
+rollback/re-upgrade then passes120.172s. Shared setup collision occurred before
+native start; corrected actual legacy shared-home journey passes62.753s.
+New isolated installed wheel9f465233 at source89c639f9 passes native cancellation
+and same-client restart/reconnect41.510s, including actual post-delete lost
+reply and exact tombstone reconciliation without second delete. Three owned
+provider requests; no external model requests. Final owned processes0 and
+working PID1879/hash unchanged. Two repo-local tickets validated/DONE, parent695
+OPEN. Worker checkout safely removed125→124; refs retained; native21 unchanged.
+
+Timing worker establishes a specific source blocker, not a new runtime proof:
+HTTP async authentication/preparation and WS task/lock/send-command queue occur
+after existing core checks. Artifact transport-boundary-blocker.json records
+anchors and minimal fix scope. Strict remote execution versus final native-send
+semantics requires user decision; do not silently weaken contract. Timing ticket
+blocked; final requested review/TDD cycle not yet run. Prior cycle retained.
+Original Python assertion remains unresolved. No merge, deployment or closure.
