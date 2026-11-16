@@ -42,6 +42,125 @@ class BoundedNativeDeliveryTests(unittest.TestCase):
         self.assertEqual(requests[1], ('thread/queue/bounded/read', dict(threadId='thread',
             clientUserMessageId=envelope.client_user_message_id)))
 
+    def test_public_cancel_retires_exact_pending_bounded_submission(self):
+        self.scenario_public_cancel()
+
+    def test_lost_cancel_reply_holds_until_exact_tombstone_reconciles(self):
+        self.scenario_public_cancel(lose_reply=True)
+
+    def scenario_public_cancel(self, lose_reply=False):
+        from datetime import UTC, datetime
+        from pathlib import Path
+        from copy import deepcopy
+        import contextlib
+        import io
+        import json
+        import tempfile
+        from unittest.mock import patch
+        from codex_wake.bounded_native import BoundedNativeAdapter
+        from codex_wake.cli import main
+        from codex_wake.injector import dispatch_firing_record
+        from codex_wake.records import all_records, build_record, write_record
+        calls = []
+        row = None
+        deleted = False
+        def request(endpoint, command, method, params, timeout):
+            nonlocal row, deleted
+            calls.append((method, deepcopy(params)))
+            if method.endswith('/add'):
+                row = dict(id='4d18e29e-9c05-45e7-a387-e50459dd3497',
+                    input=params['input'], clientUserMessageId=params['clientUserMessageId'],
+                    expiresAtUnixMicros=params['expiresAtUnixMicros'])
+                return dict(queuedSubmission=row)
+            if method.endswith('/delete'):
+                self.assertEqual(params, dict(threadId=target['thread_id'], queuedSubmissionId=row['id']))
+                deleted = True
+                if lose_reply:raise TimeoutError('synthetic lost delete reply')
+                return dict(deleted=True, inspection=dict(state='canceled', queuedSubmission=row))
+            return dict(inspection=dict(state='canceled' if deleted else 'pending', queuedSubmission=row))
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = dict(transport='native', thread_id='01a1227e-a041-7b72-9c36-18349e7dd22c',
+                endpoint='unix://', codex_cmd='/codex', expires_at='2026-10-09T00:10:00Z')
+            record = build_record(predicate=dict(type='not_before', due_at='2026-10-09T00:00:00Z'),
+                prompt='wake', cwd=root, target=target)
+            record['status'] = 'firing'; write_record(root, record)
+            adapter = CodexRuntimeAdapter(read_thread=lambda unused:dict(id=target['thread_id'], status=dict(type='idle')),
+                request=request, run=lambda *a, **k:self.fail('unbounded submission'), project_failure=lambda *a:None,
+                bounded_adapter=BoundedNativeAdapter(request=request))
+            dispatch_firing_record(root, all_records(root)[0], now=datetime(2026,10,9,tzinfo=UTC), runtime_adapter=adapter)
+            pending = all_records(root)[0]
+            before_bytes = pending.path.read_bytes()
+            before = deepcopy(pending.record['native_delivery'])
+            denied = io.StringIO()
+            with patch('codex_wake.native_delivery._codex_adapter', return_value=adapter), contextlib.redirect_stdout(denied):
+                denied_code = main(['--wake-root', str(root), 'cancel', record['id'],
+                    '--caller-wake-subject', '01a1227e-a041-7b72-9c36-18349e7dd22d', '--json'])
+            self.assertEqual(denied_code, 5)
+            self.assertIn('outside verified caller scope', denied.getvalue())
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(pending.path.read_bytes(), before_bytes)
+            if lose_reply:
+                uncertain = io.StringIO()
+                with patch('codex_wake.native_delivery._codex_adapter', return_value=adapter), contextlib.redirect_stdout(uncertain):
+                    uncertain_code = main(['--wake-root', str(root), 'cancel', record['id'], '--json'])
+                self.assertEqual(uncertain_code, 5)
+                self.assertIn('TimeoutError', uncertain.getvalue())
+                self.assertEqual(pending.path.read_bytes(), before_bytes)
+            output = io.StringIO()
+            with patch('codex_wake.native_delivery._codex_adapter', return_value=adapter), contextlib.redirect_stdout(output):
+                code = main(['--wake-root', str(root), 'cancel', record['id'], '--json'])
+            result = json.loads(output.getvalue())['roots'][0]['results'][0]
+            self.assertEqual((code, result['state']), (0, 'cancelled'))
+            saved = all_records(root)[0].record
+            self.assertEqual(saved['status'], 'cancelled')
+            self.assertEqual(saved['native_delivery']['submission_id'], before['submission_id'])
+            self.assertEqual(saved['native_delivery']['expires_at_unix_micros'], before['expires_at_unix_micros'])
+            self.assertEqual(saved['native_delivery']['reconciliation']['reason'], 'bounded_native_canceled')
+            self.assertEqual([method for method, _ in calls],
+                ['thread/queue/bounded/add', 'thread/queue/bounded/read', 'thread/queue/bounded/delete']
+                + (['thread/queue/bounded/read'] if lose_reply else []))
+
+    def test_bounded_cancel_never_claims_to_undo_admitted_or_uncertain_work(self):
+        from copy import deepcopy
+        from codex_wake.bounded_native import BoundedNativeAdapter
+        from codex_wake.runtime_delivery import RuntimeRecipient
+        envelope = RuntimeSubmissionEnvelope('4d18e29e-9c05-45e7-a387-e50459dd3496', 1791504600000000)
+        row = dict(id='4d18e29e-9c05-45e7-a387-e50459dd3497',
+            input=[dict(type='text', text='wake', text_elements=[])],
+            clientUserMessageId=envelope.client_user_message_id, expiresAtUnixMicros=envelope.expires_at_unix_micros)
+        recipient = RuntimeRecipient('codex', 'thread', dict(endpoint='unix://', codex_cmd='/codex'))
+        admission = dict(state='admitted', queuedSubmission=row, turnId='turn-owned',
+            clockEvidence=dict(lower=1, upper=2, authority=dict(contract_version=1, state='qualified',
+                lower=1, upper=2, counter=dict(epoch='4d18e29e-9c05-45e7-a387-e50459dd3498',
+                    counter=1, frequency=10000000, rate_ppm=5000))))
+        for state in ('admitted', 'notFound', 'ambiguous', 'expired', 'canceled'):
+            with self.subTest(state=state):
+                calls = []
+                def request(endpoint, command, method, params, timeout):
+                    calls.append(method)
+                    return dict(inspection=admission if state == 'admitted' else dict(state=state, queuedSubmission=row))
+                observed = BoundedNativeAdapter(request=request).cancel_bounded(recipient, 'wake', envelope, row['id'])
+                self.assertEqual(observed.reason, 'bounded_native_' + state)
+                self.assertIsNone(observed.evidence)
+                self.assertEqual(calls, ['thread/queue/bounded/read'])
+        for defect in ('queue_identity', 'deadline', 'input', 'delete_timeout', 'delete_malformed'):
+            with self.subTest(defect=defect):
+                calls = []
+                def request(endpoint, command, method, params, timeout):
+                    calls.append(method)
+                    changed = deepcopy(row)
+                    if method.endswith('/read'):
+                        if defect == 'queue_identity':changed['id']='4d18e29e-9c05-45e7-a387-e50459dd3499'
+                        if defect == 'deadline':changed['expiresAtUnixMicros']+=1
+                        if defect == 'input':changed['input'][0]['text']='another prompt'
+                        return dict(inspection=dict(state='pending', queuedSubmission=changed))
+                    if defect == 'delete_timeout':raise TimeoutError('synthetic lost delete reply')
+                    return dict(inspection=dict(state='canceled', queuedSubmission=None))
+                with self.assertRaises((ValueError, TimeoutError)):
+                    BoundedNativeAdapter(request=request).cancel_bounded(recipient, 'wake', envelope, row['id'])
+                self.assertEqual(len(calls), 2 if defect.startswith('delete_') else 1)
+
     def test_original_expiry_preserves_microseconds_and_earlier_stop(self):
         from codex_wake.runtime_delivery import original_submission_expiry
         record = dict(scheduling_intent=dict(schedule=dict(kind='at', due_at='2026-10-09T00:00:00Z'),
@@ -101,8 +220,8 @@ class BoundedNativeDeliveryTests(unittest.TestCase):
                     self.assertEqual(all_records(root)[0].record['status'], 'firing')
                 if instant == 0:
                     # Cancellation must not claim success while native pending
-                    # work remains executable. Exact native deletion is not yet
-                    # implemented, so the public command explicitly holds.
+                    # work remains executable. The default production backend is
+                    # unqualified, so the public command explicitly holds.
                     import contextlib
                     import io
                     import json

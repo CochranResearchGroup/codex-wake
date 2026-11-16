@@ -3,7 +3,7 @@
 Only a host-owned qualified runtime may inject this into CodexRuntimeAdapter.
 No RPC capability response or caller flag enables it. Pending is queue acceptance,
 not observed delivery; admitted is permission to inspect the exact native turn,
-not completion. Cancellation is deliberately unsupported here.
+not completion. Cancellation inspects the original envelope before deleting its exact row.
 """
 from uuid import UUID
 
@@ -85,3 +85,18 @@ class BoundedNativeAdapter:
         return RuntimeReconciliation(dict(source='bounded_native_admission',
             turn_id=response['turnId'], queue_id=queued['id'],
             client_message_id=envelope.client_user_message_id, execution='not_observed'))
+
+    def cancel_bounded(self, recipient, prompt, envelope, queue_id=None):
+        state, queued, _ = self._read(recipient, prompt, envelope)
+        if queue_id is not None and queued is not None and queued['id'] != queue_id:
+            raise WakeError('bounded native queue identity changed')
+        if state != 'pending':
+            return RuntimeReconciliation(None, 'bounded_native_' + state)
+        target = recipient.binding
+        response = self._request(target['endpoint'], target['codex_cmd'],
+            'thread/queue/bounded/delete', dict(threadId=recipient.session_id,
+                queuedSubmissionId=queued['id']), 10)
+        state, retained = self._inspect(response.get('inspection'), prompt, envelope)
+        if retained is not None and retained['id'] != queued['id']:
+            raise WakeError('bounded native queue identity changed')
+        return RuntimeReconciliation(None, 'bounded_native_' + state)

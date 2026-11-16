@@ -288,6 +288,40 @@ def native_evidence(target, prompt):
     return observed.evidence, observed.reason
 
 
+def cancel_native_pending(root, found, *, runtime_adapter=None):
+    """Cancel only an exact bounded native entry; ambiguous legacy effects hold."""
+    from .runtime_delivery import submission_envelope
+    record = dict(found.record)
+    delivery = dict(record.get('native_delivery', {}))
+    if delivery.get('state') != 'uncertain' or 'expires_at_unix_micros' not in delivery:
+        raise WakeError('submission uncertain; reconcile original effect before cancellation')
+    prompt = native_prompt(root, record)
+    if delivery.get('prompt_sha256') != hashlib.sha256(prompt.encode()).hexdigest():
+        raise WakeError('native submission payload changed')
+    adapter = runtime_adapter or _codex_adapter()
+    recipient = adapter.resolve(record['target'])
+    if (recipient.version != 1 or recipient.runtime != 'codex'
+            or recipient.session_id != record['target']['thread_id']):
+        raise WakeError('cancellation recipient changed')
+    method = getattr(adapter, 'cancel_bounded', None)
+    if method is None:
+        raise WakeError('submission uncertain; reconcile original effect before cancellation')
+    try:
+        observed = method(recipient, prompt, submission_envelope(record), delivery.get('queue_id'))
+    except Exception as exc:
+        raise WakeError('native cancellation evidence unavailable: ' + type(exc).__name__) from exc
+    if (not isinstance(observed, RuntimeReconciliation) or observed.evidence is not None
+            or observed.reason not in ('bounded_native_canceled', 'bounded_native_expired')):
+        reason = observed.reason if isinstance(observed, RuntimeReconciliation) else 'invalid cancellation outcome'
+        raise WakeError('submission uncertain; reconcile original effect before cancellation: ' + str(reason))
+    record['status'] = 'cancelled' if observed.reason == 'bounded_native_canceled' else 'expired'
+    delivery['reconciliation'] = dict(state='resolved', reason=observed.reason)
+    record['native_delivery'] = delivery
+    record = append_event(record, 'native_bounded_terminal', observed.reason + '; no replay', None)
+    replace_record(root, found, record)
+    return record['status']
+
+
 def reconcile_native(root, found, now, *, force=False, runtime_adapter: RuntimeAdapter | None = None):
     from .injector import DispatchResult
     record = dict(found.record)
