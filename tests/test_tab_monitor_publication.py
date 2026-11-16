@@ -39,13 +39,16 @@ class MonitorPublicationTests(unittest.TestCase):
                     time.sleep(.01)
                 self.assertEqual(snapshot_path.stat().st_mtime_ns,original_snapshot)
                 current=monitor.execute('tabs.monitor.status',{})
-                self.assertEqual(current['snapshot']['freshness'],'fresh')
+                # A wall-clock reversal correctly marks a retained snapshot
+                # stale. This process test checks monotonic publication cadence;
+                # clock-controlled status tests cover freshness separately.
+                self.assertEqual(current['monitor']['status'],'running')
                 self.assertGreater(current['monitor']['observer']['costs']['ticks'],original_ticks)
                 until=time.monotonic()+1.4
                 while snapshot_path.stat().st_mtime_ns==original_snapshot:
                     self.assertLess(time.monotonic(),until)
                     time.sleep(.01)
-                self.assertEqual(monitor.execute('tabs.monitor.status',{})['snapshot']['freshness'],'fresh')
+                self.assertEqual(monitor.execute('tabs.monitor.status',{})['monitor']['status'],'running')
             finally:
                 monitor.execute('tabs.monitor.stop',{})
 
