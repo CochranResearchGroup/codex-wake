@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_CEILING
 import ipaddress
 import json
 import math
@@ -125,4 +125,6 @@ def from_response(response, *, counter, frequency):
     utc = {"status": "network", "sources": ["stable-time:" + x for x in operators],
            "lower": math.nextafter(lower - .000001, -math.inf),
            "upper": math.nextafter(upper + float(elapsed) + .000001, math.inf), "reason": ""}
-    return {"utc": utc, "counter": host, "reason": "authenticated_utc"}
+    consumed_ns = int((elapsed * 1000000000).to_integral_value(rounding=ROUND_CEILING)) + 1
+    return {"utc": utc, "counter": host, "reason": "authenticated_utc",
+            "valid_for_ns": max(0, max_age - age - consumed_ns)}

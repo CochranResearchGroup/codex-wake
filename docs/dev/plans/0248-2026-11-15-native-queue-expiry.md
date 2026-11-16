@@ -293,3 +293,16 @@ Counter-only intents without a qualified absolute deadline must hold. Historical
 already-submitted unbounded work retains its original reconciliation path and is
 never resent as a bounded replacement. Formal review and its TDD findings pass
 remain reserved; #695 remains OPEN.
+
+
+### 2026-11-16 transport continuation
+
+Explicit UID1017 read-only Stable Time enrollment was approved and executed;
+authenticated UTC was observed without logging credential values. Native
+`db4dcfc839` projects helper bounds through a fresh private host-counter read,
+retaining the original finite authority lease. Red/green clock regression and
+26 selected native queue/clock tests pass. The helper contract now requires
+remaining validity and its host-owned counter source. Python13 focused checks
+pass on both supported interpreters. Package3 and actual daemon boundary,
+upgrade/rollback, full Python regression and shared cancellation acceptance
+remain open. Production bounded delivery remains disabled and #695 remains OPEN.

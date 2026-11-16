@@ -10252,3 +10252,17 @@ main4bcba85e into the existing #695 lane. Preserve all three append-only catalog
 roadmap/runbook intents; disambiguate the two P248 roadmap labels by native/peer
 suffixes without renaming canonical plan files. Source auto-merges; verify focused
 carry behavior before completing merge. No second broad review is requested.
+
+
+## Turn | 2026-11-16 | #695 clock transport source regression
+
+Native db4dcfc839 advances helper bounds using a fresh nonce-correlated read of
+its same-UID private Windows QPC bridge. Invalid ownership, nonce, frequency,
+rollback, remaining service validity or over-two-second handoff holds admission.
+The public clock regression first returned stale lower100, then passed with
+projected bounds; the two clock tests and24 existing queue tests pass together.
+Python helper now carries conservative remaining validity and the bridge address;
+13 clock/bridge checks pass on Python3.11 and3.12. Selected Ruff and diff pass.
+This proves controlled source behavior, not installed native queue acceptance or
+arbitrary suspension safety. Complete package3 is building at the exact native
+commit. No working native replacement; production bounded adapter stays disabled.

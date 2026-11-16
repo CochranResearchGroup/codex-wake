@@ -20,6 +20,12 @@ def response():
 
 
 class NativeClockTests(unittest.TestCase):
+    def test_authenticated_utc_retains_conservative_remaining_validity(self):
+        result = from_response(response(), counter=10000010, frequency=10000000)
+        # Eleven counter ticks at the slowest allowed rate consume1106ns,
+        # rounded up, plus1ns safety margin from the original ten-second lease.
+        self.assertEqual(result['valid_for_ns'], 9999998893)
+
     def test_wake_tolerance_does_not_relax_service_utc_qualification(self):
         valid = response()
         self.assertIsNotNone(from_response(valid, counter=10000010, frequency=10000000)['utc'])

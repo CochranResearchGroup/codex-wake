@@ -1,15 +1,15 @@
 {
   "state": "incomplete_not_qualified",
   "base": "d32063f96c2dff1dc96af839b3952abb6acfeda4",
-  "source_commit": "3695947e81fba3976eca5c8ca20e6ae509253a89",
-  "patch_sha256": "3a769c92c50d2268db089addcc7f92c41744021d8c3c28e642658dda20c38ef5",
-  "validation": "24 native queue tests PASS at3695947e81, including auth-recovery expired/unknown/eligible controls and unpublished-input recovery regression; state14 PASS; complete package2 assembled, not qualified",
+  "source_commit": "db4dcfc8393911c6a04e159c9c4f51af6fdd1eda",
+  "patch_sha256": "eac28d51528cbd3a954562a51bd8ade9b7afa32ff7030bd35f4eaaf4441a9e23",
+  "validation": "26 native queue/clock transport tests PASS at db4dcfc839; earlier state14 PASS; package3 pending; no installed qualification",
   "native_api": "thread/queue/bounded/{add,list,read,delete,capabilities}",
   "expiry_field": "expiresAtUnixMicros",
   "clock_authority": "Stable Time",
   "wake_busy_queue_enabled": false,
   "working_installation_authorized": false,
-  "clock_transport_qualification": "unqualified: helper sample-to-native admission elapsed bounds unresolved",
+  "clock_transport_qualification": "source regression resolved for helper-to-native counter projection; actual daemon boundary and delay qualification outstanding",
   "native_expiry_boundary": "final HTTP/WebSocket send after preparation/auth; retries recheck original deadline; staged history published only after accepted stream; recovery marker only after publication",
-  "test_uid_clock": "held: no accepted real test-user grant; explicit policy exception pending for documented shared read-only clock enrollment"
+  "test_uid_clock": "approved narrow shared read-only Stable Time enrollment executed; authenticated UTC observed as UID1017; values withheld"
 }

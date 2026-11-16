@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 
 from .native_clock import snapshot
+from .host_counter import counter_socket
 
 
 def main():
@@ -25,8 +26,10 @@ def main():
     os.environ['CODEX_WAKE_STABLE_TIME_CONFIG'] = str(args.config)
     value = snapshot()
     utc, counter = value.get('utc'), value.get('counter')
+    valid_for_ns = value.get('valid_for_ns')
     if (not isinstance(utc, dict) or utc.get('status') != 'network'
             or not isinstance(counter, dict) or value.get('reason') != 'authenticated_utc'
+            or type(valid_for_ns) is not int or not 0 < valid_for_ns <= 300000000000
             or any(type(utc.get(k)) not in (int, float) or not math.isfinite(utc[k])
                    for k in ('lower', 'upper'))
             or utc['lower'] > utc['upper']):
@@ -35,7 +38,9 @@ def main():
     print(json.dumps(dict(contract_version=1, state='qualified',
                          lower=math.nextafter(utc['lower'] - 0.000001, -math.inf),
                          upper=math.nextafter(utc['upper'] + 0.000001, math.inf),
-                         counter=counter)))
+                         counter=counter, valid_for_ns=valid_for_ns,
+                         counter_source=dict(kind='windows_qpc_private_bridge',
+                                             socket=str(counter_socket())))))
     return 0
 
 

@@ -51,20 +51,26 @@ def _values(counter, frequency):
     return counter, frequency
 
 
+def counter_socket(directory=None):
+    """The private endpoint used by this user's maintained QPC bridge."""
+    return _directory(directory)/'counter.sock'
+
+
 def read_counter(directory=None, *, start=True):
     """Read a newly sampled counter through the current user's private bridge."""
-    root = _directory(directory)
+    address = counter_socket(directory)
+    root = address.parent
     deadline = time.monotonic()+5
     launched = False
     request_id = uuid.uuid4().hex
     while True:
         try:
-            info = (root/'counter.sock').lstat()
+            info = address.lstat()
             if not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
                 raise ValueError('counter_socket_not_private')
             with socket.socket(socket.AF_UNIX) as client:
                 client.settimeout(max(.001, deadline-time.monotonic()))
-                client.connect(str(root/'counter.sock'))
+                client.connect(str(address))
                 client.sendall((request_id+'\n').encode())
                 data = _line(client, deadline)
                 response = json.loads(data)
