@@ -10081,3 +10081,30 @@ and no error. Stale was the correct product result after a wall-clock reversal;
 the cadence test's unconditional freshness assertions were invalid. Preserve
 write/tick/cadence assertions and existing clock-controlled freshness coverage.
 All11 monitor tests PASS after this test-only correction; full matrix pending.
+
+
+## Turn | 2026-11-16 | #695 MONITOR-CLOCK-01 TDD repair
+
+The operator requested TDD after a deterministic0.19s public refresh/status
+reproduction proved that guest-wall rollback changed freshness. Keep one bug
+cycle at a time: the explicit clock-provider seam first failed as unsupported,
+then passed with persisted authenticated counters; a separate default-reader
+expiry test failed fresh-versus-stale, then passed after default Stable Time
+wiring. The default reader never falls back to guest UTC or plain NTP. Counter
+resolution/rate enlarge elapsed age conservatively; missing/changed evidence
+is stale and does not rebase. Old snapshots remain readable without authority.
+
+The original reproduction is green against the real configured clock. A private
+background owner published stable_time_counter freshness with upper age0.130s;
+its owned process stopped and was absent afterward. Changed-surface Python3.11
+validation44 PASS70.880s, including monitor, observer, summary and routing callers.
+The summary test now injects the external clock seam rather than replacing the
+status method. Python3.12 selected checks16 PASS14.433s; no installed-service change.
+
+Frozen matrix v3 at29c6424d finished2661 tests with3 failures,1 error,1 skip.
+Its four failures remain in host-preflight, shared-refresh, monitor policy and
+unified connectors; Python3.12 full did not start. The consumed completion wake
+was canceled after direct result reconciliation, with cancellation confirmed.
+Temporary clock checkout exists only to preserve that frozen run and must be
+removed after integration and verified remote custody. Formal #695 review is not
+repeated. Clock transport/separate-UID acceptance gates and #695 OPEN remain.

@@ -15,13 +15,18 @@ public regression reproduced premature daemon recovery of unpublished bounded
 input; marker publication is corrected and the24-test queue suite passes.
 Complete GNU package2 is assembled from this source, but not runtime-qualified.
 Shared Wake source is implemented with production bounded delivery still refused.
-The corrected Python3.11 full run completed2661 tests with one stale-monitor
-assertion failure and one skip; Python3.12 was not started after that failure.
-The monitor failure reproduced a negative wall-clock age (-6.9s) with a live
-matching owner. The process cadence test now retains its monotonic write/tick
-checks without requiring wall-clock freshness; the11 monitor tests pass. Earlier
-failures remain retained, and the full matrix still requires a passing readback. Real test-user clock enrollment awaits the explicit credential-policy
-exception, and suspend-safe helper-to-admission clock transport remains unqualified.
+The frozen matrix v3 completed2661 Python3.11 tests with3 failures,1 error and
+1 skip; Python3.12 did not start. The host-preflight, connector, shared-refresh
+and monitor-policy failures remain retained and unresolved; no full-green claim.
+Operator-requested MONITOR-CLOCK-01 addresses the independently reproduced
+monitor guest-clock dependency through public refresh/status TDD. Default
+persisted-frame freshness now uses authenticated Stable Time elapsed counters;
+missing/changed evidence is stale and legacy snapshots do not regain authority.
+The original wall-rollback reproduction and a private real-service background
+monitor pass; changed-surface checks pass44 on Python3.11 and16 on Python3.12.
+This does not migrate all formatting/routing timers or qualify native dispatch.
+Real test-user clock enrollment awaits the explicit credential-policy exception,
+and suspend-safe helper-to-admission clock transport remains unqualified.
 No working daemon replacement, merge, deployment or ticket closure is claimed.
 
 ## Scope and contract
@@ -94,6 +99,31 @@ UTC bounds for this safety contract.
 No mock-only native claims, synthetic qualified clock in live acceptance,
 production policy changes, incidental provider changes or fixture framework.
 Memory writes forbidden absent explicit user request.
+
+## MONITOR-CLOCK-01 | Stable Time monitor freshness
+
+Owner root; IN_PROGRESS, same #695 implementation WIP. A temporary continuation
+checkout isolated this repair while the original source was frozen under matrix
+v3; fold it into the existing lane and remove it after verified source custody.
+
+Seam: public TabMonitor refresh/status across independently constructed readers,
+plus the actual private background owner with the configured real clock. This
+proves retained-frame freshness, not every nested trait's timer or native expiry.
+One red/green slice first adds explicit clock-provider injection and persisted
+counter evidence; the next proves default configured-clock expiration without
+waiting for wall time. Counter-only authenticated evidence suffices for elapsed
+age; guest UTC and plain NTP do not. Changed epoch/frequency, rollback, unavailable
+evidence and invalid rate hold freshness stale, without rebasing the saved frame.
+
+Compatibility: snapshot schema1 gains clock_counter and observed_at_time_basis.
+Default status reports freshness_basis and an upper age_seconds bound, or null
+when continuity is unknown. Older frames remain readable but stale until observed
+again. Explicit internal point-clock injection remains labeled injected_clock;
+portable controller operations cannot select this constructor seam. Wall sample
+timestamps remain diagnostic metadata; this slice is not a global clock migration.
+Definition of done: public regressions and affected callers pass, real configured
+clock readback succeeds, the owned test process is gone, and source custody plus
+temporary-checkout cleanup are verified. Wider #695 acceptance remains separate.
 
 ## Stable Time integration decision (operator selected)
 

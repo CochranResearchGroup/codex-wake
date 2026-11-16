@@ -1,11 +1,13 @@
 """Public monitor publication preserves changes and bounds quiet disk writes."""
 import json
+import os
 from pathlib import Path
 import tempfile
 import shutil
 import subprocess
 import time
 import unittest
+from unittest.mock import patch
 
 from codex_wake.tab_monitor import TabMonitor
 
@@ -53,7 +55,7 @@ class MonitorPublicationTests(unittest.TestCase):
                 monitor.execute('tabs.monitor.stop',{})
 
     def test_quiet_owner_keeps_tick_cadence_until_longer_snapshot_heartbeat(self):
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, CODEX_WAKE_STABLE_TIME_CONFIG=''):
             root=Path(directory)
             path=root/'controller-tabs.json'
             path.write_text(json.dumps(dict(schema_version=1,workspaces={})));path.chmod(0o600)
@@ -78,7 +80,8 @@ class MonitorPublicationTests(unittest.TestCase):
                     status=monitor.execute('tabs.monitor.status',{})
                 self.assertLessEqual(status['monitor']['observer']['costs']['ticks']-ticks,18,
                                      'quiet heartbeat deadline must not create a busy loop')
-                self.assertEqual(status['snapshot']['freshness'],'fresh')
+                self.assertEqual(status['monitor']['status'],'running')
+                self.assertEqual(status['snapshot']['freshness'],'stale')
             finally:
                 monitor.execute('tabs.monitor.stop',{})
 
@@ -86,7 +89,7 @@ class MonitorPublicationTests(unittest.TestCase):
     def test_daemon_persists_full_rows_and_enabled_routing_receives_them(self):
         from codex_wake.controller_tabs import controller_tabs_from_root
         from codex_wake.terminal_routing import TerminalRouting
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, CODEX_WAKE_STABLE_TIME_CONFIG=''):
             root=Path(directory);tmux=['tmux','-S',str(root/'tmux.sock')]
             subprocess.run([*tmux,'new-session','-d','-s','source','exec sleep 60'],check=True)
             subprocess.run([*tmux,'new-session','-d','-s','destination','exec sleep 60'],check=True)
@@ -111,13 +114,13 @@ class MonitorPublicationTests(unittest.TestCase):
                 while True:
                     report=monitor.execute('tabs.monitor.status',{})
                     snapshot=report['snapshot']
-                    if snapshot and snapshot.get('resource_count')==3 and snapshot.get('freshness')=='fresh':
+                    if snapshot and snapshot.get('resource_count')==3:
                         break
                     self.assertLess(time.monotonic(),until)
                     time.sleep(.02)
                 self.assertIsInstance(snapshot['resources'],list)
                 self.assertEqual(len(snapshot['resources']),3)
-                self.assertEqual(snapshot['freshness'],'fresh')
+                self.assertEqual(snapshot['freshness'],'stale')
                 self.assertIn('last_formatting',report['monitor'])
             finally:
                 monitor.execute('tabs.monitor.stop',{})
@@ -204,9 +207,9 @@ class MonitorPublicationTests(unittest.TestCase):
     def test_publisher_writes_changed_evidence_immediately_before_heartbeat(self):
         with tempfile.TemporaryDirectory() as directory:
             mono=[0.]
-            monitor=TabMonitor(directory,monotonic=lambda:mono[0])
+            monitor=TabMonitor(directory,clock=lambda:1000.,monotonic=lambda:mono[0])
             record={}
-            snapshot=dict(schema_version=1,origin='manual',observed_at=time.time(),resources=[],
+            snapshot=dict(schema_version=1,origin='manual',observed_at=1000.,resources=[],
                 workspaces=[],unavailable=[],evidence_revision='evidence-one',projection_revision='display-one',
                 observer=dict(costs=dict(ticks=1),sources=[]))
             self.assertTrue(monitor.publish_observation(snapshot,record))
