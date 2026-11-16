@@ -15,7 +15,11 @@ remaining formatting/routing timers are explicitly outside freshness authority.
 
 Source validation: Python3.12 affected66 PASS92.540s, covering monitor, observer,
 summary, routing and all four failure-group modules seen in the separate #695
-full run. Python3.11 same selection pending. RuffF821/F822/F823, policy wiring,
+full run. Initial Python3.11 selection failed one existing shared-refresh expiry test
+(66 tests,121.670s): its injected trusted_upper followed guest wall steps.
+The test now advances its original UTC anchor by monotonic elapsed time; this
+preserves the original two-second expiry and independent watcher. Post-correction
+Python3.11 selection and Python3.12 shared-refresh checks are pending. RuffF821/F822/F823, policy wiring,
 compileall and diff checks pass. Initial wheel build lacked the build module;
 the private builder was repaired without changing runtime dependencies.
 

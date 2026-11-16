@@ -10094,3 +10094,11 @@ reviewer handles clock_release_standards_review and clock_release_spec_review.
 Operator authorized review, merge and deployment. Versiondev40 preserves dev39
 Grok controls. Source/package/installed acceptance and release readback pending;
 no native update, inference or credential copy is authorized by this packet.
+
+Python3.12 affected66 PASS92.540s. Python3.11 initial66 failed one shared-refresh
+expiry assertion after a guest-wall step stretched a two-second test deadline.
+Correct only the injected test clock to advance its original anchor by elapsed
+time; no production shared-refresh change. Original failure retained. Both runbook
+intents survived a docs-only rebase over the concurrent P233 deployment closeout;
+source and tests were byte-identical immediately after that rebase. Post-correction
+validation pending. No paid hosted checks were requested.
