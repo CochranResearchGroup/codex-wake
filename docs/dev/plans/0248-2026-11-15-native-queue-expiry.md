@@ -323,3 +323,31 @@ remaining validity and its host-owned counter source. Python13 focused checks
 pass on both supported interpreters. Package3 and actual daemon boundary,
 upgrade/rollback, full Python regression and shared cancellation acceptance
 remain open. Production bounded delivery remains disabled and #695 remains OPEN.
+
+
+### 2026-11-16 prepared expiry and stopped rollback qualification
+
+Exact Native075639f50a package4, SHA44f25dea, passed two more installed
+journeys under real UID1017, using the actual launcher and authenticated Stable
+Time with the existing approved credential references. Prepared-expiry v2
+passed39.919s: an explicitly trusted owned UserPromptSubmit hook entered while
+eligible and returned after the original deadline; expired prompt and derived
+context were absent from both captured model requests, including after reload.
+Controls completed. This does not establish arbitrary suspension atomicity.
+
+Stopped rollback v4 passed99.126s: three real TUI clients, two synthetic histories
+and paused native goals/budgets; explicit stop, rollback to working0.169musl,
+then explicit stop/re-upgrade to candidateGNU. History prefixes and goal fields
+survived; old binary left the bounded entry untouched, and candidate expired
+its original ID/deadline after re-upgrade. An owned mandatory log permission
+failure prevented startup, then permission repair restored launchability.
+Exactly two synthetic provider requests; no external model calls.
+
+Earlier setup/readiness failures remain recorded. The v3 qualifier raced an
+asynchronous paused-goal dialog: Enter selected Resume goal, causing the mock
+request cap to fail. V4 explicitly waits, selects Leave paused and asserts status;
+no product code or cap was changed. Final scoped processes0; working PID1879
+and musl hash unchanged. Curated package4-partial-acceptance.json retains all
+remaining gates. Default/shared layouts, private-owner locks, uninterrupted
+reconnect, production cooperation, suspend boundary and full Python validation
+remain unqualified. Production bounded adapter remains disabled; #695 OPEN.
