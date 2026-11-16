@@ -297,21 +297,22 @@
       ],
       "checkout_custody": "Worker explicitly returned Cargo/cache/artifact custody; primary owns current source diagnosis and remaining live qualification. Existing source checkouts retained.",
       "worker_wake_base": "1f8fd14b33faad7e145919a6861daa5a36bc2b16",
-      "progress": "Exact23bc package/UID1017fivejobsPASS; primary38hashes(includes2receipts)/freshUIDcensus0; obsolete historical13baseline predatesboot, preservationacrossbootnotclaimed. Actual realOpenAIworker completesOPENAI_WORKER_OK. Grokparentthenheld: converter lacks nativeplaintextAgentMessage. New publicclientpositiveRED job023456 pending, productionunchanged. Known326959tokens NOTfulltreetotal; unknownretained. T8OPEN; no replay.",
-      "native_result_sha": "23bc20474a24e7afbb59a02e0e070017ef58080a",
+      "progress": "Exact23bc packageacceptedwithpreviousbootcensuslimitation. RealOpenAIchildcompleted17764tokens; GrokparentheldonunsupportedplaintextAgentMessage. PublicclientREDproved beforeHTTP; minimalconverterpreservesattributionexplicituntrustedrole and rejectsopaquecontentnoHTTP. API5+SSE4GREEN40.594s atnativeee0e; Core12unchangedreused. Nextcausalexactpackagepending, no replay. Cumulativeknown326959NOTaggregatequalifiedtotal; Grokcompleted8/12, OpenAIcompleted1/2+earlierfailedHTTP400unknownusage, tools8/16, refresh1. T8/parentOPEN.",
+      "native_result_sha": "ee0e0b82ff88a3060d035782229931e8f9484ee9",
       "package_manifest": "runtime/grok-native-233/t8-plaintext-message-package-manifest.json",
       "package_entrypoint_sha256": "e9943677786cbb80a149ef22003bdbfbae105f6423f8b7db7d5656d1b81fe54d",
       "local_acceptance": "docs/dev/evidence/plan0233/t8-isolated-package-acceptance.md",
       "primary_gate": "docs/dev/evidence/plan0233/t8-real-account-gate.md",
       "validation": "Complete5exec+metadata/current4firstpartybuild PASS1048.585s; UID1017 upgrade/rollback/history/multiclient63.880s, failed-start repair/rollback64.439s, saved-history14.222s, private-owner7.793s PASS; installed auth/catalog13+usage16 PASS8.016s; all336 module hashes match; installed candidate+rollback all6filehashes verified; owned0/preexisting13 preserved.",
-      "package_state": "plaintext_message_package_qualified_isolated_live_agent_notification_gap",
+      "package_state": "agent_notification_source_validated_causal_package_pending",
       "wake_result_sha": "2d8a4a390063d5b42fff7cc0c571c5bc92fb5421",
       "live_progress": "docs/dev/evidence/plan0233/t8-real-account-progress.md",
       "diagnostic_source_manifest": "runtime/grok-native-233/t8-source-manifest.json",
       "version_header_source_manifest": "runtime/grok-native-233/t8-version-header-source-manifest.json",
       "usage_routing_source_manifest": "runtime/grok-native-233/t8-usage-routing-source-manifest.json",
       "plaintext_message_source_manifest": "runtime/grok-native-233/t8-plaintext-message-source-manifest.json",
-      "previous_package_native_source": "212d798546aabffe65129464a61905e810fed248"
+      "previous_package_native_source": "212d798546aabffe65129464a61905e810fed248",
+      "agent_notification_source_manifest": "runtime/grok-native-233/t8-agent-notification-source-manifest.json"
     }
   ],
   "initial_ready": [

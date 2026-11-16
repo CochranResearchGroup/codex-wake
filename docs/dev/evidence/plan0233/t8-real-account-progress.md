@@ -449,3 +449,21 @@ plaintext child notification and requires it to reach the request as explicitly
 untrusted user content. Exact local RED job `job-20261116T023456Z-f9a33f3ceba9`
 is pending; production source is unchanged while that failure is demonstrated.
 No further live call, login or refresh occurred. T8 and parent remain OPEN.
+
+
+The public continuation regression compiled and reproduced the exact unsupported
+history rejection in `job-20261116T023456Z-f9a33f3ceba9`. Native request conversion
+now admits only wholly plaintext agent messages, preserves sender and recipient,
+and labels the content explicitly untrusted at user role. Mixed plaintext and
+ciphertext messages remain rejected before HTTP; no provider-private data is
+forwarded. The focused API5/SSE4 checks pass in
+`job-20261116T023855Z-e409c6803175` (40.594s total,0.38s client execution). Unchanged
+Core12 results are reused; no Core/schema surface changed in this delta.
+
+Nativeee0e0b82ff88a3060d035782229931e8f9484ee9/tree
+034e4da995a9e0b062d09f89a58d8a8243ac49b7 has exact additive patch reconstruction
+and verified private bundle custody. The new source still needs its own package
+qualification. This is source acceptance, not repaired live-parent acceptance.
+Cumulative counters retain8/12 completed Grok responses,1/2 completed OpenAI worker
+responses plus the earlier failed HTTP400 attempt with unconfirmed usage,8/16
+tools and one official refresh. No historical unknown charge is zeroed.
