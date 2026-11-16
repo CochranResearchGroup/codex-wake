@@ -55,3 +55,13 @@ Self-review against base12345152: standards and spec pass for bounded command
 repair; terminal identity and deduplication use existing adapter validation.
 Original records remain byte-identical; unfinished and wrong-thread evidence
 remain held; replay reuses the bound receipt. No temporary DEBUG logging added.
+
+## Evidenced scope refinement
+
+One original peer reconciled live; readiness changed held to ready, no dispatch,
+original SHA256 unchanged. A bounded active-conversation pass inspected39 peers:
+9 more verified,30 unresolved, all30 original executables removed by upgrades.
+Expose explicit --read-codex-path using the existing qualified _peer_read_target
+mechanism. Red at CLI rejects the new argument; green must qualify ownership,
+mode/executable/absolute path and preserve saved targets. Existing unsafe-reader
+and wrong-identity holds remain intact. No automatic executable/account fallback.

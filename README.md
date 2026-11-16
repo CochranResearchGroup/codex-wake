@@ -254,7 +254,10 @@ codex-wake sessions close thread:THREAD_UUID
 terminal evidence. It saves a bound completion receipt that can clear
 `peer_history_reconciliation_required`, preserving the original wake record,
 deadline and acceptance. It never resubmits work. Unfinished or unavailable
-history remains unresolved; repeat with the same wake ID after recovery.
+history remains unresolved; repeat with the same wake ID after recovery. When
+the saved historical executable has been removed, select an owned, executable,
+non-writable-by-others reader with `--read-codex-path /absolute/current/codex`.
+This replaces only the observation transport; original targets remain intact.
 
 ### Choose an agent lifecycle operation
 

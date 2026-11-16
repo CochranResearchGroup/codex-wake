@@ -21,6 +21,7 @@ def add_native_parser(subparsers):
     commands = native.add_subparsers(dest='native_command', required=True)
     reconcile = commands.add_parser('reconcile', help='inspect native evidence without resubmitting')
     reconcile.add_argument('wake_id')
+    reconcile.add_argument('--read-codex-path', help='qualified read-only replacement for a removed historical executable; accepted completion only')
     migrate = commands.add_parser('migrate', help='inspect/promote earlier candidate native records without delivery')
     migrate.add_argument('wake_id')
     migrate.add_argument('--apply', action='store_true', help='save original and promote schema1 native record to schema4')
@@ -332,9 +333,9 @@ def reconcile_native(root, found, now, *, force=False, runtime_adapter: RuntimeA
     return DispatchResult('submitted', 'native acceptance reconciled')
 
 
-def reconcile_accepted_completion(root, record):
+def reconcile_accepted_completion(root, record, read_codex_path=None):
     """Inspect terminal history without changing accepted intent or submitting input."""
-    from .wake_mode_runtime import _terminal_evidence, _terminal_receipt
+    from .wake_mode_runtime import _peer_read_target, _terminal_evidence, _terminal_receipt
     if _terminal_receipt(root, record) is not None:
         return dict(state='resolved', reason='terminal_evidence_already_recorded')
     prompt = native_prompt(root, record)
@@ -342,7 +343,10 @@ def reconcile_accepted_completion(root, record):
     if expected and expected != hashlib.sha256(prompt.encode()).hexdigest():
         return dict(state='unresolved', reason='native_submission_payload_changed')
     try:
-        evidence, _ = native_evidence(record['target'], prompt)
+        target = record['target']
+        if read_codex_path is not None:
+            target = _peer_read_target(target, dict(target, codex_cmd=read_codex_path))
+        evidence, _ = native_evidence(target, prompt)
     except Exception:
         return dict(state='unresolved', reason='native_evidence_unavailable')
     if not _terminal_evidence(evidence):
@@ -369,7 +373,7 @@ def reconcile_command(args, root):
         if found.record.get('target', {}).get('transport') != 'native':
             raise WakeError('reconciliation requires a native wake')
         if found.record.get('native_delivery', {}).get('state') == 'accepted':
-            completion = reconcile_accepted_completion(root, found.record)
+            completion = reconcile_accepted_completion(root, found.record, getattr(args, 'read_codex_path', None))
             print(json.dumps(dict(wake_id=args.wake_id,
                 result='completion_reconciled' if completion['state'] == 'resolved' else 'skipped',
                 status=found.record['status'], native_delivery=found.record['native_delivery'],

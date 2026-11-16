@@ -417,9 +417,14 @@ class NativeDeliveryTests(unittest.TestCase):
             replace_record(root, found, record)
             original = all_records(root)[0].path.read_bytes()
             prompt = f"WAKE_TRIGGER_ID={record['id']}\nWAKE_TRIGGER_ROOT={root.resolve()}\nExecute the task"
+            reader = root / 'selected-reader'
+            reader.write_text('#!/bin/sh\nexit 1\n')
+            reader.chmod(0o700)
             observed_status = 'inProgress'
             observed_thread = record['target']['thread_id']
             def native(endpoint, codex, method, params, timeout):
+                if method != 'thread/read' or params.get('includeTurns') is not False:
+                    self.assertEqual(codex, str(reader))
                 if method == 'thread/queue/list':
                     return {'data': [], 'nextCursor': None}
                 if method == 'thread/read':
@@ -433,7 +438,11 @@ class NativeDeliveryTests(unittest.TestCase):
             with patch('codex_wake.native_protocol.native_request', side_effect=native), patch(
                     'codex_wake.native_delivery.native_request', side_effect=native):
                 self.assertEqual(registration_harness_readiness(root, current)['state'], 'held')
-                command = ['--wake-root', str(root), 'native', 'reconcile', record['id']]
+                command = ['--wake-root', str(root), 'native', 'reconcile', '--read-codex-path', str(reader), record['id']]
+                reader.chmod(0o777)
+                self.assertEqual(run(command), 0)
+                self.assertEqual(registration_harness_readiness(root, current)['state'], 'held')
+                reader.chmod(0o700)
                 self.assertEqual(run(command), 0)
                 self.assertEqual(registration_harness_readiness(root, current)['state'], 'held')
                 observed_status = 'completed'
