@@ -156,7 +156,8 @@ class AgentRefreshTests(unittest.TestCase):
 
     def refresh_scenario(self, *, draft, stale_mcp=False, loss=None, expire_after_stop=False, unapproved_probe=False, advancing_usage=False, recipient_guard=None, goal_change=None, mcp_ready=False, rollback_requested=False, rollback_absence=False,operation='refresh', budget=False, session_limit=2000, twice=False, original_status='paused', resume_readback_loss=False, client_idle=False, client_idle_stop=0, managed_default=False, stale_catalog=False, managed_guard='', background=False):
         thread_id = '00000000-0000-7000-8000-000000000158'
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(
+                os.environ, {'XDG_CONFIG_HOME': str(Path(tmp) / 'config')}):
             root = Path(tmp)
             client_script = root / 'codex'
             client_script.write_text(f'#!{sys.executable}\nimport ctypes,time\n'
