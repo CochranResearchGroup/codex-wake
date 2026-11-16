@@ -199,11 +199,14 @@ def collect(root,identifier):
                             answer=dict(text=raw[:32768].decode(errors='replace'),truncated=final_truncated or len(raw)>32768,source='native_turn_events',turn_id=turn_id))
                         store.update(identifier,status='completed');runtime._save(record);return
         except Exception as error:
-            store.update(identifier,status='uncertain' if transmitted else 'failed',reason=getattr(error,'code','native_event_connection_lost'))
             record=runtime._load(identifier)
             if record['phase']!='terminal':
                 record.update(phase='uncertain' if transmitted else 'terminal',execution='unknown' if transmitted else 'failed',delivery='uncertain' if transmitted else 'not_submitted',reason=getattr(error,'code','native_event_connection_lost'))
                 runtime._save(record)
+            # Publish collector failure only after the operation journal retains
+            # definitive pre-submit refusal. The dispatcher may return as soon
+            # as it sees this status; publishing first races its uncertain save.
+            store.update(identifier,status='uncertain' if transmitted else 'failed',reason=getattr(error,'code','native_event_connection_lost'))
 
 
 if __name__=='__main__':

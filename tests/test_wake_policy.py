@@ -14,7 +14,7 @@ from codex_wake.injector import dispatch_firing_record
 from codex_wake.runtime_delivery import RuntimeRecipient, RuntimeObservation, RuntimeSubmission, RuntimeReconciliation
 
 THREAD = '01a1227e-a041-7b72-9c36-18349e7dd22c'
-CLOCK = {'utc': None, 'counter': {'epoch': 'boot-a', 'counter': 1000, 'frequency': 1000, 'rate_ppm': 0}}
+CLOCK = {'utc': {'status':'network', 'sources':['fixture-a','fixture-b'], 'lower':1800000000, 'upper':1800000000}, 'counter': {'epoch': 'boot-a', 'counter': 1000, 'frequency': 1000, 'rate_ppm': 0}}
 
 
 class WakePolicyTests(unittest.TestCase):
@@ -77,10 +77,10 @@ class WakePolicyTests(unittest.TestCase):
                 return RuntimeRecipient('codex', THREAD, target)
             def observe(self, recipient):
                 return RuntimeObservation('ready', 'fixture_idle', {})
-            def submit(self, recipient, prompt):
+            def submit_bounded(self, recipient, prompt, envelope):
                 self.submits += 1
                 return RuntimeSubmission('uncertain', reason='response_lost')
-            def reconcile(self, recipient, prompt):
+            def reconcile_bounded(self, recipient, prompt, envelope):
                 self.reconciles += 1
                 return RuntimeReconciliation(reason='not_yet_observed')
         with tempfile.TemporaryDirectory() as temporary:
@@ -135,7 +135,7 @@ class WakePolicyTests(unittest.TestCase):
                 return RuntimeRecipient('codex', THREAD, target)
             def observe(self, recipient):
                 return RuntimeObservation('ready', 'fixture_loaded_without_tab_evidence', {})
-            def submit(self, recipient, prompt):
+            def submit_bounded(self, recipient, prompt, envelope):
                 self.submits += 1
                 return RuntimeSubmission('accepted', receipt_id='00000000-0000-7000-8000-000000000318',
                                          evidence_kind='native_queue_acceptance')
