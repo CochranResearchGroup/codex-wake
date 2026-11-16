@@ -10368,3 +10368,18 @@ Preserve original failure, no quarantine or full-green claim. Further diagnosis
 requires the actual assertion trace from a bounded reproducing selection; do
 not repeat the already-passing prefix or enlarge into a duplicate full run.
 #695 remains OPEN; installed qualification gates unchanged.
+
+
+## Turn | 2026-11-16 | #695 installed private-client ownership
+
+Exact package4 SHA44f25dea under UID1017 through the installed pinned launcher
+with registered private backend: first real TUI holds account ownership; second
+launch exits2, identifies recorded live owner PID/channel and provides Close
+existing client plus fuser recovery instructions. Candidate native process hash
+verified. One Ctrl-C closes owner normally; fresh real TUI opens same store
+under new owner, then exits normally. No model requests. Initial qualifier
+failed only on its unnecessary second Ctrl-C after pane exit; retain that
+receipt. V2 passes; scoped final processes0; working PID1879/hash unchanged.
+Curated package4 partial evidence updated. This qualifies normal-exit private
+lock recovery, not forced-crash handling, default/shared histories or reconnect.
+No source behavior changed; #695 remains OPEN and not installable.
