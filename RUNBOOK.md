@@ -10102,3 +10102,11 @@ time; no production shared-refresh change. Original failure retained. Both runbo
 intents survived a docs-only rebase over the concurrent P233 deployment closeout;
 source and tests were byte-identical immediately after that rebase. Post-correction
 validation pending. No paid hosted checks were requested.
+
+The second Python3.11 run passed65/66 and failed the policy generation check.
+A focused actual-worker probe identified paused/clock_regressed: production safety
+behavior was correct. Preserve it in the test rather than assuming the policy
+always stays enabled; normal ticks retain generation, clock-regression pauses
+advance it once. Policy8 checks PASS on both versions; shared-refresh14 checks
+PASS on3.12 after its clock-injection repair. Original failures remain retained.
+This is affected validation with focused corrections, not a clean full matrix.

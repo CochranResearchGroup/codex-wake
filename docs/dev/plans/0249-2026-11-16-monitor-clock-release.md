@@ -9,8 +9,9 @@ Parent diagnostic: MONITOR-CLOCK-01, independent of unfinished native expiry #69
 Clock repair carried forward from9a670307 onto current main, retaining the Grok
 release. One bounded two-axis source review reports Standards0/Spec0 findings.
 Clock source previously passed44 affected Python3.11 and16 selected Python3.12
-checks and real configured-clock private-owner acceptance. Release validation,
-PR merge and exact installed-wheel qualification remain pending.
+checks and real configured-clock private-owner acceptance. Clock-only release validation covers66 affected checks on both supported Python
+versions, with original failures and focused corrections retained. PR704 merge
+and exact installed-wheel qualification remain pending.
 
 ## Scope and acceptance
 

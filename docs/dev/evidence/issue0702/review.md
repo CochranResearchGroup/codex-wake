@@ -18,8 +18,14 @@ summary, routing and all four failure-group modules seen in the separate #695
 full run. Initial Python3.11 selection failed one existing shared-refresh expiry test
 (66 tests,121.670s): its injected trusted_upper followed guest wall steps.
 The test now advances its original UTC anchor by monotonic elapsed time; this
-preserves the original two-second expiry and independent watcher. Post-correction
-Python3.11 selection and Python3.12 shared-refresh checks are pending. RuffF821/F822/F823, policy wiring,
+preserves the original two-second expiry and independent watcher. Post-correction Python3.12 shared-refresh14 PASS22.175s. Python3.11
+66-test rerun then failed only the monitor-policy generation assertion; a focused
+probe proved a legitimate paused/clock_regressed outcome. Preserve this guard:
+the test now checks unchanged generation for normal enabled ticks and one
+generation increment for a clock-regression safety pause. Policy8 checks pass
+on Python3.11 (8.104s) and3.12 (7.758s). The other65 checks passed in the preceding
+Python3.11 run86.341s. Both failed runs are retained; no claim of one clean full
+Python3.11 matrix. All observed failures have focused passing corrections. RuffF821/F822/F823, policy wiring,
 compileall and diff checks pass. Initial wheel build lacked the build module;
 the private builder was repaired without changing runtime dependencies.
 
