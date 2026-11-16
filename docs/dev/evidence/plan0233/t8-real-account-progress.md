@@ -334,3 +334,84 @@ logout occurred. The budget receipt retains4/12 Grok responses and4/16 tools use
 Continuation requires explicit operator direction under the remaining allocation;
 no automatic renewal/reset is scheduled. T8 and parent remain OPEN,7/8 children
 closed, broad review/remediation counters0.
+
+
+## Continuing qualification: real mixed-worker defect found
+
+The operator explicitly removed repeated time-window approval gates and directed
+qualification to continue. Original numeric ceilings, cumulative known spend,
+and every earlier unknown history remain retained. This supersedes the earlier
+15-minute continuation hold; working-profile installation remains outside scope.
+
+The official credential had expired. The approved single official metadata
+refresh passed, retained the exact account binding, and a no-refresh private read
+confirmed a current bearer. Fresh official model metadata was read. The prior
+coding observation was explicitly re-admitted for the unchanged exact native
+package/account with its original observation time; this is not a new coding run.
+
+The corrected persistent native WebSocket used `config.inference_selection`.
+A real Grok parent spawned an OpenAI worker with normal `spawn_agent`, preserving
+provider and parent/session attribution. The child failed: its plain task text
+was wrapped in an `encrypted_content` item, and OpenAI returned HTTP400
+`invalid_encrypted_content`. The parent then held further work with
+`provider_request_unobserved`. No uncertain request was replayed.
+
+The Grok stream normalizer omits `encrypted_function_args`; the existing
+collaboration router requires an explicitly empty list to identify plaintext
+message arguments. A focused regression now requires that marker through the
+public Grok client. Production source is unchanged pending the local failure.
+The exact retained CargoSignal job is `job-20261116T013102Z-632a21f13a16`, with
+`dev-small`, two jobs, offline/locked inputs and zero retries. It currently waits
+for another task's existing build to release the shared Cargo artifact lock;
+no duplicate build was launched.
+
+The new root has one known response of63315 cache-inclusive tokens. Combined
+with the earlier coding run this is103870 known tokens, **not** a qualified
+worker-tree total. One OpenAI child request failed without a numeric completion.
+Wake's public tree observer correctly reports unknown/null with
+`provider_completion_unconfirmed`; earlier unknown usage remains retained.
+T8 and parent stay OPEN,7/8 children closed, broad review/remediation0.
+
+
+The regression compiled and failed on the expected `Null` versus `Array []`
+marker assertion (0.09s test execution). A one-field Grok-only fix now supplies
+`encrypted_function_args: []`. The next exact job,
+`job-20261116T013931Z-cd82e54c799c`, has passed all five Grok API client checks
+and four SSE checks; its Core worker/OpenAI safety selection remains building.
+The existing worker test now also covers MultiAgentV2 and inspects the actual
+OpenAI request for plaintext task content. This is pending validation, not a
+passing live worker claim. A persistent completion wake is verified armed with
+both native harness and monitor ready. No further provider requests were made.
+
+
+On completion, `013931` reported API5/SSE4 and11 of12 Core checks passing.
+The new MultiAgentV2 assertion expected a bare task string, but native
+`AgentMessage::into_communication` correctly renders one attributed plaintext
+NEW_TASK envelope with task name, sender and payload. This is an assertion
+error, not evidence of another product defect. The assertion now expects that
+exact envelope and still rejects encrypted content. Production code is unchanged
+from the one-field fix. The retained follow-up `job-20261116T015131Z-ae24ab977b17`
+runs the same12 Core checks with zero retries and a new synthetic-history capture
+directory. Its result remains pending; no live request has been repeated.
+
+
+The corrected run passed all12 Core checks in4.466s (730.153s total including
+compilation). Together with unchanged API5/SSE4 results this validates21 focused
+checks. Actual captured native histories join through Wake at285 tokens for
+Grok→OpenAI,405 for inherited Grok and285 for MultiAgentV2 Grok→OpenAI; each has
+an actual child numeric record. Every adverse missing-child copy returns
+unknown/null. These are local synthetic-provider checks, not live acceptance.
+
+Native source23bc20474a24e7afbb59a02e0e070017ef58080a, tree
+3f0e6e7e99b0a463e466f744db396e3b80e03f2c is preserved in the additive full-index
+zero-context patch and source manifest. Applying to exact212d reconstructs that
+tree; the private incremental bundle verifies. Stable rustfmt followed validation
+and made formatting-only changes; its existing nightly imports warnings remain.
+No public schema shape changed. The previous212d package remains preserved and
+qualified for its source; the new source requires its own exact package gates.
+
+The live driver also retained a32k fixture context override although actual
+metadata admits256k and its first request reported62556 input tokens. The next
+disposable driver will use the admitted context window; this is a driver
+correction, not an established cause of the earlier held parent or a production
+fix. No failed inference is replayed. T8 and parent remain OPEN.
