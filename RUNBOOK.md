@@ -10350,3 +10350,21 @@ and musl hash unchanged. Curated package4-partial-acceptance.json retains all
 remaining gates. Default/shared layouts, private-owner locks, uninterrupted
 reconnect, production cooperation, suspend boundary and full Python validation
 remain unqualified. Production bounded adapter remains disabled; #695 OPEN.
+
+
+## Turn | 2026-11-16 | #695 unresolved preflight focused diagnosis
+
+At d06c7ae4 the private diagnosing-bugs replay runs only
+HandoffPreflightTests.scenario(bad_review='test_count_only'), three bounded
+repetitions with immediate assertion traceback reporting. Python3.11 passes
+all three,8.479s, with original validation config/state roots and explicit
+Stable Time disable for this isolated synthetic protocol test. No full suite
+was run. Retained original stderr has WebSocket1011 connection errors before
+the failed subtest, but those same errors occur in these passing replays; they
+are not a discriminating signal or an established cause. Original matrix lacks
+the assertion traceback because it timed out before unittest's final summary.
+No reliable minimal red loop yet; no production or test implementation change.
+Preserve original failure, no quarantine or full-green claim. Further diagnosis
+requires the actual assertion trace from a bounded reproducing selection; do
+not repeat the already-passing prefix or enlarge into a duplicate full run.
+#695 remains OPEN; installed qualification gates unchanged.
