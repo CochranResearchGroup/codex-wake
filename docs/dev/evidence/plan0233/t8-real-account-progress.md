@@ -506,3 +506,17 @@ worker responses plus the earlier failed HTTP400 attempt with unknown usage,
 10/16 tools and one refresh. The known numeric sum550569 is not a qualified
 aggregate campaign total. T8 and parent remain OPEN,7/8 children closed, with
 broad review/remediation counters0.
+
+
+The focused portable-worker regression passed in
+`job-20261116T032223Z-2713407d75fe` (784.095s including compilation,0.00s test).
+Native1a2fb1df4cefdef9782cd82d8cceef8c70e1c05c/tree
+fc3e28d007f1b9925b3f768d3e6d894f491d2ec3 retains attributed plaintext worker
+notifications as bounded untrusted recent context, preserves constraints through
+a roundtrip and rejects ciphertext. One accidentally duplicated immutable-context
+assertion block was removed after GREEN; the same assertions remain once and
+production did not change after validation. Exact additive patch reconstruction
+and the private bundle verify. No public schema shape changed.
+The source fix awaits one causal exact package/UID1017 qualification before the
+remaining live handoff and Stop checks. Actual mixed-worker success and all older
+unknown histories remain preserved. No new provider request was issued.

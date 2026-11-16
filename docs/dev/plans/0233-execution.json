@@ -297,14 +297,14 @@
       ],
       "checkout_custody": "Worker explicitly returned Cargo/cache/artifact custody; primary owns current source diagnosis and remaining live qualification. Existing source checkouts retained.",
       "worker_wake_base": "1f8fd14b33faad7e145919a6861daa5a36bc2b16",
-      "progress": "Exactee0e/99447 packagefiveUID1017gatesPASS/freshsameboot0->0/allhashesverified; initialfailedstartsocketpathfixturefailure retained/corrected. ActualparentMIXED_WORKER_OK+OpenAIchildOPENAI_WORKER_OK; publicWakequalified223610cacheinclusive/4actualcharges. PublichandofflocallyheldoncompletedplaintextAgentMessage; zero provider I/O. Minimalportablecontextarm+onefocusedCoreunitrunningjob032223, useactualpublicRED instead of redundantcompile(031554 stoppedwhilelockwaiting143). Nativeee0e+oneknownfiledirty, no acceptedfuturepatch/packageyet. CountsGrok11/12/OpenAIcompleted2/2+olderfailed400unknown/tools10/16/refresh1; known550569notqualifiedaggregatetotal. T8/parentOPEN7of8; review/remediation0.",
-      "native_result_sha": "ee0e0b82ff88a3060d035782229931e8f9484ee9",
+      "progress": "Actual mixed-worker223610PASS retained. Actual public handoff RED unsupportedplaintextnotification proved beforepaidI/O. Minimalboundedportablecontextarm+oneCoreunitGREEN032223PASS784.095s/0stest, duplicatedassertioncleanup only. Native1a2fb1 sourcecustodyexact; causalpackagepending. No newlivecalls. CountersunchangedGrok11/12/OAIcompleted2/2+olderfailed400unknown/tools10/16/refresh1; T8/parentOPEN7of8 review/remediation0.",
+      "native_result_sha": "1a2fb1df4cefdef9782cd82d8cceef8c70e1c05c",
       "package_manifest": "runtime/grok-native-233/t8-agent-notification-package-manifest.json",
       "package_entrypoint_sha256": "99447ea05fae83235988bbe37c11689231a5c061ff5b1464751f2c0b039ed03e",
       "local_acceptance": "docs/dev/evidence/plan0233/t8-isolated-package-acceptance.md",
       "primary_gate": "docs/dev/evidence/plan0233/t8-real-account-gate.md",
       "validation": "Complete5exec+metadata/current4firstpartybuild PASS1048.585s; UID1017 upgrade/rollback/history/multiclient63.880s, failed-start repair/rollback64.439s, saved-history14.222s, private-owner7.793s PASS; installed auth/catalog13+usage16 PASS8.016s; all336 module hashes match; installed candidate+rollback all6filehashes verified; owned0/preexisting13 preserved.",
-      "package_state": "agent_notification_package_qualified_real_mixed_worker_pass_portable_handoff_fix_pending",
+      "package_state": "portable_worker_source_validated_causal_package_pending",
       "wake_result_sha": "2d8a4a390063d5b42fff7cc0c571c5bc92fb5421",
       "live_progress": "docs/dev/evidence/plan0233/t8-real-account-progress.md",
       "diagnostic_source_manifest": "runtime/grok-native-233/t8-source-manifest.json",
@@ -312,7 +312,8 @@
       "usage_routing_source_manifest": "runtime/grok-native-233/t8-usage-routing-source-manifest.json",
       "plaintext_message_source_manifest": "runtime/grok-native-233/t8-plaintext-message-source-manifest.json",
       "previous_package_native_source": "212d798546aabffe65129464a61905e810fed248",
-      "agent_notification_source_manifest": "runtime/grok-native-233/t8-agent-notification-source-manifest.json"
+      "agent_notification_source_manifest": "runtime/grok-native-233/t8-agent-notification-source-manifest.json",
+      "portable_worker_source_manifest": "runtime/grok-native-233/t8-portable-worker-source-manifest.json"
     }
   ],
   "initial_ready": [
