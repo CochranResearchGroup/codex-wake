@@ -1,7 +1,7 @@
 # Accepted wake completion reconciliation
 
-State: OPEN
-Work item: LOCAL-WAKE-ACCEPTED-RECONCILIATION (IN_PROGRESS)
+State: CLOSED (source repair and bounded live evidence repair; integration/deployment pending)
+Work item: LOCAL-WAKE-ACCEPTED-RECONCILIATION (DONE for this bounded packet)
 Owner: root / ecochran76
 Priority: P1
 Branch: fix/accepted-wake-reconciliation
@@ -65,3 +65,31 @@ Expose explicit --read-codex-path using the existing qualified _peer_read_target
 mechanism. Red at CLI rejects the new argument; green must qualify ownership,
 mode/executable/absolute path and preserve saved targets. Existing unsafe-reader
 and wrong-identity holds remain intact. No automatic executable/account fallback.
+
+## Final acceptance and handoff
+
+PR703 preserves source checkpoints002419d1 and83f67dbd. Final focused selection:
+33 tests PASS8.721s on installed dev39 Python3.12 with candidate source via
+PYTHONPATH=src:tests; pinned ruff0.14.2 F821/F822/F823, policy wiring, compile and
+whitespace PASS. No retries erased actual failures; environment dependency and
+red regressions remain recorded. Self-review: Standards pass against repo policy;
+Spec pass against this plan; no unresolved accepted findings.
+
+Live repair via candidate CLI (no package installation): one exact historical
+peer cleared two pending wake readiness checks, then9 of39 peers in a second
+conversation were verified with original executables. The other30 had removed
+historical pins; all30 subsequently reconciled via the explicitly selected,
+qualified current read-only launcher in91.974s. All40 original record hashes
+remained unchanged, zero input/dispatch attempted. Second conversation readiness
+changed held to ready. Original TTLs, grants, scheduling and acceptance intact.
+This establishes peer readiness, not future trigger delivery. One separately
+observed legacy relative-origin-unanchored wake is outside this repair.
+
+Private per-record receipts and debug harnesses remain in user state, outside
+Git. Installed CLI/supervisor remain dev39. No restart, bulk413-record migration,
+merge, release or installation. PR703 is the bounded review/integration handoff;
+exact candidate qualification and installation remain separate future work.
+Task checkout retires after final pushed-ref verification. Memory disposition
+unavailable: Graphiti is healthy, but reviewed project-cloud routing was not
+resolved by bounded atlas discovery (returned another project's cloud); no
+cross-project memory write attempted.
