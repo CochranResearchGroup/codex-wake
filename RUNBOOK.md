@@ -10108,3 +10108,8 @@ was canceled after direct result reconciliation, with cancellation confirmed.
 Temporary clock checkout exists only to preserve that frozen run and must be
 removed after integration and verified remote custody. Formal #695 review is not
 repeated. Clock transport/separate-UID acceptance gates and #695 OPEN remain.
+
+Clock repair commit9a670307 is fast-forwarded into feat/native-expiry-695 and
+verified at the matching remote ref. The temporary checkout was removed normally
+after accounting for disposable caches. MONITOR-CLOCK-01 source repair is DONE;
+#695 remains OPEN with its retained full-suite and native qualification gates.

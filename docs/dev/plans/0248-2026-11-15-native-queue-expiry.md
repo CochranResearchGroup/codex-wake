@@ -102,9 +102,10 @@ Memory writes forbidden absent explicit user request.
 
 ## MONITOR-CLOCK-01 | Stable Time monitor freshness
 
-Owner root; IN_PROGRESS, same #695 implementation WIP. A temporary continuation
-checkout isolated this repair while the original source was frozen under matrix
-v3; fold it into the existing lane and remove it after verified source custody.
+Owner root; DONE for source repair and bounded acceptance, parent #695 OPEN.
+Commit9a670307 is integrated into the existing lane with matching remote custody.
+The temporary continuation checkout used during frozen matrix v3 was removed
+without force after verification. No installed-service or native acceptance claim.
 
 Seam: public TabMonitor refresh/status across independently constructed readers,
 plus the actual private background owner with the configured real clock. This
