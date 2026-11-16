@@ -415,3 +415,37 @@ metadata admits256k and its first request reported62556 input tokens. The next
 disposable driver will use the admitted context window; this is a driver
 correction, not an established cause of the earlier held parent or a production
 fix. No failed inference is replayed. T8 and parent remain OPEN.
+
+
+## Exact plaintext package accepted; real OpenAI child completes
+
+All five package/runtime jobs passed for native23bc/tree3f0e and entrypoint
+e9943677786cbb80a149ef22003bdbfbae105f6423f8b7db7d5656d1b81fe54d.
+Primary independently checked six source package files,30 UID1017 candidate,
+installed and rollback files, two runtime receipt hashes and all five terminal
+job receipts. Installed upgrade, rollback, saved history, multi-client/ownership
+and failed-start gates pass. Existing Wake runtime/wheel qualification is reused.
+Worker leases are explicitly returned. No working installation was changed.
+
+The historical13-process snapshot cannot serve as a current census: all13
+recorded start times exceed current boot uptime and their PIDs are absent.
+Primary retains that gap and does not claim preservation across reboot. Fresh
+UID1017 census is empty, with no owned or unattributed processes; current runtime
+case evidence remains valid. The worker's original held receipt is unchanged.
+
+Using the exact new package, current no-refresh auth and the admitted256k context
+window, a real Grok parent spawned a normal OpenAI worker. The child completed
+`OPENAI_WORKER_OK` with its own numeric usage record17764. Three Grok responses
+reported67819,68720 and68786 tokens. The parent made two malformed float timeout
+wait calls and then held upon intake of the child's plaintext completion message.
+Grok request conversion currently lacks `ResponseItem::AgentMessage` handling;
+this is independently visible in source. No inference was replayed. The public
+Wake observer retains unknown/null `provider_completion_unconfirmed` for this
+tree. Known numeric records sum326959 across runs, not a qualified full total;
+older unknown histories and original cumulative counts remain retained.
+
+The existing public Grok client continuation test now includes an attributed
+plaintext child notification and requires it to reach the request as explicitly
+untrusted user content. Exact local RED job `job-20261116T023456Z-f9a33f3ceba9`
+is pending; production source is unchanged while that failure is demonstrated.
+No further live call, login or refresh occurred. T8 and parent remain OPEN.
