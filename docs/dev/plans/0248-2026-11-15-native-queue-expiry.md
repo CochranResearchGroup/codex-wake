@@ -164,3 +164,30 @@ against d32063f96c and a private incremental Git bundle. Native server handler
 build is running through Cargo Signal (not yet passing). Session-only build wake
 registration was held with session_owner_unverified; no unattended continuation
 is armed and no lifetime fallback was selected. Working runtime unchanged.
+
+## Server build and timing boundary checkpoint
+
+Native checkpoint23b3ff6af3 fixes the app-server steering match for
+QueueAdmissionHeld. Server-build1 failed compilation on that missing exhaustive
+case; server-build2 passed (exit0,80.095s). The only subsequent change is rustfmt
+formatting of that match arm. Latest queue regression runs separately after the
+microsecond/API changes; do not reuse the earlier queue20 result as proof of
+this exact source. Private receipt root remains native-expiry-0248.
+
+The Stable Time helper currently advances bounds to its own Windows-QPC
+observation, but native has not qualified elapsed transport between that sample
+and admission. Tokio's two-second timeout alone does not prove a suspend-safe
+bound. Production activation remains forbidden until this gap is resolved.
+The operator has been asked whether expiry governs atomic queue selection or
+must be rechecked before model execution after a suspension. No answer has
+been assumed, and the existing conservative contract remains authoritative.
+
+Read-only delegated discovery identified that permission_wake already persists
+a submission UUID before I/O but does not forward it or the original deadline;
+ModeRuntimeAdapter's background turn/start path bypasses bounded queueing.
+Shared adoption must address both and distinguish pending native ownership from
+admission, execution and acknowledgment. Worker handles expiry_wake_contract
+and expiry_clock_bounds returned source-grounded recommendations; neither made
+edits, runtime effects or a formal review. Source and package qualification,
+shared adoption, the requested formal review/TDD findings pass and issue closure
+remain incomplete. No working runtime changed.

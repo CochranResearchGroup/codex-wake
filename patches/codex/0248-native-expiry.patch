@@ -8892,6 +8892,20 @@ index e7a4de7624..8bf712f020 100644
 +    }
 +    Ok(response)
 +}
+diff --git a/codex-rs/app-server/src/request_processors/turn_processor.rs b/codex-rs/app-server/src/request_processors/turn_processor.rs
+index 6a69cc899d..7ff130e470 100644
+--- a/codex-rs/app-server/src/request_processors/turn_processor.rs
++++ b/codex-rs/app-server/src/request_processors/turn_processor.rs
+@@ -1172,6 +1172,9 @@ impl TurnRequestProcessor {
+             SteerSubmission::Steered { turn_id } => turn_id,
+             SteerSubmission::NotSubmitted { reason } => {
+                 let (message, data, error_type) = match reason {
++                    NotSubmittedReason::QueueAdmissionHeld => {
++                        ("queue admission held".to_string(), None, None)
++                    }
+                     NotSubmittedReason::ServerDraining => {
+                         return Err(crate::error_code::server_draining_error());
+                     }
 diff --git a/codex-rs/core/src/session/turn_input.rs b/codex-rs/core/src/session/turn_input.rs
 index fb7575936d..e2fae161f2 100644
 --- a/codex-rs/core/src/session/turn_input.rs
