@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 from codex_wake.cli import run
 from codex_wake.mcp_server import CommandRunner, SPECS
@@ -201,14 +202,16 @@ class HarnessCallerTests(unittest.TestCase):
                 idempotency_key='future-monitor-fixture', session_mode='background', wake_lifetime='persistent')
             write_monitor_health(wake_root=root, source='qualification-fixture', mode='once')
             with patch('codex_wake.sessions.observe', return_value={'complete':False,'sessions':[]}), patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
-                    'codex_wake.native_clock.snapshot', return_value=clock):
+                    'codex_wake.native_clock.snapshot', return_value=clock), patch(
+                    'codex_wake.signal_records.probe_managed_reader_capability', return_value=SimpleNamespace(schema_versions=[8])), patch(
+                    'codex_wake.wake_mode_runtime.registration_harness_readiness', return_value={'state':'ready','evidence':'synthetic fixture'}):
                 first, failed = runner.call('wake_native_after', body, native_context=META)
                 self.assertFalse(failed, first)
                 self.assertFalse(first['armed'], 'a one-shot observation is not durable monitor ownership')
                 write_monitor_health(wake_root=root, source='qualification-fixture', mode='loop')
                 same, failed = runner.call('wake_native_after', body, native_context=META)
                 self.assertFalse(failed, same)
-            self.assertTrue(same['armed'])
+            self.assertTrue(same['armed'],same)
             self.assertTrue(same['deduplicated'])
             self.assertEqual(same['id'], first['id'])
             self.assertEqual(same['due_at'], first['due_at'])

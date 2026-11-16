@@ -10028,3 +10028,13 @@ SessionInputs.queue is separate. Run01 timing failure preserved, minimal runner
 correction and fresh run02 passed. Focused lint/syntax/help/policy/diff PASS.
 Both owned terminals and scratch directories retired; independent process/config/
 native-hash audit PASS. Evidence0247. No deployment. Memory disposition forbidden.
+
+## Native independent-policy renewal diagnosis | 2026-11-16
+
+Work item native-explicit-policy-renewal: persistent monitor's legacy three-route
+contract cannot be expressed by mandatory three-mode MCP schema. Isolated actual
+installed constructor RED; public caller regression RED then GREEN with native
+explicit_policy selector requiring explicit lifetime/startup/routes. Preserve old
+fingerprint and reject lifecycle removal/denied routes. No production intent,
+permission, service or daemon changes. Source note records tests and rollout gate;
+working-account installation/next-two wake restoration remains unverified.

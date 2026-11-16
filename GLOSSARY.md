@@ -526,3 +526,10 @@ rechecked at dispatch. Unreconciled prior submissions hold admission.
 The current intent's qualified CLI used only to observe an exact old native
 submission when its saved executable is gone. It never replaces the original
 binding, grants authority, or authorizes submission replay.
+
+**Explicit policy registration**:
+The native registration selector `explicit_policy` requires an explicit wake
+lifetime, recipient-startup policy and ordered delivery routes. It selects the
+existing independent policy contract without introducing a session lifecycle
+mode into the persisted target. It can preserve legacy retry identity, but cannot
+remove an existing lifecycle binding or bypass identity and route permissions.
