@@ -1,9 +1,20 @@
 # 0248 — Native bounded queue expiry (#695)
 
-State ACTIVE. Owner root/ecochran76; WIP1. Branch feat/native-expiry-695.
+State: OPEN
+Owner root/ecochran76; WIP1. Branch feat/native-expiry-695.
 Parent #610. Preserve unrelated work and the working daemon. No working-host
 native upgrade until exact complete package and rollback pass separate-UID
 qualification and applicable installation authorization is established.
+
+## Current State
+
+Native final-send/quarantine implementation has21 passing queue tests and an
+assembled complete package, but the single review's authentication-retry finding
+still blocks acceptance. The unused clockless admission path is removed with14
+state tests passing. Shared Wake adapter source is implemented; full local Python
+validation exposed planning metadata and runtime/control failures under repair.
+Real test-user Stable Time enrollment awaits the explicit credential-policy
+exception; time-transport qualification and working-host activation remain closed.
 
 ## Scope and contract
 

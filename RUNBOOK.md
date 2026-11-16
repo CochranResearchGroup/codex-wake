@@ -10043,3 +10043,18 @@ The separate test user's stale clock fixture endpoint correctly holds; dedicated
 real consumer and sample-to-native elapsed qualification remain unresolved.
 Shared Wake adapter implementation continues in its bounded worker. #695 stays
 OPEN; no working daemon change, deployment or bounded queue activation occurred.
+
+
+## Turn | 2026-11-15 | #695 review and local-validation remediation
+
+[Plan0248](docs/dev/plans/0248-2026-11-15-native-queue-expiry.md) remains OPEN.
+The single two-axis review accepted S-1 (unused clockless selection API) and
+F-SPEC-01 (authentication recovery can reuse an earlier time decision). One TDD
+remediation pass is active; no repeated broad review. Full Python3.12 validation
+ran2661 tests and failed17/19 (one skip); complete raw failure evidence retained.
+The planning auditor also found13 already-completed historical plans and this
+active plan used unrecognized state headers. Normalize only their header syntax,
+retaining bounded completion notes and unresolved caveats; this does not
+requalify earlier runtime claims. The before-audit lists all14 exact errors.
+Runtime/control regressions and release prerequisites remain under focused repair.
+No installed service or production clock credential changed.
