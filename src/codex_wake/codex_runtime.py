@@ -144,6 +144,11 @@ class CodexRuntimeAdapter:
             return RuntimeReconciliation(None, 'bounded_native_admitted_execution_unconfirmed')
         return exact
 
+    def cancel_bounded(self, recipient, prompt, envelope, queue_id=None):
+        if self._bounded_adapter is None:
+            return RuntimeReconciliation(None, 'bounded_native_backend_not_qualified')
+        return self._bounded_adapter.cancel_bounded(recipient, prompt, envelope, queue_id)
+
     def submit(self, recipient: RuntimeRecipient, prompt: str) -> RuntimeSubmission:
         if self.busy_policy != "wait":
             return RuntimeSubmission("not_sent", reason="busy_policy_unsupported", pre_io=True)
