@@ -8,19 +8,26 @@ qualification and applicable installation authorization is established.
 
 ## Current State
 
-Native075639f50a retains bounded queue enforcement and adds conservative local
+Native `075639f50a` retains bounded queue enforcement and adds conservative local
 package replacement: an identical full package is pinned without restarting or
 retargeting the running daemon; a different running package requires explicit
 checkpoint and stop. Two real UID1017 reproductions established unconditional
 force-stop, including same-binary reinstall; the managed-PID regression is red
-before the fix, then green, with all8 preparation controls passing.
-Package4 assembly and original installed updater reproduction remain pending.
+before the fix, then green, with all 8 preparation controls passing.
+Package 4 assembled in 1432.524 seconds, with all 6 hashes verified under UID1017. Both
+original live updater reproductions pass: different-package refusal and identical-
+package pinning preserve the active turn, exact PID and selection. The exact
+package also passes the actual launcher and real-clock queue/restart journey
+in 51.626 seconds; final case-owned processes: 0. See the
+[partial acceptance receipt](../evidence/issue0695/package4-partial-acceptance.json).
 The production restart path and cooperative recovery protocol are not qualified.
 
-Package3/db4dcfc839 passed real UID1017 Stable Time expiry/cancellation/control,
+Packages 3 (`db4dcfc839`) and 4 (`075639f50a`) passed real UID1017 Stable Time
+expiry/cancellation/control,
 unknown-clock hold and original deadline/client identity after restart. Expired
 and canceled inputs never reached model/history; controls did. All case-owned
-processes stopped. This does not qualify package4 or arbitrary suspend/send delay.
+processes stopped. This does not qualify arbitrary suspend/send delay or the
+remaining upgrade gates.
 The approved read-only clock enrollment and pinned helper remain unchanged.
 Production bounded Wake delivery stays refused; shared native cancellation and
 remaining installed preparation/send, ownership, failed-start and rollback gates
@@ -28,7 +35,14 @@ remain open. One formal review and TDD findings pass are retained, not repeated.
 
 Full matrixv4 atWakeaf1c8dde exceeded2400seconds onPython3.11; four assertions
 failed before timeout, andPython3.12 did not start. Exact orphan unittest child
-was terminated and absence verified. Retain all failures; no full-green claim.
+was terminated and absence verified. Focused reproduction confirmed stale command
+coverage, a malformed CLOSED annotation in the peer plan header, and refresh tests
+reading operator wake roots through inherited XDG_CONFIG_HOME. Generated coverage
+and the deterministic header are repaired; refresh tests now isolate their config,
+with29 controls passing onPython3.11 and36 affected module checks onPython3.12.
+The original preflight subcase passes alone and its51-test module passes145.032s,
+but its earlier full-suite failure remains unexplained and is not erased.
+Retain all failures; no full-green claim.
 Working daemon1879 retains its original hash. #695 remains OPEN; no working native
 installation, merge, deployment or closure is claimed.
 

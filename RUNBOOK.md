@@ -10287,3 +10287,26 @@ repeat, qualification bypass, working installation or #695 closure.
 Matrixv4 times out2400s, with4 observed assertions and312 not started; exact orphan
 child terminated, raw failures retained. Memory forbidden by plan; private evidence
 and checkpoint retain the diagnosis and remaining gates.
+
+
+## Turn | 2026-11-16 | #695 package4 original live updater regression passes
+
+The exact package4 completion wake reached this chat. Build1432.524s passes;
+all6 immutable file hashes match before and after transfer to real UID1017.
+Original cross-build and identical-build live loops pass, preserving active turn,
+PID and selection; updater exits1 with actionable refusal for a different package,
+and0 for identical-package pinning. Neither requests shutdown. Exact package4
+also passes actual launcher plus real Stable Time expiry/cancel/control,
+clock-unavailable hold and original identity/deadline across native restart,
+51.626s. Final owned processes0; working daemon1879/hash unchanged. Curated
+partial evidence under issue0695; production/cooperative/rollback gates stay open.
+
+Four previous full-matrix failures were replayed without a full rerun. Preflight
+passes alone, retained as unreconciled; three reproduce. Normalize peer plan's
+CLOSED header without changing its outcome, regenerate11 missing Grok command
+coverage entries, and isolate refresh fixture config. One-variable probe proves
+XDG_CONFIG_HOME fixes refresh while XDG_STATE_HOME does not; production close
+protection is unchanged. Two document checks and29 refresh controls pass on311;
+36 affected module checks pass on312 in48.912s; the51-test preflight module
+passes145.032s. Original full-suite preflight failure remains unexplained, not
+reclassified as clean or quarantined. #695 remains OPEN.

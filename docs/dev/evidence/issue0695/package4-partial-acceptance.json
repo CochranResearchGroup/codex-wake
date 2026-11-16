@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "issue": 695,
+  "state": "partial_acceptance_not_installable",
+  "native_source_commit": "075639f50a5cf8f8cdfa39b5213cd77a6efa3d53",
+  "package": {
+    "version": "0.169.0-wake695.4+075639f50a",
+    "target": "x86_64-unknown-linux-gnu",
+    "files": {
+      "codex-package.json": "23eeec6b592a935108e402fabb5402e34606d0952f2728dd7322db7c0f81f6b0",
+      "codex-path/rg": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849",
+      "codex-resources/bwrap": "da1fe1635e7d3f087e65d840e807a9d7f9d2c05ab9af782c1bd6bb5f5f094220",
+      "bin/codex-code-mode-host": "d4be946e489a6b4b10937df891ae4719eb6689348f85c48602fe7565fb6904e9",
+      "bin/codex-exec-server": "5a8bdba9f1b5e9f7f438b7d5b9ebf2dd7dae7ccb16e69ed8586decc4826994e3",
+      "bin/codex": "44f25dea7c6fc65c1745dcbb94782ebd4da404dad1ddff838aa658ba6ff23f5b"
+    }
+  },
+  "environment": {
+    "uid": 1017,
+    "shared_wsl_kernel": true,
+    "provider": "owned localhost Responses stream",
+    "external_model_calls": 0,
+    "material_difference": "Candidate GNU/system glibc; working baseline musl."
+  },
+  "source_validation": {
+    "red": "Managed PID interrupted by local replacement before fix",
+    "green": "Running different-package replacement refused; identical complete package preserves PID and selection",
+    "command": "cargo test --locked --profile dev-small -p codex-app-server-daemon --lib prepare_install::tests",
+    "passed": 8
+  },
+  "installed_validation": {
+    "cross": {
+      "state": "passed",
+      "updater_exit": 1,
+      "active_turn_preserved": true,
+      "selection_preserved": true,
+      "forced_shutdown": false,
+      "seconds": 29.80804875800095
+    },
+    "same": {
+      "state": "passed",
+      "updater_exit": 0,
+      "active_turn_preserved": true,
+      "selection_preserved": true,
+      "forced_shutdown": false,
+      "seconds": 30.37545335800678
+    }
+  },
+  "queue_restart": {
+    "state": "passed",
+    "expired_and_canceled_absent_from_model_and_history": true,
+    "control_reached_model": true,
+    "unknown_time_held": true,
+    "original_deadlines_and_client_ids_survive_restart": true,
+    "restart_expired_absent_from_model_and_history": true,
+    "restart_control_reached_model": true,
+    "provider_requests": 3,
+    "stop_exit_code": 0
+  },
+  "final_owned_processes": [],
+  "working_native_changed": false,
+  "production_bounded_delivery_enabled": false,
+  "remaining": [
+    "production restart/cooperative upgrade protocol",
+    "complete upgrade/rollback and failed-start/private-owner qualification",
+    "installed preparation/send delay and suspension boundaries",
+    "shared native pending cancellation integration",
+    "full Python validation, including unreconciled full-suite preflight failure"
+  ]
+}
