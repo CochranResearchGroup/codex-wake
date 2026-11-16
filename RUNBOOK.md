@@ -10266,3 +10266,24 @@ Python helper now carries conservative remaining validity and the bridge address
 This proves controlled source behavior, not installed native queue acceptance or
 arbitrary suspension safety. Complete package3 is building at the exact native
 commit. No working native replacement; production bounded adapter stays disabled.
+
+
+## Turn | 2026-11-16 | #695 diagnose unsafe local native replacement
+
+Package3 assembled875.971s and all6 hashes matched after UID1017 transfer.
+Actual installed bounded queue expiry/cancel/control passes49.579s; unknown-time
+hold and immutable identity/deadline across daemon restart pass69.221s. No expired
+or canceled input reached model/history. Working daemon unchanged; owned cases0.
+The maintained upgrade journey uncovered 0.169 unconditional active-work stop.
+After removing obsolete setup assumptions, minimal real active-stream repros fail
+both cross-build and same-build replacement, with forced shutdown and no checkpoint.
+Source confirms local replacement and production restart have no work-preparation
+check; legacy cooperative protocol is absent. Native075639f50a now safely refuses
+different-package local replacement while running, and pins identical complete
+packages without restart or retarget. Managed-PID regression red then green;
+all8 preparation checks pass. Production restart and cooperative recovery remain
+unqualified; package4 and original installed repro are pending. No broad review
+repeat, qualification bypass, working installation or #695 closure.
+Matrixv4 times out2400s, with4 observed assertions and312 not started; exact orphan
+child terminated, raw failures retained. Memory forbidden by plan; private evidence
+and checkpoint retain the diagnosis and remaining gates.

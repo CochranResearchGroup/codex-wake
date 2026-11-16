@@ -453,7 +453,7 @@ identifiers can locate observations, whose freshness and uncertainty remain visi
 **Upgrade recovery**:
 Continuing work paused by a specific daemon upgrade from its durable checkpoint,
 under the same authority, remaining allowance, deadline and conversation identity.
-It does not resume work that was already paused or grant new resources.
+It does not resume work that was already paused or grant new resources. Replacing an executable or receiving a successful updater exit does not establish recovery acceptance.
 
 **Recovery acceptance**:
 Durable evidence that one recovery continuation was admitted for an exact upgrade

@@ -8,28 +8,29 @@ qualification and applicable installation authorization is established.
 
 ## Current State
 
-Native3695947e81 has24 passing public queue tests. The one formal review and
-one TDD findings pass are complete: the unused clockless path is removed, and
-authentication recovery rechecks the original deadline before retry. A separate
-public regression reproduced premature daemon recovery of unpublished bounded
-input; marker publication is corrected and the24-test queue suite passes.
-Complete GNU package2 is assembled from this source, but not runtime-qualified.
-Shared Wake source is implemented with production bounded delivery still refused.
-The frozen matrix v3 completed2661 Python3.11 tests with3 failures,1 error and
-1 skip; Python3.12 did not start. The host-preflight, connector, shared-refresh
-and monitor-policy failures remain retained and unresolved; no full-green claim.
-Operator-requested MONITOR-CLOCK-01 addresses the independently reproduced
-monitor guest-clock dependency through public refresh/status TDD. Default
-persisted-frame freshness now uses authenticated Stable Time elapsed counters;
-missing/changed evidence is stale and legacy snapshots do not regain authority.
-The original wall-rollback reproduction and a private real-service background
-monitor pass; changed-surface checks pass44 on Python3.11 and16 on Python3.12.
-This does not migrate all formatting/routing timers or qualify native dispatch.
-Operator approved the narrow credential-policy exception on2026-11-16. UID1017
-is enrolled and a real-service read returned authenticated UTC/counter evidence;
-no credential values or hashes were logged. The working clock service did not
-change. Helper-to-admission elapsed transport remains unqualified.
-No working daemon replacement, merge, deployment or ticket closure is claimed.
+Native075639f50a retains bounded queue enforcement and adds conservative local
+package replacement: an identical full package is pinned without restarting or
+retargeting the running daemon; a different running package requires explicit
+checkpoint and stop. Two real UID1017 reproductions established unconditional
+force-stop, including same-binary reinstall; the managed-PID regression is red
+before the fix, then green, with all8 preparation controls passing.
+Package4 assembly and original installed updater reproduction remain pending.
+The production restart path and cooperative recovery protocol are not qualified.
+
+Package3/db4dcfc839 passed real UID1017 Stable Time expiry/cancellation/control,
+unknown-clock hold and original deadline/client identity after restart. Expired
+and canceled inputs never reached model/history; controls did. All case-owned
+processes stopped. This does not qualify package4 or arbitrary suspend/send delay.
+The approved read-only clock enrollment and pinned helper remain unchanged.
+Production bounded Wake delivery stays refused; shared native cancellation and
+remaining installed preparation/send, ownership, failed-start and rollback gates
+remain open. One formal review and TDD findings pass are retained, not repeated.
+
+Full matrixv4 atWakeaf1c8dde exceeded2400seconds onPython3.11; four assertions
+failed before timeout, andPython3.12 did not start. Exact orphan unittest child
+was terminated and absence verified. Retain all failures; no full-green claim.
+Working daemon1879 retains its original hash. #695 remains OPEN; no working native
+installation, merge, deployment or closure is claimed.
 
 ## Scope and contract
 

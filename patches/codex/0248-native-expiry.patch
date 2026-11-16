@@ -1541,6 +1541,213 @@ index d719a520b7..32044c1130 100644
  dependencies = [
   "anyhow",
   "assert_cmd",
+diff --git a/codex-rs/app-server-daemon/src/prepare_install.rs b/codex-rs/app-server-daemon/src/prepare_install.rs
+index ef09b6dab1..c378c09c97 100644
+--- a/codex-rs/app-server-daemon/src/prepare_install.rs
++++ b/codex-rs/app-server-daemon/src/prepare_install.rs
+@@ -42,7 +42,8 @@ pub(super) async fn prepare(daemon: &Daemon, settings: &DaemonSettings) -> Resul
+     .map(|_| ())
+ }
+ 
+-/// Select this CLI's complete package and pin it, restarting only a running daemon.
++/// Select this CLI's complete package and pin it without interrupting running work.
++/// A different package requires an explicitly stopped daemon.
+ /// Returns None when the user cancels without changing the installation.
+ pub async fn update_from_cli(
+     confirm: impl FnOnce(&InstallRequest) -> Result<bool>,
+@@ -296,6 +297,35 @@ async fn prepare_from_package(
+         !stable || version == binary_version,
+         "the CLI package version does not match its executable"
+     );
++    if mode == InstallMode::Replace
++        && let Some(backend) = &backend
++    {
++        // Neither the version probe nor a grace timeout establishes that work is
++        // checkpointed. Only an identical complete package is safe to pin live.
++        // Keep the selected path and recovery state unchanged in that case.
++        let same_package = previous_root == root
++            && if let Some(previous_release) = &previous_release {
++                package_tree(previous_release, None, &mut BTreeMap::new())? == digest
++            } else {
++                false
++            };
++        let same_executable = backend
++            .running_executable_identity()
++            .await?
++            .is_some_and(|identity| identity.digest == running_identity.digest);
++        anyhow::ensure!(
++            same_package && same_executable,
++            "cannot replace a running daemon without qualified upgrade preparation; checkpoint and stop it with `codex app-server daemon stop`, then retry the update"
++        );
++        crate::backend::pid_update_loop_backend(daemon.backend_paths(settings))
++            .stop()
++            .await?;
++        let marker = root.join("auto-update-version");
++        if marker.exists() {
++            std::fs::remove_file(marker)?;
++        }
++        return Ok(true);
++    }
+     let name = if stable && mode == InstallMode::Missing {
+         format!("{version}-{target}")
+     } else {
+@@ -350,16 +380,6 @@ async fn prepare_from_package(
+                     && previous_root.join("current").canonicalize().ok() == previous_release,
+                 "daemon selection changed while preparing its package; retry the command"
+             );
+-            if let Some(backend) = &backend {
+-                if let Err(error) = crate::thread_recovery::discard_pending(daemon) {
+-                    eprintln!(
+-                        "warning: failed to clear stale daemon recovery before replacement: {error}"
+-                    );
+-                }
+-                backend
+-                    .stop_with_grace(settings.shutdown_grace_seconds)
+-                    .await?;
+-            }
+             Ok::<(), anyhow::Error>(())
+         }
+         .await;
+@@ -403,20 +423,6 @@ async fn prepare_from_package(
+             tracing::warn!(%error, "could not record daemon selection for pruning");
+         }
+     }
+-    if backend.is_some() {
+-        let selected = Daemon {
+-            pid_file: daemon.pid_file.with_file_name(crate::DAEMON_PID_FILE_NAME),
+-            update_pid_file: daemon
+-                .update_pid_file
+-                .with_file_name(crate::DAEMON_UPDATE_PID_FILE_NAME),
+-            managed_codex_bin: root.join("current").join(entrypoint),
+-            ..daemon.clone()
+-        };
+-        selected.start_managed_backend(settings).await.context(
+-            "daemon package selected but could not start; retry with `codex app-server daemon start`",
+-        )?;
+-        selected.wait_until_ready().await?;
+-    }
+     if let Err(error) = crate::release_pruning::prune(daemon, &root, settings).await {
+         tracing::debug!(%error, "skipped daemon release pruning");
+     }
+diff --git a/codex-rs/app-server-daemon/src/prepare_install_tests.rs b/codex-rs/app-server-daemon/src/prepare_install_tests.rs
+index 9180bf6bc1..ba9eeee1bd 100644
+--- a/codex-rs/app-server-daemon/src/prepare_install_tests.rs
++++ b/codex-rs/app-server-daemon/src/prepare_install_tests.rs
+@@ -52,6 +52,114 @@ fn package(root: &Path, version: &str) -> PathBuf {
+     bin
+ }
+ 
++#[tokio::test]
++async fn local_replacement_refuses_a_running_daemon_before_changing_selection() {
++    let temp = tempfile::TempDir::new().unwrap();
++    let home = temp.path().join("home");
++    let daemon = daemon(&home);
++    let settings = DaemonSettings {
++        shutdown_grace_seconds: 0,
++        auto_update_enabled: false,
++        ..DaemonSettings::default()
++    };
++    let source = temp.path().join("package");
++    let bin = package(&source, "0.152.0");
++    prepare_from_package(
++        &daemon,
++        &settings,
++        InstallMode::Missing,
++        Some(&source),
++        &bin,
++        |_| Ok(true),
++    )
++    .await
++    .unwrap();
++    let selection = home
++        .join("packages/app-server-daemon/current")
++        .canonicalize()
++        .unwrap();
++    let live_bin = temp.path().join("live-daemon");
++    codex_utils_cargo_bin::write_executable(&live_bin, "#!/bin/sh\nexec sleep 30\n").unwrap();
++    let backend = crate::backend::PidBackend::new(live_bin, daemon.pid_file.clone(), false);
++    backend.start().await.unwrap();
++    let result = prepare_from_package(
++        &daemon,
++        &settings,
++        InstallMode::Replace,
++        Some(&source),
++        &bin,
++        |_| Ok(true),
++    )
++    .await;
++    let still_running = backend.is_starting_or_running().await.unwrap();
++    let after = home
++        .join("packages/app-server-daemon/current")
++        .canonicalize()
++        .unwrap();
++    backend.stop_with_grace(0).await.unwrap();
++    assert!(still_running, "replacement interrupted the running daemon");
++    assert_eq!(after, selection);
++    let error = result.expect_err("a local update must not stop an uncheckpointed daemon");
++    assert!(
++        error.to_string().contains("checkpoint and stop"),
++        "{error:#}"
++    );
++}
++
++#[tokio::test]
++async fn identical_live_package_is_pinned_without_restarting_or_retargeting() {
++    let temp = tempfile::TempDir::new().unwrap();
++    let home = temp.path().join("home");
++    let daemon = daemon(&home);
++    let settings = DaemonSettings {
++        shutdown_grace_seconds: 0,
++        auto_update_enabled: false,
++        ..DaemonSettings::default()
++    };
++    let source = temp.path().join("package");
++    let bin = package(&source, "0.152.0");
++    codex_utils_cargo_bin::write_executable(&bin,
++        "#!/bin/sh\nif [ \"$1\" = \"--version\" ]; then echo 'codex 0.152.0'; else exec sleep 30; fi\n").unwrap();
++    prepare_from_package(
++        &daemon,
++        &settings,
++        InstallMode::Missing,
++        Some(&source),
++        &bin,
++        |_| Ok(true),
++    )
++    .await
++    .unwrap();
++    let selected = home.join("packages/app-server-daemon/current");
++    let before = selected.canonicalize().unwrap();
++    let backend =
++        crate::backend::PidBackend::new(selected.join("bin/codex"), daemon.pid_file.clone(), false);
++    backend.start().await.unwrap();
++    let pid_record = std::fs::read(&daemon.pid_file).unwrap();
++    let result = prepare_from_package(
++        &daemon,
++        &settings,
++        InstallMode::Replace,
++        Some(&source),
++        &bin,
++        |_| Ok(true),
++    )
++    .await;
++    let still_running = backend.is_starting_or_running().await.unwrap();
++    let after_pid_record = std::fs::read(&daemon.pid_file).ok();
++    let after = selected.canonicalize().unwrap();
++    backend.stop_with_grace(0).await.unwrap();
++    assert!(result.unwrap());
++    assert!(still_running);
++    assert_eq!(after_pid_record, Some(pid_record));
++    assert_eq!(after, before);
++    assert!(
++        !home
++            .join("packages/app-server-daemon/auto-update-version")
++            .exists()
++    );
++}
++
+ #[tokio::test]
+ async fn seeds_full_package() {
+     let temp = tempfile::TempDir::new().expect("temp");
 diff --git a/codex-rs/app-server-protocol/schema/precomputed/app-server-exports-experimental.json.zst b/codex-rs/app-server-protocol/schema/precomputed/app-server-exports-experimental.json.zst
 index cc70847e71d0a42b4a2929bee9077ca3262f1af7..047ad6213af1e04decb43fc8ebbc44589f8492f4 100644
 GIT binary patch
@@ -8911,6 +9118,31 @@ index 6a69cc899d..7ff130e470 100644
                      NotSubmittedReason::ServerDraining => {
                          return Err(crate::error_code::server_draining_error());
                      }
+diff --git a/codex-rs/cli/src/daemon_install.rs b/codex-rs/cli/src/daemon_install.rs
+index cf1b450b0c..b6425b70a2 100644
+--- a/codex-rs/cli/src/daemon_install.rs
++++ b/codex-rs/cli/src/daemon_install.rs
+@@ -31,7 +31,7 @@ fn describe_install(request: &InstallRequest) -> String {
+     );
+     if request.restart_required {
+         message.push_str(
+-            "\nThe running daemon will restart; active or queued work may be interrupted.",
++            "\nA different package requires checkpointing work and stopping the running daemon first. An identical package is pinned without restarting it.",
+         );
+     }
+     message
+diff --git a/codex-rs/cli/src/daemon_install_tests.rs b/codex-rs/cli/src/daemon_install_tests.rs
+index 700c23784e..ef8a4ea82e 100644
+--- a/codex-rs/cli/src/daemon_install_tests.rs
++++ b/codex-rs/cli/src/daemon_install_tests.rs
+@@ -13,6 +13,6 @@ fn running_daemon_replacement_prompt() {
+     Replace installed daemon version 0.152.0 with CLI version 0.0.0 from /cli/package.
+     The daemon package will be installed in /home/packages/app-server-daemon.
+     The selected package will be pinned. Run `codex app-server daemon update` to return to production updates.
+-    The running daemon will restart; active or queued work may be interrupted.
++    A different package requires checkpointing work and stopping the running daemon first. An identical package is pinned without restarting it.
+     ");
+ }
 diff --git a/codex-rs/core/src/client.rs b/codex-rs/core/src/client.rs
 index 425967e392..ac786fcba0 100644
 --- a/codex-rs/core/src/client.rs
