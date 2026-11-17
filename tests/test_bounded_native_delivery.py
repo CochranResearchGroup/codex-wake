@@ -274,3 +274,39 @@ class BoundedNativeDeliveryTests(unittest.TestCase):
         observed = adapter.reconcile_bounded(recipient, 'wake', envelope)
         self.assertEqual((observed.evidence['source'], observed.evidence['execution'], observed.evidence['turn_id']),
             ('bounded_native_admission', 'not_observed', 'turn-exact'))
+
+    def test_admitted_wire_rounding_preserves_conservative_expiry(self):
+        from copy import deepcopy
+        from codex_wake.bounded_native import BoundedNativeAdapter
+        from codex_wake.runtime_delivery import RuntimeRecipient
+        envelope = RuntimeSubmissionEnvelope('4d18e29e-9c05-45e7-a387-e50459dd3496', 1794885320000000)
+        recipient = RuntimeRecipient('codex', 'thread', dict(endpoint='unix://', codex_cmd='/codex'))
+        # Exact numeric pair observed in a real native RPC response after persistence.
+        inspection = dict(state='admitted', queuedSubmission=dict(id='4d18e29e-9c05-45e7-a387-e50459dd3497',
+            clientUserMessageId=envelope.client_user_message_id, expiresAtUnixMicros=envelope.expires_at_unix_micros,
+            input=[dict(type='text', text='wake', text_elements=[])]), turnId='turn-exact',
+            clockEvidence=dict(lower=1794885199.5396998, upper=1794885200.049925,
+                authority=dict(contract_version=1, state='qualified', lower=1794885199.5396998,
+                    upper=1794885200.0499253, counter=dict(epoch='4d18e29e-9c05-45e7-a387-e50459dd3498',
+                        counter=123, frequency=10000000, rate_ppm=5000))))
+        calls = []
+        def request(*args):
+            calls.append(args[2])
+            return dict(inspection=inspection)
+        outcome = BoundedNativeAdapter(request=request).cancel_bounded(recipient, 'wake', envelope)
+        self.assertEqual(outcome.reason, 'bounded_native_admitted')
+        self.assertEqual(calls, ['thread/queue/bounded/read'])
+        for defect in ('more_than_wire_rounding', 'authority_reaches_expiry'):
+            with self.subTest(defect=defect):
+                changed = deepcopy(inspection)
+                clock = changed['clockEvidence']
+                selected = envelope
+                if defect == 'more_than_wire_rounding':
+                    clock['authority']['upper'] = 1794885200.0499256
+                else:
+                    selected = RuntimeSubmissionEnvelope(envelope.client_user_message_id, 1794885200000000)
+                    changed['queuedSubmission']['expiresAtUnixMicros'] = selected.expires_at_unix_micros
+                    clock['upper'] = 1794885199.9999998
+                    clock['authority']['upper'] = 1794885200.0
+                with self.assertRaises(ValueError):
+                    BoundedNativeAdapter(request=lambda *args:dict(inspection=changed)).cancel_bounded(recipient, 'wake', selected)
