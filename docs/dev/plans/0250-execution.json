@@ -139,13 +139,49 @@
     },
     "ST04-GOVERNOR": {
       "owner": "root",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
       ],
       "scope": "Qualified UTC public meters and retained counter continuation wait",
-      "validation": "New2 checksPASS311/312; wider19 case run16PASS,2 failures1error retained; targeted fixture repairs ongoing. Legacy watcher SIGSTOP held lock; exact owned child resumed for cleanup. No full suite repeated."
+      "validation": "New2 checksPASS311/312; wider19 case run16PASS,2failures1error retained. All3 failures repaired with focused checks: shared continuation311/312, expiry311/312 now separately proves native stop, legacy watcher311/312 after qualified heartbeat and safe fixture stop. No claim of rerun whole-module green."
+    },
+    "ST04-HEARTBEAT": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "scope": "Goal controller structured host-counter heartbeat freshness; no legacy BOOTTIME interpretation; missing clock observation stays unavailable",
+      "validation": "Legacy watcher public scenario PASS311/312; affected meter and clock-loss checks PASS312; clock core7PASS311; Ruff undefined names/diff pass"
+    },
+    "ST04-STRICT": {
+      "owner": "time_bypass_audit",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "scope": "Frozen retained executor anchor, strict guard and lifecycle supervision heartbeat; no deadline renewal"
+    },
+    "ST04-CANCEL": {
+      "owner": "grok_readiness_diagnosis",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "scope": "Legacy v1/v4 cancellation metadata qualified or explicitly unobserved; stop remains available"
+    },
+    "ST04-BOOTSTRAP": {
+      "owner": "stable_time_bootstrap",
+      "state": "running",
+      "dependencies": [
+        "ST02"
+      ],
+      "scope": "Read-only host-counter bootstrap contract diagnosis; no source or runtime effects"
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -156,5 +192,6 @@
     "initial": "115selected311/103selected312; eachfailedonlyonewrongtestmodule name test_work_acceptance_commands; allactualtests114/102passed",
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
-  }
+  },
+  "updated_at": "2026-11-17T16:19:52.554273+00:00"
 }

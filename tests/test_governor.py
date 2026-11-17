@@ -465,7 +465,10 @@ class GovernorTests(unittest.TestCase):
                 if method=='thread/read':result['thread']['path']=str(log)
                 return result
             with harness.controller(root) as watcher,patch('codex_wake.lifecycle_budget.trusted_upper',return_value=fixtures.NOW),patch('codex_wake.local_sessions.resolve',return_value=row),patch('codex_wake.goal_supervision.native_request',side_effect=native_call):
-                os.kill(watcher.pid,signal.SIGSTOP)
+                from codex_wake.goal_supervision import _lock
+                # Freeze only after the child has released its admission lock.
+                with _lock(root/'goal-supervision', 'maintenance'):
+                    os.kill(watcher.pid,signal.SIGSTOP)
                 heartbeat=root/'goal-supervision/controller.json'
                 retained=json.loads(heartbeat.read_text());retained.pop('governor_protocol')
                 heartbeat.write_text(json.dumps(retained))

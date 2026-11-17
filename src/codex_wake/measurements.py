@@ -12,9 +12,9 @@ class TimeUnavailable(ValueError):
 def snapshot():
     from . import native_clock
     # snapshot's legacy no-config network path is not Stable Time authority.
-    if not native_clock.configuration():
-        raise TimeUnavailable('stable_time_configuration_required')
     try:
+        if not native_clock.configuration():
+            raise TimeUnavailable('stable_time_configuration_required')
         value = native_clock.snapshot()
         _counter(value)
         if value['reason'] == 'authenticated_utc':

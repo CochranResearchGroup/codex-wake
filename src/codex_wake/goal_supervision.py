@@ -470,16 +470,25 @@ def _accounting_decreased(receipt,observation):
 
 
 def _heartbeat(directory):
+    from . import measurements
     try:
         path=directory/'controller.json';_private(path)
         value=json.loads(path.read_text())
-        age=time.clock_gettime(time.CLOCK_BOOTTIME)-value['observed_boottime']
+        age=measurements.elapsed_bounds(value['clock_observation'],measurements.snapshot())[1]
         valid=(value['active'] is True and value['pid']!=os.getpid()
             and value['boot_id']==boot_id_value() and process_exists(value['pid'])
             and process_identity(value['pid'])==value['identity']
             and 0<=age<=max(3,3*value['interval']))
         return dict(value,fresh=valid,age_seconds=age,process_alive=process_exists(value['pid']) and process_identity(value['pid'])==value['identity'])
     except (OSError,ValueError,KeyError,TypeError):return dict(fresh=False,reason='controller_unavailable')
+
+
+def _controller_clock():
+    from . import measurements
+    try:
+        return measurements.snapshot()
+    except measurements.TimeUnavailable:
+        return None
 
 
 def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_principal=None,native_context=None):
@@ -1305,7 +1314,8 @@ def watch(root,interval=1):
         presenter.start()
         try:
             while running:
-                _save(directory/'controller.json',dict(heartbeat,active=True,observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
+                _save(directory/'controller.json',dict(heartbeat,active=True,observed_boottime=None,
+                    clock_observation=_controller_clock()))
                 observations=poll(root)
                 _acknowledge_enrollments(directory,heartbeat,observations)
                 from .goal_maintenance import replacement_observed
@@ -1324,7 +1334,8 @@ def watch(root,interval=1):
                                 from .goal_native_guard import expire
                                 expire(path,receipt)
                             else:_stop(path,receipt,'controller_stopped')
-            _save(directory/'controller.json',dict(heartbeat,active=False,observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
+            _save(directory/'controller.json',dict(heartbeat,active=False,observed_boottime=None,
+                clock_observation=_controller_clock()))
             # Stop control precedes presentation. Drain the newly journaled stop
             # once; stalled native I/O must not hold controller exit indefinitely.
             presentation_stop.set()
