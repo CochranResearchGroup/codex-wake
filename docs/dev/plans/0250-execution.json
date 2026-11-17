@@ -81,7 +81,7 @@
     },
     "ST04-BUDGET": {
       "owner": "time_bypass_audit",
-      "state": "implemented",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -89,16 +89,63 @@
       "worker": "/root/time_bypass_audit",
       "result_sha": "7177b48e",
       "scope": "strictcurrentUTCgoalupper and truthfulunqualifiedstopmetadata; originaldeadline/origin/usageimmutable; otherBOOTTIME paths pending",
-      "validation": "12focusedchecks311and312; rootintegrationpending"
+      "validation": "12 focused checks pass Python3.11 and3.12 on integration branch",
+      "integration_sha": "3f8f0fe8"
     },
     "ST04-PERMISSIONS": {
       "owner": "grok_readiness_diagnosis",
+      "state": "validated",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "scope": "permissionmetadata/approvalUTCexpiry strictdefaultclock; staticstandingandoperatorstop unaffected",
+      "worker_sha": "45d0011d",
+      "integration_sha": "7a049a92",
+      "validation": "14 worker checks each Python3.11/3.12; integration permission and task metadata selection24PASS311"
+    },
+    "ST04-RECOVERY": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "scope": "Both admission checks use original qualified UTC deadline; clock loss refuses recovery",
+      "validation": "5 checks each Python3.11/3.12; retained red evidence",
+      "integration_sha": "07ece11b"
+    },
+    "ST04-REFRESH": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "scope": "Original reload deadline uses qualified UTC; missing authority blocks",
+      "validation": "15PASS311 and2 affected checksPASS312; initial stale fixture failure retained",
+      "integration_sha": "07ece11b"
+    },
+    "ST04-TASK-METADATA": {
+      "owner": "grok_readiness_diagnosis",
+      "state": "validated",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "scope": "Task brief metadata requires qualified UTC; original pins retained",
+      "validation": "15 worker checks each Python3.11/3.12; integrated selection24PASS311",
+      "integration_sha": "a2aa0640"
+    },
+    "ST04-GOVERNOR": {
+      "owner": "root",
       "state": "running",
       "dependencies": [
         "ST01",
         "ST02"
       ],
-      "scope": "permissionmetadata/approvalUTCexpiry strictdefaultclock; staticstandingandoperatorstop unaffected"
+      "scope": "Qualified UTC public meters and retained counter continuation wait",
+      "validation": "New2 checksPASS311/312; wider19 case run16PASS,2 failures1error retained; targeted fixture repairs ongoing. Legacy watcher SIGSTOP held lock; exact owned child resumed for cleanup. No full suite repeated."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
