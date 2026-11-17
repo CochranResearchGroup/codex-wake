@@ -171,5 +171,31 @@
     "owned_follow_on_turn_paused_and_interrupted_before_upgrade": true,
     "external_model_calls": 0
   },
-  "recipe_provenance": "Retained operator-scoped package5-qualification-recipes.json records recipe hashes; raw stage receipts preserved outside Git."
+  "recipe_provenance": "Retained operator-scoped package5-qualification-recipes.json records recipe hashes; raw stage receipts preserved outside Git.",
+  "bounded_native_admission": {
+    "contract_version": 1,
+    "state": "qualified",
+    "checks": {
+      "expiry": true,
+      "unknown": true,
+      "cancellation": true,
+      "restart": true,
+      "history_isolation": true,
+      "final_send": true,
+      "rollback": true,
+      "ownership": true,
+      "reconnect": true
+    },
+    "provenance": {
+      "expiry": "695-package5-prepared and 695-package5-queue",
+      "unknown": "695-package5-queue",
+      "cancellation": "695-package5-cancel-reconnect",
+      "restart": "695-package5-queue",
+      "history_isolation": "695-package5-prepared and 695-package5-queue",
+      "final_send": "Native9af send-boundary source controls plus installed prepared-expiry gate",
+      "rollback": "695-package5-account and default/shared gates",
+      "ownership": "695-package5-private",
+      "reconnect": "695-package5-cancel-reconnect"
+    }
+  }
 }

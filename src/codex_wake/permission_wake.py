@@ -189,7 +189,8 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
             record['runtime_observation']=observation.summary(recipient)
             if not supported(route,observation):
                 reasons.append(route+':unsupported');continue
-            if observation.state!='ready':
+            from .runtime_policies import native_delivery_ready
+            if not native_delivery_ready(record['target'], observation):
                 reasons.append(route+':'+observation.reason);break
             record['permission_check']=check_route(root,record,route)
             verdict=dispatch_gate(record,clock_provider())

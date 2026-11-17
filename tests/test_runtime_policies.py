@@ -185,9 +185,10 @@ class IntegratedPolicySelectionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)/'wake'
             for policy in ('queue','interrupt'):
-                with self.assertRaisesRegex(WakeError,'busy_policy_unsupported'):
-                    run(['--wake-root',str(root),'native','after','--busy-policy',policy,
-                         '--codex-path','/not-an-executable','exact-thread','1m','--','Synthetic'])
+                if policy == 'interrupt':
+                    with self.assertRaisesRegex(WakeError,'busy_policy_unsupported'):
+                        run(['--wake-root',str(root),'native','after','--busy-policy',policy,
+                             '--codex-path','/not-an-executable','exact-thread','1m','--','Synthetic'])
                 runner=CommandRunner(wake_root=root)
                 value,failed=runner.call('wake_grok_after',dict(binding_id='grok_'+'a'*32,
                     trigger='1m',prompt='Synthetic',idempotency_key='original',busy_policy=policy))

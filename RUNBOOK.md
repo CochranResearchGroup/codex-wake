@@ -10474,3 +10474,30 @@ Final fresh owned processes0, working1879/b452 unchanged. No695close or
 production bounded activation. Wake0839 pending continuation canceled after
 manual terminal-run reconciliation; original submitted007 wake is not falsely
 reported canceled. Parent next gates remain production adoption and Python.
+
+
+## Turn | 2026-11-16 | #695 host-qualified default factory
+
+Root took activation and delegated hostgate/explicitqueue slices. Each meaningful
+behavior observed RED thenGREEN: typed preIO refusal versus lostreply; qualified
+busy capability; real sameconnection peer/caps; mode/MCP/startup policy. Host
+opt-in policy pins private report; sameUnixpeer executable and capabilities are
+rechecked before bounded input. CLI/MCP freeze explicitqueue; absentwait retains
+historical idempotency. Actor/mode/route gates and Grok wait-only remain intact.
+
+Affected8module integration94PASS31156.962s; focused51PASS31217.322s plus final
+startup/idempotency2PASS2.534s. Ruff full selectedfiles reports54 preexisting and
+54 current diagnostics, zerointroduced; no unrelated lintcleanup. Actual isolated
+UID1017 defaultfactory against package5/real StableTime passes submit original
+IDs/expiry, cancel, admitted reconciliation and missing/revoked approval refusal;
+2localhost provider calls,0external calls/credentialcopies,stop0. Initialwheel
+c774cfdd; finalwheel341da603 changes only startup/idempotency and installed2PASS
+2.522s. Firstdelta smoke moduleimport setupfailure retained. Native9af/all6hashes
+unchanged, workingPID1879/b452 unchanged, owned activationprocesses0.
+
+695-ACTIVATE validated repo-local; working-host opt-in remains unset. No native
+rebuild, previous qualification repeat or broadreview repeat. New Python latency
+25/100ms probes2PASS4.317s; originalassertion context missing, no speculativefix,
+quarantine or fullgreen claim. Parent695 remains OPEN. Owned Wake/Native checkouts
+retained for this explicit blocker, next review on original failure evidence or
+next authorized installation gate; no new checkout, registeredWakecount123.

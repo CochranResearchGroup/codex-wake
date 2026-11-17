@@ -42,6 +42,35 @@
       "tracker_resolution": "DONE repo-local source; exact package5/runtime parent acceptance pending",
       "result_sha": "9af0e8e48d0c2dcfe1800a3deaadfcec7e2c0bd7",
       "validation": "249PASS (26queue+2clock+221API), public delayed-auth/WS/queue UNKNOWN and knownexpiry behavioral reds retained"
+    },
+    "695-ACTIVATE": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "695-QUAL",
+        "695-ADAPTER",
+        "695-TIMING"
+      ],
+      "scope": "Host-owned opt-in qualified native factory; same-connection actualpeer hash + capability negotiation beforeinput; explicitqueuepolicy only qualified peers; no working daemon change",
+      "acceptance": "Missing/revoked/tampered approval, wrongpeer/oldcapabilities refuse preIO; qualifieddefaultfactory submits originaldeadline/IDs via CLI/API/MCP andnativecancel/reconcile; actualUID1017 package5 proof",
+      "priority": "P1",
+      "workers": [
+        "activation_host_gate",
+        "activation_queue_policy"
+      ],
+      "validation": "94PASS311;51PASS312+final2PASS; actualUID1017 defaultfactory PASS; finalwheel delta2PASS installed",
+      "evidence": "docs/dev/evidence/issue0695/bounded-activation-acceptance.json",
+      "tracker_resolution": "DONE repo-local activation source and isolated installed acceptance; no working-host enablement"
+    },
+    "695-PYTHON": {
+      "owner": "python695_causal",
+      "state": "blocked",
+      "dependencies": [],
+      "scope": "New bounded public-RPC latency causal probe; no passingprefix/fullrun repetition",
+      "evidence": "private ticket-695-python-next/result.json",
+      "blocker": "No original assertion/receipt/readiness context;25/100ms latency probe passes2 in4.317s",
+      "priority": "P1",
+      "tracker_resolution": "OPEN blocked: no causal red; no quarantine or speculative fix"
     }
   },
   "review": {
@@ -56,7 +85,7 @@
     "remediation_passes": 1,
     "remediation": "No behavioral blocker; no new test/source edit warranted. Retain existing redgreen controls."
   },
-  "integration_tip": "89c639f9",
+  "integration_tip": "fd7d54649a36c469c2e46111d828ef1f920e839f",
   "package5_acceptance": {
     "state": "validated",
     "native_source": "9af0e8e48d0c2dcfe1800a3deaadfcec7e2c0bd7",

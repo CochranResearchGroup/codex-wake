@@ -81,6 +81,11 @@ class CodexRuntimeAdapter:
             "terminal_input": RuntimeCapability("unsupported", "not_this_delivery_method"),
             "receiver_acknowledgment": RuntimeCapability("not_qualified", "queue_is_not_receiver_ack"),
         }
+        if self._bounded_adapter is not None:
+            try:
+                capabilities['busy_queue'] = self._bounded_adapter.capability(recipient)
+            except Exception:
+                capabilities['busy_queue'] = RuntimeCapability('not_qualified', 'bounded_native_backend_not_qualified')
         if target.get('startup_policy') == 'active_tab':
             from .sessions import observe
             try:
@@ -123,8 +128,7 @@ class CodexRuntimeAdapter:
             return RuntimeObservation("unavailable", "runtime_observation_unavailable", capabilities, resumed)
 
     def submit_bounded(self, recipient, prompt, envelope):
-        # This host-owned injection is deliberately absent from production wiring.
-        # An RPC capability advertisement is not package/runtime qualification.
+        # Host qualification must be rechecked on the submission connection.
         if self._bounded_adapter is None:
             return RuntimeSubmission('not_sent', reason='bounded_native_backend_not_qualified', pre_io=True)
         return self._bounded_adapter.submit_bounded(recipient, prompt, envelope)

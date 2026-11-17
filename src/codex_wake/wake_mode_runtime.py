@@ -164,6 +164,7 @@ class ModeRuntimeAdapter:
     def submit_bounded(self, recipient, prompt, envelope):
         # Bounded pending input must never use the background turn/start route.
         from .runtime_delivery import submit_bounded
+        from .runtime_policies import native_delivery_ready
         if recipient.binding.get('session_mode') is None:
             return submit_bounded(self.adapter, recipient, prompt, envelope)
         if recipient.binding.get('session_mode') == 'session_only':
@@ -179,7 +180,7 @@ class ModeRuntimeAdapter:
             if self._presence(routed.binding, resumed=resumed) != ('existing_tab' if route == 'new_tab' else route):
                 return RuntimeSubmission('not_sent', reason='recipient_ownership_changed', pre_io=True)
             recheck = self.adapter.resolve(dict(routed.binding, resume_policy='hold'))
-            if self.adapter.observe(recheck).state != 'ready':
+            if not native_delivery_ready(routed.binding, self.adapter.observe(recheck)):
                 return RuntimeSubmission('not_sent', reason='recipient_busy_or_unavailable', pre_io=True)
         except Exception:
             return RuntimeSubmission('not_sent', reason='recipient_ownership_unknown', pre_io=True)

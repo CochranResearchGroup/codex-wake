@@ -6,6 +6,41 @@ from codex_wake.runtime_delivery import RuntimeSubmissionEnvelope
 
 
 class BoundedNativeDeliveryTests(unittest.TestCase):
+    def test_busy_queue_observation_requires_host_qualification(self):
+        from codex_wake.bounded_native import BoundedNativeAdapter
+        from codex_wake.runtime_delivery import RuntimeCapability
+        def forbidden(*args):
+            self.fail('observation submitted input')
+        for qualified in (False, True):
+            with self.subTest(qualified=qualified):
+                bounded = BoundedNativeAdapter(request=forbidden)
+                if qualified:
+                    bounded = BoundedNativeAdapter(request=forbidden,
+                        qualification=lambda recipient:RuntimeCapability('supported', 'host_qualified_bounded_native'))
+                adapter = CodexRuntimeAdapter(read_thread=lambda target:dict(id=target['thread_id'], status=dict(type='active')),
+                    request=forbidden, run=forbidden, project_failure=forbidden, bounded_adapter=bounded)
+                recipient = adapter.resolve(dict(transport='native', thread_id='01a1227e-a041-7b72-9c36-18349e7dd22c',
+                    endpoint='unix://', codex_cmd='/codex'))
+                observed = adapter.observe(recipient)
+                self.assertEqual(observed.state, 'busy')
+                self.assertEqual(observed.capabilities['busy_queue'].state, 'supported' if qualified else 'not_qualified')
+
+    def test_host_refusal_is_pre_io_but_lost_reply_remains_uncertain(self):
+        from codex_wake.bounded_native import BoundedNativeAdapter
+        from codex_wake.bounded_native_qualification import BoundedNativePreIORefusal
+        from codex_wake.runtime_delivery import RuntimeRecipient
+        recipient = RuntimeRecipient('codex', 'thread', dict(endpoint='unix://', codex_cmd='/codex'))
+        envelope = RuntimeSubmissionEnvelope('4d18e29e-9c05-45e7-a387-e50459dd3496', 1791504600000000)
+        for error, expected in (
+            (BoundedNativePreIORefusal('revoked'), ('not_sent', True)),
+            (TimeoutError('reply lost'), ('uncertain', False)),
+        ):
+            with self.subTest(error=type(error).__name__):
+                def request(*args):
+                    raise error
+                outcome = BoundedNativeAdapter(request=request).submit_bounded(recipient, 'wake', envelope)
+                self.assertEqual((outcome.state, outcome.pre_io), expected)
+
     def test_unqualified_backend_refuses_before_submission_io(self):
         def forbidden(*args, **kwargs):
             self.fail('unqualified native backend performed submission I/O')

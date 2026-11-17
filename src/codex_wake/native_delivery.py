@@ -50,10 +50,10 @@ def add_native_parser(subparsers):
 from .wake_policy import guard_registration
 
 
-@guard_registration
+@guard_registration(native=True)
 def create_native(args, root):
-    from .runtime_policies import require_wait_policy
-    require_wait_policy(getattr(args,"busy_policy","wait"))
+    from .runtime_policies import require_native_policy
+    require_native_policy(getattr(args,"busy_policy","wait"))
     from .app_server import resolve_codex_cmd
     from .cli import create_record
     try:
@@ -100,7 +100,8 @@ def create_native(args, root):
     target = {'transport': 'native', 'thread_id': args.thread_id,
               'codex_cmd': resolve_codex_cmd(args.codex_path, required=True),
               'endpoint': args.endpoint, 'expires_at': (due + ttl).isoformat().replace('+00:00', 'Z'),
-              'resume_policy': 'same_thread' if args.resume_missing else 'hold'}
+              'resume_policy': 'same_thread' if args.resume_missing else 'hold',
+              'busy_policy': getattr(args, 'busy_policy', 'wait')}
     return create_record(args.prompt, predicate, root, now, args, target=target,
                          time_observation=observation)
 
@@ -126,9 +127,13 @@ def expire_native(root, found, now):
 
 
 def _codex_adapter():
+    from .bounded_native import BoundedNativeAdapter
+    from .bounded_native_qualification import QualifiedBoundedNativeRequest
+    qualified = QualifiedBoundedNativeRequest(request=native_request)
     return CodexRuntimeAdapter(
         read_thread=read_native_thread, request=native_request,
         run=subprocess.run, project_failure=submission_failure,
+        bounded_adapter=BoundedNativeAdapter(request=qualified, qualification=qualified.capability),
     )
 
 
@@ -178,8 +183,9 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
         record['runtime_observation'] = observation.summary(recipient)
         from .wake_policy import startup_reason
         policy_reason = startup_reason(record, observation)
-        ready = observation.state == 'ready' and policy_reason is None
-        if policy_reason or (target.get('session_mode') and observation.state != 'ready'):
+        from .runtime_policies import native_delivery_ready
+        ready = native_delivery_ready(target, observation) and policy_reason is None
+        if policy_reason or (target.get('session_mode') and not ready):
             record['policy_outcome'] = dict(state='held', reason=policy_reason or observation.reason)
         if observation.resumed:
             record = append_event(record, 'native_same_thread_resumed',

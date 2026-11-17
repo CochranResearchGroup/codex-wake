@@ -151,7 +151,7 @@ class HarnessCallerTests(unittest.TestCase):
             root = Path(temporary)
             runner = CommandRunner(wake_root=root)
             body = dict(caller_thread_id=THREAD, trigger='1m', prompt='Continue', idempotency_key='native-mcp', session_mode='background',
-                        wake_lifetime='conversation', owner_end='hold', recipient_startup='background_saved')
+                        wake_lifetime='conversation', owner_end='hold', recipient_startup='background_saved', busy_policy='queue')
             denied, failed = runner.call('wake_native_after', body)
             self.assertTrue(failed)
             self.assertFalse(all_records(root))
@@ -164,6 +164,12 @@ class HarnessCallerTests(unittest.TestCase):
             self.assertEqual(record['wake_policy']['owner'], dict(kind='conversation', id='codex:' + THREAD))
             self.assertEqual(record['wake_policy']['startup'], 'background_saved')
             self.assertEqual(record['target']['resume_policy'], 'same_thread')
+            self.assertEqual(record['target']['busy_policy'], 'queue')
+            with patch('codex_wake.sessions.observe', return_value={'complete':False,'sessions':[]}), patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+                    'codex_wake.native_clock.snapshot', return_value={'utc': None, 'counter': None}):
+                changed, failed = runner.call('wake_native_after', dict(body, busy_policy='wait'), native_context=META)
+            self.assertTrue(failed, changed)
+            self.assertEqual(all_records(root)[0].record['target']['busy_policy'], 'queue')
 
     def test_future_wakes_expose_original_due_and_delivery_window_without_claiming_monitoring(self):
         from datetime import datetime, UTC, timedelta

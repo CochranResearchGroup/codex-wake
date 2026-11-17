@@ -16,6 +16,28 @@ def inventory(live=False, complete=True):
 
 
 class BackgroundMode(unittest.TestCase):
+    def test_busy_bounded_background_requires_explicit_queue_and_fresh_qualification(self):
+        from codex_wake.runtime_delivery import RuntimeCapability, RuntimeObservation, RuntimeRecipient, RuntimeSubmissionEnvelope
+        envelope = RuntimeSubmissionEnvelope('22222222-2222-4222-8222-222222222222', 2000000100000000)
+        for policy, capability, expected in (('queue', 'supported', 'accepted'),
+                                             ('wait', 'supported', 'not_sent'),
+                                             ('queue', 'not_qualified', 'not_sent')):
+            with self.subTest(policy=policy, capability=capability), tempfile.TemporaryDirectory() as d:
+                boundary = Mock()
+                boundary.resolve.side_effect = lambda target: RuntimeRecipient('codex', THREAD, dict(target))
+                boundary.observe.side_effect = [RuntimeObservation('busy', 'recipient_busy',
+                    {'busy_queue': RuntimeCapability(state, 'host_qualification')})
+                    for state in ('supported', capability)]
+                boundary.submit_bounded.return_value = RuntimeSubmission('accepted')
+                adapter = ModeRuntimeAdapter(Path(d), boundary)
+                recipient = adapter.resolve(dict(TARGET, busy_policy=policy))
+                with patch('codex_wake.sessions.observe', return_value=inventory()):
+                    self.assertEqual(adapter.observe(recipient).state, 'busy')
+                    result = adapter.submit_bounded(recipient, 'check', envelope)
+                self.assertEqual(result.state, expected)
+                self.assertEqual(boundary.submit_bounded.call_count, int(expected == 'accepted'))
+                boundary.submit.assert_not_called()
+
     def adapter(self, root, states):
         self.request = Mock(return_value={'thread': {'id': THREAD}})
         self.run = Mock()

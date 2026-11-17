@@ -9,6 +9,31 @@ qualification and applicable installation authorization is established.
 
 ## Current State
 
+695-ACTIVATE is source-validated and qualified at the isolated installed default
+factory seam. The host process may explicitly select an owner-only policy via
+`CODEX_WAKE_BOUNDED_NATIVE_POLICY`. Missing policy continues to refuse bounded
+input. Every operation pins the report, verifies the actual connected same-UID
+native process/executable, negotiates scoped bounded capabilities on that same
+connection, and rechecks approval and process before the bounded RPC. Original
+IDs/deadline and lost-reply uncertainty remain unchanged. Explicit native queue
+intent is frozen across CLI/MCP registration; fresh qualification is required at
+busy dispatch and final mode admission. Wait/interrupt and other runtime gates
+retain their existing semantics. No working service configuration was changed.
+
+Focused integration94PASS onPython3.11; focused51PASS plus final delta2PASS on
+Python3.12. Real UID1017 default factory submitted/canceled/reconciled against
+Native9af and real Stable Time, two owned localhost provider requests, no external
+model calls or credential copies. Final wheel differs only in startup/idempotency
+handling and its two installed checks pass. All six native hashes and working
+PID1879/b452 are unchanged, owned activation processes0. See
+[activation acceptance](../evidence/issue0695/bounded-activation-acceptance.json).
+Parent695 stays OPEN: the original comprehensive Python assertion lacks a causal
+reproduction (new25/100ms probes pass), and working-host activation/production
+restart and cooperative recovery remain separate gates. No broad review or native
+build/qualification repeat was performed.
+
+## Prior execution evidence (historical)
+
 Native `9af0e8e48d` is committed clean and source-validated: final native-send
 admission after HTTP authentication/preparation and inside the WS sender;
 non-consuming pending preflight, UNKNOWN retains original pending state, known
@@ -496,3 +521,51 @@ PID1879/hash unchanged; no working native replacement. Original failed pipeline
 and setup receipts retained. Curated package5-installed-acceptance.json owns
 qualification summary; parent695 stays OPEN pending production adapter adoption,
 original full Python assertion and applicable live/runtime gates.
+
+
+## Remaining adoption packet | 2026-11-16
+
+Operator re-invoked implement-spec + diagnosing-bugs. Reusefd7d5464 integration
+checkout, package5 and final review; no native rebuild/requalification or broad
+review repeat. Root owns695-ACTIVATE; workerpython695_causal owns695-PYTHON
+read-only diagnosis. New latency25/100ms scenarios pass2/4.317s, so original
+assertion remains unresolved; do not invent cause or force arbitrarytimeout.
+
+Activation contract: CODEX_WAKE_BOUNDED_NATIVE_POLICY is an explicit host-process
+configuration path, never a CLI/API/MCP caller argument. Private real owner-only
+JSON config pins the qualification report by SHA256; report identifies exact
+native executable/package/source and named qualified finalsend checks. Missing,
+revoked, malformed or changed evidence refuses beforeinput. No default selection
+or promotion of the working daemon. Each effect connects to the current owned
+Unix peer, verifies its actual process/executable hash against approved report,
+and negotiates scoped bounded capabilities on THAT SAME connection before the
+input RPC. Never check one socket and submit through another. Revalidate policy
+and process after negotiation; lost input replies remain uncertain/no resend.
+
+Qualified peers alone expose busy_queue and permit explicitly frozen queue
+policy. Other runtimes keep wait-only policy. Registration/permission/mode
+selection and route claims remain existing owners; no new permissiongrant or
+fallback route. Public CLI/API/MCP share frozen policy and original expiry/IDs.
+Hostpolicy revocation stops neweffects; it does not claim to retract admitted
+work. Existing native IPC verify_connection seam owns pre-input verification.
+
+## Host opt-in operation
+
+The policy is private, absolute, owned by the executing UID, a real regular file
+with mode0600 or0400. Its schema is `{"schema_version":1,
+"qualification_report":"/absolute/private/report.json",
+"qualification_sha256":"<sha256-of-report-bytes>"}`. The report has the same
+private-file restrictions; it pins `native_source_commit`, the executable digest
+at `package.files["bin/codex"]`, and qualified named
+`bounded_native_admission` checks. The package5 acceptance report supplies the
+source-backed projection; copying this public evidence is distinct from copying
+credentials. Keep approval local to the intended host process. CLI/API/MCP callers
+cannot provide an approval path or promote a capability advertisement.
+
+`--busy-policy queue` is explicit native scheduling intent, not approval. The
+native MCP scheduling tools expose the same `busy_policy` enum (wait/queue).
+Omitted wait preserves historical idempotency fingerprints. Existing session
+modes, actor/target grants and route constraints remain required. Removing or
+changing policy/report stops subsequent bounded operations before their RPC;
+it does not retract already admitted work. An input reply lost after verified
+admission remains uncertain and must reconcile without resend.

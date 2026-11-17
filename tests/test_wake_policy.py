@@ -18,6 +18,22 @@ CLOCK = {'utc': {'status':'network', 'sources':['fixture-a','fixture-b'], 'lower
 
 
 class WakePolicyTests(unittest.TestCase):
+    def test_create_load_run_accepts_busy_only_for_qualified_explicit_native_queue(self):
+        from codex_wake.runtime_delivery import RuntimeCapability
+        from codex_wake.wake_policy import startup_reason
+        with tempfile.TemporaryDirectory() as temporary:
+            record = self.register(Path(temporary), '--busy-policy', 'queue')
+        for transport, busy_policy, capability, expected in (
+                ('native', 'queue', 'supported', None),
+                ('native', 'wait', 'supported', 'recipient_startup_unavailable_or_unsupported'),
+                ('native', 'queue', 'not_qualified', 'recipient_startup_unavailable_or_unsupported'),
+                ('grok', 'queue', 'supported', 'recipient_startup_unavailable_or_unsupported')):
+            with self.subTest(transport=transport, busy_policy=busy_policy, capability=capability):
+                target = dict(record['target'], transport=transport, busy_policy=busy_policy)
+                observed = RuntimeObservation('busy', 'recipient_busy',
+                    {'busy_queue': RuntimeCapability(capability, 'host_qualification')})
+                self.assertEqual(startup_reason(dict(record, target=target), observed), expected)
+
     def register(self, root, *options, key='policy-test'):
         with patch('codex_wake.native_clock.snapshot', return_value=CLOCK), contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(run(['--wake-root', str(root), 'native', 'after', '--json',
@@ -29,6 +45,7 @@ class WakePolicyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             original = self.register(root)
+            self.assertNotIn('busy_policy', original['target'], 'preserve historical wait request fingerprints')
             self.assertEqual(original['schema_version'], 8)
             self.assertEqual(original['wake_policy']['startup'], 'create_load_run')
             self.assertEqual(classify_record(original), 'native_intent_v6')

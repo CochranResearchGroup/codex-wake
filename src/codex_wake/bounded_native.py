@@ -8,12 +8,20 @@ not completion. Cancellation inspects the original envelope before deleting its 
 from uuid import UUID
 
 from .records import WakeError
+from .bounded_native_qualification import BoundedNativePreIORefusal
 from .runtime_delivery import RuntimeReconciliation, RuntimeSubmission
 
 
 class BoundedNativeAdapter:
-    def __init__(self, *, request):
+    def __init__(self, *, request, qualification=None):
         self._request = request
+        self._qualification = qualification
+
+    def capability(self, recipient):
+        from .runtime_delivery import RuntimeCapability
+        if self._qualification is None:
+            return RuntimeCapability('not_qualified', 'bounded_native_backend_not_qualified')
+        return self._qualification(recipient)
 
     @staticmethod
     def _input(prompt):
@@ -80,12 +88,17 @@ class BoundedNativeAdapter:
             if state in ('pending', 'admitted'):
                 return RuntimeSubmission('accepted', receipt_id=queued['id'], evidence_kind='native_queue_acceptance')
             return RuntimeSubmission('uncertain', reason='bounded_native_' + state)
+        except BoundedNativePreIORefusal:
+            return RuntimeSubmission('not_sent', reason='bounded_native_backend_not_qualified', pre_io=True)
         except Exception:
             # A timeout or malformed response never authorizes an unbounded retry.
             return RuntimeSubmission('uncertain', reason='bounded_native_acceptance_unconfirmed')
 
     def reconcile_bounded(self, recipient, prompt, envelope):
-        state, queued, response = self._read(recipient, prompt, envelope)
+        try:
+            state, queued, response = self._read(recipient, prompt, envelope)
+        except BoundedNativePreIORefusal:
+            return RuntimeReconciliation(None, 'bounded_native_backend_not_qualified')
         if state != 'admitted':
             return RuntimeReconciliation(None, 'bounded_native_' + state)
         return RuntimeReconciliation(dict(source='bounded_native_admission',
@@ -93,7 +106,10 @@ class BoundedNativeAdapter:
             client_message_id=envelope.client_user_message_id, execution='not_observed'))
 
     def cancel_bounded(self, recipient, prompt, envelope, queue_id=None):
-        state, queued, _ = self._read(recipient, prompt, envelope)
+        try:
+            state, queued, _ = self._read(recipient, prompt, envelope)
+        except BoundedNativePreIORefusal:
+            return RuntimeReconciliation(None, 'bounded_native_backend_not_qualified')
         if queue_id is not None and queued is not None and queued['id'] != queue_id:
             raise WakeError('bounded native queue identity changed')
         if state != 'pending':
