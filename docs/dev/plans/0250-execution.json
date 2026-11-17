@@ -168,12 +168,15 @@
     },
     "ST04-CANCEL": {
       "owner": "grok_readiness_diagnosis",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
       ],
-      "scope": "Legacy v1/v4 cancellation metadata qualified or explicitly unobserved; stop remains available"
+      "scope": "Legacy v1/v4 cancellation metadata qualified or explicitly unobserved; stop remains available",
+      "worker_sha": "c991c35728926b133d643d2fc22ba08d29a61f8a",
+      "integration_sha": "ff08980f",
+      "validation": "27 focused records/signal controls PASS311 and312; integrated public legacy cancellation subcases PASS311; no global utc_now replacement"
     },
     "ST04-BOOTSTRAP": {
       "owner": "stable_time_bootstrap",
@@ -181,7 +184,17 @@
       "dependencies": [
         "ST02"
       ],
-      "scope": "Read-only host-counter bootstrap contract diagnosis; no source or runtime effects"
+      "scope": "Approved non-authoritative whole-operation blocking transport fuse; no guest clock reads, no measurement bootstrap recursion, no daemon/helper/protocol change"
+    },
+    "ST04-STOP-METADATA": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "scope": "New stop diagnostics use qualified coordinate or explicitly unknown time; original first-stop history retained, stop stays available",
+      "validation": "Public retained-deadline metadata RED then2PASS311;2 affected checks plus7goal-time controls PASS312; no broad run"
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -193,5 +206,5 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-17T16:19:52.554273+00:00"
+  "updated_at": "2026-11-17T16:24:31.329177+00:00"
 }

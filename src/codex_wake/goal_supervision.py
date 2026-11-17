@@ -942,6 +942,24 @@ def _allocation_latch(receipt,reason,deadline=None):
     return deadline
 
 
+def _stop_clock(receipt,reason):
+    """A protective stop remains writable without a qualified timestamp."""
+    from .goal_time import upper, relative, GoalTimeUnavailable
+    observed=None
+    clock_reason='clock_unqualified'
+    if receipt['boot_id']!=boot_id_value():
+        clock_reason='boot_identity_changed'
+    elif reason!='clock_unqualified' and receipt.get('clock_failure')!='clock_unqualified':
+        try:
+            observed=upper(receipt)
+            clock_reason='authenticated_host_counter' if relative(receipt) else 'qualified_utc'
+        except GoalTimeUnavailable as error:
+            clock_reason=error.code
+    return dict(observed_boottime=None,
+        observed_upper=observed if not relative(receipt) else None,
+        clock_qualified=observed is not None,clock_reason=clock_reason)
+
+
 def _stop_episode(path,receipt,reason):
     """Retain distinct faults across recovery without rewriting the first stop."""
     episodes=receipt.setdefault('stop_episodes',[])
@@ -950,12 +968,12 @@ def _stop_episode(path,receipt,reason):
     controller=_heartbeat(path.parent)
     event=dict(id=uuid4().hex,kind='stop',reason=reason,receipt_generation=receipt['generation'],
         allocation_id=receipt['allocation_id'],boot_id=boot_id_value(),
-        observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
         controller_generation=controller.get('generation'),used_tokens=receipt.get('used_tokens'),
         token_limit=receipt['token_limit'],deadline=receipt['deadline'],
         native_method=receipt.get('observation_method') if reason=='observation_unavailable' else None,
         cause=receipt.get('observation_error') if reason=='observation_unavailable' else None)
     from .goal_time import public_time
+    event.update(_stop_clock(receipt,reason))
     event.update(public_time(receipt))
     episodes.append(event);receipt['active_stop_id']=event['id']
 
@@ -969,12 +987,9 @@ def _first_stop(path,receipt,reason):
             retained=json.loads(allocation_path.read_text()).get('first_stop')
             if retained and retained.get('receipt_generation')==receipt['generation']:
                 original=retained
-    clock_unqualified=reason=='clock_unqualified' or receipt.get('clock_failure')=='clock_unqualified'
-    # Clock-authority failure is not evidence that guest BOOTTIME can supply
-    # a replacement timestamp. Preserve the stop with explicit unknown time.
-    now=None if clock_unqualified else time.clock_gettime(time.CLOCK_BOOTTIME)
-    elapsed=None if clock_unqualified else now-receipt['started_boottime']
-    qualified=not clock_unqualified and receipt['boot_id']==boot_id_value() and elapsed>=0
+    clock=_stop_clock(receipt,reason) if original is None else original
+    qualified=clock['clock_qualified']
+    clock_unqualified=not qualified
     try:
         controller_path=path.parent/'controller.json';_private(controller_path)
         controller=json.loads(controller_path.read_text())
@@ -983,10 +998,9 @@ def _first_stop(path,receipt,reason):
     # first retained diagnostic explicitly instead of inventing that history.
     receipt['first_stop']=original or dict(version=1,reason=reason,
         provenance='existing_latch_observed' if receipt.get('stop_latched') else 'stop_decision',
-        observed_boottime=now,boot_id=boot_id_value(),
-        observed_upper=receipt['started_upper']+elapsed if qualified else None,
-        clock_qualified=qualified,clock_reason='clock_unqualified' if clock_unqualified else 'same_boot_elapsed' if qualified else
-            ('boot_identity_changed' if receipt['boot_id']!=boot_id_value() else 'elapsed_time_invalid'),
+        observed_boottime=None,boot_id=boot_id_value(),
+        observed_upper=clock.get('observed_upper'),
+        clock_qualified=qualified,clock_reason=clock['clock_reason'],
         last_usage_observed_boottime=receipt.get('observed_boottime'),
         controller_observed_boottime=controller.get('observed_boottime'),
         controller_generation=controller.get('generation',receipt.get('controller_generation')),
@@ -999,7 +1013,7 @@ def _first_stop(path,receipt,reason):
         cause=receipt.get('observation_error') if reason=='observation_unavailable' else None,
         observation_duration_seconds=receipt.get('observation_duration_seconds') if reason=='observation_unavailable' else None)
     from .goal_time import relative, public_time
-    if relative(receipt):
+    if relative(receipt) and original is None:
         diagnostic=receipt['first_stop']
         diagnostic.update(public_time(receipt), observed_upper=None,
             observed_elapsed_upper=receipt.get('clock_elapsed_upper'),

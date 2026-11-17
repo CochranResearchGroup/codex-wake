@@ -916,7 +916,11 @@ class GoalSupervisionTests(unittest.TestCase):
                 enroll(root,policy,THREAD,42,120)
                 self.assertEqual(poll(root)[0]['state'],'checkpoint_requested')
                 with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+121):
-                    self.assertEqual(poll(root)[0]['state'],'stopped')
+                    stopped=poll(root)[0]
+                    self.assertEqual(stopped['state'],'stopped')
+                    self.assertEqual(stopped['first_stop']['observed_upper'],NOW+121)
+                    self.assertIsNone(stopped['first_stop']['observed_boottime'])
+                    self.assertIsNone(stopped['stop_episodes'][-1]['observed_boottime'])
                 self.assertEqual(native['active'],[])
 
     def test_unqualified_utc_stops_without_rewriting_original_allowance(self):
