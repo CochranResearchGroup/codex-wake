@@ -416,6 +416,10 @@ class GovernorTests(unittest.TestCase):
                     time.sleep(.05)
                     result=execute(root,'status',dict(selector=fixtures.THREAD),principal=actor)
                 self.assertTrue(result['watcher']['native_guard_qualified'])
+                from codex_wake.measurements import TimeUnavailable
+                with patch('codex_wake.measurements.fresh',side_effect=TimeUnavailable('counter unavailable')):
+                    held=execute(root,'status',dict(selector=fixtures.THREAD),principal=actor)
+                self.assertFalse(held['watcher']['native_guard_qualified'])
                 self.assertEqual(result['limits']['token_limit'],100)
                 self.assertTrue(native['lease_calls'])
                 self.assertEqual(next(call for call in native['lease_calls'] if not call.get('query'))['memberTurns'][0]['turnIds'],['work'])
