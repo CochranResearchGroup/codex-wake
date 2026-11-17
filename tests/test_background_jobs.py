@@ -14,6 +14,32 @@ from codex_wake.task_briefs import BriefAuthority, TaskBriefStore
 
 
 class BackgroundJobsTests(unittest.TestCase):
+    def test_exact_cancel_remains_available_without_qualified_timestamp(self):
+        from unittest.mock import patch
+        from codex_wake import measurements
+        clock = dict(reason='authenticated_counter_only', counter=dict(
+            epoch='c357309d-c209-4467-b757-e1488e6b1aaa', counter=1000,
+            frequency=1000, rate_ppm=0))
+        store = self.approve('pass', max_seconds=3)
+        with patch.object(measurements, 'utc_time', return_value=100), patch.object(measurements, 'snapshot', return_value=clock), patch('codex_wake.background_jobs.subprocess.Popen') as spawn:
+            spawn.return_value.poll.return_value = 0
+            job = store.launch('fixture', principal=self.worker, idempotency_key='cancel-clock')
+        with patch.object(measurements, 'utc_time', side_effect=measurements.TimeUnavailable('unqualified')):
+            store.cancel(job['job_id'], principal=self.worker, expected_generation=job['generation'])
+        request = json.loads((self.root/'background-jobs'/job['job_id']/'cancel.json').read_text())
+        self.assertIsNone(request['requested_at'])
+        self.assertEqual(request['clock_status'], 'unavailable')
+        self.assertEqual(request['generation'], job['generation'])
+
+    def test_unqualified_stable_time_refuses_before_supervisor_launch(self):
+        from unittest.mock import patch
+        from codex_wake import measurements
+        store = self.approve("raise SystemExit('must not execute')", max_seconds=3)
+        with patch.object(measurements, 'utc_time', side_effect=measurements.TimeUnavailable('unqualified')), patch('codex_wake.background_jobs.subprocess.Popen') as spawn:
+            with self.assertRaises(measurements.TimeUnavailable):
+                store.launch('fixture', principal=self.worker, idempotency_key='clock-held')
+        spawn.assert_not_called()
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
