@@ -31,6 +31,19 @@ class NativeLargeResponseTests(unittest.TestCase):
                 native_request('unix://', '/codex', 'thread/read', dict(threadId='owned'), 2)
             locate.assert_not_called()
 
+    def test_reconciliation_holds_before_reads_when_stable_time_is_unqualified(self):
+        from codex_wake.codex_runtime import CodexRuntimeAdapter
+        from codex_wake.records import WakeError
+        def forbidden(*args, **kwargs):
+            self.fail('reconciliation read before qualified time')
+        adapter = CodexRuntimeAdapter(read_thread=forbidden, request=forbidden,
+            run=forbidden, project_failure=forbidden)
+        target = adapter.resolve(dict(transport='native', thread_id='owned',
+            endpoint='unix:///owned', codex_cmd='/codex'))
+        with patch('codex_wake.native_clock.configuration', return_value=None):
+            with self.assertRaisesRegex(WakeError, 'stable_time_unavailable'):
+                adapter.reconcile(target, 'retained prompt')
+
     def test_reconciliation_reads_user_message_beyond_default_websocket_cap(self):
         prompt = 'wake regression marker'
         thread_id = '01a10922-e791-7dd0-8bb2-ae9f110a688b'

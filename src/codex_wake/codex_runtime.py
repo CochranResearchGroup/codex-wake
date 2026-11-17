@@ -4,11 +4,11 @@ from __future__ import annotations
 import os
 import re
 import subprocess
-import time
 from types import MappingProxyType
 from uuid import UUID
 
 from .records import WakeError
+from .measurements import TimeUnavailable, deadline as stable_deadline
 from .runtime_delivery import (
     RuntimeCapability, RuntimeObservation, RuntimeRecipient, RuntimeReconciliation,
     RuntimeSubmission, RuntimeTargetError,
@@ -60,7 +60,7 @@ class CodexRuntimeAdapter:
         self._request = request
         self._run = run
         self._project_failure = project_failure
-        self._clock = monotonic or time.monotonic
+        self._clock = monotonic  # Explicit trusted fixture seam; production uses Stable Time.
 
     def resolve(self, target) -> RuntimeRecipient:
         if target.get("transport") != "native" or target.get("runtime", "codex") != "codex":
@@ -194,14 +194,24 @@ class CodexRuntimeAdapter:
     def reconcile(self, recipient: RuntimeRecipient, prompt: str) -> RuntimeReconciliation:
         """Observe only this session and return receipt identities, never bodies."""
         target = recipient.binding
-        deadline = self._clock() + 10
+        try:
+            timer = stable_deadline(10) if self._clock is None else None
+            injected_end = self._clock() + 10 if self._clock is not None else None
+        except TimeUnavailable:
+            raise WakeError('native_stable_time_unavailable') from None
+
+        def remaining_budget():
+            try:
+                return timer.remaining() if timer is not None else injected_end - self._clock()
+            except TimeUnavailable:
+                raise WakeError('native_stable_time_unavailable') from None
 
         def request(method, params):
-            remaining = deadline - self._clock()
+            remaining = remaining_budget()
             if remaining <= 0:
                 raise WakeError("native reconciliation observation timed out")
             response = self._request(target["endpoint"], target["codex_cmd"], method, params, remaining)
-            if self._clock() >= deadline:
+            if remaining_budget() <= 0:
                 raise WakeError("native reconciliation observation timed out")
             return response
 
@@ -361,7 +371,7 @@ class CodexRuntimeAdapter:
                             freshness='Observed with this exact native turn reconciliation',
                             ambiguity='Completion establishes execution, not acceptance of the result.'),
                     )
-        if self._clock() >= deadline:
+        if remaining_budget() <= 0:
             raise WakeError("native reconciliation observation timed out")
         if len(evidence) != 1:
             return RuntimeReconciliation(

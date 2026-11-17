@@ -23,7 +23,7 @@
     },
     "ST03": {
       "owner": "time_bypass_audit",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -31,7 +31,11 @@
       "worker": "/root/time_bypass_audit",
       "branch": "feat/stable-time-custody-0250",
       "base": "6b5dad0c22c38215e269a89abdc712b4b302300d",
-      "scope": "structured freshness across observation/custody/backgroundjob/workacceptance owners; original UTCmetadata retained"
+      "scope": "structured freshness across observation/custody/backgroundjob/workacceptance owners; original UTCmetadata retained",
+      "integration_sha": "1d140f6a",
+      "worker_sha": "f9368576f778b0bf2ca133d756ff1e43b912f772",
+      "validation": "41focusedchecks311/312 worker; rootactual3publicscenariospassed viaenrolledStableTime; maintainedrealprocessjobmodule13PASS; immutableoriginaldeadlineandstrictcustody preserved",
+      "actual_evidence": "private st03-actual-public-result.json andst03-background-module-311.log"
     },
     "ST04": {
       "owner": "root",
@@ -58,12 +62,12 @@
         "ST02"
       ],
       "scope": "native protocol, bounded peerqualification, sharedmetadata reader deadline adoption and implicit alternateclock fallback refusal",
-      "validation": "64focusedchecks Python311,52Python312; two publicpreIO missingclock RED/GREEN and realUnix factory non-guestclock RED/GREEN; undefined-name Ruff/diff pass",
+      "validation": "64focused311/52focused312authority+nativechecks; thennewreconciliationclockgate30PASS311/18PASS312; missingauthorityholds beforeRPC/endpointresolution; explicitnumericfixtureonly clocks retained",
       "native_build": "unchanged; no rebuild or broadreview"
     },
     "ST04-GROK": {
       "owner": "grok_readiness_diagnosis",
-      "state": "implemented",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -72,10 +76,38 @@
       "branch": "fix/stable-time-grok-login-0250",
       "base": "6b5dad0c22c38215e269a89abdc712b4b302300d",
       "result_sha": "bba146a32b094d612f84bb651294bb0fd6afcc4c",
-      "validation": "14focusedauthchecks on311and312; missing/midflowclock RED/GREEN; no realautheffects"
+      "validation": "14focusedauthchecks311and312; rootintegratedaffectedselectionalso14authcasespass; no realautheffects",
+      "integration_sha": "46aca738"
+    },
+    "ST04-BUDGET": {
+      "owner": "time_bypass_audit",
+      "state": "implemented",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "worker": "/root/time_bypass_audit",
+      "result_sha": "7177b48e",
+      "scope": "strictcurrentUTCgoalupper and truthfulunqualifiedstopmetadata; originaldeadline/origin/usageimmutable; otherBOOTTIME paths pending",
+      "validation": "12focusedchecks311and312; rootintegrationpending"
+    },
+    "ST04-PERMISSIONS": {
+      "owner": "grok_readiness_diagnosis",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "scope": "permissionmetadata/approvalUTCexpiry strictdefaultclock; staticstandingandoperatorstop unaffected"
     }
   },
   "review": "Previous single broadreview retained; no repeat",
   "working_effects": "none",
-  "live_grok_renewal": "Explicit question pending: new12Grok/2OpenAI/16localtools/15StableTimeminute/1metadatarefresh packet; previous allowance exhausted and unknowncharge/stop records retained; do not dispatch without approval."
+  "live_grok_renewal": "Explicit question pending: new12Grok/2OpenAI/16localtools/15StableTimeminute/1metadatarefresh packet; previous allowance exhausted and unknowncharge/stop records retained; do not dispatch without approval.",
+  "integration_validation_attempt": {
+    "source": "1d140f6a",
+    "initial": "115selected311/103selected312; eachfailedonlyonewrongtestmodule name test_work_acceptance_commands; allactualtests114/102passed",
+    "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
+    "full_suite": false
+  }
 }
