@@ -9,6 +9,17 @@ qualification and applicable installation authorization is established.
 
 ## Current State
 
+Native `9af0e8e48d` is committed clean and source-validated: final native-send
+admission after HTTP authentication/preparation and inside the WS sender;
+non-consuming pending preflight, UNKNOWN retains original pending state, known
+expiry is terminal before first attempt, bounded WS publication waits for send.
+249 affected controls pass (26queue+2clock+221API), with behavioral red/green
+evidence. Final batch review against Native075/Wakef8e completed once: Standards
+low private-helper cleanup deferred; Spec no source findings. One bounded
+findings pass required no behavioral change or manufactured test. Package5
+assembly is running through the maintained complete-package selector; new
+installed qualification remains pending. Package4 receipts below are historical.
+
 Native `075639f50a` retains bounded queue enforcement and adds conservative local
 package replacement: an identical full package is pinned without restarting or
 retargeting the running daemon; a different running package requires explicit
@@ -34,9 +45,9 @@ Production bounded Wake delivery stays refused. Installed preparation expiry,
 private-owner normal-exit recovery, stopped account/default/shared native-home
 rollback, failed-start repair and same-client reconnect now pass. Shared pending
 cancellation source and isolated installed adapter seam also pass; production
-factory remains disabled. The remaining precise native blocker is transport:
-HTTP asynchronous auth/preparation and WS task/lock/send-command queue can delay
-actual sending after core admission. See transport-boundary-blocker.json.
+factory remains disabled. The former package4 transport blocker is documented in
+transport-boundary-blocker.json and addressed by Native9af source; exact package5
+qualification remains required.
 Operator accepted final native transport-send admission on 2026-11-16.
 Recheck after authentication, preparation and transport waits, immediately before
 the native sender writes. Unknown/expired time prevents sending. Remote model

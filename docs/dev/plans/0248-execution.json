@@ -49,7 +49,12 @@
     "new_batch_fixed_point": "Wakef8e879c291c172add80211b83de2b3c581fa2295; Native075639f50a5cf8f8cdfa39b5213cd77a6efa3d53",
     "max_broad_reviews": 1,
     "max_remediation_passes": 1,
-    "new_batch_status": "source tickets validated; final frozen batch review ready"
+    "new_batch_status": "one final review complete; no blocking sourcefindings; low helpercleanup backlog; package/runtime needs_evidence",
+    "passes": 1,
+    "standards_accepted": 1,
+    "spec_code_findings": 0,
+    "remediation_passes": 1,
+    "remediation": "No behavioral blocker; no new test/source edit warranted. Retain existing redgreen controls."
   },
   "integration_tip": "89c639f9"
 }

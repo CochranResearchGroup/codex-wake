@@ -10414,3 +10414,36 @@ anchors and minimal fix scope. Strict remote execution versus final native-send
 semantics requires user decision; do not silently weaken contract. Timing ticket
 blocked; final requested review/TDD cycle not yet run. Prior cycle retained.
 Original Python assertion remains unresolved. No merge, deployment or closure.
+
+
+## Turn | 2026-11-16 | #695 final native-send source complete, package5 pending
+
+Operator accepted final native-send admission; remote model-start remains an
+explicit limitation. Native worker source9af0e8e48d committed clean. HTTP async
+auth red→green, WS delayed-sender/early-publication red→green, full queue late
+transport red→green, UNKNOWN early-consume red→green retained. Compile-only
+exhaustive-error-match attempts retained separately. Existing QueueStore atomic
+consume reused at final sender; pending outer preflight non-consuming, no new
+protocol/state API. Known expiry durableExpired; UNKNOWN originalpending and
+qualified same-ID/deadline resume; history isolation through reload pass.
+28queue/clock plus221API controls pass. Full source patch pinned; verified
+incremental private Native bundle depends on retained verified075 base bundle.
+
+One final two-axis batch review (Wakef8e→f28, Native075→9af): Standards1low
+nonblocking private-helper scenario cleanup backlog, Spec0source findings and
+newpackage/runtime needs_evidence. One bounded findings pass: no accepted
+behavioral blocker; no new fixture or code rewrite. Source frozen. Package5
+locked/offline metadata preflight validates maintained four-bin selector, GNU
+dev-small, jobs2, stack8MiB, incremental0 and retained cache. Complete immutable
+assembly started once; CLI doctor arm will be covered there. Existing UID1017
+Stable Time reference still returns finite authenticatedUTC, no credentials
+copied. Package5 runtime acceptance pending; source does not qualify new bytes.
+
+Completion wake intent007c195714e3434cadd371b4eb9f2cd0 is armed, monitor ready,
+exact native read verified, session_only/existing_tab preserved. Resume exact
+build result first, then all6 hashes, publicpackage transfer and serial UID1017
+qualification through retained recipes. Earlier source-completion wake canceled
+with confirmation after manual reconciliation. No working installation or695
+closure; original full Python assertion and production activation/cooperation
+gates remain open. Native/Wake owned checkouts retained for exact build/runtime
+acceptance; registered inventories21/124, no new checkout in this turn.
