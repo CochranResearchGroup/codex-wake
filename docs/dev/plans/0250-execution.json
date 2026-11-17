@@ -343,14 +343,27 @@
   },
   "review": "Previous single broadreview retained; no repeat",
   "working_effects": "none",
-  "live_grok_renewal": "Explicit question pending: new12Grok/2OpenAI/16localtools/15StableTimeminute/1metadatarefresh packet; previous allowance exhausted and unknowncharge/stop records retained; do not dispatch without approval.",
+  "live_grok_renewal": "User approved fresh12Grok/2OpenAI/16localtools/900StableTimeSeconds/1metadatarefresh; existing login only. Owner grok_readiness_diagnosis preflight; live budget not yet started. Prior exhausted/unknown-charge history immutable; no replay.",
   "integration_validation_attempt": {
     "source": "1d140f6a",
     "initial": "115selected311/103selected312; eachfailedonlyonewrongtestmodule name test_work_acceptance_commands; allactualtests114/102passed",
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-17T18:13:07.400524+00:00",
+  "updated_at": "2026-11-17T20:38:19.134732+00:00",
   "worker_cleanup": "Completed original Grok, custody and bootstrap checkouts removed after clean exact commit/source byte equality and pushed custody verified; worker branch refs retained. New reenrollment/poll-ack and account-control checkouts active.",
-  "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration."
+  "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
+  "protective_integration": {
+    "source": "53cb11bd",
+    "commits": [
+      "2c7a07ea",
+      "53cb11bd"
+    ],
+    "validation": "14 combined product/daemon/exact-owned-interrupt checks PASS Python3.11 and3.12; private Unix peers, not installed Native acceptance",
+    "logs": [
+      "st04-protective-integration-311.log",
+      "st04-protective-integration-312.log"
+    ],
+    "limits": "No provider calls or installed daemon changes. Broader migrations/fullPython/runtime/activation gates open."
+  }
 }
