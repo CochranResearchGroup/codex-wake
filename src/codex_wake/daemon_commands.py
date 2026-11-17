@@ -7,7 +7,7 @@ import time
 import hashlib
 from pathlib import Path
 
-from .controller_auth import Actor, AuthError
+from .controller_auth import Actor, AuthError, _qualified_upper
 from .controller_daemons import ControllerDaemons
 from .managed_inventory import InventoryError
 
@@ -27,7 +27,7 @@ def execute(root, operation, arguments, *, actor=None, authorize=None, owner=Non
     owner = owner or owner_from_root(root)
     if operation in ('daemons.list', 'daemons.status'):
         def guard():
-            if actor is not None and (not isinstance(actor, Actor) or actor.expires_at <= time.time()
+            if actor is not None and (not isinstance(actor, Actor) or actor.expires_at <= _qualified_upper()
                     or authorize is None or authorize() != actor or 'observe' not in actor.scopes):
                 raise AuthError('insufficient_scope')
         guard()

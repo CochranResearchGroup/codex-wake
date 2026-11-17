@@ -4,14 +4,65 @@ from dataclasses import replace
 import hashlib
 from pathlib import Path
 import tempfile
-import time
 import unittest
 
-from codex_wake.controller_auth import AuthError, OAuthAuthority
-from codex_wake.daemon_commands import execute, local_operator
+from codex_wake.controller_auth import Actor, AuthError, OAuthAuthority
+from unittest.mock import patch
+
+UTC=1800000000
+from codex_wake.daemon_commands import execute
 
 
 class ProductAuthorizationTests(unittest.TestCase):
+    def setUp(self):
+        clock=patch('codex_wake.measurements.utc_bounds',return_value=(UTC,UTC+1))
+        clock.start();self.addCleanup(clock.stop)
+
+    def test_remote_actor_clock_loss_and_ambiguous_expiry_refuse_before_private_io(self):
+        from codex_wake.measurements import TimeUnavailable
+        from codex_wake.profile_operations import execute as profile_execute
+        target=dict(host='fixture',environment='test',account='alice',home='/fixture/alice',home_generation='1:2')
+        actor=Actor('operator','owner','client','grant','https://fixture','wake:controller',frozenset({'observe','account.observe'}),[target],200)
+        class Owner:
+            calls=[]
+            def execute(self,operation,arguments):
+                self.calls.append(operation)
+                return {'stores':[]} if operation=='stores.list' else {'daemon':{'target':target}}
+        for route in ('profile','daemon'):
+            owner=Owner();owner.calls=[]
+            def call():
+                if route=='profile':return profile_execute('/unused','stores.list',{},accounts=owner,actor=actor,authorize=lambda:actor)
+                return execute('/unused','daemons.status',{},owner=owner,actor=actor,authorize=lambda:actor)
+            with self.subTest(route=route), patch('codex_wake.measurements.utc_bounds',return_value=(198,199)):
+                self.assertEqual(call()['status'],'completed')
+            for bounds,code in (((199,200),'insufficient_scope'),(TimeUnavailable('private-clock'),'qualified_time_unavailable')):
+                owner.calls=[]
+                with self.subTest(route=route,code=code), patch('codex_wake.measurements.utc_bounds',return_value=bounds if isinstance(bounds,tuple) else None,side_effect=bounds if isinstance(bounds,Exception) else None):
+                    with self.assertRaises(AuthError) as held:call()
+                    self.assertEqual(held.exception.code,code)
+                    self.assertEqual(owner.calls,[])
+                    self.assertNotIn('private-clock',str(held.exception))
+
+    def test_local_status_and_stop_remain_separate_from_explicit_actor_read_guard(self):
+        from codex_wake.measurements import TimeUnavailable
+        from codex_wake.controller_runtime import ControllerRuntime
+        target=dict(host='fixture',environment='test',account='alice',home='/fixture/alice',home_generation='1:2',build_sha256='a'*64,process=None,socket_generation=None)
+        actor=Actor('operator','owner','local-fixture','local-fixture','local://fixture','wake:controller',frozenset({'control','observe'}),[target],UTC+120)
+        class Owner:
+            calls=[]
+            def execute(self,operation,arguments):
+                self.calls.append(operation)
+                return {'daemon':{'target':target}}
+        with tempfile.TemporaryDirectory() as directory:
+            runtime=ControllerRuntime(directory,now=lambda:UTC)
+            owner=Owner()
+            request=dict(operation_id='stop',idempotency_key='stop',correlation_id='stop',binding='local-cli',target=target)
+            with patch('codex_wake.measurements.utc_bounds',side_effect=TimeUnavailable('missing')), patch('codex_wake.daemon_commands.local_operator',return_value=actor), patch('codex_wake.controller_runtime.ControllerRuntime',return_value=runtime):
+                self.assertEqual(execute(directory,'daemons.status',{},owner=owner)['status'],'completed')
+                result=execute(directory,'daemons.stop',dict(expected_target=target,confirm=True,_request=request),owner=owner)
+            self.assertEqual(result['status'],'completed')
+            self.assertIn('daemons.stop',owner.calls)
+
     def test_oauth_can_issue_exact_registry_and_native_generation_grants(self):
         with tempfile.TemporaryDirectory() as tmp:
             authority = OAuthAuthority(Path(tmp) / 'auth.sqlite', issuer='http://localhost:1234', resource='http://localhost:1234/controller')
@@ -36,13 +87,13 @@ class ProductAuthorizationTests(unittest.TestCase):
 
     def test_revoked_or_expired_daemon_observation_never_opens_native_state(self):
         target = dict(host='test', environment='linux', account='alice', home='/tmp/alice', home_generation='1:2')
-        actor = local_operator(target)
+        actor = Actor('fixture','owner','client','grant','local://fixture','wake:controller',frozenset({'observe'}),[target],UTC+120)
         class Unreachable:
             def execute(self, *unused):
                 raise AssertionError('unauthorized native state opened')
         def revoked():
             raise AuthError()
-        for selected, authorize in ((actor, revoked), (replace(actor, expires_at=time.time()-1), lambda: actor)):
+        for selected, authorize in ((actor, revoked), (replace(actor, expires_at=UTC-1), lambda: actor)):
             with self.assertRaises(AuthError):
                 execute('/tmp/unused', 'daemons.status', {'account':'alice'}, actor=selected, authorize=authorize, owner=Unreachable())
 
