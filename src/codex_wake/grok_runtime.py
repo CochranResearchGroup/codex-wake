@@ -138,6 +138,9 @@ class GrokRuntimeAdapter:
             if remaining <= 0:
                 break
             observed = self.reconcile(recipient, prompt)
+            # A receipt read cannot extend either retained budget or survive clock loss.
+            if min(phase.remaining(), self.deadline.remaining()) <= 0:
+                break
             if observed.evidence:
                 return RuntimeSubmission('accepted', evidence_kind='terminal_observation', evidence=observed.evidence)
             remaining = min(phase.remaining(), self.deadline.remaining())

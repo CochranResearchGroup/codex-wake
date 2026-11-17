@@ -104,6 +104,37 @@ class GrokStableDeadlineTests(unittest.TestCase):
         self.assertIs(host.deadline,parent)
         self.assertNotIn('private-clock-loss',str(result))
 
+    def test_late_or_clock_lost_receipt_never_accepts_after_possible_paste(self):
+        from unittest.mock import patch
+        from codex_wake import measurements
+        from codex_wake.grok_runtime import GrokRuntimeAdapter
+        from test_measurements import observation
+        prompt='WAKE_RUNTIME_SUBMISSION_ID=01234567-89ab-cdef-0123-456789abcdef\nTask'
+        for failure in ('elapsed','unavailable'):
+            clock=[1000]
+            class Host:
+                pasted=False
+                inputs=[]
+                def snapshot(self,binding):
+                    if self.pasted:
+                        clock[0]=40000 if failure=='elapsed' else None
+                        return dict(binding,frame=FRAME.replace('minimal · /help',prompt+'\nminimal · /help'))
+                    return dict(binding,frame=FRAME)
+                def refresh_identity(self,binding):pass
+                def paste(self,binding,prompt,*,deadline=None):
+                    self.inputs.append(prompt);self.pasted=True
+            def read_clock():
+                if clock[0] is None:raise measurements.TimeUnavailable('private-clock-loss')
+                return observation(clock[0],rate=0)
+            host=Host()
+            recipient=RuntimeRecipient('grok',SESSION,dict(start_ticks=42,boot_id='boot',pid=123,session_id=SESSION,executable_sha256='a'*64))
+            with self.subTest(failure=failure), patch('codex_wake.measurements.snapshot',side_effect=read_clock):
+                result=GrokRuntimeAdapter(host).submit(recipient,prompt)
+                self.assertEqual(result.state,'uncertain')
+                self.assertFalse(result.pre_io)
+                self.assertEqual(host.inputs,[prompt])
+                self.assertNotIn('private-clock-loss',str(result))
+
     def test_identity_commands_share_parent_and_five_second_phase(self):
         from unittest.mock import patch
         from types import SimpleNamespace
