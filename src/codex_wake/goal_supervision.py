@@ -530,11 +530,14 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
         if permit_path.exists():
             _private(permit_path)
             permit=json.loads(permit_path.read_text())
-            if (permit.get('state') in ('prepared','handoff')
+            if (permit.get('state') in ('prepared','handoff','unqualified')
                     and receipt.get('state') in ('armed','checkpoint_requested')
-                    and not receipt.get('stop_latched')
-                    and time.clock_gettime(time.CLOCK_BOOTTIME)<permit.get('expires_boottime',0)):
-                receipt.update(state='held',reason='controller_maintenance')
+                    and not receipt.get('stop_latched')):
+                from .goal_maintenance import window
+                decision=window(permit)
+                if decision['state']!='expired' or permit.get('state')=='unqualified':
+                    receipt.update(state='held',reason='maintenance_clock_unqualified'
+                        if decision['state']=='unqualified' or permit.get('state')=='unqualified' else 'controller_maintenance')
         if receipt['state'] in ('armed','checkpoint_requested') and not receipt['controller']['fresh']:
             receipt.update(state='held',reason='controller_unavailable')
         receipt['sampled']=True;receipt['maximum_token_overshoot']=None
