@@ -20,12 +20,18 @@ from websockets.sync.client import unix_connect
 from .controller_runtime import ControllerRuntime, encoded
 from .managed_inventory import InventoryError
 from .process import process_identity
+from . import measurements
 
 MAX_EVENTS=2048
 MAX_BYTES=2*1024*1024
 MAX_EVENT_BYTES=16384
 MAX_SECONDS=3600
 MODES=('stream','transcript','final','silent')
+
+
+def _metadata_time():
+    try:return measurements.utc_time()
+    except measurements.TimeUnavailable:return None
 
 
 class TurnEvents:
@@ -43,12 +49,34 @@ class TurnEvents:
             row=db.execute('SELECT state FROM native_turn_collectors WHERE operation_id=?',(identifier,)).fetchone()
         return json.loads(row[0]) if row else dict(status='unavailable',reason='native_event_history_unavailable',sequence=0,truncated=False)
 
+    def publish_scope(self,record,row,connection,turn_id):
+        from .native_protocol import _protective_scope
+        with self.runtime.connect() as db:
+            original=db.execute('SELECT fingerprint,record FROM operations WHERE id=?',(record['operation_id'],)).fetchone()
+        current=json.loads(original[1])
+        if (current['operation']!='sessions.prompt' or current['target']!=record['target']
+                or current['payload_sha256']!=record['payload_sha256']):raise InventoryError('stale_target','original admission changed')
+        scope=_protective_scope(connection,row,record,original[0],turn_id)
+        with self.runtime.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            saved=db.execute('SELECT state FROM native_turn_collectors WHERE operation_id=?',(record['operation_id'],)).fetchone()
+            state=json.loads(saved[0]) if saved else dict(sequence=0,truncated=False)
+            prior=state.get('protective_scope')
+            if prior:
+                if any(prior.get(k)!=scope.get(k) for k in ('operation_id','admission_fingerprint','target_sha256','turn_id')):
+                    raise InventoryError('stale_target','qualified protective ownership changed')
+                return
+            state['protective_scope']=scope
+            state['protective_scope_status']='qualified'
+            db.execute('INSERT OR REPLACE INTO native_turn_collectors VALUES(?,?)',(record['operation_id'],encoded(state)))
+
     def update(self,identifier,**values):
         with self.runtime.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             row=db.execute('SELECT state FROM native_turn_collectors WHERE operation_id=?',(identifier,)).fetchone()
-            state=json.loads(row[0]) if row else dict(sequence=0,truncated=False,created_at=time.time())
-            state.update(values,updated_at=time.time())
+            state=json.loads(row[0]) if row else dict(sequence=0,truncated=False,created_at=_metadata_time())
+            state.update(values,updated_at=_metadata_time())
+            state['metadata_clock_status']='qualified' if state['updated_at'] is not None else 'unavailable'
             db.execute('INSERT OR REPLACE INTO native_turn_collectors VALUES(?,?)',(identifier,encoded(state)))
 
     def append(self,identifier,kind,params):
@@ -66,7 +94,8 @@ class TurnEvents:
                 first=db.execute('SELECT sequence,size FROM native_turn_events WHERE operation_id=? ORDER BY sequence LIMIT 1',(identifier,)).fetchone()
                 db.execute('DELETE FROM native_turn_events WHERE operation_id=? AND sequence=?',(identifier,first[0]))
                 count-=1;total-=first[1];state['truncated']=True
-            state.update(sequence=sequence,updated_at=time.time(),truncated=state['truncated'] or cut)
+            state.update(sequence=sequence,updated_at=_metadata_time(),truncated=state['truncated'] or cut)
+            state['metadata_clock_status']='qualified' if state['updated_at'] is not None else 'unavailable'
             db.execute('UPDATE native_turn_collectors SET state=? WHERE operation_id=?',(encoded(state),identifier))
 
     def read(self,identifier,cursor=0,limit=100):
@@ -157,6 +186,10 @@ def collect(root,identifier):
                 if not isinstance(turn_id,str) or not turn_id:raise InventoryError('uncertain_effect','native turn acknowledgement missing')
                 handle=dict(kind='native_turn',local_control=True,turn_id=turn_id,target=target)
                 record.update(result=handle,execution='running',delivery='submitted',acceptance='harness_accepted',phase='waiting',reason=None)
+                try:store.publish_scope(record,row,ws,turn_id)
+                except (ValueError,OSError,KeyError,TypeError) as error:
+                    if not store.state(identifier).get('protective_scope'):
+                        store.update(identifier,protective_scope_status='unqualified',protective_scope_error=type(error).__name__)
                 runtime._save(record);store.update(identifier,status='collecting',turn_id=turn_id)
                 deadline=time.monotonic()+MAX_SECONDS
                 while True:

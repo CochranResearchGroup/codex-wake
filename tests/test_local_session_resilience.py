@@ -23,7 +23,7 @@ from codex_wake.local_session_events import TurnEvents
 
 
 @contextlib.contextmanager
-def peer(*,lost_ack=False,echo_id=True,busy=False,hold_ack=False,hold_observation=False):
+def peer(*,lost_ack=False,echo_id=True,busy=False,hold_ack=False,hold_observation=False,interrupt_reply='ack'):
     with tempfile.TemporaryDirectory() as directory,patch.dict(os.environ):
         # Wire fixtures own no operator panes; inherit isolation in collectors.
         os.environ.pop('TMUX',None);os.environ['TMUX_TMPDIR']=directory
@@ -64,7 +64,11 @@ def peer(*,lost_ack=False,echo_id=True,busy=False,hold_ack=False,hold_observatio
                         if lost_ack:return
                         result={'turn':{'id':'owned-turn'}}
                     elif method=='turn/interrupt':
-                        state['interrupts'].append(params);state['status']='interrupted';finish.set();result={}
+                        state['interrupts'].append(params)
+                        if interrupt_reply=='stall':drop.wait(5);return
+                        if interrupt_reply=='reject':
+                            ws.send(json.dumps(dict(id=message['id'],error=dict(code=-32000,message='refused'))));continue
+                        state['status']='interrupted';finish.set();result={}
                     else:raise AssertionError(method)
                     ws.send(json.dumps(dict(id=message['id'],result=result)))
                     if method=='turn/start':
@@ -95,6 +99,88 @@ def submit(state,key='intent'):
 
 
 class SessionResilienceTests(unittest.TestCase):
+    def test_private_revocation_interrupts_qualified_owned_turn_during_total_clock_loss_once(self):
+        from codex_wake.measurements import TimeUnavailable
+        with peer() as state:
+            admitted=submit(state,'protective-clock-loss')
+            identifier=admitted['operation_id']
+            record=state['owner'].runtime._load(identifier)
+            principal=record['principal']
+            original_metadata=TurnEvents(state['root']).state(identifier)
+            self.assertEqual(original_metadata['protective_scope_status'],'qualified')
+            original_scope=original_metadata['protective_scope']
+            with patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('all counter evidence lost')):
+                outcome=state['owner'].runtime.revoke_grant(principal['grant_id'],issuer=principal['issuer'],resource=principal['resource'])
+                self.assertEqual(state['interrupts'],[dict(threadId='one',turnId='owned-turn')])
+                self.assertEqual(outcome['operations'][0]['cancellation'],'requested')
+                state['owner'].runtime.revoke_grant(principal['grant_id'],issuer=principal['issuer'],resource=principal['resource'])
+                self.assertEqual(len(state['interrupts']),1)
+                from codex_wake.native_protocol import native_request
+                from codex_wake.records import WakeError
+                with self.assertRaisesRegex(WakeError,'stable_time_unavailable'):
+                    native_request(state['endpoint'],'/unused','turn/start',dict(threadId='one'),1)
+                self.assertEqual(TurnEvents(state['root']).state(identifier)['protective_scope'],original_scope)
+            self.assertEqual(len(state['starts']),1)
+
+    def test_total_clock_loss_does_not_reconcile_unacknowledged_turn_or_create_scope(self):
+        from codex_wake.measurements import TimeUnavailable
+        with peer(lost_ack=True) as state:
+            admitted=submit(state,'protective-unacked');identifier=admitted['operation_id']
+            record=state['owner'].runtime._load(identifier);principal=record['principal']
+            self.assertNotIn('protective_scope',TurnEvents(state['root']).state(identifier))
+            with patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('lost')):
+                outcome=state['owner'].runtime.revoke_grant(principal['grant_id'],issuer=principal['issuer'],resource=principal['resource'])
+            self.assertEqual(outcome['operations'][0]['cancellation'],'uncertain')
+            self.assertEqual(state['interrupts'],[])
+            self.assertNotIn('protective_scope',TurnEvents(state['root']).state(identifier))
+            self.assertEqual(len(state['starts']),1)
+
+    def test_clock_loss_rejects_missing_empty_mismatched_or_retargeted_scope(self):
+        from codex_wake.measurements import TimeUnavailable
+        for defect in ('legacy','empty_turn','admission','target','endpoint','replaced_socket'):
+            with self.subTest(defect=defect),peer() as state:
+                with contextlib.ExitStack() as cleanups:
+                    admitted=submit(state,'protective-'+defect);identifier=admitted['operation_id']
+                    store=TurnEvents(state['root']);metadata=store.state(identifier)
+                    self.assertIn('protective_scope',metadata)
+                    if defect=='legacy':metadata.pop('protective_scope')
+                    elif defect=='empty_turn':metadata['protective_scope']['turn_id']=''
+                    elif defect=='admission':metadata['protective_scope']['admission_fingerprint']='changed'
+                    elif defect=='target':metadata['protective_scope']['target_sha256']='changed'
+                    elif defect=='endpoint':metadata['protective_scope']['endpoint']='unix:///changed.sock'
+                    else:
+                        Path(state['endpoint'][7:]).unlink()
+                        replacement=cleanups.enter_context(unix_serve(state['handler'],state['endpoint'][7:]))
+                        worker=threading.Thread(target=replacement.serve_forever,daemon=True);worker.start()
+                        cleanups.callback(worker.join,2);cleanups.callback(replacement.shutdown)
+                    with store.runtime.connect() as db:
+                        db.execute('UPDATE native_turn_collectors SET state=? WHERE operation_id=?',(json.dumps(metadata),identifier))
+                    record=state['owner'].runtime._load(identifier);principal=record['principal']
+                    with patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('lost')):
+                        outcome=state['owner'].runtime.revoke_grant(principal['grant_id'],issuer=principal['issuer'],resource=principal['resource'])
+                    self.assertEqual(state['interrupts'],[])
+                    self.assertEqual(outcome['operations'][0]['cancellation'],'uncertain')
+                    if defect=='legacy':self.assertNotIn('protective_scope',store.state(identifier))
+                    self.assertEqual(len(state['starts']),1)
+
+    def test_protective_fuse_and_rejection_remain_uncertain_without_replay(self):
+        from codex_wake.measurements import TimeUnavailable
+        for response in ('stall','reject','unsupported_fuse'):
+            with self.subTest(response=response),peer(interrupt_reply=response) as state:
+                admitted=submit(state,'protective-'+response);identifier=admitted['operation_id']
+                record=state['owner'].runtime._load(identifier);principal=record['principal']
+                with contextlib.ExitStack() as stack:
+                    stack.enter_context(patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('lost')))
+                    if response=='unsupported_fuse':stack.enter_context(patch('codex_wake.host_counter._TransportFuse',side_effect=ValueError('unsupported')))
+                    outcome=state['owner'].runtime.revoke_grant(principal['grant_id'],issuer=principal['issuer'],resource=principal['resource'])
+                    self.assertEqual(outcome['operations'][0]['cancellation'],'uncertain')
+                    self.assertEqual(len(state['interrupts']),0 if response=='unsupported_fuse' else 1)
+                    state['owner'].runtime.revoke_grant(principal['grant_id'],issuer=principal['issuer'],resource=principal['resource'])
+                    self.assertEqual(len(state['interrupts']),0 if response=='unsupported_fuse' else 1)
+                current=state['owner'].runtime._load(identifier)
+                self.assertNotEqual(current['phase'],'terminal')
+                self.assertEqual(TurnEvents(state['root']).state(identifier)['protective_attempt']['status'],'uncertain')
+
     def test_missing_native_ack_never_cancels_an_unbound_turn_or_replays_prompt(self):
         for echo in (False,'duplicate'):
             with peer(lost_ack=True,echo_id=echo) as state:
