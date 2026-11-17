@@ -1,0 +1,51 @@
+{
+  "spec": "docs/dev/plans/0250-2026-11-17-stable-time-everywhere.md",
+  "branch": "feat/native-expiry-695",
+  "base": "098f409a8de5d7010984189127bf4f10e12fb1d3",
+  "wip_limit": 3,
+  "tickets": {
+    "ST01": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [],
+      "paths": [
+        "src/codex_wake/measurements.py",
+        "tests/test_measurements.py"
+      ],
+      "validation": "7 focused publicinterface checks pass Python3.11 and3.12; ruff/diff pass; UTC/counter domains separate, ratebounds/epoch/frequency/rollback/unqualifiedhold; native bridge bootstrap remains ST04 adoption gate"
+    },
+    "ST02": {
+      "owner": "time_bypass_audit",
+      "state": "validated",
+      "dependencies": [],
+      "evidence": "private st02-time-bypass-audit.json",
+      "summary": "440 production measurements,42boundclocks,197injectedcalls across134files;602scriptmeasurements90files; legacy persistedclockdomains identified"
+    },
+    "ST03": {
+      "owner": "root",
+      "state": "pending",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ]
+    },
+    "ST04": {
+      "owner": "pending",
+      "state": "pending",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ]
+    },
+    "GR01": {
+      "owner": "grok_readiness_diagnosis",
+      "state": "validated",
+      "dependencies": [],
+      "evidence": "private gr01-grok-readiness-diagnosis.json",
+      "summary": "Catalogexpiry already StableTime; bothmetadata/codingproof expired2026-11-17T01:27:08.145664Z; prior liveallowance exhausted, no new qualification effects authorized",
+      "next_gate": "renewed explicit liveallowance and stop/unknowncharge reconciliation; immutableexpiry preserved"
+    }
+  },
+  "review": "Previous single broadreview retained; no repeat",
+  "working_effects": "none"
+}
