@@ -30,6 +30,40 @@ from codex_wake.signals import ArmedSignal, Eq, Resume, SignalRequest, SourceAnc
 
 
 class RecordTests(unittest.TestCase):
+    def test_legacy_cancellation_preserves_authority_without_guest_time(self) -> None:
+        from codex_wake.measurements import TimeUnavailable
+        from codex_wake.records import WakeError
+        targets = (
+            dict(transport='tmux', tmux_socket='/tmp/tmux/default', pane='%1'),
+            dict(transport='native', thread_id='00000000-0000-7000-8000-000000000695',
+                 endpoint='unix:///tmp/native.sock', codex_cmd='/codex', expires_at='2030-01-01T00:00:00Z'),
+        )
+        for target in targets:
+            for qualified in (False, True):
+                with self.subTest(transport=target['transport'], qualified=qualified), tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    record = build_record(predicate=dict(type='not_before', due_at='2026-05-18T21:15:00Z'),
+                        prompt='continue', cwd=root, target=target, now=datetime(2026, 5, 18, tzinfo=UTC))
+                    original = write_record(root, record)
+                    with patch('codex_wake.measurements.utc_bounds', return_value=(100, 101),
+                               side_effect=None if qualified else TimeUnavailable('private-clock-detail')), \
+                            patch('codex_wake.records.utc_now', side_effect=AssertionError('guest time forbidden')):
+                        cancelled = cancel_record(root, record['id'])
+                        retained = cancelled.read_bytes()
+                        with self.assertRaisesRegex(WakeError, 'cannot cancel wake in status cancelled'):
+                            cancel_record(root, record['id'])
+                    value = json.loads(retained)
+                    self.assertEqual(value['status'], 'cancelled')
+                    self.assertEqual(value['updated_at'], '1970-01-01T00:01:41Z' if qualified else None)
+                    self.assertEqual(value['events'][-1]['at'], value['updated_at'])
+                    if not qualified:
+                        self.assertEqual(value['events'][-1]['time_status'], 'not_observed')
+                    for field in ('id', 'schema_version', 'created_at', 'target', 'predicate', 'next_attempt_at', 'attempts'):
+                        self.assertEqual(value[field], record[field])
+                    self.assertEqual(classify_record(value), 'v1')
+                    self.assertFalse(original.exists())
+                    self.assertEqual(cancelled.read_bytes(), retained)
+
     def test_signal_cleanup_requires_durable_terminal_fence_and_released_pins(self) -> None:
         from codex_wake.event_wake import EventWake
         from codex_wake.signal_records import (

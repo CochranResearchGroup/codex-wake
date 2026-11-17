@@ -630,11 +630,23 @@ def _cancel_found(
     if status in {"submitted", "failed", "cancelled", "expired", "archived"}:
         raise WakeError(f"cannot cancel wake in status {status}")
     network = classify_record(record) in {'network_v3', 'native_network_v5', 'native_intent_v6', 'runtime_intent_v7'}
-    current = None if network else now or utc_now()
+    if network:
+        current = None
+    elif now is not None:
+        current = now
+    elif record.get('schema_version') in (1, 4):
+        from . import measurements
+        try:
+            current = measurements.datetime_now()
+        except measurements.TimeUnavailable:
+            # Stopping an authorized wake does not require a timestamp.
+            current = None
+    else:
+        current = utc_now()
     record["status"] = "cancelled"
-    record["updated_at"] = None if network else format_utc(current)
+    record["updated_at"] = None if current is None else format_utc(current)
     events = list(record.get("events") or [])
-    events.append(dict(type='cancelled',message='Wake cancelled by operator',at=None,time_status='not_observed') if network else make_event("cancelled", "Wake cancelled by operator", current))
+    events.append(dict(type='cancelled',message='Wake cancelled by operator',at=None,time_status='not_observed') if current is None else make_event("cancelled", "Wake cancelled by operator", current))
     record["events"] = events
     destination = write_record(root, record)
     if checkpoint is not None:

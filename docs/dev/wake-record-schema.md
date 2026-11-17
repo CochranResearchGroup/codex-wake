@@ -48,7 +48,7 @@ payloads, but never derives live authority from JSON alone.
 - `schema_version`: integer schema version.
 - `id`: stable wake id.
 - `created_at`: UTC timestamp.
-- `updated_at`: UTC timestamp.
+- `updated_at`: UTC timestamp, or `null` for cancellation without qualified UTC as described below.
 - `cwd`: creating working directory.
 - `target`: dispatch target object.
 - `predicate`: trigger predicate object.
@@ -65,6 +65,17 @@ payloads, but never derives live authority from JSON alone.
 - `ack_timeout_seconds`: ack wait limit.
 - `next_attempt_at`: UTC timestamp for the next dispatch attempt or predicate check.
 - `events`: ordered audit events.
+
+### Legacy cancellation audit time
+
+Operator cancellation of schema-1 and schema-4 wakes uses qualified Stable Time
+UTC when available. If UTC is unavailable or unqualified, cancellation remains
+available: `updated_at` and the new cancellation event's `at` are `null`, and that
+event carries `time_status: "not_observed"`. This is the same explicit unknown-time
+shape used by network-time cancellation; a WSL timestamp or an old timestamp is
+never substituted. Original creation time, trigger, deadline, target, identity and
+attempt counters remain unchanged. These audit fields do not establish expiry,
+authorize dispatch, renew a deadline or change terminal-state checks.
 
 ## Status Vocabulary
 
