@@ -20,6 +20,38 @@ NOW=1893456000
 
 
 class GoalSupervisionTests(unittest.TestCase):
+    def test_identical_reenrollment_retains_qualified_native_lease_without_rearming(self):
+        from copy import deepcopy
+        observation=dict(reason='authenticated_utc',utc=dict(status='network',lower=NOW,upper=NOW),
+            valid_for_ns=300000000000,counter=dict(epoch='c357309d-c209-4467-b757-e1488e6b1aaa',
+                counter=1000,frequency=1000,rate_ppm=0))
+        controller=dict(fresh=True,generation='controller-original',governor_protocol=1)
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,request=self.fixture(directory)
+            native['lease_reply']=dict(armed=True,expired=False,stopVerified=False,ttlMs=10000)
+            with patch('codex_wake.goal_supervision._heartbeat',return_value=controller),patch(
+                    'codex_wake.goal_supervision.native_request',side_effect=request),patch(
+                    'codex_wake.lifecycle_budget.trusted_upper',return_value=NOW),patch(
+                    'codex_wake.measurements.snapshot',return_value=observation),patch(
+                    'time.clock_gettime',return_value=10):
+                first=enroll(root,policy,THREAD,100,120,requires_native_guard=True)
+                self.assertEqual(first['native_guard']['status'],'armed')
+                original=deepcopy(first['native_guard'])
+                effects=len(native['lease_calls'])
+                again=enroll(root,policy,THREAD,100,120,requires_native_guard=True)
+                self.assertEqual(again['deadline'],first['deadline'])
+                self.assertEqual(again['time_origin'],first['time_origin'])
+                self.assertEqual(again['enrollment_revision'],first['enrollment_revision'])
+                self.assertEqual(again['native_guard'],original)
+                self.assertEqual(again['native_guard']['ack_clock'],observation)
+                self.assertEqual(len(native['lease_calls']),effects)
+                self.assertEqual(effects,1)
+                tightened=enroll(root,policy,THREAD,90,120,requires_native_guard=True)
+                self.assertEqual(tightened['deadline'],first['deadline'])
+                self.assertGreater(tightened['enrollment_revision'],first['enrollment_revision'])
+                self.assertNotEqual(tightened['native_guard']['lease_id'],original['lease_id'])
+                self.assertEqual(len(native['lease_calls']),2)
+
     def test_initial_accounting_timeout_does_not_persist_an_irrecoverable_stop(self):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,_=self.fixture(directory)

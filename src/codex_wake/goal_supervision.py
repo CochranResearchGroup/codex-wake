@@ -742,10 +742,11 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
             receipt.pop('poll_ack',None)
         else:receipt.setdefault('enrollment_revision',1)
         prior_guard=(old or {}).get('native_guard',{})
+        from .goal_native_guard import qualified as guard_qualified
         guard_stale=(prior_guard.get('status') in ('expired','lost','released') or
             prior_guard.get('status')=='armed' and
             (prior_guard.get('controller_generation')!=controller.get('generation') or
-             time.clock_gettime(time.CLOCK_BOOTTIME)-prior_guard.get('ack_boottime',-1e30)>=prior_guard.get('ttl_ms',0)/1000))
+             not guard_qualified(old)))
         if old and requires_native_guard and guard_stale:
             receipt['enrollment_revision']+=1
             receipt.pop('poll_ack',None)
@@ -885,7 +886,14 @@ def enroll(root,policy_path,caller_thread_id,token_limit,time_limit_seconds,
         if receipt.get('requires_native_guard'):
             from .goal_native_guard import arm
             exhausted=receipt.get('first_stop',{}).get('reason') in ('allocation_exhausted','task_exhausted','continuation_held')
-            if not receipt.get('stop_latched') or exhausted:
+            retain_guard=bool(same and old.get('state') in ('armed','checkpoint_requested')
+                and receipt.get('state') in ('armed','checkpoint_requested')
+                and not receipt.get('stop_latched')
+                and old.get('enrollment_revision')==receipt.get('enrollment_revision')
+                and prior_guard.get('controller_generation')==controller.get('generation')
+                and guard_qualified(receipt))
+            if retain_guard:guarded=True
+            elif not receipt.get('stop_latched') or exhausted:
                 guarded=arm(path,receipt,force=True,stop=bool(receipt.get('stop_latched')))
             else:guarded=False
             if not guarded:
