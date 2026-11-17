@@ -268,11 +268,13 @@
     },
     "ST04-RUNTIME-DEADLINE": {
       "owner": "grok_readiness_diagnosis",
-      "state": "pending",
+      "state": "implemented",
       "dependencies": [
         "ST04-DEADLINE-RESTRICT"
       ],
-      "scope": "Four-file Grok runtime/terminal/wake/A2A retained deadline contract; waits on root Deadline.restrict primitive before source edits"
+      "scope": "Four-file Grok runtime/terminal/wake/A2A retained deadline contract; waits on root Deadline.restrict primitive before source edits",
+      "worker_sha": "802ae4fc46350e457e51d0f3f08c8b698a0b5399",
+      "validation": "28workerchecksPASS311/312; integration held for final post-reconciliation deadline boundary diagnosis; no provider effects"
     },
     "ST04-DEADLINE-RESTRICT": {
       "owner": "root",
@@ -282,6 +284,36 @@
       ],
       "scope": "Tighten total duration against immutable original host-counter anchor; never renew on later observation",
       "validation": "New regression RED AttributeError then8 measurement controls PASS311 and312; restrict20 cannot extend original2-second cap"
+    },
+    "ST04-DEADLINE-CONTINUITY": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "ST04-DEADLINE-RESTRICT"
+      ],
+      "scope": "Retain latest qualified observation and elapsed upper high-water; rollback above original anchor cannot extend remaining duration",
+      "validation": "Public Deadline regression RED then9core controls PASS311/312; original anchor remains immutable"
+    },
+    "ST04-MAINTENANCE": {
+      "owner": "time_bypass_audit",
+      "state": "implemented",
+      "dependencies": [
+        "ST01",
+        "ST04-POLL-ACK"
+      ],
+      "worker_sha": "63536fa3d507c0d1c1d19f5d6e56d2fc42349b12",
+      "scope": "One retained permit anchor/fixed duration; legacy/unknown holds, protective stop preserved",
+      "integration_gate": "Diagnose rollback above anchor after a previously observed counter; latest mutable evidence must not rebase anchor/duration",
+      "validation": "Worker public and private CLI/watcher controls pass311/312; exact receipts retain scope. Not yet integrated."
+    },
+    "ST04-RECORD-LIFECYCLE": {
+      "owner": "root",
+      "state": "pending",
+      "dependencies": [
+        "ST01",
+        "ST04-CANCEL"
+      ],
+      "scope": "Discovery only: archive unknown time must not fall back through append_event/created_at; retention must use qualified lower-now vs upper-original evidence. Daemon scheduling needs separate lower/upper decisions while preserving emergency/counter-only paths. No global utc_now replacement or source edits yet."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -293,6 +325,6 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-17T16:51:44.944493+00:00",
+  "updated_at": "2026-11-17T17:05:14.830264+00:00",
   "worker_cleanup": "Completed original Grok, custody and bootstrap checkouts removed after clean exact commit/source byte equality and pushed custody verified; worker branch refs retained. New reenrollment/poll-ack and account-control checkouts active."
 }

@@ -64,9 +64,16 @@ class Deadline:
             raise TimeUnavailable('stable_time_invalid_duration')
         self._seconds = seconds
         self._anchor = snapshot()
+        self._last_observation = self._anchor
+        self._elapsed_upper = 0
 
     def remaining(self):
-        return max(0, self._seconds - elapsed_bounds(self._anchor, snapshot())[1])
+        current = snapshot()
+        elapsed_bounds(self._last_observation, current)
+        elapsed = elapsed_bounds(self._anchor, current)[1]
+        self._last_observation = current
+        self._elapsed_upper = max(self._elapsed_upper, elapsed)
+        return max(0, self._seconds - self._elapsed_upper)
 
     def restrict(self, seconds):
         """Tighten total duration against this original anchor, never renew it."""

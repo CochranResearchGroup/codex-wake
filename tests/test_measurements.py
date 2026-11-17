@@ -12,6 +12,14 @@ def observation(counter, *, epoch='3c93a3d4-445d-4403-8a40-77fa9162dee6', rate=5
 
 
 class MeasurementsTests(unittest.TestCase):
+    def test_deadline_rejects_rollback_after_an_already_qualified_observation(self):
+        with patch('codex_wake.measurements.snapshot',side_effect=[
+                observation(1000),observation(2000),observation(1500)]):
+            retained=measurements.deadline(10)
+            self.assertLess(retained.remaining(),10)
+            with self.assertRaises(measurements.TimeUnavailable):
+                retained.remaining()
+
     def test_restrict_only_tightens_duration_against_original_anchor(self):
         with patch('codex_wake.measurements.snapshot',side_effect=[
                 observation(1000,rate=0),observation(2000,rate=0),observation(2500,rate=0)]):
