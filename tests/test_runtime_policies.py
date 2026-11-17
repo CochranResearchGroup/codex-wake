@@ -195,3 +195,17 @@ class IntegratedPolicySelectionTests(unittest.TestCase):
                 self.assertTrue(failed)
                 self.assertEqual(value['error']['code'],'busy_policy_unsupported')
             self.assertFalse(root.exists())
+
+
+def setUpModule():
+    from itertools import count
+    from unittest.mock import patch
+    from test_measurements import observation
+    global _qualified_clock_patch
+    counters=count(1000,100)
+    _qualified_clock_patch=patch('codex_wake.measurements.snapshot', side_effect=lambda:observation(next(counters),rate=0))
+    _qualified_clock_patch.start()
+
+
+def tearDownModule():
+    _qualified_clock_patch.stop()
