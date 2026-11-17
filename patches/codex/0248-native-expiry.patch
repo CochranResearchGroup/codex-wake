@@ -9143,21 +9143,558 @@ index 700c23784e..ef8a4ea82e 100644
 +    A different package requires checkpointing work and stopping the running daemon first. An identical package is pinned without restarting it.
      ");
  }
+diff --git a/codex-rs/cli/src/doctor.rs b/codex-rs/cli/src/doctor.rs
+index ab43884ac8..cac54b9285 100644
+--- a/codex-rs/cli/src/doctor.rs
++++ b/codex-rs/cli/src/doctor.rs
+@@ -2511,7 +2511,8 @@ fn websocket_error_detail(err: &ApiError) -> String {
+             "handshake error: incomplete response: [redacted]".to_string()
+         }
+         // These variants format fixed text; retry metadata is typed and never printed.
+-        ApiError::ContentFilter
++        ApiError::RequestNotAdmitted
++        | ApiError::ContentFilter
+         | ApiError::ContextWindowExceeded
+         | ApiError::QuotaExceeded
+         | ApiError::UsageNotIncluded
+diff --git a/codex-rs/codex-api/src/api_bridge.rs b/codex-rs/codex-api/src/api_bridge.rs
+index 07958edff9..1f117a3884 100644
+--- a/codex-rs/codex-api/src/api_bridge.rs
++++ b/codex-rs/codex-api/src/api_bridge.rs
+@@ -27,7 +27,8 @@ pub fn map_api_error(err: ApiError) -> CodexErr {
+         | ApiError::ServerOverloaded { retry_after }
+         | ApiError::PolicyCapacityUnavailable { retry_after }
+         | ApiError::Transport(TransportError::Http { retry_after, .. }) => *retry_after,
+-        ApiError::Transport(_)
++        ApiError::RequestNotAdmitted
++        | ApiError::Transport(_)
+         | ApiError::Api { .. }
+         | ApiError::Stream(_)
+         | ApiError::ContentFilter
+@@ -58,6 +59,9 @@ pub fn map_api_error(err: ApiError) -> CodexErr {
+ 
+ fn map_api_error_details(err: ApiError) -> CodexErr {
+     match err {
++        ApiError::RequestNotAdmitted => {
++            CodexErr::Fatal("bounded queue execution not admitted".to_string())
++        }
+         ApiError::ContextWindowExceeded => CodexErr::ContextWindowExceeded,
+         ApiError::QuotaExceeded => CodexErr::QuotaExceeded,
+         ApiError::UsageNotIncluded => CodexErr::UsageNotIncluded,
+diff --git a/codex-rs/codex-api/src/endpoint/responses.rs b/codex-rs/codex-api/src/endpoint/responses.rs
+index 9c41a802ea..304d2651af 100644
+--- a/codex-rs/codex-api/src/endpoint/responses.rs
++++ b/codex-rs/codex-api/src/endpoint/responses.rs
+@@ -57,6 +57,11 @@ impl<T: HttpTransport> ResponsesClient<T> {
+         }
+     }
+ 
++    pub fn with_request_admission(mut self, admission: Option<crate::RequestAdmission>) -> Self {
++        self.session = self.session.with_request_admission(admission);
++        self
++    }
++
+     #[instrument(
+         name = "responses.stream_request",
+         level = "info",
+diff --git a/codex-rs/codex-api/src/endpoint/responses_websocket.rs b/codex-rs/codex-api/src/endpoint/responses_websocket.rs
+index 015c8a7ce8..5a6449c6f3 100644
+--- a/codex-rs/codex-api/src/endpoint/responses_websocket.rs
++++ b/codex-rs/codex-api/src/endpoint/responses_websocket.rs
+@@ -69,7 +69,8 @@ struct WsStream {
+ enum WsCommand {
+     Send {
+         message: Message,
+-        tx_result: oneshot::Sender<Result<(), WsError>>,
++        admission: Option<crate::RequestAdmission>,
++        tx_result: oneshot::Sender<Result<(), ApiError>>,
+     },
+ }
+ 
+@@ -118,9 +119,13 @@ impl WsStream {
+                             break;
+                         };
+                         match command {
+-                            WsCommand::Send { message, tx_result } => {
+-                                let result = send_message(&mut inner, message).await;
+-                                let should_break = result.is_err();
++                            WsCommand::Send { message, admission, tx_result } => {
++                                let result = if let Some(admit) = admission && !admit().await {
++                                    Err(ApiError::RequestNotAdmitted)
++                                } else {
++                                    send_message(&mut inner, message).await.map_err(map_ws_stream_error)
++                                };
++                                let should_break = result.is_err() && !matches!(&result, Err(ApiError::RequestNotAdmitted));
+                                 let _ = tx_result.send(result);
+                                 if should_break {
+                                     break;
+@@ -172,8 +177,8 @@ impl WsStream {
+ 
+     async fn request(
+         &mut self,
+-        make_command: impl FnOnce(oneshot::Sender<Result<(), WsError>>) -> WsCommand,
+-    ) -> Result<(), WsError> {
++        make_command: impl FnOnce(oneshot::Sender<Result<(), ApiError>>) -> WsCommand,
++    ) -> Result<(), ApiError> {
+         let (tx_result, rx_result) = oneshot::channel();
+         if self.tx_command.send(make_command(tx_result)).await.is_ok()
+             && let Ok(result) = rx_result.await
+@@ -181,14 +186,22 @@ impl WsStream {
+             return result;
+         }
+         while let Some(message) = self.rx_message.recv().await {
+-            message?;
++            message.map_err(map_ws_stream_error)?;
+         }
+-        Err(WsError::ConnectionClosed)
++        Err(map_ws_stream_error(WsError::ConnectionClosed))
+     }
+ 
+-    async fn send(&mut self, message: Message) -> Result<(), WsError> {
+-        self.request(|tx_result| WsCommand::Send { message, tx_result })
+-            .await
++    async fn send(
++        &mut self,
++        message: Message,
++        admission: Option<crate::RequestAdmission>,
++    ) -> Result<(), ApiError> {
++        self.request(|tx_result| WsCommand::Send {
++            message,
++            admission,
++            tx_result,
++        })
++        .await
+     }
+ 
+     async fn next(&mut self) -> Option<Result<Message, WsError>> {
+@@ -279,20 +292,34 @@ impl ResponsesWebsocketConnection {
+             .is_none_or(|stream| stream.pump_task.is_finished())
+     }
+ 
++    pub async fn stream_request(
++        &self,
++        request: ResponsesWsRequest<'_>,
++        connection_reused: bool,
++        turn_state: Option<Arc<OnceLock<String>>>,
++    ) -> Result<ResponseStream, ApiError> {
++        self.stream_request_with_admission(request, connection_reused, turn_state, None)
++            .await
++    }
++
+     #[instrument(
+         name = "responses_websocket.stream_request",
+         level = "info",
+         skip_all,
+         fields(transport = "responses_websocket", api.path = "/responses")
+     )]
+-    pub async fn stream_request(
++    pub async fn stream_request_with_admission(
+         &self,
+         request: ResponsesWsRequest<'_>,
+         connection_reused: bool,
+         turn_state: Option<Arc<OnceLock<String>>>,
++        admission: Option<crate::RequestAdmission>,
+     ) -> Result<ResponseStream, ApiError> {
+-        let (tx_event, rx_event) =
++        let (tx_event, mut rx_event) =
+             mpsc::channel::<std::result::Result<ResponseEvent, ApiError>>(1600);
++        let bounded = admission.is_some();
++        let (tx_started, rx_started) = oneshot::channel();
++        let tx_started = bounded.then_some(tx_started);
+         let (tx_interrupt, rx_interrupt) = oneshot::channel();
+         let stream = Arc::clone(&self.stream);
+         let idle_timeout = self.idle_timeout;
+@@ -392,6 +419,8 @@ impl ResponsesWebsocketConnection {
+                         &timing_log_context,
+                         interrupt.clone(),
+                         &mut completion,
++                        admission,
++                        tx_started,
+                     );
+                     tokio::pin!(response);
+ 
+@@ -419,7 +448,12 @@ impl ResponsesWebsocketConnection {
+                     }
+                 };
+ 
+-                if let Err(err) = result {
++                if let Err(ApiError::RequestNotAdmitted) = result {
++                    // Refusal occurred in the pump before any request bytes; keep the socket usable.
++                    *guard = Some(ws_stream);
++                    drop(guard);
++                    let _ = tx_event.send(Err(ApiError::RequestNotAdmitted)).await;
++                } else if let Err(err) = result {
+                     // A terminal stream error should reach the caller immediately. Waiting for a
+                     // graceful close handshake here can stall indefinitely and mask the error.
+                     drop(guard);
+@@ -441,6 +475,19 @@ impl ResponsesWebsocketConnection {
+             .instrument(current_span),
+         );
+ 
++        // Core publishes staged bounded input only after this API returns success.
++        // An unbounded stream retains its existing eager return behavior.
++        if bounded && rx_started.await.is_err() {
++            while let Some(event) = rx_event.recv().await {
++                if let Err(error) = event {
++                    return Err(error);
++                }
++            }
++            return Err(ApiError::Stream(
++                "websocket sender ended before admission".to_owned(),
++            ));
++        }
++
+         Ok(ResponseStream {
+             rx_event,
+             upstream_request_id: None,
+@@ -825,6 +872,8 @@ async fn run_websocket_response_stream(
+     timing_log_context: &ResponsesWebsocketTimingLogContext,
+     interrupt: impl Future<Output = ResponseInterrupt> + Clone + Unpin,
+     completion: &mut Option<ResponseEvent>,
++    admission: Option<crate::RequestAdmission>,
++    tx_started: Option<oneshot::Sender<()>>,
+ ) -> Result<(), ApiError> {
+     let mut last_server_model: Option<String> = None;
+     let mut safety_buffering_treatment = SafetyBufferingTreatment::default();
+@@ -841,9 +890,14 @@ async fn run_websocket_response_stream(
+         idle_timeout,
+         telemetry.as_ref(),
+         timing_log_context.connection_reused,
++        admission,
+     )
+     .await?;
+ 
++    if let Some(tx_started) = tx_started {
++        let _ = tx_started.send(());
++    }
++
+     // A response owns its interrupt, and create must be sent before interrupt.
+     let mut interrupt_request = interrupt.clone().fuse();
+     let mut interruption = None;
+@@ -867,6 +921,7 @@ async fn run_websocket_response_stream(
+                     idle_timeout,
+                     /*telemetry*/ None,
+                     timing_log_context.connection_reused,
++                    None,
+                 )
+                 .await?;
+                 awaiting_interrupt_ack = matches!(request, ResponseInterrupt::Cancel { .. });
+@@ -1094,15 +1149,16 @@ async fn send_websocket_request(
+     idle_timeout: Duration,
+     telemetry: Option<&Arc<dyn WebsocketTelemetry>>,
+     connection_reused: bool,
++    admission: Option<crate::RequestAdmission>,
+ ) -> Result<(), ApiError> {
+     let request_start = Instant::now();
+     let result = tokio::time::timeout(
+         idle_timeout,
+-        ws_stream.send(Message::Text(request_text.into())),
++        ws_stream.send(Message::Text(request_text.into()), admission),
+     )
+     .await
+     .map_err(|_| ApiError::Stream("idle timeout sending websocket request".into()))
+-    .and_then(|result| result.map_err(map_ws_stream_error));
++    .and_then(|result| result);
+ 
+     if let Some(t) = telemetry.as_ref() {
+         t.on_ws_request(
+diff --git a/codex-rs/codex-api/src/endpoint/session.rs b/codex-rs/codex-api/src/endpoint/session.rs
+index 7849225b5c..0d74c47dcb 100644
+--- a/codex-rs/codex-api/src/endpoint/session.rs
++++ b/codex-rs/codex-api/src/endpoint/session.rs
+@@ -17,6 +17,7 @@ use std::sync::Arc;
+ use tracing::instrument;
+ 
+ pub(crate) struct EndpointSession<T: HttpTransport> {
++    request_admission: Option<crate::RequestAdmission>,
+     transport: T,
+     provider: Provider,
+     auth: SharedAuthProvider,
+@@ -26,6 +27,7 @@ pub(crate) struct EndpointSession<T: HttpTransport> {
+ impl<T: HttpTransport> EndpointSession<T> {
+     pub(crate) fn new(transport: T, provider: Provider, auth: SharedAuthProvider) -> Self {
+         Self {
++            request_admission: None,
+             transport,
+             provider,
+             auth,
+@@ -33,6 +35,14 @@ impl<T: HttpTransport> EndpointSession<T> {
+         }
+     }
+ 
++    pub(crate) fn with_request_admission(
++        mut self,
++        admission: Option<crate::RequestAdmission>,
++    ) -> Self {
++        self.request_admission = admission;
++        self
++    }
++
+     pub(crate) fn with_request_telemetry(
+         mut self,
+         request: Option<Arc<dyn RequestTelemetry>>,
+@@ -133,18 +143,37 @@ impl<T: HttpTransport> EndpointSession<T> {
+         let body = body.map(RequestBody::EncodedJson);
+         let mut request = self.make_request(&method, path, &extra_headers, body.as_ref());
+         configure(&mut request);
+-        let request = request.into_prepared().map_err(TransportError::Build)?;
++        let mut request = request.into_prepared().map_err(TransportError::Build)?;
++        // Bounded sends authenticate and prepare before the final native transport gate.
++        // No async credential work or opaque retry may outlive this permission.
++        let bounded = self.request_admission.is_some();
++        let mut retry = self.provider.retry.to_policy();
++        if let Some(admit) = &self.request_admission {
++            request = self
++                .auth
++                .apply_auth(request)
++                .await
++                .map_err(TransportError::from)?;
++            if !admit().await {
++                return Err(ApiError::RequestNotAdmitted);
++            }
++            retry.max_attempts = 1;
++        }
+         let make_request = || request.clone();
+ 
+         let stream = run_with_request_telemetry(
+-            self.provider.retry.to_policy(),
++            retry,
+             self.request_telemetry.clone(),
+             make_request,
+             |req| {
+                 let auth = self.auth.clone();
+                 let transport = &self.transport;
+                 async move {
+-                    let req = auth.apply_auth(req).await.map_err(TransportError::from)?;
++                    let req = if bounded {
++                        req
++                    } else {
++                        auth.apply_auth(req).await.map_err(TransportError::from)?
++                    };
+                     transport.stream(req).await
+                 }
+             },
+diff --git a/codex-rs/codex-api/src/error.rs b/codex-rs/codex-api/src/error.rs
+index 2793335324..a4f2b53f08 100644
+--- a/codex-rs/codex-api/src/error.rs
++++ b/codex-rs/codex-api/src/error.rs
+@@ -9,6 +9,8 @@ use thiserror::Error;
+ 
+ #[derive(Debug, Error)]
+ pub enum ApiError {
++    #[error("bounded queue execution not admitted")]
++    RequestNotAdmitted,
+     #[error(transparent)]
+     Transport(#[from] TransportError),
+     #[error("api error {status}: {message}")]
+diff --git a/codex-rs/codex-api/src/lib.rs b/codex-rs/codex-api/src/lib.rs
+index 68b0c1c4ae..f99310248b 100644
+--- a/codex-rs/codex-api/src/lib.rs
++++ b/codex-rs/codex-api/src/lib.rs
+@@ -131,3 +131,7 @@ pub use crate::telemetry::SseTelemetry;
+ pub use crate::telemetry::WebsocketTelemetry;
+ pub use codex_protocol::protocol::RealtimeAudioFrame;
+ pub use codex_protocol::protocol::RealtimeEvent;
++
++/// Final native transport-send admission for a bounded request.
++pub type RequestAdmission =
++    std::sync::Arc<dyn Fn() -> futures::future::BoxFuture<'static, bool> + Send + Sync>;
+diff --git a/codex-rs/codex-api/tests/clients.rs b/codex-rs/codex-api/tests/clients.rs
+index fc96b300c5..e19f7b26cc 100644
+--- a/codex-rs/codex-api/tests/clients.rs
++++ b/codex-rs/codex-api/tests/clients.rs
+@@ -774,3 +774,50 @@ async fn async_auth_provider_rejects_sync_resolution_and_authenticates_requests(
+     );
+     Ok(())
+ }
++
++#[tokio::test]
++async fn bounded_responses_recheck_admission_after_async_authentication() -> Result<()> {
++    use std::sync::atomic::{AtomicBool, Ordering};
++    struct ExpiringAuth(Arc<AtomicBool>);
++    impl AuthProvider for ExpiringAuth {
++        fn add_auth_headers(&self, _headers: &mut HeaderMap) -> Result<(), AuthError> {
++            Ok(())
++        }
++        fn apply_auth(&self, request: Request) -> codex_api::AuthProviderFuture<'_> {
++            Box::pin(async move {
++                tokio::task::yield_now().await;
++                self.0.store(false, Ordering::SeqCst);
++                Ok(request)
++            })
++        }
++    }
++    let eligible = Arc::new(AtomicBool::new(true));
++    let clock = Arc::clone(&eligible);
++    let state = RecordingState::default();
++    let client = ResponsesClient::new(
++        RecordingTransport::new(state.clone()),
++        provider("openai"),
++        Arc::new(ExpiringAuth(eligible)),
++    )
++    .with_request_admission(Some(Arc::new(move || {
++        let clock = Arc::clone(&clock);
++        Box::pin(async move { clock.load(Ordering::SeqCst) })
++    })));
++    let result = client
++        .stream(
++            serde_json::json!({"input":"expired bounded prompt"}),
++            HeaderMap::new(),
++            Compression::None,
++            None,
++        )
++        .await;
++    assert!(
++        matches!(result, Err(ApiError::RequestNotAdmitted)),
++        "expired request was not distinctly rejected after async authentication"
++    );
++    assert!(
++        state.take_stream_requests().is_empty(),
++        "expired input reached transport"
++    );
++    Ok(())
++}
+diff --git a/codex-rs/codex-api/tests/responses_websocket_probe.rs b/codex-rs/codex-api/tests/responses_websocket_probe.rs
+index 278f7ac995..57d727be54 100644
+--- a/codex-rs/codex-api/tests/responses_websocket_probe.rs
++++ b/codex-rs/codex-api/tests/responses_websocket_probe.rs
+@@ -292,3 +292,117 @@ async fn probe_preserves_evidence_and_redacts_wire_secrets() {
+         server.await.expect("fixture completes");
+     }
+ }
++
++#[tokio::test]
++async fn bounded_websocket_waits_for_sender_then_rechecks_before_publication() -> anyhow::Result<()>
++{
++    use codex_api::{ResponseCreateWsRequest, ResponsesApiRequest, ResponsesWsRequest};
++    use futures::{SinkExt, StreamExt};
++    use std::sync::atomic::{AtomicBool, Ordering};
++    use tokio_tungstenite::tungstenite::Message;
++    fn request(model: &str) -> ResponsesApiRequest {
++        ResponsesApiRequest {
++            model: model.into(),
++            input: vec![],
++            tools: None,
++            tool_choice: "auto".into(),
++            parallel_tool_calls: false,
++            reasoning: None,
++            store: false,
++            stream: true,
++            stream_options: None,
++            include: vec![],
++            service_tier: None,
++            prompt_cache_key: None,
++            prompt_cache_options: None,
++            text: None,
++            access_programs: None,
++            client_metadata: None,
++        }
++    }
++    let listener = TcpListener::bind("127.0.0.1:0").await?;
++    let address = listener.local_addr()?;
++    let (entered_tx, entered_rx) = tokio::sync::oneshot::channel();
++    let (release_tx, release_rx) = tokio::sync::oneshot::channel();
++    let server = tokio::spawn(async move {
++        let (socket, _) = listener.accept().await?;
++        let mut socket = tokio_tungstenite::accept_async(socket).await?;
++        let first = socket.next().await.expect("initial request")?;
++        assert!(first.to_text()?.contains("first-control"));
++        entered_tx.send(()).unwrap();
++        release_rx.await?;
++        socket.send(Message::text(r#"{"type":"response.completed","response":{"id":"first","usage":{"input_tokens":1,"output_tokens":1,"total_tokens":2}}}"#)).await?;
++        let control = socket.next().await.expect("eligible control")?;
++        assert!(
++            control.to_text()?.contains("eligible-control"),
++            "expired bounded request reached provider: {control}"
++        );
++        socket.send(Message::text(r#"{"type":"response.completed","response":{"id":"control","usage":{"input_tokens":1,"output_tokens":1,"total_tokens":2}}}"#)).await?;
++        Ok::<_, anyhow::Error>(())
++    });
++    let client = probe_client(format!("http://{address}"));
++    let connection = Arc::new(
++        client
++            .connect(
++                &HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
++                HeaderMap::new(),
++                HeaderMap::new(),
++                None,
++                None,
++            )
++            .await?,
++    );
++    let first = request("first-control");
++    let _first_stream = connection
++        .stream_request(
++            ResponsesWsRequest::ResponseCreate(ResponseCreateWsRequest::from(&first)),
++            false,
++            None,
++        )
++        .await?;
++    entered_rx.await?;
++    let eligible = Arc::new(AtomicBool::new(true));
++    let clock = Arc::clone(&eligible);
++    let bounded_connection = Arc::clone(&connection);
++    let (started_tx, started_rx) = tokio::sync::oneshot::channel();
++    let bounded = tokio::spawn(async move {
++        let expired = request("expired-bounded");
++        started_tx.send(()).unwrap();
++        bounded_connection
++            .stream_request_with_admission(
++                ResponsesWsRequest::ResponseCreate(ResponseCreateWsRequest::from(&expired)),
++                true,
++                None,
++                Some(Arc::new(move || {
++                    let clock = Arc::clone(&clock);
++                    Box::pin(async move { clock.load(Ordering::SeqCst) })
++                })),
++            )
++            .await
++    });
++    started_rx.await?;
++    tokio::task::yield_now().await;
++    assert!(
++        !bounded.is_finished(),
++        "bounded stream was published before sender admission"
++    );
++    eligible.store(false, Ordering::SeqCst);
++    release_tx.send(()).unwrap();
++    assert!(matches!(
++        tokio::time::timeout(Duration::from_secs(5), bounded).await??,
++        Err(ApiError::RequestNotAdmitted)
++    ));
++    let control = request("eligible-control");
++    let mut stream = connection
++        .stream_request(
++            ResponsesWsRequest::ResponseCreate(ResponseCreateWsRequest::from(&control)),
++            true,
++            None,
++        )
++        .await?;
++    while let Some(event) = stream.next().await {
++        event?;
++    }
++    server.await??;
++    Ok(())
++}
 diff --git a/codex-rs/core/src/client.rs b/codex-rs/core/src/client.rs
-index 425967e392..ac786fcba0 100644
+index 425967e392..d7c49aebef 100644
 --- a/codex-rs/core/src/client.rs
 +++ b/codex-rs/core/src/client.rs
-@@ -313,6 +313,9 @@ pub struct ModelClient {
+@@ -313,6 +313,13 @@ pub struct ModelClient {
      required_cyber_access_programs: Option<Arc<cyber_access_program::RequiredCyberAccessPrograms>>,
  }
  
-+pub(crate) type RequestAdmission =
-+    Arc<dyn Fn() -> futures::future::BoxFuture<'static, bool> + Send + Sync>;
++/// Separate preparation permission from the authoritative first transport-send decision.
++#[derive(Clone)]
++pub(crate) struct RequestAdmission {
++    pub(crate) preflight: codex_api::RequestAdmission,
++    pub(crate) admit: codex_api::RequestAdmission,
++}
 +
  /// A turn-scoped streaming session created from a [`ModelClient`].
  ///
  /// The session establishes a Responses WebSocket connection lazily and reuses it across multiple
-@@ -328,6 +331,7 @@ pub struct ModelClient {
+@@ -328,6 +335,7 @@ pub struct ModelClient {
  /// the previous turn's sticky-routing token into the next turn, which violates the client/server
  /// contract and can cause routing bugs.
  pub struct ModelClientSession {
@@ -9165,7 +9702,7 @@ index 425967e392..ac786fcba0 100644
      client: ModelClient,
      websocket_session: WebsocketSession,
      /// Turn state for sticky routing.
-@@ -347,6 +351,7 @@ pub struct ModelClientSession {
+@@ -347,6 +355,7 @@ pub struct ModelClientSession {
  /// Executes HTTP Responses requests without owning a turn's WebSocket state.
  pub(crate) struct ResponsesHttpExecutor<'a> {
      client: &'a ModelClient,
@@ -9173,7 +9710,7 @@ index 425967e392..ac786fcba0 100644
  }
  
  #[derive(Debug, Clone)]
-@@ -754,6 +759,7 @@ impl ModelClient {
+@@ -754,6 +763,7 @@ impl ModelClient {
              websocket_session.auth_owner = auth_owner;
          }
          ModelClientSession {
@@ -9181,7 +9718,7 @@ index 425967e392..ac786fcba0 100644
              client: self.clone(),
              websocket_session,
              turn_state: Arc::new(OnceLock::new()),
-@@ -1616,7 +1622,15 @@ impl ModelClientSession {
+@@ -1616,7 +1626,15 @@ impl ModelClientSession {
  
  impl<'a> ResponsesHttpExecutor<'a> {
      pub(crate) fn new(client: &'a ModelClient) -> Self {
@@ -9198,7 +9735,7 @@ index 425967e392..ac786fcba0 100644
      }
  
      #[allow(clippy::too_many_arguments)]
-@@ -2093,12 +2107,21 @@ impl ResponsesHttpExecutor<'_> {
+@@ -2093,12 +2111,26 @@ impl ResponsesHttpExecutor<'_> {
                  request.input = input;
              }
              inference_trace_attempt.record_started(&request);
@@ -9215,9 +9752,14 @@ index 425967e392..ac786fcba0 100644
 +                api_provider.retry.max_attempts = 1;
 +            }
 +            let client = ApiResponsesClient::new(transport, api_provider, client_setup.api_auth)
++                .with_request_admission(
++                    self.request_admission
++                        .as_ref()
++                        .map(|admission| admission.admit.clone()),
++                )
 +                .with_telemetry(Some(request_telemetry), Some(sse_telemetry));
 +            if let Some(admit) = &self.request_admission
-+                && !admit().await
++                && !(admit.preflight)().await
 +            {
 +                return Err(CodexErr::Fatal(
 +                    "bounded queue execution not admitted".to_string(),
@@ -9226,22 +9768,35 @@ index 425967e392..ac786fcba0 100644
              let stream_result = client.stream_request(request, options).await;
  
              match stream_result {
-@@ -2447,6 +2470,14 @@ impl ModelClientSession {
+@@ -2447,11 +2479,26 @@ impl ModelClientSession {
                      ),
                  ],
              );
 +            if !warmup
 +                && let Some(admit) = &self.request_admission
-+                && !admit().await
++                && !(admit.preflight)().await
 +            {
 +                return Err(CodexErr::Fatal(
 +                    "bounded queue execution not admitted".to_string(),
 +                ));
 +            }
              let stream_result = websocket_connection
-                 .stream_request(
+-                .stream_request(
++                .stream_request_with_admission(
                      ws_request,
-@@ -2594,6 +2625,10 @@ impl ModelClientSession {
+                     self.websocket_session.connection_reused(),
+                     Some(Arc::clone(&self.turn_state)),
++                    if warmup {
++                        None
++                    } else {
++                        self.request_admission
++                            .as_ref()
++                            .map(|admission| admission.admit.clone())
++                    },
+                 )
+                 .await;
+             if let Some(original_item_ids) = original_item_ids {
+@@ -2594,6 +2641,10 @@ impl ModelClientSession {
      /// fall back to the HTTP Responses API transport otherwise. The trace context may be enabled or
      /// disabled, but is always explicit so transport paths do not need separate trace/no-trace
      /// branches.
@@ -9252,7 +9807,7 @@ index 425967e392..ac786fcba0 100644
      pub async fn stream(
          &mut self,
          prompt: &Prompt,
-@@ -2633,6 +2668,7 @@ impl ModelClientSession {
+@@ -2633,6 +2684,7 @@ impl ModelClientSession {
                  }
  
                  ResponsesHttpExecutor::new(&self.client)
@@ -9313,10 +9868,10 @@ index ce93060cd4..44d746d553 100644
          model_info: &ModelInfo,
 diff --git a/codex-rs/core/src/session/queued_input.rs b/codex-rs/core/src/session/queued_input.rs
 new file mode 100644
-index 0000000000..8a1f86deaf
+index 0000000000..b256304a4d
 --- /dev/null
 +++ b/codex-rs/core/src/session/queued_input.rs
-@@ -0,0 +1,129 @@
+@@ -0,0 +1,157 @@
 +//! Bounded input stays out of reusable history until native model admission.
 +use super::daemon_recovery::RecordedTurnInput;
 +use super::session::Session;
@@ -9372,6 +9927,34 @@ index 0000000000..8a1f86deaf
 +            }
 +        }
 +        history
++    }
++
++    /// Preparation must not consume a pending queue entry. Its original record,
++    /// cancellation and qualified-time decision belong to final transport send.
++    pub(super) async fn preflight_queued_input(&self, turn: &TurnContext) -> bool {
++        let mut staged = turn.queued_input.lock().await;
++        match staged.stage {
++            Stage::Admitted => true,
++            Stage::Pending(_) => staged.guard.is_some(),
++            Stage::Rejected => false,
++            Stage::Authorized(_) => {
++                // A prior provider attempt remains admitted; never turn a rejected
++                // retry into a fresh pending entry or renew its original deadline.
++                let permitted = match &staged.guard {
++                    Some(guard) => tokio::time::timeout(
++                        std::time::Duration::from_secs(15),
++                        guard.recheck(turn.sub_id.clone()),
++                    )
++                    .await
++                    .unwrap_or(false),
++                    None => false,
++                };
++                if !permitted {
++                    staged.stage = Stage::Rejected;
++                }
++                permitted
++            }
++        }
 +    }
 +
 +    pub(super) async fn admit_queued_input(&self, turn: &TurnContext) -> bool {
@@ -9447,7 +10030,7 @@ index 0000000000..8a1f86deaf
 +    }
 +}
 diff --git a/codex-rs/core/src/session/turn.rs b/codex-rs/core/src/session/turn.rs
-index d775099466..d9f0305f59 100644
+index d775099466..2ca0088166 100644
 --- a/codex-rs/core/src/session/turn.rs
 +++ b/codex-rs/core/src/session/turn.rs
 @@ -504,7 +504,9 @@ pub(crate) async fn run_turn(
@@ -9492,18 +10075,27 @@ index d775099466..d9f0305f59 100644
          };
          let input_item_count = history.raw_items().len();
          let sampling_step_context = Arc::new(StepContext {
-@@ -2993,8 +2997,17 @@ async fn try_run_sampling_request(
+@@ -2993,8 +2997,26 @@ async fn try_run_sampling_request(
          None
      };
      let mut resampling = crate::guardian::ResponseResampling::new(&sess);
 +    if turn_context.queued_input.lock().await.is_pending() {
++        let preflight_session = Arc::clone(&sess);
++        let preflight_turn = Arc::clone(&turn_context);
 +        let admission_session = Arc::clone(&sess);
 +        let admission_turn = Arc::clone(&turn_context);
-+        client_session.set_request_admission(Some(Arc::new(move || {
-+            let sess = Arc::clone(&admission_session);
-+            let turn = Arc::clone(&admission_turn);
-+            Box::pin(async move { sess.admit_queued_input(&turn).await })
-+        })));
++        client_session.set_request_admission(Some(crate::client::RequestAdmission {
++            preflight: Arc::new(move || {
++                let sess = Arc::clone(&preflight_session);
++                let turn = Arc::clone(&preflight_turn);
++                Box::pin(async move { sess.preflight_queued_input(&turn).await })
++            }),
++            admit: Arc::new(move || {
++                let sess = Arc::clone(&admission_session);
++                let turn = Arc::clone(&admission_turn);
++                Box::pin(async move { sess.admit_queued_input(&turn).await })
++            }),
++        }));
 +    }
      let mut stream_request = async |prompt: &Prompt| {
 -        client_session
@@ -9511,7 +10103,7 @@ index d775099466..d9f0305f59 100644
              .stream(
                  prompt,
                  &step_context.settings.model_info,
-@@ -3006,7 +3019,11 @@ async fn try_run_sampling_request(
+@@ -3006,7 +3028,11 @@ async fn try_run_sampling_request(
                  &inference_trace,
              )
              .instrument(trace_span!("stream_request"))
@@ -9594,6 +10186,30 @@ index fb7575936d..1dd781c067 100644
      turn_context
          .turn_metadata_state
          .update_responsesapi_client_metadata(responsesapi_client_metadata);
+diff --git a/codex-rs/ext/guardian-v2/src/async_scorer/metrics.rs b/codex-rs/ext/guardian-v2/src/async_scorer/metrics.rs
+index a92217b1b0..b497172baa 100644
+--- a/codex-rs/ext/guardian-v2/src/async_scorer/metrics.rs
++++ b/codex-rs/ext/guardian-v2/src/async_scorer/metrics.rs
+@@ -29,6 +29,7 @@ pub(super) fn sampler_failure_reason(error: &LunaSamplerError) -> &'static str {
+         LunaSamplerError::InputTooLarge => "input_too_large",
+         LunaSamplerError::QueueFull => "queue_full",
+         LunaSamplerError::Api(error) => match error {
++            ApiError::RequestNotAdmitted => "request_not_admitted",
+             ApiError::Transport(TransportError::Http { status, .. })
+             | ApiError::Api { status, .. } => match status.as_u16() {
+                 401 => "http_401",
+diff --git a/codex-rs/ext/guardian-v2/src/async_scorer/sampler/execution.rs b/codex-rs/ext/guardian-v2/src/async_scorer/sampler/execution.rs
+index b6bcd4d4a4..c5cdc7ea77 100644
+--- a/codex-rs/ext/guardian-v2/src/async_scorer/sampler/execution.rs
++++ b/codex-rs/ext/guardian-v2/src/async_scorer/sampler/execution.rs
+@@ -153,6 +153,7 @@ impl SamplingExecution {
+                     | TransportError::ResponseTooLarge { .. }
+                     | TransportError::Policy(_),
+                 )
++                | ApiError::RequestNotAdmitted
+                 | ApiError::ContextWindowExceeded
+                 | ApiError::ResponseIncomplete(_)
+                 | ApiError::QuotaExceeded
 diff --git a/codex-rs/ext/queue/Cargo.toml b/codex-rs/ext/queue/Cargo.toml
 index 4b5e5d04f4..5dd582bec7 100644
 --- a/codex-rs/ext/queue/Cargo.toml
@@ -10188,10 +10804,10 @@ index 12671a0ef7..b46c6d0bfd 100644
              responsesapi_client_metadata,
          })
 diff --git a/codex-rs/ext/queue/tests/queue_service.rs b/codex-rs/ext/queue/tests/queue_service.rs
-index e2a4cd43b7..6ca9e91137 100644
+index e2a4cd43b7..57f163e4b7 100644
 --- a/codex-rs/ext/queue/tests/queue_service.rs
 +++ b/codex-rs/ext/queue/tests/queue_service.rs
-@@ -1201,3 +1201,540 @@ async fn resumed_idle_dispatches_input_without_a_loaded_manager() -> anyhow::Res
+@@ -1201,3 +1201,678 @@ async fn resumed_idle_dispatches_input_without_a_loaded_manager() -> anyhow::Res
      assert_eq!(metadata["client_type"], "ios_app");
      Ok(())
  }
@@ -10603,6 +11219,45 @@ index e2a4cd43b7..6ca9e91137 100644
 +    }
 +}
 +
++// Explicit unit-boundary clock. The final send observation crosses the original
++// deadline after initial selection; API transport tests separately pin
++// the observation after authentication and sender waiting.
++// With non-consuming Pending preflight the final sender is the second clock
++// observation, rather than the old third observation after early consume.
++struct FinalSendClock {
++    inner: AuthRecoveryClock,
++    observations: std::sync::atomic::AtomicUsize,
++    unknown: bool,
++}
++impl codex_queue_extension::QueueClock for FinalSendClock {
++    fn sample(&self) -> codex_queue_extension::QueueClockFuture<'_> {
++        Box::pin(async move {
++            if self.observations.fetch_add(1, Ordering::SeqCst) == 1 {
++                std::fs::write(
++                    &self.inner.0,
++                    if self.unknown { "unknown" } else { "expired" },
++                )
++                .unwrap();
++            }
++            self.inner.sample().await
++        })
++    }
++}
++
++#[cfg(unix)]
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn bounded_transport_admission_rechecks_original_deadline_before_first_send()
++-> anyhow::Result<()> {
++    assert_bounded_auth_recovery("before_transport", 0, false).await
++}
++
++#[cfg(unix)]
++#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
++async fn bounded_transport_unknown_time_keeps_original_pending_until_qualified()
++-> anyhow::Result<()> {
++    assert_bounded_auth_recovery("before_transport_unknown", 0, false).await
++}
++
 +#[cfg(unix)]
 +#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 +async fn expired_bounded_input_is_not_retried_after_authentication_recovery() -> anyhow::Result<()>
@@ -10626,8 +11281,8 @@ index e2a4cd43b7..6ca9e91137 100644
 +#[cfg(unix)]
 +async fn assert_bounded_auth_recovery(
 +    after_rejection: &'static str,
-+    expected_attempts: usize,
-+    expect_history: bool,
++    mut expected_attempts: usize,
++    mut expect_history: bool,
 +) -> anyhow::Result<()> {
 +    let server = start_mock_server().await;
 +    let auth_home = tempfile::tempdir()?;
@@ -10644,7 +11299,9 @@ index e2a4cd43b7..6ca9e91137 100644
 +    let handler_token = token.clone();
 +    let handler_marker = marker.clone();
 +    let response = responses::mount_response_handler(&server, move |_| {
-+        if observed.fetch_add(1, Ordering::SeqCst) == 0 {
++        if observed.fetch_add(1, Ordering::SeqCst) == 0
++            && !after_rejection.starts_with("before_transport")
++        {
 +            std::fs::write(&handler_token, "second-fixture-token").unwrap();
 +            std::fs::write(&handler_marker, after_rejection).unwrap();
 +            wiremock::ResponseTemplate::new(401).set_body_string("synthetic auth recovery")
@@ -10670,7 +11327,16 @@ index e2a4cd43b7..6ca9e91137 100644
 +        .await?;
 +    let thread_id = test.session_configured.thread_id;
 +    let queue = loaded_thread_queue(&test)?;
-+    let clock = Arc::new(AuthRecoveryClock(marker));
++    let clock: Arc<dyn codex_queue_extension::QueueClock> =
++        if after_rejection.starts_with("before_transport") {
++            Arc::new(FinalSendClock {
++                inner: AuthRecoveryClock(marker.clone()),
++                observations: std::sync::atomic::AtomicUsize::new(0),
++                unknown: after_rejection == "before_transport_unknown",
++            })
++        } else {
++            Arc::new(AuthRecoveryClock(marker.clone()))
++        };
 +    let staged = QueuedItemService::new(
 +        Arc::clone(&queue),
 +        Weak::new(),
@@ -10701,16 +11367,75 @@ index e2a4cd43b7..6ca9e91137 100644
 +        expected_attempts,
 +        "each retry must use current qualified time and the original deadline"
 +    );
-+    assert!(
-+        matches!(
-+            live.bounded_outcome(thread_id, item.id)
++    if after_rejection == "before_transport_unknown" {
++        assert!(
++            live.bounded_outcome(thread_id, item.id.clone())
 +                .await?
-+                .unwrap()
-+                .status,
-+            codex_thread_store::BoundedQueueStatus::Admitted { .. }
-+        ),
-+        "the first attempt remains recorded, not falsely undone"
-+    );
++                .is_none(),
++            "unknown time before first send must not consume original pending entry"
++        );
++        assert_eq!(
++            live.list_bounded_page(thread_id, 0, 10).await?,
++            vec![item.clone()]
++        );
++        test.codex
++            .start_turn_if_idle(TurnInputRequest::new(user_input(
++                "operator control while clock unknown",
++            )))
++            .await?;
++        wait_for_event_match(test.codex.as_ref(), |event| {
++            matches!(event, EventMsg::TurnComplete(_)).then_some(())
++        })
++        .await;
++        assert_eq!(response.requests().len(), 1);
++        let body = response.requests()[0].body_json().to_string();
++        assert!(body.contains("operator control while clock unknown"));
++        assert!(!body.contains("bounded prompt expired during auth recovery"));
++        std::fs::write(&marker, "eligible")?;
++        emit_idle(&live, thread_id).await;
++        wait_for_event_match(test.codex.as_ref(), |event| {
++            matches!(event, EventMsg::TurnComplete(_)).then_some(())
++        })
++        .await;
++        assert_eq!(response.requests().len(), 2);
++        assert!(
++            response.requests()[1]
++                .body_json()
++                .to_string()
++                .contains("bounded prompt expired during auth recovery")
++        );
++        let original = live
++            .bounded_outcome(thread_id, item.id.clone())
++            .await?
++            .unwrap();
++        assert_eq!(original.record.id, item.id);
++        assert_eq!(original.record.expires_at, item.expires_at);
++        expected_attempts = 2;
++        expect_history = true;
++    }
++    let outcome = live
++        .bounded_outcome(thread_id, item.id.clone())
++        .await?
++        .unwrap();
++    assert_eq!(outcome.record.id, item.id);
++    assert_eq!(outcome.record.expires_at, item.expires_at);
++    if after_rejection == "before_transport" {
++        assert!(
++            matches!(
++                outcome.status,
++                codex_thread_store::BoundedQueueStatus::Expired
++            ),
++            "proven expiry before the first provider attempt is terminal"
++        );
++    } else {
++        assert!(
++            matches!(
++                outcome.status,
++                codex_thread_store::BoundedQueueStatus::Admitted { .. }
++            ),
++            "an actual first attempt remains recorded, not falsely undone"
++        );
++    }
 +    live.enqueue(
 +        thread_id,
 +        user_input("ordinary control after rejected retry"),
@@ -10730,6 +11455,35 @@ index e2a4cd43b7..6ca9e91137 100644
 +        body.contains("bounded prompt expired during auth recovery"),
 +        expect_history
 +    );
++    if after_rejection == "before_transport" {
++        let rollout = test.codex.rollout_path().context("rollout path missing")?;
++        test.codex.shutdown_and_wait().await?;
++        test.thread_manager.remove_thread(&thread_id).await;
++        let resumed = test
++            .thread_manager
++            .resume_legacy_thread_from_rollout(
++                test.config.clone(),
++                rollout,
++                test.thread_manager.auth_manager(),
++                None,
++                Default::default(),
++            )
++            .await?;
++        resumed
++            .thread
++            .start_turn_if_idle(TurnInputRequest::new(user_input(
++                "resumed control after send refusal",
++            )))
++            .await?;
++        wait_for_event_match(resumed.thread.as_ref(), |event| {
++            matches!(event, EventMsg::TurnComplete(_)).then_some(())
++        })
++        .await;
++        assert_eq!(response.requests().len(), 2);
++        let body = response.requests()[1].body_json().to_string();
++        assert!(body.contains("resumed control after send refusal"));
++        assert!(!body.contains("bounded prompt expired during auth recovery"));
++    }
 +    Ok(())
 +}
 diff --git a/codex-rs/ext/queue/tests/stable_time_clock.rs b/codex-rs/ext/queue/tests/stable_time_clock.rs
@@ -10959,6 +11713,18 @@ index 93fa948cdb..792428eb17 100644
      /// New work superseded the expected previous turn of an internal continuation.
      Superseded,
  
+diff --git a/codex-rs/response-debug-context/src/lib.rs b/codex-rs/response-debug-context/src/lib.rs
+index f80feb40a5..ec6feccb0b 100644
+--- a/codex-rs/response-debug-context/src/lib.rs
++++ b/codex-rs/response-debug-context/src/lib.rs
+@@ -78,6 +78,7 @@ pub fn telemetry_transport_error_message(error: &TransportError) -> String {
+ 
+ pub fn telemetry_api_error_message(error: &ApiError) -> String {
+     match error {
++        ApiError::RequestNotAdmitted => "bounded queue execution not admitted".to_string(),
+         ApiError::Transport(transport) => telemetry_transport_error_message(transport),
+         ApiError::Api { status, .. } => format!("api error {}", status.as_u16()),
+         ApiError::Stream(err) => err.to_string(),
 diff --git a/codex-rs/state/queue_migrations/0003_bounded_queue.sql b/codex-rs/state/queue_migrations/0003_bounded_queue.sql
 new file mode 100644
 index 0000000000..aa60f1dc96

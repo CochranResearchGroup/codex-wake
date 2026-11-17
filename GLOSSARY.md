@@ -10,6 +10,11 @@ The point in time when a registered wake becomes due, including time spent aslee
 **Message expiration**:
 The deadline after which a message is no longer eligible for delivery, including time spent asleep.
 
+**Final native-send admission**:
+Authorization for one bounded input to be sent toward its model provider while
+its original expiration remains eligible, independent of earlier selection or
+preparation. It does not establish when the remote model starts.
+
 **Trusted time**:
 A bounded estimate of current time accepted under the configured source-selection rules.
 

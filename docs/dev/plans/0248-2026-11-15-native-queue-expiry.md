@@ -432,3 +432,20 @@ integration tips; prior earlier review cycle remains retained. One new final
 two-axis review and one findings remediation pass are reserved after validation.
 Package4 proof remains historical; changed native bytes require a new complete
 immutable package and separate-UID acceptance before installed qualification.
+
+Final-send causal scope refinement: initial outer guard currently consumes and
+records Admitted before request transport. To preserve unknown-time hold before
+first send, make outer checks non-consuming preflight and move first durable
+consume to the final sender callback. Existing protocol/core guard and queue
+service transition are included in this same ticket. After any actual first
+request, Admitted remains historical truth and retry checks must not pretend to
+undo it. Public queue checks must distinguish pre-first-send unknown/pending
+from post-first-send authorization recovery, preserving original IDs/deadlines.
+This implements the existing frozen contract; it does not add another mode.
+
+Smallest seam selected: split the existing core admission context into
+non-consuming pending preflight and final consume. Pending preflight verifies
+the host guard exists; final existing QueueStore.admit_bounded owns the original
+record/time/cancel transaction. Its current unknown→pending and expired→terminal
+behavior is reused, without a new protocol/state API or duplicated UTC/DB reads.
+Existing queue-selection gating and Authorized-stage retry rechecks remain.
