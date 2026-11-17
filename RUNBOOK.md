@@ -10447,3 +10447,30 @@ with confirmation after manual reconciliation. No working installation or695
 closure; original full Python assertion and production activation/cooperation
 gates remain open. Native/Wake owned checkouts retained for exact build/runtime
 acceptance; registered inventories21/124, no new checkout in this turn.
+
+
+## Turn | 2026-11-16 | #695 package5 qualified; admitted-wire repair
+
+Exact scheduled wake007c1957/native receipt90a3465c reached this chat. Build5
+PASS1176.072s, Native9af/codex6bc59c44, six hashes verified both sides before
+and after transfer/qualification. Nine real UID1017 stages serial, no working
+changes: first8PASS; final adapter stage rejected duplicate finite upper
+bounds differing one f64 step. Failure retained. Exact public response replay
+normalizing only that field proves equality trigger. Public regression RED,
+Wakeff9b9c01 fixes adjacent-representation validation conservatively (larger
+upper+outward rounding strictly before originalexpiry); too-wide/crossing-expiry
+controls refuse. Ten focused controls pass on3113.716s/3123.203s; ruff/diffPASS.
+Only failed installed stage replayed with new isolated helper, credentials
+references unchanged. Long tmux case setup failed before native work; shorter
+case PASS25.147s. Native package not rebuilt; broad review not repeated.
+
+Actual canceled/lostreply/admitted/restart/reconnect proof passes. Separate
+nonzero goal continuity PASS42.807s: Native charged25 provider-reported tokens,
+budget2000; exact cumulative usage/status/history retained through rollback
+and re-upgrade. Owned second stream intentionally paused/interrupted before
+upgrade; working/unrelated turns preserved. No external model calls. All
+original failures retained; original fullPython failure remains unresolved.
+Final fresh owned processes0, working1879/b452 unchanged. No695close or
+production bounded activation. Wake0839 pending continuation canceled after
+manual terminal-run reconciliation; original submitted007 wake is not falsely
+reported canceled. Parent next gates remain production adoption and Python.

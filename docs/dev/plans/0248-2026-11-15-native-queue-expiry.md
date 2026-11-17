@@ -17,8 +17,12 @@ expiry is terminal before first attempt, bounded WS publication waits for send.
 evidence. Final batch review against Native075/Wakef8e completed once: Standards
 low private-helper cleanup deferred; Spec no source findings. One bounded
 findings pass required no behavioral change or manufactured test. Package5
-assembly is running through the maintained complete-package selector; new
-installed qualification remains pending. Package4 receipts below are historical.
+assembly passed1176.072s and exact six-file hashes match under UID1017 before
+and after installed acceptance. Nine installed gates pass, including a retained
+adapter float-representation failure repaired in Wakeff9b9c01 and only that
+failed gate replayed. Nonzero nativegoal25tokens/2000budget survive rollback and
+re-upgrade. Working daemon unchanged; parent695 remains OPEN for production
+adoption and original Python failure. Package4 receipts below are historical.
 
 Native `075639f50a` retains bounded queue enforcement and adds conservative local
 package replacement: an identical full package is pinned without restarting or
@@ -47,7 +51,7 @@ rollback, failed-start repair and same-client reconnect now pass. Shared pending
 cancellation source and isolated installed adapter seam also pass; production
 factory remains disabled. The former package4 transport blocker is documented in
 transport-boundary-blocker.json and addressed by Native9af source; exact package5
-qualification remains required.
+qualification now passes in UID1017; working installation remains separate.
 Operator accepted final native transport-send admission on 2026-11-16.
 Recheck after authentication, preparation and transport waits, immediately before
 the native sender writes. Unknown/expired time prevents sending. Remote model
@@ -460,3 +464,35 @@ the host guard exists; final existing QueueStore.admit_bounded owns the original
 record/time/cancel transaction. Its current unknown→pending and expired→terminal
 behavior is reused, without a new protocol/state API or duplicated UTC/DB reads.
 Existing queue-selection gating and Authorized-stage retry rechecks remain.
+
+
+### Package5 installed acceptance | 2026-11-16
+
+Completion wake007c1957 actually reached this conversation with native receipt
+90a3465c; registration alone was not treated as delivery. Reconciled exact
+complete-package5/job-20261117T024538Z-0b8376c8c1a7: PASS1176.072s. All six
+source and transferred hashes match; codex6bc59c44, Native9af. Nine serial
+installed gates now pass: active updater cross/same, account/default/shared
+history rollback, privateowner, preparation expiry/reload, queue expiry/cancel/
+unknown/restart, and admitted/lostreply/reconnect. First8 passed initially.
+
+Final adapter stage initially failed safely: real persisted RPC duplicate upper
+bounds1794885200.049925 and1794885200.0499253 differ exactlyone f64 step; strict
+equality refused admitted evidence. Exact public-response replay isolates that
+one field. Public adapter regression RED, then focused10PASS311/10PASS312 after
+Wakeff9b9c01 repair. At most adjacent representable bounds allowed; both finite,
+ordered and qualified; larger upper rounded outward must be strictly before
+original expiry. More disagreement and crossing expiry still refuse. Native
+bytes unchanged; new isolated test helper preserves priorhelper/credentials.
+The first repair replay had a too-long tmux socket before native start; short
+case then PASS25.147s. No native rebuild or broad review repeated.
+
+Additional public nativegoal check PASS42.807s: owned provider reports25tokens,
+then goal explicitly paused and its exact owned follow-on turn interrupted.
+Paused status, tokenBudget2000, exact tokensUsed25, original history and identity
+survive stopped rollback/re-upgrade. Intentional owned interruption is separate
+from active-stream updater preservation. Fresh owned-process census0 and working
+PID1879/hash unchanged; no working native replacement. Original failed pipeline
+and setup receipts retained. Curated package5-installed-acceptance.json owns
+qualification summary; parent695 stays OPEN pending production adapter adoption,
+original full Python assertion and applicable live/runtime gates.

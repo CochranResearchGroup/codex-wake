@@ -1,15 +1,15 @@
 {
-  "state": "source_validated_package5_pending",
+  "state": "native_package5_qualified_parent_open",
   "base": "d32063f96c2dff1dc96af839b3952abb6acfeda4",
   "source_commit": "9af0e8e48d0c2dcfe1800a3deaadfcec7e2c0bd7",
   "patch_sha256": "8ba55c20eedb7b12b1aa96faa6836c8227323b8aa499889c0e80e4ab3535d6f8",
-  "validation": "Native9af0e8e48d:249 affected controls PASS (26queue+2clock+221API); behavioral HTTP/auth, WS delayed-send/publication and original pending UNKNOWN red\u2192green retained. Complete package5 and installed acceptance pending; package4 receipts historical only.",
+  "validation": "Native9af249 sourcecontrolsPASS; complete package5 PASS1176.072s; exact6filehashes verifiedbefore/after UID1017; nine installed gates PASS with retained finaladapter failure repaired only in Wakeff9b9c01; nonzero nativegoal25tokens preserved rollback/reupgrade. Original fullPython failure and productionactivation remain OPEN.",
   "native_api": "thread/queue/bounded/{add,list,read,delete,capabilities}",
   "expiry_field": "expiresAtUnixMicros",
   "clock_authority": "Stable Time",
   "wake_busy_queue_enabled": false,
   "working_installation_authorized": false,
-  "clock_transport_qualification": "Historical package4 real Stable Time and counter handoff; Native9af source public queue/transport controls pass, new exact package5 qualification pending.",
+  "clock_transport_qualification": "Exact package5 actuallauncher realStableTime expiry/cancel/unknown/restart/preparation/reload passed; source HTTPauth/WSsender latechecks and UNKNOWN-firstsend controls passed; no remote model-start/OS-pause atomicity claim.",
   "native_expiry_boundary": "Operator accepted final native transport-send admission. Non-consuming Pending preflight; original atomic record/time consume after HTTP auth/preparation and inside WS sender after queue/lock waits. UNKNOWN remains pending; expired terminal. Bounded WS history waits for send acknowledgement. Real-attempt retry admission remains truthful. No remote model-start guarantee.",
   "test_uid_clock": "approved narrow shared read-only Stable Time enrollment executed; authenticated UTC observed as UID1017; values withheld",
   "local_updater": "075639f50a: identical complete running package pinned without restart/retarget; different running package refused before native stop/selection changes. Production restart/cooperative recovery remain unqualified."

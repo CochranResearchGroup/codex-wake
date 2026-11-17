@@ -33,5 +33,12 @@
     "/root/final695_standards",
     "/root/final695_spec"
   ],
-  "native_source_remains_frozen": true
+  "native_source_remains_frozen": true,
+  "subsequent_runtime_blocker": {
+    "source": "ff9b9c01",
+    "scope": "bounded_native.py admitted wire clock validation only",
+    "verification": "public reproduction red; exactnative response causalreplay;10focusedPASS311/312; installed failedstage only rerunPASS25.147s",
+    "broad_review_repeated": false,
+    "native_source_changed": false
+  }
 }

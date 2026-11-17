@@ -56,5 +56,16 @@
     "remediation_passes": 1,
     "remediation": "No behavioral blocker; no new test/source edit warranted. Retain existing redgreen controls."
   },
-  "integration_tip": "89c639f9"
+  "integration_tip": "89c639f9",
+  "package5_acceptance": {
+    "state": "validated",
+    "native_source": "9af0e8e48d0c2dcfe1800a3deaadfcec7e2c0bd7",
+    "codex_sha256": "6bc59c44a04dcf1c1a36f9754397b26994ccf6a3a932c7e872560a8016bac978",
+    "installed_gates_passed": 9,
+    "additional_nonzero_goal_continuity": "25tokens/2000budget preserved rollback/reupgrade",
+    "postqualification_python_repair": "ff9b9c01; conservative adjacent-f64 wire validation, red then10focusedPASS311and312; final installed stage retryPASS25.147s",
+    "first_pipeline_failure_retained": true,
+    "working_installation": false,
+    "parent695": "OPEN"
+  }
 }
