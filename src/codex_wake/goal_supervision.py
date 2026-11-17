@@ -502,7 +502,7 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
         from .goal_readiness import engagement
         return dict(state='held',reason='not_enrolled',thread_id=caller_thread_id,controller=controller,
             engagement=engagement({},controller))
-    with _lock(directory,name):
+    with _lock(directory,'maintenance'), _lock(directory,name):
         _private(path);receipt=json.loads(path.read_text())
         pending_recovery=None
         if receipt.get('allocation_path'):
@@ -534,7 +534,7 @@ def show(root,policy_path,caller_thread_id,allocation_id=None,*,permission_princ
                     and receipt.get('state') in ('armed','checkpoint_requested')
                     and not receipt.get('stop_latched')):
                 from .goal_maintenance import window
-                decision=window(permit)
+                decision=window(directory,permit)
                 if decision['state']!='expired' or permit.get('state')=='unqualified':
                     receipt.update(state='held',reason='maintenance_clock_unqualified'
                         if decision['state']=='unqualified' or permit.get('state')=='unqualified' else 'controller_maintenance')

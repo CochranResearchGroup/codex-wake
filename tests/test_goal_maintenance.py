@@ -74,7 +74,7 @@ class GoalMaintenanceTests(unittest.TestCase):
         from codex_wake.goal_maintenance import prepare,authorize_exit,admission_guard,replacement_observed
         from codex_wake.measurements import TimeUnavailable
         from codex_wake.process import boot_id_value
-        for defect in ('legacy','clock_loss','epoch','rollback','expired'):
+        for defect in ('legacy','missing_observation','missing_highwater','clock_loss','epoch','rollback','rollback_after_show','expired','rate_narrowing'):
             with self.subTest(defect=defect),tempfile.TemporaryDirectory() as directory:
                 root,policy,_,native,request=self.fixture(directory)
                 native['goal']['status']='paused';native['active']=[]
@@ -96,33 +96,57 @@ class GoalMaintenanceTests(unittest.TestCase):
                         legacy=dict(original);legacy.pop('clock_anchor');legacy['version']=1
                         legacy.update(prepared_boottime=10,expires_boottime=999999999999)
                         permit_path.write_text(json.dumps(legacy))
+                    elif defect in ('missing_observation','missing_highwater'):
+                        legacy=dict(original)
+                        legacy.pop('clock_observation' if defect=='missing_observation' else 'clock_elapsed_upper_seconds')
+                        permit_path.write_text(json.dumps(legacy))
+                    elif defect=='rollback_after_show':
+                        clock['counter']['counter']=2000
+                        self.assertEqual(show(root,policy,THREAD)['reason'],'controller_maintenance')
+                        observed=json.loads(permit_path.read_text())
+                        self.assertEqual(observed['clock_observation']['counter']['counter'],2000)
+                        clock['counter']['counter']=1500
+                    elif defect=='rate_narrowing':
+                        clock['counter'].update(counter=10950,rate_ppm=5000)
+                        show(root,policy,THREAD)
+                        observed=json.loads(permit_path.read_text())
+                        self.assertGreaterEqual(observed['clock_elapsed_upper_seconds'],10)
+                        clock['counter']['rate_ppm']=0
                     elif defect=='clock_loss':acquisition.side_effect=TimeUnavailable('missing')
                     elif defect=='epoch':clock['counter']['epoch']='00000000-0000-4000-8000-000000000469'
                     elif defect=='rollback':clock['counter']['counter']=999
                     else:clock['counter']['counter']=11000
+                    expired=defect in ('expired','rate_narrowing')
                     self.assertFalse(authorize_exit(root/'goal-supervision',controller))
                     refused=json.loads(permit_path.read_text())
-                    self.assertEqual(refused['handoff_refusal'],'expired' if defect=='expired' else 'unqualified')
-                    if defect=='expired':
+                    self.assertEqual(refused['handoff_refusal'],'expired' if expired else 'unqualified')
+                    if expired:
                         admission_guard(root/'goal-supervision')
                         self.assertEqual(json.loads(permit_path.read_text())['state'],'preparation_expired')
-                        # Restore only the original pending state to exercise replacement expiry.
-                        permit_path.write_text(json.dumps(original))
+                        # Keep expiry/high-water evidence while exercising replacement handling.
+                        refused['state']='prepared'
+                        permit_path.write_text(json.dumps(refused))
                     else:
                         with self.assertRaisesRegex(ValueError,'maintenance'):
                             admission_guard(root/'goal-supervision')
                         self.assertEqual(show(root,policy,THREAD)['reason'],'maintenance_clock_unqualified')
                     replacement_observed(root/'goal-supervision',dict(controller,generation='replacement'))
                     final=json.loads(permit_path.read_text())
-                    self.assertEqual(final['state'],'expired' if defect=='expired' else 'unqualified')
+                    self.assertEqual(final['state'],'expired' if expired else 'unqualified')
                     self.assertEqual(final.get('clock_anchor'),None if defect=='legacy' else original['clock_anchor'])
+                    if defect=='rollback_after_show':
+                        self.assertEqual(final['clock_observation'],observed['clock_observation'])
+                        self.assertEqual(final['clock_elapsed_upper_seconds'],observed['clock_elapsed_upper_seconds'])
+                    if defect=='rate_narrowing':
+                        self.assertEqual(final['clock_elapsed_upper_seconds'],observed['clock_elapsed_upper_seconds'])
+
                     current=show(root,policy,THREAD)
                     self.assertTrue(current['stop_latched'])
                     self.assertEqual(current['deadline'],before['deadline'])
                     self.assertEqual(current['time_origin'],before['time_origin'])
                     self.assertEqual(current['generation'],before['generation'])
                     self.assertEqual(current['used_tokens'],before['used_tokens'])
-                    if defect!='expired':
+                    if not expired:
                         with self.assertRaisesRegex(ValueError,'maintenance'):
                             prepare(root,permission,10)
 

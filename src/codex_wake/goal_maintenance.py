@@ -47,20 +47,34 @@ def _policy(path, root):
     return value,hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def window(permit):
-    """Read one retained maintenance interval; guest clock fields are historical."""
+def window(directory,permit):
+    """Caller holds maintenance lock; retain continuity without renewing authority."""
+    path=_permit_path(directory)
+    latched=permit.get('window_state')
+    if latched in ('expired','unqualified'):
+        return dict(state=latched,clock_status='qualified' if latched=='expired' else 'unqualified',
+            elapsed_upper_seconds=permit.get('clock_elapsed_upper_seconds'),
+            clock_observation=permit.get('clock_observation'))
     try:
-        seconds=permit['duration_seconds']
+        seconds=permit['duration_seconds'];previous=permit['clock_observation']
+        highwater=permit['clock_elapsed_upper_seconds']
         if (permit.get('version')!=2 or permit.get('clock_basis')!='stable_time_host_counter_v1'
-                or type(seconds) not in (int,float) or not math.isfinite(seconds) or not 0<seconds<=60):
+                or type(seconds) not in (int,float) or not math.isfinite(seconds) or not 0<seconds<=60
+                or type(highwater) not in (int,float) or not math.isfinite(highwater) or highwater<0):
             raise measurements.TimeUnavailable('maintenance_clock_unqualified')
         anchor=permit['clock_anchor'];current=measurements.snapshot()
-        measurements.elapsed_bounds(permit.get('departure_clock_observation',anchor),current)
-        elapsed=measurements.elapsed_bounds(anchor,current)[1]
-        return dict(state='eligible' if elapsed<seconds else 'expired',clock_status='qualified',
-            elapsed_upper_seconds=elapsed,clock_observation=current)
+        measurements.elapsed_bounds(previous,current)
+        elapsed=max(highwater,measurements.elapsed_bounds(anchor,current)[1])
+        state='eligible' if elapsed<seconds else 'expired'
     except (measurements.TimeUnavailable,OSError,ValueError,KeyError,TypeError):
+        # A failed observation never replaces the retained evidence or high-water.
+        permit.update(window_state='unqualified',clock_status='unqualified')
+        _save(path,permit)
         return dict(state='unqualified',clock_status='unqualified',clock_observation=None)
+    permit.update(clock_observation=current,clock_elapsed_upper_seconds=elapsed,
+        window_state=state,clock_status='qualified')
+    _save(path,permit)
+    return dict(state=state,clock_status='qualified',elapsed_upper_seconds=elapsed,clock_observation=current)
 
 
 def admission_guard(directory):
@@ -68,7 +82,7 @@ def admission_guard(directory):
     if path.exists():
         permit=_read(path)
         if permit.get('state') not in ('prepared','handoff','unqualified'):return
-        decision=window(permit)
+        decision=window(directory,permit)
         heartbeat=_heartbeat(directory)
         if (permit.get('state')=='prepared' and heartbeat.get('fresh') and
                 heartbeat.get('generation')==permit['controller']['generation'] and
@@ -118,7 +132,8 @@ def prepare(root,policy_path,seconds):
             ('generation','pid','identity','boot_id')},policy_path=str(Path(policy_path).absolute()),
             policy_sha256=digest,prepared_boottime=None,expires_boottime=None,
             clock_basis='stable_time_host_counter_v1',clock_anchor=anchor,duration_seconds=seconds,
-            clock_status='qualified',receipts=receipts,allocations=allocations)
+            clock_status='qualified',clock_observation=anchor,clock_elapsed_upper_seconds=0,
+            window_state='eligible',receipts=receipts,allocations=allocations)
         _save(_permit_path(directory),permit)
         return dict(state='prepared',controller_generation=heartbeat['generation'],
             expires_boottime=None,clock_basis=permit['clock_basis'],seconds=seconds,receipt_count=len(receipts),
@@ -132,7 +147,7 @@ def authorize_exit(directory,heartbeat):
     try:
         permit=_read(path)
         if permit.get('state')!='prepared':return False
-        decision=window(permit)
+        decision=window(directory,permit)
         if decision['state']!='eligible':
             permit.update(clock_status=decision['clock_status'],handoff_refusal=decision['state'])
             _save(path,permit);return False
@@ -159,7 +174,7 @@ def authorize_exit(directory,heartbeat):
                             allocation['used_tokens']<before['used_tokens']):return False
             # The controller is exiting, not renewing authority. Public readiness
             # still fails on its inactive/stale heartbeat until a new poll succeeds.
-            decision=window(permit)
+            decision=window(directory,permit)
             if decision['state']!='eligible':
                 permit.update(clock_status=decision['clock_status'],handoff_refusal=decision['state'])
                 _save(path,permit);return False
@@ -176,7 +191,7 @@ def replacement_observed(directory,heartbeat):
         if not path.exists():return
         permit=_read(path)
         if permit.get('state') not in ('handoff','prepared'):return
-        decision=window(permit)
+        decision=window(directory,permit)
         if permit['controller']['generation']==heartbeat['generation']:
             if permit['state']=='prepared' and decision['state']=='expired':
                 permit.update(state='preparation_expired',clock_status='qualified');_save(path,permit)
