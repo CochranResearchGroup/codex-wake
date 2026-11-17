@@ -11,11 +11,11 @@ import os
 from pathlib import Path
 import stat
 import subprocess
-import time
 from typing import Any, Callable
 
 from . import __version__
 from .records import WakeError
+from .measurements import TimeUnavailable, deadline
 
 
 class SharedSourceError(WakeError):
@@ -37,13 +37,13 @@ class SharedAppServerReader:
         self.timeout = timeout
         self.connector = connector
         self.connection: Any = None
-        self.deadline = 0.0
+        self.deadline = None
         self.sequence = 0
         self.server_metadata: dict[str, Any] = {}
 
     def __enter__(self) -> SharedAppServerReader:
-        self.deadline = time.monotonic() + self.timeout
         try:
+            self.deadline = deadline(self.timeout)
             if self.path.is_symlink():
                 from .strict_runtime import resolve_executor_endpoint
                 try:
@@ -69,12 +69,19 @@ class SharedAppServerReader:
             return self
         except Exception as exc:
             self.close()
+            if isinstance(exc, TimeUnavailable):
+                raise SharedSourceError('shared_stable_time_unavailable') from None
             if isinstance(exc, WakeError):
                 raise
             raise SharedSourceError(f"shared app-server unavailable: {type(exc).__name__}") from None
 
     def remaining(self) -> float:
-        remaining = self.deadline - time.monotonic()
+        if self.deadline is None:
+            raise SharedSourceError('shared_stable_time_unavailable')
+        try:
+            remaining = self.deadline.remaining()
+        except TimeUnavailable:
+            raise SharedSourceError('shared_stable_time_unavailable') from None
         if remaining <= 0:
             raise SharedSourceError("shared metadata observation timed out")
         return remaining

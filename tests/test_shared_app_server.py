@@ -34,12 +34,28 @@ def result(identifier, value):
 
 class SharedReaderTests(unittest.TestCase):
     def setUp(self):
+        clock = dict(reason='authenticated_utc', valid_for_ns=1000000000,
+            utc=dict(status='network', lower=1700000000, upper=1700000001),
+            counter=dict(epoch='3c93a3d4-445d-4403-8a40-77fa9162dee6',
+                counter=1000, frequency=1000, rate_ppm=5000))
+        for target, value in (('configuration', '/explicit-test-clock'), ('snapshot', clock)):
+            context = patch('codex_wake.native_clock.' + target, return_value=value)
+            context.start()
+            self.addCleanup(context.stop)
         self.tmp = tempfile.TemporaryDirectory()
         self.path = Path(self.tmp.name) / 'daemon.sock'
         self.sock = socket.socket(socket.AF_UNIX)
         self.sock.bind(str(self.path))
         self.addCleanup(self.tmp.cleanup)
         self.addCleanup(self.sock.close)
+
+    def test_unqualified_time_holds_before_connecting(self):
+        with patch('codex_wake.native_clock.configuration', return_value=None), \
+                patch('websockets.sync.client.unix_connect') as connect:
+            with self.assertRaisesRegex(SharedSourceError, 'stable_time_unavailable'):
+                with SharedAppServerReader('unix://' + str(self.path)):
+                    self.fail('unqualified time admitted a timed connection')
+            connect.assert_not_called()
 
     def reader(self, replies):
         connection = FakeConnection(replies)

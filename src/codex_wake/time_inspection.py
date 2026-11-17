@@ -113,9 +113,12 @@ def inspect_time(*, offline=False, collector=None):
                   decision=asdict(TimeDecision('uncertain',reason='acquisition_not_requested')), sources=sources)
     if offline:
         return report
+    if collector is None:
+        report['decision'] = asdict(TimeDecision('uncertain', reason='stable_time_acquisition_required'))
+        return report
     request = dict(request_id=str(uuid.uuid4()),guest_boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip())
     try:
-        data = (collector or windows_collect)([s for s in sources if s['scale']],request)
+        data = collector([s for s in sources if s['scale']],request)
         if data['request_id'] != request['request_id'] or data['guest_boot'] != request['guest_boot']:
             raise ValueError('collector_identity_mismatch')
         if not all(isinstance(data[k],str) and data[k] for k in ('host_boot','host_boot_end','generation')) or data['host_boot'] != data['host_boot_end']:
@@ -188,7 +191,10 @@ def time_command(args):
                       decision=asdict(decision), observation=observation, purpose='installed-service-consumer',
                       note='Observation is diagnostic; only the validated decision supplies finite dispatch authority.')
     else:
-        report = inspect_time(offline=args.offline)
+        report = inspect_time(offline=True)
+        if not args.offline:
+            report.update(provider='stable-time',
+                decision=asdict(TimeDecision('uncertain', reason='stable_time_configuration_required')))
     print(json.dumps(report, sort_keys=True))
     return 0
 
@@ -199,6 +205,4 @@ def network_time_decision():
     if config:
         from .stable_time import service_time_decision
         return service_time_decision(config)
-    report = inspect_time()
-    decision = report['decision']
-    return TimeDecision(decision['status'],tuple(decision['sources']),decision['lower'],decision['upper'],decision['reason'])
+    return TimeDecision('uncertain', reason='stable_time_configuration_required')

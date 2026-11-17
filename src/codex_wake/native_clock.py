@@ -1,7 +1,6 @@
 """Acquire UTC bounds and authenticated host elapsed evidence without guest UTC."""
 from __future__ import annotations
 
-from dataclasses import asdict
 from datetime import datetime
 from decimal import Decimal, ROUND_CEILING
 import ipaddress
@@ -32,13 +31,7 @@ def snapshot():
     """One bounded observation; counter-only evidence is never labeled UTC."""
     config_path = configuration()
     if not config_path:
-        from .time_inspection import network_time_decision
-        from .time_provider import require_time_decision
-        try:
-            decision = require_time_decision(network_time_decision())
-            return {"utc": asdict(decision), "counter": None, "reason": "bounded_utc"}
-        except (OSError, ValueError, TypeError):
-            return {"utc": None, "counter": None, "reason": "clock_unavailable"}
+        return {"utc": None, "counter": None, "reason": "stable_time_configuration_required"}
     try:
         config = json.loads(Path(config_path).read_text())
         origin = config["url"]

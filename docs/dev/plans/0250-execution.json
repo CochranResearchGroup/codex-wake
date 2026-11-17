@@ -22,20 +22,25 @@
       "summary": "440 production measurements,42boundclocks,197injectedcalls across134files;602scriptmeasurements90files; legacy persistedclockdomains identified"
     },
     "ST03": {
-      "owner": "root",
-      "state": "pending",
+      "owner": "time_bypass_audit",
+      "state": "running",
       "dependencies": [
         "ST01",
         "ST02"
-      ]
+      ],
+      "worker": "/root/time_bypass_audit",
+      "branch": "feat/stable-time-custody-0250",
+      "base": "6b5dad0c22c38215e269a89abdc712b4b302300d",
+      "scope": "structured freshness across observation/custody/backgroundjob/workacceptance owners; original UTCmetadata retained"
     },
     "ST04": {
-      "owner": "pending",
-      "state": "pending",
+      "owner": "root",
+      "state": "running",
       "dependencies": [
         "ST01",
         "ST02"
-      ]
+      ],
+      "scope": "Complete auditadoption pending; completedsubsets are not globalcompletion"
     },
     "GR01": {
       "owner": "grok_readiness_diagnosis",
@@ -44,8 +49,33 @@
       "evidence": "private gr01-grok-readiness-diagnosis.json",
       "summary": "Catalogexpiry already StableTime; bothmetadata/codingproof expired2026-11-17T01:27:08.145664Z; prior liveallowance exhausted, no new qualification effects authorized",
       "next_gate": "renewed explicit liveallowance and stop/unknowncharge reconciliation; immutableexpiry preserved"
+    },
+    "ST04-NATIVE": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "scope": "native protocol, bounded peerqualification, sharedmetadata reader deadline adoption and implicit alternateclock fallback refusal",
+      "validation": "64focusedchecks Python311,52Python312; two publicpreIO missingclock RED/GREEN and realUnix factory non-guestclock RED/GREEN; undefined-name Ruff/diff pass",
+      "native_build": "unchanged; no rebuild or broadreview"
+    },
+    "ST04-GROK": {
+      "owner": "grok_readiness_diagnosis",
+      "state": "implemented",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "worker": "/root/grok_readiness_diagnosis",
+      "branch": "fix/stable-time-grok-login-0250",
+      "base": "6b5dad0c22c38215e269a89abdc712b4b302300d",
+      "result_sha": "bba146a32b094d612f84bb651294bb0fd6afcc4c",
+      "validation": "14focusedauthchecks on311and312; missing/midflowclock RED/GREEN; no realautheffects"
     }
   },
   "review": "Previous single broadreview retained; no repeat",
-  "working_effects": "none"
+  "working_effects": "none",
+  "live_grok_renewal": "Explicit question pending: new12Grok/2OpenAI/16localtools/15StableTimeminute/1metadatarefresh packet; previous allowance exhausted and unknowncharge/stop records retained; do not dispatch without approval."
 }

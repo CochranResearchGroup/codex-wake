@@ -5,10 +5,10 @@ import json
 import os
 from pathlib import Path
 import stat
-import time
 
 from . import __version__
 from .records import WakeError
+from .measurements import TimeUnavailable, deadline
 
 
 class NativeCapabilityUnavailable(WakeError):
@@ -22,7 +22,15 @@ class NativeHealthDeadline(WakeError):
 def native_request(endpoint, codex, method, params, timeout, *, verify_connection=None):
     from .shared_app_server import locate_shared_endpoint
     from websockets.sync.client import unix_connect
-    deadline = time.monotonic() + timeout
+    try:
+        timer = deadline(timeout)
+    except TimeUnavailable:
+        raise WakeError('native_stable_time_unavailable') from None
+    def remaining_budget():
+        try:
+            return timer.remaining()
+        except TimeUnavailable:
+            raise WakeError('native_stable_time_unavailable') from None
     if endpoint == 'unix://':
         endpoint = locate_shared_endpoint(codex_cmd=codex, timeout=timeout)
     if not endpoint.startswith('unix://') or not Path(endpoint[7:]).is_absolute():
@@ -36,7 +44,7 @@ def native_request(endpoint, codex, method, params, timeout, *, verify_connectio
         raise WakeError('native lifecycle endpoint is unavailable') from None
     if not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.geteuid():
         raise WakeError('native lifecycle endpoint must be an owned Unix socket')
-    remaining = deadline - time.monotonic()
+    remaining = remaining_budget()
     if remaining <= 0:
         raise WakeError('native lifecycle endpoint observation timed out')
     # Long-lived threads can exceed the WebSocket library's 1 MiB default.
@@ -46,7 +54,7 @@ def native_request(endpoint, codex, method, params, timeout, *, verify_connectio
         def request(identifier, name, body):
             ws.send(json.dumps({'id': identifier, 'method': name, 'params': body}))
             while True:
-                remaining = deadline - time.monotonic()
+                remaining = remaining_budget()
                 if remaining <= 0:
                     raise WakeError('native lifecycle request timed out; inspect state before retry')
                 result = json.loads(ws.recv(timeout=remaining))

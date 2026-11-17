@@ -8,6 +8,7 @@ import sys
 import tempfile
 import threading
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from websockets.exceptions import ConnectionClosed
@@ -92,6 +93,28 @@ def _request(root):
 
 
 class BoundedNativeQualificationTests(unittest.TestCase):
+    def setUp(self):
+        clock = dict(reason='authenticated_utc', valid_for_ns=1000000000,
+            utc=dict(status='network', lower=1700000000, upper=1700000001),
+            counter=dict(epoch='3c93a3d4-445d-4403-8a40-77fa9162dee6',
+                counter=1000, frequency=1000, rate_ppm=5000))
+        for target, value in (('configuration', '/explicit-test-clock'), ('snapshot', clock)):
+            context = patch('codex_wake.native_clock.' + target, return_value=value)
+            context.start()
+            self.addCleanup(context.stop)
+
+    def test_submission_qualification_does_not_measure_guest_elapsed_time(self):
+        from codex_wake.native_delivery import _codex_adapter
+        def guest_clock():
+            self.fail('qualification measured a guest clock')
+        with _peer() as (root, calls), patch('codex_wake.bounded_native_qualification.time',
+                SimpleNamespace(monotonic=guest_clock), create=True):
+            adapter = _codex_adapter()
+            recipient = adapter.resolve(dict(transport='native', thread_id=_THREAD,
+                endpoint='unix://' + str(root / 'native.sock'), codex_cmd=sys.executable))
+            result = adapter.submit_bounded(recipient, 'wake', RuntimeSubmissionEnvelope(_CLIENT, _EXPIRY))
+            self.assertEqual(result.state, 'accepted')
+
     def test_default_factory_preserves_envelope_and_negotiates_on_submission_connection(self):
         from codex_wake.native_delivery import _codex_adapter
         with _peer() as (root, calls):

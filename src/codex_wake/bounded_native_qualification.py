@@ -14,12 +14,12 @@ import re
 import socket
 import stat
 import struct
-import time
 
 from .native_protocol import native_request
 from .process import process_identity
 from .records import WakeError
 from .runtime_delivery import RuntimeCapability
+from .measurements import deadline
 
 
 _CHECKS = ('expiry', 'unknown', 'cancellation', 'restart', 'history_isolation',
@@ -106,8 +106,8 @@ class QualifiedBoundedNativeRequest:
                     or not isinstance(params.get('threadId'), str) or not params['threadId']
                     or type(timeout) not in (int, float) or not math.isfinite(timeout) or timeout <= 0):
                 raise WakeError(_REFUSAL)
-            deadline = time.monotonic() + timeout
             approval = _approval()
+            timer = deadline(timeout)
             peer = None
             credentials = None
 
@@ -123,7 +123,7 @@ class QualifiedBoundedNativeRequest:
                     ws.send(json.dumps(dict(id=identifier, method=_CAPABILITIES,
                         params=dict(threadId=params['threadId']))))
                     while True:
-                        remaining = deadline - time.monotonic()
+                        remaining = timer.remaining()
                         if remaining <= 0:
                             raise WakeError(_REFUSAL)
                         message = json.loads(ws.recv(timeout=remaining))
@@ -134,11 +134,11 @@ class QualifiedBoundedNativeRequest:
                             break
                 if _approval() != approval or _peer_process(credentials) != peer:
                     raise WakeError(_REFUSAL)
-                if time.monotonic() >= deadline:
+                if timer.expired():
                     raise WakeError(_REFUSAL)
                 verified = method != _CAPABILITIES
 
-            remaining = deadline - time.monotonic()
+            remaining = timer.remaining()
             if remaining <= 0:
                 raise WakeError(_REFUSAL)
             result = self._request(endpoint, codex, method, params, remaining,

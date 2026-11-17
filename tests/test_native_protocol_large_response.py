@@ -4,12 +4,33 @@ from pathlib import Path
 import tempfile
 import threading
 import unittest
+from unittest.mock import patch
 
 from websockets.sync.server import unix_serve
 from codex_wake.native_delivery import native_evidence
 
 
 class NativeLargeResponseTests(unittest.TestCase):
+    def setUp(self):
+        clock = dict(reason='authenticated_utc', valid_for_ns=1000000000,
+            utc=dict(status='network', lower=1700000000, upper=1700000001),
+            counter=dict(epoch='3c93a3d4-445d-4403-8a40-77fa9162dee6',
+                counter=1000, frequency=1000, rate_ppm=5000))
+        for target, value in (('configuration', '/explicit-test-clock'), ('snapshot', clock)):
+            context = patch('codex_wake.native_clock.' + target, return_value=value)
+            context.start()
+            self.addCleanup(context.stop)
+
+    def test_unqualified_clock_refuses_before_endpoint_resolution(self):
+        from codex_wake.native_protocol import native_request
+        from codex_wake.records import WakeError
+        with patch('codex_wake.native_clock.configuration', return_value=None), \
+                patch('codex_wake.shared_app_server.locate_shared_endpoint',
+                    side_effect=AssertionError('endpoint resolution before clock admission')) as locate:
+            with self.assertRaisesRegex(WakeError, 'stable_time_unavailable'):
+                native_request('unix://', '/codex', 'thread/read', dict(threadId='owned'), 2)
+            locate.assert_not_called()
+
     def test_reconciliation_reads_user_message_beyond_default_websocket_cap(self):
         prompt = 'wake regression marker'
         thread_id = '01a10922-e791-7dd0-8bb2-ae9f110a688b'

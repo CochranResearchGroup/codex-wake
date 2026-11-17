@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 from copy import deepcopy
 
 from codex_wake.native_clock import from_response
@@ -20,6 +21,17 @@ def response():
 
 
 class NativeClockTests(unittest.TestCase):
+    def test_missing_stable_time_configuration_holds_without_network_fallback(self):
+        from codex_wake.native_clock import snapshot
+        with patch('codex_wake.native_clock.configuration', return_value=None), \
+                patch('codex_wake.time_inspection.network_time_decision',
+                    side_effect=AssertionError('non-Stable-Time fallback attempted')) as fallback:
+            value = snapshot()
+            self.assertIsNone(value['utc'])
+            self.assertIsNone(value['counter'])
+            self.assertEqual(value['reason'], 'stable_time_configuration_required')
+            fallback.assert_not_called()
+
     def test_authenticated_utc_retains_conservative_remaining_validity(self):
         result = from_response(response(), counter=10000010, frequency=10000000)
         # Eleven counter ticks at the slowest allowed rate consume1106ns,
