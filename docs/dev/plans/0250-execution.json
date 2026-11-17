@@ -159,12 +159,15 @@
     },
     "ST04-STRICT": {
       "owner": "time_bypass_audit",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
       ],
-      "scope": "Frozen retained executor anchor, strict guard and lifecycle supervision heartbeat; no deadline renewal"
+      "scope": "Frozen retained executor anchor, strict guard and lifecycle supervision heartbeat; no deadline renewal",
+      "worker_sha": "bc65ca6ebec036a9edc8549485a676e9c17ec822",
+      "integration_sha": "4bdc35b6",
+      "validation": "Worker47 affected scenarios PASS311/312 plus final delta/heartbeat/adjacent refusal checks; root4 critical default/legacy/cleanup/refusal cases PASS311/312. Real systemd/native acceptance separate."
     },
     "ST04-CANCEL": {
       "owner": "grok_readiness_diagnosis",
@@ -180,11 +183,14 @@
     },
     "ST04-BOOTSTRAP": {
       "owner": "stable_time_bootstrap",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST02"
       ],
-      "scope": "Approved non-authoritative whole-operation blocking transport fuse; no guest clock reads, no measurement bootstrap recursion, no daemon/helper/protocol change"
+      "scope": "Approved non-authoritative whole-operation blocking transport fuse; no guest clock reads, no measurement bootstrap recursion, no daemon/helper/protocol change",
+      "worker_sha": "1dd3764718895921da1043164a1297cb5ded4d5a",
+      "integration_sha": "ed7c8913",
+      "validation": "Worker9PASS311/312; root bootstrap9 plus native lease public2 PASS311; no guest clock measurement; explicit non-authoritative blocking fuses only"
     },
     "ST04-STOP-METADATA": {
       "owner": "root",
@@ -195,6 +201,54 @@
       ],
       "scope": "New stop diagnostics use qualified coordinate or explicitly unknown time; original first-stop history retained, stop stays available",
       "validation": "Public retained-deadline metadata RED then2PASS311;2 affected checks plus7goal-time controls PASS312; no broad run"
+    },
+    "ST04-NATIVE-GUARD": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "integration_sha": "f11c61b4",
+      "scope": "Retained pre-send host-counter acknowledgement anchor; missing/legacy/expired clock unqualified, query never reanchors",
+      "validation": "Public status clock-loss RED then2native guard scenarios PASS311/312; post-bootstrap integrated2PASS311; coupled reenrollment consumer fixed separately"
+    },
+    "ST04-REENROLL": {
+      "owner": "time_bypass_audit",
+      "state": "validated",
+      "dependencies": [
+        "ST04-NATIVE-GUARD"
+      ],
+      "worker_sha": "6bf66e8b8c90a4975583ed14751ca7710854c39d",
+      "integration_sha": "707aabe5",
+      "validation": "Public TypeError RED thenPASS311/312; integratedPASS311. Same lease/anchor/deadline/revision retained without rearm, tighter limit still revises/rearms"
+    },
+    "ST04-APP-TRANSPORT": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "ST01",
+        "ST04-BOOTSTRAP"
+      ],
+      "scope": "Qualified startup/request deadlines and dispatch metadata, nonblocking stdio send, existing WebSocket timer only protective I/O fuse; clock loss holds before startup/attempt mutation/input",
+      "validation": "Startup authority2subcases RED thenGREEN;20causally affected checksPASS311,21PASS312 after admission case; admission1PASS311 and final startup/cleanup2PASS311; full suite not run"
+    },
+    "ST04-POLL-ACK": {
+      "owner": "time_bypass_audit",
+      "state": "running",
+      "dependencies": [
+        "ST04-REENROLL"
+      ],
+      "scope": "Exact producers in goal_supervision and freshness consumers in goal_readiness/goal_renewal; legacy acknowledgements require genuine new poll"
+    },
+    "ST04-GROK-CONTROLS": {
+      "owner": "grok_readiness_diagnosis",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "scope": "Remove unused stdio timestamp; qualify actor expiry and cached-token staleness in account observation/readiness; no provider effects"
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -206,5 +260,6 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-17T16:24:31.329177+00:00"
+  "updated_at": "2026-11-17T16:40:41.292907+00:00",
+  "worker_cleanup": "Completed original Grok, custody and bootstrap checkouts removed after clean exact commit/source byte equality and pushed custody verified; worker branch refs retained. New reenrollment/poll-ack and account-control checkouts active."
 }

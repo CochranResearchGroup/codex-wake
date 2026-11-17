@@ -13,6 +13,36 @@ import test_app_server
 
 
 class PersistentDispatchTests(unittest.TestCase):
+    def test_clock_loss_holds_dispatch_without_consuming_attempt_or_starting_turn(self):
+        from codex_wake.measurements import TimeUnavailable
+        from codex_wake.records import WakeError
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)/'wake'
+            found=test_app_server.AppServerTests().make_record(root,Path(directory))
+            original=found.path.read_bytes()
+            client=test_app_server.FakeAppServerClient()
+            with patch('codex_wake.measurements.datetime_now',side_effect=TimeUnavailable('unqualified')):
+                with self.assertRaisesRegex(WakeError,'Stable Time'):
+                    dispatch_app_server_record(root,found,client=client)
+            self.assertEqual(client.calls,[])
+            self.assertEqual(found.path.read_bytes(),original)
+
+    def test_missing_qualified_clock_refuses_transport_startup_before_effects(self):
+        from codex_wake.app_server import StdioAppServerClient, UnixWebSocketAppServerClient
+        from codex_wake.measurements import TimeUnavailable
+        from codex_wake.records import WakeError
+        for client in (StdioAppServerClient, UnixWebSocketAppServerClient):
+            with self.subTest(client=client.__name__), \
+                    patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('unqualified')), \
+                    patch('codex_wake.app_server.subprocess.Popen') as spawn, \
+                    patch('codex_wake.app_server.persistent_app_server_socket') as discover, \
+                    patch('websockets.sync.client.unix_connect') as connect:
+                with self.assertRaisesRegex(WakeError,'Stable Time'):
+                    client()
+                spawn.assert_not_called()
+                discover.assert_not_called()
+                connect.assert_not_called()
+
     def test_turn_survives_websocket_close_without_claiming_completion(self):
         for owned_alias in (False, True):
             with self.subTest(owned_alias=owned_alias):
@@ -172,32 +202,40 @@ for line in sys.stdin:
                 server=serve(handler,sock=listener,close_timeout=.05)
                 worker=threading.Thread(target=server.serve_forever);worker.start()
                 client=None
-                started=time.monotonic()
+                from codex_wake import measurements
+                from test_measurements import observation
+                read_clock=measurements.snapshot
+                started=read_clock()
+                ticks=iter(range(1000,1000000))
                 try:
-                    with patch('codex_wake.app_server.persistent_app_server_socket',return_value=path):
+                    with patch('codex_wake.measurements.snapshot',side_effect=lambda:observation(next(ticks))), patch('codex_wake.app_server.persistent_app_server_socket',return_value=path):
                         client=UnixWebSocketAppServerClient(timeout_seconds=.08)
-                    with self.assertRaises(WakeError):client.initialize()
+                        with self.assertRaises(WakeError):client.initialize()
                 finally:
                     if client is not None:client.close()
                     server.shutdown();worker.join(2)
-                self.assertLess(time.monotonic()-started,2)
+                self.assertLess(measurements.elapsed_bounds(started,read_clock())[1],2)
 
     def test_rpc_timeout_reaps_only_owned_client(self):
         import sys
-        import time
+        from codex_wake import measurements
+        from test_measurements import observation
         from codex_wake.app_server import StdioAppServerClient
         from codex_wake.records import WakeError
-        client = StdioAppServerClient(
+        read_clock=measurements.snapshot
+        started=read_clock()
+        ticks=iter(range(1000,1000000))
+        with patch('codex_wake.measurements.snapshot',side_effect=lambda:observation(next(ticks))):
+            client = StdioAppServerClient(
             command=[sys.executable, '-c', 'import time; time.sleep(300)'],
             timeout_seconds=.05,
         )
-        started = time.monotonic()
-        try:
-            with self.assertRaisesRegex(WakeError, 'timed out'):
-                client.initialize()
-        finally:
-            client.close()
-        self.assertLess(time.monotonic() - started, 3)
+            try:
+                with self.assertRaisesRegex(WakeError, 'timed out'):
+                    client.initialize()
+            finally:
+                client.close()
+        self.assertLess(measurements.elapsed_bounds(started,read_clock())[1],3)
         self.assertIsNotNone(client.process.poll())
 
     def test_discovery_timeout_does_not_start_a_proxy_or_daemon(self):
