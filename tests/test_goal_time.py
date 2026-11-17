@@ -67,9 +67,9 @@ class GoalTimeTests(unittest.TestCase):
         self.assertIsNone(shown['deadline_utc'])
         self.assertEqual(shown['elapsed_limit_seconds'],10)
 
-    @patch('codex_wake.goal_readiness.time.clock_gettime', return_value=1000)
+    @patch('codex_wake.measurements.snapshot', return_value=dict(reason='authenticated_counter_only',utc=None,counter=dict(ANCHOR,counter=2000)))
     def test_counter_readiness_and_notice_never_format_elapsed_as_utc(self, _fixture_clock):
-        import tempfile,time
+        import tempfile
         from pathlib import Path
         from codex_wake.goal_readiness import engagement
         from codex_wake.goal_notices import record_notice
@@ -77,12 +77,13 @@ class GoalTimeTests(unittest.TestCase):
             generation='receipt',enrollment_revision=1,state='armed',accounting=dict(state='qualified'),
             used_tokens=1,token_limit=10,token_accounting='fresh',deadline=10,
             time_limit_seconds=10,time_origin=0,started_upper=0,
-            started_boottime=time.clock_gettime(time.CLOCK_BOOTTIME),
+            started_boottime=None,
             checkpoint_token_percent=5,checkpoint_seconds=1,session_scope=True,native_goal_status=None,
             time_basis='authenticated_host_counter',clock_anchor=ANCHOR,
             clock_observation=dict(ANCHOR,counter=2000),clock_elapsed_upper=1.0012,
             poll_ack=dict(enrollment_revision=1,receipt_generation='receipt',
-                controller_generation='controller',observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
+                controller_generation='controller',observed_boottime=None,
+                clock_observation=dict(reason='authenticated_counter_only',utc=None,counter=dict(ANCHOR,counter=2000))))
         controller=dict(fresh=True,generation='controller',interval=1)
         self.assertFalse(engagement(receipt,controller)['engaged'])
         controller.update(time_bases=['qualified_utc','authenticated_host_counter'],session_scope_without_goal=True)
@@ -91,11 +92,61 @@ class GoalTimeTests(unittest.TestCase):
         self.assertIsNone(view['card']['deadline_utc'])
         self.assertIsNone(view['card']['timezone'])
         self.assertEqual(view['card']['time_basis'],'authenticated_host_counter')
+        from copy import deepcopy
+        original=deepcopy(receipt)
+        qualified=deepcopy(_fixture_clock.return_value)
+        for invalid in (None,dict(qualified,counter=dict(ANCHOR,counter=1000)),
+                dict(qualified,counter=dict(ANCHOR,epoch='00000000-0000-4000-8000-000000000469',counter=2000)),
+                dict(qualified,counter=dict(ANCHOR,counter=50000))):
+            with self.subTest(clock=invalid):
+                _fixture_clock.return_value=invalid
+                self.assertFalse(engagement(receipt,controller)['engaged'])
+                self.assertEqual(receipt,original)
+        _fixture_clock.return_value=qualified
+        legacy=deepcopy(receipt);legacy['poll_ack'].pop('clock_observation')
+        legacy['poll_ack']['observed_boottime']=10
+        self.assertFalse(engagement(legacy,controller)['engaged'])
+        for field,value in (('enrollment_revision',2),('receipt_generation','replacement'),
+                ('controller_generation','replacement')):
+            mismatch=deepcopy(receipt);mismatch['poll_ack'][field]=value
+            self.assertFalse(engagement(mismatch,controller)['engaged'])
+
+
         with tempfile.TemporaryDirectory() as directory:
             event=record_notice(Path(directory),receipt,'activation')
             self.assertNotIn('1970',event['text'])
             self.assertIn('authenticated host elapsed',event['text'])
             self.assertIsNone(event['snapshot']['deadline'])
+
+    def test_absolute_readiness_card_requires_current_qualified_utc_without_reanchoring(self):
+        from copy import deepcopy
+        from codex_wake.goal_readiness import engagement
+        from codex_wake.measurements import TimeUnavailable
+        stamp=dict(reason='authenticated_utc',utc=dict(status='network',lower=100,upper=101),
+            valid_for_ns=300000000000,counter=dict(ANCHOR,counter=2000))
+        receipt=dict(thread_id='owned',allocation_id='allocation',generation='receipt',enrollment_revision=1,
+            state='armed',accounting=dict(state='qualified'),used_tokens=1,token_limit=10,
+            started_upper=100,time_origin=100,deadline=200,checkpoint_token_percent=5,checkpoint_seconds=1,
+            poll_ack=dict(enrollment_revision=1,receipt_generation='receipt',controller_generation='controller',
+                observed_boottime=None,clock_observation=stamp))
+        controller=dict(fresh=True,generation='controller',interval=1)
+        original=deepcopy(receipt)
+        with patch('codex_wake.measurements.snapshot',return_value=stamp),patch(
+                'codex_wake.lifecycle_budget.trusted_upper',return_value=110),patch(
+                'time.clock_gettime',side_effect=AssertionError('no guest clock')):
+            shown=engagement(receipt,controller)
+            self.assertTrue(shown['engaged'])
+            self.assertEqual(shown['card']['remaining_seconds'],90)
+            self.assertEqual(shown['card']['time_observation'],'qualified_utc')
+            with patch('codex_wake.lifecycle_budget.trusted_upper',side_effect=TimeUnavailable('lost')):
+                held=engagement(receipt,controller)
+                self.assertFalse(held['engaged'])
+                self.assertEqual(held['status'],'clock_unqualified')
+        self.assertEqual(receipt,original)
+        with patch('codex_wake.measurements.snapshot',side_effect=AssertionError('disabled control needs no clock')):
+            self.assertEqual(engagement(dict(receipt,governor_enabled=False),controller)['status'],'inactive')
+        with patch('codex_wake.measurements.snapshot',side_effect=AssertionError('stop needs no clock')):
+            self.assertEqual(engagement(dict(receipt,stop_latched=True),controller)['status'],'continuation_held')
 
     def test_counter_anchor_cannot_switch_basis_or_survive_continuity_loss(self):
         from codex_wake.goal_time import admit,GoalTimeUnavailable

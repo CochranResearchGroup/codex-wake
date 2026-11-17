@@ -1298,17 +1298,21 @@ def _acknowledge_enrollments(directory,controller,observations):
             if (observed.get('state')=='held' and observed.get('reason')=='idle_session_future_task_isolation_unsupported'
                     and receipt.get('requires_native_guard') and not receipt.get('stop_latched')
                     and receipt.get('accounting',{}).get('state')=='qualified'):
+                clock=_controller_clock()
+                if clock is None:continue
                 receipt['prepared_poll_ack']=dict(enrollment_revision=receipt['enrollment_revision'],receipt_generation=receipt['generation'],
-                    controller_generation=controller['generation'],observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME))
+                    controller_generation=controller['generation'],observed_boottime=None,clock_observation=clock)
                 _save(path,receipt)
                 continue
             if (observed.get('state') not in ('armed','checkpoint_requested') or
                     receipt.get('state') not in ('armed','checkpoint_requested') or receipt.get('stop_latched')
                     or (receipt.get('accounting') or {}).get('state')!='qualified'):
                 continue
+            clock=_controller_clock()
+            if clock is None:continue
             receipt['poll_ack']=dict(enrollment_revision=receipt.get('enrollment_revision',1),
                 receipt_generation=receipt['generation'],controller_generation=controller['generation'],
-                observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME))
+                observed_boottime=None,clock_observation=clock)
             receipt['controller_generation']=controller['generation']
             _record_supervision_notice(path,receipt,'engagement',controller)
             _save(path,receipt)
