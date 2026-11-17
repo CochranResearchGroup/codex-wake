@@ -270,9 +270,18 @@
       "owner": "grok_readiness_diagnosis",
       "state": "pending",
       "dependencies": [
-        "ST01"
+        "ST04-DEADLINE-RESTRICT"
       ],
       "scope": "Four-file Grok runtime/terminal/wake/A2A retained deadline contract; waits on root Deadline.restrict primitive before source edits"
+    },
+    "ST04-DEADLINE-RESTRICT": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "ST01"
+      ],
+      "scope": "Tighten total duration against immutable original host-counter anchor; never renew on later observation",
+      "validation": "New regression RED AttributeError then8 measurement controls PASS311 and312; restrict20 cannot extend original2-second cap"
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -284,6 +293,6 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-17T16:50:49.822845+00:00",
+  "updated_at": "2026-11-17T16:51:44.944493+00:00",
   "worker_cleanup": "Completed original Grok, custody and bootstrap checkouts removed after clean exact commit/source byte equality and pushed custody verified; worker branch refs retained. New reenrollment/poll-ack and account-control checkouts active."
 }

@@ -68,6 +68,13 @@ class Deadline:
     def remaining(self):
         return max(0, self._seconds - elapsed_bounds(self._anchor, snapshot())[1])
 
+    def restrict(self, seconds):
+        """Tighten total duration against this original anchor, never renew it."""
+        if type(seconds) not in (int, float) or not math.isfinite(seconds) or seconds < 0:
+            raise TimeUnavailable('stable_time_invalid_duration')
+        self._seconds = min(self._seconds, seconds)
+        return self
+
     def expired(self):
         return self.remaining() <= 0
 

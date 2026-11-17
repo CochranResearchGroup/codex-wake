@@ -12,6 +12,19 @@ def observation(counter, *, epoch='3c93a3d4-445d-4403-8a40-77fa9162dee6', rate=5
 
 
 class MeasurementsTests(unittest.TestCase):
+    def test_restrict_only_tightens_duration_against_original_anchor(self):
+        with patch('codex_wake.measurements.snapshot',side_effect=[
+                observation(1000,rate=0),observation(2000,rate=0),observation(2500,rate=0)]):
+            retained=measurements.deadline(10)
+            self.assertIs(retained.restrict(2),retained)
+            remaining=retained.remaining()
+            self.assertGreater(remaining,.99)
+            self.assertLess(remaining,1)
+            retained.restrict(20)
+            remaining=retained.remaining()
+            self.assertGreater(remaining,.49)
+            self.assertLess(remaining,.5)
+
     def test_expired_utc_handoff_cannot_produce_a_timestamp(self):
         with patch('codex_wake.native_clock.configuration', return_value='/host-approved/config'), \
                 patch('codex_wake.native_clock.snapshot', return_value=dict(observation(1000), valid_for_ns=0)):
