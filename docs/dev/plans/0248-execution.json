@@ -60,7 +60,8 @@
       ],
       "validation": "94PASS311;51PASS312+final2PASS; actualUID1017 defaultfactory PASS; finalwheel delta2PASS installed",
       "evidence": "docs/dev/evidence/issue0695/bounded-activation-acceptance.json",
-      "tracker_resolution": "DONE repo-local activation source and isolated installed acceptance; no working-host enablement"
+      "tracker_resolution": "DONE repo-local activation source and isolated installed acceptance; no working-host enablement",
+      "source_commit": "aee2e97308fe9dc69f35f757e4c868147aa498a2"
     },
     "695-PYTHON": {
       "owner": "python695_causal",
@@ -85,7 +86,7 @@
     "remediation_passes": 1,
     "remediation": "No behavioral blocker; no new test/source edit warranted. Retain existing redgreen controls."
   },
-  "integration_tip": "fd7d54649a36c469c2e46111d828ef1f920e839f",
+  "integration_tip": "aee2e97308fe9dc69f35f757e4c868147aa498a2",
   "package5_acceptance": {
     "state": "validated",
     "native_source": "9af0e8e48d0c2dcfe1800a3deaadfcec7e2c0bd7",

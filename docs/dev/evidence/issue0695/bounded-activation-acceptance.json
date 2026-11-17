@@ -11,7 +11,15 @@
     "host_gate": "7PASS real Unix sockets including defaultfactory, wrongpeer, oldcaps, tamper/revocation andlostreply",
     "lint": "54 baseline diagnostics;54current;0introduced",
     "diff_check": "passed",
-    "full_suite": "NOT rerun; original failed assertion remains unresolved"
+    "full_suite": "NOT rerun; original failed assertion remains unresolved",
+    "commands": [
+      "PYTHONPATH=src:tests python3.11 -m unittest test_bounded_native_delivery test_bounded_native_qualification test_runtime_policies test_wake_mode_runtime test_harness_callers test_wake_policy test_native_intent_recovery test_native_delivery",
+      "PYTHONPATH=src:tests python3.12 -m unittest test_bounded_native_delivery test_bounded_native_qualification test_runtime_policies test_wake_mode_runtime test_harness_callers",
+      "PYTHONPATH=src:tests python3.12 -m unittest test_wake_policy.WakePolicyTests.test_create_load_run_accepts_busy_only_for_qualified_explicit_native_queue test_wake_policy.WakePolicyTests.test_new_wake_freezes_configurable_startup_and_existing_intent_survives_default_change",
+      "pip wheel --no-deps --no-build-isolation .",
+      "git diff --check"
+    ],
+    "environment": "Existing local Python3.11/3.12 validation environments replace unpaid hostedCI; installed acceptance uses LinuxUID1017 on shared WSL kernel and owned localhost Responses provider. Native candidate GNU/glibc; working baseline musl."
   },
   "installed": {
     "uid": 1017,
@@ -40,5 +48,6 @@
     "Original full Python assertion lacks original traceback/receipt/readiness and causal reproduction",
     "Working-host approval/configuration and production restart/cooperative protocol are not enabled or qualified"
   ],
-  "review": "Reuse one completed final batch review/findings pass; no repeat"
+  "review": "Reuse one completed final batch review/findings pass; no repeat",
+  "source_commit": "aee2e97308fe9dc69f35f757e4c868147aa498a2"
 }
