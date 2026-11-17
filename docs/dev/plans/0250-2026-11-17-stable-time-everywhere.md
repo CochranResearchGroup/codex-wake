@@ -53,3 +53,19 @@ GlobalAGENTS already updated; source migration remains incomplete until ST04.
 No workinghost activation or premature closure695/628. Parent validation still
 requires an explicitly authorized comprehensive pass after source convergence.
 Memorywrite forbidden absent explicitrequest; retain canonical evidence instead.
+
+## Bootstrap transport boundary
+
+`host_counter` cannot request the shared measurement clock while acquiring its
+QPC sample: that would recurse through `native_clock.snapshot`. Its Linux LP64
+timerfd is an explicit, relative kernel blocking-I/O fuse, never a UTC sample,
+elapsed measurement, freshness result or authorization deadline. No guest clock
+value is read. One retained client fuse covers connect, send, retries and the
+entire response frame; progress never rearms it. Request and producer frame
+fuses likewise cover the whole frame, and a malformed or late producer is
+retired without replay. Unsupported timerfd acquisition holds before bridge
+startup; there is no clock or platform fallback. Fixed idle accept and owned
+child cleanup waits remain blocking primitives. Actual counter qualification,
+epoch/rate continuity and UTC handoff age remain with the existing authenticated
+Stable Time and QPC validators. A kernel fuse firing proves only transport
+refusal, never that an authority deadline elapsed.
