@@ -37,8 +37,11 @@ cancellation source and isolated installed adapter seam also pass; production
 factory remains disabled. The remaining precise native blocker is transport:
 HTTP asynchronous auth/preparation and WS task/lock/send-command queue can delay
 actual sending after core admission. See transport-boundary-blocker.json.
-Literal remote model-start timing versus final native transport-send admission
-needs an operator decision; no weaker guarantee is silently adopted.
+Operator accepted final native transport-send admission on 2026-11-16.
+Recheck after authentication, preparation and transport waits, immediately before
+the native sender writes. Unknown/expired time prevents sending. Remote model
+start, network delay and an OS pause between final sample and syscall remain
+explicit limitations; no provider-side enforcement is claimed.
 One earlier formal review/TDD cycle is retained. The newly requested final batch
 cycle remains pending until the blocked timing ticket resolves.
 
@@ -70,7 +73,7 @@ or old native backends remain pre-I/O refused. An advertised field alone does
 not establish accepted qualification. Existing bounded Wake admission stays
 closed until actual native enforcement is qualified.
 
-At the model-turn admission boundary, independently qualified UTC bounds decide:
+At final native transport-send admission, independently qualified UTC bounds decide:
 upper < expiresAt permits admission; lower >= expiresAt expires; a straddling
 interval or unavailable/stale/untrusted evidence holds. Equality never permits
 start. Obtain time from host-owned authority, never prompt/sender metadata or
@@ -410,3 +413,22 @@ Worker695-TIMING remains blocked with exact source anchors and minimal transport
 remediation scope. No native code/build changed. User decision pending on strict
 remote-start versus final native transport-send admission. The requested new
 final review/remediation cycle is not consumed before this gate resolves.
+
+
+### 2026-11-16 final native-send boundary accepted
+
+Operator accepted the recommendation to use final native transport-send admission
+for695, excluding remote model-start guarantees. Ticket695-TIMING reopened to
+running; worker send_boundary_695 owns Native checkout/code exclusively, root
+owns Wake integration and UID1017 runtime. Existing HTTP/WS outer guards stay;
+HTTP must recheck after asynchronous auth/preparation, WS inside actual sender
+after task/lock/command-queue delays. Bounded WS return must wait for send result
+so rejected input cannot be published into retained history. Legacy unbounded
+stream behavior must remain compatible. Existing provider/queue seams drive
+red→green; no generic test framework or working daemon effects.
+
+Final batch review compares Wakef8e879c2 and Native075639f50a to their completed
+integration tips; prior earlier review cycle remains retained. One new final
+two-axis review and one findings remediation pass are reserved after validation.
+Package4 proof remains historical; changed native bytes require a new complete
+immutable package and separate-UID acceptance before installed qualification.

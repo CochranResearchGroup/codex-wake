@@ -30,20 +30,22 @@
     },
     "695-TIMING": {
       "owner": "send_boundary_695",
-      "state": "blocked",
+      "state": "running",
       "dependencies": [],
       "worker": "/root/send_boundary_695",
       "write_scope": "private source-boundary proposal; no edits authorized yet",
-      "blocker": "Guarantee boundary requires operator decision: strict remote model execution vs final application transport-send admission. HTTP async auth and WS lock/command queue remain after core checks.",
-      "evidence": "private ticket-695-timing/boundary-blocker.json"
+      "blocker": null,
+      "evidence": "private ticket-695-timing/boundary-blocker.json",
+      "decision": "Operator accepted final native transport-send admission; no remote model-start guarantee",
+      "native_base": "075639f50a5cf8f8cdfa39b5213cd77a6efa3d53"
     }
   },
   "review": {
     "prior_cycle": "completed retained",
-    "new_batch_fixed_point": "pending_user_selection",
+    "new_batch_fixed_point": "Wakef8e879c291c172add80211b83de2b3c581fa2295; Native075639f50a5cf8f8cdfa39b5213cd77a6efa3d53",
     "max_broad_reviews": 1,
     "max_remediation_passes": 1,
-    "new_batch_status": "pending until blocked695-TIMING is resolved; no additional broad review or remediation pass consumed"
+    "new_batch_status": "reserved after ticket validation; one broad two-axis review and one findings remediation pass"
   },
   "integration_tip": "89c639f9"
 }
