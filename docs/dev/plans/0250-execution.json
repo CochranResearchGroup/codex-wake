@@ -235,20 +235,44 @@
     },
     "ST04-POLL-ACK": {
       "owner": "time_bypass_audit",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST04-REENROLL"
       ],
-      "scope": "Exact producers in goal_supervision and freshness consumers in goal_readiness/goal_renewal; legacy acknowledgements require genuine new poll"
+      "scope": "Exact producers in goal_supervision and freshness consumers in goal_readiness/goal_renewal; legacy acknowledgements require genuine new poll",
+      "worker_sha": "18c9fd0abfaf35c648ae4743245bd684c7ad2d02",
+      "integration_sha": "14f4daff",
+      "validation": "Worker6 public scenarios plus2 final delta checks PASS311/312. Root combined host-preflight real watcher scenario PASS311/312, both account modules also PASS (12 selected311/13selected312). No live service/provider acceptance claimed."
     },
     "ST04-GROK-CONTROLS": {
       "owner": "grok_readiness_diagnosis",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
       ],
-      "scope": "Remove unused stdio timestamp; qualify actor expiry and cached-token staleness in account observation/readiness; no provider effects"
+      "scope": "Remove unused stdio timestamp; qualify actor expiry and cached-token staleness in account observation/readiness; no provider effects",
+      "worker_sha": "0f93689a309f207e57b9f18dcf0b1deea03803fb",
+      "integration_sha": "b9c49167",
+      "validation": "12 focused account/stdio controls PASS311/312; root account modules plus host-preflight integrated12PASS311/13PASS312. Cached bytes and exact actor gates preserved; no provider effects."
+    },
+    "ST04-PREFLIGHT-METADATA": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "ST01",
+        "ST04-POLL-ACK"
+      ],
+      "scope": "Host compatibility observations have qualified UTC or explicit null/not_observed; disabled/manual controls remain available",
+      "validation": "Metadata RED then unitGREEN311; original fixture malformed UTC stub repaired with qualified counter/UTC evidence. Earlier module attempted read-only tmux has-session because wrong fixture UTC made expired launch eligible; retained failed log, no session created. Final2PASS311, combined positive1+11accountPASS311 and2+11PASS312 after poll-ack integration; no deployment/provider effects."
+    },
+    "ST04-RUNTIME-DEADLINE": {
+      "owner": "grok_readiness_diagnosis",
+      "state": "pending",
+      "dependencies": [
+        "ST01"
+      ],
+      "scope": "Four-file Grok runtime/terminal/wake/A2A retained deadline contract; waits on root Deadline.restrict primitive before source edits"
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -260,6 +284,6 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-17T16:40:41.292907+00:00",
+  "updated_at": "2026-11-17T16:50:49.822845+00:00",
   "worker_cleanup": "Completed original Grok, custody and bootstrap checkouts removed after clean exact commit/source byte equality and pushed custody verified; worker branch refs retained. New reenrollment/poll-ack and account-control checkouts active."
 }
