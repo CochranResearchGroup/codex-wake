@@ -236,7 +236,26 @@ Current optional fields include:
 - `evidence_paths`: log, marker, or evidence paths related to the wake.
 - `last_error`: terminal failure detail.
 - `previous_status`: status before archival.
-- `archived_at`: archive timestamp.
+- `archived_at`: archive observation timestamp, or unknown UTC. Legacy schema1/4
+  operator archival remains available without time authority and records null
+  timestamps plus an event with `time_status: not_observed`.
+- `archive_time_bounds`: optional archival UTC evidence for timed schemas,
+  `{basis: qualified_utc, lower: number, upper: number}`, or
+  `{basis: not_observed, lower: null, upper: null}`. These bounds describe the
+  archive operation's observation; they never renew a wake or its original
+  scheduling anchor. Retention compares qualified current UTC lower against
+  this retained upper plus the requested age, without rounding interval edges.
+  Missing current UTC or an unqualified legacy archive age holds cleanup with
+  an explicit error before deletion. Bare schema1/2/4/5 historical timestamps
+  are retained as metadata and cannot supply qualified age. Older schema3
+  network archives used an accepted upper truncated to whole seconds; its next
+  whole second is a conservative upper for retention. Signal cleanup still
+  requires durable terminal fencing and released retention pins. Untimed
+  schema6/7/8 archival keeps its existing unknown-time cleanup policy.
+
+  Older cleanup executables do not understand these evidence requirements. Keep
+  them quiesced before adopting this retention policy on a root; source validation
+  does not authorize mixed-reader deployment or working-root adoption.
 - `dispatch_result`: accepted app-server `thread_id` and `turn_id` metadata
   when returned; for OpenClaw Gateway dispatch, sanitized Gateway metadata
   such as `run_id`, `status`, `summary`, `session_id`, provider/model, payload

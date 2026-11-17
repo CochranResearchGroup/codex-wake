@@ -297,24 +297,28 @@
     },
     "ST04-MAINTENANCE": {
       "owner": "time_bypass_audit",
-      "state": "implemented",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST04-POLL-ACK"
       ],
-      "worker_sha": "63536fa3d507c0d1c1d19f5d6e56d2fc42349b12",
+      "worker_sha": "258ef0522aa56bfef90e56c185dc16fa800b57c6",
       "scope": "One retained permit anchor/fixed duration; legacy/unknown holds, protective stop preserved",
       "integration_gate": "Diagnose rollback above anchor after a previously observed counter; latest mutable evidence must not rebase anchor/duration",
-      "validation": "Worker public and private CLI/watcher controls pass311/312; exact receipts retain scope. Not yet integrated."
+      "validation": "Both new public continuity REDs retained. Worker5 scenariosPASS311/312 (9 defects + private real watcher). Root combined actor6 + maintenance3 PASS311/312. Ordered maintenance\u2192receipt lock, immutable anchor/duration and persisted monotone evidence; legacy/missing evidence held.",
+      "integration_sha": "fdd88274"
     },
     "ST04-RECORD-LIFECYCLE": {
       "owner": "root",
-      "state": "pending",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST04-CANCEL"
       ],
-      "scope": "Discovery only: archive unknown time must not fall back through append_event/created_at; retention must use qualified lower-now vs upper-original evidence. Daemon scheduling needs separate lower/upper decisions while preserving emergency/counter-only paths. No global utc_now replacement or source edits yet."
+      "scope": "Timed archival UTC evidence/unknown legacy metadata; retained upper vs qualified lower retention comparison, explicit gate before deletion; signal fences and untimed6/7/8 policy preserved. Daemon/creator/move clocks remain separate pending owners.",
+      "acceptance": "Public unknown-time archival no raw clock/event fallback; uncertain retention boundary cannot delete, missing/legacy qualification holds, known old records and dry-run still work, existing signal fences preserved. No real operator archive/delete effects; fixtures only.",
+      "validation": "Archive raw-clock and uncertain-retention public REDs retained. Records+network24PASS311/312, fresh-process cross-store crash/recovery1PASS each311/312. Legacy network quantization delta1PASS each after retained missing-json test import failure repaired. Ruffundefined/diffPASS. No actual operator data archived/deleted; isolated fixtures only.",
+      "deployment_gate": "Quiesce older cleanup readers before root adoption; no mixed-reader or working-root adoption authorized by source validation."
     },
     "ST04-OAUTH": {
       "owner": "root",
@@ -324,6 +328,17 @@
       ],
       "scope": "Default opaque OAuth clock is qualified UTC; lower-bound issuance cannot extend fixed TTL, upper-bound verification holds ambiguous expiry; revocation untimed and available; explicit injected point clocks preserved",
       "validation": "Clock-loss grant and conservative lifetime public regressions RED thenGREEN. Module9PASS311. Final OAuth+connector16 actual casesPASS311/312 plus wrong test-class collection error retained; corrected scheduled original-authority scenario1PASS311/312, not relabeled full initial green. Integer conservative expires_in preserves OAuth wire type. No real connector or credential effects."
+    },
+    "ST04-ACTOR-GUARDS": {
+      "owner": "grok_readiness_diagnosis",
+      "state": "validated",
+      "dependencies": [
+        "ST04-OAUTH"
+      ],
+      "worker_sha": "aad7c4dedea7cbe45cba7a99f65bb74ac480b2fb",
+      "integration_sha": "f6fc8f31",
+      "scope": "Explicit actor profile/daemon read expiry qualified UTC; actor=None verified local read/stop paths untouched",
+      "validation": "6worker public product/daemon scenariosPASS311/312, root combined9 actor/maintenancePASS311/312. No Actor-string local bypass, no private reads on clock loss."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -335,6 +350,7 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-17T17:20:19.694233+00:00",
-  "worker_cleanup": "Completed original Grok, custody and bootstrap checkouts removed after clean exact commit/source byte equality and pushed custody verified; worker branch refs retained. New reenrollment/poll-ack and account-control checkouts active."
+  "updated_at": "2026-11-17T18:13:07.400524+00:00",
+  "worker_cleanup": "Completed original Grok, custody and bootstrap checkouts removed after clean exact commit/source byte equality and pushed custody verified; worker branch refs retained. New reenrollment/poll-ack and account-control checkouts active.",
+  "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration."
 }

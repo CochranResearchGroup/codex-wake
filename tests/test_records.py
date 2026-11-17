@@ -24,12 +24,37 @@ from codex_wake.records import (
     signal_cleanup_protection,
     status_summary,
     write_record,
+    WakeError,
 )
 from codex_wake.signal_records import build_signal_record
 from codex_wake.signals import ArmedSignal, Eq, Resume, SignalRequest, SourceAnchor
 
 
 class RecordTests(unittest.TestCase):
+    def test_legacy_archive_preserves_unknown_time_without_guest_clock_fallback(self):
+        from codex_wake.measurements import TimeUnavailable
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            record=build_record(predicate=dict(type='not_before',due_at='2026-05-20T00:00:00Z'),
+                prompt='fixture',cwd=root,target=dict(transport='tmux',tmux_socket='/fixture/socket',pane='%1'),
+                now=datetime(2026,5,18,tzinfo=UTC))
+            record.update(id='wake_archive_unknown',status='cancelled')
+            write_record(root,record)
+            with patch('codex_wake.measurements.utc_bounds',side_effect=TimeUnavailable('unqualified')), \
+                    patch('codex_wake.records.utc_now',side_effect=AssertionError('guest clock forbidden')):
+                archived=archive_record(root,record['id'])
+            observed=json.loads(archived.read_text())
+            self.assertEqual(observed['status'],'archived')
+            self.assertIsNone(observed['archived_at'])
+            self.assertIsNone(observed['updated_at'])
+            self.assertIsNone(observed['events'][-1]['at'])
+            self.assertEqual(observed['created_at'],record['created_at'])
+            self.assertEqual(observed['target'],record['target'])
+            with self.assertRaisesRegex(WakeError,'archive_retention_time_unqualified'):
+                cleanup_archived_records(root,older_than=timedelta(days=1),
+                    now=datetime(2030,1,1,tzinfo=UTC),delete=True)
+            self.assertTrue(archived.exists())
+
     def test_legacy_cancellation_preserves_authority_without_guest_time(self) -> None:
         from codex_wake.measurements import TimeUnavailable
         from codex_wake.records import WakeError
@@ -97,6 +122,9 @@ class RecordTests(unittest.TestCase):
                     "record_revision": 2,
                     "archived_at": "2026-09-14T14:00:00Z",
                     "updated_at": "2026-09-14T14:00:00Z",
+                    "archive_time_bounds": dict(basis='qualified_utc',
+                        lower=datetime(2026,9,14,14,0,tzinfo=UTC).timestamp(),
+                        upper=datetime(2026,9,14,14,0,tzinfo=UTC).timestamp()),
                 }
             )
             archive_path = root / "archive" / "wake_signal.json"
@@ -410,6 +438,20 @@ class RecordTests(unittest.TestCase):
             pending["id"] = "wake_pending"
             pending["status"] = "pending"
             write_record(root, pending)
+
+            from codex_wake.measurements import TimeUnavailable
+            with patch('codex_wake.measurements.utc_bounds',side_effect=TimeUnavailable('unqualified')):
+                with self.assertRaisesRegex(WakeError,'qualified_time_unavailable'):
+                    cleanup_archived_records(root,older_than=timedelta(days=7),delete=True)
+            self.assertTrue(old_path.exists())
+            self.assertTrue(fresh_path.exists())
+
+            with patch('codex_wake.measurements.utc_bounds',return_value=(
+                    (current-timedelta(seconds=1)).timestamp(),(current+timedelta(seconds=1)).timestamp())):
+                uncertain=cleanup_archived_records(root,older_than=current-old,delete=True)
+            self.assertEqual(uncertain,[])
+            self.assertTrue(old_path.exists())
+            self.assertTrue(fresh_path.exists())
 
             results = cleanup_archived_records(root, older_than=timedelta(days=7), now=current, delete=True)
 
