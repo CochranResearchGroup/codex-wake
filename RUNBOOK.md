@@ -10501,3 +10501,19 @@ rebuild, previous qualification repeat or broadreview repeat. New Python latency
 quarantine or fullgreen claim. Parent695 remains OPEN. Owned Wake/Native checkouts
 retained for this explicit blocker, next review on original failure evidence or
 next authorized installation gate; no new checkout, registeredWakecount123.
+
+
+## Turn | 2026-11-17 | #695 captured Python failure is host clock discontinuity
+
+Actual wake85f44962/b71b1149 reconciled exact corrected diagnostic run115214:
+FAIL389tests377.363s; historicalhandoffmethodPASS. Firstnewfailure background
+mutation jobunknown vscompleted. Focused publiccase red0.839s; exceptioncapture
+shows supervisor ResourceClaimError owner_unqualified before childcreation:
+fresh claimant timestamp exceeds laterwallclock by8.714642s. Independent8s
+CLOCK_REALTIME/CLOCK_MONOTONIC sample sees four8-9s realtimejumps. Samepublic
+scenario with continuous shared diagnosticclock10PASS7.302s. Temporaryhooks
+removed; productguards unchanged. Original54s launcherimportfailure retained.
+No comprehensive retry, native rebuild or broadreview. Clockdiagnosis artifact
+owns curated evidence; fullsuite notgreen, oldhandoff cause unresolved,695OPEN.
+Next gate: qualified sharedclaim freshness/hosttime repair. Checkouts retained
+for this concrete remaining gate; no new checkout or workingdaemon changes.

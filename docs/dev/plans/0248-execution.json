@@ -68,10 +68,11 @@
       "state": "blocked",
       "dependencies": [],
       "scope": "New bounded public-RPC latency causal probe; no passingprefix/fullrun repetition",
-      "evidence": "private ticket-695-python-next/result.json",
-      "blocker": "No original assertion/receipt/readiness context;25/100ms latency probe passes2 in4.317s",
+      "evidence": "docs/dev/evidence/issue0695/python-clock-diagnosis.json",
+      "blocker": "Newapproved run fails at backgroundclaim guard under independently observed8-9s realtimejumps. Currentcapturedfailure diagnosed; historicalhandofffailure unresolved; no fullgreen.",
       "priority": "P1",
-      "tracker_resolution": "OPEN blocked: no causal red; no quarantine or speculative fix"
+      "tracker_resolution": "OPEN blocked: no causal red; no quarantine or speculative fix",
+      "next_action": "Qualify stable cross-process claimant freshness/host realtime before another comprehensive run; no securityguard relaxation"
     }
   },
   "review": {

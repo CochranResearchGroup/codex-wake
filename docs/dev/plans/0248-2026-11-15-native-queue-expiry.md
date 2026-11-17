@@ -27,9 +27,12 @@ model calls or credential copies. Final wheel differs only in startup/idempotenc
 handling and its two installed checks pass. All six native hashes and working
 PID1879/b452 are unchanged, owned activation processes0. See
 [activation acceptance](../evidence/issue0695/bounded-activation-acceptance.json).
-Parent695 stays OPEN: the original comprehensive Python assertion lacks a causal
-reproduction (new25/100ms probes pass), and working-host activation/production
-restart and cooperative recovery remain separate gates. No broad review or native
+Parent695 stays OPEN: the historical handoff assertion lacks a causal
+reproduction. A new approved fail-fast run reaches389 tests and captures a
+different background-job failure caused by observed8-9second host realtime
+discontinuities; see [clock diagnosis](../evidence/issue0695/python-clock-diagnosis.json).
+Working-host activation/production restart and cooperative recovery remain
+separate gates. No broad review or native
 build/qualification repeat was performed.
 
 ## Prior execution evidence (historical)
@@ -569,3 +572,26 @@ modes, actor/target grants and route constraints remain required. Removing or
 changing policy/report stops subsequent bounded operations before their RPC;
 it does not retract already admitted work. An input reply lost after verified
 admission remains uncertain and must reconcile without resend.
+
+## Approved Python first-failure diagnosis | 2026-11-17
+
+Exact wake85f44962/native submissionb71b1149 reached this conversation. Corrected
+job115214 resultFAIL377.363s,389tests. Initial54s launcher-import setupfailure
+retained separately; adding sourceroot restores nine importmodulecontrols.
+The historical test_count_only method passes in this actual discovery. First
+new failure is backgroundmutation old-profile freshclaim: unknown vscompleted.
+Focused method initiallyPASS1.604s; bounded probe thenFAIL0.839s; instrumentation
+reproduces exactold-profile assertion on repetition9/7.366s. Supervisor refuses
+before child creation, reasonlaunch_not_released, ResourceClaimError
+owner_unqualified: fresh observation1794916830.437962 exceeds supervisornow
+1794916821.72332 by8.714642s. Independent eightsecond CLOCK_REALTIME versus
+CLOCK_MONOTONIC observation captures four8-9second realtimejumps. Continuous
+shared diagnosticclock counterfactual10PASS7.302s confirms this captured trigger.
+
+All temporary instrumentation removed and product source matches frozenHEAD.
+No guard relaxed, hosttime changed, workingdaemon restarted, credentials copied,
+Native build/review repeated, or fullgreen claimed. Currentfailure is diagnosed
+as invalid hostclock conditions for existing wall-based freshness; historical
+handoff failure is not retroactively explained. Next bounded decision is a
+qualified cross-process freshness clock or hostrealtime repair before another
+comprehensive lane; parent695 remains OPEN.
