@@ -268,13 +268,14 @@
     },
     "ST04-RUNTIME-DEADLINE": {
       "owner": "grok_readiness_diagnosis",
-      "state": "implemented",
+      "state": "validated",
       "dependencies": [
         "ST04-DEADLINE-RESTRICT"
       ],
       "scope": "Four-file Grok runtime/terminal/wake/A2A retained deadline contract; waits on root Deadline.restrict primitive before source edits",
-      "worker_sha": "802ae4fc46350e457e51d0f3f08c8b698a0b5399",
-      "validation": "28workerchecksPASS311/312; integration held for final post-reconciliation deadline boundary diagnosis; no provider effects"
+      "worker_sha": "047e80b9d9497cca21fae4474b62e0e117518537",
+      "validation": "802 original28PASS311/312; post-reconcile late/lost-clock regression RED then5 focusedPASS311/312; combined with core continuity root29PASS311 and29PASS312. Same original anchor passed through wake/A2A/terminal/fallback, no replay after possible paste.",
+      "integration_sha": "624692dc"
     },
     "ST04-DEADLINE-RESTRICT": {
       "owner": "root",
@@ -314,6 +315,15 @@
         "ST04-CANCEL"
       ],
       "scope": "Discovery only: archive unknown time must not fall back through append_event/created_at; retention must use qualified lower-now vs upper-original evidence. Daemon scheduling needs separate lower/upper decisions while preserving emergency/counter-only paths. No global utc_now replacement or source edits yet."
+    },
+    "ST04-OAUTH": {
+      "owner": "root",
+      "state": "validated",
+      "dependencies": [
+        "ST01"
+      ],
+      "scope": "Default opaque OAuth clock is qualified UTC; lower-bound issuance cannot extend fixed TTL, upper-bound verification holds ambiguous expiry; revocation untimed and available; explicit injected point clocks preserved",
+      "validation": "Clock-loss grant and conservative lifetime public regressions RED thenGREEN. Module9PASS311. Final OAuth+connector16 actual casesPASS311/312 plus wrong test-class collection error retained; corrected scheduled original-authority scenario1PASS311/312, not relabeled full initial green. Integer conservative expires_in preserves OAuth wire type. No real connector or credential effects."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -325,6 +335,6 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-17T17:05:14.830264+00:00",
+  "updated_at": "2026-11-17T17:20:19.694233+00:00",
   "worker_cleanup": "Completed original Grok, custody and bootstrap checkouts removed after clean exact commit/source byte equality and pushed custody verified; worker branch refs retained. New reenrollment/poll-ack and account-control checkouts active."
 }
