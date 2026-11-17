@@ -960,9 +960,12 @@ def _first_stop(path,receipt,reason):
             retained=json.loads(allocation_path.read_text()).get('first_stop')
             if retained and retained.get('receipt_generation')==receipt['generation']:
                 original=retained
-    now=time.clock_gettime(time.CLOCK_BOOTTIME)
-    elapsed=now-receipt['started_boottime']
-    qualified=receipt['boot_id']==boot_id_value() and elapsed>=0
+    clock_unqualified=reason=='clock_unqualified' or receipt.get('clock_failure')=='clock_unqualified'
+    # Clock-authority failure is not evidence that guest BOOTTIME can supply
+    # a replacement timestamp. Preserve the stop with explicit unknown time.
+    now=None if clock_unqualified else time.clock_gettime(time.CLOCK_BOOTTIME)
+    elapsed=None if clock_unqualified else now-receipt['started_boottime']
+    qualified=not clock_unqualified and receipt['boot_id']==boot_id_value() and elapsed>=0
     try:
         controller_path=path.parent/'controller.json';_private(controller_path)
         controller=json.loads(controller_path.read_text())
@@ -973,7 +976,7 @@ def _first_stop(path,receipt,reason):
         provenance='existing_latch_observed' if receipt.get('stop_latched') else 'stop_decision',
         observed_boottime=now,boot_id=boot_id_value(),
         observed_upper=receipt['started_upper']+elapsed if qualified else None,
-        clock_qualified=qualified,clock_reason='same_boot_elapsed' if qualified else
+        clock_qualified=qualified,clock_reason='clock_unqualified' if clock_unqualified else 'same_boot_elapsed' if qualified else
             ('boot_identity_changed' if receipt['boot_id']!=boot_id_value() else 'elapsed_time_invalid'),
         last_usage_observed_boottime=receipt.get('observed_boottime'),
         controller_observed_boottime=controller.get('observed_boottime'),
@@ -992,7 +995,7 @@ def _first_stop(path,receipt,reason):
         diagnostic.update(public_time(receipt), observed_upper=None,
             observed_elapsed_upper=receipt.get('clock_elapsed_upper'),
             clock_qualified=qualified and reason not in ('counter_continuity_lost','authenticated_elapsed_unavailable'),
-            clock_reason=reason if reason in ('counter_continuity_lost','authenticated_elapsed_unavailable') else 'authenticated_host_counter')
+            clock_reason='clock_unqualified' if clock_unqualified else reason if reason in ('counter_continuity_lost','authenticated_elapsed_unavailable') else 'authenticated_host_counter')
     receipt.update(stop_latched=True,state='stop_unverified',reason=reason)
     # The shared ledger is the authority for successor admission. Commit its
     # latch first, so a crash during the caller receipt write cannot reopen it.

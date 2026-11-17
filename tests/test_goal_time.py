@@ -7,6 +7,47 @@ ANCHOR = dict(epoch='00000000-0000-4000-8000-000000000468', counter=1000, freque
 
 
 class GoalTimeTests(unittest.TestCase):
+    def test_absolute_utc_allowance_reads_qualified_upper_without_guest_elapsed(self):
+        from copy import deepcopy
+        from codex_wake.goal_time import upper
+        receipt = dict(time_basis='qualified_utc', started_upper=100, time_origin=90,
+            deadline=130, started_boottime=999999999, used_tokens=7, stop_latched=True)
+        original = deepcopy(receipt)
+        with patch('codex_wake.lifecycle_budget.trusted_upper', return_value=125), patch(
+                'time.clock_gettime', side_effect=AssertionError('guest clock must not measure allowance')):
+            self.assertEqual(upper(receipt), 125)
+        self.assertEqual(receipt, original)
+
+    def test_absolute_utc_clock_loss_and_unknown_basis_hold_without_rebasing(self):
+        from copy import deepcopy
+        from codex_wake.goal_time import upper, GoalTimeUnavailable
+        receipt = dict(started_upper=100, time_origin=90, deadline=130,
+            used_tokens=7, stop_latched=True, started_boottime=-999999)
+        original = deepcopy(receipt)
+        with patch('codex_wake.lifecycle_budget.trusted_upper', side_effect=ValueError('unqualified')), patch(
+                'codex_wake.native_clock.snapshot') as fallback:
+            with self.assertRaises(GoalTimeUnavailable) as refused:
+                upper(receipt)
+        self.assertEqual(refused.exception.code, 'clock_unqualified')
+        fallback.assert_not_called()
+        self.assertEqual(receipt, original)
+        for changed in (dict(receipt, time_basis='unknown_future_basis'),
+                        dict(receipt, deadline=float('inf')),
+                        dict(receipt, time_origin=None), dict(receipt, started_upper=True)):
+            with self.subTest(changed=changed), patch('codex_wake.lifecycle_budget.trusted_upper') as clock:
+                with self.assertRaises(GoalTimeUnavailable):
+                    upper(changed)
+                clock.assert_not_called()
+
+    def test_trusted_upper_uses_strict_utc_bounds_and_refuses_unavailable_time(self):
+        from codex_wake.lifecycle_budget import trusted_upper
+        from codex_wake.measurements import TimeUnavailable
+        with patch('codex_wake.measurements.utc_bounds', return_value=(111, 112)):
+            self.assertEqual(trusted_upper(), 112)
+        with patch('codex_wake.measurements.utc_bounds', side_effect=TimeUnavailable('unqualified')):
+            with self.assertRaisesRegex(ValueError, 'admissible time unavailable'):
+                trusted_upper()
+
     def test_fresh_allowance_uses_authenticated_counter_without_inventing_utc(self):
         from codex_wake.goal_time import admit, public_time, upper
         clock=dict(utc=None,counter=ANCHOR,reason='authenticated_counter_only')
@@ -26,7 +67,8 @@ class GoalTimeTests(unittest.TestCase):
         self.assertIsNone(shown['deadline_utc'])
         self.assertEqual(shown['elapsed_limit_seconds'],10)
 
-    def test_counter_readiness_and_notice_never_format_elapsed_as_utc(self):
+    @patch('codex_wake.goal_readiness.time.clock_gettime', return_value=1000)
+    def test_counter_readiness_and_notice_never_format_elapsed_as_utc(self, _fixture_clock):
         import tempfile,time
         from pathlib import Path
         from codex_wake.goal_readiness import engagement

@@ -694,7 +694,7 @@ class GoalSupervisionTests(unittest.TestCase):
             root,policy,log,native,_=self.fixture(directory)
             with log.open('a') as stream:stream.write('{"type":')
             with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
-                receipt=enroll(root,policy,THREAD,100,120,checkpoint_seconds=30)
+                enroll(root,policy,THREAD,100,120,checkpoint_seconds=30)
                 first=poll(root)[0]
                 self.assertEqual(first['state'],'winding_down')
                 self.assertEqual(native['goal']['status'],'paused')
@@ -704,7 +704,7 @@ class GoalSupervisionTests(unittest.TestCase):
                 again=poll(root)[0]
                 self.assertEqual(again['winddown_deadline'],limit)
                 self.assertEqual(sum(m=='turn/steer' for m,_ in native['calls']),1)
-                with patch('codex_wake.goal_supervision.time.clock_gettime',return_value=receipt['started_boottime']+31):
+                with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+31):
                     final=poll(root)[0]
                 self.assertEqual(final['state'],'stopped',final)
                 native['active']=['operator-reply']
@@ -716,12 +716,12 @@ class GoalSupervisionTests(unittest.TestCase):
             root,policy,log,native,_=self.fixture(directory)
             with log.open('a') as stream:stream.write('{"type":')
             with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
-                receipt=enroll(root,policy,THREAD,100,20,checkpoint_seconds=60)
+                enroll(root,policy,THREAD,100,20,checkpoint_seconds=60)
                 first=poll(root)[0]
                 self.assertEqual(first['winddown_deadline'],NOW+20)
                 repeated=enroll(root,policy,THREAD,100,20,checkpoint_seconds=60)
                 self.assertEqual(repeated['winddown_deadline'],first['winddown_deadline'])
-                with patch('codex_wake.goal_supervision.time.clock_gettime',return_value=receipt['started_boottime']+21):
+                with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+21):
                     self.assertEqual(poll(root)[0]['state'],'stopped')
                 self.assertEqual(native['active'],[])
 
@@ -913,11 +913,29 @@ class GoalSupervisionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root,policy,_,native,request=self.fixture(directory)
             with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
-                receipt=enroll(root,policy,THREAD,42,120)
+                enroll(root,policy,THREAD,42,120)
                 self.assertEqual(poll(root)[0]['state'],'checkpoint_requested')
-                with patch('codex_wake.goal_supervision.time.clock_gettime',return_value=receipt['started_boottime']+121):
+                with patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW+121):
                     self.assertEqual(poll(root)[0]['state'],'stopped')
                 self.assertEqual(native['active'],[])
+
+    def test_unqualified_utc_stops_without_rewriting_original_allowance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root,policy,_,native,_=self.fixture(directory)
+            with self.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=NOW):
+                original=enroll(root,policy,THREAD,100,120)
+                with patch('codex_wake.lifecycle_budget.trusted_upper',side_effect=ValueError('unqualified')):
+                    result=poll(root)[0]
+                self.assertEqual(result['reason'],'clock_unqualified')
+                self.assertEqual(result['state'],'stopped')
+                self.assertEqual(native['active'],[])
+                retained=show(root,policy,THREAD)
+                self.assertFalse(retained['first_stop']['clock_qualified'])
+                self.assertIsNone(retained['first_stop']['observed_upper'])
+                self.assertIsNone(retained['first_stop']['observed_boottime'])
+                self.assertEqual(retained['first_stop']['clock_reason'],'clock_unqualified')
+                for name in ('deadline','time_origin','started_upper','used_tokens','token_limit'):
+                    self.assertEqual(retained[name],original[name])
 
     def test_revoked_host_grant_stops_only_persisted_exact_thread(self):
         with tempfile.TemporaryDirectory() as directory:
