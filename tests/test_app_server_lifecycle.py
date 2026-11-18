@@ -27,21 +27,82 @@ class PersistentDispatchTests(unittest.TestCase):
             self.assertEqual(client.calls,[])
             self.assertEqual(found.path.read_bytes(),original)
 
-    def test_missing_qualified_clock_refuses_transport_startup_before_effects(self):
+    def test_invalid_transport_timeout_refuses_before_effects(self):
         from codex_wake.app_server import StdioAppServerClient, UnixWebSocketAppServerClient
-        from codex_wake.measurements import TimeUnavailable
         from codex_wake.records import WakeError
         for client in (StdioAppServerClient, UnixWebSocketAppServerClient):
-            with self.subTest(client=client.__name__), \
-                    patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('unqualified')), \
-                    patch('codex_wake.app_server.subprocess.Popen') as spawn, \
-                    patch('codex_wake.app_server.persistent_app_server_socket') as discover, \
-                    patch('websockets.sync.client.unix_connect') as connect:
-                with self.assertRaisesRegex(WakeError,'Stable Time'):
-                    client()
-                spawn.assert_not_called()
-                discover.assert_not_called()
-                connect.assert_not_called()
+            for timeout in (float('nan'), float('inf'), -float('inf'), True, False, -1, None):
+                with self.subTest(client=client.__name__, timeout=timeout), \
+                        patch('codex_wake.app_server.subprocess.Popen') as spawn, \
+                        patch('codex_wake.app_server.persistent_app_server_socket') as discover:
+                    with self.assertRaisesRegex(WakeError, 'invalid app-server timeout'):
+                        client(timeout_seconds=timeout)
+                    spawn.assert_not_called()
+                    discover.assert_not_called()
+
+    def test_websocket_startup_discovery_uses_original_budget(self):
+        from codex_wake.app_server import UnixWebSocketAppServerClient
+        from codex_wake.records import WakeError
+        from subprocess import CompletedProcess
+        from types import SimpleNamespace
+        advisory = [0.0]
+        def discover(command, **kwargs):
+            self.assertLessEqual(kwargs['timeout'], .25)
+            advisory[0] = 1.0
+            return CompletedProcess(command, 0, json.dumps({'status': 'running', 'socketPath': '/owned.sock'}))
+        with patch('codex_wake.app_server.time', SimpleNamespace(monotonic=lambda: advisory[0])), \
+                patch('codex_wake.app_server.resolve_codex_cmd', return_value='/unused'), \
+                patch('codex_wake.app_server.subprocess.run', side_effect=discover), \
+                patch('websockets.sync.client.unix_connect') as connect:
+            with self.assertRaisesRegex(WakeError, 'timed out'):
+                UnixWebSocketAppServerClient(timeout_seconds=.25)
+            connect.assert_not_called()
+
+    def test_stdio_transport_without_reliable_time_and_stalled_large_write(self):
+        import sys
+        from codex_wake.app_server import StdioAppServerClient
+        from codex_wake.measurements import TimeUnavailable
+        from codex_wake.records import WakeError
+        echo = "import sys,json\nfor line in sys.stdin:\n q=json.loads(line);print(json.dumps({'id':q['id'],'result':{'ok':True}}),flush=True)"
+        with patch('codex_wake.measurements.snapshot', side_effect=TimeUnavailable('unqualified')):
+            client = StdioAppServerClient(command=[sys.executable, '-c', echo], timeout_seconds=1)
+            try:
+                self.assertEqual(client.initialize(), {'ok': True})
+            finally:
+                client.close()
+            blocked = StdioAppServerClient(command=[sys.executable, '-c', 'import time; time.sleep(300)'], timeout_seconds=.05)
+            try:
+                with self.assertRaisesRegex(WakeError, 'timed out'):
+                    blocked.start_turn('owned', 'x' * (2 * 1024 * 1024))
+            finally:
+                blocked.close()
+            self.assertIsNotNone(blocked.process.poll())
+
+    def test_websocket_transport_without_reliable_time(self):
+        from codex_wake.app_server import UnixWebSocketAppServerClient
+        from codex_wake.measurements import TimeUnavailable
+        from websockets.sync.server import unix_serve
+        def peer(connection):
+            for raw in connection:
+                request = json.loads(raw)
+                if 'id' in request:
+                    connection.send(json.dumps({'id': request['id'], 'result': {'ok': True}}))
+        with tempfile.TemporaryDirectory() as directory:
+            endpoint = Path(directory) / 'peer.sock'
+            with unix_serve(peer, str(endpoint)) as server:
+                worker = threading.Thread(target=server.serve_forever, daemon=True)
+                worker.start()
+                try:
+                    with patch('codex_wake.measurements.snapshot', side_effect=TimeUnavailable('unqualified')), \
+                            patch('codex_wake.app_server.persistent_app_server_socket', return_value=endpoint):
+                        client = UnixWebSocketAppServerClient(timeout_seconds=1)
+                        try:
+                            self.assertEqual(client.initialize(), {'ok': True})
+                        finally:
+                            client.close()
+                finally:
+                    server.shutdown()
+                    worker.join(2)
 
     def test_turn_survives_websocket_close_without_claiming_completion(self):
         for owned_alias in (False, True):
