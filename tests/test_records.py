@@ -69,6 +69,24 @@ class RecordTests(unittest.TestCase):
                 self.assertEqual(observed[key],record[key])
             self.assertEqual(observed['last_error'],'retained reason')
 
+    def test_signal_move_without_utc_preserves_its_required_timestamp_contract(self):
+        from codex_wake.measurements import TimeUnavailable
+        stamp=datetime(2026,5,18,tzinfo=UTC)
+        armed=ArmedSignal('wake_signal','arm_wake_signal',
+            SignalRequest(1,'memory','source-1','occurrence','job.completed','job:1','occurs',
+                (Eq('result','ready'),),'required'),SourceAnchor(0,'memory:0',{},'local_journal'),stamp,None)
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            raw,_=build_signal_record(armed,Resume('continue',root,dict(transport='tmux')),
+                journal_uuid='journal-1',revision=1)
+            record=json.loads(raw);write_record(root,record)
+            with patch('codex_wake.measurements.datetime_now',side_effect=TimeUnavailable('no UTC')):
+                with self.assertRaisesRegex(WakeError,'signal_move_time_unqualified'):
+                    move_record(root,find_record(root,record['id']),'failed',event_type='failed',message='fixture')
+            retained=find_record(root,record['id']).record
+            self.assertEqual(retained,record)
+            self.assertEqual(classify_record(retained),'signal_v2')
+
     def test_untimed_record_events_and_moves_do_not_acquire_utc(self):
         for schema in (6,7,8):
             with self.subTest(schema=schema),tempfile.TemporaryDirectory() as tmp:

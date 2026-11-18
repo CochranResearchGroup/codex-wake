@@ -1077,24 +1077,29 @@ print(json.dumps({
     def test_signal_expiry_uncertainty_holds_match_without_retiring_original_arm(self):
         from dataclasses import replace
         lower=datetime(2026,9,14,14,1,59,tzinfo=UTC).timestamp()+.25
-        with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp)/'wake'
-            registered=datetime(2026,9,14,14,0,tzinfo=UTC)
-            runtime=SQLiteSignalModule(signal_journal_path(root),lease_clock=lambda:registered,
-                record_publisher=WakeRecordPublisher(root,ManagedReaderCapability(root,'reader',1,frozenset({1,2}),True)))
-            registration=EventWake(runtime,adapters=[make_adapter()],clock=lambda:registered,
-                id_factory=lambda:'wake_uncertain_expiry').register(
-                    replace(make_intent(),expires_at=datetime(2026,9,14,14,2,tzinfo=UTC)),idempotency_key='uncertain-expiry')
-            self.assertIsInstance(registration,Registration)
-            runtime.ingest([make_observation()],SourceCommit('memory','contract-test','checkpoint-1',1,
-                datetime(2026,9,14,14,1,tzinfo=UTC)))
-            with patch('codex_wake.measurements.utc_bounds',return_value=(lower,lower+2)):
-                result=poll_once(root,dispatch=False,signal_runtime=runtime)
-            self.assertEqual(result.fired,0)
-            self.assertEqual(result.pending,1)
-            self.assertEqual(result.time_held,1)
-            self.assertIsNotNone(runtime.load_armed_signal('wake_uncertain_expiry'))
-            self.assertEqual(find_record(root,'wake_uncertain_expiry').record['status'],'pending')
+        for already_reserved in (False,True):
+            with self.subTest(already_reserved=already_reserved),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp)/'wake'
+                registered=datetime(2026,9,14,14,0,tzinfo=UTC)
+                runtime=SQLiteSignalModule(signal_journal_path(root),lease_clock=lambda:registered,
+                    record_publisher=WakeRecordPublisher(root,ManagedReaderCapability(root,'reader',1,frozenset({1,2}),True)))
+                registration=EventWake(runtime,adapters=[make_adapter()],clock=lambda:registered,
+                    id_factory=lambda:'wake_uncertain_expiry').register(
+                        replace(make_intent(),expires_at=datetime(2026,9,14,14,2,tzinfo=UTC)),idempotency_key='uncertain-expiry')
+                self.assertIsInstance(registration,Registration)
+                runtime.ingest([make_observation()],SourceCommit('memory','contract-test','checkpoint-1',1,
+                    datetime(2026,9,14,14,1,tzinfo=UTC)))
+                if already_reserved:
+                    armed=runtime.load_armed_signal('wake_uncertain_expiry')
+                    from codex_wake.signals import EvaluationLimits,Matched
+                    self.assertIsInstance(runtime.evaluate('wake_uncertain_expiry',armed,datetime(2026,9,14,14,1,tzinfo=UTC),EvaluationLimits(100)),Matched)
+                with patch('codex_wake.measurements.utc_bounds',return_value=(lower,lower+2)):
+                    result=poll_once(root,dispatch=False,signal_runtime=runtime)
+                self.assertEqual(result.fired,int(already_reserved))
+                self.assertEqual(result.pending,int(not already_reserved))
+                self.assertEqual(result.time_held,int(not already_reserved))
+                self.assertIsNotNone(runtime.load_armed_signal('wake_uncertain_expiry'))
+                self.assertEqual(find_record(root,'wake_uncertain_expiry').record['status'],'firing' if already_reserved else 'pending')
 
     def test_legacy_firing_rechecks_retry_anchor_before_dispatch(self):
         from tests.test_injector import FakeTmuxRunner

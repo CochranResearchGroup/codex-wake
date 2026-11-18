@@ -540,9 +540,11 @@ def poll_once(
                         pending += 1
                     continue
                 if armed.expires_at is not None and current < armed.expires_at <= upper:
-                    pending += 1
-                    time_held += 1
-                    continue
+                    authority = signal_runtime.inspect_signal_state(wake_id, record=current_item.record)
+                    if not isinstance(authority, dict) or not authority.get('reservation'):
+                        pending += 1
+                        time_held += 1
+                        continue
                 outcome, source_publishes = _evaluate_signal(
                     signal_runtime,
                     armed,

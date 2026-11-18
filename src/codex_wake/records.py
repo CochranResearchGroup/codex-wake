@@ -702,6 +702,10 @@ def move_record(
     record = dict(found.record)
     untimed = record.get('schema_version') in (6, 7, 8) and now is None
     current = None if untimed else _metadata_now(now)
+    if current is None and found.record.get('schema_version') == 2:
+        # Schema2 still requires a timestamp. Do not publish an unreadable
+        # record or change the separate signal terminal-fence contract.
+        raise WakeError('signal_move_time_unqualified')
     record["status"] = status
     record["updated_at"] = None if current is None else format_utc(current)
     if last_error:

@@ -57,7 +57,7 @@ native intent clock domains, absolute timestamp parser or protective cancellatio
 - `schema_version`: integer schema version.
 - `id`: stable wake id.
 - `created_at`: UTC timestamp.
-- `updated_at`: UTC timestamp, or `null` for cancellation without qualified UTC as described below.
+- `updated_at`: UTC timestamp; legacy or untimed native records may use `null` when no UTC observation is available. Schema2 retains its required timestamp contract.
 - `cwd`: creating working directory.
 - `target`: dispatch target object.
 - `predicate`: trigger predicate object.
@@ -74,6 +74,31 @@ native intent clock domains, absolute timestamp parser or protective cancellatio
 - `ack_timeout_seconds`: ack wait limit.
 - `next_attempt_at`: UTC timestamp for the next dispatch attempt or predicate check.
 - `events`: ordered audit events.
+
+Default event appends and authorized status moves use qualified Stable Time UTC,
+or `at: null` with `time_status: "not_observed"` when UTC is unavailable. A move
+uses one observation for both its `updated_at` and event timestamp. It preserves
+the original creation time, trigger, deadline and identity. Untimed native intent
+events keep their existing null-time shape without acquiring UTC. These metadata
+operations do not grant dispatch authority or replace the separate signal-journal
+terminal fence. Schema2 moves require UTC and hold before publication with
+`signal_move_time_unqualified` instead of writing a null timestamp that its
+existing decoder would reject; its cancellation/terminal-fence path is unchanged.
+
+The daemon uses fresh qualified lower UTC bounds for legacy readiness and retry
+decisions, holds a new signal match while expiry is uncertain, and preserves a
+match already reserved by the journal. `time_held` in a poll result counts legacy
+pending or firing records held by time admission; zero counts retain the existing
+output shape. Relative native intents continue through their own qualified
+counter domain even when UTC is unavailable. This does not establish a new
+transport-side final-send guarantee for legacy targets.
+
+Signal-journal preparation leases use the lower UTC bound to prove previous
+ownership expired and anchor a new fixed lease. Continuation requires the fresh
+upper bound to remain before that original expiry. Unknown or ambiguous time
+holds new timed work, while inspection of an existing current-schema journal
+remains available. New journal and migration timestamps require qualified time;
+no schema or terminal-retirement timestamp contract changes here.
 
 ### Legacy cancellation audit time
 

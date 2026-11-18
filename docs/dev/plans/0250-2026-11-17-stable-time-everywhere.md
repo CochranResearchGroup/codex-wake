@@ -97,3 +97,23 @@ finding; one bounded TDD pass adds final wait authorization before publication.
 See docs/dev/evidence/issue0695/st04-current-batch-review.md. ST04-COLLECTOR was
 validated in the preceding batch. GlobalST04 and #695 remain OPEN; this closeout
 does not establish full Python, installed runtime, activation or live Grok proof.
+
+## Daemon, event metadata and signal lease batch
+
+ST04-DAEMON-UTC, ST04-RECORD-EVENTS and ST04-SIGNAL-LEASES are validated and
+closed repo-local on the integration branch. Default legacy scheduling uses
+qualified lower UTC; missing UTC holds legacy work with additive time_held
+reporting while relative native counter intents continue. Signal expiry holds
+new matching on uncertainty and preserves already reserved matches. Events and
+legacy moves use qualified-or-unknown metadata; schema2 moves retain their
+required timestamp and hold before publication rather than becoming unreadable.
+Lease reclaim and continuation use lower/upper bounds without renewing ownership.
+The journal schema and terminal-fence contract remain unchanged.
+
+Combined92 focused checks pass on Python3.11/3.12; final27 causal checks pass on
+both after integration guards. Earlier review/remediation are preserved without
+a new broad review. See issue0695/st04-daemon-signal-validation.json under
+docs/dev/evidence. GlobalST04/fullPython/runtime/activation remain open.
+The stale Grok parent lookup is resolved by the retained takeover receipt; the
+current live gate is the expired allowance and uncertain sample, not a missing
+parent. No new live work is authorized by this source continuation.

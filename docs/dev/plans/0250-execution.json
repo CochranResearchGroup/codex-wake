@@ -479,7 +479,7 @@
     "ST04-DAEMON-UTC": {
       "owner": "root",
       "worker": "/root",
-      "state": "implemented",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -491,13 +491,14 @@
       ],
       "acceptance": "Reademergencycontrolbeforeclock. DefaultlegacydecisionsusequalifiedlowerUTC, missingUTCholdslegacy/signalobservation/dispatchwithtime_heldcount; relativecounter-onlynative6/7/8proceedthroughownclock. RecheckUTCbeforelegacydispatch, useuppertoholdambiguousnative4expiry. Explicitnowtrustedhostseam preserved. No finalsendguaranteesnewtransport/noNativebuild.",
       "non_goals": "No provider/service/credentials/Nativebuild/fullsuite/broadreview/OpenClaw/memoryeffects.",
-      "tracker_resolution": "pendingvalidatedintegration",
-      "validation": "62focuseddaemon/nativeintent/networkchecksPASS311 beforeworkerintegration; lower/readiness/unknownUTC/signalexpiry/retry publicREDs retained. Additivetime_heldreporting; originalnativecounteranchorspreserved."
+      "tracker_resolution": "closed_repo_local_after_validated_integration",
+      "validation": "Combined92focusedchecksPASS311/312; final27causalrecords/daemon/nativecounterchecksPASS311/312. Ruffundefined/policywiring/diffPASS. See batchevidence; no installed/fullPythonacceptance.",
+      "integration_sha": "97c0e289"
     },
     "ST04-RECORD-EVENTS": {
       "owner": "st04_record_events",
       "worker": "/root/st04_record_events",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -509,12 +510,16 @@
       ],
       "acceptance": "Defaultevent/movemetadataqualifiedUTC-or-null/not_observed; explicitnowpreserved. Stop/identity/deadline/retention unchanged. No globalutc_nowreplacement/no coupledv2cancelretirementchange.",
       "non_goals": "No provider/service/credentials/Nativebuild/fullsuite/broadreview/OpenClaw/memoryeffects.",
-      "tracker_resolution": "pendingvalidatedintegration"
+      "tracker_resolution": "closed_repo_local_after_validated_integration",
+      "worker_sha": "d7b64e856104c02fe4443bed7d9aa6b8dff648e2",
+      "integration_sha": "a84cd2b4",
+      "worker_branch": "fix/stable-time-record-events-0250",
+      "validation": "Combined92focusedchecksPASS311/312; final27causalrecords/daemon/nativecounterchecksPASS311/312. Ruffundefined/policywiring/diffPASS. See batchevidence; no installed/fullPythonacceptance."
     },
     "ST04-SIGNAL-LEASES": {
       "owner": "st04_signal_leases",
       "worker": "/root/st04_signal_leases",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -526,7 +531,11 @@
       ],
       "acceptance": "DefaultnewmetadataqualifiedUTC. Ownershipreclaimrequiresqualifiedlower>=expiry; newTTLanchoredlower, continuedleaseadmissionrequiresupper<expiry. Missing/ambiguoustimeholdsnewownership/work; explicitlease_clockpointseamandexistingreadonlyinspectionretained. No schema/domain/terminalretirementcontractchange.",
       "non_goals": "No provider/service/credentials/Nativebuild/fullsuite/broadreview/OpenClaw/memoryeffects.",
-      "tracker_resolution": "pendingvalidatedintegration"
+      "tracker_resolution": "closed_repo_local_after_validated_integration",
+      "worker_sha": "a3d2996090a38ebf147e017c2af4243d3cbb565d",
+      "integration_sha": "fcf84a87",
+      "worker_branch": "fix/stable-time-signal-leases-0250",
+      "validation": "Combined92focusedchecksPASS311/312; final27causalrecords/daemon/nativecounterchecksPASS311/312. Ruffundefined/policywiring/diffPASS. See batchevidence; no installed/fullPythonacceptance."
     },
     "GR01-LIVE-WINDOW": {
       "owner": "root",
@@ -545,7 +554,7 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-18T18:09:05.210682+00:00",
+  "updated_at": "2026-11-18T18:18:13.114683+00:00",
   "worker_cleanup": "Previous completed worker trees removed after exact clean custody. Collector active isolated tree; sample worker private artifacts/read-only Native tree. Root retains integration checkout for openST04/#695.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
@@ -568,10 +577,15 @@
       "ST04-RECORD-EVENTS",
       "ST04-SIGNAL-LEASES"
     ],
-    "state": "running",
+    "state": "closed_repo_local",
     "wip_limit": 3,
     "review": "Previousfinalreview/TDDpassretained; no repeatbroadreviewauthorizedfor0250 continuation.",
-    "gate_reporting": "AdditivePollResult.time_held countsheldlegacytime-dependentrecords whileindependentnativecounterintentworkremainsavailable."
+    "gate_reporting": "AdditivePollResult.time_held countsheldlegacytime-dependentrecords whileindependentnativecounterintentworkremainsavailable.",
+    "implementation_tip": "fcf84a87",
+    "integration_delta": "Preservealreadyreservedmatcheswhenexpiryintervalstraddlesdeadline; causalsubcaseRED/GREEN; no renewal/newidentity.",
+    "evidence": "docs/dev/evidence/issue0695/st04-daemon-signal-validation.json",
+    "validation": "92combinedPASS311/312;27finaldeltaPASS311/312;Ruff/policywiring/diffPASS",
+    "integration_deltas": "Reservedsignalexpiryreplaypreserved;schema2unknownUTCmovesheldbeforeserialization;rootcausalRED/GREENchecks."
   },
   "completed_batches": [
     {
