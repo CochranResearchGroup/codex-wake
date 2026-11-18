@@ -1386,6 +1386,8 @@ class SQLiteSignalModule(SignalEngine):
         }:
             return Degraded(None, "TERMINAL_RECORD_INVALID", None)
         wake_id = WakeId(str(decoded["id"]))
+        if now is None and terminal_status != 'cancelled':
+            return Degraded(wake_id, 'TERMINAL_TIME_UNQUALIFIED', None)
         connection: sqlite3.Connection | None = None
         try:
             connection = self._connect()

@@ -53,6 +53,9 @@ class RecordTests(unittest.TestCase):
             original = find_record(root, 'wake_signal').record
             with patch('codex_wake.measurements.snapshot', side_effect=measurements.TimeUnavailable('unavailable')), \
                     patch('codex_wake.records.utc_now', side_effect=AssertionError('guest clock')):
+                # Untimed stopping must not authorize a fabricated expiration.
+                runtime.retire_terminal_record(dict(original, status='expired'), now=None)
+                self.assertIsNone(runtime.terminal_status('wake_signal'))
                 cancelled = json.loads(cancel_record(root, 'wake_signal').read_text())
                 self.assertEqual(classify_record(cancelled), 'signal_v2')
                 self.assertEqual(cancelled['status'], 'cancelled')
