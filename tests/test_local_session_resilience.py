@@ -99,6 +99,52 @@ def submit(state,key='intent'):
 
 
 class SessionResilienceTests(unittest.TestCase):
+    def test_result_clock_loss_during_owned_read_refuses_without_replaying_prompt(self):
+        from codex_wake import measurements
+        from codex_wake.measurements import TimeUnavailable
+        with peer(hold_observation=True) as state, ThreadPoolExecutor() as workers:
+            record=submit(state,'result-clock-lost-after-read');identifier=record['operation_id']
+            authority_now=measurements.utc_time()
+            state['owner'].runtime.now=lambda:authority_now
+            result=workers.submit(state['owner'].result,identifier,3)
+            self.assertTrue(state['observation'].wait(5))
+            with patch('codex_wake.daemon_commands._qualified_upper',return_value=authority_now), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('lost during owned read')):
+                state['release_observation'].set()
+                with self.assertRaisesRegex(TimeUnavailable,'lost during owned read'):
+                    result.result(5)
+            again=submit(state,'result-clock-lost-after-read')
+            self.assertEqual(again['operation_id'],identifier)
+            self.assertEqual(len(state['starts']),1)
+
+    def test_positive_output_wait_requires_counter_but_cached_page_does_not(self):
+        from codex_wake import measurements
+        from codex_wake.measurements import TimeUnavailable
+        with peer(busy=True) as state:
+            record=submit(state,'output-wait-clock');identifier=record['operation_id']
+            authority_now=measurements.utc_time()
+            state['owner'].runtime.now=lambda:authority_now
+            with patch('codex_wake.daemon_commands._qualified_upper',return_value=authority_now), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('counter unavailable')):
+                with self.assertRaisesRegex(TimeUnavailable,'counter unavailable'):
+                    state['owner'].output(identifier,mode='transcript',timeout=1)
+                cached=state['owner'].output(identifier,mode='transcript',timeout=0)
+            self.assertTrue(cached['terminal'])
+            self.assertEqual(state['starts'],[])
+
+    def test_positive_result_wait_requires_counter_but_cached_read_does_not(self):
+        from codex_wake.measurements import TimeUnavailable
+        with peer(busy=True) as state:
+            record=submit(state,'result-wait-clock');identifier=record['operation_id']
+            # Explicit UTC authority is independent of the counter under test.
+            from codex_wake import measurements
+            authority_now=measurements.utc_time()
+            state['owner'].runtime.now=lambda:authority_now
+            with patch('codex_wake.daemon_commands._qualified_upper',return_value=authority_now), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('counter unavailable')):
+                with self.assertRaisesRegex(TimeUnavailable,'counter unavailable'):
+                    state['owner'].result(identifier,timeout=1)
+                cached=state['owner'].result(identifier,timeout=0)['result']['operation']
+            self.assertEqual(cached['phase'],'terminal')
+            self.assertEqual(state['starts'],[])
+
     def test_collector_loses_clock_on_ack_keeps_unknown_without_prompt_replay(self):
         from codex_wake import local_session_events as events
         from codex_wake.measurements import TimeUnavailable

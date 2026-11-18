@@ -8,6 +8,7 @@ import struct
 import time
 from uuid import uuid4
 
+from . import measurements
 from .controller_runtime import ControllerRuntime, encoded
 from .daemon_commands import local_operator
 from .managed_inventory import InventoryError
@@ -112,40 +113,55 @@ class LocalSessionControl:
     def result(self,operation_id,timeout=0):
         if type(timeout) not in (int,float) or not 0<=timeout<=30:
             raise InventoryError('invalid_argument','caller wait timeout must be zero to thirty seconds')
-        actor=self._actor(operation_id);deadline=time.monotonic()+timeout
+        deadline=measurements.deadline(timeout) if timeout else None
+        actor=self._actor(operation_id);expired=False
         while True:
             record=self._owned_record(actor,operation_id)
+            if deadline is not None and deadline.remaining()<=0:
+                expired=True;break
             if record['phase']!='terminal':
                 try:self.observe_native_owned(record)
                 except (ValueError,OSError,WebSocketException) as error:
                     record.update(phase='uncertain',execution='unknown',reason=getattr(error,'code','native_owner_unavailable'))
+                if deadline is not None and deadline.remaining()<=0:
+                    record=self._owned_record(actor,operation_id)
+                    expired=True;break
                 record=self._retain_observation(record)
             self.runtime._owned(actor,record,lambda:actor)
-            if record['phase']=='terminal' or time.monotonic()>=deadline:break
-            time.sleep(min(.05,max(0,deadline-time.monotonic())))
+            remaining=deadline.remaining() if deadline is not None else 0
+            expired=deadline is not None and remaining<=0
+            if record['phase']=='terminal' or deadline is None or expired:break
+            time.sleep(min(.05,remaining))
         return self.runtime.envelope('operations.wait' if timeout else 'operations.result',record,
-            **({'wait':dict(status='completed' if record['phase']=='terminal' else 'timeout',ends_work=False)} if timeout else {}))
+            **({'wait':dict(status='completed' if record['phase']=='terminal' and not expired else 'timeout',ends_work=False)} if timeout else {}))
 
     def output(self,operation_id,*,mode='final',cursor=0,limit=100,timeout=0):
         from .local_session_events import TurnEvents,MODES
         if mode not in MODES or type(timeout) not in (int,float) or not 0<=timeout<=30:
             raise InventoryError('invalid_argument','output mode and timeout0..30 required')
+        deadline=measurements.deadline(timeout) if timeout else None
         actor=self._actor(operation_id)
         self.runtime._owned(actor,self.runtime._load(operation_id),lambda:actor)
-        store=TurnEvents(self.root);deadline=time.monotonic()+timeout
+        store=TurnEvents(self.root);expired=False
         while True:
             record=self.runtime._load(operation_id)
+            if deadline is not None and deadline.remaining()<=0:
+                expired=True
+                page=store.read(operation_id,cursor,limit);terminal=record['phase']=='terminal'
+                break
             if store.state(operation_id)['status']=='uncertain' and record.get('result') and record['phase']!='terminal':
                 # Read-only terminal reconciliation cannot reconstruct missing live events.
                 self.result(operation_id)
                 record=self.runtime._load(operation_id)
             page=store.read(operation_id,cursor,limit)
             terminal=record['phase']=='terminal'
-            if terminal or (mode in ('stream','transcript') and page['events']) or store.state(operation_id)['status'] in ('uncertain','unavailable') or time.monotonic()>=deadline:break
-            time.sleep(min(.02,max(0,deadline-time.monotonic())))
+            remaining=deadline.remaining() if deadline is not None else 0
+            expired=deadline is not None and remaining<=0
+            if terminal or (mode in ('stream','transcript') and page['events']) or store.state(operation_id)['status'] in ('uncertain','unavailable') or deadline is None or expired:break
+            time.sleep(min(.02,remaining))
         value=dict(operation_id=operation_id,turn_id=(record.get('result') or {}).get('turn_id'),
             mode=mode,terminal=terminal,execution=record['execution'],phase=record['phase'],reason=record.get('reason'),
-            next_cursor=page['next_cursor'],latest_cursor=page['latest_cursor'],retention=page['retention'],wait=dict(status='completed' if terminal else 'timeout',ends_work=False))
+            next_cursor=page['next_cursor'],latest_cursor=page['latest_cursor'],retention=page['retention'],wait=dict(status='completed' if terminal and not expired else 'timeout',ends_work=False))
         if mode=='transcript':value['events']=page['events']
         elif mode=='stream':value['text']=''.join(event['params'].get('delta','') for event in page['events'] if event['kind']=='item/agentMessage/delta')
         elif mode=='final':
