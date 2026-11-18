@@ -1,12 +1,14 @@
 """Native reconciliation must tolerate long-thread responses with a finite cap."""
 import json
 from pathlib import Path
+from types import SimpleNamespace
 import tempfile
 import threading
 import unittest
 from unittest.mock import patch
 
 from websockets.sync.server import unix_serve
+from websockets.exceptions import ConnectionClosed
 from codex_wake.native_delivery import native_evidence
 
 
@@ -21,15 +23,87 @@ class NativeLargeResponseTests(unittest.TestCase):
             context.start()
             self.addCleanup(context.stop)
 
-    def test_unqualified_clock_refuses_before_endpoint_resolution(self):
+    def test_rpc_waits_work_without_stable_time(self):
+        from codex_wake.native_protocol import native_request
+        calls = []
+        def handler(ws):
+            for raw in ws:
+                request = json.loads(raw)
+                calls.append(request['method'])
+                if 'id' in request:
+                    ws.send(json.dumps({'id': request['id'], 'result': {'ok': True}}))
+        with tempfile.TemporaryDirectory() as directory:
+            endpoint = Path(directory) / 'server.sock'
+            with unix_serve(handler, str(endpoint)) as server:
+                worker = threading.Thread(target=server.serve_forever, daemon=True)
+                worker.start()
+                try:
+                    with patch('codex_wake.native_clock.configuration', return_value=None), \
+                            patch('codex_wake.measurements.deadline', side_effect=AssertionError('protective wait queried reliable time')):
+                        self.assertEqual(native_request('unix://' + str(endpoint), 'unused',
+                            'thread/read', {'threadId': 'owned'}, 2), {'ok': True})
+                    self.assertEqual(calls, ['initialize', 'initialized', 'thread/read'])
+                finally:
+                    server.shutdown()
+                    worker.join(timeout=2)
+
+    def test_rpc_initialize_and_request_share_one_protective_budget(self):
         from codex_wake.native_protocol import native_request
         from codex_wake.records import WakeError
-        with patch('codex_wake.native_clock.configuration', return_value=None), \
-                patch('codex_wake.shared_app_server.locate_shared_endpoint',
-                    side_effect=AssertionError('endpoint resolution before clock admission')) as locate:
-            with self.assertRaisesRegex(WakeError, 'stable_time_unavailable'):
-                native_request('unix://', '/codex', 'thread/read', dict(threadId='owned'), 2)
-            locate.assert_not_called()
+        advisory = [0.0]
+        def handler(ws):
+            try:
+                for raw in ws:
+                    request = json.loads(raw)
+                    if request.get('method') == 'initialize':
+                        ws.send(json.dumps({'id': request['id'], 'result': {}}))
+            except ConnectionClosed:
+                pass  # Client closes immediately on its protective timeout.
+        def initialized(ws, metadata):
+            advisory[0] = 3.0
+        with tempfile.TemporaryDirectory() as directory:
+            endpoint = Path(directory) / 'server.sock'
+            with unix_serve(handler, str(endpoint)) as server:
+                worker = threading.Thread(target=server.serve_forever, daemon=True)
+                worker.start()
+                try:
+                    with patch('codex_wake.native_protocol.time', SimpleNamespace(monotonic=lambda: advisory[0])):
+                        with self.assertRaisesRegex(WakeError, 'inspect state before retry'):
+                            native_request('unix://' + str(endpoint), 'unused',
+                                'thread/read', {}, 2, verify_connection=initialized)
+                finally:
+                    server.shutdown()
+                    worker.join(timeout=2)
+
+    def test_rpc_timeout_after_write_does_not_replay(self):
+        from codex_wake.native_protocol import native_request
+        from codex_wake.records import WakeError
+        calls = []
+        release = threading.Event()
+        def handler(ws):
+            for raw in ws:
+                request = json.loads(raw)
+                calls.append(request['method'])
+                if request['method'] == 'initialize':
+                    ws.send(json.dumps({'id': request['id'], 'result': {}}))
+                elif request['method'] == 'turn/start':
+                    release.wait(2)
+                    return
+        with tempfile.TemporaryDirectory() as directory:
+            endpoint = Path(directory) / 'server.sock'
+            with unix_serve(handler, str(endpoint)) as server:
+                worker = threading.Thread(target=server.serve_forever, daemon=True)
+                worker.start()
+                try:
+                    with patch('codex_wake.native_clock.configuration', return_value=None):
+                        with self.assertRaises((TimeoutError, WakeError)):
+                            native_request('unix://' + str(endpoint), 'unused',
+                                'turn/start', {'threadId': 'owned'}, .1)
+                    self.assertEqual(calls.count('turn/start'), 1)
+                finally:
+                    release.set()
+                    server.shutdown()
+                    worker.join(timeout=2)
 
     def test_reconciliation_holds_before_reads_when_stable_time_is_unqualified(self):
         from codex_wake.codex_runtime import CodexRuntimeAdapter

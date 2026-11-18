@@ -5,10 +5,10 @@ import json
 import os
 from pathlib import Path
 import stat
+import time
 
 from . import __version__
 from .records import WakeError
-from .measurements import TimeUnavailable, deadline
 
 
 class NativeCapabilityUnavailable(WakeError):
@@ -22,15 +22,11 @@ class NativeHealthDeadline(WakeError):
 def native_request(endpoint, codex, method, params, timeout, *, verify_connection=None, observe_result=None):
     from .shared_app_server import locate_shared_endpoint
     from websockets.sync.client import unix_connect
-    try:
-        timer = deadline(timeout)
-    except TimeUnavailable:
-        raise WakeError('native_stable_time_unavailable') from None
+    # This bounds local transport resource use only. Native expiry and permission
+    # decisions retain their own authoritative envelopes at their owners.
+    stop = time.monotonic() + timeout
     def remaining_budget():
-        try:
-            return timer.remaining()
-        except TimeUnavailable:
-            raise WakeError('native_stable_time_unavailable') from None
+        return stop - time.monotonic()
     if endpoint == 'unix://':
         endpoint = locate_shared_endpoint(codex_cmd=codex, timeout=timeout)
     if not endpoint.startswith('unix://') or not Path(endpoint[7:]).is_absolute():
