@@ -186,10 +186,15 @@ def time_command(args):
     config = stable_time_config()
     if config:
         from .stable_time import service_time_result
-        decision, observation = (TimeDecision('uncertain', reason='acquisition_not_requested'), None) if args.offline else service_time_result(config)
+        decision, observation = (TimeDecision('uncertain', reason='acquisition_not_requested'), None) if args.offline else service_time_result(config, measurement_only=True)
+        measurement_decision = decision
+        if decision.status != 'uncertain':
+            decision = TimeDecision('uncertain', reason='receipt_time_bound_unqualified')
         report = dict(schema=1, provider='stable-time', authentication='NTS-required',
-                      decision=asdict(decision), observation=observation, purpose='installed-service-consumer',
-                      note='Observation is diagnostic; only the validated decision supplies finite dispatch authority.')
+                      decision=asdict(decision), measurement_decision=asdict(measurement_decision),
+                      observation=observation, purpose='installed-service-consumer',
+                      basis='service_measurement', receipt_time_bound=False, production_ready=False,
+                      note='Bounds describe the service measurement instant, not receipt or print time. Inspection authorizes no dispatch.')
     else:
         report = inspect_time(offline=True)
         if not args.offline:

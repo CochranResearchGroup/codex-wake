@@ -64,9 +64,15 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         raise ValueError('stable_time_redirect_refused')
 
 
-def service_time_result(config_path):
-    """Read one existing service observation, then its native counter handoff."""
+def service_time_result(config_path, *, measurement_only=False):
+    """Read service evidence; inspection can retain its measurement instant.
+
+    measurement_only never claims a client-receipt bound. Strict scheduling
+    callers keep the existing explicit native handoff until their contract is
+    migrated; a service-point upper bound cannot replace that authority.
+    """
     observation = None
+    failure = 'stable_time_client_configuration_invalid'
     try:
         config = json.loads(Path(config_path).read_text())
         if not isinstance(config, dict):
@@ -87,8 +93,10 @@ def service_time_result(config_path):
                                             urllib.request.HTTPSHandler(context=context))
         request = urllib.request.Request(origin.rstrip('/')+'/v1/time',
                                          headers={'Authorization': 'Bearer '+token})
+        failure = 'stable_time_client_transport_failed'
         with opener.open(request, timeout=3) as stream:
             body = stream.read(1048577)
+        failure = 'stable_time_response_invalid'
         if len(body) > 1048576:
             raise ValueError('stable_time_response_too_large')
         response = json.loads(body)
@@ -101,12 +109,23 @@ def service_time_result(config_path):
             'operators', 'authentication', 'time_scale') if key in response}
         if response.get('status') in ('unavailable', 'unbounded'):
             return TimeDecision('uncertain', reason='stable_time_unavailable'), observation
+        measurement = response['measurement']
+        if any(not isinstance(measurement.get(key), str) or not measurement[key].isascii()
+               or not measurement[key].isdigit() or len(measurement[key]) > 20
+               or int(measurement[key]) > 2**64-1 for key in ('counter', 'frequency_hz')):
+            raise ValueError('invalid_service_measurement')
+        at_measurement = decision_from_response(response,
+            counter=int(measurement['counter']), frequency=int(measurement['frequency_hz']))
+        if measurement_only:
+            return at_measurement, observation
         from .host_counter import read_counter
+        failure = 'stable_time_client_counter_unavailable'
         counter, frequency = read_counter()
+        failure = 'stable_time_client_handoff_invalid'
         return decision_from_response(response, counter=counter, frequency=frequency), observation
     except (OSError, ValueError, KeyError, TypeError, AttributeError, OverflowError, subprocess.SubprocessError):
         # Never include transport errors containing credentials or substitute guest time.
-        return TimeDecision('uncertain', reason='stable_time_unavailable_or_invalid'), observation
+        return TimeDecision('uncertain', reason=failure), observation
 
 
 def service_time_decision(config_path):
