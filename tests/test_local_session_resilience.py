@@ -99,51 +99,59 @@ def submit(state,key='intent'):
 
 
 class SessionResilienceTests(unittest.TestCase):
-    def test_result_clock_loss_during_owned_read_refuses_without_replaying_prompt(self):
+    def test_result_and_output_recheck_authority_before_advisory_timeout_publication(self):
         from codex_wake import measurements
-        from codex_wake.measurements import TimeUnavailable
-        with peer(hold_observation=True) as state, ThreadPoolExecutor() as workers:
-            record=submit(state,'result-clock-lost-after-read');identifier=record['operation_id']
-            authority_now=measurements.utc_time()
-            state['owner'].runtime.now=lambda:authority_now
-            result=workers.submit(state['owner'].result,identifier,3)
-            self.assertTrue(state['observation'].wait(5))
-            with patch('codex_wake.measurements.utc_bounds',return_value=(authority_now,authority_now)), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('lost during owned read')):
-                state['release_observation'].set()
-                with self.assertRaisesRegex(TimeUnavailable,'lost during owned read'):
-                    result.result(5)
-            again=submit(state,'result-clock-lost-after-read')
-            self.assertEqual(again['operation_id'],identifier)
-            self.assertEqual(len(state['starts']),1)
+        from codex_wake.controller_auth import AuthError
+        from codex_wake.daemon_commands import local_operator
+        for method in ('result','output'):
+            for loss in ('expiry','revocation'):
+                with self.subTest(method=method,loss=loss),tempfile.TemporaryDirectory() as directory:
+                    root=Path(directory);home=root/'home';home.mkdir()
+                    owner=LocalSessionControl(root);authority=[100]
+                    owner.runtime.now=lambda:authority[0]
+                    target=dict(host='fixture',environment='linux',uid=os.getuid(),home=str(home))
+                    with patch('codex_wake.measurements.utc_bounds',return_value=(100,100)):
+                        actor=local_operator(target)
+                        request=dict(operation_id='final-authority',idempotency_key='final-authority',
+                            correlation_id='final-authority',binding='fixture',target=target)
+                        owner.runtime.execute(actor,'sessions.prompt',dict(_request=request),authorize=lambda:actor,
+                            dispatch=lambda *_:dict(answer='private retained result'))
+                        calls=0
+                        def clock():
+                            nonlocal calls
+                            calls+=1
+                            if calls>=3:
+                                if loss=='expiry':authority[0]=221
+                                else:owner.runtime.revoke_grant(actor.grant_id,issuer=actor.issuer,resource=actor.resource)
+                                return 2.0
+                            return 0.0
+                        with patch('codex_wake.local_session_operations.time.monotonic',side_effect=clock):
+                            with self.assertRaises(AuthError):
+                                getattr(owner,method)('final-authority',timeout=1)
 
-    def test_positive_output_wait_requires_counter_but_cached_page_does_not(self):
+    def test_positive_result_and_output_waits_do_not_require_counter(self):
         from codex_wake import measurements
-        from codex_wake.measurements import TimeUnavailable
-        with peer(busy=True) as state:
-            record=submit(state,'output-wait-clock');identifier=record['operation_id']
-            authority_now=measurements.utc_time()
-            state['owner'].runtime.now=lambda:authority_now
-            with patch('codex_wake.measurements.utc_bounds',return_value=(authority_now,authority_now)), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('counter unavailable')):
-                with self.assertRaisesRegex(TimeUnavailable,'counter unavailable'):
-                    state['owner'].output(identifier,mode='transcript',timeout=1)
-                cached=state['owner'].output(identifier,mode='transcript',timeout=0)
-            self.assertTrue(cached['terminal'])
-            self.assertEqual(state['starts'],[])
-
-    def test_positive_result_wait_requires_counter_but_cached_read_does_not(self):
-        from codex_wake.measurements import TimeUnavailable
-        with peer(busy=True) as state:
-            record=submit(state,'result-wait-clock');identifier=record['operation_id']
-            # Explicit UTC authority is independent of the counter under test.
-            from codex_wake import measurements
-            authority_now=measurements.utc_time()
-            state['owner'].runtime.now=lambda:authority_now
-            with patch('codex_wake.measurements.utc_bounds',return_value=(authority_now,authority_now)), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('counter unavailable')):
-                with self.assertRaisesRegex(TimeUnavailable,'counter unavailable'):
-                    state['owner'].result(identifier,timeout=1)
-                cached=state['owner'].result(identifier,timeout=0)['result']['operation']
-            self.assertEqual(cached['phase'],'terminal')
-            self.assertEqual(state['starts'],[])
+        from codex_wake.daemon_commands import local_operator
+        for method in ('result','output'):
+            with self.subTest(method=method),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);home=root/'home';home.mkdir()
+                owner=LocalSessionControl(root);owner.runtime.now=lambda:100
+                target=dict(host='fixture',environment='linux',uid=os.getuid(),home=str(home))
+                with patch('codex_wake.measurements.utc_bounds',return_value=(100,100)):
+                    actor=local_operator(target)
+                    request=dict(operation_id='retained',idempotency_key='retained',
+                        correlation_id='retained',binding='fixture',target=target)
+                    owner.runtime.execute(actor,'sessions.prompt',dict(_request=request),authorize=lambda:actor,
+                        dispatch=lambda *_:dict(answer='retained'))
+                    with patch('codex_wake.measurements.snapshot',side_effect=measurements.TimeUnavailable('auxiliary counter unavailable')):
+                        positive=getattr(owner,method)('retained',timeout=1)
+                        cached=getattr(owner,method)('retained',timeout=0)
+                if method=='result':
+                    self.assertEqual(positive['result']['operation']['phase'],'terminal')
+                    self.assertEqual(cached['result']['operation']['phase'],'terminal')
+                else:
+                    self.assertTrue(positive['terminal'])
+                    self.assertTrue(cached['terminal'])
 
     def test_collector_loses_clock_on_ack_keeps_unknown_without_prompt_replay(self):
         from codex_wake import local_session_events as events

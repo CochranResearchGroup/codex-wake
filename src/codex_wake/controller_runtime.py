@@ -18,7 +18,6 @@ from weakref import WeakKeyDictionary
 
 from .controller_auth import Actor, AuthError, _qualified_upper
 from .managed_inventory import InventoryError
-from . import measurements
 
 
 def encoded(value):
@@ -388,11 +387,12 @@ class ControllerRuntime:
     def _wait(self, actor, record, authorize, timeout):
         if type(timeout) not in (int, float) or not 0 <= timeout <= 30:
             raise InventoryError('invalid_argument', 'caller wait timeout must be zero to thirty seconds')
-        deadline = measurements.deadline(timeout) if timeout else None
+        # Caller waiting is advisory; _owned retains genuine authorization checks.
+        deadline = time.monotonic() + timeout if timeout else None
         while True:
-            if deadline is not None and deadline.remaining() <= 0: return record, 'timeout'
+            if deadline is not None and (deadline - time.monotonic()) <= 0: return record, 'timeout'
             record = self._refresh(actor, self._owned(actor, self._load(record['operation_id']), authorize), authorize)
-            remaining = deadline.remaining() if deadline is not None else None
+            remaining = (deadline - time.monotonic()) if deadline is not None else None
             if remaining is not None and remaining <= 0: return record, 'timeout'
             if record['phase'] == 'terminal': return record, 'completed'
             if remaining is None: return record, 'timeout'
@@ -478,17 +478,17 @@ class ControllerRuntime:
             cursor, limit, timeout = arguments.get('cursor', 0), arguments.get('limit', 100), arguments.get('timeout', 0)
             if type(cursor) is not int or cursor < 0 or type(limit) is not int or not 1 <= limit <= 100 or type(timeout) not in (int, float) or not 0 <= timeout <= 30:
                 raise InventoryError('invalid_argument', 'bounded nonnegative stream cursor/limit/timeout required')
-            deadline = measurements.deadline(timeout) if timeout else None
+            deadline = time.monotonic() + timeout if timeout else None
             record = self._refresh(actor, record, authorize)
             while True:
-                remaining = deadline.remaining() if deadline is not None else None
+                remaining = (deadline - time.monotonic()) if deadline is not None else None
                 if remaining is not None and remaining <= 0:
                     events = []
                     break
                 with self.connect() as db:
                     rows = db.execute('SELECT payload FROM events WHERE operation_id=? AND sequence>? ORDER BY sequence LIMIT ?', (record['operation_id'], cursor, limit)).fetchall()
                 events = [json.loads(row[0]) for row in rows]
-                remaining = deadline.remaining() if deadline is not None else None
+                remaining = (deadline - time.monotonic()) if deadline is not None else None
                 if remaining is not None and remaining <= 0:
                     events = []
                     break
@@ -496,7 +496,7 @@ class ControllerRuntime:
                 time.sleep(min(.05, remaining))
                 record = self._refresh(actor, self._owned(actor, self._load(record['operation_id']), authorize), authorize)
             self._owned(actor, record, authorize)
-            if deadline is not None and deadline.remaining() <= 0: events = []
+            if deadline is not None and (deadline - time.monotonic()) <= 0: events = []
             return self.envelope(operation, record, events=events, next_cursor=events[-1]['sequence'] if events else cursor,
                 stream=dict(mode='bounded_correlated_events', token_stream=False))
         record = self._refresh(actor, record, authorize)
