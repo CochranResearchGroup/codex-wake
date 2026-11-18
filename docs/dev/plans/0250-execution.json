@@ -543,6 +543,36 @@
       "dependencies": [],
       "scope": "Original900sStableTimewindow expired; uncertainfreshsamplepreserved. Needexplicitrenewedlivewindow beforeanynewprobe, pluscompleteerrorcapture/backgroundmetadataeffectqualification.",
       "non_goals": "No timerreset/no replay/no newproviderpermissionfromimplement-spec."
+    },
+    "ST04-ACK-WAIT": {
+      "owner": "root",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "base": "bf3799ec7f5146dd68cd8b76a51095773b3ce096",
+      "paths": [
+        "src/codex_wake/injector.py",
+        "tests/test_injector.py"
+      ],
+      "acceptance": "Positive acknowledgement wait retains one qualified counter deadline; zero wait remains untimed inspection. Clock loss after possible paste holds unknown outcome without replay; original retry semantics on qualified timeout retained.",
+      "non_goals": "No fullsuite, reviewrepeat, build, deployment, provider, daemon or memory effects."
+    },
+    "ST04-MONITOR": {
+      "owner": "st04_monitor_time",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "base": "bf3799ec7f5146dd68cd8b76a51095773b3ce096",
+      "paths": [
+        "src/codex_wake/monitor.py",
+        "tests/test_monitor.py"
+      ],
+      "acceptance": "Monitor timestamps and freshness use conservative qualified UTC bounds or explicit unavailable metadata; explicit now seam retained.",
+      "non_goals": "No fullsuite, reviewrepeat, build, deployment, provider, daemon or memory effects."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -554,7 +584,7 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-18T18:18:13.114683+00:00",
+  "updated_at": "2026-11-18T20:01:19.839099+00:00",
   "worker_cleanup": "Previous completed worker trees removed after exact clean custody. Collector active isolated tree; sample worker private artifacts/read-only Native tree. Root retains integration checkout for openST04/#695.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
@@ -571,21 +601,13 @@
     "limits": "No provider calls or installed daemon changes. Broader migrations/fullPython/runtime/activation gates open."
   },
   "current_batch": {
-    "base": "c39eabd6cf29096fbb0cfc366ada11ae0bd6a089",
+    "base": "bf3799ec7f5146dd68cd8b76a51095773b3ce096",
     "tickets": [
-      "ST04-DAEMON-UTC",
-      "ST04-RECORD-EVENTS",
-      "ST04-SIGNAL-LEASES"
+      "ST04-ACK-WAIT",
+      "ST04-MONITOR"
     ],
-    "state": "closed_repo_local",
-    "wip_limit": 3,
-    "review": "Previousfinalreview/TDDpassretained; no repeatbroadreviewauthorizedfor0250 continuation.",
-    "gate_reporting": "AdditivePollResult.time_held countsheldlegacytime-dependentrecords whileindependentnativecounterintentworkremainsavailable.",
-    "implementation_tip": "fcf84a87",
-    "integration_delta": "Preservealreadyreservedmatcheswhenexpiryintervalstraddlesdeadline; causalsubcaseRED/GREEN; no renewal/newidentity.",
-    "evidence": "docs/dev/evidence/issue0695/st04-daemon-signal-validation.json",
-    "validation": "92combinedPASS311/312;27finaldeltaPASS311/312;Ruff/policywiring/diffPASS",
-    "integration_deltas": "Reservedsignalexpiryreplaypreserved;schema2unknownUTCmovesheldbeforeserialization;rootcausalRED/GREENchecks."
+    "state": "running",
+    "review": "Retain previous review; no broad review repeat."
   },
   "completed_batches": [
     {
@@ -621,6 +643,23 @@
       "remediation": "Public4subcaseRED, minimumfinal_ownedguard; 5focusedPASS311/312. No broadreview rerun.",
       "adjacent_validation": "7unifiedterminal/presentationcasesPASS311; no sourcechangesafteractorissuance exceptreviewguard.",
       "scope_limit": "Fourrepo-localticketsclosed; globalST04/#695/#628 andfullPython/activation/liveGrok remainopen. NoNativebuild/fullsuite/reviewrepeat/liveeffects."
+    },
+    {
+      "base": "c39eabd6cf29096fbb0cfc366ada11ae0bd6a089",
+      "tickets": [
+        "ST04-DAEMON-UTC",
+        "ST04-RECORD-EVENTS",
+        "ST04-SIGNAL-LEASES"
+      ],
+      "state": "closed_repo_local",
+      "wip_limit": 3,
+      "review": "Previousfinalreview/TDDpassretained; no repeatbroadreviewauthorizedfor0250 continuation.",
+      "gate_reporting": "AdditivePollResult.time_held countsheldlegacytime-dependentrecords whileindependentnativecounterintentworkremainsavailable.",
+      "implementation_tip": "fcf84a87",
+      "integration_delta": "Preservealreadyreservedmatcheswhenexpiryintervalstraddlesdeadline; causalsubcaseRED/GREEN; no renewal/newidentity.",
+      "evidence": "docs/dev/evidence/issue0695/st04-daemon-signal-validation.json",
+      "validation": "92combinedPASS311/312;27finaldeltaPASS311/312;Ruff/policywiring/diffPASS",
+      "integration_deltas": "Reservedsignalexpiryreplaypreserved;schema2unknownUTCmovesheldbeforeserialization;rootcausalRED/GREENchecks."
     }
   ]
 }
