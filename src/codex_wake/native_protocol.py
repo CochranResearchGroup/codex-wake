@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 from pathlib import Path
 import stat
@@ -22,6 +23,8 @@ class NativeHealthDeadline(WakeError):
 def native_request(endpoint, codex, method, params, timeout, *, verify_connection=None, observe_result=None):
     from .shared_app_server import locate_shared_endpoint
     from websockets.sync.client import unix_connect
+    if type(timeout) not in (int, float) or not math.isfinite(timeout) or timeout < 0:
+        raise WakeError('invalid native request timeout')
     # This bounds local transport resource use only. Native expiry and permission
     # decisions retain their own authoritative envelopes at their owners.
     stop = time.monotonic() + timeout

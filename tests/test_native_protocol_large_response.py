@@ -23,6 +23,18 @@ class NativeLargeResponseTests(unittest.TestCase):
             context.start()
             self.addCleanup(context.stop)
 
+    def test_invalid_rpc_timeout_refuses_before_endpoint_discovery_or_connection(self):
+        from codex_wake.native_protocol import native_request
+        from codex_wake.records import WakeError
+        for timeout in (float('nan'), float('inf'), -float('inf'), True, False, -1, '2', None):
+            with self.subTest(timeout=timeout), \
+                    patch('codex_wake.shared_app_server.locate_shared_endpoint') as locate, \
+                    patch('websockets.sync.client.unix_connect') as connect:
+                with self.assertRaisesRegex(WakeError, 'invalid native request timeout'):
+                    native_request('unix://', 'unused', 'thread/read', {}, timeout)
+                locate.assert_not_called()
+                connect.assert_not_called()
+
     def test_rpc_waits_work_without_stable_time(self):
         from codex_wake.native_protocol import native_request
         calls = []
