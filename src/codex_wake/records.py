@@ -354,12 +354,29 @@ def capture_tmux_target(
     }
 
 
-def make_event(event_type: str, message: str, now: datetime | None = None) -> dict[str, Any]:
-    return {
-        "at": format_utc(now or utc_now()),
+def _metadata_now(now: datetime | None) -> datetime | None:
+    if now is not None:
+        return now
+    from . import measurements
+    try:
+        return measurements.datetime_now()
+    except measurements.TimeUnavailable:
+        return None
+
+
+def _event_at(event_type: str, message: str, now: datetime | None) -> dict[str, Any]:
+    event = {
+        "at": None if now is None else format_utc(now),
         "type": event_type,
         "message": message,
     }
+    if now is None:
+        event['time_status'] = 'not_observed'
+    return event
+
+
+def make_event(event_type: str, message: str, now: datetime | None = None) -> dict[str, Any]:
+    return _event_at(event_type, message, _metadata_now(now))
 
 
 def append_event(
@@ -682,13 +699,17 @@ def move_record(
 ) -> Path:
     if status not in VALID_STATUSES:
         raise WakeError(f"invalid wake status: {status}")
-    current = now or utc_now()
     record = dict(found.record)
+    untimed = record.get('schema_version') in (6, 7, 8) and now is None
+    current = None if untimed else _metadata_now(now)
     record["status"] = status
-    record["updated_at"] = format_utc(current)
+    record["updated_at"] = None if current is None else format_utc(current)
     if last_error:
         record["last_error"] = last_error
-    record = append_event(record, event_type, message, current)
+    event = (dict(at=None, type=event_type, message=message)
+             if untimed
+             else _event_at(event_type, message, current))
+    record['events'] = [*(record.get('events') or []), event]
     destination = write_record(root, record)
     if found.path != destination and found.path.exists():
         found.path.unlink()

@@ -18,6 +18,10 @@ from codex_wake.records import (
     capture_tmux_target,
     format_utc,
     iter_records,
+    make_event,
+    move_record,
+    find_record,
+    append_event,
     parse_duration,
     parse_timestamp,
     schema_summary,
@@ -31,6 +35,79 @@ from codex_wake.signals import ArmedSignal, Eq, Resume, SignalRequest, SourceAnc
 
 
 class RecordTests(unittest.TestCase):
+    def test_default_record_events_preserve_unknown_time_without_guest_fallback(self):
+        from codex_wake.measurements import TimeUnavailable
+        with patch('codex_wake.measurements.datetime_now',side_effect=TimeUnavailable('missing UTC')), \
+                patch('codex_wake.records.utc_now',side_effect=AssertionError('guest clock forbidden')):
+            event=make_event('observed','metadata only')
+            self.assertIsNone(event['at'])
+            self.assertEqual(event['time_status'],'not_observed')
+            record=dict(schema_version=1,id='fixture',events=[dict(type='original',at='2026-05-18T00:00:00Z')])
+            updated=append_event(record,'observed','metadata only',detail='retained')
+            self.assertEqual(updated['events'][-1],dict(event,detail='retained'))
+            self.assertEqual(record['events'],[dict(type='original',at='2026-05-18T00:00:00Z')])
+
+    def test_record_move_keeps_unknown_metadata_without_guest_clock_fallback(self):
+        from codex_wake.measurements import TimeUnavailable
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            record=build_record(predicate=dict(type='not_before',due_at='2026-05-20T00:00:00Z'),
+                prompt='fixture',cwd=root,target=dict(transport='app-server',thread_id='fixture',endpoint='stdio://'),
+                now=datetime(2026,5,18,tzinfo=UTC))
+            original=write_record(root,record)
+            with patch('codex_wake.measurements.datetime_now',side_effect=TimeUnavailable('unqualified')), \
+                    patch('codex_wake.records.utc_now',side_effect=AssertionError('guest clock forbidden')):
+                moved=move_record(root,find_record(root,record['id']),'failed',event_type='failed',
+                    message='authorized failure',last_error='retained reason')
+            observed=find_record(root,record['id']).record
+            self.assertEqual(moved.parent.name,'failed')
+            self.assertFalse(original.exists())
+            self.assertEqual(observed['status'],'failed')
+            self.assertIsNone(observed['updated_at'])
+            self.assertEqual(observed['events'][-1],dict(at=None,type='failed',message='authorized failure',time_status='not_observed'))
+            for key in ('created_at','id','predicate','target','prompt','next_attempt_at'):
+                self.assertEqual(observed[key],record[key])
+            self.assertEqual(observed['last_error'],'retained reason')
+
+    def test_untimed_record_events_and_moves_do_not_acquire_utc(self):
+        for schema in (6,7,8):
+            with self.subTest(schema=schema),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp)
+                record=dict(schema_version=schema,id='untimed',status='pending',events=[],
+                    created_at=None,updated_at=None,predicate=dict(type='native_intent'),
+                    target=dict(thread_id='fixture'),intent_id='original')
+                original=write_record(root,record)
+                with patch('codex_wake.measurements.datetime_now',side_effect=AssertionError('untimed record must not measure UTC')):
+                    appended=append_event(record,'observed','untimed')
+                    self.assertEqual(appended['events'][-1],dict(at=None,type='observed',message='untimed'))
+                    moved=move_record(root,find_record(root,'untimed'),'failed',event_type='failed',message='untimed')
+                self.assertEqual(moved,original)
+                observed=find_record(root,'untimed').record
+                self.assertIsNone(observed['updated_at'])
+                self.assertEqual(observed['events'][-1],dict(at=None,type='failed',message='untimed'))
+                self.assertEqual(observed['intent_id'],'original')
+
+    def test_event_and_move_metadata_keep_qualified_and_explicit_host_times(self):
+        qualified=datetime(2030,1,1,tzinfo=UTC)
+        explicit=datetime(2026,5,18,tzinfo=UTC)
+        for now,expected in ((None,'2030-01-01T00:00:00Z'),(explicit,'2026-05-18T00:00:00Z')):
+            with self.subTest(explicit=now is not None),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp)
+                record=build_record(predicate=dict(type='not_before',due_at='2030-01-01T00:00:00Z'),
+                    prompt='fixture',cwd=root,target=dict(transport='app-server',thread_id='fixture',endpoint='stdio://'),now=explicit)
+                write_record(root,record)
+                with patch('codex_wake.measurements.datetime_now',return_value=qualified,
+                           side_effect=AssertionError('trusted host time must not be sampled') if now is not None else None), \
+                        patch('codex_wake.records.utc_now',side_effect=AssertionError('guest clock forbidden')):
+                    event=make_event('observed','metadata',now)
+                    appended=append_event(record,'observed','metadata',now)
+                    moved=move_record(root,find_record(root,record['id']),'failed',event_type='observed',message='metadata',now=now)
+                self.assertEqual(event,dict(at=expected,type='observed',message='metadata'))
+                self.assertEqual(appended['events'][-1],event)
+                observed=json.loads(moved.read_text())
+                self.assertEqual(observed['updated_at'],expected)
+                self.assertEqual(observed['events'][-1],event)
+
     def test_record_creation_requires_qualified_time_unless_host_supplies_now(self):
         from codex_wake.measurements import TimeUnavailable
         with tempfile.TemporaryDirectory() as tmp, \
