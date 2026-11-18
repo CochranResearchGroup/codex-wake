@@ -33,6 +33,37 @@ class RuntimeTests(unittest.TestCase):
             with self.assertRaises(AuthError): runtime.operation(Actor('other', *tuple(actor.__dict__.values())[1:]), 'operations.result', {'operation_id': 'operation-one'}, authorize=lambda: actor)
             self.assertEqual(effect.read_text(), 'one effect')
 
+    def test_wait_rechecks_authority_after_the_deadline_observation(self):
+        from unittest.mock import patch
+        from codex_wake.controller_runtime import ControllerRuntime
+        from test_measurements import observation
+        for boundary in ('before_refresh','after_refresh'):
+            for loss in ('expiry','revocation'):
+                with self.subTest(boundary=boundary,loss=loss),tempfile.TemporaryDirectory() as directory:
+                    authority={'now':100,'revoked':False}
+                    runtime=ControllerRuntime(directory,now=lambda:authority['now'])
+                    actor=self.actor()
+                    def authorize():
+                        if authority['revoked']:raise AuthError('invalid_token')
+                        return actor
+                    request=dict(operation_id='final-authority',idempotency_key='final-authority',
+                        correlation_id='final-authority',binding='fixture',target=actor.targets[0])
+                    runtime.execute(actor,'fixture.effect',dict(_request=request),authorize=authorize,
+                        dispatch=lambda *_:dict(answer='private retained result'))
+                    calls=0
+                    def clock():
+                        nonlocal calls
+                        calls+=1
+                        trigger=2 if boundary=='before_refresh' else 3
+                        if calls>=trigger:
+                            if loss=='expiry':authority['now']=1001
+                            else:authority['revoked']=True
+                            return observation(3000,rate=0)
+                        return observation(1000+calls,rate=0)
+                    with patch('codex_wake.measurements.snapshot',side_effect=clock):
+                        with self.assertRaises(AuthError):
+                            runtime.operation(actor,'operations.wait',dict(operation_id='final-authority',timeout=1),authorize=authorize)
+
     def test_positive_wait_requires_counter_but_zero_timeout_keeps_retained_result(self):
         from unittest.mock import patch
         from codex_wake.controller_runtime import ControllerRuntime

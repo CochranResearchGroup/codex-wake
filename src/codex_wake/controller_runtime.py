@@ -472,6 +472,7 @@ class ControllerRuntime:
             return self.envelope(operation, record)
         if operation == 'operations.wait':
             record, status = self._wait(actor, record, authorize, arguments.get('timeout', 30))
+            self._owned(actor, record, authorize)
             return self.envelope(operation, record, wait=dict(status=status, ends_work=False))
         if operation == 'operations.stream':
             cursor, limit, timeout = arguments.get('cursor', 0), arguments.get('limit', 100), arguments.get('timeout', 0)

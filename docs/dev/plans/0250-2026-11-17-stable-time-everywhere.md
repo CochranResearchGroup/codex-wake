@@ -87,3 +87,13 @@ capability inference is withdrawn. Preserve original receipts and append correct
 Require selected executable acceptance, eligible parent/turn pins, bounded startup
 effects, qualified external deadline and consumed unknown attempts before spending
 the approved fresh allowance. No new Native build or working-daemon adoption.
+
+## Creation and wait batch closeout
+
+The current batch in0250-execution.json closes ST04-CREATION,
+ST04-CONTROLLER-WAITS, ST04-LOCAL-WAITS and ST04-LOCAL-ACTOR on the integration
+branch. One review from5d291917 to frozenf0556ea0 accepted one Spec P1 boundary
+finding; one bounded TDD pass adds final wait authorization before publication.
+See docs/dev/evidence/issue0695/st04-current-batch-review.md. ST04-COLLECTOR was
+validated in the preceding batch. GlobalST04 and #695 remain OPEN; this closeout
+does not establish full Python, installed runtime, activation or live Grok proof.
