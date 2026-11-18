@@ -546,7 +546,7 @@
     },
     "ST04-ACK-WAIT": {
       "owner": "root",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -557,11 +557,14 @@
         "tests/test_injector.py"
       ],
       "acceptance": "Positive acknowledgement wait retains one qualified counter deadline; zero wait remains untimed inspection. Clock loss after possible paste holds unknown outcome without replay; original retry semantics on qualified timeout retained.",
-      "non_goals": "No fullsuite, reviewrepeat, build, deployment, provider, daemon or memory effects."
+      "non_goals": "No fullsuite, reviewrepeat, build, deployment, provider, daemon or memory effects.",
+      "integration_sha": "d814049c",
+      "validation": "Integrated test_injector test_monitor test_measurements:49 PASS Python3.11/3.12; Ruff F821/F822/F823, policy wiring, diff PASS.",
+      "tracker_resolution": "closed_repo_local_after_validated_integration"
     },
     "ST04-MONITOR": {
       "owner": "st04_monitor_time",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -572,20 +575,26 @@
         "tests/test_monitor.py"
       ],
       "acceptance": "Monitor timestamps and freshness use conservative qualified UTC bounds or explicit unavailable metadata; explicit now seam retained.",
-      "non_goals": "No fullsuite, reviewrepeat, build, deployment, provider, daemon or memory effects."
+      "non_goals": "No fullsuite, reviewrepeat, build, deployment, provider, daemon or memory effects.",
+      "integration_sha": "4c78045f",
+      "validation": "Integrated test_injector test_monitor test_measurements:49 PASS Python3.11/3.12; Ruff F821/F822/F823, policy wiring, diff PASS.",
+      "tracker_resolution": "closed_repo_local_after_validated_integration",
+      "worker": "/root/st04_monitor_time",
+      "worker_sha": "aedf1c10011e7b186e4400797fdaff6966196802",
+      "worker_branch": "fix/stable-time-monitor-0250"
     }
   },
   "review": "Previous single broadreview retained; no repeat",
   "working_effects": "none",
-  "live_grok_renewal": "Approvedunused; allprovider/refreshcounts0, durationnotstarted. Existingthread/sampleadapter prepared andselectedbinaryloopbackqualified; liveparentgate GR01-PARENT-EVIDENCE remains. No additional permission requested; approvalretained.",
+  "live_grok_renewal": "Original approved window expired; fresh sample uncertain. GR01-LIVE-WINDOW owns required renewal; parent evidence resolved. No live effects in this batch.",
   "integration_validation_attempt": {
     "source": "1d140f6a",
     "initial": "115selected311/103selected312; eachfailedonlyonewrongtestmodule name test_work_acceptance_commands; allactualtests114/102passed",
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-18T20:01:19.839099+00:00",
-  "worker_cleanup": "Previous completed worker trees removed after exact clean custody. Collector active isolated tree; sample worker private artifacts/read-only Native tree. Root retains integration checkout for openST04/#695.",
+  "updated_at": "2026-11-18T20:05:12.906549+00:00",
+  "worker_cleanup": "Previous completed workers removed with clean exact custody; monitor worker pending same closeout cleanup. Root retains integration for remaining ST04/#695.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
     "source": "53cb11bd",
@@ -606,8 +615,11 @@
       "ST04-ACK-WAIT",
       "ST04-MONITOR"
     ],
-    "state": "running",
-    "review": "Retain previous review; no broad review repeat."
+    "state": "closed_repo_local",
+    "review": "Retain previous review; no broad review repeat.",
+    "implementation_tip": "4c78045f",
+    "evidence": "docs/dev/evidence/issue0695/st04-ack-monitor-validation.json",
+    "validation": "49 focused PASS each Python3.11/3.12; static PASS"
   },
   "completed_batches": [
     {

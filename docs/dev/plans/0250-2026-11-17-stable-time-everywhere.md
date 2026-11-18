@@ -117,3 +117,17 @@ docs/dev/evidence. GlobalST04/fullPython/runtime/activation remain open.
 The stale Grok parent lookup is resolved by the retained takeover receipt; the
 current live gate is the expired allowance and uncertain sample, not a missing
 parent. No new live work is authorized by this source continuation.
+
+## Acknowledgement wait and monitor batch
+
+ST04-ACK-WAIT and ST04-MONITOR are validated/closed repo-local. A positive
+acknowledgement wait uses one retained qualified counter deadline, acquired before
+paste, and rechecks after receipt observation. Missing time before paste holds
+without an attempt; loss after possible paste retains an unknown outcome and
+prohibits replay while allowing later receipt reconciliation. Zero wait stays an
+untimed inspection. Monitor metadata uses qualified lower UTC or null/not_observed;
+freshness requires conservative qualified bounds. Integrated49 focused checks
+PASS on Python3.11/3.12. See issue0695/st04-ack-monitor-validation.json.
+Global ST04 and #695 remain open; legacy transport metadata/final-send admission
+and signal-v2 terminal timestamps still need separate adoption. No broad review,
+full suite, Native build, live provider effects or deployment occurred.
