@@ -18,13 +18,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path, required=True)
     args = parser.parse_args()
-    held = dict(contract_version=1, state='held', reason='stable_time_unavailable')
+    held = dict(contract_version=1, state='held', reason='stable_time_client_configuration_invalid')
     if not args.config.is_absolute():
         print(json.dumps(held))
         return 0
     # A required nonempty override prevents snapshot's optional NTP fallback.
     os.environ['CODEX_WAKE_STABLE_TIME_CONFIG'] = str(args.config)
     value = snapshot()
+    reason = value.get('reason', '')
+    held['reason'] = reason if reason.startswith('stable_time_client_') or reason in (
+        'stable_time_configuration_required', 'stable_time_response_invalid') else 'stable_time_utc_unqualified'
     utc, counter = value.get('utc'), value.get('counter')
     valid_for_ns = value.get('valid_for_ns')
     if (not isinstance(utc, dict) or utc.get('status') != 'network'

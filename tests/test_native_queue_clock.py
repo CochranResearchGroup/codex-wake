@@ -39,5 +39,5 @@ class NativeQueueClockTests(unittest.TestCase):
                 env=dict(os.environ, PYTHONPATH='src'))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(json.loads(result.stdout), {
-            'contract_version': 1, 'state': 'held', 'reason': 'stable_time_unavailable'})
+            'contract_version': 1, 'state': 'held', 'reason': 'stable_time_client_configuration_invalid'})
         self.assertEqual(result.stderr, '')

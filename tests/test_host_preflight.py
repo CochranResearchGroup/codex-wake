@@ -74,14 +74,16 @@ class HostPreflightTests(unittest.TestCase):
             def fixture_clock():
                 value=host_snapshot()
                 return dict(value,utc=dict(status='network',lower=NOW,upper=NOW+1))
-            with helper.controller(root) as controller, patch('codex_wake.lifecycle_budget.trusted_upper', return_value=NOW), patch('codex_wake.native_clock.snapshot',side_effect=fixture_clock):
+            with helper.controller(root, interval=.05) as controller, patch('codex_wake.lifecycle_budget.trusted_upper', return_value=NOW), patch('codex_wake.native_clock.snapshot',side_effect=fixture_clock):
                 enroll(root, policy, THREAD, 100, 120)
                 poll(root)
-                from codex_wake.measurements import deadline as qualified_deadline
-                deadline = qualified_deadline(6)
+                # Test readiness is an ordinary wait; real engagement checks
+                # still validate the resident controller's qualified evidence.
+                deadline = time.monotonic() + 6
                 while not show(root, policy, THREAD)['engagement']['engaged']:
                     self.assertIsNone(controller.poll())
-                    self.assertFalse(deadline.expired(), 'resident first poll did not qualify')
+                    self.assertLess(time.monotonic(), deadline,
+                        'resident first poll did not qualify: ' + json.dumps(show(root, policy, THREAD)['engagement']))
                     time.sleep(.02)
                 for event in list_notices(root, THREAD):
                     present_notice(root, event['event_id'])
