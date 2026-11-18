@@ -17,7 +17,6 @@ from .grok_acp import ACPRefusal
 from .local_session_events import TurnEvents, MAX_EVENT_BYTES
 from .controller_runtime import encoded
 from .process import process_identity
-from . import measurements
 
 
 def launch(root, identifier):
@@ -68,12 +67,13 @@ def collect(root, identifier):
         store.update(identifier, status='connecting', pid=os.getpid(), process=process_identity(os.getpid()),
                      provider='grok', unsupported_event_kinds=[])
         try:
-            deadline = measurements.Deadline(10)
+            # Protective custody handoff wait; actor and provider guards own authorization expiry.
+            deadline = time.monotonic() + 10
             while True:
-                if deadline.remaining() <= 0:
+                if time.monotonic() >= deadline:
                     raise RuntimeError('original admission did not publish collector custody')
                 record = runtime._load(identifier)
-                remaining = deadline.remaining()
+                remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     raise RuntimeError('original admission did not publish collector custody')
                 if record['phase'] == 'waiting':
@@ -95,7 +95,7 @@ def collect(root, identifier):
                 store.update(identifier, status='running')
             owner = ControllerGrok(root, on_update=update)
             selected, guard = local._connection(row['profile'], target)
-            if deadline.remaining() <= 0:
+            if time.monotonic() >= deadline:
                 raise RuntimeError('original admission collector custody deadline elapsed')
             with owner._connection(selected, guard) as connection:
                 owner._negotiation(connection, selected)

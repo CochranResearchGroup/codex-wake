@@ -1,4 +1,4 @@
-"""Qualified collector custody deadlines gate the public ACP collector."""
+"""Protective custody waits retain ownership without an extra reliable-clock gate."""
 import hashlib
 import json
 import os
@@ -12,7 +12,6 @@ from codex_wake.daemon_commands import local_operator
 from codex_wake.local_grok_events import collect
 from codex_wake.local_session_events import TurnEvents
 from codex_wake.process import process_identity
-from test_measurements import observation
 
 
 class GrokEventWaitTests(unittest.TestCase):
@@ -46,13 +45,12 @@ class GrokEventWaitTests(unittest.TestCase):
                 handle=dict(kind='grok_acp_collecting', native_request_id=identifier)))
         return runtime, actor, identifier
 
-    def test_expired_custody_deadline_holds_even_when_waiting_is_already_published(self):
+    def test_expired_protective_wait_holds_even_when_waiting_is_already_published(self):
         with tempfile.TemporaryDirectory() as directory, patch(
                 'codex_wake.measurements.utc_bounds', return_value=(1000, 1000.001)):
             root = Path(directory)
             runtime, actor, identifier = self.seed(root)
-            with patch('codex_wake.measurements.snapshot', side_effect=[
-                    observation(1000), observation(1001), observation(12000)]), patch(
+            with patch('time.monotonic', side_effect=[1, 1, 12]), patch(
                     'codex_wake.grok_acp.GrokACPConnection', side_effect=AssertionError('ACP must not open')) as connection:
                 collect(root, identifier)
             self.assertEqual(connection.call_count, 0)
@@ -60,26 +58,6 @@ class GrokEventWaitTests(unittest.TestCase):
                 authorize=lambda: actor)['result']['operation']
             self.assertEqual(result['phase'], 'uncertain')
             self.assertEqual(result['execution'], 'unknown')
-            self.assertEqual(TurnEvents(root).state(identifier)['status'], 'uncertain')
-
-    def test_missing_or_lost_counter_holds_original_intent_without_reopening_collector(self):
-        from codex_wake import measurements
-        for samples in ([measurements.TimeUnavailable('missing')],
-                        [observation(1000), observation(1001), measurements.TimeUnavailable('lost')]):
-            with self.subTest(samples=len(samples)), tempfile.TemporaryDirectory() as directory, patch(
-                    'codex_wake.measurements.utc_bounds', return_value=(1000, 1000.001)):
-                root = Path(directory)
-                runtime, actor, identifier = self.seed(root)
-                with patch('codex_wake.measurements.snapshot', side_effect=samples), patch(
-                        'codex_wake.grok_acp.GrokACPConnection', side_effect=AssertionError('ACP must not open')) as connection:
-                    collect(root, identifier)
-                    collect(root, identifier)
-                self.assertEqual(connection.call_count, 0)
-                result = runtime.operation(actor, 'operations.result', dict(operation_id=identifier),
-                    authorize=lambda: actor)['result']['operation']
-                self.assertEqual(result['operation_id'], identifier)
-                self.assertEqual(result['phase'], 'uncertain')
-                self.assertFalse(TurnEvents(root).state(identifier).get('transmitted', False))
 
     def connection(self, calls):
         class Connection:
@@ -105,30 +83,14 @@ class GrokEventWaitTests(unittest.TestCase):
                 raise AssertionError(method)
         return Connection
 
-    def test_clock_loss_after_discovery_holds_before_prompt_connection(self):
+    def test_counter_client_failure_does_not_gate_authorized_original_prompt(self):
         from codex_wake import measurements
         with tempfile.TemporaryDirectory() as directory, patch(
                 'codex_wake.measurements.utc_bounds', return_value=(1000, 1000.001)):
             root = Path(directory)
             runtime, actor, identifier = self.seed(root)
             calls = []
-            with patch('codex_wake.measurements.snapshot', side_effect=[observation(1000),
-                    observation(1001), observation(1002), measurements.TimeUnavailable('lost')]), patch(
-                    'codex_wake.grok_acp.GrokACPConnection', self.connection(calls)):
-                collect(root, identifier)
-            self.assertEqual(calls, ['open', 'initialize', 'session/list'])
-            result = runtime.operation(actor, 'operations.result', dict(operation_id=identifier),
-                authorize=lambda: actor)['result']['operation']
-            self.assertEqual(result['phase'], 'uncertain')
-            self.assertFalse(TurnEvents(root).state(identifier).get('transmitted', False))
-
-    def test_qualified_custody_wait_preserves_single_original_prompt(self):
-        with tempfile.TemporaryDirectory() as directory, patch(
-                'codex_wake.measurements.utc_bounds', return_value=(1000, 1000.001)):
-            root = Path(directory)
-            runtime, actor, identifier = self.seed(root)
-            calls = []
-            with patch('codex_wake.measurements.snapshot', return_value=observation(1000)), patch(
+            with patch('codex_wake.measurements.snapshot', side_effect=measurements.TimeUnavailable('counter helper failed')), patch(
                     'codex_wake.grok_acp.GrokACPConnection', self.connection(calls)):
                 collect(root, identifier)
                 collect(root, identifier)
@@ -139,3 +101,17 @@ class GrokEventWaitTests(unittest.TestCase):
             self.assertEqual(result['execution'], 'completed')
             self.assertEqual(result['result']['native_request_id'], identifier)
             self.assertEqual(TurnEvents(root).state(identifier)['status'], 'completed')
+
+    def test_reliable_actor_time_failure_still_prevents_provider_discovery(self):
+        from codex_wake import measurements
+        from codex_wake.controller_auth import AuthError
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with patch('codex_wake.measurements.utc_bounds', return_value=(1000, 1000.001)):
+                runtime, actor, identifier = self.seed(root)
+            with patch('codex_wake.measurements.utc_bounds', side_effect=measurements.TimeUnavailable('UTC unavailable')), patch(
+                    'codex_wake.grok_acp.GrokACPConnection', side_effect=AssertionError('ACP must not open')) as connection:
+                with self.assertRaises(AuthError):
+                    collect(root, identifier)
+            self.assertEqual(connection.call_count, 0)
+            self.assertEqual(TurnEvents(root).state(identifier)['status'], 'unavailable')
