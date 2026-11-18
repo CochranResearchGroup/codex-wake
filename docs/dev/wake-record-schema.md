@@ -594,3 +594,18 @@ This additive fence requires the current reader: before downgrade, keep held
 firing records out of an older scheduler that does not enforce this field.
 Monitor health `checked_at` can be null with `time_status: not_observed`; such
 health is never fresh. No wake record schema revision is introduced.
+
+### Signal cancellation without an observed timestamp
+
+Schema2 cancellation remains available without qualified UTC. The record retains
+its last observed nonempty `updated_at` and sets `updated_at_time_status` to `not_observed`; this retained value is not evidence of cancellation time. The
+cancelled event has null `at` and `time_status: not_observed`. The decoder and
+identity remain unchanged. A qualified cancellation records its qualified time.
+
+The existing journal schema uses empty text for the unobserved retirement and
+pin-release timestamps of this untimed cancellation. Empty text is not UTC or
+retention evidence; NULL `released_at` still means the pin is unreleased. Arm
+tombstones, terminal lifecycle status and released-pin presence fence replay.
+Only cancellation supports untimed retirement: other terminal statuses return
+`TERMINAL_TIME_UNQUALIFIED` when no timestamp is supplied. Archival and cleanup
+keep their existing qualified-time and retention requirements.

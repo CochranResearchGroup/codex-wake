@@ -131,3 +131,22 @@ PASS on Python3.11/3.12. See issue0695/st04-ack-monitor-validation.json.
 Global ST04 and #695 remain open; legacy transport metadata/final-send admission
 and signal-v2 terminal timestamps still need separate adoption. No broad review,
 full suite, Native build, live provider effects or deployment occurred.
+
+## Signal cancellation and input/output custody packet
+
+ST04-SIGNAL-CANCEL preserves readable schema2 records and durable terminal fences
+when stopping without UTC. ST04-INJECTOR-METADATA requires qualified default UTC
+before legacy transport work and holds Native4 expiry uncertainty. ST04-HOST-STDIN
+retains a qualified frame deadline through input acceptance. ST04-OUTPUT-FRAMES
+retains a positive wait across generator suspension and preserves untimed
+inspection/established terminal-page drainage. ST04-GROK-EVENT-WAIT retains its
+original custody wait and refuses an unqualified final connection without replay.
+No live Grok allowance is renewed. Actor acquisition remains its separate
+pre-custody UTC gate; unvalidated targets are not mutated for diagnostics.
+
+Fresh source inventory at ffa2ac25 found305 direct raw measurements in83
+production files,29 callable bindings and16 legacy wrapper calls. This is a
+static candidate inventory before the packet, not current reachability or proof
+of a completed migration. Tabs/terminal contracts are the largest coupled debt;
+OpenClaw remains parked. Prior broad review is preserved without repetition.
+Final packet evidence owns exact checks, retained failures and closeout states.

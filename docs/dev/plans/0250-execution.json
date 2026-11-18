@@ -599,11 +599,13 @@
       "acceptance": "Signal cancellation uses qualified UTC when available; missing time still stops with retained last-observed updated_at plus explicit unknown marker/event, and untimed journal terminal fence. Keep schema2 valid, identity/pins/republication fences intact; no retention deadline fabricated.",
       "non_goals": "No fullsuite/build/reviewrepeat/provider/service/credentials/memory/merge/deploy effects.",
       "integration_sha": "ffa2ac25",
-      "validation": "35 records/signal-record checks PASS311/312 before final untimed-expiry guard; guard RED/GREEN311 and2 signal final controls PASS312. Combined integration gate pending."
+      "validation": "Root integrated85 terminal/input cases PASS each311/312; untimed-expiry RED/GREEN preserved.",
+      "tracker_resolution": "closed_repo_local_after_validated_integration",
+      "evidence": "docs/dev/evidence/issue0695/st04-terminal-stream-validation.json"
     },
     "ST04-INJECTOR-METADATA": {
       "owner": "st04_injector_metadata",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -611,14 +613,22 @@
       "base": "7c09353a89eb189380dd0b04b17dac70df22060a",
       "paths": [
         "src/codex_wake/injector.py",
-        "tests/test_injector.py"
+        "tests/test_injector.py",
+        "tests/test_native_delivery.py"
       ],
       "acceptance": "Default injector UTC metadata qualified; absent authority holds before attempts/transport; explicit now/network ownership and untimed held-ack reconciliation retained.",
-      "non_goals": "No fullsuite/build/reviewrepeat/provider/service/credentials/memory/merge/deploy effects."
+      "non_goals": "No fullsuite/build/reviewrepeat/provider/service/credentials/memory/merge/deploy effects.",
+      "integration_sha": "3dc12f2b",
+      "tracker_resolution": "closed_repo_local_after_validated_integration",
+      "evidence": "docs/dev/evidence/issue0695/st04-terminal-stream-validation.json",
+      "worker": "/root/st04_injector_metadata",
+      "worker_sha": "fa95eddacebeee0faa9491a3029dae659474c749",
+      "worker_branch": "fix/stable-time-injector-metadata-0250",
+      "validation": "Worker56 PASS311/312 after retained deterministic fixture corrections; root integrated85 plus separate10 network controls PASS each311/312."
     },
     "ST04-HOST-STDIN": {
       "owner": "root",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -629,11 +639,15 @@
         "tests/test_host_commands.py"
       ],
       "acceptance": "Five-second stdin frame read retains original qualified deadline across select/read; absent or lost authority refuses input acceptance, including after EOF, no guest fallback. Existing byte/object limits unchanged.",
-      "non_goals": "No live/build/fullsuite/reviewrepeat/daemon/credential/memory effects."
+      "non_goals": "No live/build/fullsuite/reviewrepeat/daemon/credential/memory effects.",
+      "integration_sha": "afad1968",
+      "tracker_resolution": "closed_repo_local_after_validated_integration",
+      "evidence": "docs/dev/evidence/issue0695/st04-terminal-stream-validation.json",
+      "validation": "Private pipe public RED/GREEN; integrated85 and final12 causal cases PASS each311/312."
     },
     "ST04-OUTPUT-FRAMES": {
       "owner": "st04_output_frames",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -644,21 +658,47 @@
         "tests/test_local_output_modes.py"
       ],
       "acceptance": "Output streaming retains original qualified wait across pages and validates before/after observation/publication; zero wait remains untimed, cursor drain and ownership/no cancel/no replay preserved.",
-      "non_goals": "No live/build/fullsuite/reviewrepeat/daemon/credential/memory effects."
+      "non_goals": "No live/build/fullsuite/reviewrepeat/daemon/credential/memory effects.",
+      "integration_sha": "1054d949",
+      "tracker_resolution": "closed_repo_local_after_validated_integration",
+      "evidence": "docs/dev/evidence/issue0695/st04-terminal-stream-validation.json",
+      "worker": "/root/st04_output_frames",
+      "worker_sha": "a8765203cccdd976d04dcb1dd19ceab4e41d9f03",
+      "worker_branch": "fix/stable-time-output-frames-0250",
+      "validation": "Worker7 module PASS311/312; final12 integrated causal selection PASS311/312 after readiness correction. Earlier joint311 failures retained; host control exact retry PASS311 and original joint11 PASS312. First empty-output failure cause unproven, not relabeled clean first-run."
     },
     "ST04-GROK-EVENT-WAIT": {
-      "owner": "root",
-      "state": "pending",
+      "owner": "st04_injector_metadata",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
       ],
-      "base": "ffa2ac255fcd32815cfbf3ef991bbce15043f05e",
+      "base": "afad1968",
       "paths": [
-        "src/codex_wake/local_grok_events.py"
+        "src/codex_wake/local_grok_events.py",
+        "tests/test_local_grok_events.py"
       ],
       "acceptance": "Collector dispatch-custody wait retains qualified deadline; absent/lost time holds before provider connection and preserves uncertain/no-replay journal state. Provider-free only.",
-      "non_goals": "No live/build/fullsuite/reviewrepeat/daemon/credential/memory effects."
+      "non_goals": "No live/build/fullsuite/reviewrepeat/daemon/credential/memory effects.",
+      "integration_sha": "88213eb4",
+      "tracker_resolution": "closed_repo_local_after_validated_integration",
+      "evidence": "docs/dev/evidence/issue0695/st04-terminal-stream-validation.json",
+      "worker": "/root/st04_injector_metadata",
+      "worker_sha": "031aa7e8744a7d0f428029865840726ed2da010f",
+      "worker_branch": "fix/stable-time-grok-event-wait-0250",
+      "validation": "4 public worker checks PASS311/312; root7 combined and final12 combined causal checks PASS311/312; no provider effects."
+    },
+    "ST04-REMAINING-INVENTORY": {
+      "owner": "st04_remaining_inventory",
+      "worker": "/root/st04_remaining_inventory",
+      "state": "validated",
+      "dependencies": [
+        "ST02"
+      ],
+      "source_tip": "ffa2ac255fcd32815cfbf3ef991bbce15043f05e",
+      "evidence": "Private st04-remaining-inventory.json; curated summary in packet evidence",
+      "scope": "AST production candidates only; no runtime reachability/all-alias claim; before current packet changes."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -670,8 +710,8 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-18T20:28:47.580801+00:00",
-  "worker_cleanup": "Completed monitor worker removed after exact clean custody; current injector worker isolated, root retains open integration lane.",
+  "updated_at": "2026-11-18T20:41:27.677977+00:00",
+  "worker_cleanup": "Exact clean/remote/file custody and removal outcomes are recorded in private st04-terminal-stream-closeout.json and worker custody receipts. Branches retained. Root integration retained for remaining ST04/#695; frozen Native/package5 retained for qualification custody, reviewed at next qualification gate.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
     "source": "53cb11bd",
@@ -695,8 +735,11 @@
       "ST04-OUTPUT-FRAMES",
       "ST04-GROK-EVENT-WAIT"
     ],
-    "state": "running",
-    "review": "Retain previous review; no broad repeat."
+    "state": "closed_repo_local",
+    "review": "Previous broad review/TDD pass retained; no repeat.",
+    "implementation_tip": "1054d949",
+    "evidence": "docs/dev/evidence/issue0695/st04-terminal-stream-validation.json",
+    "validation": "85 terminal/input +10 network each311/312; final12 stream/custody/input each311/312; retained first failures and explicit flake disposition."
   },
   "completed_batches": [
     {
@@ -762,5 +805,14 @@
       "evidence": "docs/dev/evidence/issue0695/st04-ack-monitor-validation.json",
       "validation": "49 focused PASS each Python3.11/3.12; static PASS"
     }
-  ]
+  ],
+  "remaining_inventory": {
+    "as_of": "ffa2ac25",
+    "direct_raw_calls": 305,
+    "direct_files": 83,
+    "callable_bindings": 29,
+    "legacy_wrapper_calls": 16,
+    "limit": "Static pre-packet candidates only; current seven direct-call removals are not a new complete inventory. OpenClaw parked.",
+    "next_scope": "Freeze coupled tabs/terminal numeric deadline contract before coordinated adoption; remaining callable defaults/shared utc_now require owner-specific qualification."
+  }
 }

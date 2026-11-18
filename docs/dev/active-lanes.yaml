@@ -3,17 +3,17 @@ work_item_tracking: required
 lanes:
   - id: native-expiry-695
     owner: root / ecochran76
-    objective: Enforce original absolute expiry at native queue admission
+    objective: Enforce native queue expiry and qualified Stable Time migration
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/695]
-    plan: docs/dev/plans/0248-2026-11-15-native-queue-expiry.md
+    plan: docs/dev/plans/0250-2026-11-17-stable-time-everywhere.md
     branch: feat/native-expiry-695
     target: origin/main
     plan_state: OPEN
     custody_state: ACTIVE_WORKTREE
     dependencies: []
     overlaps: []
-    updated_at: 2026-11-16
-    disposition: Native075 package4 retained; installed expiry, stopped account rollback and private owner normal-exit recovery passed. Root695-QUAL and pending_cancel_695 adapter validated/DONE; adapter97f6dca7 integrated89c639f9 and isolated installed proof passes. Timing695-TIMING blocked on transport-send versus remote-start semantics; no active UID1017 job. WIP ceiling3; production stays refused.
+    updated_at: 2026-11-18
+    disposition: Plan0250 five-ticket terminal/input/output packet source-qualified; curated issue0695/st04-terminal-stream-validation.json retains first failures and focused checks. GlobalST04/fullPython/runtime/activation open. FrozenNative9af/package5 retained for qualification; working daemon unchanged. WIP3; no live Grok renewal or premature695 closure.
 
 
   - id: monitor-clock-702
