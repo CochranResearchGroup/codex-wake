@@ -3,7 +3,6 @@ import json
 
 from .cli_output import emit
 import os
-import time
 import hashlib
 from pathlib import Path
 
@@ -18,8 +17,13 @@ def owner_from_root(root):
 
 
 def local_operator(target, capabilities=('control', 'observe')):
+    from . import measurements
+    try:
+        lower, _ = measurements.utc_bounds()
+    except measurements.TimeUnavailable:
+        raise AuthError('qualified_time_unavailable') from None
     return Actor('uid:' + str(os.getuid()), 'owner', 'local-cli', 'local-cli',
-                 'local://uid/' + str(os.getuid()), 'wake:controller', frozenset(capabilities), [target], time.time() + 120)
+                 'local://uid/' + str(os.getuid()), 'wake:controller', frozenset(capabilities), [target], lower + 120)
 
 
 def execute(root, operation, arguments, *, actor=None, authorize=None, owner=None):

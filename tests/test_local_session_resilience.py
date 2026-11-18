@@ -108,7 +108,7 @@ class SessionResilienceTests(unittest.TestCase):
             state['owner'].runtime.now=lambda:authority_now
             result=workers.submit(state['owner'].result,identifier,3)
             self.assertTrue(state['observation'].wait(5))
-            with patch('codex_wake.daemon_commands._qualified_upper',return_value=authority_now), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('lost during owned read')):
+            with patch('codex_wake.measurements.utc_bounds',return_value=(authority_now,authority_now)), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('lost during owned read')):
                 state['release_observation'].set()
                 with self.assertRaisesRegex(TimeUnavailable,'lost during owned read'):
                     result.result(5)
@@ -123,7 +123,7 @@ class SessionResilienceTests(unittest.TestCase):
             record=submit(state,'output-wait-clock');identifier=record['operation_id']
             authority_now=measurements.utc_time()
             state['owner'].runtime.now=lambda:authority_now
-            with patch('codex_wake.daemon_commands._qualified_upper',return_value=authority_now), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('counter unavailable')):
+            with patch('codex_wake.measurements.utc_bounds',return_value=(authority_now,authority_now)), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('counter unavailable')):
                 with self.assertRaisesRegex(TimeUnavailable,'counter unavailable'):
                     state['owner'].output(identifier,mode='transcript',timeout=1)
                 cached=state['owner'].output(identifier,mode='transcript',timeout=0)
@@ -138,7 +138,7 @@ class SessionResilienceTests(unittest.TestCase):
             from codex_wake import measurements
             authority_now=measurements.utc_time()
             state['owner'].runtime.now=lambda:authority_now
-            with patch('codex_wake.daemon_commands._qualified_upper',return_value=authority_now), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('counter unavailable')):
+            with patch('codex_wake.measurements.utc_bounds',return_value=(authority_now,authority_now)), patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('counter unavailable')):
                 with self.assertRaisesRegex(TimeUnavailable,'counter unavailable'):
                     state['owner'].result(identifier,timeout=1)
                 cached=state['owner'].result(identifier,timeout=0)['result']['operation']

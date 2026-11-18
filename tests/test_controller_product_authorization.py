@@ -18,6 +18,17 @@ class ProductAuthorizationTests(unittest.TestCase):
         clock=patch('codex_wake.measurements.utc_bounds',return_value=(UTC,UTC+1))
         clock.start();self.addCleanup(clock.stop)
 
+    def test_local_actor_issuance_uses_qualified_lower_and_holds_without_utc(self):
+        from codex_wake.daemon_commands import local_operator
+        from codex_wake.measurements import TimeUnavailable
+        target=dict(host='fixture',environment='test')
+        actor=local_operator(target)
+        self.assertEqual(actor.expires_at,UTC+120)
+        self.assertEqual(actor.targets,[target])
+        with patch('codex_wake.measurements.utc_bounds',side_effect=TimeUnavailable('missing')):
+            with self.assertRaises(AuthError) as held:local_operator(target)
+            self.assertEqual(held.exception.code,'qualified_time_unavailable')
+
     def test_remote_actor_clock_loss_and_ambiguous_expiry_refuse_before_private_io(self):
         from codex_wake.measurements import TimeUnavailable
         from codex_wake.profile_operations import execute as profile_execute
