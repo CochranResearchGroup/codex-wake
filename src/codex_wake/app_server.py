@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import math
+import time
 import os
 import select
 import shutil
@@ -23,18 +25,15 @@ APP_SERVER_CODEX_ENV = "CODEX_WAKE_CODEX_CMD"
 
 
 def _deadline(seconds):
-    try:
-        return measurements.deadline(seconds)
-    except measurements.TimeUnavailable as error:
-        raise WakeError('app-server qualified Stable Time unavailable') from error
+    if type(seconds) not in (int, float) or not math.isfinite(seconds) or seconds < 0:
+        raise WakeError('invalid app-server timeout')
+    # Advisory resource budget only; dispatch time and expiry retain their owners.
+    return time.monotonic() + seconds
 
 
 def _remaining(deadline):
-    try:
-        remaining=deadline.remaining()
-    except measurements.TimeUnavailable as error:
-        raise WakeError('app-server qualified Stable Time unavailable') from error
-    if remaining<=0:
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
         raise WakeError('app-server timed out while waiting for response')
     return remaining
 
@@ -158,14 +157,14 @@ def private_daemon_socket(socket_path: str) -> Path:
     return path
 
 
-def persistent_app_server_socket(codex_cmd: str | None = None) -> Path:
+def persistent_app_server_socket(codex_cmd: str | None = None, *, _budget=None) -> Path:
     """Discover an existing private daemon; never start or take ownership of it."""
-    deadline=_deadline(5)
+    deadline=_deadline(5) if _budget is None else _budget
     codex = resolve_codex_cmd(codex_cmd, required=True)
     try:
         result = subprocess.run(
             [codex, "app-server", "daemon", "version"], capture_output=True,
-            text=True, timeout=_remaining(deadline), check=False,
+            text=True, timeout=min(5.0, _remaining(deadline)), check=False,
         )
         _remaining(deadline)
         if result.returncode:
@@ -482,7 +481,7 @@ class UnixWebSocketAppServerClient(StdioAppServerClient):
         self.timeout_seconds = timeout_seconds
         self._next_id = 1
         _remaining(startup)
-        socket_path = persistent_app_server_socket(codex_cmd)
+        socket_path = persistent_app_server_socket(codex_cmd, _budget=startup)
         try:
             self._connection_context = unix_connect(
                 socket_path, uri="ws://localhost/", open_timeout=min(5.0, _remaining(startup)),
@@ -504,8 +503,7 @@ class UnixWebSocketAppServerClient(StdioAppServerClient):
         self._next_id += 1
         deadline = _deadline(self.timeout_seconds)
         # recv's timeout doesn't bound sendall. Interrupt only our socket at the
-        # blocking transport fuse, never elapsed evidence. Qualified counter
-        # checks below own acceptance, including after a stalled send.
+        # protective budget, including time spent in a stalled send.
         def expire() -> None:
             try:
                 self.connection.socket.shutdown(socket.SHUT_RDWR)
