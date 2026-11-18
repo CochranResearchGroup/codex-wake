@@ -270,7 +270,9 @@ for line in sys.stdin:
                 ticks=iter(range(1000,1000000))
                 try:
                     with patch('codex_wake.measurements.snapshot',side_effect=lambda:observation(next(ticks))), patch('codex_wake.app_server.persistent_app_server_socket',return_value=path):
-                        client=UnixWebSocketAppServerClient(timeout_seconds=.08)
+                        # Peer setup is independent of the deliberately short RPC budget.
+                        client=UnixWebSocketAppServerClient(timeout_seconds=2)
+                        client.timeout_seconds=.08
                         with self.assertRaises(WakeError):client.initialize()
                 finally:
                     if client is not None:client.close()
