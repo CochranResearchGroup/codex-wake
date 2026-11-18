@@ -99,6 +99,57 @@ def submit(state,key='intent'):
 
 
 class SessionResilienceTests(unittest.TestCase):
+    def test_collector_loses_clock_on_ack_keeps_unknown_without_prompt_replay(self):
+        from codex_wake import local_session_events as events
+        from codex_wake.measurements import TimeUnavailable
+        for loss_at in ('ack','scope'):
+            with peer() as state, contextlib.ExitStack() as clock:
+                original=events.unix_connect
+                @contextlib.contextmanager
+                def connection(*args,**kwargs):
+                    with original(*args,**kwargs) as ws:
+                        class Wrapped:
+                            def __getattr__(self,name):return getattr(ws,name)
+                            def recv(self,**options):
+                                raw=ws.recv(**options)
+                                if loss_at=='ack' and json.loads(raw).get('id')==5:
+                                    clock.enter_context(patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('lost at acknowledgement')))
+                                return raw
+                        yield Wrapped()
+                publish=events.TurnEvents.publish_scope
+                def publish_then_lose(store,*args):
+                    publish(store,*args)
+                    if loss_at=='scope':clock.enter_context(patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('lost after scope publication')))
+                def run(root,identifier):
+                    with patch.object(events,'unix_connect',connection), patch.object(events.TurnEvents,'publish_scope',publish_then_lose):events.collect(root,identifier)
+                    retained=events.TurnEvents(root).runtime._load(identifier)
+                    clock.close()
+                    if retained['phase']=='uncertain':
+                        from codex_wake.managed_inventory import InventoryError
+                        raise InventoryError('uncertain_effect','retrieve original operation')
+                    return retained.get('result')
+                with patch.object(events,'launch',side_effect=run):
+                    value=submit(state,'collector-lost-ack-clock')
+                self.assertEqual(len(state['starts']),1)
+                self.assertEqual(value['phase'],'uncertain')
+                self.assertEqual(value['reason'],'uncertain_effect')
+                self.assertEqual(TurnEvents(state['root']).state(value['operation_id'])['reason'],'stable_time_unavailable')
+                self.assertEqual('protective_scope' in TurnEvents(state['root']).state(value['operation_id']),loss_at=='scope')
+                self.assertIsNone(value.get('result'))
+                clock.close()
+                again=submit(state,'collector-lost-ack-clock')
+                self.assertEqual(again['operation_id'],value['operation_id'])
+                self.assertEqual(len(state['starts']),1)
+
+    def test_launch_without_qualified_counter_refuses_before_detached_collector(self):
+        from codex_wake.local_session_events import launch
+        from codex_wake.measurements import TimeUnavailable
+        with tempfile.TemporaryDirectory() as root, patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('unavailable')):
+            with patch('codex_wake.local_session_events.subprocess.Popen') as spawn:
+                with self.assertRaisesRegex(TimeUnavailable,'unavailable'):
+                    launch(root,'not-yet-started')
+                spawn.assert_not_called()
+
     def test_private_revocation_interrupts_qualified_owned_turn_during_total_clock_loss_once(self):
         from codex_wake.measurements import TimeUnavailable
         with peer() as state:
