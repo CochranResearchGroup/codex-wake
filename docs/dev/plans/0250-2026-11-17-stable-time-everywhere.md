@@ -177,3 +177,21 @@ static candidate inventory before the packet, not current reachability or proof
 of a completed migration. Tabs/terminal contracts are the largest coupled debt;
 OpenClaw remains parked. Prior broad review is preserved without repetition.
 Final packet evidence owns exact checks, retained failures and closeout states.
+
+## Supported service decision contract
+
+Python admission and authorization reads use fresh StableTime observations at
+`basis: service_measurement`. Bounds and counters describe that service instant,
+not client receipt or provider send. The existing epoch/frequency/rate policy
+supports elapsed comparisons between service observations without WSL clock
+extrapolation. An observation earlier than a retained local sample holds; no
+anchor is reset or silently converted. Existing persisted deadlines remain fixed.
+
+The bounded caller audit found no separate unconditional receipt-current UTC
+requirement in the reviewed Python owners. Native Plan0248 owns final transport
+send admission against the original expiry. Its handoff must retain the original
+service counter and bounds, so Native can account for elapsed handoff once.
+Python must not preadvance the same bounds and cause a second advancement there.
+Default Python clients therefore no longer need the auxiliary counter process.
+The explicit pure handoff conversion remains for compatibility, without starting
+that helper. A source change is not installed Native acceptance or deployment.

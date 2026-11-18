@@ -34,8 +34,8 @@ class StableTimeTests(unittest.TestCase):
                     contextlib.redirect_stdout(output):
                 self.assertEqual(cli.main(['time', 'inspect']), 0)
             report = json.loads(output.getvalue())
-            self.assertEqual(report['decision']['status'], 'uncertain')
-            self.assertEqual(report['decision']['reason'], 'receipt_time_bound_unqualified')
+            self.assertEqual(report['decision']['status'], 'network')
+            self.assertEqual(report['decision']['reason'], '')
             self.assertEqual(report['measurement_decision']['status'], 'network')
             self.assertEqual(report['basis'], 'service_measurement')
             self.assertFalse(report['receipt_time_bound'])
@@ -44,15 +44,15 @@ class StableTimeTests(unittest.TestCase):
             self.assertLessEqual(report['measurement_decision']['lower'], 1791590400.0)
             self.assertLess(report['measurement_decision']['upper'], 1791590400.10001)
             helper.assert_not_called()
-            # The scheduling handoff remains strict, but a broken client helper
-            # must not be reported as loss of the service's finite observation.
+            # Python selection uses the service decision instant too; an
+            # auxiliary helper cannot invalidate that authenticated observation.
             from codex_wake.stable_time import service_time_result
             with patch('codex_wake.stable_time.ssl.SSLContext'), \
                     patch('codex_wake.stable_time.urllib.request.build_opener', return_value=opener), \
                     patch('codex_wake.host_counter.read_counter', side_effect=OSError('private helper detail')):
                 decision, observed = service_time_result(config)
-            self.assertEqual(decision.status, 'uncertain')
-            self.assertEqual(decision.reason, 'stable_time_client_counter_unavailable')
+            self.assertEqual(decision.status, 'network')
+            self.assertEqual(decision.reason, '')
             self.assertEqual(observed['bound'], 'finite')
             response['measurement']['counter'] = True
             opener.open.return_value.__enter__.return_value.read.return_value = json.dumps(response).encode()

@@ -16,10 +16,16 @@ def snapshot():
         if not native_clock.configuration():
             raise TimeUnavailable('stable_time_configuration_required')
         value = native_clock.snapshot()
+        if value.get('reason') in {
+                'stable_time_configuration_required', 'stable_time_client_configuration_invalid',
+                'stable_time_client_transport_failed', 'stable_time_response_invalid'}:
+            raise TimeUnavailable(value['reason'])
         _counter(value)
         if value['reason'] == 'authenticated_utc':
             _utc(value)
         return deepcopy(value)
+    except TimeUnavailable:
+        raise
     except (OSError, ValueError, KeyError, TypeError, AttributeError, OverflowError):
         raise TimeUnavailable('stable_time_unavailable_or_unqualified') from None
 
@@ -44,11 +50,12 @@ def fresh(anchor, seconds, *, current=None):
 
 
 def utc_bounds():
+    """Bounds at a fresh service measurement, never receipt-time extrapolation."""
     return _utc(snapshot())
 
 
 def utc_time():
-    """Qualified upper UTC for metadata; decision callers must use bounds."""
+    """Service-measurement upper UTC; decision callers must use both bounds."""
     return utc_bounds()[1]
 
 

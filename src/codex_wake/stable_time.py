@@ -65,11 +65,11 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 def service_time_result(config_path, *, measurement_only=False):
-    """Read service evidence; inspection can retain its measurement instant.
+    """Read evidence at the service instant, not at client receipt.
 
-    measurement_only never claims a client-receipt bound. Strict scheduling
-    callers keep the existing explicit native handoff until their contract is
-    migrated; a service-point upper bound cannot replace that authority.
+    measurement_only remains accepted for existing inspection callers. All
+    Python consumers now use the service measurement; final Native admission
+    owns its separate original-expiry check and handoff accounting.
     """
     observation = None
     failure = 'stable_time_client_configuration_invalid'
@@ -116,18 +116,12 @@ def service_time_result(config_path, *, measurement_only=False):
             raise ValueError('invalid_service_measurement')
         at_measurement = decision_from_response(response,
             counter=int(measurement['counter']), frequency=int(measurement['frequency_hz']))
-        if measurement_only:
-            return at_measurement, observation
-        from .host_counter import read_counter
-        failure = 'stable_time_client_counter_unavailable'
-        counter, frequency = read_counter()
-        failure = 'stable_time_client_handoff_invalid'
-        return decision_from_response(response, counter=counter, frequency=frequency), observation
+        return at_measurement, observation
     except (OSError, ValueError, KeyError, TypeError, AttributeError, OverflowError, subprocess.SubprocessError):
         # Never include transport errors containing credentials or substitute guest time.
         return TimeDecision('uncertain', reason=failure), observation
 
 
 def service_time_decision(config_path):
-    """Scheduling adapter: only a validated finite interval confers authority."""
+    """Finite Python selection bounds at the service decision instant."""
     return service_time_result(config_path)[0]

@@ -188,8 +188,6 @@ def time_command(args):
         from .stable_time import service_time_result
         decision, observation = (TimeDecision('uncertain', reason='acquisition_not_requested'), None) if args.offline else service_time_result(config, measurement_only=True)
         measurement_decision = decision
-        if decision.status != 'uncertain':
-            decision = TimeDecision('uncertain', reason='receipt_time_bound_unqualified')
         report = dict(schema=1, provider='stable-time', authentication='NTS-required',
                       decision=asdict(decision), measurement_decision=asdict(measurement_decision),
                       observation=observation, purpose='installed-service-consumer',

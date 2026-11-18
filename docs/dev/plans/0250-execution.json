@@ -742,19 +742,20 @@
     },
     "R0250-OWNER-WAITS": {
       "owner": "root",
-      "state": "pending",
+      "state": "running",
       "dependencies": [
         "R0250-ORDINARY-WAITS"
       ],
-      "scope": "Remove further protective wait clock gates in local_session_operations/controller_runtime; preserve genuine actor/permission expiry checks."
+      "scope": "Remove further protective wait clock gates in local_session_operations/controller_runtime; preserve genuine actor/permission expiry checks.",
+      "worker": "/root/owner_waits_correction"
     },
     "R0250-STRICT-CLIENT": {
       "owner": "root",
-      "state": "pending",
+      "state": "running",
       "dependencies": [
         "R0250-SERVICE-CONTRACT"
       ],
-      "scope": "Migrate remaining strict client consumers to a supported service measurement contract without extra app bridge or false receipt-current upper bound. Preserve original persisted deadlines and refusal where evidence is insufficient."
+      "scope": "Default native_clock and stable_time clients consume service-point UTC/counter evidence directly; compare service-counter observations for elapsed, preserve earlier local-anchor order guards and Native final-send envelope."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -783,18 +784,13 @@
     "limits": "No provider calls or installed daemon changes. Broader migrations/fullPython/runtime/activation gates open."
   },
   "current_batch": {
-    "base": "363394fe11935749a95f5984215aca09377540f9",
+    "base": "9410932979dcf540e5143025c447126637d45b66",
     "tickets": [
-      "R0250-ACK",
-      "R0250-ORDINARY-WAITS",
-      "R0250-SERVICE-CONTRACT"
+      "R0250-OWNER-WAITS",
+      "R0250-STRICT-CLIENT"
     ],
-    "state": "closed_repo_local_corrective_components",
-    "authority": "User replacement AGENTS.md supersedes universal measurement rule",
-    "review": "Preserve prior review evidence; focused corrective validation only.",
-    "implementation_tip": "932ea539",
-    "validation": "41 waits +17 service checks PASS each311/312; real helper-free time inspection qualified_live; static PASS.",
-    "limits": "Reconciliation is incomplete for lower owner waits and strict helper-dependent scheduling clients; no whole-stack helper independence claimed."
+    "state": "running",
+    "design": "Fresh Python decisions use explicit service-measurement basis; Native owns separate final-send expiry. No app helper required for service observations; no guest extrapolation or anchor renewal."
   },
   "completed_batches": [
     {
@@ -874,6 +870,20 @@
       "implementation_tip": "1054d949",
       "evidence": "docs/dev/evidence/issue0695/st04-terminal-stream-validation.json",
       "validation": "85 terminal/input +10 network each311/312; final12 stream/custody/input each311/312; retained first failures and explicit flake disposition."
+    },
+    {
+      "base": "363394fe11935749a95f5984215aca09377540f9",
+      "tickets": [
+        "R0250-ACK",
+        "R0250-ORDINARY-WAITS",
+        "R0250-SERVICE-CONTRACT"
+      ],
+      "state": "closed_repo_local_corrective_components",
+      "authority": "User replacement AGENTS.md supersedes universal measurement rule",
+      "review": "Preserve prior review evidence; focused corrective validation only.",
+      "implementation_tip": "932ea539",
+      "validation": "41 waits +17 service checks PASS each311/312; real helper-free time inspection qualified_live; static PASS.",
+      "limits": "Reconciliation is incomplete for lower owner waits and strict helper-dependent scheduling clients; no whole-stack helper independence claimed."
     }
   ],
   "remaining_inventory": {
