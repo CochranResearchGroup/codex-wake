@@ -309,6 +309,36 @@ class CliTests(unittest.TestCase):
         with self.assertRaisesRegex(WakeError, "absolute parser-safe path"):
             cli.service_config_for_args(args, Path("/tmp/wake"))
 
+    def test_legacy_after_uses_qualified_upper_without_rounding_due_early(self):
+        from test_measurements import observation
+        clock=observation(1000)
+        clock['utc'].update(lower=1893456000.25,upper=1893456000.75)
+        for argv in [['after','1s','--','fixture'],['app','after','fixture-thread','1s','--','fixture']]:
+            with self.subTest(command=argv[0]),tempfile.TemporaryDirectory() as tmp, \
+                    patch('codex_wake.measurements.snapshot',return_value=clock), \
+                    patch('codex_wake.cli.utc_now',side_effect=AssertionError('guest clock forbidden')):
+                root=Path(tmp)
+                code,out,err=self.run_cli(argv,root)
+                self.assertEqual(code,0,err)
+                record=json.loads(next((root/'pending').glob('*.json')).read_text())
+                self.assertEqual(record['predicate']['due_at'],'2030-01-01T00:00:02Z')
+                self.assertEqual(record['created_at'],'2030-01-01T00:00:00Z')
+
+    def test_legacy_creators_hold_without_qualified_utc_before_record_write(self):
+        from codex_wake.measurements import TimeUnavailable
+        requests=[['app','after','fixture-thread','1s','--','fixture'],['after','1s','--','fixture'],['at','2030-01-01T00:00:00Z','--','fixture'],
+                  ['file','created.txt','--','fixture'],['changed','changed.txt','--','fixture'],
+                  ['pid',str(os.getpid()),'--','fixture']]
+        for argv in requests:
+            with self.subTest(command=argv[0]),tempfile.TemporaryDirectory() as tmp, \
+                    patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('clock absent')), \
+                    patch('codex_wake.cli.utc_now',side_effect=AssertionError('guest clock forbidden')):
+                root=Path(tmp)
+                code,out,err=self.run_cli(argv,root)
+                self.assertEqual(code,2)
+                self.assertIn('stable_time_creation_unqualified',err)
+                self.assertFalse(list((root/'pending').glob('*.json')))
+
     def test_after_creates_pending_wake(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

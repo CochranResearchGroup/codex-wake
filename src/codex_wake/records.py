@@ -160,6 +160,15 @@ def utc_now() -> datetime:
     return datetime.now(UTC).replace(microsecond=0)
 
 
+def creation_utc_upper() -> float:
+    """Qualified creation observation; unavailable time cannot authorize a new record."""
+    from .measurements import TimeUnavailable, utc_time
+    try:
+        return utc_time()
+    except TimeUnavailable:
+        raise WakeError('stable_time_creation_unqualified') from None
+
+
 def format_utc(value: datetime) -> str:
     return value.astimezone(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -209,7 +218,7 @@ def parse_utc_timestamp(value: str) -> datetime:
 
 
 def make_wake_id(now: datetime | None = None) -> str:
-    current = now or utc_now()
+    current = now if now is not None else datetime.fromtimestamp(creation_utc_upper(), UTC)
     stamp = current.astimezone(UTC).strftime("%Y%m%d_%H%M%S")
     return f"wake_{stamp}_{secrets.token_hex(2)}"
 
@@ -377,7 +386,7 @@ def build_record(
     target: dict[str, Any],
     now: datetime | None = None,
 ) -> dict[str, Any]:
-    current = now or utc_now()
+    current = now if now is not None else datetime.fromtimestamp(creation_utc_upper(), UTC)
     wake_id = make_wake_id(current)
     timestamp = format_utc(current)
     return {

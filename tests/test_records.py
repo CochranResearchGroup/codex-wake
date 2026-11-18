@@ -31,6 +31,18 @@ from codex_wake.signals import ArmedSignal, Eq, Resume, SignalRequest, SourceAnc
 
 
 class RecordTests(unittest.TestCase):
+    def test_record_creation_requires_qualified_time_unless_host_supplies_now(self):
+        from codex_wake.measurements import TimeUnavailable
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch('codex_wake.measurements.snapshot',side_effect=TimeUnavailable('unqualified')), \
+                patch('codex_wake.records.utc_now',side_effect=AssertionError('guest clock forbidden')):
+            args=dict(predicate=dict(type='not_before',due_at='2030-01-01T00:00:00Z'),
+                      prompt='fixture',cwd=Path(tmp),target=dict(transport='app-server',thread_id='fixture',endpoint='stdio://'))
+            with self.assertRaisesRegex(WakeError,'stable_time_creation_unqualified'):
+                build_record(**args)
+            explicit=build_record(**args,now=datetime(2026,5,18,tzinfo=UTC))
+            self.assertEqual(explicit['created_at'],'2026-05-18T00:00:00Z')
+
     def test_legacy_archive_preserves_unknown_time_without_guest_clock_fallback(self):
         from codex_wake.measurements import TimeUnavailable
         with tempfile.TemporaryDirectory() as directory:

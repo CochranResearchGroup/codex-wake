@@ -45,6 +45,15 @@ payloads, but never derives live authority from JSON alone.
 
 ## Required Top-Level Fields
 
+New legacy timer, app-server, file and process records require qualified Stable
+Time UTC before publication. Missing UTC holds creation with
+`stable_time_creation_unqualified`; it does not substitute the guest clock.
+Legacy relative timers round the accepted raw upper UTC bound upward to a whole
+second before adding the duration, so serialization cannot make them due early.
+Their metadata keeps the existing whole-second representation. Explicit trusted
+host-supplied creation times remain supported. This does not change the separate
+native intent clock domains, absolute timestamp parser or protective cancellation.
+
 - `schema_version`: integer schema version.
 - `id`: stable wake id.
 - `created_at`: UTC timestamp.
