@@ -585,7 +585,7 @@
     },
     "ST04-SIGNAL-CANCEL": {
       "owner": "root",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -597,7 +597,9 @@
         "tests/test_records.py"
       ],
       "acceptance": "Signal cancellation uses qualified UTC when available; missing time still stops with retained last-observed updated_at plus explicit unknown marker/event, and untimed journal terminal fence. Keep schema2 valid, identity/pins/republication fences intact; no retention deadline fabricated.",
-      "non_goals": "No fullsuite/build/reviewrepeat/provider/service/credentials/memory/merge/deploy effects."
+      "non_goals": "No fullsuite/build/reviewrepeat/provider/service/credentials/memory/merge/deploy effects.",
+      "integration_sha": "ffa2ac25",
+      "validation": "35 records/signal-record checks PASS311/312 before final untimed-expiry guard; guard RED/GREEN311 and2 signal final controls PASS312. Combined integration gate pending."
     },
     "ST04-INJECTOR-METADATA": {
       "owner": "st04_injector_metadata",
@@ -613,6 +615,50 @@
       ],
       "acceptance": "Default injector UTC metadata qualified; absent authority holds before attempts/transport; explicit now/network ownership and untimed held-ack reconciliation retained.",
       "non_goals": "No fullsuite/build/reviewrepeat/provider/service/credentials/memory/merge/deploy effects."
+    },
+    "ST04-HOST-STDIN": {
+      "owner": "root",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "base": "ffa2ac255fcd32815cfbf3ef991bbce15043f05e",
+      "paths": [
+        "src/codex_wake/host_commands.py",
+        "tests/test_host_commands.py"
+      ],
+      "acceptance": "Five-second stdin frame read retains original qualified deadline across select/read; absent or lost authority refuses input acceptance, including after EOF, no guest fallback. Existing byte/object limits unchanged.",
+      "non_goals": "No live/build/fullsuite/reviewrepeat/daemon/credential/memory effects."
+    },
+    "ST04-OUTPUT-FRAMES": {
+      "owner": "st04_output_frames",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "base": "ffa2ac255fcd32815cfbf3ef991bbce15043f05e",
+      "paths": [
+        "src/codex_wake/local_control_commands.py",
+        "tests/test_local_output_modes.py"
+      ],
+      "acceptance": "Output streaming retains original qualified wait across pages and validates before/after observation/publication; zero wait remains untimed, cursor drain and ownership/no cancel/no replay preserved.",
+      "non_goals": "No live/build/fullsuite/reviewrepeat/daemon/credential/memory effects."
+    },
+    "ST04-GROK-EVENT-WAIT": {
+      "owner": "root",
+      "state": "pending",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "base": "ffa2ac255fcd32815cfbf3ef991bbce15043f05e",
+      "paths": [
+        "src/codex_wake/local_grok_events.py"
+      ],
+      "acceptance": "Collector dispatch-custody wait retains qualified deadline; absent/lost time holds before provider connection and preserves uncertain/no-replay journal state. Provider-free only.",
+      "non_goals": "No live/build/fullsuite/reviewrepeat/daemon/credential/memory effects."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -624,7 +670,7 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-18T20:17:13.076982+00:00",
+  "updated_at": "2026-11-18T20:28:47.580801+00:00",
   "worker_cleanup": "Completed monitor worker removed after exact clean custody; current injector worker isolated, root retains open integration lane.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
@@ -644,7 +690,10 @@
     "base": "7c09353a89eb189380dd0b04b17dac70df22060a",
     "tickets": [
       "ST04-SIGNAL-CANCEL",
-      "ST04-INJECTOR-METADATA"
+      "ST04-INJECTOR-METADATA",
+      "ST04-HOST-STDIN",
+      "ST04-OUTPUT-FRAMES",
+      "ST04-GROK-EVENT-WAIT"
     ],
     "state": "running",
     "review": "Retain previous review; no broad repeat."
