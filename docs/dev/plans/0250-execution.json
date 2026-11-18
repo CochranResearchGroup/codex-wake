@@ -771,15 +771,42 @@
       "dependencies": [
         "R0250-STRICT-CLIENT"
       ],
-      "scope": "Reconcile/qualify Native final-send clock-source protocol under supported StableTime policy. Existing Native clock producer still advertises legacy private counter source; Python helper removal does not qualify or replace it. Preserve exact original expiry and no-replay/host qualification gates."
+      "scope": "Reconcile/qualify Native final-send clock-source protocol under supported StableTime policy. Existing Native clock producer still advertises legacy private counter source; Python helper removal does not qualify or replace it. Preserve exact original expiry and no-replay/host qualification gates.",
+      "decision_gate": "Operator choice requested: retain Plan0248 final-send guarantee versus change to service-measurement admission. No dependent Native code/build change before answer.",
+      "evidence": "Frozen Native9af codex-rs/ext/queue/src/clock.rs requires private counter read after service output. Supported service contract excludes delivery-time bound."
     },
     "R0250-TRANSPORT-WAITS": {
       "owner": "root",
-      "state": "pending",
+      "state": "validated",
       "dependencies": [
         "R0250-OWNER-WAITS"
       ],
-      "scope": "Classify remaining transport-only wait gates in native_protocol/app-server and other owners; remove only unnecessary time availability gates, retain actual authorization and expiry. No raw-call-count target."
+      "scope": "First owner native_protocol protective request budget only; preserve actual expiry/protective ownership guards and finite argument validation.",
+      "worker": "/root/transport_waits_correction",
+      "worker_sha": "fcfe9b554ffb2e6b716622588026d990448a0f66",
+      "worker_branch": "fix/transport-waits-policy-0250",
+      "integration_sha": "ab89437f",
+      "validation": "13 focused native RPC checks PASS311/312 worker and integration; finite timeout validation restored before I/O.",
+      "tracker_resolution": "closed_repo_local_after_validated_integration",
+      "integration_shas": [
+        "fc7687a0",
+        "ab89437f"
+      ]
+    },
+    "R0250-APP-TRANSPORT-WAITS": {
+      "owner": "root",
+      "worker": "/root/transport_waits_correction",
+      "state": "validated",
+      "dependencies": [
+        "R0250-TRANSPORT-WAITS"
+      ],
+      "worker_sha": "1efc072a621cf179109f1a3a7dfabdc50dfb3c8f",
+      "integration_sha": "69d27514",
+      "scope": "Ordinary app-server startup/discovery/stdio/WebSocket protective waits; reliable dispatch authority unchanged.",
+      "validation": "Worker24PASS311/312; integration24PASS311,31223PASS/1fixture handshake error retained; exact framed RPC casePASS311/312 after separate startup allowance, original request timeout retained.",
+      "remediation_worker_sha": "417ff3e9bbe78de62cdded8dd99a76335a264662",
+      "tracker_resolution": "closed_repo_local_after_validated_integration",
+      "remediation_integration_sha": "7f1186a0d39ecf33274ead9decb4b9a8ce9c3f3f"
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -808,16 +835,16 @@
     "limits": "No provider calls or installed daemon changes. Broader migrations/fullPython/runtime/activation gates open."
   },
   "current_batch": {
-    "base": "9410932979dcf540e5143025c447126637d45b66",
+    "base": "dd720de4d94c7717f5fe51e4bd74e532dabf9f38",
     "tickets": [
-      "R0250-OWNER-WAITS",
-      "R0250-STRICT-CLIENT"
+      "R0250-NATIVE-CLOCK-SOURCE",
+      "R0250-TRANSPORT-WAITS",
+      "R0250-APP-TRANSPORT-WAITS"
     ],
-    "state": "closed_repo_local_python_components",
-    "design": "Fresh Python decisions use explicit service-measurement basis; Native owns separate final-send expiry. No app helper required for service observations; no guest extrapolation or anchor renewal.",
-    "implementation_tip": "79f99c36",
-    "evidence": "docs/dev/evidence/issue0695/r0250-default-client-validation.json",
-    "limits": "Source Python components validated; Native clock-source runtime qualification, other transport wait reconciliation and fullPython remain open."
+    "state": "independent_tickets_closed_native_decision_pending",
+    "review": "Retain prior broad review; focused corrective validation only.",
+    "native_decision": "Pending explicit operator answer; final-send guarantee retained.",
+    "evidence": "docs/dev/evidence/issue0695/r0250-transport-waits.json"
   },
   "completed_batches": [
     {
@@ -911,6 +938,18 @@
       "implementation_tip": "932ea539",
       "validation": "41 waits +17 service checks PASS each311/312; real helper-free time inspection qualified_live; static PASS.",
       "limits": "Reconciliation is incomplete for lower owner waits and strict helper-dependent scheduling clients; no whole-stack helper independence claimed."
+    },
+    {
+      "base": "9410932979dcf540e5143025c447126637d45b66",
+      "tickets": [
+        "R0250-OWNER-WAITS",
+        "R0250-STRICT-CLIENT"
+      ],
+      "state": "closed_repo_local_python_components",
+      "design": "Fresh Python decisions use explicit service-measurement basis; Native owns separate final-send expiry. No app helper required for service observations; no guest extrapolation or anchor renewal.",
+      "implementation_tip": "79f99c36",
+      "evidence": "docs/dev/evidence/issue0695/r0250-default-client-validation.json",
+      "limits": "Source Python components validated; Native clock-source runtime qualification, other transport wait reconciliation and fullPython remain open."
     }
   ],
   "remaining_inventory": {
