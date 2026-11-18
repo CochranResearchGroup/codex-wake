@@ -8,7 +8,6 @@ import tempfile
 import subprocess
 import sys
 import threading
-import time
 import unittest
 from unittest.mock import patch
 from websockets.sync.server import unix_serve
@@ -105,6 +104,7 @@ class OutputModesTests(unittest.TestCase):
         self.assertEqual(frames[-1], {'exit_code': 0})
 
     def test_detached_collector_retains_live_text_order_and_original_retry(self):
+        from codex_wake import measurements
         release=threading.Event();delta=threading.Event();submissions=[]
         with tempfile.TemporaryDirectory() as temporary:
             root=Path(temporary);home=root/'home';home.mkdir();endpoint='unix://'+str(root/'native.sock')
@@ -129,7 +129,7 @@ class OutputModesTests(unittest.TestCase):
                         # Schema-shaped telemetry from the qualified native protocol; not a live capture.
                         event('turn/moderationMetadata',metadata={'decision':'allowed'})
                         event('item/agentMessage/delta',itemId='answer',delta='Hello ');delta.set()
-                        if not release.wait(10):return
+                        release.wait()
                         event('item/started',item={'id':'tool','type':'commandExecution','command':'echo fixture'})
                         event('item/completed',item={'id':'tool','type':'commandExecution','exitCode':0})
                         event('item/agentMessage/delta',itemId='answer',delta='world')
@@ -150,8 +150,8 @@ class OutputModesTests(unittest.TestCase):
                     operation=submitted['result']['operation'];identifier=operation['operation_id']
                     self.assertTrue(delta.wait(3))
                     live=owner.output(identifier,mode='stream',timeout=3)
-                    deadline=time.monotonic()+5
-                    while not live['text'] and time.monotonic()<deadline:
+                    deadline=measurements.Deadline(5)
+                    while not live['text'] and not deadline.expired():
                         live=owner.output(identifier,mode='stream',cursor=live['next_cursor'],timeout=3)
                     self.assertEqual(live['text'],'Hello ')
                     self.assertFalse(live['terminal'])
@@ -167,7 +167,7 @@ class OutputModesTests(unittest.TestCase):
                     self.assertIn(identifier,err.getvalue())
                     release.set()
                     final=owner.output(identifier,mode='final',timeout=3)
-                    self.assertEqual(final['text'],'Hello world')
+                    self.assertEqual(final['text'],'Hello world',json.dumps(final,sort_keys=True))
                     transcript=owner.output(identifier,mode='transcript')
                     self.assertEqual([event['kind'] for event in transcript['events']],['turn/started','turn/moderationMetadata','item/agentMessage/delta','item/started','item/completed','item/agentMessage/delta','item/completed','thread/tokenUsage/updated','turn/completed'])
                     self.assertTrue(transcript['retention']['history_complete'])
