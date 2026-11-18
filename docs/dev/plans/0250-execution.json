@@ -413,12 +413,13 @@
       "acceptance": "Legacy after/at/app/file/changed/pid creators require qualifiedUTC before writing; relative whole-second due rounds up acceptedUTCupper+duration; explicit trustednow fixtures and native6/7/8 paths preserved; stop/globalutc_now unchanged.",
       "validation_environment": "FocusedPython3.11/3.12; publicAPI seam RED/GREEN; fixturesisolated, no provider/service/build/fullsuite effects.",
       "tracker_resolution": "pending; requiresvalidatedintegration",
-      "validation": "34focusedPASS311/312: records/network +9CLIcreation/clock cases. Three REDloops retained; missingUTC no record, rawupper ceil beforedatetime, trustednow preserved. No broad/full/live effects."
+      "validation": "34focusedPASS311/312: records/network +9CLIcreation/clock cases. Three REDloops retained; missingUTC no record, rawupper ceil beforedatetime, trustednow preserved. No broad/full/live effects.",
+      "integration_sha": "dc8ebc2c"
     },
     "ST04-LOCAL-WAITS": {
       "owner": "st04_local_waits",
       "worker": "/root/st04_local_waits",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -430,12 +431,16 @@
       ],
       "acceptance": "Positive waits use originalqualifiedDeadline beforeobservation, recheckafterIO, zero-timeoutinspect retained; exactprotectivecancel/noreplay unchanged.",
       "validation_environment": "FocusedPython3.11/3.12; publicAPI seam RED/GREEN; fixturesisolated, no provider/service/build/fullsuite effects.",
-      "tracker_resolution": "pending; requiresvalidatedintegration"
+      "tracker_resolution": "pending; requiresvalidatedintegration",
+      "worker_sha": "0d8eaddf4e11b6fa65546d0c852c5b5df9ad67bf",
+      "integration_sha": "f35b2e8e",
+      "worker_branch": "fix/stable-time-local-waits-0250",
+      "validation": "6 focusedworkerPASS311/312; finalcombined23PASS311/312 includesactorintegration. Initial23case311had2fixtureerrors afterstrictactorissuer; separateUTCauthorityfixturecorrectedandretainedfailedlog. No broad/fullsuite."
     },
     "ST04-CONTROLLER-WAITS": {
       "owner": "st04_controller_waits",
       "worker": "/root/st04_controller_waits",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
@@ -447,11 +452,15 @@
       ],
       "acceptance": "Controller wait/events use originalqualifiedDeadline, no progressrenewal; zero-timeoutinspect, actor/target/cursor/revocation semantics preserved.",
       "validation_environment": "FocusedPython3.11/3.12; publicAPI seam RED/GREEN; fixturesisolated, no provider/service/build/fullsuite effects.",
-      "tracker_resolution": "pending; requiresvalidatedintegration"
+      "tracker_resolution": "pending; requiresvalidatedintegration",
+      "worker_sha": "173284970991cbf9c45370f55cf146582a677004",
+      "integration_sha": "ee9f7f7f",
+      "worker_branch": "fix/stable-time-controller-waits-0250",
+      "validation": "6 focusedworkerPASS311/312; finalcombined23PASS311/312 includesactorintegration. Initial23case311had2fixtureerrors afterstrictactorissuer; separateUTCauthorityfixturecorrectedandretainedfailedlog. No broad/fullsuite."
     },
     "ST04-LOCAL-ACTOR": {
       "owner": "root",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST04-OAUTH"
@@ -460,7 +469,9 @@
         "src/codex_wake/daemon_commands.py",
         "tests/test_controller_product_authorization.py"
       ],
-      "acceptance": "LocalActor120s ceiling uses qualifiedlowerUTC; missingUTC refusesissuance, qualifiedupper continuesverification, no change to untimedlocalstop."
+      "acceptance": "LocalActor120s ceiling uses qualifiedlowerUTC; missingUTC refusesissuance, qualifiedupper continuesverification, no change to untimedlocalstop.",
+      "integration_sha": "781772f0",
+      "validation": "PublicissuerRED then11auth/daemonPASS311; combined23PASS311/312 includingexactclockloss/cachedreads anduntimedstop. Lowerboundissuance/upperverification, no WSLfallback."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -472,7 +483,7 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-18T15:11:11.906460+00:00",
+  "updated_at": "2026-11-18T15:14:24.340883+00:00",
   "worker_cleanup": "Previous completed worker trees removed after exact clean custody. Collector active isolated tree; sample worker private artifacts/read-only Native tree. Root retains integration checkout for openST04/#695.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
@@ -498,6 +509,17 @@
     ],
     "review": "Onefinalreview for newbatch from5d291917 (questionasked; noanswer yet, stateddefault), thenoneboundedTDDfindingspass. Earlierbroadreview not repeated.",
     "wip_limit": 3,
-    "live_grok": "Expiredwindow; unknownsamplepreserved, noproviderpermission inferredfromimplement-spec."
+    "live_grok": "Expiredwindow; unknownsamplepreserved, noproviderpermission inferredfromimplement-spec.",
+    "state": "implementation_validated_review_pending",
+    "implementation_tip": "781772f0",
+    "review_base": "5d2919175664ae1e0ceab0843162b276d6ba6260",
+    "focused_validation": [
+      "34creation/record/network checksPASS311/312",
+      "23combinedcontroller/localwait/authority/daemonchecksPASS311/312",
+      "RuffundefinednamesPASS",
+      "policywiringPASS"
+    ],
+    "retained_failure": "st04-current-batch-3.11.log:21PASS,2fixtureerrors due stricterissuer; finalv2same23PASSboth, not erased",
+    "live_effects": "none; expiredGrokallowance anduncertainsample unchanged"
   }
 }
