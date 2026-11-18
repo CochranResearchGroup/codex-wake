@@ -167,83 +167,38 @@ class InjectorTests(unittest.TestCase):
             self.assertIsNone(event['at'])
             self.assertEqual(event['time_status'], 'not_observed')
 
-    def test_ack_wait_rechecks_original_counter_deadline_after_receipt_observation(self) -> None:
-        from test_measurements import observation
+    def test_ordinary_ack_wait_does_not_require_a_time_service_observation(self) -> None:
         from codex_wake import measurements
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            path = root / 'acks' / 'wake_test.submitted'
-            path.parent.mkdir()
-            path.write_text('{}')
-            for counters, expected in [((1000, 1001, 1002), True), ((1000, 1001, 3000), False)]:
-                with self.subTest(counters=counters), patch('codex_wake.measurements.snapshot',
-                        side_effect=[observation(value) for value in counters]), patch(
-                        'codex_wake.injector.time.monotonic', side_effect=AssertionError('guest clock')):
-                    self.assertEqual(wait_for_ack(root, 'wake_test', 1), expected)
-            with patch('codex_wake.measurements.snapshot', side_effect=[
-                    observation(1000), observation(1001), observation(1000)]):
-                with self.assertRaises(measurements.TimeUnavailable):
-                    wait_for_ack(root, 'wake_test', 1)
-
-    def test_ack_clock_loss_after_paste_holds_without_replaying_and_accepts_later_receipt(self) -> None:
-        from codex_wake import measurements
-        from test_measurements import observation
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp) / 'wake'
-            found = self.make_firing_record(root, Path(tmp))
-            runner = FakeTmuxRunner()
-            now = datetime(2026, 5, 18, 21, 15, tzinfo=UTC)
-            samples = iter([observation(1000)])
-            def clock():
-                try:
-                    return next(samples)
-                except StopIteration:
-                    raise measurements.TimeUnavailable('clock unavailable')
-            with patch('codex_wake.measurements.snapshot', side_effect=clock):
-                result = dispatch_firing_record(root, found, runner=runner, now=now,
-                    thread_identity_resolver=self.identity, ack_timeout_override=1)
-                self.assertEqual(result.status, 'skipped')
-                held = find_record(root, 'wake_test')
-                self.assertEqual(held.record['status'], 'firing')
-                self.assertEqual(held.record['attempts'], 1)
-                result = dispatch_firing_record(root, held, runner=runner, now=now,
-                    thread_identity_resolver=self.identity, ack_timeout_override=1)
-                self.assertEqual(result.status, 'skipped')
-                self.assertEqual(len(runner.pastes), 1)
-
-                path = root / 'acks' / 'wake_test.submitted'
-                path.parent.mkdir(exist_ok=True)
-                path.write_text('{}')
-                result = dispatch_firing_record(root, find_record(root, 'wake_test'), runner=runner,
-                    now=now, thread_identity_resolver=self.identity, ack_timeout_override=1)
-                self.assertEqual(result.status, 'submitted')
-                self.assertEqual(len(runner.pastes), 1)
-
-    def test_missing_ack_clock_before_paste_holds_without_consuming_attempt(self) -> None:
-        from codex_wake import measurements
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp) / 'wake'
-            found = self.make_firing_record(root, Path(tmp))
-            runner = FakeTmuxRunner()
-            with patch('codex_wake.measurements.snapshot', side_effect=measurements.TimeUnavailable('clock unavailable')):
-                result = dispatch_firing_record(root, found, runner=runner,
-                    now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC),
-                    thread_identity_resolver=self.identity, ack_timeout_override=1)
-            self.assertEqual(result.status, 'skipped')
-            self.assertEqual(runner.pastes, [])
-            self.assertEqual(find_record(root, 'wake_test').record['attempts'], 0)
-
-    def test_ack_wait_requires_qualified_time_but_zero_wait_is_untimed(self) -> None:
-        from codex_wake import measurements
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            path = root / 'acks' / 'wake_test.submitted'
-            path.parent.mkdir()
-            path.write_text('{}')
-            with patch('codex_wake.measurements.snapshot', side_effect=measurements.TimeUnavailable('clock unavailable')):
+            receipt = root / 'acks' / 'wake_test.submitted'
+            receipt.parent.mkdir()
+            receipt.write_text('{}')
+            with patch('codex_wake.measurements.snapshot', side_effect=measurements.TimeUnavailable('client helper failed')):
                 self.assertTrue(wait_for_ack(root, 'wake_test', 0))
-                with self.assertRaises(measurements.TimeUnavailable):
-                    wait_for_ack(root, 'wake_test', 1)
+                self.assertTrue(wait_for_ack(root, 'wake_test', 1))
+
+    def test_ack_polling_adds_no_clock_gate_and_old_held_outcomes_do_not_replay(self) -> None:
+        from codex_wake import measurements
+        with tempfile.TemporaryDirectory() as tmp:
+            for held in (False, True):
+                with self.subTest(held=held):
+                    root = Path(tmp) / str(held)
+                    found = self.make_firing_record(root, Path(tmp))
+                    if held:
+                        found.record['ack_wait_time_held'] = True
+                        found = WakePath(write_record(root, found.record), found.record)
+                    else:
+                        receipt = root / 'acks' / 'wake_test.submitted'
+                        receipt.parent.mkdir(exist_ok=True)
+                        receipt.write_text('{}')
+                    runner = FakeTmuxRunner()
+                    with patch('codex_wake.measurements.snapshot', side_effect=measurements.TimeUnavailable('client helper failed')):
+                        result = dispatch_firing_record(root, found, runner=runner,
+                            now=datetime(2026, 5, 18, 21, 15, tzinfo=UTC),
+                            thread_identity_resolver=self.identity, ack_timeout_override=1)
+                    self.assertEqual(result.status, 'skipped' if held else 'submitted')
+                    self.assertEqual(len(runner.pastes), 0 if held else 1)
 
     def setUp(self) -> None:
         patcher = patch(

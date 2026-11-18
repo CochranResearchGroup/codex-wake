@@ -1,4 +1,4 @@
-# 0250 | Stable Time for all WSL measurements
+# 0250 | StableTime integration and timing requirements
 
 State: OPEN
 Owner: root
@@ -6,16 +6,43 @@ Parent: #695 remaining Python gate; operator correction applies across Codex Wak
 Integration: feat/native-expiry-695; base098f409a8de5d7010984189127bf4f10e12fb1d3.
 WIP3. Reuse owned checkout; preserve workingdaemon, credentials and unrelatedlanes.
 
-## Contract
+## Contract (replacement policy; current authority)
 
-Every application time measurement uses qualified Stable Time UTC or its
-host-counter evidence: timestamps, elapsedtime, deadlines, timeouts andfreshness.
-No WSLwall/monotonic fallback, midpoint fabricated as expiryproof, or global
-monkeypatch. Missing/unqualified evidence, counterepoch/frequency change, expired
-handoff or counterrollback holds timedependent effects. Strict guards stay strict.
-Persisted old clockcoordinates never silently change domains or renew deadlines.
-Existing explicit host-injected deterministic clockseams remain valid for tests.
-Blocking transport primitives are not evidence of elapsedtime or UTC.
+Use the existing StableTime service and supported client/API for actions that
+need reasonably correct elapsed time, deadlines, freshness or UTC. Interpret
+observations at their documented service measurement instant with their supplied
+uncertainty. Never extrapolate trusted time with a WSL clock or silently use
+unreliable guest time for those actions. Do not require an application-specific
+host-counter bridge or separate local counter process to consume service data.
+
+Ordinary OS waits, caller polling limits and incidental log timestamps do not
+need additional StableTime calls or qualification gates. Their timeouts are
+protective/advisory, not proof that an authorization or original wake expiry
+has elapsed. Preserve actual permission, lease, freshness and expiry owners.
+Pause only the action that needs unavailable reliable time. Distinguish service
+outage, transport/configuration failure and auxiliary client/helper failure.
+
+The former all-clock-call migration and zero-raw-call acceptance criterion are
+superseded. Existing inventory counts are historical discovery aids, not remaining
+work counts. Existing source validation receipts remain historical evidence;
+they do not establish compliance with this replacement policy. Existing durable
+unknown outcomes and deadlines must not be reset during correction.
+
+## Current reconciliation packet
+
+R0250-ACK (root): remove additional StableTime qualification from ordinary receipt
+polling; preserve reconciliation of already-held submission records without replay.
+R0250-ORDINARY-WAITS (worker): remove extra clock calls/gates from SSH frame input,
+output presentation and collector custody polling, retaining original protective
+wait bounds and underlying authorization owners.
+R0250-SERVICE-CONTRACT (root with read-only discovery): document supported service
+measurement semantics and remove helper dependence only where the consumer can
+use that measurement basis honestly. Do not relabel a past service-point upper
+bound as a current client-receipt upper bound. Preserve strict-effect refusal
+until its required evidence is established; no new counter bridge is permitted.
+
+Below are historical execution sections under the superseded universal rule;
+0250-execution.json records corrective ticket states and current acceptance.
 
 ## Bounded execution graph
 

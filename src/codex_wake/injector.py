@@ -297,21 +297,16 @@ def ack_path(root: Path, wake_id: str) -> Path:
     return root / "acks" / f"{wake_id}.submitted"
 
 
-def wait_for_ack(root: Path, wake_id: str, timeout_seconds: float, *,
-                 deadline: measurements.Deadline | None = None) -> bool:
+def wait_for_ack(root: Path, wake_id: str, timeout_seconds: float) -> bool:
+    """Advisory receipt polling; this is not trusted expiry evidence."""
     path = ack_path(root, wake_id)
-    if timeout_seconds <= 0:
-        return path.exists()
-    deadline = deadline if deadline is not None else measurements.Deadline(timeout_seconds)
+    until = time.monotonic() + max(0.0, timeout_seconds)
     while True:
-        if deadline.expired():
-            return False
-        observed = path.exists()
-        remaining = deadline.remaining()
+        if path.exists():
+            return True
+        remaining = until - time.monotonic()
         if remaining <= 0:
             return False
-        if observed:
-            return True
         time.sleep(min(0.1, remaining))
 
 
@@ -474,7 +469,7 @@ def _dispatch_firing_record_unlocked(
         # A paste may already have succeeded. Never start another wait/attempt
         # with a renewed deadline; only reconcile the durable receipt.
         if not ack_path(root, wake_id).exists():
-            return DispatchResult('skipped', 'ack outcome unknown; Stable Time wait held; no replay')
+            return DispatchResult('skipped', 'ack outcome unknown; prior wait held; no replay')
         record['status'] = 'submitted'
         record = append_event(record, 'ack_observed', 'Held wake submission ack observed', now)
         replace_record(root, found, record)
@@ -495,7 +490,7 @@ def _dispatch_firing_record_unlocked(
             else:
                 current = measurements.datetime_now()
         except measurements.TimeUnavailable:
-            return DispatchResult('skipped', 'Stable Time UTC unavailable; no dispatch authorized')
+            return DispatchResult('skipped', 'reliable UTC unavailable to this client; no dispatch authorized')
     if record.get("schema_version") == 2:
         authorized = False
         if signal_authorizer is not None:
@@ -685,10 +680,6 @@ def _dispatch_firing_record_unlocked(
             timeout = ack_timeout_override
             if timeout is None:
                 timeout = float(record.get("ack_timeout_seconds") or 30)
-            try:
-                ack_deadline = measurements.Deadline(timeout) if timeout > 0 else None
-            except measurements.TimeUnavailable:
-                return DispatchResult('skipped', 'Stable Time unavailable before paste')
             attempt = int(record.get("attempts") or 0) + 1
             record["attempts"] = attempt
             record["updated_at"] = format_utc(current)
@@ -701,14 +692,7 @@ def _dispatch_firing_record_unlocked(
             )
             replace_record(root, found, record)
             tmux.paste_prompt(socket, pane, wake_id, canonical_prompt(wake_id, root))
-            try:
-                acknowledged = wait_for_ack(root, wake_id, timeout, deadline=ack_deadline)
-            except measurements.TimeUnavailable:
-                record['ack_wait_time_held'] = True
-                record = append_event(record, 'ack_time_held',
-                    'Submission outcome unknown; Stable Time unavailable; no replay', None)
-                replace_record(root, WakePath(root / 'firing' / f'{wake_id}.json', record), record)
-                return DispatchResult('skipped', 'ack outcome unknown; Stable Time wait held; no replay')
+            acknowledged = wait_for_ack(root, wake_id, timeout)
             if acknowledged:
                 record["status"] = "submitted"
                 record["updated_at"] = format_utc(current)

@@ -699,6 +699,27 @@
       "source_tip": "ffa2ac255fcd32815cfbf3ef991bbce15043f05e",
       "evidence": "Private st04-remaining-inventory.json; curated summary in packet evidence",
       "scope": "AST production candidates only; no runtime reachability/all-alias claim; before current packet changes."
+    },
+    "R0250-ACK": {
+      "owner": "root",
+      "state": "running",
+      "dependencies": [],
+      "base": "363394fe11935749a95f5984215aca09377540f9",
+      "acceptance": "Ordinary receipt wait has no extra StableTime gate; old held outcomes remain no-replay."
+    },
+    "R0250-ORDINARY-WAITS": {
+      "owner": "ordinary_wait_correction",
+      "state": "running",
+      "dependencies": [],
+      "base": "363394fe11935749a95f5984215aca09377540f9",
+      "acceptance": "SSH frame/presentation/custody waits use ordinary protective limits; actual permission/expiry ownership unchanged."
+    },
+    "R0250-SERVICE-CONTRACT": {
+      "owner": "root",
+      "state": "running",
+      "dependencies": [],
+      "base": "363394fe11935749a95f5984215aca09377540f9",
+      "acceptance": "Service observations consumed at documented measurement basis without extra bridge; no false outage or current-upper claim."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -727,19 +748,15 @@
     "limits": "No provider calls or installed daemon changes. Broader migrations/fullPython/runtime/activation gates open."
   },
   "current_batch": {
-    "base": "7c09353a89eb189380dd0b04b17dac70df22060a",
+    "base": "363394fe11935749a95f5984215aca09377540f9",
     "tickets": [
-      "ST04-SIGNAL-CANCEL",
-      "ST04-INJECTOR-METADATA",
-      "ST04-HOST-STDIN",
-      "ST04-OUTPUT-FRAMES",
-      "ST04-GROK-EVENT-WAIT"
+      "R0250-ACK",
+      "R0250-ORDINARY-WAITS",
+      "R0250-SERVICE-CONTRACT"
     ],
-    "state": "closed_repo_local",
-    "review": "Previous broad review/TDD pass retained; no repeat.",
-    "implementation_tip": "1054d949",
-    "evidence": "docs/dev/evidence/issue0695/st04-terminal-stream-validation.json",
-    "validation": "85 terminal/input +10 network each311/312; final12 stream/custody/input each311/312; retained first failures and explicit flake disposition."
+    "state": "running",
+    "authority": "User replacement AGENTS.md supersedes universal measurement rule",
+    "review": "Preserve prior review evidence; focused corrective validation only."
   },
   "completed_batches": [
     {
@@ -804,6 +821,21 @@
       "implementation_tip": "4c78045f",
       "evidence": "docs/dev/evidence/issue0695/st04-ack-monitor-validation.json",
       "validation": "49 focused PASS each Python3.11/3.12; static PASS"
+    },
+    {
+      "base": "7c09353a89eb189380dd0b04b17dac70df22060a",
+      "tickets": [
+        "ST04-SIGNAL-CANCEL",
+        "ST04-INJECTOR-METADATA",
+        "ST04-HOST-STDIN",
+        "ST04-OUTPUT-FRAMES",
+        "ST04-GROK-EVENT-WAIT"
+      ],
+      "state": "closed_repo_local",
+      "review": "Previous broad review/TDD pass retained; no repeat.",
+      "implementation_tip": "1054d949",
+      "evidence": "docs/dev/evidence/issue0695/st04-terminal-stream-validation.json",
+      "validation": "85 terminal/input +10 network each311/312; final12 stream/custody/input each311/312; retained first failures and explicit flake disposition."
     }
   ],
   "remaining_inventory": {
@@ -814,5 +846,12 @@
     "legacy_wrapper_calls": 16,
     "limit": "Static pre-packet candidates only; current seven direct-call removals are not a new complete inventory. OpenClaw parked.",
     "next_scope": "Freeze coupled tabs/terminal numeric deadline contract before coordinated adoption; remaining callable defaults/shared utc_now require owner-specific qualification."
+  },
+  "policy_reconciliation": {
+    "authority": "Replacement user AGENTS.md",
+    "superseded": "Universal raw-clock elimination; separate counter helper for consuming service observations; clock qualification for every OS wait/log timestamp.",
+    "service_readback": "MCP health ready=true; get_time contract2 finite qualified_live, service measurement instant2026-11-18T21:23:03.671386358Z.",
+    "prior_inventory": "Historical static candidates, not remaining required migrations.",
+    "old_gates": "Native/permission/expiry evidence still required; no guest extrapolation or deadline renewal."
   }
 }
