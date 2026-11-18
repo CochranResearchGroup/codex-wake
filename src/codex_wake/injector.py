@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable, Protocol
 
@@ -21,7 +21,6 @@ from .records import (
     format_utc,
     find_record,
     replace_record,
-    utc_now,
     codex_client_identity_for_tty,
 )
 
@@ -480,7 +479,23 @@ def _dispatch_firing_record_unlocked(
         record = append_event(record, 'ack_observed', 'Held wake submission ack observed', now)
         replace_record(root, found, record)
         return DispatchResult('submitted', 'ack observed after held wait')
-    current = now or utc_now()
+    if now is not None:
+        current = now
+    else:
+        try:
+            target = record.get('target')
+            if isinstance(target, dict) and target.get('transport') == 'native':
+                from .records import parse_timestamp
+                lower, upper = measurements.utc_bounds()
+                current = datetime.fromtimestamp(upper, UTC)
+                expiry = parse_timestamp(target['expires_at']).timestamp()
+                # Metadata's rounded upper bound cannot prove expiration.
+                if lower < expiry <= max(upper, current.timestamp()):
+                    return DispatchResult('skipped', 'native expiry is uncertain')
+            else:
+                current = measurements.datetime_now()
+        except measurements.TimeUnavailable:
+            return DispatchResult('skipped', 'Stable Time UTC unavailable; no dispatch authorized')
     if record.get("schema_version") == 2:
         authorized = False
         if signal_authorizer is not None:

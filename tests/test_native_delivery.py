@@ -20,6 +20,12 @@ class NativeDeliveryTests(unittest.TestCase):
         clock = patch('codex_wake.native_clock.snapshot', return_value=dict(utc=dict(status='network', sources=['a','b'], lower=1791504000, upper=1791504000.2), counter=None))
         clock.start()
         self.addCleanup(clock.stop)
+        from test_measurements import observation
+        qualified = observation(1000)
+        qualified['utc'] = dict(status='network', lower=1791504000, upper=1791504000.2)
+        stable = patch('codex_wake.measurements.snapshot', return_value=qualified)
+        stable.start()
+        self.addCleanup(stable.stop)
 
     def test_file_wake_expires_even_if_file_never_appears(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -35,6 +41,7 @@ class NativeDeliveryTests(unittest.TestCase):
     def native_record(self, root, executable):
         record = build_record(predicate={'type': 'not_before', 'due_at': '2026-10-09T00:00:00Z'},
                               prompt='Execute the task', cwd=root,
+                              now=datetime(2026, 10, 9, tzinfo=UTC),
                               target={'transport': 'native', 'thread_id': '01a1227e-a041-7b72-9c36-18349e7dd22c',
                                       'endpoint': 'unix://', 'codex_cmd': str(executable),
                                       'expires_at': '2026-10-09T00:10:00Z'})
