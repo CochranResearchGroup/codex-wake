@@ -343,7 +343,7 @@
     "ST04-COLLECTOR": {
       "owner": "collector_stable_deadlines",
       "worker": "/root/collector_stable_deadlines",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST04-APP-TRANSPORT"
@@ -354,12 +354,16 @@
         "tests/test_local_session_resilience.py"
       ],
       "acceptance": "Qualified deadline before launch/input, retained counter anchor for acknowledgement/RPC/stream; post-I/O clock loss cannot claim timely acceptance; preserve exact protective-scope publication and no replay. Focused Python311/312.",
-      "non_goals": "No installed daemon/build/provider effects or comprehensive review/test rerun."
+      "non_goals": "No installed daemon/build/provider effects or comprehensive review/test rerun.",
+      "worker_sha": "5cc120501bb588e939c1c0f668220c758eff4922",
+      "integration_sha": "2d3f3aa0",
+      "validation": "6focusedPASS311/312worker; root same6PASS311 onintegration. ExactpublicACK/postscopeclockloss, no-spawn, lateACK, disconnectedstream, busyrefusal, protectiveinterrupt. No fullsuite/nativeacceptance.",
+      "evidence": "private st04-collector-result.json andst04-collector-integration-311.log"
     },
     "GR01-SAMPLE": {
       "owner": "root",
       "worker": "/root/grok_admission_contract",
-      "state": "running",
+      "state": "blocked",
       "dependencies": [
         "GR01",
         "ST01"
@@ -367,19 +371,41 @@
       "scope": "New private selected-build thread/sample bounded packet; sourcea5806e, expected latestfinished persistentroot, exactlyonegeneration/zeroCoretools. Existing user allowance unchanged.",
       "acceptance": "Real selected executable provider-free interception/cleanup acceptance before anyliveactivation; qualified originaldeadline and no uncertain replay; hooks/MCP startup effects qualified.",
       "non_goals": "No fullcoding/mixedroute proof; no Nativebuild/serviceupgrade/credentials copies.",
-      "evidence": "Private gr01-fresh-packet/diagnosis-correction.json; original wrong-source preflight retained."
+      "evidence": "private gr01-fresh-packet/sample-adapter-receipt.json, binary-sample-result.json and persisted-parent-metadata-result.json",
+      "implemented": "Private durable one-attempt thread/sample adapter and provider-free selected-binary harness prepared.",
+      "validation": "5adapterchecksPASS311/312worker plus root5PASS311. Actual selectedbinaryf3213987 loopbackResponsesPASS: prelude1+sample1, toolnull/noCoreexecution, ownedNativeprocessreaped. GenericResponses, notGrok auth/wire acceptance.",
+      "blocker_id": "GR01-PARENT"
+    },
+    "GR01-PARENT": {
+      "owner": "root",
+      "state": "blocked",
+      "dependencies": [
+        "GR01"
+      ],
+      "scope": "Qualify an existing idle persistent Grok root with latestfinishedturn and exactaccount/build/settings, no oldunknownstoppedtree replay or inheritedunqualifiedhook/MCPeffects.",
+      "acceptance": "Eligible exactparent/turn andstartupcontrols qualified beforeanylive sample/refresh. Freshprelude requires enforceableadmission, notpromptlimits.",
+      "evidence": "Exact60795 loadedlist and boundedgrokfilteredDBonlythreadlist returnedempty. No conclusion aboutallotherstores/threads.",
+      "blocker_id": "GR01-PARENT-EVIDENCE"
+    },
+    "GR01-PARENT-EVIDENCE": {
+      "owner": "root",
+      "state": "blocked",
+      "dependencies": [],
+      "scope": "Missing exacteligiblepersistentparent evidence; no candidate in boundedselecteddaemonmetadataqueries.",
+      "unblock": "Attributable eligibleparent locator or a separatelyqualifiedboundedparentpreparationroute.",
+      "non_goals": "Do notfabricatecompletedturn, unboundedprelude, broadenprivatehistoryscan or alterworkingdaemon."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
   "working_effects": "none",
-  "live_grok_renewal": "Approved12Grok/2OpenAI/16localtools/900StableTimeSeconds/1refresh; unused and not activated. Old preflight always-refusing stub/wrong9af source cannot establish selectedGrok capability absence. a5806e thread/sample candidate under provider-free qualification; no inference/refresh yet.",
+  "live_grok_renewal": "Approvedunused; allprovider/refreshcounts0, durationnotstarted. Existingthread/sampleadapter prepared andselectedbinaryloopbackqualified; liveparentgate GR01-PARENT-EVIDENCE remains. No additional permission requested; approvalretained.",
   "integration_validation_attempt": {
     "source": "1d140f6a",
     "initial": "115selected311/103selected312; eachfailedonlyonewrongtestmodule name test_work_acceptance_commands; allactualtests114/102passed",
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-18T11:40:29.093614+00:00",
+  "updated_at": "2026-11-18T11:46:42.139844+00:00",
   "worker_cleanup": "Previous completed worker trees removed after exact clean custody. Collector active isolated tree; sample worker private artifacts/read-only Native tree. Root retains integration checkout for openST04/#695.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
