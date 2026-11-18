@@ -582,18 +582,22 @@ legacy preservation and reader requirements. New native and managed Grok intent
 registrations write schema8, retaining base intent version6/7 semantics. Older
 records remain unchanged; unknown policy/record versions hold without delivery.
 
-### Held acknowledgement time
+### Held acknowledgement outcomes
 
-A firing tmux record may carry `ack_wait_time_held: true` after qualified time
-is lost following a possible paste. Its submission outcome remains unknown.
-The current reader never pastes that record again or renews its wait; it can
-reconcile an existing submission receipt into submitted status. Missing time
-before paste leaves the attempt count unchanged. Qualified acknowledgement
-timeouts retain the existing retry policy; zero waits are untimed inspection.
-This additive fence requires the current reader: before downgrade, keep held
-firing records out of an older scheduler that does not enforce this field.
+Historical firing tmux records may carry `ack_wait_time_held: true` from an
+older clock-gated receipt wait. Their submission outcome remains unknown. The
+current reader never pastes those records again; it can reconcile an existing
+submission receipt into submitted status. Keep this no-replay fence during
+correction and before downgrade to readers that do not understand the field.
+
+Ordinary receipt polling uses a protective OS wait and does not need an extra
+StableTime observation. Its timeout is not proof that a permission, lease, or
+original wake expiry elapsed. Scheduling/retry anchors and genuine expiry checks
+keep their own reliable-time requirements. A client/helper failure must not be
+reported as a StableTime service outage.
+
 Monitor health `checked_at` can be null with `time_status: not_observed`; such
-health is never fresh. No wake record schema revision is introduced.
+health is never fresh. No wake record schema revision is introduced here.
 
 ### Signal cancellation without an observed timestamp
 

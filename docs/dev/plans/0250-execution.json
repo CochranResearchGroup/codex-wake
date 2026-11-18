@@ -44,7 +44,7 @@
         "ST01",
         "ST02"
       ],
-      "scope": "Complete auditadoption pending; completedsubsets are not globalcompletion"
+      "scope": "Reconcile reliable-time owners with supported StableTime service semantics; ordinary waits/log metadata allowed. Prior raw-call inventory is not a migration target."
     },
     "GR01": {
       "owner": "grok_readiness_diagnosis",
@@ -702,24 +702,59 @@
     },
     "R0250-ACK": {
       "owner": "root",
-      "state": "running",
+      "state": "validated",
       "dependencies": [],
       "base": "363394fe11935749a95f5984215aca09377540f9",
-      "acceptance": "Ordinary receipt wait has no extra StableTime gate; old held outcomes remain no-replay."
+      "acceptance": "Ordinary receipt wait has no extra StableTime gate; old held outcomes remain no-replay.",
+      "integration_sha": "3c49b314",
+      "tracker_resolution": "closed_repo_local_corrective_component",
+      "evidence": "docs/dev/evidence/issue0695/r0250-policy-reconciliation.json",
+      "validation": "Public no-extra-clock-gate RED/GREEN; injector29 PASS311/312; combined waits41 PASS311/312. Historical held no-replay fence retained."
     },
     "R0250-ORDINARY-WAITS": {
       "owner": "ordinary_wait_correction",
-      "state": "running",
+      "state": "validated",
       "dependencies": [],
       "base": "363394fe11935749a95f5984215aca09377540f9",
-      "acceptance": "SSH frame/presentation/custody waits use ordinary protective limits; actual permission/expiry ownership unchanged."
+      "acceptance": "SSH frame/presentation/custody waits use ordinary protective limits; actual permission/expiry ownership unchanged.",
+      "integration_sha": "57106956",
+      "tracker_resolution": "closed_repo_local_corrective_component",
+      "evidence": "docs/dev/evidence/issue0695/r0250-policy-reconciliation.json",
+      "worker": "/root/ordinary_wait_correction",
+      "worker_sha": "94c0d7cdf227fde658fe0db257a2ddccfc290961",
+      "worker_branch": "fix/ordinary-waits-policy-0250",
+      "validation": "12 owned checks PASS311/312; root combined41 PASS311/312."
     },
     "R0250-SERVICE-CONTRACT": {
       "owner": "root",
-      "state": "running",
+      "state": "validated",
       "dependencies": [],
       "base": "363394fe11935749a95f5984215aca09377540f9",
-      "acceptance": "Service observations consumed at documented measurement basis without extra bridge; no false outage or current-upper claim."
+      "acceptance": "Service observations consumed at documented measurement basis without extra bridge; no false outage or current-upper claim.",
+      "integration_sha": "932ea539",
+      "tracker_resolution": "closed_repo_local_corrective_component",
+      "evidence": "docs/dev/evidence/issue0695/r0250-policy-reconciliation.json",
+      "worker": "/root/service_clock_contract",
+      "worker_sha": "42e4697b86bafc429a2575dd9cd4649254a849d2",
+      "worker_branch": "fix/service-observation-policy-0250",
+      "validation": "17 stable_time/time_inspection PASS311/312 worker and root. Real CLI qualified_live service measurement inspection succeeded.",
+      "scope": "Helper-free read-only service inspection and explicit measurement-basis/failure taxonomy; strict scheduling helper replacement remains R0250-STRICT-CLIENT."
+    },
+    "R0250-OWNER-WAITS": {
+      "owner": "root",
+      "state": "pending",
+      "dependencies": [
+        "R0250-ORDINARY-WAITS"
+      ],
+      "scope": "Remove further protective wait clock gates in local_session_operations/controller_runtime; preserve genuine actor/permission expiry checks."
+    },
+    "R0250-STRICT-CLIENT": {
+      "owner": "root",
+      "state": "pending",
+      "dependencies": [
+        "R0250-SERVICE-CONTRACT"
+      ],
+      "scope": "Migrate remaining strict client consumers to a supported service measurement contract without extra app bridge or false receipt-current upper bound. Preserve original persisted deadlines and refusal where evidence is insufficient."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -732,7 +767,7 @@
     "full_suite": false
   },
   "updated_at": "2026-11-18T20:41:27.677977+00:00",
-  "worker_cleanup": "Exact clean/remote/file custody and removal outcomes are recorded in private st04-terminal-stream-closeout.json and worker custody receipts. Branches retained. Root integration retained for remaining ST04/#695; frozen Native/package5 retained for qualification custody, reviewed at next qualification gate.",
+  "worker_cleanup": "Worker removal and exact remote/clean/file custody outcomes are recorded in private r0250-policy-closeout.json after final publication. Root integration retained for named remaining owner-wait and strict-client reconciliation; frozen Native/package5 retained for #695 qualification.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
     "source": "53cb11bd",
@@ -754,9 +789,12 @@
       "R0250-ORDINARY-WAITS",
       "R0250-SERVICE-CONTRACT"
     ],
-    "state": "running",
+    "state": "closed_repo_local_corrective_components",
     "authority": "User replacement AGENTS.md supersedes universal measurement rule",
-    "review": "Preserve prior review evidence; focused corrective validation only."
+    "review": "Preserve prior review evidence; focused corrective validation only.",
+    "implementation_tip": "932ea539",
+    "validation": "41 waits +17 service checks PASS each311/312; real helper-free time inspection qualified_live; static PASS.",
+    "limits": "Reconciliation is incomplete for lower owner waits and strict helper-dependent scheduling clients; no whole-stack helper independence claimed."
   },
   "completed_batches": [
     {
@@ -845,13 +883,19 @@
     "callable_bindings": 29,
     "legacy_wrapper_calls": 16,
     "limit": "Static pre-packet candidates only; current seven direct-call removals are not a new complete inventory. OpenClaw parked.",
-    "next_scope": "Freeze coupled tabs/terminal numeric deadline contract before coordinated adoption; remaining callable defaults/shared utc_now require owner-specific qualification."
+    "next_scope": "Classify owners by actual reliable-time requirements; no blanket tabs/raw-call migration. Correct lower ordinary waits and explicit service/receipt measurement bases first."
   },
   "policy_reconciliation": {
     "authority": "Replacement user AGENTS.md",
     "superseded": "Universal raw-clock elimination; separate counter helper for consuming service observations; clock qualification for every OS wait/log timestamp.",
     "service_readback": "MCP health ready=true; get_time contract2 finite qualified_live, service measurement instant2026-11-18T21:23:03.671386358Z.",
     "prior_inventory": "Historical static candidates, not remaining required migrations.",
-    "old_gates": "Native/permission/expiry evidence still required; no guest extrapolation or deadline renewal."
+    "old_gates": "Native/permission/expiry evidence still required; no guest extrapolation or deadline renewal.",
+    "remaining_owners": [
+      "local_session_operations._native_output and controller_runtime wait loops: separate protective wait from genuine actor UTC checks.",
+      "native_clock.snapshot and strict StableTime decision consumers: existing receipt-time assumptions must not be replaced by service-point upper bounds."
+    ],
+    "updated_at": "2026-11-18T21:37:38.415472+00:00",
+    "timestamp_basis": "Incidental OS metadata; not authority or deadline evidence."
   }
 }

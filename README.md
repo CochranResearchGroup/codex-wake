@@ -1176,15 +1176,24 @@ a different recovery, or silently overwrites another canonical image.
 
 ### Inspect external time on WSL
 
-Run `codex-wake time inspect` to collect a bounded network-time report without
-changing the clock or mailbox. `codex-wake time inspect --offline` shows source
-admission policy without network access. Reports identify the accepted interval,
-its host-counter instant, and each source's exclusion reason. Windows PowerShell
-interop is required; unavailable acquisition returns uncertainty. Network rounds
-are limited to one per 64 seconds across processes, with a two-minute bounded
-cache. Cloudflare/NIST/Alastyr observations are explicitly unauthenticated; Netnod/PTB
-remain disabled pending time-scale qualification. This inspection command does
-not activate deadline effects. See Plan0123 qualification for policy and limits.
+Run `codex-wake time inspect` to read the configured StableTime service without
+changing the clock or mailbox. This service inspection uses its supported HTTP
+API and does not require Wake's separate counter helper or PowerShell interop.
+`measurement_decision` reports finite bounds at `basis: service_measurement`;
+they are not extrapolated with a WSL clock or relabeled as receipt-current bounds.
+The separate `decision` remains uncertain when receipt-time authority is not
+established. Inspection authorizes no dispatch. Client configuration, transport,
+response and counter-helper failures have distinct reasons; a helper failure
+is not evidence that the service is down.
+
+`--offline` avoids acquisition. Without service configuration, the legacy
+external-time inspection path retains its separate admission/interop rules:
+network rounds are limited to one per64seconds with a bounded cache, and
+Cloudflare/NIST/Alastyr plain NTP is explicitly unauthenticated. Netnod/PTB
+admission in that legacy path is separate from StableTime's NTS source policy.
+See Plan0123 for legacy qualification and the
+[StableTime service contract](https://github.com/CochranResearchGroup/stable-time/blob/main/docs/specs/0001-stable-time-v1.md)
+for service measurement uncertainty and delivery-time limits.
 
 ### Opt-in network time (0.8.0)
 
