@@ -69,3 +69,21 @@ child cleanup waits remain blocking primitives. Actual counter qualification,
 epoch/rate continuity and UTC handoff age remain with the existing authenticated
 Stable Time and QPC validators. A kernel fuse firing proves only transport
 refusal, never that an authority deadline elapsed.
+
+## Current bounded continuation
+
+ST04-COLLECTOR (owner collector_stable_deadlines, running; blockers validated
+ST01/ST04-APP-TRANSPORT) owns local_session_events launch, RPC and stream deadlines.
+Acceptance: original qualified deadline, refusal before new input on clock loss,
+uncertain/no replay after possible input, exact protective ownership preserved.
+
+GR01-SAMPLE (root, preparation running; blockers validated GR01/ST01) qualifies
+the selected Grok build's existing thread/sample route before live use. It captures
+one response on an ephemeral fork; model tool calls are not dispatched by Core.
+This is a narrow candidate, not full coding or mixed-provider qualification.
+The old packet adapter unconditionally refused and its schema inspection used
+Native9af instead of the selected Grok sourcea5806e; that earlier categorical
+capability inference is withdrawn. Preserve original receipts and append correction.
+Require selected executable acceptance, eligible parent/turn pins, bounded startup
+effects, qualified external deadline and consumed unknown attempts before spending
+the approved fresh allowance. No new Native build or working-daemon adoption.

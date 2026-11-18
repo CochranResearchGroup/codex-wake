@@ -339,19 +339,48 @@
       "integration_sha": "f6fc8f31",
       "scope": "Explicit actor profile/daemon read expiry qualified UTC; actor=None verified local read/stop paths untouched",
       "validation": "6worker public product/daemon scenariosPASS311/312, root combined9 actor/maintenancePASS311/312. No Actor-string local bypass, no private reads on clock loss."
+    },
+    "ST04-COLLECTOR": {
+      "owner": "collector_stable_deadlines",
+      "worker": "/root/collector_stable_deadlines",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST04-APP-TRANSPORT"
+      ],
+      "base": "f8d8fea9dfb5f56093af0407f4296b401c03b427",
+      "paths": [
+        "src/codex_wake/local_session_events.py",
+        "tests/test_local_session_resilience.py"
+      ],
+      "acceptance": "Qualified deadline before launch/input, retained counter anchor for acknowledgement/RPC/stream; post-I/O clock loss cannot claim timely acceptance; preserve exact protective-scope publication and no replay. Focused Python311/312.",
+      "non_goals": "No installed daemon/build/provider effects or comprehensive review/test rerun."
+    },
+    "GR01-SAMPLE": {
+      "owner": "root",
+      "worker": "/root/grok_admission_contract",
+      "state": "running",
+      "dependencies": [
+        "GR01",
+        "ST01"
+      ],
+      "scope": "New private selected-build thread/sample bounded packet; sourcea5806e, expected latestfinished persistentroot, exactlyonegeneration/zeroCoretools. Existing user allowance unchanged.",
+      "acceptance": "Real selected executable provider-free interception/cleanup acceptance before anyliveactivation; qualified originaldeadline and no uncertain replay; hooks/MCP startup effects qualified.",
+      "non_goals": "No fullcoding/mixedroute proof; no Nativebuild/serviceupgrade/credentials copies.",
+      "evidence": "Private gr01-fresh-packet/diagnosis-correction.json; original wrong-source preflight retained."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
   "working_effects": "none",
-  "live_grok_renewal": "User approved fresh12Grok/2OpenAI/16localtools/900StableTimeSeconds/1metadatarefresh; existing login only. Owner grok_readiness_diagnosis preflight; live budget not yet started. Prior exhausted/unknown-charge history immutable; no replay.",
+  "live_grok_renewal": "Approved12Grok/2OpenAI/16localtools/900StableTimeSeconds/1refresh; unused and not activated. Old preflight always-refusing stub/wrong9af source cannot establish selectedGrok capability absence. a5806e thread/sample candidate under provider-free qualification; no inference/refresh yet.",
   "integration_validation_attempt": {
     "source": "1d140f6a",
     "initial": "115selected311/103selected312; eachfailedonlyonewrongtestmodule name test_work_acceptance_commands; allactualtests114/102passed",
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-17T20:38:19.134732+00:00",
-  "worker_cleanup": "Completed original Grok, custody and bootstrap checkouts removed after clean exact commit/source byte equality and pushed custody verified; worker branch refs retained. New reenrollment/poll-ack and account-control checkouts active.",
+  "updated_at": "2026-11-18T11:40:29.093614+00:00",
+  "worker_cleanup": "Previous completed worker trees removed after exact clean custody. Collector active isolated tree; sample worker private artifacts/read-only Native tree. Root retains integration checkout for openST04/#695.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
     "source": "53cb11bd",
