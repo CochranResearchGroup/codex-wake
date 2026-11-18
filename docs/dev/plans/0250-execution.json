@@ -371,29 +371,31 @@
       "scope": "New private selected-build thread/sample bounded packet; sourcea5806e, expected latestfinished persistentroot, exactlyonegeneration/zeroCoretools. Existing user allowance unchanged.",
       "acceptance": "Real selected executable provider-free interception/cleanup acceptance before anyliveactivation; qualified originaldeadline and no uncertain replay; hooks/MCP startup effects qualified.",
       "non_goals": "No fullcoding/mixedroute proof; no Nativebuild/serviceupgrade/credentials copies.",
-      "evidence": "private gr01-fresh-packet/sample-adapter-receipt.json, binary-sample-result.json and persisted-parent-metadata-result.json",
+      "evidence": "Private takeover-diagnosis.json supersedesstaleparentlookup. Preparedadapter/loopbackqualified; actualsampleuncertain, original900swindowexpired.",
       "implemented": "Private durable one-attempt thread/sample adapter and provider-free selected-binary harness prepared.",
       "validation": "5adapterchecksPASS311/312worker plus root5PASS311. Actual selectedbinaryf3213987 loopbackResponsesPASS: prelude1+sample1, toolnull/noCoreexecution, ownedNativeprocessreaped. GenericResponses, notGrok auth/wire acceptance.",
-      "blocker_id": "GR01-PARENT"
+      "blocker_id": "GR01-LIVE-WINDOW"
     },
     "GR01-PARENT": {
       "owner": "root",
-      "state": "blocked",
+      "state": "validated",
       "dependencies": [
         "GR01"
       ],
       "scope": "Qualify an existing idle persistent Grok root with latestfinishedturn and exactaccount/build/settings, no oldunknownstoppedtree replay or inheritedunqualifiedhook/MCPeffects.",
       "acceptance": "Eligible exactparent/turn andstartupcontrols qualified beforeanylive sample/refresh. Freshprelude requires enforceableadmission, notpromptlimits.",
-      "evidence": "Exact60795 loadedlist and boundedgrokfilteredDBonlythreadlist returnedempty. No conclusion aboutallotherstores/threads.",
-      "blocker_id": "GR01-PARENT-EVIDENCE"
+      "evidence": "Private gr01-fresh-packet/takeover-preflight-result.json; correctcampaignhome/provider, idlecompletedparent/noactivegoal. Wronghome/filterholdretainedashistory.",
+      "tracker_resolution": "closed_repo_local_corrected_stale_lookup"
     },
     "GR01-PARENT-EVIDENCE": {
       "owner": "root",
-      "state": "blocked",
+      "state": "validated",
       "dependencies": [],
       "scope": "Missing exacteligiblepersistentparent evidence; no candidate in boundedselecteddaemonmetadataqueries.",
       "unblock": "Attributable eligibleparent locator or a separatelyqualifiedboundedparentpreparationroute.",
-      "non_goals": "Do notfabricatecompletedturn, unboundedprelude, broadenprivatehistoryscan or alterworkingdaemon."
+      "non_goals": "Do notfabricatecompletedturn, unboundedprelude, broadenprivatehistoryscan or alterworkingdaemon.",
+      "tracker_resolution": "closed_repo_local_corrected_stale_lookup",
+      "evidence": "Private gr01-fresh-packet/takeover-preflight-result.json; correctcampaignhome/provider, idlecompletedparent/noactivegoal. Wronghome/filterholdretainedashistory."
     },
     "ST04-CREATION": {
       "owner": "root",
@@ -473,6 +475,65 @@
       "integration_sha": "781772f0",
       "validation": "PublicissuerRED then11auth/daemonPASS311; combined23PASS311/312 includingexactclockloss/cachedreads anduntimedstop. Lowerboundissuance/upperverification, no WSLfallback.",
       "tracker_resolution": "closed_repo_local_after_validated_integration_and_one_review"
+    },
+    "ST04-DAEMON-UTC": {
+      "owner": "root",
+      "worker": "/root",
+      "state": "implemented",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "base": "c39eabd6cf29096fbb0cfc366ada11ae0bd6a089",
+      "paths": [
+        "src/codex_wake/daemon.py",
+        "tests/test_daemon.py"
+      ],
+      "acceptance": "Reademergencycontrolbeforeclock. DefaultlegacydecisionsusequalifiedlowerUTC, missingUTCholdslegacy/signalobservation/dispatchwithtime_heldcount; relativecounter-onlynative6/7/8proceedthroughownclock. RecheckUTCbeforelegacydispatch, useuppertoholdambiguousnative4expiry. Explicitnowtrustedhostseam preserved. No finalsendguaranteesnewtransport/noNativebuild.",
+      "non_goals": "No provider/service/credentials/Nativebuild/fullsuite/broadreview/OpenClaw/memoryeffects.",
+      "tracker_resolution": "pendingvalidatedintegration",
+      "validation": "62focuseddaemon/nativeintent/networkchecksPASS311 beforeworkerintegration; lower/readiness/unknownUTC/signalexpiry/retry publicREDs retained. Additivetime_heldreporting; originalnativecounteranchorspreserved."
+    },
+    "ST04-RECORD-EVENTS": {
+      "owner": "st04_record_events",
+      "worker": "/root/st04_record_events",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "base": "c39eabd6cf29096fbb0cfc366ada11ae0bd6a089",
+      "paths": [
+        "src/codex_wake/records.py",
+        "tests/test_records.py"
+      ],
+      "acceptance": "Defaultevent/movemetadataqualifiedUTC-or-null/not_observed; explicitnowpreserved. Stop/identity/deadline/retention unchanged. No globalutc_nowreplacement/no coupledv2cancelretirementchange.",
+      "non_goals": "No provider/service/credentials/Nativebuild/fullsuite/broadreview/OpenClaw/memoryeffects.",
+      "tracker_resolution": "pendingvalidatedintegration"
+    },
+    "ST04-SIGNAL-LEASES": {
+      "owner": "st04_signal_leases",
+      "worker": "/root/st04_signal_leases",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "base": "c39eabd6cf29096fbb0cfc366ada11ae0bd6a089",
+      "paths": [
+        "src/codex_wake/signal_store.py",
+        "tests/test_signal_store.py"
+      ],
+      "acceptance": "DefaultnewmetadataqualifiedUTC. Ownershipreclaimrequiresqualifiedlower>=expiry; newTTLanchoredlower, continuedleaseadmissionrequiresupper<expiry. Missing/ambiguoustimeholdsnewownership/work; explicitlease_clockpointseamandexistingreadonlyinspectionretained. No schema/domain/terminalretirementcontractchange.",
+      "non_goals": "No provider/service/credentials/Nativebuild/fullsuite/broadreview/OpenClaw/memoryeffects.",
+      "tracker_resolution": "pendingvalidatedintegration"
+    },
+    "GR01-LIVE-WINDOW": {
+      "owner": "root",
+      "state": "blocked",
+      "dependencies": [],
+      "scope": "Original900sStableTimewindow expired; uncertainfreshsamplepreserved. Needexplicitrenewedlivewindow beforeanynewprobe, pluscompleteerrorcapture/backgroundmetadataeffectqualification.",
+      "non_goals": "No timerreset/no replay/no newproviderpermissionfromimplement-spec."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -484,7 +545,7 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-18T15:19:20.652312+00:00",
+  "updated_at": "2026-11-18T18:09:05.210682+00:00",
   "worker_cleanup": "Previous completed worker trees removed after exact clean custody. Collector active isolated tree; sample worker private artifacts/read-only Native tree. Root retains integration checkout for openST04/#695.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
@@ -501,37 +562,51 @@
     "limits": "No provider calls or installed daemon changes. Broader migrations/fullPython/runtime/activation gates open."
   },
   "current_batch": {
-    "base": "5d2919175664ae1e0ceab0843162b276d6ba6260",
+    "base": "c39eabd6cf29096fbb0cfc366ada11ae0bd6a089",
     "tickets": [
-      "ST04-CREATION",
-      "ST04-LOCAL-WAITS",
-      "ST04-CONTROLLER-WAITS",
-      "ST04-LOCAL-ACTOR"
+      "ST04-DAEMON-UTC",
+      "ST04-RECORD-EVENTS",
+      "ST04-SIGNAL-LEASES"
     ],
-    "review": "Onefinalreview for newbatch from5d291917 (questionasked; noanswer yet, stateddefault), thenoneboundedTDDfindingspass. Earlierbroadreview not repeated.",
+    "state": "running",
     "wip_limit": 3,
-    "live_grok": "Expiredwindow; unknownsamplepreserved, noproviderpermission inferredfromimplement-spec.",
-    "state": "closed_repo_local",
-    "implementation_tip": "781772f0",
-    "review_base": "5d2919175664ae1e0ceab0843162b276d6ba6260",
-    "focused_validation": [
-      "34creation/record/network checksPASS311/312",
-      "23combinedcontroller/localwait/authority/daemonchecksPASS311/312",
-      "RuffundefinednamesPASS",
-      "policywiringPASS"
-    ],
-    "retained_failure": "st04-current-batch-3.11.log:21PASS,2fixtureerrors due stricterissuer; finalv2same23PASSboth, not erased",
-    "live_effects": "none; expiredGrokallowance anduncertainsample unchanged",
-    "review_tip": "f0556ea0",
-    "review_passes": 1,
-    "remediation_passes": 1,
-    "review_results": {
-      "Standards": "0blocking/0backlog candidates",
-      "Spec": "1P1blocking accepted andfixed: finalwaitpublicationmustrecheckexpired/revokedauthority"
-    },
-    "review_evidence": "docs/dev/evidence/issue0695/st04-current-batch-review.md",
-    "remediation": "Public4subcaseRED, minimumfinal_ownedguard; 5focusedPASS311/312. No broadreview rerun.",
-    "adjacent_validation": "7unifiedterminal/presentationcasesPASS311; no sourcechangesafteractorissuance exceptreviewguard.",
-    "scope_limit": "Fourrepo-localticketsclosed; globalST04/#695/#628 andfullPython/activation/liveGrok remainopen. NoNativebuild/fullsuite/reviewrepeat/liveeffects."
-  }
+    "review": "Previousfinalreview/TDDpassretained; no repeatbroadreviewauthorizedfor0250 continuation.",
+    "gate_reporting": "AdditivePollResult.time_held countsheldlegacytime-dependentrecords whileindependentnativecounterintentworkremainsavailable."
+  },
+  "completed_batches": [
+    {
+      "base": "5d2919175664ae1e0ceab0843162b276d6ba6260",
+      "tickets": [
+        "ST04-CREATION",
+        "ST04-LOCAL-WAITS",
+        "ST04-CONTROLLER-WAITS",
+        "ST04-LOCAL-ACTOR"
+      ],
+      "review": "Onefinalreview for newbatch from5d291917 (questionasked; noanswer yet, stateddefault), thenoneboundedTDDfindingspass. Earlierbroadreview not repeated.",
+      "wip_limit": 3,
+      "live_grok": "Expiredwindow; unknownsamplepreserved, noproviderpermission inferredfromimplement-spec.",
+      "state": "closed_repo_local",
+      "implementation_tip": "781772f0",
+      "review_base": "5d2919175664ae1e0ceab0843162b276d6ba6260",
+      "focused_validation": [
+        "34creation/record/network checksPASS311/312",
+        "23combinedcontroller/localwait/authority/daemonchecksPASS311/312",
+        "RuffundefinednamesPASS",
+        "policywiringPASS"
+      ],
+      "retained_failure": "st04-current-batch-3.11.log:21PASS,2fixtureerrors due stricterissuer; finalv2same23PASSboth, not erased",
+      "live_effects": "none; expiredGrokallowance anduncertainsample unchanged",
+      "review_tip": "f0556ea0",
+      "review_passes": 1,
+      "remediation_passes": 1,
+      "review_results": {
+        "Standards": "0blocking/0backlog candidates",
+        "Spec": "1P1blocking accepted andfixed: finalwaitpublicationmustrecheckexpired/revokedauthority"
+      },
+      "review_evidence": "docs/dev/evidence/issue0695/st04-current-batch-review.md",
+      "remediation": "Public4subcaseRED, minimumfinal_ownedguard; 5focusedPASS311/312. No broadreview rerun.",
+      "adjacent_validation": "7unifiedterminal/presentationcasesPASS311; no sourcechangesafteractorissuance exceptreviewguard.",
+      "scope_limit": "Fourrepo-localticketsclosed; globalST04/#695/#628 andfullPython/activation/liveGrok remainopen. NoNativebuild/fullsuite/reviewrepeat/liveeffects."
+    }
+  ]
 }
