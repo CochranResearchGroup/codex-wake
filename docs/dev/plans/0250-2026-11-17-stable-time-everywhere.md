@@ -30,16 +30,15 @@ unknown outcomes and deadlines must not be reset during correction.
 
 ## Current reconciliation packet
 
-R0250-ACK (root): remove additional StableTime qualification from ordinary receipt
-polling; preserve reconciliation of already-held submission records without replay.
-R0250-ORDINARY-WAITS (worker): remove extra clock calls/gates from SSH frame input,
-output presentation and collector custody polling, retaining original protective
-wait bounds and underlying authorization owners.
-R0250-SERVICE-CONTRACT (root with read-only discovery): document supported service
-measurement semantics and remove helper dependence only where the consumer can
-use that measurement basis honestly. Do not relabel a past service-point upper
-bound as a current client-receipt upper bound. Preserve strict-effect refusal
-until its required evidence is established; no new counter bridge is permitted.
+R0250-OWNER-WAITS separates controller/local caller waits from genuine actor
+UTC authorization. Final result/output publication retains fresh authority checks,
+including advisory timeout paths. R0250-STRICT-CLIENT removes the auxiliary
+counter-helper requirement from default Python snapshots and service decisions.
+Service UTC and counter evidence remain at the explicit measurement instant.
+
+Earlier ACK/SSH/presentation/custody corrections and helper-free inspection are
+complete source components. Historical receipts below describe earlier contracts;
+the supported service decision section and execution ledger govern current work.
 
 Below are historical execution sections under the superseded universal rule;
 0250-execution.json records corrective ticket states and current acceptance.
@@ -195,3 +194,14 @@ Python must not preadvance the same bounds and cause a second advancement there.
 Default Python clients therefore no longer need the auxiliary counter process.
 The explicit pure handoff conversion remains for compatibility, without starting
 that helper. A source change is not installed Native acceptance or deployment.
+
+## Native qualification boundary
+
+The frozen Native final-send implementation and its clock-producer wire still
+include the legacy private counter-source contract. This packet removes Python
+sampling helpers; it does not replace that Native producer/consumer protocol or
+prove the advertised counter socket is live. Runtime/service-source replacement
+and qualification stay in #695. The original expiry envelope, host qualification
+refusal, and no-replay protections remain mandatory before any deployment.
+Other transport-only wait gates outside the owned files remain owner-specific
+reconciliation work, not a renewed all-clock-call migration.

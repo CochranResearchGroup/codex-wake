@@ -1181,10 +1181,12 @@ changing the clock or mailbox. This service inspection uses its supported HTTP
 API and does not require Wake's separate counter helper or PowerShell interop.
 `measurement_decision` reports finite bounds at `basis: service_measurement`;
 they are not extrapolated with a WSL clock or relabeled as receipt-current bounds.
-The separate `decision` remains uncertain when receipt-time authority is not
-established. Inspection authorizes no dispatch. Client configuration, transport,
-response and counter-helper failures have distinct reasons; a helper failure
-is not evidence that the service is down.
+`decision` uses the same service instant for Python selection and authorization;
+it does not claim receipt-time accuracy. Default Python clock clients consume
+these observations directly without the auxiliary counter helper. Inspection
+authorizes no dispatch or installed Native readiness. Client configuration,
+transport and invalid-response failures have distinct reasons and do not by
+themselves establish a service outage.
 
 `--offline` avoids acquisition. Without service configuration, the legacy
 external-time inspection path retains its separate admission/interop rules:

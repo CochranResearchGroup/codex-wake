@@ -13,7 +13,7 @@ lanes:
     dependencies: []
     overlaps: []
     updated_at: 2026-11-18
-    disposition: Plan0250 replacement-policy reconciliation through932ea539; ordinary wait gates removed and read-only service inspection helper-free. Remaining lower owner waits and strict client measurement-basis migration explicit. Global695/runtime/fullPython gates open; no live Grok renewal or deployment.
+    disposition: Plan0250 default Python service clients helper-free and controller/local advisory waits separated from genuine actor checks through79f99c36. Native final-send clock-source protocol/qualification remains explicit; runtime/fullPython/activation open. No new Native build, live provider input or daemon change.
 
 
   - id: monitor-clock-702

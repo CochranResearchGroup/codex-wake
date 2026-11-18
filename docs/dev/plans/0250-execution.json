@@ -742,20 +742,44 @@
     },
     "R0250-OWNER-WAITS": {
       "owner": "root",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "R0250-ORDINARY-WAITS"
       ],
       "scope": "Remove further protective wait clock gates in local_session_operations/controller_runtime; preserve genuine actor/permission expiry checks.",
-      "worker": "/root/owner_waits_correction"
+      "worker": "/root/owner_waits_correction",
+      "integration_sha": "9f2de173",
+      "worker_sha": "da112c106db5411e37a2ac076e448c60394cf7a0",
+      "worker_branch": "fix/owner-waits-policy-0250",
+      "validation": "23 integrated owner/output checks PASS Python3.11/3.12. Counter-client independence and final result/output expiry/revocation4 subcases RED/GREEN.",
+      "tracker_resolution": "closed_repo_local_after_validated_integration"
     },
     "R0250-STRICT-CLIENT": {
       "owner": "root",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "R0250-SERVICE-CONTRACT"
       ],
-      "scope": "Default native_clock and stable_time clients consume service-point UTC/counter evidence directly; compare service-counter observations for elapsed, preserve earlier local-anchor order guards and Native final-send envelope."
+      "scope": "Default Python snapshots/selection consume explicit service-measurement evidence without helper; Native final-send remains separate qualification/protocol owner.",
+      "integration_sha": "a7d34a08",
+      "validation": "Core77 PASS311 before additional error-case; final10 measurement checks PASS311, full78 PASS312. Queue-reader2 final checks PASS311/312. Real defaults qualified with helper forced unavailable. Authority20 PASS311;312 first19PASS/1readiness failure, exactcase PASS311/312 after test-cadence correction; first failure retained.",
+      "tracker_resolution": "closed_repo_local_python_clients_only"
+    },
+    "R0250-NATIVE-CLOCK-SOURCE": {
+      "owner": "root",
+      "state": "pending",
+      "dependencies": [
+        "R0250-STRICT-CLIENT"
+      ],
+      "scope": "Reconcile/qualify Native final-send clock-source protocol under supported StableTime policy. Existing Native clock producer still advertises legacy private counter source; Python helper removal does not qualify or replace it. Preserve exact original expiry and no-replay/host qualification gates."
+    },
+    "R0250-TRANSPORT-WAITS": {
+      "owner": "root",
+      "state": "pending",
+      "dependencies": [
+        "R0250-OWNER-WAITS"
+      ],
+      "scope": "Classify remaining transport-only wait gates in native_protocol/app-server and other owners; remove only unnecessary time availability gates, retain actual authorization and expiry. No raw-call-count target."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -768,7 +792,7 @@
     "full_suite": false
   },
   "updated_at": "2026-11-18T20:41:27.677977+00:00",
-  "worker_cleanup": "Worker removal and exact remote/clean/file custody outcomes are recorded in private r0250-policy-closeout.json after final publication. Root integration retained for named remaining owner-wait and strict-client reconciliation; frozen Native/package5 retained for #695 qualification.",
+  "worker_cleanup": "Private r0250-default-client-closeout.json owns exact clean/file/remote custody and removal outcome. Root integration retained for named Native clock-source/transport followups; frozen Native/package5 retained for qualification custody.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
     "source": "53cb11bd",
@@ -789,8 +813,11 @@
       "R0250-OWNER-WAITS",
       "R0250-STRICT-CLIENT"
     ],
-    "state": "running",
-    "design": "Fresh Python decisions use explicit service-measurement basis; Native owns separate final-send expiry. No app helper required for service observations; no guest extrapolation or anchor renewal."
+    "state": "closed_repo_local_python_components",
+    "design": "Fresh Python decisions use explicit service-measurement basis; Native owns separate final-send expiry. No app helper required for service observations; no guest extrapolation or anchor renewal.",
+    "implementation_tip": "79f99c36",
+    "evidence": "docs/dev/evidence/issue0695/r0250-default-client-validation.json",
+    "limits": "Source Python components validated; Native clock-source runtime qualification, other transport wait reconciliation and fullPython remain open."
   },
   "completed_batches": [
     {
@@ -902,8 +929,8 @@
     "prior_inventory": "Historical static candidates, not remaining required migrations.",
     "old_gates": "Native/permission/expiry evidence still required; no guest extrapolation or deadline renewal.",
     "remaining_owners": [
-      "local_session_operations._native_output and controller_runtime wait loops: separate protective wait from genuine actor UTC checks.",
-      "native_clock.snapshot and strict StableTime decision consumers: existing receipt-time assumptions must not be replaced by service-point upper bounds."
+      "Native final-send clock-source protocol/qualification (#695); frozen Native source/package not rebuilt or deployed.",
+      "Transport-only waits outside current controller/local owner files."
     ],
     "updated_at": "2026-11-18T21:37:38.415472+00:00",
     "timestamp_basis": "Incidental OS metadata; not authority or deadline evidence."

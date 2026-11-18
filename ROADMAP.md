@@ -1839,3 +1839,11 @@ bounded busy queue refused until separate-UID native qualification passes.
 [Plan0248](docs/dev/plans/0248-2026-11-16-accepted-wake-reconciliation.md):
 PR703 integrated; dev41 exact-wheel qualification and working deployment
 accepted. No bulk historical wake migration. See Plan0248 deployment evidence.
+
+### Plan0250 timing-policy reconciliation
+
+[Plan0250](docs/dev/plans/0250-2026-11-17-stable-time-everywhere.md) now uses
+supported service-measurement semantics for Python clients and separates ordinary
+waits from genuine authorization. Next: Native final-send clock-source protocol
+qualification under #695, then remaining transport-only wait owners. Historical
+raw-clock counts are discovery aids, not a migration target or release gate.

@@ -16,7 +16,12 @@ its original expiration remains eligible, independent of earlier selection or
 preparation. It does not establish when the remote model starts.
 
 **Trusted time**:
-A bounded estimate of current time accepted under the configured source-selection rules.
+A bounded UTC estimate accepted under the configured source-selection rules at its documented measurement instant. It does not by itself bound delivery to another process.
+
+**Service measurement instant**:
+The instant described by StableTime's UTC bounds and host-counter evidence.
+Client receipt and provider send are separate instants. WSL clocks must not be
+used to extrapolate this trusted observation.
 
 **Time uncertainty**:
 The condition in which available evidence cannot establish whether a deadline has passed.
