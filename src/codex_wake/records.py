@@ -662,7 +662,7 @@ def _cancel_found(
         current = None
     elif now is not None:
         current = now
-    elif record.get('schema_version') in (1, 4):
+    elif record.get('schema_version') in (1, 2, 4):
         from . import measurements
         try:
             current = measurements.datetime_now()
@@ -672,7 +672,13 @@ def _cancel_found(
     else:
         current = utc_now()
     record["status"] = "cancelled"
-    record["updated_at"] = None if current is None else format_utc(current)
+    if current is None and record.get('schema_version') == 2:
+        # Schema2 requires a timestamp string. Retain the last observation,
+        # explicitly excluding it as evidence of the cancellation's time.
+        record['updated_at_time_status'] = 'not_observed'
+    else:
+        record["updated_at"] = None if current is None else format_utc(current)
+        record.pop('updated_at_time_status', None)
     events = list(record.get("events") or [])
     events.append(dict(type='cancelled',message='Wake cancelled by operator',at=None,time_status='not_observed') if current is None else make_event("cancelled", "Wake cancelled by operator", current))
     record["events"] = events
@@ -894,7 +900,7 @@ def protected_signal_cleanup_records(
     return protected
 
 
-def _retire_signal_terminal(root: Path, record: dict[str, Any], now: datetime) -> None:
+def _retire_signal_terminal(root: Path, record: dict[str, Any], now: datetime | None) -> None:
     if decode_signal_record(record) is None:
         return
     try:

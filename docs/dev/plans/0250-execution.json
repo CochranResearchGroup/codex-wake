@@ -582,6 +582,37 @@
       "worker": "/root/st04_monitor_time",
       "worker_sha": "aedf1c10011e7b186e4400797fdaff6966196802",
       "worker_branch": "fix/stable-time-monitor-0250"
+    },
+    "ST04-SIGNAL-CANCEL": {
+      "owner": "root",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "base": "7c09353a89eb189380dd0b04b17dac70df22060a",
+      "paths": [
+        "src/codex_wake/records.py",
+        "src/codex_wake/signal_store.py",
+        "tests/test_records.py"
+      ],
+      "acceptance": "Signal cancellation uses qualified UTC when available; missing time still stops with retained last-observed updated_at plus explicit unknown marker/event, and untimed journal terminal fence. Keep schema2 valid, identity/pins/republication fences intact; no retention deadline fabricated.",
+      "non_goals": "No fullsuite/build/reviewrepeat/provider/service/credentials/memory/merge/deploy effects."
+    },
+    "ST04-INJECTOR-METADATA": {
+      "owner": "st04_injector_metadata",
+      "state": "running",
+      "dependencies": [
+        "ST01",
+        "ST02"
+      ],
+      "base": "7c09353a89eb189380dd0b04b17dac70df22060a",
+      "paths": [
+        "src/codex_wake/injector.py",
+        "tests/test_injector.py"
+      ],
+      "acceptance": "Default injector UTC metadata qualified; absent authority holds before attempts/transport; explicit now/network ownership and untimed held-ack reconciliation retained.",
+      "non_goals": "No fullsuite/build/reviewrepeat/provider/service/credentials/memory/merge/deploy effects."
     }
   },
   "review": "Previous single broadreview retained; no repeat",
@@ -593,8 +624,8 @@
     "selection_correction": "Correctmissingselection is test_resource_claim_commands:4PASS311 and4PASS312; failedattemptsretained, notfullcombinedgreen",
     "full_suite": false
   },
-  "updated_at": "2026-11-18T20:05:12.906549+00:00",
-  "worker_cleanup": "Previous completed workers removed with clean exact custody; monitor worker pending same closeout cleanup. Root retains integration for remaining ST04/#695.",
+  "updated_at": "2026-11-18T20:17:13.076982+00:00",
+  "worker_cleanup": "Completed monitor worker removed after exact clean custody; current injector worker isolated, root retains open integration lane.",
   "worker_followup_correction": "Maintenance continuity followup initially queued to completed worker by send_message; explicitly activated with followup_task, both REDs and final exact result reconciled before integration.",
   "protective_integration": {
     "source": "53cb11bd",
@@ -610,16 +641,13 @@
     "limits": "No provider calls or installed daemon changes. Broader migrations/fullPython/runtime/activation gates open."
   },
   "current_batch": {
-    "base": "bf3799ec7f5146dd68cd8b76a51095773b3ce096",
+    "base": "7c09353a89eb189380dd0b04b17dac70df22060a",
     "tickets": [
-      "ST04-ACK-WAIT",
-      "ST04-MONITOR"
+      "ST04-SIGNAL-CANCEL",
+      "ST04-INJECTOR-METADATA"
     ],
-    "state": "closed_repo_local",
-    "review": "Retain previous review; no broad review repeat.",
-    "implementation_tip": "4c78045f",
-    "evidence": "docs/dev/evidence/issue0695/st04-ack-monitor-validation.json",
-    "validation": "49 focused PASS each Python3.11/3.12; static PASS"
+    "state": "running",
+    "review": "Retain previous review; no broad repeat."
   },
   "completed_batches": [
     {
@@ -672,6 +700,18 @@
       "evidence": "docs/dev/evidence/issue0695/st04-daemon-signal-validation.json",
       "validation": "92combinedPASS311/312;27finaldeltaPASS311/312;Ruff/policywiring/diffPASS",
       "integration_deltas": "Reservedsignalexpiryreplaypreserved;schema2unknownUTCmovesheldbeforeserialization;rootcausalRED/GREENchecks."
+    },
+    {
+      "base": "bf3799ec7f5146dd68cd8b76a51095773b3ce096",
+      "tickets": [
+        "ST04-ACK-WAIT",
+        "ST04-MONITOR"
+      ],
+      "state": "closed_repo_local",
+      "review": "Retain previous review; no broad review repeat.",
+      "implementation_tip": "4c78045f",
+      "evidence": "docs/dev/evidence/issue0695/st04-ack-monitor-validation.json",
+      "validation": "49 focused PASS each Python3.11/3.12; static PASS"
     }
   ]
 }

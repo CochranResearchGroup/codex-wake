@@ -35,6 +35,38 @@ from codex_wake.signals import ArmedSignal, Eq, Resume, SignalRequest, SourceAnc
 
 
 class RecordTests(unittest.TestCase):
+    def test_signal_cancellation_without_utc_preserves_valid_record_and_terminal_fence(self) -> None:
+        from codex_wake import measurements
+        from codex_wake.event_wake import EventWake
+        from codex_wake.signal_records import ManagedReaderCapability, WakeRecordPublisher, signal_journal_path
+        from codex_wake.signal_store import SQLiteSignalModule
+        from tests.test_signals import make_adapter, make_intent
+
+        now = datetime(2026, 9, 14, 14, 0, tzinfo=UTC)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / 'wake'
+            runtime = SQLiteSignalModule(signal_journal_path(root), lease_clock=lambda: now,
+                record_publisher=WakeRecordPublisher(root,
+                    ManagedReaderCapability(root, 'reader', 1, frozenset({1, 2}), True)))
+            EventWake(runtime, adapters=[make_adapter()], clock=lambda: now,
+                id_factory=lambda: 'wake_signal').register(make_intent(), idempotency_key='job-42')
+            original = find_record(root, 'wake_signal').record
+            with patch('codex_wake.measurements.snapshot', side_effect=measurements.TimeUnavailable('unavailable')), \
+                    patch('codex_wake.records.utc_now', side_effect=AssertionError('guest clock')):
+                cancelled = json.loads(cancel_record(root, 'wake_signal').read_text())
+                self.assertEqual(classify_record(cancelled), 'signal_v2')
+                self.assertEqual(cancelled['status'], 'cancelled')
+                self.assertEqual(cancelled['updated_at'], original['updated_at'])
+                self.assertEqual(cancelled['updated_at_time_status'], 'not_observed')
+                self.assertIsNone(cancelled['events'][-1]['at'])
+                self.assertEqual(runtime.terminal_status('wake_signal'), 'cancelled')
+                state = runtime.inspect_signal_state('wake_signal', record=cancelled)
+                self.assertEqual(state['arm']['state'], 'tombstoned')
+                self.assertEqual(state['pins'], [])
+                runtime.reconcile_publications()
+                self.assertFalse((root / 'pending' / 'wake_signal.json').exists())
+                self.assertEqual(find_record(root, 'wake_signal').record, cancelled)
+
     def test_default_record_events_preserve_unknown_time_without_guest_fallback(self):
         from codex_wake.measurements import TimeUnavailable
         with patch('codex_wake.measurements.datetime_now',side_effect=TimeUnavailable('missing UTC')), \

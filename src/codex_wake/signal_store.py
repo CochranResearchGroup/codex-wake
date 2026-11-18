@@ -1377,7 +1377,7 @@ class SQLiteSignalModule(SignalEngine):
         self,
         record: object,
         *,
-        now: datetime,
+        now: datetime | None,
     ) -> bool | Degraded:
         decoded = decode_signal_record(record)
         terminal_status = decoded.get("status") if decoded else None
@@ -1411,7 +1411,10 @@ class SQLiteSignalModule(SignalEngine):
                 if reservation is not None:
                     connection.rollback()
                     return Degraded(wake_id, "MATCH_RESERVED", None)
-            retired_at = _format_time(now)
+            # This fence is an untimed stop, not a lease or retention deadline.
+            # Empty text means unobserved time; NULL on released_at still means
+            # an unreleased pin. Existing schema and presence checks stay valid.
+            retired_at = '' if now is None else _format_time(now)
             connection.execute(
                 "UPDATE arms SET state = 'tombstoned' WHERE wake_id = ?",
                 (str(wake_id),),
