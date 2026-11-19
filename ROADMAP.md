@@ -1732,3 +1732,103 @@ Live provider/closed-Byobu execution remains unexercised; no schedules created.
 
 CLOSED (merged/deployed; native first-contact and reconnect accepted): [LOCAL-P230](docs/dev/plans/0230-2026-11-13-mailbox-first-contact-bindings.md).
 One source lane; remove first-poll prerequisite and qualify opt-in client rebinding.
+
+## P234 | Unified hierarchical connector control
+
+Status: CLOSED; PR644 merged, dev21 deployed
+Work item: #623; eleven child tickets
+Plan: [Unified control spec](docs/dev/plans/0234-2026-11-14-unified-control-spec.md)
+Current State: All eleven child tickets CLOSED; one two-axis review and one TDD
+pass resolved accepted findings. Source/installed-candidate evidence and limits:
+[validation](docs/dev/evidence/plan0234/validation.md), [review](docs/dev/evidence/plan0234/review.md).
+Operator subsequently authorized review/merge/deploy. [Deployment evidence](docs/dev/evidence/plan0234/deployment.md); live provider acceptance excluded.
+
+## P235 | External OAuth connector
+
+Status: DONE. Work item: #646. Owner: root / ecochran76.
+Plan: [External OAuth connector](docs/dev/plans/0235-2026-11-14-external-oauth-connector.md).
+Current State: Source/installed package qualified and deployed after explicit operator
+approval. Public metadata200, MCP401, owner isolation403. Human consent/client linking
+remain separate. [Deployment evidence](docs/dev/evidence/plan0235/deployment.md).
+
+## P236 | Delegated connector consent
+
+Status: DONE. Work item: #650. Owner: root / ecochran76.
+Plan: [Delegated consent](docs/dev/plans/0236-2026-11-14-delegated-connector-consent.md).
+Explicit, scoped operator-authorized agent setup with separate actor attribution.
+
+## P238 | Browser consent Origin
+
+Status: DONE. Plan: [Browser consent Origin](docs/dev/plans/0238-2026-11-14-browser-consent-origin.md).
+Preserve first-party form Origin without sending cross-site referrers.
+
+## P239 | Pinned native input lookup
+
+Status: DONE. Local ticket: CW-0239. Plan: [Pinned native input](docs/dev/plans/0239-2026-11-14-pinned-native-input.md).
+PR658/659 integrated; dev27 deployed; real ChatGPT greeting queued to exact native conversation.
+
+## P240 | Native input result reconciliation
+
+Status: DONE. Local ticket CW-0240. Plan: [Native input reconciliation](docs/dev/plans/0240-2026-11-14-native-input-result-reconciliation.md).
+PR661 deployed as dev28; original ChatGPT round-trip result now reports completed with exact answer.
+
+## P241 | External connector acceptance
+
+Status: COMPLETE. All nine childtickets #664–#672 closed from actual deployed acceptance. One final Standards/Spec review and one bounded TDD remediation pass completed; no blocking findings remain. Plan [0241](docs/dev/plans/0241-2026-11-14-connector-acceptance.md), review evidence [0241](docs/dev/evidence/0241-final-review.md). Product repairs merged/deployeddev34; PR676 publishes acceptance artifacts; parent663 unchanged.
+
+
+## P242 | Bounded native history reconciliation
+
+Status COMPLETE. Issue #674 closed; plan [0242](docs/dev/plans/0242-2026-11-15-history-reconciliation.md).
+Replace whole-history reconciliation with bounded full-item turn pages, retaining
+exact identities, complete pagination, shared observation deadline and no replay.
+Display summaries are not treated as full evidence. PR682 merged8009ce7c; exact
+dev35 deployed. Source and installed UID119checks pass; installed long-history
+readback5pages3.027s with0inputs. See evidence0242.
+
+## P243 | Whole-container loss and monitor restart
+
+Status COMPLETE. Issue #681 accepted; plan [0243](docs/dev/plans/0243-2026-11-15-container-monitor-acceptance.md).
+Qualify actual persistent wakes in isolated owned state after complete private
+terminal-container loss and independent owned-monitor restart. Prior668 kept a
+keeper. Actualdev37 run03 whole-container loss and run04 monitor restart each
+completed exactlyonecorrelatedinput; originaldaemon/browser/44panes/policy
+preserved. Evidence0243. No working-host reboot or global policy change.
+Repeated cadence/missed/overlap coverage remains a follow-on packet.
+
+## P244 | Installed repeated cadence and policy acceptance
+
+Status COMPLETE. Issue #685 accepted; plan [0244](docs/dev/plans/0244-2026-11-15-recurring-acceptance.md).
+Three completed native occurrences plus independent real-clock missed-run and
+bounded pending-overlap decisions. Native busy-turn queueing, calendar/DST and
+reboot/soak remain outside this acceptance. Seven installed cases passed; original
+cleanup failure retained and independently reconciled. Evidence0244.
+
+## P245 | Actual native busy-turn scheduler overlap
+
+Status FUNCTIONAL ACCEPTANCE COMPLETE. Issue #688; plan [0245](docs/dev/plans/0245-2026-11-15-native-busy-overlap.md).
+Prove skip/latest/bounded queue while a real native turn runs a bounded owned
+command, then exact retained deliveries after release. No direct native busy
+queue, calendar, reboot or soak qualification. Actual counts1/2/3 verified;
+owned cleanup passed. Operator subsequently confirmed those pane closures; original census retained. Evidence0245.
+
+## P246 | Calendar, timezone and DST replay
+
+Status COMPLETE. Issue #691 accepted; plan [0246](docs/dev/plans/0246-2026-11-15-calendar-dst-acceptance.md).
+Installed deterministic replay for local clock versus interval semantics, explicit
+gap/fold policies and restart persistence. All12valid/8rejection cases passed
+under installeddev37/tzdb2026e; no product deployment. Evidence0246.
+No live DST/provider/clock-auth claim.
+
+## P247 | Direct native busy queue boundary
+
+Status COMPLETE (qualification). Issue #694; plan [0247](docs/dev/plans/0247-2026-11-15-native-queue-boundary.md).
+Cancellation and control dequeue passed under actual busy execution. Native expiry
+remains unqualified; enforcement tracked in #695. Evidence0247. No native upgrade.
+
+
+## P248 | Accepted peer-history reconciliation
+
+[Plan0248](docs/dev/plans/0248-2026-11-16-accepted-wake-reconciliation.md):
+PR703 integrated; dev41 exact-wheel qualification and working deployment
+accepted. No bulk historical wake migration. See Plan0248 deployment evidence.

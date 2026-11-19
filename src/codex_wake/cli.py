@@ -780,7 +780,8 @@ def build_parser() -> argparse.ArgumentParser:
     from .account_shortcuts import register as register_shortcuts
     register_shortcuts(parser)
     from .command_contract import apply_help
-    return apply_help(parser)
+    from .unified_contract import apply_cli
+    return apply_cli(apply_help(parser))
 
 
 def add_target_options(parser: argparse.ArgumentParser) -> None:
@@ -2825,13 +2826,29 @@ def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
 
 
 def run(argv: list[str] | None = None, *, permission_principal=None, registration_cwd=None) -> int:
+    from .unified_contract import expand_cli, metadata
     parser = build_parser()
+    argv, discover = expand_cli(argv, parser)
+    if discover:
+        print(json.dumps(metadata(), sort_keys=True))
+        return 0
     args = parser.parse_args(argv)
     if registration_cwd is not None:
         if permission_principal is None or not Path(registration_cwd).is_absolute():
             raise WakeError('verified_registration_workspace_required')
         args._registration_cwd = Path(registration_cwd)
-    if (args.command in ('accounts', 'stores', 'configuration', 'history', 'builds', 'daemons', 'migration', 'tabs')
+    if getattr(args, '_external_connector', False):
+        if args.wake_root is not None:
+            raise WakeError('The external connector uses the Wake root in its private config; remove --wake-root.')
+        try:
+            from .external_connector import serve
+        except ImportError:
+            raise WakeError('Install the codex-wake MCP extra to serve the connector.') from None
+        try:
+            return serve(args.config)
+        except (ValueError, OSError, KeyError) as error:
+            raise WakeError('External connector configuration is invalid: '+str(error)) from None
+    if (args.command in ('accounts', 'stores', 'configuration', 'history', 'builds', 'daemons', 'migration', 'tabs', 'environment')
             and not (args.command == 'configuration' and args.account_verb == 'default-root')):
         from .shortcut_store import default_root
         try:
@@ -2852,6 +2869,19 @@ def run(argv: list[str] | None = None, *, permission_principal=None, registratio
         from .time_inspection import time_command
         return time_command(args)
     root = resolve_root(args)
+    if getattr(args, "_unified_operation", None):
+        from .local_control_service import LocalOperations
+        payload = dict(getattr(args, 'arguments', {}))
+        for key in getattr(args, '_unified_fields', ['resource_id']):
+            if hasattr(args, key):
+                if key in payload:raise WakeError('duplicate_unified_argument')
+                payload[key] = getattr(args, key)
+        if getattr(args, '_unified_route', None) == 'protected':
+            from .controller_client import execute_cli
+            from types import SimpleNamespace
+            return execute_cli(SimpleNamespace(endpoint=args.controller_endpoint, token_file=args.controller_token_file, transport=args.controller_transport, operation=args._unified_operation, arguments=payload))
+        print(json.dumps(LocalOperations(root).execute(args._unified_operation, payload), sort_keys=True))
+        return 0
     if args.command == "schedules":
         from .recurring_commands import command as schedule_command
         return schedule_command(args, root)

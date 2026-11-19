@@ -26,6 +26,14 @@ TOOLS = {
 }
 
 
+from .grok_provider_auth import tool_specs as grok_auth_specs
+for name, spec in grok_auth_specs().items():
+    TOOLS[name] = (spec[1], dict(type='object', properties=spec[3], required=spec[4], additionalProperties=False))
+
+from .grok_model_catalog import tool_specs as grok_model_specs
+for name, spec in grok_model_specs().items():
+    TOOLS[name] = (spec[1], dict(type='object', properties=spec[3], required=spec[4], additionalProperties=False))
+
 from .account_observation import tool_specs as account_observation_specs
 for name, spec in account_observation_specs().items():
     TOOLS[name] = (spec[1], {'type': 'object', 'properties': spec[3], 'required': spec[4], 'additionalProperties': False})
@@ -135,12 +143,33 @@ from .governor_commands import schemas as governor_schemas
 TOOLS.update({'wake_governor_' + verb: ('governor.' + verb, schema) for verb, schema in governor_schemas().items()})
 
 
+from .unified_connectors import protected_operations
+PROTECTED_ADAPTERS=protected_operations()
+from .unified_wakes import protected_operations as protected_wake_operations
+PROTECTED_ADAPTERS.update(protected_wake_operations())
+from .unified_terminal import protected_operations as protected_terminal_operations
+PROTECTED_ADAPTERS.update(protected_terminal_operations())
+from .unified_session_input import protected_operations as protected_input_operations
+from .unified_session_presentation import protected_operations as protected_presentation_operations
+PROTECTED_ADAPTERS.update(protected_input_operations())
+PROTECTED_ADAPTERS.update(protected_presentation_operations())
+from .unified_bulk import protected_operations as protected_bulk_operations
+PROTECTED_ADAPTERS.update(protected_bulk_operations())
+TOOLS.update({tool:(operation,schema) for operation,(tool,schema,required,handler) in PROTECTED_ADAPTERS.items()})
+from .unified_contract import api_aliases
+api_aliases(TOOLS)
+
+
 class ProtectedOperations:
     """Shared API/MCP admission. Binding and client registration confer no grant."""
     # operation: (capability, list collection or None, singleton key).
     # Account/config reads require their own capabilities and an exact account
     # identity grant; inventory observe never authorizes reading native config.
     READ_POLICIES = {
+        'grok_auth.status': ('account.observe', None, None),
+        'grok_auth.revoke': ('account.revoke', None, None),
+        'grok_models.list': ('account.observe', None, None),
+        'grok_models.resolve': ('account.observe', None, None),
         **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait','checkpoint') else 'control', None, None)
             for verb in ('capabilities','create','prompt','wait','cancel','checkpoint','fork')},
         'health.observe': ('observe', None, None),
@@ -208,11 +237,18 @@ class ProtectedOperations:
 
     READ_POLICIES.update({'governor.' + verb: ('observe' if verb == 'status' else 'control', None, None) for verb in governor_schemas()})
 
+    READ_POLICIES.update({operation:(required,None,None) for operation,(tool,schema,required,handler) in PROTECTED_ADAPTERS.items()})
+
     def __init__(self, authority, operations):
         self.authority, self.operations = authority, operations
 
     def execute(self, token, operation, arguments):
+        from .unified_contract import original
+        operation = original(operation, self.READ_POLICIES.keys() | {"runtime.input", "runtime.recover", "grants.revoke"})
         actor = self.authority.authenticate(token)
+        from .unified_connectors import check_action,check_legacy_content
+        check_action(actor,operation)
+        check_legacy_content(actor,operation)
         policy = self.READ_POLICIES.get(operation)
         required = policy[0] if policy else {'runtime.input': 'control', 'runtime.recover': 'recovery',
                     'grants.revoke': 'admin'}.get(operation)
@@ -221,7 +257,9 @@ class ProtectedOperations:
         if required not in actor.scopes:
             raise AuthError('insufficient_scope')
         from .profile_operations import OPERATIONS as profile_operations
-        if operation.startswith('governor.'):
+        if operation in PROTECTED_ADAPTERS:
+            result=PROTECTED_ADAPTERS[operation][3](self.authority,self.operations,token,operation,arguments)
+        elif operation.startswith('governor.'):
             from .governor_commands import protected_execute
             if self.operations.inventory is None:
                 raise InventoryError('configuration_unavailable', 'Host governor owner unavailable.')
@@ -233,6 +271,18 @@ class ProtectedOperations:
                 raise InventoryError('configuration_unavailable', 'host account owner unavailable')
             result = execute(self.operations.inventory.root, operation, arguments,
                 accounts=self.operations.accounts, actor=actor,
+                authorize=lambda: self.authority.authenticate(token))
+        elif operation in ('grok_auth.status', 'grok_auth.revoke'):
+            from .grok_provider_auth import observe
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'Host Grok account owner unavailable.')
+            result = observe(self.operations.inventory.root, arguments, actor=actor,
+                authorize=lambda: self.authority.authenticate(token), operation=operation)
+        elif operation.startswith('grok_models.'):
+            from .grok_model_catalog import observe
+            if self.operations.inventory is None:
+                raise InventoryError('configuration_unavailable', 'Host Grok account owner unavailable.')
+            result = observe(self.operations.inventory.root, operation, arguments, actor=actor,
                 authorize=lambda: self.authority.authenticate(token))
         elif operation.startswith('grok.'):
             from .controller_grok import ControllerGrok
@@ -443,6 +493,8 @@ class ProtectedOperations:
                 result['result'][policy[1]] = [row for row in result['result'][policy[1]] if allowed(row)]
             elif not allowed(result['result'][policy[2]]):
                 raise AuthError('insufficient_scope')
+        if operation=='connectors.grants.revoke' and arguments.get('grant_id')==actor.grant_id:
+            return result
         current = self.authority.authenticate(token)
         if current.grant_id != actor.grant_id:
             raise AuthError()

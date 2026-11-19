@@ -36,7 +36,7 @@ caller first-launch MCP bootstrap remains a separate documented limitation.
 The package provides:
 
 - `native after|at|file` for an exact thread, with expiry and explicit same-thread resume.
-- `native reconcile` for uncertain submission and `native migrate` for earlier candidate records.
+- `native reconcile` for uncertain submission or accepted completion evidence, and `native migrate` for earlier candidate records.
 - `sessions list|show|resolve|current|watch|open|close` for discovery and visible tab lifecycle.
 - `sessions configuration|spawn|refresh|handoff` for approved worker tasks, resource reloads and fresh-context continuation.
 - Durable records, installed polling, registered-root supervision, cancellation and archival.
@@ -249,6 +249,15 @@ codex-wake native at --resume-missing THREAD_UUID "2026-10-12T17:30:00-05:00" --
 codex-wake native reconcile WAKE_ID
 codex-wake sessions close thread:THREAD_UUID
 ```
+
+`native reconcile WAKE_ID` also checks accepted submissions for exact native
+terminal evidence. It saves a bound completion receipt that can clear
+`peer_history_reconciliation_required`, preserving the original wake record,
+deadline and acceptance. It never resubmits work. Unfinished or unavailable
+history remains unresolved; repeat with the same wake ID after recovery. When
+the saved historical executable has been removed, select an owned, executable,
+non-writable-by-others reader with `--read-codex-path /absolute/current/codex`.
+This replaces only the observation transport; original targets remain intact.
 
 ### Choose an agent lifecycle operation
 
@@ -1218,3 +1227,20 @@ The source now supports [managed conversation inventory](docs/managed-inventory.
 [explicit wake lifetime/startup policy](docs/wake-policy.md). CLI and MCP use the
 same state and authority boundaries. These source additions do not install or
 activate new host permissions, lifecycle adapters or production monitors.
+
+### Native harness readiness and historical receipts
+
+Mode-aware native registration reports `harness` separately from `monitor`.
+`armed` requires a successful exact-recipient read and no unreconciled peer
+history. `held_harness` retains the original intent: inspect its reason rather
+than create a replacement. Preflight never resumes/loads a thread or starts a
+turn; current activity can change before delivery and is rechecked there.
+
+When a prior accepted submission's CLI executable has been removed, native peer
+reconciliation may use the current intent's qualified CLI for read-only access
+to the same endpoint and conversation. Exact prompt/terminal evidence is still
+required and its receipt remains bound to the original target/submission. One
+remote historical read is allowed per admission poll. Missing/ambiguous evidence
+stays held; read failures report `peer_reconciliation_unavailable`, distinct
+from an actual unfinished check. No old work is resubmitted or marked complete
+from age, current idleness, or a different CLI's existence.

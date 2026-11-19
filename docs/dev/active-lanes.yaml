@@ -1,6 +1,231 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: P250
+    owner: primary / ecochran76
+    objective: Upgrade retained native Wake governor and Grok mods to upstream0.169.0
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/707]
+    plan: docs/dev/plans/0250-2026-11-16-native-0169-upgrade.md
+    branch: feat/native-0169-upgrade
+    worker_branches: [feat/native-0169-upgrade]
+    target: origin/main
+    plan_state: IN_PROGRESS
+    custody_state: CHECKPOINTED
+    dependencies: []
+    overlaps: [P233, native-expiry-695]
+    updated_at: 2026-11-16
+    disposition: Retained native checkout reused;25 source conflicts resolved, schemas generating before native carry regression and exact package qualification. Working0.167 untouched; frontenddev41 preserved. No native push, paid CI or live inference.
+
+  - id: monitor-clock-702
+    owner: root / ecochran76
+    objective: Release qualified Stable Time monitor freshness
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/702]
+    plan: docs/dev/plans/0249-2026-11-16-monitor-clock-release.md
+    branch: fix/monitor-clock-release-702
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [native-expiry-695]
+    updated_at: 2026-11-16
+    disposition: PR704 merged and dev40 deployed; exact wheel and real-clock CLI qualified; temporary checkout retiring after evidence custody. Native expiry695 remains open.
+  - id: P233
+    owner: primary / ecochran76
+    objective: Use native Grok models inside the modded Codex tool and worker loop
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/628]
+    plan: docs/dev/plans/0233-grok-in-codex-spec.md
+    branch: feat/grok-native-provider
+    worker_branches: [feat/p233-release-qualification]
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [P231, P234]
+    updated_at: 2026-11-15
+    disposition: PR700 merged; dev39 CLI and one independent modded native profile deployed/verified; all8 children closed and review1 remediation1 complete. Grok auth currently unavailable pending operator refresh; no inference submitted. Parent628 remains open; native source checkout retained under preservation instruction.
+  - id: native-queue-694
+    owner: root / ecochran76
+    objective: Qualify native busy queue cancellation and expiry capability boundary
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/694]
+    plan: docs/dev/plans/0247-2026-11-15-native-queue-boundary.md
+    branch: test/native-queue-694
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-15
+    disposition: Cancellation/control qualified; expiry implementation remains open in #695; no runtime change
+
+  - id: calendar-dst-691
+    owner: root / ecochran76
+    objective: Qualify installed clock cadence timezone and DST replay across restarts
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/691]
+    plan: docs/dev/plans/0246-2026-11-15-calendar-dst-acceptance.md
+    branch: test/calendar-dst-691
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-15
+    disposition: Installed calendar replay accepted; no product change or live DST claim; retire checkout after exact remote custody
+
+  - id: native-busy-overlap-688
+    owner: root / ecochran76
+    objective: Qualify scheduler overlap while actual native turn is in progress
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/688]
+    plan: docs/dev/plans/0245-2026-11-15-native-busy-overlap.md
+    branch: test/native-busy-overlap-688
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-15
+    disposition: Actual busy cases accepted and owned resources cleaned; paneclosure attribution unestablished; retire checkout after evidence remote custody
+
+  - id: recurrence-685
+    owner: root / ecochran76
+    objective: Qualify installed repeated cadence and bounded missed/overlap policies
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/685]
+    plan: docs/dev/plans/0244-2026-11-15-recurring-acceptance.md
+    branch: test/recurrence-685
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-15
+    disposition: PR686 merged; seven cases accepted and cleanup reconciled; no product deployment; task checkout retiring after exact remote custody
+
+  - id: wake-container-restart-681
+    owner: root / ecochran76; worker prepare_full_container_681
+    objective: Qualify whole owned terminal loss and monitor restart
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/681]
+    plan: docs/dev/plans/0243-2026-11-15-container-monitor-acceptance.md
+    branch: test/wake-container-restart-681
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-15
+    disposition: PR683 merged and dev37 deployed; run03 whole-loss and run04 monitor-restart accepted; worker checkout removed; final evidence publication closes remaining root checkout
+
+  - id: native-history-pages-674
+    owner: root / ecochran76
+    objective: Reconcile long native history through bounded read-only pages
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/674]
+    plan: docs/dev/plans/0242-2026-11-15-history-reconciliation.md
+    branch: fix/native-history-pages-674
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-15
+    disposition: PR682 merged and dev35 deployed; issue674 closed; checkout retained only to publish follow-on acceptance evidence then removed
+
+  - id: connector-acceptance-0241
+    owner: root / ecochran76
+    objective: Qualify external connector session control and close tickets
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/664, https://github.com/CochranResearchGroup/codex-wake/issues/665, https://github.com/CochranResearchGroup/codex-wake/issues/666, https://github.com/CochranResearchGroup/codex-wake/issues/667, https://github.com/CochranResearchGroup/codex-wake/issues/668, https://github.com/CochranResearchGroup/codex-wake/issues/669, https://github.com/CochranResearchGroup/codex-wake/issues/670, https://github.com/CochranResearchGroup/codex-wake/issues/671, https://github.com/CochranResearchGroup/codex-wake/issues/672]
+    plan: docs/dev/plans/0241-2026-11-14-connector-acceptance.md
+    branch: feat/connector-acceptance
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: PUBLISHED_REVIEW
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-14
+    disposition: All nine closed; review1 and remediation1 complete; PR676 published review; owned checkout closes after exact remote custody
+
+  - id: native-input-reconciliation-0240
+    owner: root / ecochran76
+    objective: Reconcile stale cancelled input with exact native completion
+    work_items: [CW-0240]
+    plan: docs/dev/plans/0240-2026-11-14-native-input-result-reconciliation.md
+    branch: fix/native-input-result-reconciliation
+    target: origin/main
+    plan_state: DONE
+    custody_state: MERGED
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-14
+    disposition: PR661 deployed; original ChatGPT operation completed; checkout retiring
+
+  - id: pinned-native-input-0239
+    owner: root / ecochran76
+    objective: Deliver the authorized ChatGPT greeting to its exact native thread
+    work_items: [CW-0239]
+    plan: docs/dev/plans/0239-2026-11-14-pinned-native-input.md
+    branch: fix/pinned-native-observation
+    target: origin/main
+    plan_state: DONE
+    custody_state: MERGED
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-14
+    disposition: PR658/659 deployed; ChatGPT queue accepted; checkout retiring
+
+  - id: connector-consent-origin-0238
+    owner: root / ecochran76
+    objective: Preserve browser consent Origin while keeping CSRF checks strict
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/654]
+    plan: docs/dev/plans/0238-2026-11-14-browser-consent-origin.md
+    branch: fix/connector-consent-origin
+    target: origin/main
+    plan_state: DONE
+    custody_state: MERGED
+    dependencies: []
+    overlaps: [P236]
+    updated_at: 2026-11-14
+    disposition: Deployed; operator OAuth and client read verified; checkout retiring
+
+  - id: connector-delegation-0236
+    owner: root / ecochran76
+    objective: Explicit scoped agent consent for operator-authorized connector setup
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/650]
+    plan: docs/dev/plans/0236-2026-11-14-delegated-connector-consent.md
+    branch: fix/connector-consent-delegation
+    target: origin/main
+    plan_state: DONE
+    custody_state: MERGED
+    dependencies: []
+    overlaps: [P235]
+    updated_at: 2026-11-14
+    disposition: Deployed; agent reaches consent; explicit mode remains required; checkout retiring
+
+  - id: external-oauth-0235
+    owner: root / ecochran76
+    objective: External OAuth MCP connector with explicit owner or subset consent
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/646]
+    plan: docs/dev/plans/0235-2026-11-14-external-oauth-connector.md
+    branch: feat/external-oauth-0235
+    target: origin/main
+    plan_state: DONE
+    custody_state: MERGED
+    dependencies: []
+    overlaps: [P234]
+    updated_at: 2026-11-14
+    disposition: Deployed; owner consent and client linking separate; checkout retires after integration
+
+  - id: unified-control-0234
+    owner: root / ecochran76
+    objective: Unified hierarchical connector control over Byobu and durable programs
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/623]
+    plan: docs/dev/plans/0234-2026-11-14-unified-control-spec.md
+    branch: feat/unified-control-0234
+    worker_branches: [feat/unified-programs-625, feat/unified-observation-626]
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [P233, P231, persistent-wakes-610]
+    updated_at: 2026-11-14
+    disposition: All11children closed; one review/one TDD pass resolved findings; PR644 merged8e5f6f7c; dev21 deployed under operator authorization; task checkout retires after evidence custody
+
   - id: persistent-wakes-610
     owner: root / ecochran76
     objective: Explicit wake session modes and durable recurring schedules
@@ -1440,3 +1665,17 @@ lanes:
     overlaps: [P216, P222]
     updated_at: 2026-11-11
     disposition: PR587 merged e16bc4d2; dev10 installed; same43pane processes retained; formatting/startup remain disabled and unit pins fixed code
+
+  - id: accepted-wake-reconciliation
+    owner: root / ecochran76
+    objective: Proactively reconcile accepted native completion without replay
+    work_items: [LOCAL-WAKE-ACCEPTED-RECONCILIATION]
+    plan: docs/dev/plans/0248-2026-11-16-accepted-wake-reconciliation.md
+    branch: fix/accepted-wake-reconciliation
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [P247]
+    updated_at: 2026-11-16
+    disposition: PR703 merged96f85564; dev41 exact-wheel UID1017 qualification and working rollout accepted;40 completion receipts retained; task checkout retires after evidence custody

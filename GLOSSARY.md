@@ -156,6 +156,12 @@ has no attachment.
 Inspection evidence that a wake prompt was accepted in the bound recipient's
 interface. It does not establish a receiver acknowledgment or a work claim.
 
+**Native completion observation**:
+Evidence from the exact native turn and complete matching user/client items
+that execution reached a terminal state. Compact summaries can locate a turn,
+but cannot alone establish this evidence. Unrelated tool output need not be
+hydrated to reconcile the selected submission.
+
 **Receiver acknowledgment**:
 An attributable receipt from the exact recipient confirming a specified delivery
 outcome. Its meaning is limited to that outcome; it does not imply completed work.
@@ -320,6 +326,19 @@ model selection is distinct from an observed model identity.
 The hosted service or local serving runtime through which a model is accessed.
 It is distinct from the coding harness, account profile and execution host.
 
+**Provider session**:
+An authenticated relationship with an inference-provider account. It is distinct
+from an agent conversation and may be shared by related conversations.
+
+**Inference selection**:
+The chosen model and provider account for a conversation or worker. It is distinct
+from the provider-reported model identity and verified execution readiness.
+
+**Provider handoff**:
+A logical agent's transition to another inference provider through a linked
+successor conversation, carrying portable context while preserving source history.
+_Avoid_: Model change when the inference provider also changes.
+
 **Runtime instance**:
 A particular running instance of a coding agent or app server. It is distinct
 from the durable conversations it can serve.
@@ -328,6 +347,11 @@ from the durable conversations it can serve.
 A terminal pane, TUI connection or structured client connection through which a
 runtime can be presented or accessed. Replacing an attachment does not by itself
 replace the conversation or logical agent.
+
+**Byobu environment**:
+The operator's collection of Byobu terminal sessions, including their tabs,
+panes and associated parent-child agent relationships.
+_Avoid_: "My tabs" when a precise resource identity is required.
 
 **Terminal session**:
 A named collection of terminal tabs whose saved definition can remain when it
@@ -362,6 +386,14 @@ not establish another.
 **Tab activity**:
 The observed work state of a conversation associated with a tab, such as running,
 idle or waiting for input. It does not establish that the terminal interface is responsive.
+
+**Monitor observation freshness**:
+Whether a retained monitor frame remains within its allowed elapsed age. The
+default reader uses authenticated Stable Time counter evidence from the same
+epoch and frequency, including conservative rate and counter-resolution bounds.
+Missing evidence or lost continuity is stale; guest wall timestamps are display
+metadata and cannot qualify freshness. An authenticated counter can qualify
+elapsed age even when UTC is unavailable.
 
 **Tab responsiveness**:
 The observed ability of the exact terminal interface associated with a tab to
@@ -505,3 +537,13 @@ without enrollment, actor reauthorization, client launch or notification replay.
 A mailbox whose persisted time policy requires the configured StableTime service's
 finite authenticated UTC evidence, without guest-clock or plain-NTP fallback.
 Existing mailbox instances observe activation at their next transaction.
+
+**Harness readiness**:
+A read-only observation of the selected native runtime and exact recipient at
+registration. It is separate from durable retention and monitor health, and is
+rechecked at dispatch. Unreconciled prior submissions hold admission.
+
+**Historical read transport**:
+The current intent's qualified CLI used only to observe an exact old native
+submission when its saved executable is gone. It never replaces the original
+binding, grants authority, or authorizes submission replay.
