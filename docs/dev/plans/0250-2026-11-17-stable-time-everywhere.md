@@ -28,7 +28,7 @@ work counts. Existing source validation receipts remain historical evidence;
 they do not establish compliance with this replacement policy. Existing durable
 unknown outcomes and deadlines must not be reset during correction.
 
-## Current reconciliation packet
+## Current State
 
 R0250-OWNER-WAITS separates controller/local caller waits from genuine actor
 UTC authorization. Final result/output publication retains fresh authority checks,
