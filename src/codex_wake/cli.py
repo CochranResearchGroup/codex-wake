@@ -2824,9 +2824,13 @@ def product_readiness_command(args: argparse.Namespace, root: Path) -> int:
     return 0
 
 
-def run(argv: list[str] | None = None, *, permission_principal=None) -> int:
+def run(argv: list[str] | None = None, *, permission_principal=None, registration_cwd=None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if registration_cwd is not None:
+        if permission_principal is None or not Path(registration_cwd).is_absolute():
+            raise WakeError('verified_registration_workspace_required')
+        args._registration_cwd = Path(registration_cwd)
     if (args.command in ('accounts', 'stores', 'configuration', 'history', 'builds', 'daemons', 'migration', 'tabs')
             and not (args.command == 'configuration' and args.account_verb == 'default-root')):
         from .shortcut_store import default_root
