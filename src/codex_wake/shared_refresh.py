@@ -469,7 +469,7 @@ def watch(root, interval=1):
     import signal
     import time
     from uuid import uuid4
-    from .goal_supervision import _save
+    from .goal_supervision import _controller_clock, _save
     from .process import boot_id_value, process_identity
     if type(interval) not in (int, float) or not math.isfinite(interval) or not .05 <= interval <= 5:
         raise WakeError('refresh interval must be between 0.05 and 5 seconds')
@@ -489,10 +489,10 @@ def watch(root, interval=1):
         try:
             while running:
                 _save(directory/'controller.json', dict(heartbeat, active=True,
-                    observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
+                    observed_boottime=None, clock_observation=_controller_clock()))
                 poll(root)
                 time.sleep(interval)
         finally:
             _save(directory/'controller.json', dict(heartbeat, active=False,
-                observed_boottime=time.clock_gettime(time.CLOCK_BOOTTIME)))
+                observed_boottime=None, clock_observation=_controller_clock()))
             for sig, handler in prior.items():signal.signal(sig, handler)
