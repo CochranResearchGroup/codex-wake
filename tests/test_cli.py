@@ -965,7 +965,10 @@ class CliTests(unittest.TestCase):
             self.assertEqual(json.loads(json_out)["signal_readiness"], readiness)
 
     def test_cleanup_dry_run_and_delete_archived_records(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
+        observed = [datetime(2026, 5, 1, tzinfo=UTC).timestamp()]
+        with tempfile.TemporaryDirectory() as tmp, patch(
+                "codex_wake.measurements.utc_bounds",
+                side_effect=lambda: (observed[0], observed[0])):
             root = Path(tmp)
             code, out, err = self.run_cli(["after", "1m", "--", "Cleanup later"], root)
             self.assertEqual(code, 0, err)
@@ -975,25 +978,22 @@ class CliTests(unittest.TestCase):
             code, _, err = self.run_cli(["archive", wake_id], root)
             self.assertEqual(code, 0, err)
             archived_path = root / "archive" / f"{wake_id}.json"
-            data = json.loads(archived_path.read_text())
-            data["archived_at"] = "2026-05-01T00:00:00Z"
-            data["updated_at"] = "2026-05-01T00:00:00Z"
-            archived_path.write_text(json.dumps(data), encoding="utf-8")
-
-            with patch("codex_wake.records.utc_now", return_value=datetime(2026, 5, 19, tzinfo=UTC)):
-                code, dry_run, err = self.run_cli(["cleanup", "--older-than", "7d"], root)
+            observed[0] = datetime(2026, 5, 19, tzinfo=UTC).timestamp()
+            code, dry_run, err = self.run_cli(["cleanup", "--older-than", "7d"], root)
             self.assertEqual(code, 0, err)
             self.assertIn("would-delete", dry_run)
             self.assertTrue(archived_path.exists())
 
-            with patch("codex_wake.records.utc_now", return_value=datetime(2026, 5, 19, tzinfo=UTC)):
-                code, deleted, err = self.run_cli(["cleanup", "--older-than", "7d", "--delete"], root)
+            code, deleted, err = self.run_cli(["cleanup", "--older-than", "7d", "--delete"], root)
             self.assertEqual(code, 0, err)
             self.assertIn("deleted", deleted)
             self.assertFalse(archived_path.exists())
 
     def test_cleanup_json_reports_archive_and_delete_candidates(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
+        observed = [datetime(2026, 5, 1, tzinfo=UTC).timestamp()]
+        with tempfile.TemporaryDirectory() as tmp, patch(
+                "codex_wake.measurements.utc_bounds",
+                side_effect=lambda: (observed[0], observed[0])):
             root = Path(tmp)
             code, out, err = self.run_cli(["after", "1m", "--", "Cleanup json"], root)
             self.assertEqual(code, 0, err)
@@ -1009,13 +1009,8 @@ class CliTests(unittest.TestCase):
             self.assertEqual(archive_data["archived_terminal_count"], 1)
             self.assertEqual(archive_data["archived_terminal"][0]["wake_id"], wake_id)
             archived_path = root / "archive" / f"{wake_id}.json"
-            record = json.loads(archived_path.read_text())
-            record["archived_at"] = "2026-05-01T00:00:00Z"
-            record["updated_at"] = "2026-05-01T00:00:00Z"
-            archived_path.write_text(json.dumps(record), encoding="utf-8")
-
-            with patch("codex_wake.records.utc_now", return_value=datetime(2026, 5, 19, tzinfo=UTC)):
-                code, delete_json, err = self.run_cli(["cleanup", "--older-than", "7d", "--delete", "--json"], root)
+            observed[0] = datetime(2026, 5, 19, tzinfo=UTC).timestamp()
+            code, delete_json, err = self.run_cli(["cleanup", "--older-than", "7d", "--delete", "--json"], root)
             self.assertEqual(code, 0, err)
             delete_data = json.loads(delete_json)
             self.assertEqual(delete_data["mode"], "delete")
