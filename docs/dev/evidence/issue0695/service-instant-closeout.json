@@ -184,5 +184,31 @@
     "sample_calls": "codex-rs/ext/queue/src/service.rs:644,696,718",
     "persistence": "codex-rs/thread-store/src/queue_store.rs:195-201; state/runtime/queued_items.rs:383-385",
     "goal_independence": "No native_queue_clock/QueueClock/config consumer in Goal/resource guards; unchanged nonqueue Goal token behavior proof retained, not renewed."
+  },
+  "python_validation_reconciliation": {
+    "source": "aa7de5e0",
+    "complete": false,
+    "retained_python311_unique_passes": 2645,
+    "collection_unique_cases": 2806,
+    "duplicate_import_instances": 18,
+    "runner_repairs": [
+      "Restore maintained Rust toolchain PATH; prepare control passes",
+      "Guard private resumable runner main against multiprocessing spawn; discard156 ambiguous child result IDs",
+      "Discard failed subtest parent IDs; preserve all historical failures"
+    ],
+    "focused_repairs": [
+      "Shared refresh watcher now publishes structured clock_observation; no guest heartbeat fallback",
+      "Ordinary RPC read/reconciliation assertions updated; private revocation and no replay preserved:2PASS each Python version",
+      "Plan0250 canonical Current State heading:1PASS311",
+      "Crash checkpoints use finite fixture lease; synthetic consolidation record uses explicit creation time:2PASS each version",
+      "Supervisor result fixture includes time_held; Grok positive route uses structured clock:2PASS each version",
+      "Operator inventory structured freshness and owned self-limit watcher synchronized fixture evidence:9PASS each version; final owned fixture children0"
+    ],
+    "pending": [
+      "Refresh expiry fixture reconciliation",
+      "Remaining Python311 cases with repaired runner",
+      "Complete Python312 collection"
+    ],
+    "validation_environment": "Local approved existing StableTime plus explicit deterministic fixture clocks; service-backed rather than blank-config hosted environment; no hosted CI or external model calls"
   }
 }
