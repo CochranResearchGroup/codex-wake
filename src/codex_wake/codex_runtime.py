@@ -4,11 +4,11 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+import time
 from types import MappingProxyType
 from uuid import UUID
 
 from .records import WakeError
-from .measurements import TimeUnavailable, deadline as stable_deadline
 from .runtime_delivery import (
     RuntimeCapability, RuntimeObservation, RuntimeRecipient, RuntimeReconciliation,
     RuntimeSubmission, RuntimeTargetError,
@@ -60,7 +60,7 @@ class CodexRuntimeAdapter:
         self._request = request
         self._run = run
         self._project_failure = project_failure
-        self._clock = monotonic  # Explicit trusted fixture seam; production uses Stable Time.
+        self._clock = monotonic  # Injectable advisory transport clock; no expiry authority.
 
     def resolve(self, target) -> RuntimeRecipient:
         if target.get("transport") != "native" or target.get("runtime", "codex") != "codex":
@@ -194,17 +194,12 @@ class CodexRuntimeAdapter:
     def reconcile(self, recipient: RuntimeRecipient, prompt: str) -> RuntimeReconciliation:
         """Observe only this session and return receipt identities, never bodies."""
         target = recipient.binding
-        try:
-            timer = stable_deadline(10) if self._clock is None else None
-            injected_end = self._clock() + 10 if self._clock is not None else None
-        except TimeUnavailable:
-            raise WakeError('native_stable_time_unavailable') from None
+        # One advisory RPC budget, retained across queue/history pagination.
+        clock = self._clock if self._clock is not None else time.monotonic
+        end = clock() + 10
 
         def remaining_budget():
-            try:
-                return timer.remaining() if timer is not None else injected_end - self._clock()
-            except TimeUnavailable:
-                raise WakeError('native_stable_time_unavailable') from None
+            return end - clock()
 
         def request(method, params):
             remaining = remaining_budget()
