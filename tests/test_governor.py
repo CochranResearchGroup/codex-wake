@@ -5,7 +5,38 @@ from unittest.mock import patch
 from pathlib import Path
 
 
+def governor_fixture_clock():
+    import time
+    from tests.test_measurements import observation
+    value = observation(int(time.monotonic() * 1000), rate=0)
+    value["utc"].update(lower=1893456000, upper=1893456000)
+    return value
+
+
 class GovernorTests(unittest.TestCase):
+    def qualify_controller_clock(self):
+        import subprocess
+        import sys
+        original_popen = subprocess.Popen
+        def launch(argv, *args, **kwargs):
+            if (len(argv) > 2 and argv[:2] == [sys.executable, '-c']
+                    and argv[2].startswith('from codex_wake.goal_supervision import watch;')):
+                # The existing owned controller shares explicit fixture
+                # counter authority with its parent, without a new watcher.
+                prefix = ("import sys; sys.path.insert(0, "
+                          + repr(str(Path(__file__).resolve().parents[1])) + "); "
+                          "from tests.test_governor import governor_fixture_clock; "
+                          "from codex_wake import measurements; "
+                          "measurements.snapshot=governor_fixture_clock; ")
+                argv = [*argv[:2], prefix + argv[2], *argv[3:]]
+            return original_popen(argv, *args, **kwargs)
+        controller_clock = patch('codex_wake.measurements.snapshot', side_effect=governor_fixture_clock)
+        controller_clock.start()
+        self.addCleanup(controller_clock.stop)
+        controller_launch = patch('test_goal_supervision.subprocess.Popen', side_effect=launch)
+        controller_launch.start()
+        self.addCleanup(controller_launch.stop)
+
     def test_continuation_clock_loss_preserves_accepted_operation_without_retry(self):
         from codex_wake.governor import _await_continuation
         from codex_wake.measurements import TimeUnavailable
@@ -358,6 +389,7 @@ class GovernorTests(unittest.TestCase):
                 if method=='thread/read':result['thread']['path']=str(log)
                 return result
             clock={'now':fixtures.NOW}
+            self.qualify_controller_clock()
             with harness.controller(root), patch('codex_wake.lifecycle_budget.trusted_upper',side_effect=lambda:clock['now']), patch('codex_wake.native_clock.snapshot',side_effect=lambda:dict(utc=dict(status='network',sources=['a','b'],lower=clock['now'],upper=clock['now']),counter=None,reason='bounded_utc')), patch('codex_wake.local_sessions.resolve',return_value=row), patch('codex_wake.goal_supervision.native_request',side_effect=native_call):
                 result=execute(root,'activate',dict(selector=fixtures.THREAD,token_limit=100,time_limit_seconds=120,request_id='activate-without-provisioning'),principal=local_operator_principal())
                 self.assertEqual(result['state'],'disconnected')
@@ -402,6 +434,7 @@ class GovernorTests(unittest.TestCase):
                 result=request(endpoint,executable,method,params,timeout)
                 if method=='thread/read':result['thread']['path']=str(log)
                 return result
+            self.qualify_controller_clock()
             actor=native_principal(fixtures.THREAD,policy=policy)
             with harness.controller(root),patch('codex_wake.lifecycle_budget.trusted_upper',return_value=fixtures.NOW),patch('codex_wake.local_sessions.resolve',return_value=row),patch('codex_wake.goal_supervision.native_request',side_effect=native_call):
                 with self.assertRaisesRegex(ValueError,'inherited host ceilings'):
