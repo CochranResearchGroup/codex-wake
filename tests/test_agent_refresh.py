@@ -167,6 +167,13 @@ class AgentRefreshTests(unittest.TestCase):
             master, slave = pty.openpty()
             client = subprocess.Popen([str(client_script)], stdin=slave, stdout=subprocess.PIPE)
             self.assertEqual(client.stdout.readline(), b'ready\n')
+            def fixture_clock():
+                upper = 1893456001 if expire_after_stop and client.poll() is not None else 1001
+                return {'utc': {'lower': upper - 1, 'upper': upper}}
+            utc = patch('codex_wake.measurements.utc_bounds',
+                        side_effect=lambda: tuple(fixture_clock()['utc'].values()))
+            utc.start()
+            self.addCleanup(utc.stop)
             tty = os.ttyname(slave)
             endpoint = root / 'native.sock'
             methods, effects = [], []
@@ -317,8 +324,7 @@ class AgentRefreshTests(unittest.TestCase):
                         with patch('codex_wake.shared_app_server.locate_shared_endpoint',return_value='unix:///wrong.sock' if managed_guard=='wrong-endpoint' else 'unix://'+str(endpoint)),patch('codex_wake.goal_supervision._heartbeat',return_value=dict(fresh=True)),patch('codex_wake.goal_supervision.show',return_value=dict(state='armed',stop_latched=False,
                                 controller=dict(fresh=True),accounting=dict(state='qualified'),used_tokens=50,
                                 token_limit=1000,deadline=10000)), patch('subprocess.run',side_effect=command), patch(
-                                'codex_wake.native_clock.snapshot',side_effect=lambda: {'utc':{'upper':
-                                    1893456001 if expire_after_stop and client.poll() is not None else 1001}}):
+                                'codex_wake.native_clock.snapshot',side_effect=fixture_clock):
                             if unapproved_probe:
                                 with redirect_stdout(StringIO()),self.assertRaisesRegex(WakeError,'read-only'):
                                     run(argv)
