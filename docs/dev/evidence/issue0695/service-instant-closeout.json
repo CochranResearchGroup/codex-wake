@@ -1,0 +1,40 @@
+{
+  "state": "in_progress",
+  "decision": "Best-effort fresh StableTime service-instant evidence at final native admission; observation-to-send suspension/delivery limitation accepted.",
+  "wake_source": "60c2c0b2031ea751bce2dff8e110778e31e1a9a7",
+  "native_base": "9af0e8e48d0c2dcfe1800a3deaadfcec7e2c0bd7",
+  "wire": {
+    "version": 2,
+    "basis": "service_measurement",
+    "receipt_time_bound": false,
+    "private_counter_bridge": false
+  },
+  "preserved": [
+    "original expiry and identities",
+    "qualified upper strictly before expiry",
+    "unavailable/overlap holds",
+    "no uncertain send replay",
+    "host peer/hash/qualification gates",
+    "v1 admitted records reconcilable"
+  ],
+  "executed": {
+    "python_reader": "2PASS311/312; causal RED retained",
+    "python_adapter": "12PASS311/312 plus task-permission fixture1PASS each; public v2/v1 reconciliation and invalid basis/receipt/private source refusal",
+    "actual_service": "Root and installed UID1017 reader qualified v2 with private helper forced unavailable; existing credential references, no copies",
+    "static": "Ruff undefined names and compileallPASS",
+    "transport_repairs": "Shared reader and native reconciliation ordinary waits:14PASS311/312 CIblank; original authorization and no-replay retained."
+  },
+  "reused": [
+    "package5 unchanged durable queue/cancel/restart/rollback/history/ownership controls",
+    "isolated factory activation proof",
+    "prior single broad review and bounded findings pass"
+  ],
+  "pending": [
+    "Native complete package build and affected installed qualification",
+    "three Native source tests: metadata valid but unexecuted after compile limits",
+    "complete Python311/312; local311 first324tests stopped at supervisor fixture, causal repair passes on both"
+  ],
+  "runtime_effects": "Isolated public wheel installed UID1017 only. Working daemon unchanged. No external model calls or new credential copies.",
+  "native_source": "e7286ffdc338457ea11b8becb26daa0f7f4855af",
+  "validation_environment": "Comprehensive local service-backed run explicitly provisions approved existing StableTime; not hermetic. Missing-clock rejection tests override authority. Prior blank-config failures and stopped run retained."
+}

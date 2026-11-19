@@ -65,14 +65,14 @@
     },
     "695-PYTHON": {
       "owner": "python695_causal",
-      "state": "blocked",
+      "state": "running",
       "dependencies": [],
-      "scope": "New bounded public-RPC latency causal probe; no passingprefix/fullrun repetition",
+      "scope": "Complete current comprehensive validation with source-aligned fixture clocks; retain old failures and immutable time guards.",
       "evidence": "docs/dev/evidence/issue0695/python-clock-diagnosis.json",
-      "blocker": "Newapproved run fails at backgroundclaim guard under independently observed8-9s realtimejumps. Currentcapturedfailure diagnosed; historicalhandofffailure unresolved; no fullgreen.",
+      "blocker": null,
       "priority": "P1",
       "tracker_resolution": "OPEN blocked: no causal red; no quarantine or speculative fix",
-      "next_action": "Qualify stable cross-process claimant freshness/host realtime before another comprehensive run; no securityguard relaxation"
+      "next_action": "Reconcile resumable311 collection, repair actual failures narrowly, then312; no passing prefix repetition."
     }
   },
   "review": {
@@ -98,5 +98,13 @@
     "first_pipeline_failure_retained": true,
     "working_installation": false,
     "parent695": "OPEN"
+  },
+  "best_effort_revision": {
+    "state": "running",
+    "decision": "Approved service-instant best effort; explicit observation-to-send suspension gap",
+    "evidence": "docs/dev/evidence/issue0695/service-instant-closeout.json",
+    "native_clock_ticket": "R0250-NATIVE-CLOCK-SOURCE in0250 ledger",
+    "native_base": "9af0e8e48d0c2dcfe1800a3deaadfcec7e2c0bd7",
+    "release": "No working host enablement; changed clock package proof pending."
   }
 }
