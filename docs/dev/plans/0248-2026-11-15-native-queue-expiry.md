@@ -672,3 +672,13 @@ One bounded review: Standards1P1; Spec sameP1 plus1P2, accepted byroot. One boun
 findings pass; no new clock migration, fullmatrix repeat or liveGrok inference.
 Retro is limited to visible session and cited receipts, recommends environment
 guardrails, and does not modify global instructions or other repositories.
+
+Release review reconciliation: 695-R1/R2 validated (artifact exact tree and public
+clock-outage controls). Main13commit conflict resolution preserves both new
+registration_cwd and explicit busy_policy; affected51PASS eachPythonversion.
+695-RELEASE proceeds for Wake frontend/services. 695-NATIVE-CUTOVER root/P1 BLOCKED
+on combined e728+a5806e carry integration/qualification: candidate e728 lacks
+the deployed Grok/worker carry. Do not change selected Native or restart its
+working daemon to deploy the frontend. See release-review.json and dev43 notes.
+Retro recommendations derive from the visible session and retained receipts;
+only the release-artifact mechanical guard is implemented in this packet.
