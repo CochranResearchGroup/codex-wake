@@ -14,12 +14,12 @@ import re
 import socket
 import stat
 import struct
+import time
 
 from .native_protocol import native_request
 from .process import process_identity
 from .records import WakeError
 from .runtime_delivery import RuntimeCapability
-from .measurements import deadline
 
 
 _CHECKS = ('expiry', 'unknown', 'cancellation', 'restart', 'history_isolation',
@@ -107,7 +107,8 @@ class QualifiedBoundedNativeRequest:
                     or type(timeout) not in (int, float) or not math.isfinite(timeout) or timeout <= 0):
                 raise WakeError(_REFUSAL)
             approval = _approval()
-            timer = deadline(timeout)
+            # This bounds transport only; Native owns admission expiry.
+            stop = time.monotonic() + timeout
             peer = None
             credentials = None
 
@@ -123,7 +124,7 @@ class QualifiedBoundedNativeRequest:
                     ws.send(json.dumps(dict(id=identifier, method=_CAPABILITIES,
                         params=dict(threadId=params['threadId']))))
                     while True:
-                        remaining = timer.remaining()
+                        remaining = (stop - time.monotonic())
                         if remaining <= 0:
                             raise WakeError(_REFUSAL)
                         message = json.loads(ws.recv(timeout=remaining))
@@ -134,11 +135,11 @@ class QualifiedBoundedNativeRequest:
                             break
                 if _approval() != approval or _peer_process(credentials) != peer:
                     raise WakeError(_REFUSAL)
-                if timer.expired():
+                if time.monotonic() >= stop:
                     raise WakeError(_REFUSAL)
                 verified = method != _CAPABILITIES
 
-            remaining = timer.remaining()
+            remaining = (stop - time.monotonic())
             if remaining <= 0:
                 raise WakeError(_REFUSAL)
             result = self._request(endpoint, codex, method, params, remaining,

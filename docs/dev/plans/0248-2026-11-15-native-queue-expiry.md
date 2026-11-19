@@ -650,3 +650,25 @@ as invalid hostclock conditions for existing wall-based freshness; historical
 handoff failure is not retroactively explained. Next bounded decision is a
 qualified cross-process freshness clock or hostrealtime repair before another
 comprehensive lane; parent695 remains OPEN.
+
+## Authorized review, merge, deployment and retro
+
+Operator request: review/merge/deploy the published branch and retrospect on the
+visible session. Currentmain a71adb35 has13independent commits; preserve detached
+MCP registration, Native carry/Stop acceptance and primary dirty files. Root owns
+one integration checkout; substantiveWIP3 ceiling unchanged.
+
+Release packet tickets (repo-local):
+-695-R1 root/P1 IN_PROGRESS: regenerate Native patch+manifest from qualifiede728;
+  acceptance is exact reconstruction tree equality and a wired provenance check.
+-695-R2 root/P2 READY: queue read/cancel/capability transport budgets remain
+  available during clock outage; preserve all peer/report and Native admission
+  guards. Public realUnix protocol red/green, no new fixture framework.
+-695-RELEASE root/P1 READY dependsR1/R2: merge main byintent, version/newimmutable
+  package, applicable changed-surface checks, isolated installed acceptance, PR
+  merge and exact-main working deployment readback with rollback retained.
+
+One bounded review: Standards1P1; Spec sameP1 plus1P2, accepted byroot. One bounded
+findings pass; no new clock migration, fullmatrix repeat or liveGrok inference.
+Retro is limited to visible session and cited receipts, recommends environment
+guardrails, and does not modify global instructions or other repositories.

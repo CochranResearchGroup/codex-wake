@@ -10230,10 +10230,10 @@ index 4b5e5d04f4..5dd582bec7 100644
 +wiremock = { workspace = true }
 diff --git a/codex-rs/ext/queue/src/clock.rs b/codex-rs/ext/queue/src/clock.rs
 new file mode 100644
-index 0000000000..d38cb45154
+index 0000000000..e754a5b711
 --- /dev/null
 +++ b/codex-rs/ext/queue/src/clock.rs
-@@ -0,0 +1,204 @@
+@@ -0,0 +1,135 @@
 +//! Native-owned Stable Time process reader. No sender clock or wall-time fallback.
 +use std::future::Future;
 +use std::path::PathBuf;
@@ -10244,7 +10244,6 @@ index 0000000000..d38cb45154
 +use codex_thread_store::BoundedQueueClockSample;
 +use serde_json::Value;
 +use tokio::io::AsyncReadExt;
-+use tokio::io::AsyncWriteExt;
 +
 +pub type QueueClockFuture<'a> =
 +    Pin<Box<dyn Future<Output = Option<BoundedQueueClockSample>> + Send + 'a>>;
@@ -10328,9 +10327,11 @@ index 0000000000..d38cb45154
 +                if !child.wait().await.ok()?.success() {
 +                    return None;
 +                }
-+                let mut value: Value = serde_json::from_slice(&bytes).ok()?;
-+                if value.get("contract_version")?.as_u64()? != 1
++                let value: Value = serde_json::from_slice(&bytes).ok()?;
++                if value.get("contract_version")?.as_u64()? != 2
 +                    || value.get("state")?.as_str()? != "qualified"
++                    || value.get("basis")?.as_str()? != "service_measurement"
++                    || value.get("receipt_time_bound")?.as_bool()?
 +                {
 +                    return None;
 +                }
@@ -10347,47 +10348,17 @@ index 0000000000..d38cb45154
 +                {
 +                    return None;
 +                }
-+                let origin = counter.get("counter")?.as_u64()?;
-+                let frequency = counter.get("frequency")?.as_u64()?;
-+                let rate = counter.get("rate_ppm")?.as_u64()?;
-+                let source = value.get("counter_source")?;
-+                if source.get("kind")?.as_str()? != "windows_qpc_private_bridge" {
++                // Counter metadata describes the service measurement; it is not a
++                // license to extrapolate UTC with a WSL or private host clock.
++                if value.get("valid_for_ns")?.as_u64()? == 0
++                    || value.get("counter_source")?.get("kind")?.as_str()?
++                        != "stable_time_service_measurement"
++                {
 +                    return None;
 +                }
-+                let socket = PathBuf::from(source.get("socket")?.as_str()?);
-+                let (current, observed_frequency) = read_host_counter(&socket).await?;
-+                if observed_frequency != frequency || current < origin {
-+                    return None;
-+                }
-+                // Integer nanosecond bounds include quantization and source rate error.
-+                let delta = u128::from(current - origin);
-+                let scale = 1_000_000_000_u128 * 1_000_000;
-+                let lower_ns = delta.saturating_sub(1) * scale
-+                    / (u128::from(frequency) * u128::from(1_000_000 + rate));
-+                let denominator = u128::from(frequency) * u128::from(1_000_000 - rate);
-+                let upper_ns = ((delta + 1) * scale).div_ceil(denominator);
-+                let validity_ns = value.get("valid_for_ns")?.as_u64()?;
-+                if upper_ns > 2_000_000_000 || upper_ns > u128::from(validity_ns) {
-+                    return None;
-+                }
-+                let projected_lower = (lower + lower_ns as f64 / 1_000_000_000.0).next_down();
-+                let projected_upper = (upper + upper_ns as f64 / 1_000_000_000.0).next_up();
-+                if !projected_lower.is_finite() || !projected_upper.is_finite() {
-+                    return None;
-+                }
-+                value["sampled_counter"] = value["counter"].clone();
-+                value["sampled_bounds"] = serde_json::json!({"lower": lower, "upper": upper});
-+                value["counter"]["counter"] = current.into();
-+                value["lower"] = projected_lower.into();
-+                value["upper"] = projected_upper.into();
-+                value["valid_for_ns"] = (validity_ns - upper_ns as u64).into();
-+                value["handoff"] = serde_json::json!({
-+                    "source":"fresh_windows_qpc_read", "lower_elapsed_ns":lower_ns as u64,
-+                    "upper_elapsed_ns":upper_ns as u64
-+                });
 +                Some(BoundedQueueClockSample {
-+                    lower: projected_lower,
-+                    upper: projected_upper,
++                    lower,
++                    upper,
 +                    evidence: value.to_string(),
 +                })
 +            };
@@ -10397,46 +10368,6 @@ index 0000000000..d38cb45154
 +                .ok()?
 +        })
 +    }
-+}
-+
-+#[cfg(target_os = "linux")]
-+async fn read_host_counter(socket: &std::path::Path) -> Option<(u64, u64)> {
-+    use std::os::unix::fs::{FileTypeExt, MetadataExt, PermissionsExt};
-+    if !socket.is_absolute() {
-+        return None;
-+    }
-+    let uid = std::fs::metadata("/proc/self").ok()?.uid();
-+    let metadata = std::fs::symlink_metadata(socket).ok()?;
-+    if !metadata.file_type().is_socket()
-+        || metadata.uid() != uid
-+        || metadata.permissions().mode() & 0o077 != 0
-+    {
-+        return None;
-+    }
-+    let mut stream = tokio::net::UnixStream::connect(socket).await.ok()?;
-+    if stream.peer_cred().ok()?.uid() != uid {
-+        return None;
-+    }
-+    let id = uuid::Uuid::now_v7().simple().to_string();
-+    stream.write_all(format!("{id}\n").as_bytes()).await.ok()?;
-+    let mut output = Vec::new();
-+    stream.take(1025).read_to_end(&mut output).await.ok()?;
-+    if output.len() > 1024 {
-+        return None;
-+    }
-+    let value: Value = serde_json::from_slice(&output).ok()?;
-+    if value.get("id")?.as_str()? != id || value.get("status")?.as_str()? != "ok" {
-+        return None;
-+    }
-+    Some((
-+        value.get("counter")?.as_u64()?,
-+        value.get("frequency")?.as_u64()?,
-+    ))
-+}
-+
-+#[cfg(not(target_os = "linux"))]
-+async fn read_host_counter(_socket: &std::path::Path) -> Option<(u64, u64)> {
-+    None
 +}
 diff --git a/codex-rs/ext/queue/src/lib.rs b/codex-rs/ext/queue/src/lib.rs
 index 47fa504595..11405b053e 100644
@@ -11488,122 +11419,142 @@ index e2a4cd43b7..57f163e4b7 100644
 +}
 diff --git a/codex-rs/ext/queue/tests/stable_time_clock.rs b/codex-rs/ext/queue/tests/stable_time_clock.rs
 new file mode 100644
-index 0000000000..ce903c359f
+index 0000000000..78643afec4
 --- /dev/null
 +++ b/codex-rs/ext/queue/tests/stable_time_clock.rs
-@@ -0,0 +1,114 @@
-+//! Host clock process/IPC seam; controlled unit evidence, not real clock qualification.
+@@ -0,0 +1,134 @@
++//! Controlled service-reader seam evidence, not real service qualification.
 +#![cfg(target_os = "linux")]
 +
 +use codex_queue_extension::{QueueClock, StableTimeClock};
-+use serde_json::json;
++use serde_json::{Value, json};
 +use std::os::unix::fs::PermissionsExt;
-+use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 +
-+#[tokio::test]
-+async fn host_counter_advances_bounds_after_helper_sampling() -> anyhow::Result<()> {
-+    let root = tempfile::tempdir()?;
-+    let socket = root.path().join("counter.sock");
-+    let listener = tokio::net::UnixListener::bind(&socket)?;
-+    std::fs::set_permissions(&socket, std::fs::Permissions::from_mode(0o600))?;
-+    let server = tokio::spawn(async move {
-+        let (stream, _) = listener.accept().await.unwrap();
-+        let (read, mut write) = stream.into_split();
-+        let mut id = String::new();
-+        BufReader::new(read).read_line(&mut id).await.unwrap();
-+        let reply = json!({"id":id.trim(),"status":"ok","counter":2000,"frequency":1000});
-+        write
-+            .write_all(format!("{reply}\n").as_bytes())
-+            .await
-+            .unwrap();
-+    });
-+    let evidence = json!({"contract_version":1,"state":"qualified","lower":100.0,"upper":100.1,"valid_for_ns":2000000000,
++fn evidence() -> Value {
++    json!({"contract_version":2,"state":"qualified","basis":"service_measurement",
++        "receipt_time_bound":false,"lower":100.0,"upper":100.1,"valid_for_ns":2000000000_u64,
 +        "counter":{"epoch":"3c93a3d4-445d-4403-8a40-77fa9162dee6","counter":1000,"frequency":1000,"rate_ppm":0},
-+        "counter_source":{"socket":socket,"kind":"windows_qpc_private_bridge"}});
-+    let reader = root.path().join("reader.py");
-+    std::fs::write(
-+        &reader,
-+        format!("#!/usr/bin/python3\nprint({:?})\n", evidence.to_string()),
-+    )?;
++        "counter_source":{"kind":"stable_time_service_measurement"}})
++}
++
++fn clock(root: &std::path::Path, body: &str) -> anyhow::Result<StableTimeClock> {
++    let reader = root.join("reader.py");
++    std::fs::write(&reader, format!("#!/usr/bin/python3\n{body}\n"))?;
 +    std::fs::set_permissions(&reader, std::fs::Permissions::from_mode(0o700))?;
-+    let config = root.path().join("native-clock.json");
++    let config = root.join("native-clock.json");
 +    std::fs::write(
 +        &config,
-+        json!({"interpreter":reader,"stable_time_config":root.path().join("stable-time.json")})
++        json!({"interpreter":reader,"stable_time_config":root.join("stable-time.json")})
 +            .to_string(),
 +    )?;
 +    std::fs::set_permissions(&config, std::fs::Permissions::from_mode(0o600))?;
-+    let value = StableTimeClock::from_config(&config).sample().await;
-+    server.abort();
-+    let sample = value.expect("controlled host counter must qualify the sample");
-+    assert!(
-+        sample.lower > 100.9,
-+        "helper transport elapsed time must advance lower bound: {}",
-+        sample.lower
-+    );
-+    assert!(
-+        sample.upper >= 101.1,
-+        "counter uncertainty must conservatively advance upper bound"
-+    );
++    Ok(StableTimeClock::from_config(&config))
++}
++
++#[tokio::test]
++async fn service_measurement_preserves_bounds_without_private_counter() -> anyhow::Result<()> {
++    let root = tempfile::tempdir()?;
++    let expected = evidence();
++    // Reader delivery has a deliberate delay. No receipt-time guarantee or
++    // elapsed-time projection may be manufactured from that delay.
++    let reader = clock(
++        root.path(),
++        &format!(
++            "import time\ntime.sleep(0.05)\nprint({:?})",
++            expected.to_string()
++        ),
++    )?;
++    let sample = reader
++        .sample()
++        .await
++        .expect("service observation qualifies");
++    assert_eq!(sample.lower, 100.0);
++    assert_eq!(sample.upper, 100.1);
++    assert_eq!(serde_json::from_str::<Value>(&sample.evidence)?, expected);
 +    Ok(())
 +}
 +
 +#[tokio::test]
-+async fn uncertain_counter_handoff_never_reuses_helper_bounds() -> anyhow::Result<()> {
-+    for (name, counter, frequency, echo, validity, mode) in [
-+        ("wrong_nonce", 2000, 1000, false, 2_000_000_000_u64, 0o600),
-+        ("frequency_changed", 2000, 2000, true, 2_000_000_000, 0o600),
-+        ("counter_rollback", 999, 1000, true, 2_000_000_000, 0o600),
-+        ("handoff_expired", 4000, 1000, true, 9_000_000_000, 0o600),
++async fn malformed_or_obsolete_service_evidence_holds() -> anyhow::Result<()> {
++    let cases = [
++        ("legacy", "contract_version", json!(1)),
++        ("held", "state", json!("held")),
++        ("wrong_basis", "basis", json!("receipt")),
++        ("receipt_claim", "receipt_time_bound", json!(true)),
++        ("string_receipt", "receipt_time_bound", json!("false")),
++        ("inverted_bounds", "lower", json!(101.0)),
++        ("non_numeric_bounds", "upper", json!("NaN")),
++        ("no_validity", "valid_for_ns", json!(0)),
++        ("negative_validity", "valid_for_ns", json!(-1)),
 +        (
-+            "service_lease_expired",
-+            2000,
-+            1000,
-+            true,
-+            500_000_000,
-+            0o600,
++            "private_bridge",
++            "counter_source",
++            json!({"kind":"windows_qpc_private_bridge","socket":"/missing"}),
 +        ),
-+        ("socket_not_private", 2000, 1000, true, 2_000_000_000, 0o666),
++        (
++            "wrong_counter",
++            "counter",
++            json!({"epoch":"bad","counter":1000,"frequency":1000,"rate_ppm":0}),
++        ),
++        (
++            "zero_frequency",
++            "counter",
++            json!({"epoch":"3c93a3d4-445d-4403-8a40-77fa9162dee6","counter":1000,"frequency":0,"rate_ppm":0}),
++        ),
++        (
++            "bad_rate",
++            "counter",
++            json!({"epoch":"3c93a3d4-445d-4403-8a40-77fa9162dee6","counter":1000,"frequency":1000,"rate_ppm":5001}),
++        ),
++        (
++            "negative_counter",
++            "counter",
++            json!({"epoch":"3c93a3d4-445d-4403-8a40-77fa9162dee6","counter":-1,"frequency":1000,"rate_ppm":0}),
++        ),
++    ];
++    for (name, field, value) in cases {
++        let root = tempfile::tempdir()?;
++        let mut malformed = evidence();
++        malformed[field] = value;
++        let reader = clock(root.path(), &format!("print({:?})", malformed.to_string()))?;
++        assert!(reader.sample().await.is_none(), "{name} must hold");
++    }
++    for field in [
++        "basis",
++        "receipt_time_bound",
++        "counter_source",
++        "valid_for_ns",
++        "counter",
++        "lower",
++        "upper",
 +    ] {
 +        let root = tempfile::tempdir()?;
-+        let socket = root.path().join("counter.sock");
-+        let listener = tokio::net::UnixListener::bind(&socket)?;
-+        std::fs::set_permissions(&socket, std::fs::Permissions::from_mode(mode))?;
-+        let server = tokio::spawn(async move {
-+            let (stream, _) = listener.accept().await.unwrap();
-+            let (read, mut write) = stream.into_split();
-+            let mut id = String::new();
-+            BufReader::new(read).read_line(&mut id).await.unwrap();
-+            let id = if echo { id.trim() } else { "wrong" };
-+            let reply = json!({"id":id,"status":"ok","counter":counter,"frequency":frequency});
-+            write
-+                .write_all(format!("{reply}\n").as_bytes())
-+                .await
-+                .unwrap();
-+        });
-+        let evidence = json!({"contract_version":1,"state":"qualified","lower":100.0,"upper":100.1,"valid_for_ns":validity,
-+            "counter":{"epoch":"3c93a3d4-445d-4403-8a40-77fa9162dee6","counter":1000,"frequency":1000,"rate_ppm":0},
-+            "counter_source":{"socket":socket,"kind":"windows_qpc_private_bridge"}});
-+        let reader = root.path().join("reader.py");
-+        std::fs::write(
-+            &reader,
-+            format!("#!/usr/bin/python3\nprint({:?})\n", evidence.to_string()),
-+        )?;
-+        std::fs::set_permissions(&reader, std::fs::Permissions::from_mode(0o700))?;
-+        let config = root.path().join("native-clock.json");
-+        std::fs::write(
-+            &config,
-+            json!({"interpreter":reader,"stable_time_config":root.path().join("stable-time.json")})
-+                .to_string(),
-+        )?;
-+        std::fs::set_permissions(&config, std::fs::Permissions::from_mode(0o600))?;
-+        let value = StableTimeClock::from_config(&config).sample().await;
-+        server.abort();
-+        assert!(
-+            value.is_none(),
-+            "{name} must hold, not reuse sampled bounds"
-+        );
++        let mut malformed = evidence();
++        malformed.as_object_mut().unwrap().remove(field);
++        let reader = clock(root.path(), &format!("print({:?})", malformed.to_string()))?;
++        assert!(reader.sample().await.is_none(), "missing {field} must hold");
 +    }
++    Ok(())
++}
++
++#[tokio::test]
++async fn process_and_configuration_failures_hold() -> anyhow::Result<()> {
++    for body in [
++        "print('x' * 4097)",
++        "raise SystemExit(1)",
++        "print('invalid json')",
++        "import time; time.sleep(3)",
++    ] {
++        let root = tempfile::tempdir()?;
++        let reader = clock(root.path(), body)?;
++        assert!(reader.sample().await.is_none(), "{body} must hold");
++    }
++    let root = tempfile::tempdir()?;
++    let _ = clock(root.path(), &format!("print({:?})", evidence().to_string()))?;
++    let config = root.path().join("native-clock.json");
++    std::fs::set_permissions(&config, std::fs::Permissions::from_mode(0o644))?;
++    assert!(!StableTimeClock::from_config(&config).configured());
++    assert!(!StableTimeClock::from_config(std::path::Path::new("relative.json")).configured());
 +    Ok(())
 +}
 diff --git a/codex-rs/protocol/src/turn_input.rs b/codex-rs/protocol/src/turn_input.rs

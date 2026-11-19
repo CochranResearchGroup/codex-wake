@@ -8,7 +8,6 @@ import sys
 import tempfile
 import threading
 import unittest
-from types import SimpleNamespace
 from unittest.mock import patch
 
 from websockets.exceptions import ConnectionClosed
@@ -103,17 +102,20 @@ class BoundedNativeQualificationTests(unittest.TestCase):
             context.start()
             self.addCleanup(context.stop)
 
-    def test_submission_qualification_does_not_measure_guest_elapsed_time(self):
-        from codex_wake.native_delivery import _codex_adapter
-        def guest_clock():
-            self.fail('qualification measured a guest clock')
-        with _peer() as (root, calls), patch('codex_wake.bounded_native_qualification.time',
-                SimpleNamespace(monotonic=guest_clock), create=True):
-            adapter = _codex_adapter()
-            recipient = adapter.resolve(dict(transport='native', thread_id=_THREAD,
-                endpoint='unix://' + str(root / 'native.sock'), codex_cmd=sys.executable))
-            result = adapter.submit_bounded(recipient, 'wake', RuntimeSubmissionEnvelope(_CLIENT, _EXPIRY))
-            self.assertEqual(result.state, 'accepted')
+    def test_queue_inspection_and_cancellation_survive_clock_client_outage(self):
+        from codex_wake.measurements import TimeUnavailable
+        with _peer() as (root, calls), patch('codex_wake.measurements.snapshot',
+                side_effect=TimeUnavailable('clock client unavailable')):
+            request = QualifiedBoundedNativeRequest()
+            for operation in ('read', 'delete', 'capabilities'):
+                with self.subTest(operation=operation):
+                    request('unix://' + str(root / 'native.sock'), sys.executable,
+                        'thread/queue/bounded/' + operation,
+                        dict(threadId=_THREAD, id=_QUEUE), 2)
+            methods = [item[1]['method'] for item in calls]
+            self.assertIn('thread/queue/bounded/read', methods)
+            self.assertIn('thread/queue/bounded/delete', methods)
+            self.assertNotIn('thread/queue/bounded/add', methods)
 
     def test_default_factory_preserves_envelope_and_negotiates_on_submission_connection(self):
         from codex_wake.native_delivery import _codex_adapter
