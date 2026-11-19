@@ -6,28 +6,6 @@ from codex_wake.runtime_delivery import RuntimeSubmissionEnvelope
 
 
 class BoundedNativeDeliveryTests(unittest.TestCase):
-    def test_native_reconciliation_does_not_require_time_authority(self):
-        from unittest.mock import patch
-        from codex_wake.measurements import TimeUnavailable
-        calls = []
-        def request(endpoint, executable, method, params, timeout):
-            calls.append(method)
-            self.assertGreater(timeout, 0)
-            self.assertLessEqual(timeout, 10)
-            if method == 'thread/queue/list':
-                return dict(data=[dict(id='queue-original', clientUserMessageId='original',
-                    input=[dict(type='text', text='wake')])], nextCursor=None)
-            if method == 'thread/read': return dict(thread=dict(id='thread'))
-            if method == 'thread/turns/list': return dict(data=[], nextCursor=None)
-            self.fail(method)
-        adapter = CodexRuntimeAdapter(read_thread=lambda target: None, request=request,
-            run=lambda *args: self.fail('reconciliation must not send'), project_failure=lambda *args: None)
-        recipient = adapter.resolve(dict(transport='native', thread_id='thread', endpoint='unix://', codex_cmd='/codex'))
-        with patch('codex_wake.measurements.snapshot', side_effect=TimeUnavailable('unavailable')):
-            result = adapter.reconcile(recipient, 'wake')
-        self.assertEqual(result.evidence['queue_id'], 'queue-original')
-        self.assertEqual(calls, ['thread/queue/list', 'thread/read', 'thread/turns/list'])
-
     def test_busy_queue_observation_requires_host_qualification(self):
         from codex_wake.bounded_native import BoundedNativeAdapter
         from codex_wake.runtime_delivery import RuntimeCapability

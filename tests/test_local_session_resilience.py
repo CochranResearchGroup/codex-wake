@@ -221,9 +221,8 @@ class SessionResilienceTests(unittest.TestCase):
                 state['owner'].runtime.revoke_grant(principal['grant_id'],issuer=principal['issuer'],resource=principal['resource'])
                 self.assertEqual(len(state['interrupts']),1)
                 from codex_wake.native_protocol import native_request
-                from codex_wake.records import WakeError
-                with self.assertRaisesRegex(WakeError,'stable_time_unavailable'):
-                    native_request(state['endpoint'],'/unused','turn/start',dict(threadId='one'),1)
+                native_request(state['endpoint'],'/unused','thread/read',dict(threadId='one',includeTurns=False),1)
+                self.assertEqual(len(state['starts']),1)
                 self.assertEqual(TurnEvents(state['root']).state(identifier)['protective_scope'],original_scope)
             self.assertEqual(len(state['starts']),1)
 

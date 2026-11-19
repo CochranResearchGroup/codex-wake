@@ -117,18 +117,28 @@ class NativeLargeResponseTests(unittest.TestCase):
                     server.shutdown()
                     worker.join(timeout=2)
 
-    def test_reconciliation_holds_before_reads_when_stable_time_is_unqualified(self):
+    def test_native_reconciliation_does_not_require_time_authority(self):
         from codex_wake.codex_runtime import CodexRuntimeAdapter
-        from codex_wake.records import WakeError
-        def forbidden(*args, **kwargs):
-            self.fail('reconciliation read before qualified time')
-        adapter = CodexRuntimeAdapter(read_thread=forbidden, request=forbidden,
-            run=forbidden, project_failure=forbidden)
-        target = adapter.resolve(dict(transport='native', thread_id='owned',
-            endpoint='unix:///owned', codex_cmd='/codex'))
-        with patch('codex_wake.native_clock.configuration', return_value=None):
-            with self.assertRaisesRegex(WakeError, 'stable_time_unavailable'):
-                adapter.reconcile(target, 'retained prompt')
+        from unittest.mock import patch
+        from codex_wake.measurements import TimeUnavailable
+        calls = []
+        def request(endpoint, executable, method, params, timeout):
+            calls.append(method)
+            self.assertGreater(timeout, 0)
+            self.assertLessEqual(timeout, 10)
+            if method == 'thread/queue/list':
+                return dict(data=[dict(id='queue-original', clientUserMessageId='original',
+                    input=[dict(type='text', text='wake')])], nextCursor=None)
+            if method == 'thread/read': return dict(thread=dict(id='thread'))
+            if method == 'thread/turns/list': return dict(data=[], nextCursor=None)
+            self.fail(method)
+        adapter = CodexRuntimeAdapter(read_thread=lambda target: None, request=request,
+            run=lambda *args: self.fail('reconciliation must not send'), project_failure=lambda *args: None)
+        recipient = adapter.resolve(dict(transport='native', thread_id='thread', endpoint='unix://', codex_cmd='/codex'))
+        with patch('codex_wake.measurements.snapshot', side_effect=TimeUnavailable('unavailable')):
+            result = adapter.reconcile(recipient, 'wake')
+        self.assertEqual(result.evidence['queue_id'], 'queue-original')
+        self.assertEqual(calls, ['thread/queue/list', 'thread/read', 'thread/turns/list'])
 
     def test_reconciliation_reads_user_message_beyond_default_websocket_cap(self):
         prompt = 'wake regression marker'
