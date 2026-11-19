@@ -30,15 +30,23 @@ unknown outcomes and deadlines must not be reset during correction.
 
 ## Current State
 
-R0250-OWNER-WAITS separates controller/local caller waits from genuine actor
-UTC authorization. Final result/output publication retains fresh authority checks,
-including advisory timeout paths. R0250-STRICT-CLIENT removes the auxiliary
-counter-helper requirement from default Python snapshots and service decisions.
-Service UTC and counter evidence remain at the explicit measurement instant.
+The approved timing-policy packet and #695 acceptance are complete on the
+integration branch. Python clients and Native final admission consume supported
+StableTime service-measurement evidence without a private counter bridge.
+Ordinary transport waits retain protective OS budgets; actual permission,
+lease, freshness and expiry owners retain qualified evidence and immutable
+anchors. The shared refresh watcher publishes structured clock observations.
 
-Earlier ACK/SSH/presentation/custody corrections and helper-free inspection are
-complete source components. Historical receipts below describe earlier contracts;
-the supported service decision section and execution ledger govern current work.
+Exact Native e7286ffdc3 complete-package/UID1017 behavior passes, and both Python
+collections cover2,806 unique cases:2,805 pass plus one opt-in systemd skip.
+Python3.12's three Windows failures pass unchanged focused reruns; their original
+failures remain retained. Rust libtest compilation is the documented deferred
+nonblocking validation-cost gap, not a unit-test pass. Current evidence is
+[service-instant-closeout.json](../evidence/issue0695/service-instant-closeout.json).
+
+This plan remains OPEN for independent GR01-SAMPLE/GR01-LIVE-WINDOW. Their
+expired/uncertain live request is not replayed or renewed by #695 closure.
+No working-host deployment or additional provider effects occurred.
 
 Below are historical execution sections under the superseded universal rule;
 0250-execution.json records corrective ticket states and current acceptance.

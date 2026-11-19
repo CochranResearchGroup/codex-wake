@@ -1,6 +1,6 @@
 # 0248 — Native bounded queue expiry (#695)
 
-State: OPEN
+State: CLOSED
 Owner root/ecochran76; substantive WIP ceiling3 for the remaining-ticket batch.
 Branch feat/native-expiry-695.
 Parent #610. Preserve unrelated work and the working daemon. No working-host
@@ -9,32 +9,36 @@ qualification and applicable installation authorization is established.
 
 ## Current State
 
-The operator accepted best-effort fresh StableTime service-instant admission,
-including the observation-to-send delay/suspension limitation. The revision below
-supersedes receipt-current timing claims. Original expiry, uncertainty holds,
-identity, permission, and no-replay rules remain unchanged.
+Repo-local #695 acceptance is complete on `feat/native-expiry-695`.
+Validated Wake source is `2ae7d0697b3606888a5a6cdbdf7e406ac46fd72e`; Native source is
+`e7286ffdc338457ea11b8becb26daa0f7f4855af`. The operator-approved contract is
+best-effort fresh StableTime service-instant evidence at final Native admission.
+Qualified upper UTC must precede the immutable original expiry; proven expiry
+is terminal and unavailable/overlapping evidence holds. Suspension or delivery
+delay between measurement and send can permit late delivery; remote model-start
+time is not guaranteed. No private counter bridge or WSL extrapolation is used.
 
-Native e7286ffdc338457ea11b8becb26daa0f7f4855af removes the private counter reader
-and consumes explicit service-measurement wirev2. Python producer/adapter and
-ordinary discovery/reconciliation wait corrections are integrated. Actual root
-and UID1017 service-reader observations qualify without the private helper.
-The complete successor package passes all six hash checks and real UID1017
-prepared-expiry/queue/restart journeys, including two invalid-reader contract
-holds. All six hashes remain unchanged and owned case processes are zero.
-The three-test Rust libtest target remains unexecuted after its bounded compile
-attempts. Plan0250 records the explicit validation-layer reconciliation: exact
-installed Native API behavior is qualified; libtest cost is deferred without a
-unit pass claim. Complete Python3.11/3.12 remains the parent closure gate.
+The exact complete Native package passes all six hashes and real UID1017
+prepared-expiry, queue, cancel, restart, control and invalid-reader contract
+journeys. Unchanged package5 launcher/history/upgrade/rollback/ownership proofs
+are retained. No external model calls, working-daemon replacement or credential
+copies were made by this completion packet.
 
-Current Python validation is a resumable local service-backed collection, not
-hermetic CI. Unaffected passing identities are retained; failed assertions are
-repaired narrowly through explicit fixture clock seams while production guards
-remain intact. Python3.12 and complete collection acceptance remain open.
-See [current acceptance evidence](../evidence/issue0695/service-instant-closeout.json)
-and0250-execution.json for exact component states. #695 remains OPEN until its
-required qualification is complete. Working-host activation/restart and release
-authority remain separate; no working daemon replacement or repeated broad
-review is implied.
+Both Python versions cover all 2,806 unique cases: 2,805 pass and one opt-in
+systemd case is skipped. Validation is local and explicitly service-backed,
+not the hosted blank-config environment. Resumable per-case evidence preserves
+failed runs and invalidates affected results when source changes. Python3.12's
+three Windows interoperability failures pass unchanged focused reruns; their
+full-run causes remain unproven. Eighteen duplicate imported test instances are
+not counted twice. The three Rust libtests remain unexecuted after bounded
+compilation attempts; exact installed Native behavior qualifies their required
+acceptance surface, with the unit compilation gap explicitly deferred.
+
+See [acceptance evidence](../evidence/issue0695/service-instant-closeout.json)
+and the0248/0250 execution ledgers. Prior single review and bounded findings pass
+are retained; no broad review was repeated. Working-host activation, merge and
+release/deployment remain separate. Plan0250's live Grok window is independent
+and remains blocked; closing #695 does not renew it.
 
 ## Prior activation evidence (historical)
 

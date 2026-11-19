@@ -39,12 +39,13 @@
     },
     "ST04": {
       "owner": "root",
-      "state": "running",
+      "state": "validated",
       "dependencies": [
         "ST01",
         "ST02"
       ],
-      "scope": "Reconcile reliable-time owners with supported StableTime service semantics; ordinary waits/log metadata allowed. Prior raw-call inventory is not a migration target."
+      "scope": "Reconcile reliable-time owners with supported StableTime service semantics; ordinary waits/log metadata allowed. Prior raw-call inventory is not a migration target.",
+      "validation": "Approved supported-service/ordinary-wait reconciliation complete; reliable-time owners retain service instant/uncertainty, immutable deadlines and unavailable holds. Native exact package/runtime accepted and Python collections complete; historical raw-call inventory is not a universal migration gate."
     },
     "GR01": {
       "owner": "grok_readiness_diagnosis",
@@ -992,12 +993,10 @@
     "service_readback": "MCP health ready=true; get_time contract2 finite qualified_live, service measurement instant2026-11-18T21:23:03.671386358Z.",
     "prior_inventory": "Historical static candidates, not remaining required migrations.",
     "old_gates": "Native/permission/expiry evidence still required; no guest extrapolation or deadline renewal.",
-    "remaining_owners": [
-      "Native final-send clock-source protocol/qualification (#695); frozen Native source/package not rebuilt or deployed.",
-      "Transport-only waits outside current controller/local owner files."
-    ],
+    "remaining_owners": [],
     "updated_at": "2026-11-18T21:37:38.415472+00:00",
-    "timestamp_basis": "Incidental OS metadata; not authority or deadline evidence."
+    "timestamp_basis": "Incidental OS metadata; not authority or deadline evidence.",
+    "final_acceptance": "Current timing-policy packet validated at Wake 2ae7d0697b3606888a5a6cdbdf7e406ac46fd72e and Native e7286ffdc338457ea11b8becb26daa0f7f4855af; independent GR01 live-window tickets remain blocked."
   },
   "native_unit_cost_gap": {
     "state": "deferred",
@@ -1005,5 +1004,17 @@
     "scope": "Existing3test libtest dependency graph cost; source tests unexecuted, Native public API acceptance qualified.",
     "evidence": "docs/dev/evidence/issue0695/service-instant-closeout.json",
     "next_review": "Separate test-cost packet; no same-target retry in current packet."
+  },
+  "final_695_acceptance": {
+    "state": "validated",
+    "wake_source": "2ae7d0697b3606888a5a6cdbdf7e406ac46fd72e",
+    "native_source": "e7286ffdc338457ea11b8becb26daa0f7f4855af",
+    "python": "Both versions2805PASS1opt-in-skip; per-case resumable service-backed validation;312 focused reruns unchanged; historical failures retained",
+    "evidence": "docs/dev/evidence/issue0695/service-instant-closeout.json",
+    "exclusions": [
+      "Independent GR01 live-window renewal",
+      "Working-host deployment",
+      "Deferred Rust libtest compilation gap"
+    ]
   }
 }

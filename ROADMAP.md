@@ -1829,10 +1829,12 @@ remains unqualified; enforcement tracked in #695. Evidence0247. No native upgrad
 
 ## P248-native | Native bounded queue expiry (#695)
 
-Status ACTIVE. Issue #695; plan [0248](docs/dev/plans/0248-2026-11-15-native-queue-expiry.md).
-Persist original expiry and outcomes; enforce at core admission using qualified
-host time. Unknown time holds. Preserve unbounded operator inputs and keep Wake
-bounded busy queue refused until separate-UID native qualification passes.
+Status COMPLETE (repo-local acceptance). Issue #695; plan [0248](docs/dev/plans/0248-2026-11-15-native-queue-expiry.md).
+Original expiry and identities persist through queue/restart/cancel/reconciliation.
+Final Native admission uses approved best-effort fresh StableTime service-instant
+evidence. Exact complete package/UID1017 qualification passes; both Python
+collections are complete with2805PASS/1opt-in-skip each. No working-host
+activation is implied; [acceptance and limitations](docs/dev/evidence/issue0695/service-instant-closeout.json).
 
 ## P248-peer | Accepted peer-history reconciliation (#703)
 
@@ -1844,6 +1846,7 @@ accepted. No bulk historical wake migration. See Plan0248 deployment evidence.
 
 [Plan0250](docs/dev/plans/0250-2026-11-17-stable-time-everywhere.md) now uses
 supported service-measurement semantics for Python clients and separates ordinary
-waits from genuine authorization. Next: Native final-send clock-source protocol
-qualification under #695, then remaining transport-only wait owners. Historical
+waits from genuine authorization. Native final-send protocol/package/runtime and
+remaining ordinary-wait owners are validated under #695. Independent live Grok
+renewal remains blocked. Historical
 raw-clock counts are discovery aids, not a migration target or release gate.

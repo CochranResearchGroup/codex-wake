@@ -10535,3 +10535,32 @@ Plan0250 terminal/input/output custody packet (2026-11-18T20:41:27.677977+00:00)
 Plan0250 policy reconciliation (2026-11-18T21:37:38.415472+00:00, incidental OS metadata): user replacement AGENTS supersedes universal raw-clock elimination and helper requirements for consuming service observations. Three corrective components validated/closed through932ea539: ordinary ACK/SSH/presentation/custody waits and helper-free time inspection. Integrated41 wait cases and17 service cases PASS each311/312; actual CLI read qualified_live service measurement with explicit basis, no receipt-time authorization. Client/helper failures distinguished from service outage. Historical305-call inventory is not a migration target. Lower owner waits and strict legacy handoff consumers remain explicit pending components. No provider/daemon/build/fullsuite/merge/deploy effects;695 remains OPEN. Evidence r0250-policy-reconciliation.json.
 
 Plan0250 supported service decisions (2026-11-18T22:15:02.188201+00:00, incidental metadata): root default native_clock/stable_time Python clients now consume service-measurement UTC/counter directly, no helper read; exact real API succeeds with helper forced unavailable. Actor/selection point distinguished from Native final-send; immutable anchors retained. Owner worker integrated9f2de173 with final result/output auth checks. Core77PASS311 plus final10measurements/2reader controls; core78PASS312, owner23PASSeach. Authority20PASS311;312 initial19PASS/1 first-poll timing failure, exactcase PASSboth after private poll cadence/readiness correction; first failure retained. Source evidence r0250-default-client-validation.json. Native clock-source legacy protocol/qualification and other transport waits remain open; no fullPython/build/provider/daemon/merge/deploy effects,695OPEN.
+
+
+## Turn | 2026-11-19 | #695 service-instant acceptance complete
+
+Validated Wake2ae7d069 and Nativee7286ffdc3 implement the approved best-effort
+StableTime service-instant final admission contract, preserving original expiry,
+identities, uncertainty holds, explicit host qualification and no replay. Native
+complete GNU package sixhashes and actualUID1017 prepared/queue/cancel/restart/
+control/invalid-reader proofs pass. Prior unchanged launcher/history/upgrade/
+rollback/ownership and single review/remediation evidence are retained. No
+working-daemon replacement, external model calls or credential copies occurred.
+
+Python3.11/3.12 each cover2806unique cases:2805PASS/1opt-in-systemdskip;18duplicate
+import instances deduplicated. Local approved StableTime configuration differs
+from hosted blank-config CI; no paid hosted runs. Corrected missingRustPATH and
+private runner multiprocessingmain guard;156ambiguous childresults invalidated.
+Shared refresh producer now publishes structured heartbeat evidence; obsolete
+transport assertions and actual fixture clock/lease/setup seams repaired without
+weakening production gates. Python3.12 fullrun2802PASS/1skip/3Windows failures;
+unchanged focusedreruns1+3PASS qualify failed cases, with original failures and
+unproven causes retained. Rust3libtests remain unexecuted after bounded compile
+attempts, explicitly deferred against exact installed behavior acceptance.
+
+Plan0248 closes repo-local; Plan0250 remains OPEN only for independent liveGrok
+window/sample gates. Worker eed6d40c pushed/read back and its clean checkout
+removed normally after cache inventory; Wake registered worktrees123. Integration
+and Native checkouts retain explicit pending disposition/custody in private
+checkpoint. See service-instant-closeout.json and0248/0250 ledgers. Merge, release
+and working-host activation remain separate.

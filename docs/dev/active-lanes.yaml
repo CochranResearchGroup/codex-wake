@@ -9,12 +9,11 @@ lanes:
     branch: feat/native-expiry-695
     target: origin/main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    custody_state: REMOTE_PRESERVED
     dependencies: []
     overlaps: []
     updated_at: 2026-11-18
-    disposition: Approved best-effort service-instant admission; Python wirev2 and advisory waits integrated, Native e7286ffdc3 removes private counter bridge. Successor package build and resumable local service-backed Python validation active; no working daemon replacement or external model calls. Prior broad review retained.
-
+    disposition: "#695 acceptance complete; exact Native package/UID1017 and both Python collections qualify. Final branch publication precedes normal integration-checkout removal; independent Plan0250 live-Grok tickets stay blocked with refs/checkpoint retained. No working daemon change."
 
   - id: qualification-fixtures-695
     owner: root / ecochran76 (worker reconcile_695_gates)
@@ -23,12 +22,12 @@ lanes:
     plan: docs/dev/plans/0250-2026-11-17-stable-time-everywhere.md
     branch: fix/qualification-fixtures-695
     target: feat/native-expiry-695
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: REMOTE_PRESERVED
     dependencies: []
     overlaps: [native-expiry-695]
     updated_at: 2026-11-18
-    disposition: Disjoint tests-only worker; root integrates serially. Existing clock seams cover task metadata, freshness, retention and owned supervisor boundaries; no product fallback or new fixture framework. Review checkout custody when current Python qualification terminates.
+    disposition: Integrated2e48caad; exact worker eed6d40c pushed and verified. Clean checkout removed normally after ignored cache inventory; owned watcher processes0. No production guard relaxation.
 
   - id: monitor-clock-702
     owner: root / ecochran76

@@ -1,7 +1,7 @@
 {
-  "state": "in_progress",
+  "state": "validated",
   "decision": "Best-effort fresh StableTime service-instant evidence at final native admission; observation-to-send suspension/delivery limitation accepted.",
-  "wake_source": "60c2c0b2031ea751bce2dff8e110778e31e1a9a7",
+  "wake_source": "2ae7d0697b3606888a5a6cdbdf7e406ac46fd72e",
   "native_base": "9af0e8e48d0c2dcfe1800a3deaadfcec7e2c0bd7",
   "wire": {
     "version": 2,
@@ -29,9 +29,7 @@
     "isolated factory activation proof",
     "prior single broad review and bounded findings pass"
   ],
-  "pending": [
-    "Complete Python3.11/3.12 collection"
-  ],
+  "pending": [],
   "runtime_effects": "Isolated public wheel installed UID1017 only. Working daemon unchanged. No external model calls or new credential copies.",
   "native_source": "e7286ffdc338457ea11b8becb26daa0f7f4855af",
   "validation_environment": "Comprehensive local service-backed run explicitly provisions approved existing StableTime; not hermetic. Missing-clock rejection tests override authority. Prior blank-config failures and stopped run retained.",
@@ -186,9 +184,9 @@
     "goal_independence": "No native_queue_clock/QueueClock/config consumer in Goal/resource guards; unchanged nonqueue Goal token behavior proof retained, not renewed."
   },
   "python_validation_reconciliation": {
-    "source": "aa7de5e0",
-    "complete": false,
-    "retained_python311_unique_passes": 2645,
+    "source": "2ae7d0697b3606888a5a6cdbdf7e406ac46fd72e",
+    "complete": true,
+    "retained_python311_unique_passes": 2805,
     "collection_unique_cases": 2806,
     "duplicate_import_instances": 18,
     "runner_repairs": [
@@ -204,11 +202,61 @@
       "Supervisor result fixture includes time_held; Grok positive route uses structured clock:2PASS each version",
       "Operator inventory structured freshness and owned self-limit watcher synchronized fixture evidence:9PASS each version; final owned fixture children0"
     ],
-    "pending": [
-      "Refresh expiry fixture reconciliation",
-      "Remaining Python311 cases with repaired runner",
-      "Complete Python312 collection"
+    "pending": [],
+    "validation_environment": "Local approved existing StableTime plus explicit deterministic fixture clocks; service-backed rather than blank-config hosted environment; no hosted CI or external model calls",
+    "python312_unique_passes": 2805,
+    "per_version_skipped": 1,
+    "skip": "Opt-in disposable systemd test; exact separate-UID Native runtime proofs remain distinct",
+    "final_results": {
+      "python311": "2805PASS/1skip across2806unique logical cases; resumable validation with affected results invalidated",
+      "python312": "Fullcollection2802PASS/1skip/3failedcases in2280.160s; unchanged focusedreruns1+3testsPASS, reconciled2805PASS/1skip",
+      "focused_windows_failures": "Two Windows helper process timeout receipts and one exit1 remain retained; cause not proven. No timeout/assertion relaxation or product edit.",
+      "duplicate_import_instances": 18,
+      "hermetic": false,
+      "hosted_ci": "Not run under operator cost policy",
+      "parked_openclaw": "Unchanged and excluded"
+    }
+  },
+  "known_validation_gaps": [
+    "Three Native Rust libtests never executed after bounded compilation; deferred nonblocking gap, required behavior qualified by exact installed Native API journeys",
+    "Original intermittent Windows interoperability full-run failures have unproven causes despite unchanged focused passes"
+  ],
+  "final_source_artifacts": {
+    "codex_wake-0.22.0.dev41-py3-none-any.whl": "91a78c2d0c76a16f5a450d174b1c669df57cbc315e75f43047c5c87ddc5e4f2a",
+    "codex_wake-0.22.0.dev41.tar.gz": "63aa8e1285b91c88726ae79e31852582242aa84b223990d1d1585a0e88f78223"
+  },
+  "deployment": "Separate installed UID1017 qualification only; working0.170daemon PID3161414 unchanged by this packet. Source branch delivery; no merge or deployment claimed.",
+  "final_local_checks": {
+    "source": "2ae7d0697b3606888a5a6cdbdf7e406ac46fd72e",
+    "ruff": "PASS --select F821,F822,F823 src scripts tests .codex/hooks",
+    "compileall": "PASS src tests .codex/hooks",
+    "policy_wiring": "PASS scripts/check_policy_wiring.py",
+    "active_planning_contract": "PASS --active-only; all-history audit reports32 unrelated legacy state/filename findings retained",
+    "package": "python -m build PASS wheel+sdist; isolated wheel installation PASS",
+    "installed_wheel_smokes": [
+      "source_registry_smoke PASS",
+      "session_discovery_smoke accepted18connections closed/no lifecycle effects/descriptors unchanged",
+      "a2a_mailbox_smoke --scheduler --operations accepted_provider_free;0children/no lifecycle effects; legacy synthetic scheduling fixture is not time-authority proof",
+      "Installed service snapshot authenticated_utc with private counter helper forced unavailable"
     ],
-    "validation_environment": "Local approved existing StableTime plus explicit deterministic fixture clocks; service-backed rather than blank-config hosted environment; no hosted CI or external model calls"
+    "installed_source_content_parity": {
+      "compared_files": 345,
+      "mismatches": 0
+    },
+    "hosted_environment_differences": [
+      "WSL shared kernel versus hosted Ubuntu",
+      "Approved StableTime explicitly configured rather than blank configuration",
+      "Windows PowerShell interop present and observed intermittent failures; focused unchanged checks pass",
+      "Unchanged parked OpenClaw plugin checks excluded"
+    ]
+  },
+  "checkout_custody": {
+    "fixture_worker": "eed6d40c verified remote; clean checkout removed normally; ignored outputs only caches",
+    "wake_integration": "Exact final remote custody then normal checkout removal; independent Plan0250 blocked state retains refs/checkpoint",
+    "native": "Clean e7286ffdc3 branch and verified private delta bundle retained; upstream OpenAI origin is not an authorized archive target. Review custody on authorized fork/archive or working-package decision.",
+    "counts_after_fixture_cleanup": {
+      "wake": 123,
+      "native": 21
+    }
   }
 }
