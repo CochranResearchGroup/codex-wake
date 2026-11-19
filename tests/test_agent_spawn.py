@@ -255,6 +255,21 @@ class AgentSpawnTests(unittest.TestCase):
         interrupts=[]
         queue_deletes=[]
         state = {'name': None, 'turns': [], 'loaded': False}
+        interrupted = False
+        budget_expired = False
+        def clock():
+            nonlocal interrupted
+            if interrupted_admission and state['loaded'] and not interrupted:
+                interrupted = True
+                raise SystemExit('fixture controller termination before admission')
+            upper = 1102 if budget_expired else 1893456001 if expire_at_task and state['loaded'] else 1001
+            return {'utc': {'lower': upper - 1, 'upper': upper}, 'counter': None}
+        # Fixture metadata and lifecycle authorization share the original dynamic
+        # UTC anchor; ordinary transport waits do not need a fixture counter.
+        utc = patch('codex_wake.measurements.utc_bounds',
+                    side_effect=lambda: tuple(clock()['utc'].values()))
+        utc.start()
+        self.addCleanup(utc.stop)
         def handler(ws):
             for raw in ws:
                 request = json.loads(raw)
@@ -432,15 +447,6 @@ class AgentSpawnTests(unittest.TestCase):
             if budget:argv.extend(['--objective-ref','bootstrap'])
             if brief_dispatch:
                 argv.extend(['--task-id','multiply','--assignment-id','multiply-one'])
-            interrupted = False
-            budget_expired=False
-            def clock():
-                nonlocal interrupted
-                if interrupted_admission and state['loaded'] and not interrupted:
-                    interrupted = True
-                    raise SystemExit('fixture controller termination before admission')
-                upper = 1102 if budget_expired else 1893456001 if expire_at_task and state['loaded'] else 1001
-                return {'utc': {'lower': upper - 1, 'upper': upper}, 'counter': None}
             try:
                 with unix_serve(handler, str(endpoint)) as server:
                     worker = threading.Thread(target=server.serve_forever, daemon=True)
