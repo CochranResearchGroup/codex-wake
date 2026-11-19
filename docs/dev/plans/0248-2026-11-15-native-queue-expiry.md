@@ -18,9 +18,11 @@ Native e7286ffdc338457ea11b8becb26daa0f7f4855af removes the private counter read
 and consumes explicit service-measurement wirev2. Python producer/adapter and
 ordinary discovery/reconciliation wait corrections are integrated. Actual root
 and UID1017 service-reader observations qualify without the private helper.
-The complete successor package build and affected installed journeys are pending.
-Three Native source tests have metadata validation only: both bounded compile
-attempts ended before test execution. No test pass is inferred from that work.
+The complete successor package passes all six hash checks and real UID1017
+prepared-expiry/queue/restart journeys, including two invalid-reader contract
+holds. All six hashes remain unchanged and owned case processes are zero.
+Three Native source tests await final post-package verification: earlier bounded
+compile attempts ended before test execution and are retained as incomplete.
 
 Current Python validation is a resumable local service-backed collection, not
 hermetic CI. Unaffected passing identities are retained; failed assertions are
