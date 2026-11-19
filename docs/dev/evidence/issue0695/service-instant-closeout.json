@@ -258,5 +258,13 @@
       "wake": 123,
       "native": 21
     }
+  },
+  "tracker": {
+    "issue": 695,
+    "state": "CLOSED",
+    "reason": "completed",
+    "closed_at": "2026-11-19T05:03:01Z",
+    "url": "https://github.com/CochranResearchGroup/codex-wake/issues/695",
+    "acceptance_publication": "90b3fe305bcfd8a2eb2886c0bb38427b470fb806"
   }
 }

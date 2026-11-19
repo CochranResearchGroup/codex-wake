@@ -71,8 +71,8 @@
       "evidence": "docs/dev/evidence/issue0695/python-clock-diagnosis.json",
       "blocker": null,
       "priority": "P1",
-      "tracker_resolution": "DONE repo-local; parent closure authorized after acceptance publication",
-      "next_action": "Publish acceptance and reconcile parent695 closure readback.",
+      "tracker_resolution": "DONE repo-local; parent695 CLOSED completed after published acceptance",
+      "next_action": "None for695; independent live Grok and working-host deployment retain their own authorization gates.",
       "validation": "Python3.11/3.12 each2805PASS1opt-in-systemdskip across2806unique cases;18duplicate imported instances deduplicated. Local approved service-backed environment;312 three Windows failures pass unchanged focused reruns, originals retained."
     }
   },
@@ -114,6 +114,12 @@
     "native": "e7286ffdc338457ea11b8becb26daa0f7f4855af",
     "state": "validated",
     "evidence": "docs/dev/evidence/issue0695/service-instant-closeout.json",
-    "tracker": "695 closure follows publication; tracker readback remains a separate authority"
+    "tracker": {
+      "state": "CLOSED",
+      "reason": "completed",
+      "closed_at": "2026-11-19T05:03:01Z",
+      "url": "https://github.com/CochranResearchGroup/codex-wake/issues/695",
+      "readback": "GitHub MCP fetch and independent authenticated gh issue view"
+    }
   }
 }

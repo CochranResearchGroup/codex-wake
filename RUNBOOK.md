@@ -10560,7 +10560,11 @@ attempts, explicitly deferred against exact installed behavior acceptance.
 
 Plan0248 closes repo-local; Plan0250 remains OPEN only for independent liveGrok
 window/sample gates. Worker eed6d40c pushed/read back and its clean checkout
-removed normally after cache inventory; Wake registered worktrees123. Integration
-and Native checkouts retain explicit pending disposition/custody in private
+removed normally after cache inventory; Wake registered worktrees123. Integration checkout removal follows exact final remote custody; Native checkout
+is retained for clean source/cache custody because the OpenAI upstream remote
+is not an authorized archive target. Exact cleanup readbacks live in the private
 checkpoint. See service-instant-closeout.json and0248/0250 ledgers. Merge, release
 and working-host activation remain separate.
+
+#695 tracker CLOSED completed at 2026-11-19T05:03:01Z; GitHub MCP and independent
+CLI readback agree. Acceptance published90b3fe30 before closure.
