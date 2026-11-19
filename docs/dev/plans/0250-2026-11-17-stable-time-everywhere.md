@@ -221,3 +221,26 @@ previous broad review is retained. No working daemon replacement or renewed
 Grok inference window. #695 closure requires the acceptance matrix, current
 Python validation and causally affected Native qualification; passing source
 checks alone does not close the issue.
+
+## Native validation seam reconciliation | 2026-11-18
+
+Exact Native e728 complete package and installed UID1017 API journeys are the
+acceptance seam for the revised clock consumer. They prove real service-point
+admission, preparation expiry/history exclusion, pending cancellation, unknown
+hold, original identities/deadlines across restart, eligible controls, and
+legacy/receipt-claim reader rejection without model input. Unchanged nonqueue
+and updater/ownership paths retain their prior qualified evidence.
+
+The three-test Rust libtest target never ran: two900s and one600s compilation
+fuses ended in its existing dependency graph, without compiler diagnostics or
+test assertions. Record it as an unexecuted, deferred validation-cost gap; never
+as a pass. This changes the validation layer, not the accepted behavior. It does
+not invalidate the compiled package or observed public API results. No further
+same-target retry is authorized by this packet. Required Python3.11/3.12 complete
+local validation remains open; this reconciliation does not waive that gate.
+
+Compatibility: reader wirev2 requires the matching successor Native consumer.
+Mixed old/new reader-consumer pairs hold bounded work; they never fall back to
+unbounded submission. Existing admitted wirev1 records remain reconcilable.
+Keep package/helper identities pinned together and qualify them before host
+activation; no stored expiry or original submission identity is rewritten.

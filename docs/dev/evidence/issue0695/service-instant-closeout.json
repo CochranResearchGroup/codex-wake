@@ -30,8 +30,7 @@
     "prior single broad review and bounded findings pass"
   ],
   "pending": [
-    "Complete Python3.11/3.12 collection",
-    "Final post-package3test Native source verification active; prior compile timeouts retained"
+    "Complete Python3.11/3.12 collection"
   ],
   "runtime_effects": "Isolated public wheel installed UID1017 only. Working daemon unchanged. No external model calls or new credential copies.",
   "native_source": "e7286ffdc338457ea11b8becb26daa0f7f4855af",
@@ -165,5 +164,25 @@
     "package_hashes_unchanged": true,
     "external_model_calls": 0,
     "clock_basis": "service_measurement; receipt_time_bound=false; no private bridge/handoff"
+  },
+  "native_source_unit_selection": {
+    "state": "unexecuted",
+    "classification": "deferred_nonblocking_validation_cost_gap",
+    "tests": 3,
+    "attempt_budgets_seconds": [
+      900,
+      900,
+      600
+    ],
+    "compiler_assertion_failures": false,
+    "executable_produced": false,
+    "decision": "Use exact installed package API as Native acceptance seam; all695 Native behavior criteria executed or validly reused. The cold libtest dependency graph is not a failed product assertion and does not invalidate primary runtime proof. No unit pass claimed and no further same-target retry.",
+    "retained_gap": "New source test target compilation/enumeration/execution remains unverified; track separately from qualified product behavior."
+  },
+  "native_reuse_scope": {
+    "wire_consumer": "codex-rs/ext/queue/src/clock.rs:29,76",
+    "sample_calls": "codex-rs/ext/queue/src/service.rs:644,696,718",
+    "persistence": "codex-rs/thread-store/src/queue_store.rs:195-201; state/runtime/queued_items.rs:383-385",
+    "goal_independence": "No native_queue_clock/QueueClock/config consumer in Goal/resource guards; unchanged nonqueue Goal token behavior proof retained, not renewed."
   }
 }

@@ -21,8 +21,10 @@ and UID1017 service-reader observations qualify without the private helper.
 The complete successor package passes all six hash checks and real UID1017
 prepared-expiry/queue/restart journeys, including two invalid-reader contract
 holds. All six hashes remain unchanged and owned case processes are zero.
-Three Native source tests await final post-package verification: earlier bounded
-compile attempts ended before test execution and are retained as incomplete.
+The three-test Rust libtest target remains unexecuted after its bounded compile
+attempts. Plan0250 records the explicit validation-layer reconciliation: exact
+installed Native API behavior is qualified; libtest cost is deferred without a
+unit pass claim. Complete Python3.11/3.12 remains the parent closure gate.
 
 Current Python validation is a resumable local service-backed collection, not
 hermetic CI. Unaffected passing identities are retained; failed assertions are

@@ -767,7 +767,7 @@
     },
     "R0250-NATIVE-CLOCK-SOURCE": {
       "owner": "root",
-      "state": "implemented",
+      "state": "validated",
       "dependencies": [
         "R0250-STRICT-CLIENT"
       ],
@@ -785,7 +785,8 @@
         }
       },
       "native_result_sha": "e7286ffdc338457ea11b8becb26daa0f7f4855af",
-      "validation": "Python v2 reader2PASS311/312; adapter13PASS311/312 CIblank. Native exact-target metadata valid; two900s compile limits reached without test execution. Successor complete package build active, then affected installed qualification required."
+      "validation": "Exact complete GNU package sixhashes verified and realUID1017 prepared/queue/invalidreader/expiry/cancel/restart/control journeys PASS. Python producer2 andadapter13PASS311/312. Three Rust source tests unexecuted after900+900+600s compile budgets; explicit nonblocking validation-cost gap, no pass claimed.",
+      "tracker_resolution": "closed_repo_local_native_behavior; parent695 requires completePython"
     },
     "R0250-TRANSPORT-WAITS": {
       "owner": "root",
@@ -862,7 +863,7 @@
       "R0250-NATIVE-CLOCK-SOURCE",
       "R0250-SHARED-TRANSPORT"
     ],
-    "state": "native_package_and_python_validation_running",
+    "state": "native_behavior_validated_python_matrix_open",
     "review": "Previous broad review retained; focused causal verification only.",
     "native_decision": "Accepted best effort service instant; delay/suspension limitation explicit.",
     "workers": {
@@ -997,5 +998,12 @@
     ],
     "updated_at": "2026-11-18T21:37:38.415472+00:00",
     "timestamp_basis": "Incidental OS metadata; not authority or deadline evidence."
+  },
+  "native_unit_cost_gap": {
+    "state": "deferred",
+    "owner": "root",
+    "scope": "Existing3test libtest dependency graph cost; source tests unexecuted, Native public API acceptance qualified.",
+    "evidence": "docs/dev/evidence/issue0695/service-instant-closeout.json",
+    "next_review": "Separate test-cost packet; no same-target retry in current packet."
   }
 }
