@@ -140,7 +140,7 @@ class BoundedNativeDeliveryTests(unittest.TestCase):
             target = dict(transport='native', thread_id='01a1227e-a041-7b72-9c36-18349e7dd22c',
                 endpoint='unix://', codex_cmd='/codex', expires_at='2026-10-09T00:10:00Z')
             record = build_record(predicate=dict(type='not_before', due_at='2026-10-09T00:00:00Z'),
-                prompt='wake', cwd=root, target=target)
+                prompt='wake', cwd=root, target=target, now=datetime(2026, 10, 9, tzinfo=UTC))
             record['status'] = 'firing'; write_record(root, record)
             adapter = CodexRuntimeAdapter(read_thread=lambda unused:dict(id=target['thread_id'], status=dict(type='idle')),
                 request=request, run=lambda *a, **k:self.fail('unbounded submission'), project_failure=lambda *a:None,
@@ -236,7 +236,7 @@ class BoundedNativeDeliveryTests(unittest.TestCase):
             target = dict(transport='native', thread_id='01a1227e-a041-7b72-9c36-18349e7dd22c', endpoint='unix://',
                 codex_cmd='/codex', expires_at='2026-10-09T00:10:00Z')
             write_record(root, build_record(predicate=dict(type='not_before', due_at='2026-10-09T00:00:00Z'),
-                prompt='wake', cwd=root, target=target))
+                prompt='wake', cwd=root, target=target, now=datetime(2026, 10, 9, tzinfo=UTC)))
             with patch('codex_wake.native_delivery.read_native_thread', return_value=dict(id='01a1227e-a041-7b72-9c36-18349e7dd22c', status=dict(type='idle'))), patch(
                 'codex_wake.native_delivery.subprocess.run', side_effect=AssertionError('unbounded submission')):
                 poll_once(root, datetime(2026, 10, 9, tzinfo=UTC))
@@ -267,7 +267,7 @@ class BoundedNativeDeliveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             target = dict(transport='native', thread_id='01a1227e-a041-7b72-9c36-18349e7dd22c', endpoint='unix://', codex_cmd='/codex', expires_at='2026-10-09T00:10:00Z')
-            record = build_record(predicate=dict(type='not_before', due_at='2026-10-09T00:00:00Z'), prompt='wake', cwd=root, target=target)
+            record = build_record(predicate=dict(type='not_before', due_at='2026-10-09T00:00:00Z'), prompt='wake', cwd=root, target=target, now=datetime(2026, 10, 9, tzinfo=UTC))
             record['status'] = 'firing'
             write_record(root, record)
             adapter = Runtime()
