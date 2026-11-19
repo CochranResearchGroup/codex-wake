@@ -200,7 +200,10 @@ class HarnessCallerTests(unittest.TestCase):
         from codex_wake.monitor import write_monitor_health
         clock = dict(utc=dict(status='network', sources=['fixture-a', 'fixture-b'],
             lower=1893456000, upper=1893456000.2), counter=None)
-        with tempfile.TemporaryDirectory() as temporary, patch.dict('os.environ', {'XDG_STATE_HOME': temporary}):
+        with tempfile.TemporaryDirectory() as temporary, patch.dict(
+                'os.environ', {'XDG_STATE_HOME': temporary}), patch(
+                'codex_wake.measurements.utc_bounds',
+                side_effect=lambda: (clock['utc']['lower'], clock['utc']['upper'])):
             root = Path(temporary) / 'wake'
             runner = CommandRunner(wake_root=root)
             body = dict(caller_thread_id=THREAD, trigger='3650d', ttl='24h', prompt='Read-only review',
