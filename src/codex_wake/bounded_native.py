@@ -51,7 +51,13 @@ class BoundedNativeAdapter:
             if (not isinstance(clock, dict)
                     or any(type(clock.get(key)) not in (int, float) or not math.isfinite(clock[key]) for key in ('lower', 'upper'))
                     or clock['lower'] > clock['upper']
-                    or not isinstance(authority, dict) or authority.get('contract_version') != 1
+                    or not isinstance(authority, dict)
+                    or type(authority.get('contract_version')) is not int
+                    or authority['contract_version'] not in (1, 2)
+                    or (authority['contract_version'] == 2 and (
+                        authority.get('basis') != 'service_measurement'
+                        or authority.get('receipt_time_bound') is not False
+                        or authority.get('counter_source') != dict(kind='stable_time_service_measurement')))
                     or authority.get('state') != 'qualified'
                     or any(type(authority.get(key)) not in (int, float) or not math.isfinite(authority[key]) for key in ('lower', 'upper'))
                     or authority['lower'] > authority['upper']

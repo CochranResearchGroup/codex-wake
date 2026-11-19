@@ -305,10 +305,26 @@ class BoundedNativeDeliveryTests(unittest.TestCase):
                 adapter = BoundedNativeAdapter(request=lambda *args: dict(inspection=malformed))
                 with self.assertRaises(ValueError):
                     adapter.reconcile_bounded(recipient, 'wake', envelope)
-        adapter = BoundedNativeAdapter(request=lambda *args: dict(inspection=response))
-        observed = adapter.reconcile_bounded(recipient, 'wake', envelope)
-        self.assertEqual((observed.evidence['source'], observed.evidence['execution'], observed.evidence['turn_id']),
-            ('bounded_native_admission', 'not_observed', 'turn-exact'))
+        # Existing admitted v1 records remain reconcilable; new admissions label
+        # the explicitly accepted service measurement basis.
+        for version in (1, 2):
+            response['clockEvidence']['authority'] = dict(authority)
+            if version == 2:
+                response['clockEvidence']['authority'].update(contract_version=2,
+                    basis='service_measurement', receipt_time_bound=False,
+                    counter_source=dict(kind='stable_time_service_measurement'))
+            adapter = BoundedNativeAdapter(request=lambda *args: dict(inspection=response))
+            observed = adapter.reconcile_bounded(recipient, 'wake', envelope)
+            self.assertEqual((observed.evidence['source'], observed.evidence['execution'], observed.evidence['turn_id']),
+                ('bounded_native_admission', 'not_observed', 'turn-exact'))
+        for defect in ('missing_basis', 'receipt_claim', 'private_bridge'):
+            changed = deepcopy(response)
+            evidence = changed['clockEvidence']['authority']
+            if defect == 'missing_basis': evidence.pop('basis')
+            if defect == 'receipt_claim': evidence['receipt_time_bound'] = True
+            if defect == 'private_bridge': evidence['counter_source']['kind'] = 'windows_qpc_private_bridge'
+            with self.subTest(defect=defect), self.assertRaises(ValueError):
+                BoundedNativeAdapter(request=lambda *args: dict(inspection=changed)).reconcile_bounded(recipient, 'wake', envelope)
 
     def test_admitted_wire_rounding_preserves_conservative_expiry(self):
         from copy import deepcopy
