@@ -101,6 +101,12 @@ class RaisingOnceAdapter(ScriptedSourceAdapter):
 
 
 class SQLiteSignalModuleTests(unittest.TestCase):
+    def setUp(self):
+        clock = patch("codex_wake.measurements.utc_bounds",
+                      return_value=(NOW.timestamp(), NOW.timestamp()))
+        clock.start()
+        self.addCleanup(clock.stop)
+
     def test_filesystem_baseline_filter_does_not_change_other_state_sources(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             database = Path(tmp) / "signals.sqlite3"
