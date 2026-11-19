@@ -372,7 +372,9 @@ def qualify(args):
                 'Process isolation adds IPC/journaling/startup cost; compare numbers before rollout. These figures do not establish lower steady-state production CPU.'}
             receipt['status'] = 'passed'
     except Exception as error:
+        import traceback
         receipt['status'] = 'failed'; receipt['error'] = f'{type(error).__name__}: {error}'
+        receipt['failure_traceback'] = traceback.format_exc()
         if pilot:
             receipt['commands'] = pilot.commands
             receipt['final_owned_processes'] = pilot.cleanup()
