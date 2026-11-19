@@ -12,8 +12,10 @@ The deadline after which a message is no longer eligible for delivery, including
 
 **Final native-send admission**:
 Authorization for one bounded input to be sent toward its model provider while
-its original expiration remains eligible, independent of earlier selection or
-preparation. It does not establish when the remote model starts.
+fresh qualified StableTime evidence at its service measurement instant places
+the original expiration in the future, independent of earlier selection or
+preparation. This is best effort: delivery delay or suspension after measurement
+can permit late sending. It does not establish when the remote model starts.
 
 **Trusted time**:
 A bounded UTC estimate accepted under the configured source-selection rules at its documented measurement instant. It does not by itself bound delivery to another process.

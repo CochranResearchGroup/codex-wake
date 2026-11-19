@@ -767,13 +767,23 @@
     },
     "R0250-NATIVE-CLOCK-SOURCE": {
       "owner": "root",
-      "state": "pending",
+      "state": "running",
       "dependencies": [
         "R0250-STRICT-CLIENT"
       ],
-      "scope": "Reconcile/qualify Native final-send clock-source protocol under supported StableTime policy. Existing Native clock producer still advertises legacy private counter source; Python helper removal does not qualify or replace it. Preserve exact original expiry and no-replay/host qualification gates.",
-      "decision_gate": "Operator choice requested: retain Plan0248 final-send guarantee versus change to service-measurement admission. No dependent Native code/build change before answer.",
-      "evidence": "Frozen Native9af codex-rs/ext/queue/src/clock.rs requires private counter read after service output. Supported service contract excludes delivery-time bound."
+      "scope": "Root Python wirev2; Native worker Rust reader/tests. Remove private bridge; fresh observation per final admission, original expiry/no-replay retained.",
+      "decision_gate": "Resolved: operator accepts best-effort fresh service-instant admission and observation-to-send suspension gap.",
+      "evidence": "Frozen Native9af codex-rs/ext/queue/src/clock.rs requires private counter read after service output. Supported service contract excludes delivery-time bound.",
+      "worker": "/root/native_service_admission",
+      "native_base": "9af0e8e48d0c2dcfe1800a3deaadfcec7e2c0bd7",
+      "wire_contract": {
+        "contract_version": 2,
+        "basis": "service_measurement",
+        "receipt_time_bound": false,
+        "counter_source": {
+          "kind": "stable_time_service_measurement"
+        }
+      }
     },
     "R0250-TRANSPORT-WAITS": {
       "owner": "root",
@@ -835,16 +845,17 @@
     "limits": "No provider calls or installed daemon changes. Broader migrations/fullPython/runtime/activation gates open."
   },
   "current_batch": {
-    "base": "dd720de4d94c7717f5fe51e4bd74e532dabf9f38",
+    "base": "bb33f963b7e5e01e545814cff7b538cb1027987e",
     "tickets": [
-      "R0250-NATIVE-CLOCK-SOURCE",
-      "R0250-TRANSPORT-WAITS",
-      "R0250-APP-TRANSPORT-WAITS"
+      "R0250-NATIVE-CLOCK-SOURCE"
     ],
-    "state": "independent_tickets_closed_native_decision_pending",
-    "review": "Retain prior broad review; focused corrective validation only.",
-    "native_decision": "Pending explicit operator answer; final-send guarantee retained.",
-    "evidence": "docs/dev/evidence/issue0695/r0250-transport-waits.json"
+    "state": "running",
+    "review": "Previous broad review retained; focused causal verification only.",
+    "native_decision": "Accepted best effort service instant; delay/suspension limitation explicit.",
+    "workers": {
+      "native_service_admission": "Native existing lane reader/tests",
+      "reconcile_695_gates": "read-only acceptance matrix"
+    }
   },
   "completed_batches": [
     {

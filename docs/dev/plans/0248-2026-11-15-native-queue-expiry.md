@@ -137,6 +137,28 @@ original identities and reason, with already-admitted distinguishable from
 pending cancellation. Do not claim cancellation undoes a running turn. Resolve
 crash after admission before resend: no exactly-once claim from delete-after-start.
 
+## Best-effort service-instant admission revision | 2026-11-18
+
+Operator decision: use fresh supported StableTime service observations at the
+existing final native-send admission boundary. This supersedes the stronger
+receipt-current/final-send timing claim above, including arbitrary suspension
+between observation and send. The original immutable expiry remains decisive:
+qualified upper < expiry admits, lower >= expiry expires, overlap or unavailable
+evidence holds. Reacquire for each admission; never use sender time, extrapolate
+with WSL time, renew the deadline, or replay an uncertain send.
+
+Service bounds describe their measurement instant, not delivery or model start.
+Delay or suspension after that measurement can allow late delivery; this is an
+accepted best-effort limitation, not an unconditional no-late-start guarantee.
+No private counter bridge or new StableTime capability is required. Reader wire
+v2 explicitly labels basis=service_measurement and receipt_time_bound=false;
+legacy private-bridge wire is rejected by the successor Native consumer.
+
+Frozen Native9af/package5 proofs remain historical evidence for unchanged queue,
+cancel, restart and rollback behavior. Clock reader/protocol changes invalidate
+only causally affected package/runtime proofs and need successor qualification.
+Working-host replacement remains separate from disposable qualification.
+
 ## Discovered implementation boundaries
 
 The initial saved modified source f986f6ed53d6b324aedbd7e32991e0185eacae14

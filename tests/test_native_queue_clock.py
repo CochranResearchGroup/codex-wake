@@ -12,7 +12,7 @@ from io import StringIO
 
 
 class NativeQueueClockTests(unittest.TestCase):
-    def test_qualified_process_output_preserves_validity_and_private_counter_source(self):
+    def test_qualified_process_output_labels_service_measurement_without_private_bridge(self):
         from codex_wake.native_queue_clock import main
         sample = dict(reason='authenticated_utc', valid_for_ns=9000000000,
                       utc=dict(status='network', lower=100., upper=100.1),
@@ -27,8 +27,13 @@ class NativeQueueClockTests(unittest.TestCase):
                 self.assertEqual(main(), 0)
             value = json.loads(output.getvalue())
             self.assertEqual(value['valid_for_ns'], 9000000000)
-            self.assertEqual(value['counter_source']['kind'], 'windows_qpc_private_bridge')
-            self.assertTrue(Path(value['counter_source']['socket']).is_relative_to(root))
+            self.assertEqual(value['contract_version'], 2)
+            self.assertEqual(value['basis'], 'service_measurement')
+            self.assertIs(value['receipt_time_bound'], False)
+            self.assertEqual(value['counter_source'], {'kind': 'stable_time_service_measurement'})
+            self.assertEqual(value['counter'], sample['counter'])
+            self.assertLess(value['lower'], 100.)
+            self.assertGreater(value['upper'], 100.1)
 
     def test_missing_stable_time_configuration_holds_without_fallback(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -39,5 +44,5 @@ class NativeQueueClockTests(unittest.TestCase):
                 env=dict(os.environ, PYTHONPATH='src'))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(json.loads(result.stdout), {
-            'contract_version': 1, 'state': 'held', 'reason': 'stable_time_client_configuration_invalid'})
+            'contract_version': 2, 'state': 'held', 'reason': 'stable_time_client_configuration_invalid'})
         self.assertEqual(result.stderr, '')

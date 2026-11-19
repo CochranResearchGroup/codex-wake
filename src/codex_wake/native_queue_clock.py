@@ -2,7 +2,8 @@
 
 Invoke as an absolute pinned interpreter/module pair with an explicit config.
 This process is independent of the Wake watcher and never accepts sender time.
-Native must bound process execution and account for elapsed time after sampling.
+Native bounds process execution as an advisory wait. Evidence describes the
+service measurement instant; delivery delay is an explicit best-effort limitation.
 """
 import argparse
 import json
@@ -11,14 +12,13 @@ import os
 from pathlib import Path
 
 from .native_clock import snapshot
-from .host_counter import counter_socket
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path, required=True)
     args = parser.parse_args()
-    held = dict(contract_version=1, state='held', reason='stable_time_client_configuration_invalid')
+    held = dict(contract_version=2, state='held', reason='stable_time_client_configuration_invalid')
     if not args.config.is_absolute():
         print(json.dumps(held))
         return 0
@@ -38,12 +38,12 @@ def main():
             or utc['lower'] > utc['upper']):
         print(json.dumps(held))
         return 0
-    print(json.dumps(dict(contract_version=1, state='qualified',
+    print(json.dumps(dict(contract_version=2, state='qualified',
                          lower=math.nextafter(utc['lower'] - 0.000001, -math.inf),
                          upper=math.nextafter(utc['upper'] + 0.000001, math.inf),
                          counter=counter, valid_for_ns=valid_for_ns,
-                         counter_source=dict(kind='windows_qpc_private_bridge',
-                                             socket=str(counter_socket())))))
+                         basis='service_measurement', receipt_time_bound=False,
+                         counter_source=dict(kind='stable_time_service_measurement'))))
     return 0
 
 

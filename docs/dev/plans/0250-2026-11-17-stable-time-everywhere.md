@@ -205,3 +205,19 @@ and qualification stay in #695. The original expiry envelope, host qualification
 refusal, and no-replay protections remain mandatory before any deployment.
 Other transport-only wait gates outside the owned files remain owner-specific
 reconciliation work, not a renewed all-clock-call migration.
+
+## Approved #695 best-effort closeout packet | 2026-11-18
+
+The operator accepts fresh service-instant evidence at final admission and the
+observation-to-send suspension/delivery limitation. Plan0248's best-effort
+revision is current timing authority; old final-send/current-upper claims are
+superseded. Root owns Python wirev2 and plan/evidence; Native worker owns the
+existing Rust clock consumer/tests; read-only reconciliation identifies exact
+remaining acceptance gates. No private bridge, no WSL extrapolation, no expiry
+renewal, and no uncertain replay. Legacy wirev1 is refused by the new consumer.
+
+Only newly invalidated focused compile/package/runtime stages may be run;
+previous broad review is retained. No working daemon replacement or renewed
+Grok inference window. #695 closure requires the acceptance matrix, current
+Python validation and causally affected Native qualification; passing source
+checks alone does not close the issue.
