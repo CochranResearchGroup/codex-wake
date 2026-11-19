@@ -201,14 +201,14 @@ print(json.dumps({'result':result.status,'record':all_records(root)[0].record}))
             def refresh_identity(inner,binding):pass
             def paste(inner,binding,prompt,*,deadline=None):
                 inner.inputs+=1;raise OSError('outcome may have reached exact TUI')
-        host=Host();clock=dict(utc=dict(status='network',sources=['one','two'],lower=1800000000,upper=1800000000.1),counter=None)
+        host=Host();clock=dict(utc=dict(status='network',sources=['one','two'],lower=1800000000,upper=1800000000.1),counter=dict(CLOCK['counter'],epoch='3c93a3d4-445d-4403-8a40-77fa9162dee6'),reason='authenticated_utc',valid_for_ns=1000000000)
         argv=['--wake-root',str(self.root),'grok','after','--ttl','2m','--json',
             '--bus-root',str(self.bus.root),'--operator-capability',str(self.capability),
             '--wake-route','existing_tab','--idempotency-key','grok-route','grok_'+'a'*32,'1s','--','Synthetic task']
         with patch('codex_wake.runtime_wakes.GrokTerminalHost',return_value=host),patch(
                 'codex_wake.runtime_wakes.binding_digest',return_value='b'*64),patch(
                 'codex_wake.service.user_state_dir',return_value=self.root/'shared-locks'),patch(
-                'codex_wake.native_clock.snapshot',return_value=clock),contextlib.redirect_stdout(io.StringIO()):
+                'codex_wake.native_clock.snapshot',return_value=clock),patch('codex_wake.measurements.snapshot',return_value=clock),contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(run(argv),0)
             original=all_records(self.root)[0].record
             self.assertEqual(original['wake_policy']['routes'],['existing_tab'])
