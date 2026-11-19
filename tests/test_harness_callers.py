@@ -20,12 +20,15 @@ META = dict(threadId=THREAD, sessionId=THREAD, callId='call-315',
 class HarnessCallerTests(unittest.TestCase):
     def test_inventory_main_cli_and_mcp_share_suppression_and_identity(self):
         from codex_wake.managed_inventory import Observation
-        import time
-        with tempfile.TemporaryDirectory() as temporary:
+        from tests.test_measurements import observation
+        clock = observation(1000)
+        with tempfile.TemporaryDirectory() as temporary, patch(
+                "codex_wake.measurements.snapshot", return_value=clock):
             root = Path(temporary)
-            sample = Observation('codex', 'codex:fixture', THREAD, str(root), 'ready', time.time(),
+            sample = Observation('codex', 'codex:fixture', THREAD, str(root), 'ready', clock['utc']['upper'],
                                  'native_metadata', dict(pid=123, start_ticks=42, boot_id='boot-a'),
-                                 [dict(pane_id='%1', window_id='@1')], {'inspect': 'supported'})
+                                 [dict(pane_id='%1', window_id='@1')], {'inspect': 'supported'},
+                                 clock_observation=clock)
             output = io.StringIO()
             with patch('codex_wake.managed_inventory_commands.RuntimeObserver.__call__', return_value=sample), contextlib.redirect_stdout(output):
                 code = run(['--wake-root', str(root), 'agents', 'enroll', '--operator', '--conversation-id', THREAD, '--json'])
