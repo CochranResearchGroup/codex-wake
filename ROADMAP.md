@@ -1,5 +1,11 @@
 # Codex Wake Roadmap
 
+## #713 | Combined Grok and bounded-expiry Native carry
+
+[Plan0252](docs/dev/plans/0252-2026-11-19-native-carry-713.md) combines the selected
+Grok carry with qualified expiry before package qualification. Source integration
+and affected checks are in progress; working Native and live Grok remain gated.
+
 ## P231 | Specialist bot families
 
 Delivered source: Wake607/Bots77 plus corrective Bots78; five implementation

@@ -10600,3 +10600,36 @@ completedworkers withfollowup_task and compacttooloutput. Only the direct
 releaseprovenance guard is implemented; no globalAGENTS/policy expansion.
 See issue0695/dev43-deployment.json andretro-dev43.md; browserreview session
 https://previews.ecochran.dyndns.org/s/4200fe982425.
+
+
+## Turn | 2026-11-19 | #713 combined Native carry integration
+
+Explicit implement-spec invocation resumes the handoff on isolated Wake and
+Native feat/native-carry-713 branches. Wake base8a5a86ba; Native basea5806e371b
+with expirye7286ffdc3. Shared upstreamd32063f96c verified. Text conflicts
+resolved by intent; experimental schema remains pending maintained regeneration.
+Grok's separate HTTP adapter needs final-send admission. A focused public-client
+regression is running via Cargo Signal, dev-small GNU, jobs2, retained cache.
+Compilation is pending, not a test pass or behavioral red. UID1017's existing
+StableTime client returned authenticated_utc without repair or credential change.
+No package build, working selection/restart, live model call or tracker closure.
+Plan0252 ledger and private native-carry-713 checkpoint retain exact job identity.
+
+
+## Turn | 2026-11-19 | #713 source committed and complete package building
+
+Corrected direct result-file wake delivered to the same conversation. Preserved
+failed red/first-green receipts. Grok final admission and typed refusal fixed;
+a separate public client regression proved two opaque sends reused admission.
+Bounded retry counts0 repair passes all22 HTTP/WS checks, including unchanged
+unbounded retries. Experimental schema generation1PASS591.713s; exact generated
+fixture1PASS188.035s. Native merge d907a42df3 retains both parents and all parent
+client tests. Public0252patch reconstructs tree86740a06107e367beb14f27baf968bfcad8ec698.
+Named-branch source bundle verifies against retained prerequisites; no upstream push.
+
+One complete-package job starts from the clean tracked Native source, dev-small,
+jobs2, incremental0,8MiB stack, retained host-GNU cache. UID1017 rollback fixture
+is now exact selected Grok a5806e/f3213987, six hashes matched; older stock musl
+is not the predecessor. Retained qualification recipes are prepared for exact
+candidate pins after build. No working selection/restart, credential changes,
+provider effects, hosted CI, repeated old3libtests or broad review occurred.

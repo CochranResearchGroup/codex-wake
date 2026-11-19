@@ -1,0 +1,20 @@
+{
+  "state": "source_integrated_package_pending",
+  "base": "d32063f96c2dff1dc96af839b3952abb6acfeda4",
+  "source_commit": "d907a42df3c8f097d4bd2d78aa5c27c33a9112c1",
+  "source_tree": "86740a06107e367beb14f27baf968bfcad8ec698",
+  "parents": [
+    "a5806e371bf306feb4513c7ef4ac2e77e1a3c5f2",
+    "e7286ffdc338457ea11b8becb26daa0f7f4855af"
+  ],
+  "patch_sha256": "d09d5d6498f2fd7daeeed43f43ec0242cc21397b7651fcca970e79e98dc1f49d",
+  "wire_contract": {
+    "contract_version": 2,
+    "basis": "service_measurement",
+    "receipt_time_bound": false
+  },
+  "validation": "API clients+WS22PASS; schema generation1PASS and exact experimental fixture1PASS; package/runtime pending",
+  "working_installation_authorized": false,
+  "provider_calls": 0,
+  "issue": 713
+}
