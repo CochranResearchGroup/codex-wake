@@ -11,11 +11,11 @@ import os
 from pathlib import Path
 import stat
 import subprocess
+import time
 from typing import Any, Callable
 
 from . import __version__
 from .records import WakeError
-from .measurements import TimeUnavailable, deadline
 
 
 class SharedSourceError(WakeError):
@@ -27,7 +27,7 @@ class SharedAppServerReader:
 
     def __init__(self, endpoint: str, *, timeout: float = 10.0,
                  connector: Callable[..., Any] | None = None):
-        if not math.isfinite(timeout) or timeout <= 0 or timeout > 60:
+        if type(timeout) not in (int, float) or not math.isfinite(timeout) or timeout <= 0 or timeout > 60:
             raise WakeError("source timeout must be positive and at most 60 seconds")
         if not endpoint.startswith("unix://") or not endpoint[7:]:
             raise SharedSourceError("an explicit existing unix://PATH endpoint is required")
@@ -43,7 +43,8 @@ class SharedAppServerReader:
 
     def __enter__(self) -> SharedAppServerReader:
         try:
-            self.deadline = deadline(self.timeout)
+            # Advisory I/O budget only; callers own freshness and authorization.
+            self.deadline = time.monotonic() + self.timeout
             if self.path.is_symlink():
                 from .strict_runtime import resolve_executor_endpoint
                 try:
@@ -69,19 +70,14 @@ class SharedAppServerReader:
             return self
         except Exception as exc:
             self.close()
-            if isinstance(exc, TimeUnavailable):
-                raise SharedSourceError('shared_stable_time_unavailable') from None
             if isinstance(exc, WakeError):
                 raise
             raise SharedSourceError(f"shared app-server unavailable: {type(exc).__name__}") from None
 
     def remaining(self) -> float:
         if self.deadline is None:
-            raise SharedSourceError('shared_stable_time_unavailable')
-        try:
-            remaining = self.deadline.remaining()
-        except TimeUnavailable:
-            raise SharedSourceError('shared_stable_time_unavailable') from None
+            raise SharedSourceError('shared connection budget is not open')
+        remaining = self.deadline - time.monotonic()
         if remaining <= 0:
             raise SharedSourceError("shared metadata observation timed out")
         return remaining

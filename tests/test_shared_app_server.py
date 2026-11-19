@@ -49,13 +49,14 @@ class SharedReaderTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.addCleanup(self.sock.close)
 
-    def test_unqualified_time_holds_before_connecting(self):
-        with patch('codex_wake.native_clock.configuration', return_value=None), \
-                patch('websockets.sync.client.unix_connect') as connect:
-            with self.assertRaisesRegex(SharedSourceError, 'stable_time_unavailable'):
-                with SharedAppServerReader('unix://' + str(self.path)):
-                    self.fail('unqualified time admitted a timed connection')
-            connect.assert_not_called()
+    def test_metadata_transport_does_not_require_time_authority(self):
+        reader, connection = self.reader([result(1, {}), result(2, {'data': [], 'nextCursor': None})])
+        with patch('codex_wake.native_clock.configuration', return_value=None):
+            with reader:
+                self.assertEqual(reader.loaded_threads(), [])
+        self.assertTrue(connection.closed)
+        self.assertEqual([item['method'] for item in connection.sent],
+                         ['initialize', 'initialized', 'thread/loaded/list'])
 
     def reader(self, replies):
         connection = FakeConnection(replies)
@@ -132,7 +133,7 @@ class SharedReaderTests(unittest.TestCase):
                     self.fail('must reject')
 
     def test_invalid_timeouts_and_endpoint(self):
-        for timeout in [0, -1, float('inf'), float('nan'), 61]:
+        for timeout in [0, -1, float('inf'), float('nan'), 61, True, None, '1']:
             with self.assertRaises(WakeError):
                 SharedAppServerReader('unix://' + str(self.path), timeout=timeout)
         for endpoint in ['stdio://', 'unix://', 'unix://relative']:
