@@ -15,6 +15,27 @@ from codex_wake import measurements
 THREAD = '00000000-0000-7000-8000-000000000168'
 
 
+def refresh_fixture_clock(path):
+    import time
+    from tests.test_measurements import observation
+    value = observation(int(time.monotonic() * 1000), rate=0)
+    utc = float(Path(path).read_text())
+    value['utc'].update(lower=utc, upper=utc)
+    return value
+
+
+REFRESH_CLOCK_BOOTSTRAP = """import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv.pop(1))
+from tests.test_shared_refresh import refresh_fixture_clock
+from codex_wake import measurements
+path = Path(sys.argv.pop(1))
+measurements.snapshot = lambda: refresh_fixture_clock(path)
+from codex_wake.cli import main
+raise SystemExit(main())
+"""
+
+
 class SharedRefreshTests(unittest.TestCase):
     def test_refresh_poll_uses_absolute_qualified_utc_and_holds_unknown_time(self):
         from codex_wake.shared_refresh import poll
@@ -170,6 +191,10 @@ class SharedRefreshTests(unittest.TestCase):
             fixture_clock = base / 'explicit-utc-fixture'
             if stale_mcp:
                 fixture_clock.write_text('1000')
+                clock = patch('codex_wake.measurements.snapshot',
+                              side_effect=lambda: refresh_fixture_clock(fixture_clock))
+                clock.start()
+                self.addCleanup(clock.stop)
             wall_anchor = 1000 if stale_mcp else measurements.utc_time()
             expiry=datetime.fromtimestamp(wall_anchor+2,timezone.utc).isoformat() if stale_mcp else '2030-01-01T00:00:00Z'
             argv=['--wake-root',str(runtime),'sessions','refresh','--profiles',str(policy),
@@ -198,20 +223,8 @@ class SharedRefreshTests(unittest.TestCase):
             if stale_mcp:
                 # Explicit host clock injection crosses this test's process seam;
                 # production has no fixture environment flag or clock fallback.
-                clock_bootstrap = '''import sys,json
-from pathlib import Path
-from codex_wake import measurements
-path=Path(sys.argv.pop(1))
-def sample():
- value=float(path.read_text())
- return dict(reason='authenticated_utc',valid_for_ns=1000000000,
-  utc=dict(status='network',lower=value,upper=value),
-  counter=dict(epoch='3c93a3d4-445d-4403-8a40-77fa9162dee6',counter=int(value*1000),frequency=1000,rate_ppm=0))
-measurements.snapshot=sample
-from codex_wake.cli import main
-raise SystemExit(main())
-'''
-                watch_command=[sys.executable,'-c',clock_bootstrap,str(fixture_clock),*watch_args]
+                watch_command=[sys.executable,'-c',REFRESH_CLOCK_BOOTSTRAP,
+                    str(Path(__file__).resolve().parents[1]),str(fixture_clock),*watch_args]
             else:
                 watch_command=[sys.executable,'-m','codex_wake',*watch_args]
             watcher=subprocess.Popen(watch_command,env=env,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
