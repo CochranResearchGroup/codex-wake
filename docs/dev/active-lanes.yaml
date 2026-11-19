@@ -13,8 +13,22 @@ lanes:
     dependencies: []
     overlaps: []
     updated_at: 2026-11-18
-    disposition: Plan0250 default Python service clients helper-free and controller/local advisory waits separated from genuine actor checks through79f99c36. Native final-send clock-source protocol/qualification remains explicit; runtime/fullPython/activation open. No new Native build, live provider input or daemon change.
+    disposition: Approved best-effort service-instant admission; Python wirev2 and advisory waits integrated, Native e7286ffdc3 removes private counter bridge. Successor package build and resumable local service-backed Python validation active; no working daemon replacement or external model calls. Prior broad review retained.
 
+
+  - id: qualification-fixtures-695
+    owner: root / ecochran76 (worker reconcile_695_gates)
+    objective: Repair evidenced Python qualification fixtures without weakening production time guards
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/695]
+    plan: docs/dev/plans/0250-2026-11-17-stable-time-everywhere.md
+    branch: fix/qualification-fixtures-695
+    target: feat/native-expiry-695
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [native-expiry-695]
+    updated_at: 2026-11-18
+    disposition: Disjoint tests-only worker; root integrates serially. Existing clock seams cover task metadata, freshness, retention and owned supervisor boundaries; no product fallback or new fixture framework. Review checkout custody when current Python qualification terminates.
 
   - id: monitor-clock-702
     owner: root / ecochran76

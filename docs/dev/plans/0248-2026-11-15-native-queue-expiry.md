@@ -9,6 +9,31 @@ qualification and applicable installation authorization is established.
 
 ## Current State
 
+The operator accepted best-effort fresh StableTime service-instant admission,
+including the observation-to-send delay/suspension limitation. The revision below
+supersedes receipt-current timing claims. Original expiry, uncertainty holds,
+identity, permission, and no-replay rules remain unchanged.
+
+Native e7286ffdc338457ea11b8becb26daa0f7f4855af removes the private counter reader
+and consumes explicit service-measurement wirev2. Python producer/adapter and
+ordinary discovery/reconciliation wait corrections are integrated. Actual root
+and UID1017 service-reader observations qualify without the private helper.
+The complete successor package build and affected installed journeys are pending.
+Three Native source tests have metadata validation only: both bounded compile
+attempts ended before test execution. No test pass is inferred from that work.
+
+Current Python validation is a resumable local service-backed collection, not
+hermetic CI. Unaffected passing identities are retained; failed assertions are
+repaired narrowly through explicit fixture clock seams while production guards
+remain intact. Python3.12 and complete collection acceptance remain open.
+See [current acceptance evidence](../evidence/issue0695/service-instant-closeout.json)
+and0250-execution.json for exact component states. #695 remains OPEN until its
+required qualification is complete. Working-host activation/restart and release
+authority remain separate; no working daemon replacement or repeated broad
+review is implied.
+
+## Prior activation evidence (historical)
+
 695-ACTIVATE is source-validated and qualified at the isolated installed default
 factory seam. The host process may explicitly select an owner-only policy via
 `CODEX_WAKE_BOUNDED_NATIVE_POLICY`. Missing policy continues to refuse bounded
