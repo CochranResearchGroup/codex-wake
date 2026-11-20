@@ -10,7 +10,8 @@
       "owner": "primary",
       "state": "validated",
       "blockers": [],
-      "result_sha": "6a125077"
+      "result_sha": "6a125077",
+      "tracker": "closed"
     },
     "720": {
       "owner": "placement worker",
@@ -19,15 +20,49 @@
       "branch": "fix/same-session-placement-720",
       "worker_handle": "/root/placement_720",
       "result_sha": "6f1795665cde59bb1427fc0d2c27a0acc7cca7d4",
-      "integration_sha": "9b4e6b1e"
+      "integration_sha": "9b4e6b1e",
+      "tracker": "closed"
     },
     "721": {
       "owner": "primary",
-      "state": "running",
+      "state": "validated",
       "blockers": [
         719,
         720
-      ]
+      ],
+      "qualification_run1": {
+        "status": "setup_failed",
+        "reason": "Native listener path is a symlink; native_request requires resolved socket. Corrected setup to match existing recovery acceptance.",
+        "provider_requests": 0,
+        "owned_remaining": []
+      },
+      "setup_history": [
+        {
+          "run": 1,
+          "reason": "Native listener alias required resolving to actual owned Unix socket",
+          "provider_requests": 0,
+          "owned_recorded_processes_remaining": []
+        },
+        {
+          "run": 2,
+          "reason": "Synthetic saved threads had no names for existing metadata-matched session discovery",
+          "provider_requests": 0,
+          "owned_recorded_processes_remaining": []
+        },
+        {
+          "run": 3,
+          "reason": "Captured owned TUI confirmed clients responsive; same missing thread names, fixed by existing thread/name/set operation",
+          "provider_requests": 0,
+          "owned_recorded_processes_remaining": []
+        },
+        {
+          "run": 4,
+          "reason": "Isolated HOME hid existing StableTime client config; reference preserved via supported CODEX_WAKE_STABLE_TIME_CONFIG. No service outage inferred.",
+          "provider_requests": 0,
+          "owned_recorded_processes_remaining": []
+        }
+      ],
+      "evidence": "docs/dev/evidence/issue0716/installed-acceptance.json"
     }
   },
   "validation": [
@@ -56,6 +91,14 @@
       "result": "19 PASS each Python3.11/3.12;3.11 30.336s; no skips; expected parser negative stderr",
       "tier": "focused",
       "source": "9b4e6b1e"
+    },
+    {
+      "ticket": 721,
+      "result": "PASS installed public CLI + actual SDK MCP,2native conversation bindings,0provider trap requests,353wheel Python members,cleanup0remaining",
+      "command": "/tmp/wake716-installed/bin/python scripts/tab_adjacent_acceptance716.py --binary <qualified native package>/bin/codex --catalog /tmp/wake716-models.json --wheel /tmp/wake716-wheels/codex_wake-0.22.0.dev43-py3-none-any.whl --output /tmp/wake716-acceptance.json --source aa77b65b4d1a1db8d488c6a777f95bb487f1e12e",
+      "source": "aa77b65b4d1a1db8d488c6a777f95bb487f1e12e",
+      "difference_from_hosted": "Local WSL with installed0.169 Native and supported StableTime client; no hosted CI, no external inference",
+      "reused_prior_art": "native recovery acceptance setup + existing installed CLI/SDK MCP conventions"
     }
   ],
   "findings": []
