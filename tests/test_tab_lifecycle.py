@@ -37,6 +37,32 @@ class TabLifecycleTests(unittest.TestCase):
         from codex_wake.tab_lifecycle import TabLifecycle
         return TabLifecycle(self.root, workspaces=self.workspaces, host='test', environment='posix')
 
+    def test_same_session_insertion_reports_and_preserves_protected_siblings(self):
+        pinned = self.tmux('new-window', '-d', '-P', '-F', '#{window_id}', '-t', '$0:', '-n', 'pinned', 'sleep 120')
+        companion = self.tmux('new-window', '-d', '-P', '-F', '#{window_id}', '-t', '$0:', '-n', 'companion', 'sleep 120')
+        owner = self.owner()
+        before = owner.inspect('source')
+        evidence = {}
+        for window in before['snapshot']['windows']:
+            for pane in window['panes']:
+                birth = pane['process_generation']
+                evidence[pane['pane_id']] = dict(fresh=True, state='idle', process=dict(
+                    pid=pane['pid'], start_ticks=birth['start_time_ticks'], boot_id=birth['boot_id']))
+        # This host observation boundary supplies verified idle fixture processes.
+        owner.workspaces['source'].update(pins=[pinned], observer=lambda timeout: evidence)
+        args = dict(workspace='source', window=companion, destination='source', index=1,
+                    expected_target=before['target'], expected_destination=before['target'])
+        preview = owner.execute('tabs.move', dict(args, preview=True))
+        self.assertTrue(preview['requires_force'], preview)
+        self.assertIn('pinned', preview['protection'])
+        self.assertEqual(preview['displaced_tabs'][0]['window_id'], pinned)
+        with self.assertRaises(InventoryError) as caught:
+            owner.execute('tabs.move', args)
+        self.assertEqual(caught.exception.code, 'tab_protected')
+        self.assertEqual(owner.inspect('source')['target'], before['target'])
+        moved = owner.execute('tabs.move', dict(args, force=True))
+        self.assertEqual(moved['window']['index'], 1)
+
     def test_shell_create_rename_focus_close_has_exact_identity_and_preserves_history(self):
         owner = self.owner()
         history = self.root / 'history.jsonl'

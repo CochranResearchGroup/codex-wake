@@ -126,7 +126,7 @@ def main():
             tmux('set-option', '-g', 'automatic-rename', 'off')
             ids = []
             windows = []
-            for i in range(2):
+            for i in range(3):
                 identifier = str(uuid.uuid4())
                 ids.append(identifier)
                 # Deliberately synthetic fixed history time; not a trusted-time measurement.
@@ -142,18 +142,13 @@ def main():
                 command = shlex.join([str(args.binary), '--remote', endpoint, 'resume', identifier, '--no-alt-screen'])
                 windows.append(tmux('new-window', '-d', '-P', '-F', '#{window_id}', '-n', 'native-'+str(i),
                                     '-c', str(workspace), command))
-                if i == 0:
-                    tmux('new-window', '-d', '-n', 'other', 'exec sleep 180')
             tmux('select-window', '-t', windows[0])
             until = time.monotonic() + 20
             while True:
                 initial_bindings = bindings()
-                if len(initial_bindings) == 2 and all(initial_bindings.values()):
+                if len(initial_bindings) == 3 and all(initial_bindings.values()):
                     break
-                if time.monotonic() >= until:
-                    print('OWNED_TUI', tmux('capture-pane', '-p', '-t', windows[0], '-S', '-20'), flush=True)
-                    print('OWNED_LOG', (root / 'native.log').read_text()[-3000:], flush=True)
-                    raise AssertionError('native bindings unavailable')
+                assert time.monotonic() < until, 'native bindings unavailable'
                 time.sleep(.1)
             before = roster()
             births = {r['window']['window_id']: [(p['pane_id'], p['pid'], p['process_generation'])
@@ -161,7 +156,7 @@ def main():
             for values in births.values():
                 for _, pid, identity in values:
                     owned[pid] = identity
-            anchor, companion = windows
+            anchor, _, companion = windows
             target_index = next(r['window']['index'] for r in before if r['window']['window_id'] == anchor)+1
             preview = operation(cli('move', '--workspace', 'fixture', '--window', companion,
                                     '--destination', 'fixture', '--index', str(target_index), '--dry-run', '--request-id', 'preview'))
@@ -219,7 +214,7 @@ def main():
                     for p in r['window']['panes']] for r in after} == births
             assert [r['window']['window_id'] for r in before if r['window']['window_id'] != companion] == [w for w in order if w != companion]
             report['checks'].append('both-native-conversation-bindings-pane-births-focus-and-unrelated-order-preserved')
-            report['conversation_bindings_verified'] = 2
+            report['conversation_bindings_verified'] = 3
             report['status'] = 'PASS'
         except BaseException as error:
             report.update(status='FAIL', error=str(error)[:3000])
@@ -239,12 +234,21 @@ def main():
             while any(process_identity(pid) == identity for pid, identity in owned.items()) and time.monotonic()<until:
                 time.sleep(.05)
             report['owned_processes_remaining'] = [pid for pid, identity in owned.items() if process_identity(pid) == identity]
+            report['owned_environment_processes_remaining'] = []
+            for proc in Path('/proc').iterdir():
+                if not proc.name.isdigit():
+                    continue
+                try:
+                    if ('CODEX_HOME='+str(home)).encode() in (proc/'environ').read_bytes().split(b'\0'):
+                        report['owned_environment_processes_remaining'].append(int(proc.name))
+                except OSError:
+                    pass
             report['trap_requests'] = calls
             report['elapsed_seconds'] = round(time.monotonic()-started, 3)
             report['budget_breach'] = report['elapsed_seconds'] > report['budget_seconds']
             report['owned_namespace_removed'] = subprocess.run(
                 ['tmux', '-S', mux, 'list-sessions'], capture_output=True, timeout=5).returncode != 0
-            if calls or report['owned_processes_remaining'] or report['budget_breach']:
+            if calls or report['owned_processes_remaining'] or report['owned_environment_processes_remaining'] or report['budget_breach']:
                 report['status'] = 'FAIL'
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(json.dumps(report, indent=2)+'\n')

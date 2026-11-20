@@ -3,8 +3,8 @@
   "spec": 716,
   "base": "42bbcb95ba1b9ee5bc0616b7126b0c4942c59d8c",
   "branch": "fix/adjacent-tabs-716",
-  "review_count": 0,
-  "remediation_count": 0,
+  "review_count": 1,
+  "remediation_count": 1,
   "tickets": {
     "719": {
       "owner": "primary",
@@ -15,7 +15,7 @@
     },
     "720": {
       "owner": "placement worker",
-      "state": "validated",
+      "state": "running",
       "blockers": [],
       "branch": "fix/same-session-placement-720",
       "worker_handle": "/root/placement_720",
@@ -25,7 +25,7 @@
     },
     "721": {
       "owner": "primary",
-      "state": "validated",
+      "state": "pending",
       "blockers": [
         719,
         720
@@ -62,7 +62,8 @@
           "owned_recorded_processes_remaining": []
         }
       ],
-      "evidence": "docs/dev/evidence/issue0716/installed-acceptance.json"
+      "evidence": "docs/dev/evidence/issue0716/installed-acceptance.json",
+      "tracker": "closed"
     }
   },
   "validation": [
@@ -99,7 +100,41 @@
       "source": "aa77b65b4d1a1db8d488c6a777f95bb487f1e12e",
       "difference_from_hosted": "Local WSL with installed0.169 Native and supported StableTime client; no hosted CI, no external inference",
       "reused_prior_art": "native recovery acceptance setup + existing installed CLI/SDK MCP conventions"
+    },
+    {
+      "finding": "S1",
+      "red_command": "PYTHONPATH=src /tmp/wake716-py311/bin/python -m unittest tests.test_tab_lifecycle.TabLifecycleTests.test_same_session_insertion_reports_and_preserves_protected_siblings -v",
+      "red": "FAIL requires_force false for pinned crossed sibling",
+      "green": "PASS same command after existing protection checks applied to displaced siblings",
+      "private_logs": "wake716-S1-{red,green}.log"
+    },
+    {
+      "finding": "S1",
+      "commands": [
+        "PYTHONPATH=src /tmp/wake716-py311/bin/python -m unittest tests.test_tab_lifecycle tests.test_tab_lifecycle_cli tests.test_tab_destination_scope tests.test_tab_contract -q",
+        "PYTHONPATH=src dev43/bin/python -m unittest tests.test_tab_lifecycle tests.test_tab_lifecycle_cli tests.test_tab_destination_scope tests.test_tab_contract -q",
+        "/tmp/wake716-py311/bin/python scripts/generate_command_reference.py --check"
+      ],
+      "result": "20PASS Python3.11(34.194s),20PASS Python3.12(31.685s);generated referencePASS;no skips",
+      "tier": "focused"
     }
   ],
-  "findings": []
+  "findings": [
+    {
+      "id": "S1",
+      "axis": "Spec",
+      "severity": "P1",
+      "disposition": "blocking",
+      "criterion": "Preserve existing focus, pin and input protections",
+      "evidence": "Same-session crossed siblings are swapped but only source protection checked; reviewer native reproducer displaced pinned@1 from1to2",
+      "remediation": "Check applicable crossed-sibling protections and report them in preview; refuse unforced protected displacement",
+      "state": "source_verified"
+    }
+  ],
+  "review_tip": "0c9df4f15536093275df34ed1f32eed9d3659729",
+  "review_command": "git diff 42bbcb95ba1b9ee5bc0616b7126b0c4942c59d8c...0c9df4f15536093275df34ed1f32eed9d3659729",
+  "reviewers": {
+    "standards": "/root/review_standards",
+    "spec": "/root/review_spec"
+  }
 }

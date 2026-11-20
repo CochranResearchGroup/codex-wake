@@ -209,6 +209,18 @@ class TabLifecycle:
                 if index < window['index']:
                     crossed.reverse()
                 placement = dict(index=index, crossed=crossed)
+                displaced = []
+                for sibling in crossed:
+                    if sibling.get('linked'):
+                        raise InventoryError('tab_protected', 'placement would displace a linked tab')
+                    protections, work = self._protection(config, sibling, deadline)
+                    displaced.append(dict(window_id=sibling['window_id'], index=sibling['index'],
+                                          protection=protections, affected_work=work))
+                    reasons = sorted(set(reasons + protections))
+                    affected.extend(work)
+                placement['displaced_tabs'] = displaced
+                if crossed and reasons and not args.get('force') and not args.get('preview'):
+                    raise InventoryError('tab_protected', 'placement would displace protected tabs: ' + ', '.join(reasons))
             else:
                 self._collision(after_destination['snapshot'], name, index=index)
         profile_owner=None
@@ -221,7 +233,8 @@ class TabLifecycle:
             return dict(status='preview', action=operation, target=before['target'],
                         destination=after_destination['target'] if after_destination else None,
                         window=window, name=name, protection=reasons, affected_work=affected,
-                        requires_force=bool(reasons))
+                        requires_force=bool(reasons),
+                        **({'displaced_tabs': placement['displaced_tabs']} if placement is not None else {}))
         # Reobserve both pinned workspaces immediately before admitting terminal I/O.
         if self.inspect(workspace, deadline=deadline)['target'] != before['target']:
             raise InventoryError('stale_target', 'source changed before lifecycle effect')
