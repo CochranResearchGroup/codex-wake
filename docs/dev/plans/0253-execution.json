@@ -15,17 +15,19 @@
     },
     "720": {
       "owner": "placement worker",
-      "state": "running",
+      "state": "validated",
       "blockers": [],
       "branch": "fix/same-session-placement-720",
       "worker_handle": "/root/placement_720",
       "result_sha": "6f1795665cde59bb1427fc0d2c27a0acc7cca7d4",
       "integration_sha": "9b4e6b1e",
-      "tracker": "closed"
+      "tracker": "closed",
+      "worker_status": "completed",
+      "worker_custody": "remote exact6f179566 verified; integrated9b4e6b1e; clean worker checkout normally removed"
     },
     "721": {
       "owner": "primary",
-      "state": "pending",
+      "state": "validated",
       "blockers": [
         719,
         720
@@ -63,7 +65,8 @@
         }
       ],
       "evidence": "docs/dev/evidence/issue0716/installed-acceptance.json",
-      "tracker": "closed"
+      "tracker": "closed",
+      "final_evidence": "docs/dev/evidence/issue0716/installed-acceptance-final.json"
     }
   },
   "validation": [
@@ -117,6 +120,14 @@
       ],
       "result": "20PASS Python3.11(34.194s),20PASS Python3.12(31.685s);generated referencePASS;no skips",
       "tier": "focused"
+    },
+    {
+      "finding": "S1",
+      "result": "PASS exact corrected installed package,3native conversation bindings,public CLI and actual SDK MCP,no force,no provider traffic,353Python files match,OS and env census0",
+      "source": "64ff8b22c99b074ac2e5a70723b180667c0884ba",
+      "wheel_sha256": "7cf2385e07925702c4d77c9e64b55d738b44eb231a67c2983a31214c02fc57dd",
+      "command": "/tmp/wake716-installed/bin/python scripts/tab_adjacent_acceptance716.py --binary <qualified native package>/bin/codex --catalog /tmp/wake716-models.json --wheel /tmp/wake716-final-wheels/codex_wake-0.22.0.dev43-py3-none-any.whl --output /tmp/wake716-acceptance-final.json --source 64ff8b22c99b074ac2e5a70723b180667c0884ba",
+      "tier": "focused"
     }
   ],
   "findings": [
@@ -128,7 +139,7 @@
       "criterion": "Preserve existing focus, pin and input protections",
       "evidence": "Same-session crossed siblings are swapped but only source protection checked; reviewer native reproducer displaced pinned@1 from1to2",
       "remediation": "Check applicable crossed-sibling protections and report them in preview; refuse unforced protected displacement",
-      "state": "source_verified"
+      "state": "verified_resolved"
     }
   ],
   "review_tip": "0c9df4f15536093275df34ed1f32eed9d3659729",
@@ -136,5 +147,15 @@
   "reviewers": {
     "standards": "/root/review_standards",
     "spec": "/root/review_spec"
+  },
+  "source_tip": "64ff8b22c99b074ac2e5a70723b180667c0884ba",
+  "delivery": "validated published integration branch; no main merge/production install/live effects",
+  "cleanup": {
+    "baseline_registered_worktrees": 122,
+    "worker_removed": true,
+    "integration": "normal removal after final exact remote checkpoint; final readback retained privately and in turn closeout",
+    "unrelated_dirty_checkout": "preserved",
+    "private_qualification": "retained outside Git",
+    "memory_disposition": "forbidden"
   }
 }

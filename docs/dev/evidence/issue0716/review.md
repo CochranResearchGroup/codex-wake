@@ -19,4 +19,4 @@ One public lifecycle regression with verified idle fixture processes first faile
 
 Final integrated selection and refreshed installed native CLI/MCP package evidence are recorded in0253-execution.json and installed-acceptance-final.json. The installed journey now uses a third idle native conversation as the crossed sibling; no protection is bypassed for an unqualified shell. All original successful samples and setup failures remain retained. No extra model requests or provider fixture framework.
 
-Accepted findings: Standards0; Spec1(P1), remediated subject to recorded final checks.
+Accepted findings: Standards0; Spec1(P1), verified resolved by20checks each3.11/3.12,generated-reference check,and corrected exact-wheel installed native CLI/MCP acceptance.

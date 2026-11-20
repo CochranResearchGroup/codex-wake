@@ -110,4 +110,3 @@ Related: #552 fixed similar generation churn for formatting only and explicitly 
 Priority suggestion: medium. State: triage. No implementation or deployment requested by this report.
 
 <!-- idempotency: tab-move-fresh-target-stale-2026-11-19 -->
-
