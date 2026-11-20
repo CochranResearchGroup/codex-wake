@@ -161,11 +161,15 @@
   "release": {
     "authorization": "operator review merge deploy",
     "version": "0.22.0.dev44",
-    "state": "prepared",
+    "state": "awaiting_explicit_time_credential_exception",
     "review": "prior two-axis review1/remediation1 reused; current published diff and blocker resolution checked",
     "target": "working CLI launchers/controller/connector only",
     "native_restart": false,
     "provider_calls": 0,
-    "gate": "UID1017 exact merged-package qualification before working install"
+    "gate": "UID1017 exact merged-package qualification before working install",
+    "source_main": "f75a44c87e926f3fd076e5d4d5bb3945bf6aa249",
+    "merged_pr": 722,
+    "wheel_sha256": "4f5c04db2b75de0da781a5e2700796a80d39809312fd3dd4e09a70ab3a5baab2",
+    "candidate_evidence": "docs/dev/evidence/issue0716/release-candidate.json"
   }
 }

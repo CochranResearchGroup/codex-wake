@@ -1,0 +1,54 @@
+{
+  "state": "awaiting_explicit_time_credential_exception",
+  "source_main": "f75a44c87e926f3fd076e5d4d5bb3945bf6aa249",
+  "merged_pr": 722,
+  "version": "0.22.0.dev44",
+  "wheel_sha256": "4f5c04db2b75de0da781a5e2700796a80d39809312fd3dd4e09a70ab3a5baab2",
+  "uid1017": {
+    "python": "3.12.3",
+    "native_package_files_matched": 6,
+    "installed_python_files_verified": 353,
+    "independent_native_lifecycle_tests": "3PASS1.399s",
+    "dependencies": "32 working dependency versions pinned; uv pip checkPASS",
+    "public_cli_mcp_acceptance": {
+      "status": "FAIL",
+      "source_commit": "f75a44c87e926f3fd076e5d4d5bb3945bf6aa249",
+      "prefix": "/tmp/wake716-dev44-uid1017",
+      "wheel_sha256": "4f5c04db2b75de0da781a5e2700796a80d39809312fd3dd4e09a70ab3a5baab2",
+      "native_sha256": "78d022a5e8c4c49a851d342ad41fe6058045f0a13064f22cc9163ac400c7e7b2",
+      "python_members_verified": 353,
+      "checks": [],
+      "provider_turns": 0,
+      "production_touched": false,
+      "tier": "focused",
+      "budget_seconds": 180,
+      "error": "(('move', '--workspace', 'fixture', '--window', '@3', '--destination', 'fixture', '--index', '2', '--dry-run', '--request-id', 'preview'), '{\"error\": {\"code\": \"qualified_time_unavailable\", \"message\": \"Tab configuration is unavailable or invalid; inspect the selected controller and refresh workspaces.\"}, \"status\": \"held\"}\\n', '')",
+      "owned_processes_remaining": [],
+      "owned_environment_processes_remaining": [],
+      "trap_requests": [],
+      "elapsed_seconds": 14.978,
+      "budget_breach": false,
+      "owned_namespace_removed": true
+    }
+  },
+  "time_setup": {
+    "original_test_endpoint": "connection refused",
+    "isolated_current_endpoint_with_existing_test_token": "401Unauthorized after current public certificate trust",
+    "working_reader": "authenticated_utc",
+    "service_outage_claim": false,
+    "production_credentials_copied": false,
+    "existing_global_client_config_modified": false
+  },
+  "working_installation": "unchanged dev43",
+  "working_services_restarted": false,
+  "native_restart": false,
+  "provider_requests": 0,
+  "pending_question": "Allow temporary read-only time-service token copy into private UID1017 file, delete after qualification; explicit0006exception required",
+  "remaining": [
+    "UID1017 authenticated public CLI/MCP acceptance",
+    "rollback/reupgrade",
+    "immutable working prefix and launcher/controller/connector switch",
+    "post-effect identities/endpoints/native census",
+    "deployment receipt publication and normal checkout cleanup"
+  ]
+}
