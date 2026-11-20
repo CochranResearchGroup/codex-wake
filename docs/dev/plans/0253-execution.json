@@ -157,5 +157,15 @@
     "unrelated_dirty_checkout": "preserved",
     "private_qualification": "retained outside Git",
     "memory_disposition": "forbidden"
+  },
+  "release": {
+    "authorization": "operator review merge deploy",
+    "version": "0.22.0.dev44",
+    "state": "prepared",
+    "review": "prior two-axis review1/remediation1 reused; current published diff and blocker resolution checked",
+    "target": "working CLI launchers/controller/connector only",
+    "native_restart": false,
+    "provider_calls": 0,
+    "gate": "UID1017 exact merged-package qualification before working install"
   }
 }
