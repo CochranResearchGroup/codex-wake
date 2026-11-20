@@ -8,12 +8,12 @@ lanes:
     plan: docs/dev/plans/0252-2026-11-19-native-carry-713.md
     branch: feat/native-carry-713
     target: origin/main
-    plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    plan_state: CLOSED
+    custody_state: PUBLICATION_PENDING
     dependencies: []
     overlaps: [native-expiry-695, P250]
     updated_at: 2026-11-19
-    disposition: Intent merge in progress; focused Grok admission red test compiling; no working cutover or live provider call
+    disposition: Native d907a42df3 combined;22checks and9UID1017journeysPASS; review1/artifact remediation1complete; owned remote source custody then normal checkout cleanup;713cutover/628live remainopen
   - id: native-expiry-695
     owner: root / ecochran76
     objective: Enforce native queue expiry and qualified Stable Time migration

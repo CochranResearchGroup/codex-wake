@@ -10633,3 +10633,40 @@ is now exact selected Grok a5806e/f3213987, six hashes matched; older stock musl
 is not the predecessor. Retained qualification recipes are prepared for exact
 candidate pins after build. No working selection/restart, credential changes,
 provider effects, hosted CI, repeated old3libtests or broad review occurred.
+
+
+## Turn | 2026-11-19 | #713 package assembled and UID1017 journeys running
+
+Exact complete package d907a42df3 passed1914.709s. All6 file hashes match
+UID1017 transfer; executable78d022a5e8c4c49a851d342ad41fe6058045f0a13064f22cc9163ac400c7e7b2.
+Retained9recipe adapter ran once, imported4actualdev43APIseams and compiledall
+scripts. Existing clock authenticated; initialUID1017processcensus0. Sequential
+account/default/shared/private/prepared/queue/cancel-reconnect/nonzero-goal/Stop
+journeys run in private receipts, stopping firstfailure. Source/package status
+does not yet establish runtime qualification. WorkingGrokselection unchanged.
+
+## Turn | 2026-11-19 | #713 local branch delivery validated
+
+Nine exact-package UID1017 journeys passed: account/default/shared history,
+rollback/reupgrade and failed-start repair, private ownership, expiry during
+preparation, queue/cancel/restart/negative clock contracts, cancel/reconnect,
+nonzero cumulative budget, and two active local tools stopped. Run 1 retained
+six passes plus the 109-byte tmux socket setup failure; run 2 used short labels
+and passed the remaining three journeys. No source or package rebuild occurred.
+
+One Standards/Spec integration review accepted one P2 artifact-context finding.
+The one remediation regenerated the retained patch with zero context and
+explicit --unidiff-zero; the same complete source tree reconstructs exactly.
+Mixed-provider selection/worker/usage/Stop controls match seven selected-carry
+source files; prior source-seam acceptance is reused within that boundary.
+No fresh live or end-to-end mixed-provider inference is claimed.
+
+Fresh OS census shows UID1017 returned from zero processes to zero. Selected
+Grok daemon PID/generation, registry and executable hash are unchanged; all six
+candidate files match after runtime acceptance in both accounts. Two baseline
+standalone clients disappeared for unobserved reasons, so global working-process
+continuity is not claimed. Source/patch/package and review evidence is under
+issue0713; tracker #713 remains open for separately authorized cutover and #628
+for live product acceptance. Owned Wake branch publication and exact remote
+source-bundle custody precede task worktree cleanup. No hosted CI, Native upstream
+push, working deployment, credential changes or live model calls occurred.
