@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "spec": 716,
+  "base": "42bbcb95ba1b9ee5bc0616b7126b0c4942c59d8c",
+  "branch": "fix/adjacent-tabs-716",
+  "review_count": 0,
+  "remediation_count": 0,
+  "tickets": {
+    "719": {
+      "owner": "primary",
+      "state": "running",
+      "blockers": []
+    },
+    "720": {
+      "owner": "placement worker",
+      "state": "implemented",
+      "blockers": [],
+      "branch": "fix/same-session-placement-720",
+      "worker_handle": "/root/placement_720",
+      "result_sha": "6f1795665cde59bb1427fc0d2c27a0acc7cca7d4"
+    },
+    "721": {
+      "owner": "primary",
+      "state": "pending",
+      "blockers": [
+        719,
+        720
+      ]
+    }
+  },
+  "validation": [
+    {
+      "ticket": 719,
+      "red_command": "PYTHONPATH=src dev43/bin/python -m unittest tests.test_tab_lifecycle_cli.LifecycleCLITests.test_cli_and_mcp_move_preview_accept_public_lifecycle_targets -v",
+      "red": "FAIL fresh discovery move preview retained uncertain/stale_target (destination strict-only versus source legacy+stable).",
+      "green": "same command PASS; whole caller module 2 PASS Python3.12",
+      "scope": "provider-free disposable tmux, public CommandRunner and CLI",
+      "private_logs": "wake719-red.log, wake719-green.log"
+    }
+  ],
+  "findings": []
+}

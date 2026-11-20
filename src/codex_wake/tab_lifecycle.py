@@ -176,7 +176,8 @@ class TabLifecycle:
         if operation in ('tabs.move', 'tabs.park', 'tabs.restore'):
             destination = args.get('destination')
             after_destination = self.inspect(destination, deadline=deadline)
-            if args.get('expected_destination') != after_destination['target']:
+            legacy_destination = dict(after_destination['target'], generation=digest(after_destination['snapshot']))
+            if args.get('expected_destination') not in (after_destination['target'], legacy_destination):
                 raise InventoryError('stale_target', 'exact current destination generation required')
             other = self.workspaces[destination]
             if (other['kind'] not in ('tmux', 'byobu')
