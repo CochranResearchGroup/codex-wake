@@ -8,20 +8,22 @@
   "tickets": {
     "719": {
       "owner": "primary",
-      "state": "running",
-      "blockers": []
+      "state": "validated",
+      "blockers": [],
+      "result_sha": "6a125077"
     },
     "720": {
       "owner": "placement worker",
-      "state": "implemented",
+      "state": "validated",
       "blockers": [],
       "branch": "fix/same-session-placement-720",
       "worker_handle": "/root/placement_720",
-      "result_sha": "6f1795665cde59bb1427fc0d2c27a0acc7cca7d4"
+      "result_sha": "6f1795665cde59bb1427fc0d2c27a0acc7cca7d4",
+      "integration_sha": "9b4e6b1e"
     },
     "721": {
       "owner": "primary",
-      "state": "pending",
+      "state": "running",
       "blockers": [
         719,
         720
@@ -36,6 +38,24 @@
       "green": "same command PASS; whole caller module 2 PASS Python3.12",
       "scope": "provider-free disposable tmux, public CommandRunner and CLI",
       "private_logs": "wake719-red.log, wake719-green.log"
+    },
+    {
+      "ticket": 719,
+      "command": "PYTHONPATH=src /tmp/wake716-py311/bin/python -m unittest tests.test_tab_lifecycle_cli tests.test_tab_destination_scope tests.test_tab_contract -q",
+      "result": "9 PASS Python3.11;25.404s; parser stderr expected negative cases"
+    },
+    {
+      "tickets": [
+        719,
+        720
+      ],
+      "commands": [
+        "PYTHONPATH=src dev43/bin/python -m unittest tests.test_tab_lifecycle tests.test_tab_lifecycle_cli tests.test_tab_destination_scope tests.test_tab_contract -q",
+        "PYTHONPATH=src /tmp/wake716-py311/bin/python -m unittest tests.test_tab_lifecycle tests.test_tab_lifecycle_cli tests.test_tab_destination_scope tests.test_tab_contract -q"
+      ],
+      "result": "19 PASS each Python3.11/3.12;3.11 30.336s; no skips; expected parser negative stderr",
+      "tier": "focused",
+      "source": "9b4e6b1e"
     }
   ],
   "findings": []
