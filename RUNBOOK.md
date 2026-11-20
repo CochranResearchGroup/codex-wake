@@ -10670,3 +10670,15 @@ issue0713; tracker #713 remains open for separately authorized cutover and #628
 for live product acceptance. Owned Wake branch publication and exact remote
 source-bundle custody precede task worktree cleanup. No hosted CI, Native upstream
 push, working deployment, credential changes or live model calls occurred.
+
+
+Owned Wake branch source custody was verified at b2aa6d8b against the actual
+remote ref, including byte-identical source bundle and exact Native commit ref.
+Both task Native checkout and superseded expiry checkout were removed normally
+after clean-state/ignored-cache inventory: registered Native worktrees22->20.
+Task-generated index had no same-UID open-file reference and was removed; the
+unrelated lsof /mnt/h warning did not trigger mount operations or service repair.
+Shared build cache, qualified packages, rollback, receipts and branches remain.
+Final Wake checkout removal follows its last clean push/readback; the external
+closeout checkpoint records execution. No source working-tree remains necessary
+for this validated branch-delivery packet.

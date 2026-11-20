@@ -191,7 +191,9 @@
     "validated": true,
     "tracker_resolved": false,
     "working_cutover": false,
-    "owned_remote_publication": "pending"
+    "owned_remote_publication": "verified",
+    "content_custody_commit": "b2aa6d8bde716afaf7d786629269ef3ab07e4a1d",
+    "branch": "https://github.com/CochranResearchGroup/codex-wake/tree/feat/native-carry-713"
   },
   "known_limits": [
     "Synthetic loopback providers; no live Grok/provider inference or entitlement proof",
@@ -200,5 +202,12 @@
     "Three prior Rust libtests remain unexecuted/deferred; not retried",
     "Stop journey covers two already-active local tools, not exhaustive scheduling",
     "Two baseline standalone clients disappeared for unobserved reasons; selected Grok daemon generation/registry/hash are unchanged"
-  ]
+  ],
+  "cleanup": {
+    "native_owned_and_superseded_expiry_checkouts": "removed normally after exactbundle remote custody; native count22->20",
+    "derived_index": "task-owned804MiB removed after no matching sameUID file references",
+    "wake_checkout": "final removal after clean commit/push/readback; execution receipt retained outsideGit",
+    "packages_and_shared_build_cache": "retained for gatedcutover/rollback/audit",
+    "branches": "retained; noNativeupstream push or branchdeletion"
+  }
 }

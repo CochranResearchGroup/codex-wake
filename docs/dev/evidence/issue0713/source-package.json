@@ -22,5 +22,38 @@
   "working_cutover": false,
   "live_provider_calls": 0,
   "runtime_acceptance": "runtime-acceptance.json",
-  "review": "review.md"
+  "review": "review.md",
+  "validation_commands": [
+    {
+      "command": "cargo test --locked --profile dev-small -p codex-api --test clients --test responses_websocket_probe --message-format=json",
+      "result": "22PASS on exact source; prior causal red receipts retained"
+    },
+    {
+      "command": "cargo test --locked --profile dev-small -p codex-app-server-protocol --lib schema_fixtures_tests::write_schema_fixtures_from_env --message-format=json -- --exact --ignored",
+      "environment": "CODEX_APP_SERVER_SCHEMA_EXPERIMENTAL=1; maintained schema root",
+      "result": "1PASS; generated combined experimental exports"
+    },
+    {
+      "command": "cargo test --locked --profile dev-small -p codex-app-server-protocol --lib schema_fixtures_tests::experimental_precomputed_exports_match_generated --message-format=json -- --exact",
+      "result": "1PASS"
+    },
+    {
+      "command": "cargo build --locked --profile dev-small --message-format=json-render-diagnostics --bin codex --bin codex-code-mode-host --bin codex-exec-server --bin bwrap",
+      "environment": {
+        "RUST_MIN_STACK": "8388608",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_TARGET_DIR": "retained compatible host-GNU cache"
+      },
+      "result": "PASS; maintained package assembler uses exact prebuilt outputs, GNU target and package version0.169.0-wake713.1+d907a42df3"
+    },
+    {
+      "command": "python scripts/check_policy_wiring.py",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS after artifact remediation"
+    }
+  ]
 }
