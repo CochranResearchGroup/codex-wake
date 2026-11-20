@@ -131,6 +131,28 @@ class TabLifecycleTests(unittest.TestCase):
                 window=source_wid, destination='holding', expected_destination=owner.inspect('holding')['target'], force=True))
         self.assertEqual(caught.exception.code, 'tab_protected')
 
+    def test_same_session_insertion_preserves_focus_and_pane_births(self):
+        owner = self.owner()
+        for name in ('second', 'third', 'fourth'):
+            self.tmux('new-window', '-d', '-t', '$0:', '-n', name, 'sleep 120')
+        before = owner.inspect('source')
+        windows = before['snapshot']['windows']
+        ids = [w['window_id'] for w in windows]
+        args = dict(workspace='source', expected_target=before['target'],
+                    destination='source', expected_destination=before['target'],
+                    window=ids[3], index=1, force=True)
+        self.assertEqual(owner.execute('tabs.move', dict(args, preview=True))['status'], 'preview')
+        result = owner.execute('tabs.move', args)
+        after = owner.inspect('source')['snapshot']['windows']
+        self.assertEqual([w['window_id'] for w in after], [ids[0], ids[3], ids[1], ids[2]])
+        self.assertEqual([w['window_id'] for w in after if w['focused']], [ids[0]])
+        self.assertEqual({w['window_id']: w['panes'] for w in after},
+                         {w['window_id']: w['panes'] for w in windows})
+        self.assertEqual(result['window']['index'], 1)
+        target = owner.inspect('source')['target']
+        self.assertEqual(owner.execute('tabs.move', dict(args, expected_target=target,
+                         expected_destination=target, force=False))['status'], 'noop')
+
     def test_other_backend_is_explicitly_unsupported(self):
         self.workspaces['source']['kind'] = 'psmux'
         owner = self.owner()
