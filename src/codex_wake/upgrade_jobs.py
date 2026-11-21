@@ -31,6 +31,10 @@ TERMINAL = frozenset(('succeeded', 'failed', 'held', 'disabled', 'superseded'))
 READS = frozenset(('status', 'list', 'show'))
 
 
+def occupies_upgrade_slot(job):
+    return job['state'] not in TERMINAL or bool(job.get('worker') or job.get('active_phase'))
+
+
 def policy_digest(config):
     return digest({key:config.get(key) for key in ('target','limits','repair','qualification','promotion')})
 
@@ -194,7 +198,7 @@ class UpgradeJobs:
                         limits=config['limits'], target=config['target'], events=state['events'],
                         notice_delivery=self.notice_summary(), compiler_cache=self.compiler_cache(config))
                 elif verb == 'cache_cleanup':
-                    if any(j['state'] not in TERMINAL or j.get('worker') or j.get('active_phase') for j in state['jobs'].values()):
+                    if any(occupies_upgrade_slot(job) for job in state['jobs'].values()):
                         raise InventoryError('upgrade_busy','compiler cache owner remains active or uncertain')
                     cache=self.compiler_cache(config)
                     path=Path(cache['path'])
@@ -235,7 +239,7 @@ class UpgradeJobs:
                     if existing:
                         result = dict(job=existing)
                     else:
-                        if any(j['state'] not in TERMINAL for j in state['jobs'].values()):
+                        if any(occupies_upgrade_slot(job) for job in state['jobs'].values()):
                             raise InventoryError('upgrade_busy', 'one upgrade candidate at a time')
                         job = dict(id=uuid.uuid4().hex, key=key, recipe=name,
                             recipe_path=str(recipe_path), recipe_sha256=hashlib.sha256(recipe_path.read_bytes()).hexdigest(),
@@ -464,6 +468,7 @@ class UpgradeJobs:
                     result=UpgradeQualification(self.root).run(frozen,config['qualification'],guard=guard)
             else:
                 from .upgrade_pipeline import prepare_reviewed_recipe
+                guard()
                 repair=prepare_reviewed_recipe(self.root,frozen,config,guard=guard,checkpoint=checkpoint)
                 if repair is not None:
                     with self.locked():
@@ -474,16 +479,24 @@ class UpgradeJobs:
                         result=dict(status='held',reason=repair.get('reason','semantic_repair_held'))
                     else:
                         frozen['prepared_recipe']=repair['prepared_recipe']
-                        result=self.run_stage(frozen)
+                        result=self.run_stage(frozen, guard_locked=guard_locked)
                 else:
-                    result=self.run_stage(frozen)
+                    result=self.run_stage(frozen, guard_locked=guard_locked)
             if not isinstance(result, dict):
                 raise ValueError('upgrade executor returned no structured outcome')
         except Exception as error:
             result = dict(status='failed', reason=str(error))
         with self.locked():
             state = self.load();job = self.job(state, frozen['id'])
-            self.guard(actor, job['target'], arguments, authorize, write=True)
+            try:
+                self.guard(actor, job['target'], arguments, authorize, write=True)
+            except (InventoryError, ValueError, OSError):
+                job.update(worker=None, active_phase=None)
+                if job['state'] not in TERMINAL:
+                    job.update(state='held', reason='upgrade_authority_unavailable')
+                    self.event(state, 'held', job, reason=job['reason'])
+                self.save(state)
+                raise
             if job['state'] in TERMINAL:
                 job.update(worker=None,active_phase=None)
                 if frozen['active_phase']=='promote':job['results']['promotion_observation']=result
@@ -538,7 +551,7 @@ class UpgradeJobs:
             if (not state['enabled'] or state['generation']!=job['generation'] or reason
                     or policy_digest(config)!=job['policy_sha256']):
                 raise InventoryError('reconciliation_refused',reason or 'original upgrade authority changed')
-            if any(other['id']!=job['id'] and other['state'] not in TERMINAL for other in state['jobs'].values()):
+            if any(other['id'] != job['id'] and occupies_upgrade_slot(other) for other in state['jobs'].values()):
                 raise InventoryError('upgrade_busy','another upgrade job remains active')
             if job.get('worker') or job.get('active_phase'):
                 raise InventoryError('reconciliation_refused','owned worker observation unresolved')
@@ -605,7 +618,7 @@ class UpgradeJobs:
             operation_id=arguments['operation_id'],guard=guard,commit=commit)
         return dict(rollback=value)
 
-    def run_stage(self, job):
+    def run_stage(self, job, *, guard_locked):
         directory = self.store / job['id'];directory.mkdir(mode=0o700, exist_ok=True)
         self.compiler_cache(self.config())
         (self.root/'upgrade-compiler-cache').mkdir(mode=0o700,exist_ok=True)
@@ -622,35 +635,29 @@ class UpgradeJobs:
             Path(env['CODEX_HOME']).mkdir(mode=0o700)
             output = directory / 'stage-result.json'
             with (directory / 'worker.log').open('ab') as log:
-                process = subprocess.Popen([sys.executable, '-m', 'codex_wake.upgrade_stage_worker',
-                    str(directory / 'build-store'), str(frozen_recipe), str(output)],
-                    env=env, stdout=log, stderr=log, start_new_session=True)
-                identity = process_identity(process.pid)
-                with self.locked():
-                    state=self.load();current=self.job(state,job['id'])
-                    if current['state'] in TERMINAL or not state['enabled'] or current['generation'] != state['generation']:
-                        process.terminate()
-                    else:
-                        current['worker']=identity
-                    self.save(state)
+                process = None
                 try:
+                    with self.locked():
+                        guard_locked()
+                        process = subprocess.Popen([sys.executable, '-m', 'codex_wake.upgrade_stage_worker',
+                            str(directory / 'build-store'), str(frozen_recipe), str(output)],
+                            env=env, stdout=log, stderr=log, start_new_session=True)
+                        identity = process_identity(process.pid)
+                        if identity is None and process.poll() is None:
+                            raise InventoryError('upgrade_worker_unverified', 'stage worker identity unavailable')
+                        state = self.load()
+                        self.job(state, job['id'])['worker'] = identity
+                        self.save(state)
                     while process.poll() is None:
                         with self.locked():
-                            state=self.load();current=self.job(state,job['id'])
-                            reason=self.budget_reason(current)
-                            stopped=current['state'] in TERMINAL or not state['enabled'] or reason
-                            if stopped:
-                                self.stop(current)
-                                if reason:current.update(state='held',reason=reason)
-                            self.save(state)
-                        if stopped:
-                            try:process.wait(timeout=2)
-                            except subprocess.TimeoutExpired:os.killpg(process.pid,signal.SIGKILL)
-                            break
+                            guard_locked()
                         time.sleep(.1)
-                    process.wait()
                 finally:
-                    try:os.killpg(process.pid,signal.SIGKILL)
-                    except ProcessLookupError:pass
+                    if process is not None:
+                        try:
+                            os.killpg(process.pid, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
+                        process.wait()
                 if output.is_file():return json.loads(output.read_text())
                 return dict(status='failed',reason='stage_worker_exit_'+str(process.returncode))

@@ -1,6 +1,6 @@
 # Plan 0262 | Autonomous upgrade owner port
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Work item: #737
 Integration branch: feat/issue-737-upgrade-owner. Base: ec412b151f82b76a70bd993e488eacc7c1b602f3.
@@ -14,7 +14,7 @@ Port the accepted durable upgrade owner to current controller authorization, rel
 | --- | --- | --- | --- |
 | #738 Durable upgrade lifecycle | None | primary | validated, tracker closed |
 | #739 Repair and qualification | #738 | repair739 + primary | validated, tracker closed |
-| #740 Future-launch selection and rollback | #739 | promotion740 | validated |
+| #740 Future-launch selection and rollback | #739 | promotion740 | validated, tracker closed |
 
 The primary owns lifecycle, discovery, public adapters and shared job schema. Repair owns source preparation, repair and qualification. Promotion owns selection, rollback and outcome reconciliation. Integrate serially. The integration worktree protects the existing primary edits and can retire after validated custody.
 
@@ -52,4 +52,17 @@ Worker result `6adc123a4fc31912ed6920d1415ca82ae8f39b46`, integrated as `81c1134
 
 Dedicated UID1017 ran wheel `d9e27a94e768e07afbf906c70c55bd9a9af0a059bd9f3e09bd90ede2964daf14` with verified sealed 0.165 and 0.166 packages in a fresh catalog. WSL command startup timed out, so the sealed package artifacts were transferred and checked against their inventories. The installed future selection kept an active 0.165 client pinned and launched the next client with exact 0.166. Public `upgrades.rollback` restored 0.165 and the following launch used that exact executable. Duplicate operations left registry bytes stable. No model or external provider requests and zero surviving owned processes. The scoped client used the Windows StableTime service. Private receipt: UID1017 lab `upgrade740-current-main/receipt.json`.
 
-The installed run exercised selection and the public rollback, and source regressions exercised the public lost-result path. No historical upgrade job was rerun. The final Standards and Spec review is next.
+The installed run exercised selection and the public rollback, and source regressions exercised the public lost-result path. No historical upgrade job was rerun. The final Standards and Spec review is recorded below.
+
+## Final review and bounded remediation
+
+One review compared `git diff ec412b151f82b76a70bd993e488eacc7c1b602f3...7d6cae5c12db2edfdece2934cb8e9cc4f3ed0fe6`, after all three ticket closures.
+
+- Standards, one accepted P1. Stage launch and polling bypassed the durable owner guard. Launch and worker registration now share the owner lock and guard. Polling rechecks the same authorization, policy, generation and allowance. Teardown preserves recorded terminal cancellation.
+- Spec, two accepted findings. The staging authorization defect is the same P1. A P2 allowed a cancelled phase to overlap a newly admitted candidate on the shared compiler cache. Start and readmission now use the same occupancy condition as cache cleanup.
+- Spec, rejected. Independent review prior to promotion is explicitly required by the originating Plan 0193. A clean deterministic replay can avoid a coding worker while retaining the review gate.
+- Spec, evidence gap retained. Installed checks covered exact-package qualification and selection/public rollback in fresh test state. Public lost-result observation and the durable lifecycle were verified locally. One fresh installed job traversing all phases was outside the executed receipt.
+
+One TDD pass used `PYTHONPATH=src:tests python -m unittest test_upgrade_jobs.UpgradeJobsTests.test_disable_during_work_rejects_late_success test_upgrade_jobs.UpgradeJobsTests.test_public_advance_holds_before_starting_a_worker_after_policy_change -v`. Both tests failed on the frozen source and passed after remediation. Final integrated source passed 85 upgrade tests per runtime with `PYTHONPATH=src:tests python -m unittest discover -s tests -p 'test_upgrade_*.py' -q` on Python 3.11.15 and 3.12.13. Pinned Ruff, command reference, compileall, and sdist/wheel build passed. Final wheel SHA256 `048928f94d11be7b1400cd22b545a58aa430148e5b6cddbb67a5f96361b1a394`. Current installed acceptance used the identified pre-remediation wheels. The staging guard correction is covered by the public source regressions. Existing broad presubmit gaps remain recorded above.
+
+Tracker #738, #739 and #740 all CLOSED. The validated port is on the integration branch. The spec and old draft PR remain as integration locators.

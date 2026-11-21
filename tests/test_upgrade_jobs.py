@@ -174,21 +174,54 @@ class UpgradeJobsTests(unittest.TestCase):
             root=Path(directory);target={'host':'fixture'}
             actor=SimpleNamespace(subject='owner',client_id='client',grant_id='grant',scopes={'admin','observe'},targets=[target])
             (root/'recipe.json').write_text(json.dumps(dict(id='candidate',upstream_version='0.166')))
-            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,recipes={'release':str(root/'recipe.json')})))
+            (root/'next.json').write_text(json.dumps(dict(id='next',upstream_version='0.167')))
+            (root/'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1,target=target,
+                recipes={'release':str(root/'recipe.json'),'next':str(root/'next.json')})))
             owner=UpgradeJobs(root);args={'expected_target':target}
             def call(verb,**extra):return owner.execute(actor,'upgrades.'+verb,dict(args,**extra))['result']
             call('enable');job=call('start',recipe='release')['job']
+            admissions = []
             def delayed(job):
+                from codex_wake.managed_inventory import InventoryError
                 call('disable')
+                call('enable')
+                try:
+                    admissions.append(call('start',recipe='next')['job']['state'])
+                except InventoryError as error:
+                    admissions.append(error.code)
                 return dict(status='staged')
             owner.executor=delayed
             result=call('advance',job_id=job['id'])['job']
             self.assertEqual(result['state'],'disabled')
             self.assertEqual(result['results'],{})
+            self.assertEqual(admissions,['upgrade_busy'])
             call('enable')
             same=call('start',recipe='release')['job']
             self.assertEqual(same['id'],job['id'])
             self.assertEqual(same['state'],'disabled')
+            self.assertEqual(call('start',recipe='next')['job']['state'],'queued')
+
+    def test_public_advance_holds_before_starting_a_worker_after_policy_change(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = {'host': 'fixture'}
+            actor = SimpleNamespace(subject='owner', client_id='client', grant_id='grant',
+                                    scopes={'admin', 'observe'}, targets=[target])
+            recipe = root / 'recipe.json'
+            recipe.write_text(json.dumps({'id': 'candidate', 'upstream_version': '0.166'}))
+            config = root / 'upgrade-bot.json'
+            declaration = dict(schema_version=1, target=target, recipes={'release': str(recipe)})
+            config.write_text(json.dumps(declaration))
+            owner = UpgradeJobs(root)
+            def call(verb, **arguments):
+                return owner.execute(actor, 'upgrades.' + verb,
+                                     dict(expected_target=target, **arguments))['result']
+            call('enable')
+            original = call('start', recipe='release')['job']
+            config.write_text(json.dumps(dict(declaration, limits={'compiler_jobs': 1})))
+            held = call('advance', job_id=original['id'])['job']
+            self.assertEqual((held['state'], held['reason']), ('held', 'upgrade_policy_changed'))
+            self.assertEqual(held['limits'], original['limits'])
 
     def test_terminal_hold_retains_shared_compiler_cache_until_explicit_cleanup(self):
         with tempfile.TemporaryDirectory() as directory:
