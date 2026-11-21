@@ -49,6 +49,8 @@ class UpgradePromotion:
 
     def check(self,job,guard):
         guard()
+        if 'start' in job.get('clock_anchor', {}):
+            return
         deadline=job.get('deadline')
         if type(deadline) not in (int,float) or not math.isfinite(deadline) or self.now()>=deadline:
             raise PromotionHeld('promotion deadline exhausted')
