@@ -295,11 +295,26 @@ class PsmuxHost:
         if len(identities) != 1:
             raise BridgeError('attachment_unavailable', 'exact psmux session is unavailable or ambiguous')
         native_processes, complete = pane_processes({int(row['pane_pid']) for row in selected})
-        windows = {}
+        indices_by_window = {}
         for row in selected:
-            window = windows.setdefault(row['window_id'], dict(window_id=row['window_id'], index=int(row['window_index']),
-                name=row['window_name'], focused=row['window_active'] == '1',
-                linked=False, panes=[]))
+            indices_by_window.setdefault(row['window_id'], set()).add(int(row['window_index']))
+        windows = {}
+        panes_by_window = {}
+        for row in selected:
+            native_window = row['window_id']
+            indices = indices_by_window[native_window]
+            window = windows.setdefault(native_window, dict(window_id=native_window, index=int(row['window_index']),
+                name=row['window_name'], focused=False, linked=len(indices) > 1, panes=[]))
+            window['focused'] |= row['window_active'] == '1'
+            if window['linked']:
+                window['linked_sessions'] = [row['session_id']]
+                window['linked_appearances'] = [dict(session_id=row['session_id'], index=index)
+                                                for index in sorted(indices)]
+            pane = row['pane_id']
+            seen = panes_by_window.setdefault(native_window, set())
+            if pane in seen:
+                continue
+            seen.add(pane)
             pid = int(row['pane_pid'])
             window['panes'].append(dict(pane_id=row['pane_id'], pane_index=int(row['pane_index']), pid=pid, platform='windows',
                 windows_creation_filetime=process_birth(pid), windows_executable=process_image(pid), cwd=row['pane_current_path'],

@@ -60,9 +60,17 @@ class FormattingScopeTests(unittest.TestCase):
             try:
                 tmux('new-session', '-d', '-s', 'other', 'sleep 30')
                 tmux('link-window', '-s', 'work:0', '-t', 'other:1')
+                tmux('link-window', '-s', 'work:0', '-t', 'work:3')
+                tmux('select-window', '-t', 'work:3')
                 workspaces = {name: dict(kind='tmux', transport=TmuxAttachmentTransport(socket, session))
                               for name, session in (('work', '$0'), ('other', '$1'))}
                 tabs = ControllerTabs(directory, workspaces=workspaces, host='host', environment='local')
+                window, = tabs.execute('tabs.list', {})['resources'][:1]
+                self.assertTrue(window['window']['focused'])
+                self.assertEqual(len(window['window']['panes']), 1)
+                self.assertEqual(window['window']['linked_appearances'], [
+                    {'session_id': '$0', 'index': 0}, {'session_id': '$0', 'index': 3},
+                    {'session_id': '$1', 'index': 1}])
                 pin = tabs.format_target(workspace='work')
                 scopes = [{k: v for k, v in target.items() if k != 'generation'}
                           for target in (pin, tabs.format_target(workspace='other'))]

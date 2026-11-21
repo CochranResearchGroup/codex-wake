@@ -149,9 +149,12 @@ class TabFormatting:
         return digest(dict(namespace=namespace, window=window))
 
     def linked_targets(self, lifecycle, selected, snapshot, target, deadline):
-        missing = set(selected.get('linked_sessions', ())) - {snapshot['session_id']}
-        if not missing:
+        sessions = set(selected.get('linked_sessions', ()))
+        if snapshot['session_id'] not in sessions:
             raise InventoryError('unsupported_target', 'Linked tab memberships are unavailable.')
+        missing = sessions - {snapshot['session_id']}
+        if not missing:
+            return []
         targets = []
         for workspace in self.tabs.workspaces:
             if workspace == target['workspace']:
@@ -206,9 +209,11 @@ class TabFormatting:
             if verb != 'override-inspect' and arguments.get('expected_target') != target:
                 raise InventoryError('stale_target', 'Presentation changed before formatting.')
             if verb != 'override-inspect' and selected.get('linked'):
-                if authorize_linked is None:
-                    raise InventoryError('insufficient_scope', 'Linked tab style requires control of every appearance.')
-                authorize_linked(self.linked_targets(lifecycle, selected, snapshot, target, deadline))
+                appearances = self.linked_targets(lifecycle, selected, snapshot, target, deadline)
+                if appearances:
+                    if authorize_linked is None:
+                        raise InventoryError('insufficient_scope', 'Linked tab style requires control of every appearance.')
+                    authorize_linked(appearances)
             state = self.read()
             overrides = state.setdefault('tab_overrides', {})
             key = self.override_key(snapshot, window)
