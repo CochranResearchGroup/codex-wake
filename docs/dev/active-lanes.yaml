@@ -9,12 +9,12 @@ lanes:
     branch: feat/issue-743-tab-management
     worker_branches: [feat/issue-745-pane-io, feat/issue-746-tab-format, feat/issue-747-tab-destroy]
     target: origin/main
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: REMOTE_PRESERVED
     dependencies: []
     overlaps: [ADJACENT-TABS-716]
     updated_at: 2026-11-21
-    disposition: Placement and pane I/O validated and closed. Formatting and shared-tab destruction active.
+    disposition: Four implementation tickets closed after installed tmux and psmux checks. One review and one remediation completed. Validated branch preserved.
   - id: UPGRADE-OWNER-737
     owner: primary / ecochran76
     objective: Port the durable autonomous upgrade owner to current main

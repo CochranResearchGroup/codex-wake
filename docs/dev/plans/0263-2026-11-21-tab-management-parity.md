@@ -1,6 +1,6 @@
 # Plan 0263 | Tab management parity
 
-State: OPEN
+State: CLOSED
 Owner: primary / ecochran76
 Branch: feat/issue-743-tab-management
 Spec: #743
@@ -60,7 +60,7 @@ Completion requires equivalent outcomes on all three public surfaces, with backe
 | --- | --- | --- | --- |
 | #744 Create, rename, place, move, and focus | None | primary | validated, tracker closed |
 | #745 Inspect and read or write exact panes | None | pane745 | validated, tracker closed |
-| #746 Formatting overrides | None | format746 | validated |
+| #746 Formatting overrides | None | format746 | validated, tracker closed |
 | #747 Unlink and destroy | #745 | destroy747 | validated, tracker closed |
 
 Primary owns placement, lifecycle and shared client contracts. Pane worker owns capture/input and operation readback. Formatting worker owns per-tab override storage and rendering. Coordinate any shared file hunks with primary and integrate serially. Tests use the existing public paths and dedicated real tabs only.
@@ -82,3 +82,17 @@ The destruction worker's `44006a86905cffbafe5b761a2404cabe1944f526` integrated a
 The integrated affected selection (tab contract, controller tabs, lifecycle, CLI, profile create, terminal sessions, native psmux and formatting) passed 62 tests on Python 3.11 and 3.12. Generated unified contract and command coverage were regenerated.
 
 Installed formatting acceptance passed five checks on real tmux and six on native Windows psmux. Native Windows CLI proved override set through the controller API and inspect/clear through OAuth MCP. The installed psmux path proved explicit styling survived an automatic pass. The exact portable rerun wheel SHA256 is `93ac480b8fc4e401f314fd1aaffb2eb060f495dc0c26828775728bfdebd03f48`. Private receipt hashes are `11146de24f4dbaa16f0cfe6814d8849f52c317a92b419528ee95deda95a2229f` (tmux) and `98e0687af935a6713f71228fd15e1ddec2d5acc56304d0159add5428399e66e2` (psmux).
+
+## Final review and remediation
+
+One independent Standards and Spec review compared `git diff 265d6fd1dc2734b23eac785fb6cbd97b729e7b9a...ea489d42537c7efe411412c5491d88dc4b60e51e` after all four implementation tickets closed.
+
+- Standards accepted two findings. P1 native relative placement used mutable indices despite resolving exact window IDs. P2 a linked window could change membership between initial observation and a formatting write. The bounded remediation preserves exact native IDs, checks order/focus/pane identity after the effect, and rechecks linked appearances and authority immediately before override mutations.
+- Spec accepted three findings. P1 is the overlapping exact placement defect, including result readback. The other findings were the omitted-profile shell default and an unsupported native unlink recorded as uncertain. Omitted profile/argv now opens the destination shell. `--saved-defaults` explicitly selects a saved profile or argv. Native shared unlink returns a terminal unsupported outcome with the retained operation ID.
+- The possibility of a persisted override record after a partial native formatting write is a nonblocking follow-up. This pass retains the original restoration evidence.
+
+The single remediation checkpoint is `5dc5c8c2f55b889c126feb8e4e3a4c2f89088f2d`. Native exact-ID dispatch, omitted-profile and stale linked-membership regressions failed before the changes and passed afterward. The focused command was `PYTHONPATH=src:tests python -m unittest test_tab_psmux.PsmuxTransportTests.test_native_relative_move_dispatches_exact_ids_and_checks_readback test_terminal_sessions.TerminalSessionTests.test_saved_launch_defaults_apply_to_new_tabs_only test_tab_format_scope -q`.
+
+Final source passed 63 tests per runtime using `PYTHONPATH=src:tests python -m unittest test_tab_contract test_controller_tabs test_tab_lifecycle test_tab_lifecycle_cli test_tab_profile_create test_terminal_sessions test_tab_psmux test_tab_formatting test_tab_format_scope test_tab_psmux_formatting -q` on Python 3.11 and 3.12. Pinned Ruff and generated contract checks passed. Final installed wheel SHA256 `48cea2bd134adf2501db4dfe6985e3b048e49ad3727d852a279c55db9f230e98` passed 12 selected tmux tests and all eight real native psmux checks. Both worker and primary acceptance used isolated test sessions. No provider requests or production tab effects.
+
+The broader planning audit continues to report the three pre-existing plan metadata findings for P259–261. Full presubmit was not run. The integration branch is ready for separate PR and deployment work.
