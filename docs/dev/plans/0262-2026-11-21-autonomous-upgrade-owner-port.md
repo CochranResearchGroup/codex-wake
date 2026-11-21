@@ -14,7 +14,7 @@ Port the accepted durable upgrade owner to current controller authorization, rel
 | --- | --- | --- | --- |
 | #738 Durable upgrade lifecycle | None | primary | validated, tracker closed |
 | #739 Repair and qualification | #738 | repair739 + primary | validated, tracker closed |
-| #740 Future-launch selection and rollback | #739 | promotion740 | running |
+| #740 Future-launch selection and rollback | #739 | promotion740 | validated |
 
 The primary owns lifecycle, discovery, public adapters and shared job schema. Repair owns source preparation, repair and qualification. Promotion owns selection, rollback and outcome reconciliation. Integrate serially. The integration worktree protects the existing primary edits and can retire after validated custody.
 
@@ -45,3 +45,11 @@ Fresh independent package reads and probes are retained under the disposable `up
 This qualification reused the exact previously built package and ran fresh installed checks against the current port. The old durable job and selected build were left alone. Public selection and outcome-only reconciliation belong to #740.
 
 The tracker readback confirmed #739 CLOSED. Worker `/root/promotion740` owns #740 from `97e030557968d51488b48d1048ba1759dad318bd`. Its disposable lane uses a new catalog and retained exact packages. Public owner reconciliation, installed selection, and tracker closure have separate evidence.
+
+## Installed selection and rollback
+
+Worker result `6adc123a4fc31912ed6920d1415ca82ae8f39b46`, integrated as `81c1134f`. Against the integration source, 84 upgrade tests passed on each Python version. Public lost-result regression verifies the original StableTime budget after a guest-wall jump and observes a committed selection without replay. The worker recorded RED before the fix and GREEN after it.
+
+Dedicated UID1017 ran wheel `d9e27a94e768e07afbf906c70c55bd9a9af0a059bd9f3e09bd90ede2964daf14` with verified sealed 0.165 and 0.166 packages in a fresh catalog. WSL command startup timed out, so the sealed package artifacts were transferred and checked against their inventories. The installed future selection kept an active 0.165 client pinned and launched the next client with exact 0.166. Public `upgrades.rollback` restored 0.165 and the following launch used that exact executable. Duplicate operations left registry bytes stable. No model or external provider requests and zero surviving owned processes. The scoped client used the Windows StableTime service. Private receipt: UID1017 lab `upgrade740-current-main/receipt.json`.
+
+The installed run exercised selection and the public rollback, and source regressions exercised the public lost-result path. No historical upgrade job was rerun. The final Standards and Spec review is next.
