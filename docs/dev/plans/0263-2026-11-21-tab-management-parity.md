@@ -59,9 +59,9 @@ Completion requires equivalent outcomes on all three public surfaces, with backe
 | Ticket | Dependencies | Owner | State |
 | --- | --- | --- | --- |
 | #744 Create, rename, place, move, and focus | None | primary | validated, tracker closed |
-| #745 Inspect and read or write exact panes | None | pane745 | validated |
+| #745 Inspect and read or write exact panes | None | pane745 | validated, tracker closed |
 | #746 Formatting overrides | None | format746 | running |
-| #747 Unlink and destroy | #745 | destroy747 | ready |
+| #747 Unlink and destroy | #745 | destroy747 | running |
 
 Primary owns placement, lifecycle and shared client contracts. Pane worker owns capture/input and operation readback. Formatting worker owns per-tab override storage and rendering. Coordinate any shared file hunks with primary and integrate serially. Tests use the existing public paths and dedicated real tabs only.
 
