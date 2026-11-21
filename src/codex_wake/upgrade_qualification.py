@@ -62,7 +62,6 @@ class UpgradeQualification:
         self.now=now or time.time
 
     def run(self,job,config,*,guard=None):
-        guard=guard or (lambda:None)
         self.owned_groups=[]
         receipt=dict(schema_version=1,job_id=job.get('id'),job_key=job.get('key'),
             target=job.get('target'),status='held',eligible_for_promotion=False,
@@ -191,7 +190,12 @@ class UpgradeQualification:
         return sorted(remaining)
 
     def check(self,job,guard):
-        guard()
+        if guard is not None:
+            guard()
+        if 'start' in job.get('clock_anchor', {}):
+            if guard is None:
+                raise QualificationError('durable upgrade guard required')
+            return
         deadline=job.get('deadline')
         if type(deadline) not in (int,float) or self.now()>=deadline:
             raise QualificationError('qualification deadline exhausted')
@@ -211,6 +215,7 @@ class UpgradeQualification:
         return dict(kind=kind,uid=os.getuid(),distro=distro,shared_kernel=True)
 
     def genuine_provenance(self,stage,package,job,guard):
+        self.check(job,guard)
         derived=None
         if stage.get('evidence_scope') not in ('official_source_build','native_source_build','disposable_native_build'):
             derived=self.reviewed_build_provenance(job)
@@ -374,10 +379,10 @@ class UpgradeQualification:
         if len(set(homes))!=2 or len(set(aliases))!=2:raise QualificationError('distinct test homes and aliases required')
         for index in (0,1,0):
             self.check(job,guard)
-            result=self.account_read(job,package,homes[index],guard)
             expected=accounts[index].get('identity_sha256')
             if config['environment'].get('kind')!='source_fixture' and (not isinstance(expected,str) or len(expected)!=64 or any(ch not in '0123456789abcdef' for ch in expected)):
-                raise QualificationError('designated authenticated account identity binding required')
+                raise AuthenticationNeeded('designated authenticated account identity binding required')
+            result=self.account_read(job,package,homes[index],guard)
             if expected is not None and result!=expected:
                 raise AuthenticationNeeded('designated test account identity differs from approved binding')
             identities.append(result)
@@ -446,7 +451,7 @@ class UpgradeQualification:
 
     def probe(self,job,probe,config,package,directory,guard):
         with tempfile.TemporaryDirectory(prefix='probe-',dir=directory) as home:
-            env={k:v for k,v in os.environ.items() if k in ('PATH','LANG','LC_ALL')}
+            env={k:v for k,v in os.environ.items() if k in ('PATH','LANG','LC_ALL','WSL_DISTRO_NAME')}
             env.update(HOME=home,CODEX_HOME=home+'/.codex',XDG_CONFIG_HOME=home+'/.config',XDG_DATA_HOME=home+'/.local/share',
                 CODEX_UPGRADE_PACKAGE=str(package),CODEX_UPGRADE_MODEL_TURNS='forbidden')
             Path(env['CODEX_HOME']).mkdir(mode=0o700)

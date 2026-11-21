@@ -96,7 +96,7 @@ class UpgradeRepair:
         self.config=config
         self.now=now or time.time
         self.clock=clock or self._host_clock
-        self.guard=guard or (lambda: None)
+        self.guard=guard
         self.checkpoint=checkpoint or (lambda value: None)
         self.evidence.mkdir(parents=True,exist_ok=True,mode=0o700)
         self.state_path=self.evidence/'repair-state.json'
@@ -110,7 +110,17 @@ class UpgradeRepair:
         _atomic(self.state_path,self.state)
 
     def _budget(self):
-        self.guard()
+        if self.guard is not None:
+            self.guard()
+        if 'start' in self.job.get('clock_anchor', {}):
+            if self.guard is None:
+                raise RepairHeld('durable_upgrade_guard_required')
+            self._check_storage()
+            return
+        self._legacy_budget()
+        self._check_storage()
+
+    def _legacy_budget(self):
         current=self.now()
         try:
             sample=self.clock();anchor=self.state['clock_anchor'];counter=sample['seconds']
@@ -130,6 +140,8 @@ class UpgradeRepair:
             raise RepairHeld('clock_uncertain') from None
         if anchor['wall_high_water']>=self.job['deadline'] or counter>=anchor['monotonic_deadline']:
             raise RepairHeld('deadline_exhausted')
+
+    def _check_storage(self):
         limit=self.job['limits'].get('temporary_bytes')
         if limit is not None:
             size=owned_storage_bytes((self.workspace,self.evidence,self.cache))
@@ -563,9 +575,13 @@ class UpgradeRepair:
         if not inflight and any(c.get('status')=='intent' and not c.get('reconciliation') for c in self.state['commands']):
             raise RepairHeld('unreconciled_command_intent')
         receipt=dict(status='verification_ready',mode=mode,job_id=job['id'],seal=seal,
-            repair_attempts=self.state['repair_attempts'],monotonic_deadline=self.state['clock_anchor']['monotonic_deadline'],
+            repair_attempts=self.state['repair_attempts'],
             source_digest=source_digest,source_inventory_path=str(self.evidence/'verification-readmission-source.json'),worker_proof=worker,
             interrupted_intent=inflight,interrupted_regeneration=dead,previous_reason=self.state.get('reason'))
+        if 'start' in job.get('clock_anchor', {}):
+            receipt['allowance_anchor'] = job['clock_anchor']['start']
+        else:
+            receipt['monotonic_deadline'] = self.state['clock_anchor']['monotonic_deadline']
         if repeating:
             self.state.setdefault('verification_readmission_history',[]).append(existing)
         _atomic(self.evidence/'verification-readmission-source.json',inventory)
@@ -579,11 +595,19 @@ class UpgradeRepair:
         first_wall=self.now()
         first_clock=self.clock()
         seal=self._seal(job,recipe)
-        self.state=dict(schema_version=1,seal=seal,repair_attempts=job.get('repair_attempts',0),last_seen=first_wall,
-            clock_anchor=dict(boot_id=first_clock.get('boot_id'),monotonic_start=first_clock.get('seconds'),
-                monotonic_latest=first_clock.get('seconds'),monotonic_deadline=first_clock.get('seconds',0)+max(0,job['deadline']-first_wall),
+        durable_anchor = job.get('clock_anchor', {}).get('start')
+        # Keep the local observation for ordering process-census evidence.
+        # The owner alone evaluates the persisted StableTime allowance.
+        clock_anchor = dict(boot_id=first_clock.get('boot_id'), monotonic_latest=first_clock.get('seconds'))
+        if durable_anchor is None:
+            clock_anchor.update(monotonic_start=first_clock.get('seconds'),
+                monotonic_deadline=first_clock.get('seconds',0)+max(0,job['deadline']-first_wall),
                 wall_high_water=first_wall,wall_observed=first_wall,wall_adjustment_count=0,last_negative_delta=0,
-                wall_observation='nondecreasing'),commands=[],patch_provenance=[],inflight=None,status='applying')
+                wall_observation='nondecreasing')
+        self.state=dict(schema_version=1,seal=seal,repair_attempts=job.get('repair_attempts',0),last_seen=first_wall,
+            clock_anchor=clock_anchor,commands=[],patch_provenance=[],inflight=None,status='applying')
+        if durable_anchor is not None:
+            self.state['allowance_anchor'] = durable_anchor
         verify_only=False
         if self.state_path.exists():
             self.state=json.loads(self.state_path.read_text())

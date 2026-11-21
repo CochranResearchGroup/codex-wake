@@ -49,6 +49,20 @@ for line in sys.stdin:
             self.assertEqual(receipt['package_files'],job['results']['stage']['files'])
             self.assertTrue(receipt['receipt_sha256'])
 
+    def test_durable_qualification_uses_owner_guard_across_guest_clock_jump(self):
+        from test_measurements import observation
+
+        with tempfile.TemporaryDirectory() as directory:
+            root, _, job, config = self.fixture(directory)
+            sample = observation(1000)
+            job.update(clock_anchor=dict(start=sample, latest=sample), deadline=0)
+            qualification = UpgradeQualification(root)
+            guarded = qualification.run(job, config, guard=lambda: None)
+            self.assertEqual(guarded['status'], 'fixture_verified', guarded)
+            unguarded = qualification.run(job, config)
+            self.assertEqual(unguarded['status'], 'held')
+            self.assertIn('durable upgrade guard required', unguarded['reason'])
+
     def test_missing_source_provenance_never_qualifies(self):
         with tempfile.TemporaryDirectory() as directory:
             root,package,job,config=self.fixture(directory)
