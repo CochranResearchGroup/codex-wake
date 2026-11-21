@@ -6,7 +6,8 @@ lanes:
     objective: Reliable adjacent placement before Grok acceptance
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/716, https://github.com/CochranResearchGroup/codex-wake/issues/719, https://github.com/CochranResearchGroup/codex-wake/issues/720, https://github.com/CochranResearchGroup/codex-wake/issues/721]
     plan: docs/dev/plans/0253-2026-11-20-adjacent-tabs-716.md
-    plan_ref: 748b5a82e5a08c4a32eecb303e6ad8c64c1a8149
+    plan_ref: chore/status-custody-255
+    integration: squash
     branch: fix/adjacent-tabs-716
     worker_branches: [fix/same-session-placement-720]
     target: origin/main
