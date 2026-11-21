@@ -1,0 +1,26 @@
+{
+  "state": "source_validated_package_pending",
+  "source": "e43290c687bbaa4ab8cac186c10a49a88a6308dd",
+  "tree": "164ac18d2bdb79c179a9a5109910f3a465c7a386",
+  "upstream_commit": "ccf9be8cc458bd6b8336fe84d68d8893f2691a5e",
+  "upstream_tag": "rust-v0.171.0",
+  "upstream_tag_object": "295eca93394bb83a6ec8e0841033f3997f97fcbd",
+  "carry_parent": "d907a42df3c8f097d4bd2d78aa5c27c33a9112c1",
+  "patch": "patches/codex/0254-native-0171.patch",
+  "patch_sha256": "8ef700b88687177448351ad99f8ebca1aa840f8aa259fdc043a5e435d375f125",
+  "bundle": "runtime/native-0171-p254/native-0171-source.bundle",
+  "bundle_sha256": "fca22b0dd35b660f1e4819178bbcc521329cd6b012088d6f3fdc2bf8bb9e1cbe",
+  "bundle_prerequisites": [
+    "d907a42df3c8f097d4bd2d78aa5c27c33a9112c1",
+    "ccf9be8cc458bd6b8336fe84d68d8893f2691a5e"
+  ],
+  "patch_reconstructed_tree": "164ac18d2bdb79c179a9a5109910f3a465c7a386",
+  "validation": {
+    "focused": "126 passed;15018 skipped; no retries; original4MiB stack guard retained",
+    "schema": "four checks passed after maintained stable/experimental export generation",
+    "sdk_contract": "passed",
+    "clippy": "prescribed codex-tui autofix passed; two equivalent idioms inspected",
+    "format": "just fmt passed",
+    "environment": "local WSL/Linux GNU, Rust1.99.1, dev-small; no hostedCI; exact package/runtime qualification pending"
+  }
+}
