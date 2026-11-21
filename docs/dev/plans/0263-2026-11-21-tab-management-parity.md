@@ -60,8 +60,8 @@ Completion requires equivalent outcomes on all three public surfaces, with backe
 | --- | --- | --- | --- |
 | #744 Create, rename, place, move, and focus | None | primary | validated, tracker closed |
 | #745 Inspect and read or write exact panes | None | pane745 | validated, tracker closed |
-| #746 Formatting overrides | None | format746 | integrated |
-| #747 Unlink and destroy | #745 | destroy747 | validated |
+| #746 Formatting overrides | None | format746 | validated |
+| #747 Unlink and destroy | #745 | destroy747 | validated, tracker closed |
 
 Primary owns placement, lifecycle and shared client contracts. Pane worker owns capture/input and operation readback. Formatting worker owns per-tab override storage and rendering. Coordinate any shared file hunks with primary and integrate serially. Tests use the existing public paths and dedicated real tabs only.
 
@@ -75,8 +75,10 @@ Pane worker source `a2846f18ec934939129d89bb49d7d2ec9151e46c` integrated as `583
 
 ## Format and destruction checkpoints
 
-Formatting source checkpoints `1d15484b`, `f35c7533`, `e895c89a`, and `0d2be796` are integrated. They add persistent overrides, exact linked appearances and a portable client correction. The current installed Windows frontend rerun is pending.
+Formatting source checkpoints `1d15484b`, `f35c7533`, `e895c89a`, and `0d2be796` are integrated. They add persistent overrides, exact linked appearances and a portable client correction. The installed Windows frontend rerun passed.
 
 The destruction worker's `44006a86905cffbafe5b761a2404cabe1944f526` integrated as `f0809ad1` after preserving both schema additions in the shared contract. Existing public tests on real tmux verified unlink with live pane survival, cross-session preview, stale membership refusal, explicit destroy, and lost-result readback without replay. Installed native psmux acceptance passed all eight checks with no remaining owned test sessions. Its native link operation creates an independent window, pane, and process, so a shared unlink is explicitly unavailable there. Exact standalone native destruction passed.
 
 The integrated affected selection (tab contract, controller tabs, lifecycle, CLI, profile create, terminal sessions, native psmux and formatting) passed 62 tests on Python 3.11 and 3.12. Generated unified contract and command coverage were regenerated.
+
+Installed formatting acceptance passed five checks on real tmux and six on native Windows psmux. Native Windows CLI proved override set through the controller API and inspect/clear through OAuth MCP. The installed psmux path proved explicit styling survived an automatic pass. The exact portable rerun wheel SHA256 is `93ac480b8fc4e401f314fd1aaffb2eb060f495dc0c26828775728bfdebd03f48`. Private receipt hashes are `11146de24f4dbaa16f0cfe6814d8849f52c317a92b419528ee95deda95a2229f` (tmux) and `98e0687af935a6713f71228fd15e1ddec2d5acc56304d0159add5428399e66e2` (psmux).
