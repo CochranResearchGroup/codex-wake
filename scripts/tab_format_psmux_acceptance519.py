@@ -73,7 +73,7 @@ print(json.dumps(dict(rc=r.returncode,out=r.stdout,err=r.stderr)))
         config.write_text(json.dumps(dict(schema_version=1,workspaces={'work':dict(kind='psmux',bridge_command=fixed,bridge_generation=description['generation'])})))
         config.chmod(0o600)
         def cli(verb):
-            r=subprocess.run([sys.executable,'-m','codex_wake.entrypoint','--wake-root',str(root),'tabs','format-'+verb,'--workspace','work'],text=True,capture_output=True,timeout=30)
+            r=subprocess.run([sys.executable,'-m','codex_wake.entrypoint','--wake-root',str(root),'tabs','format-'+verb,'--workspace','work','--json'],text=True,capture_output=True,timeout=30)
             assert r.returncode==0,(r.stdout,r.stderr)
             envelope=json.loads(r.stdout)
             return envelope['result']['operation']['result'] if verb not in ('status','inspect') else envelope
@@ -92,7 +92,7 @@ print(json.dumps(dict(rc=r.returncode,out=r.stdout,err=r.stderr)))
         reply=subprocess.run([POWERSHELL,'-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',encoded],input=json.dumps(request),text=True,capture_output=True,timeout=25,check=True)
         observed=json.loads(reply.stdout.lstrip('\ufeff'));assert observed['generation']==description['generation'] and 'result' in observed,observed
         checks.append('actual-powershell-pinned-native-formatting-read')
-        command="$ErrorActionPreference='Stop';$r=[Console]::In.ReadToEnd()|ConvertFrom-Json;if($r.installed){& wsl.exe --distribution $r.distro --user $r.user --exec /usr/bin/env -u PYTHONPATH $r.python -m codex_wake.entrypoint --wake-root $r.root tabs format-rollback --workspace work}else{& wsl.exe --distribution $r.distro --user $r.user --exec /usr/bin/env ('PYTHONPATH='+$r.source) $r.python -m codex_wake.entrypoint --wake-root $r.root tabs format-rollback --workspace work};if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}"
+        command="$ErrorActionPreference='Stop';$r=[Console]::In.ReadToEnd()|ConvertFrom-Json;if($r.installed){& wsl.exe --distribution $r.distro --user $r.user --exec /usr/bin/env -u PYTHONPATH $r.python -m codex_wake.entrypoint --wake-root $r.root tabs format-rollback --workspace work --json}else{& wsl.exe --distribution $r.distro --user $r.user --exec /usr/bin/env ('PYTHONPATH='+$r.source) $r.python -m codex_wake.entrypoint --wake-root $r.root tabs format-rollback --workspace work --json};if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}"
         import pwd
         distro=os.environ.get('WSL_DISTRO_NAME') or 'Ubuntu'
         payload=dict(distro=distro,user=pwd.getpwuid(os.getuid()).pw_name,source=str(Path(tab_psmux_bridge.__file__).resolve().parents[1]),python=sys.executable,root=str(root),installed=not bool(os.environ.get('PYTHONPATH')))
@@ -104,13 +104,31 @@ print(json.dumps(dict(rc=r.returncode,out=r.stdout,err=r.stderr)))
         checks.append('actual-powershell-public-cli-exact-rollback')
         # Native MCP uses existing controller public execution, with exact pins.
         owner=controller_tabs_from_root(root)
-        target=owner.execute('tabs.list',{})['resources'][0]['target']
+        target=owner.format_target(workspace="work")
         payload=dict(workspace='work',expected_target=target)
         payload['_request']=dict(operation_id='format-rollback',idempotency_key='format-rollback',correlation_id='format-rollback',binding='fixture',target=target)
         result,failed=CommandRunner(wake_root=root).call('wake_tabs_format_rollback',payload)
         assert not failed and result['result']['operation']['result']['status']=='rolled_back',result
         for wid,original in originals.items():assert transport.formatting('read',dict(window=wid),time.monotonic()+15)==original
         checks.append('public-mcp-exact-original-restoration-and-reenable')
+        wid=windows[1]['window_id']
+        style=dict(foreground='yellow',background='blue',attributes=['bold','underscore'])
+        command=[sys.executable,'-m','codex_wake.entrypoint','--wake-root',str(root),
+                 'tabs','format','override-set','--workspace','work','--window',wid,'--style',json.dumps(style),'--json']
+        result=subprocess.run(command,text=True,capture_output=True,timeout=30)
+        assert result.returncode==0,(result.stdout,result.stderr)
+        assert json.loads(result.stdout)['result']['operation']['result']['override']==style
+        assert cli('reenable')['status']=='applied'
+        result,failed=CommandRunner(wake_root=root).call('wake_tabs_format_override_inspect',dict(workspace='work',window=wid))
+        assert not failed and result['result']['override']==style,result
+        assert result['result']['options']['window-status-style']['effective']=='fg=yellow,bg=blue,bold,underscore',result
+        command[command.index('override-set')]='override-clear'
+        command=command[:-3]+['--json']
+        cleared=subprocess.run(command,text=True,capture_output=True,timeout=30)
+        assert cleared.returncode==0,(cleared.stdout,cleared.stderr)
+        assert json.loads(cleared.stdout)['result']['operation']['result']['override'] is None
+        assert cli('rollback')['status']=='rolled_back'
+        checks.append('persistent-exact-tab-override-cli-mcp-and-automatic-owner')
         # Full local listings must be exact after restoring; changing inheritance
         # into an equal explicit value would fail these readbacks.
         final=transport.snapshot(time.monotonic()+15)

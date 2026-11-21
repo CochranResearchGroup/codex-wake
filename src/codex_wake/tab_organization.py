@@ -68,6 +68,9 @@ class TmuxTransport:
         rows = [r for r in all_rows if r['session_id'] == self.session]
         if not rows:
             raise TabError('workspace_unavailable', 'exact session unavailable')
+        sessions_by_window = {}
+        for row in all_rows:
+            sessions_by_window.setdefault(row['window_id'], set()).add(row['session_id'])
         windows = {}
         for row in rows:
             wid = row['window_id']
@@ -75,7 +78,9 @@ class TmuxTransport:
                 raise TabError('workspace_unqualified', 'invalid native IDs')
             window = windows.setdefault(wid, dict(window_id=wid, index=int(row['window_index']),
                 name=row['window_name'], focused=row['window_active'] == '1',
-                linked=len({r['session_id'] for r in all_rows if r['window_id'] == wid}) > 1, panes=[]))
+                linked=len(sessions_by_window[wid]) > 1, panes=[]))
+            if window['linked']:
+                window['linked_sessions'] = sorted(sessions_by_window[wid])
             window['panes'].append(dict(pane_id=row['pane_id'], pid=int(row['pane_pid']),
                 pane_title=row['pane_title'],pane_current_path=row['pane_current_path'],pane_tty=row['pane_tty'],pane_current_command=row['pane_current_command']))
         self.focused = next(w['window_id'] for w in windows.values() if w['focused'])

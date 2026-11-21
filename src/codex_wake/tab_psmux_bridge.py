@@ -469,12 +469,14 @@ class PsmuxHost:
             window=args.get('window')
             if not isinstance(window,str) or window not in windows:
                 raise BridgeError('stale_target','Exact current window required')
-            flags=['-w'];target=self.session+':'+str(windows[window]['index'])
+            flags=['-w'];target=self.session+':'+window
         if action.startswith('write'):
             values=args['values']
             for name,value in values.items():
                 if value is None:self.command('set-option',*flags,'-u','-t',target,name)
                 else:self.command('set-option',*flags,'-t',target,name,value)
+        if not session:
+            return self._window_format_options(target)
         raw=self.command('show-options',*flags,'-t',target)
         explicit={line.split(' ',1)[0] for line in raw.splitlines() if line and not line[0].isspace()}
         result={}
@@ -482,8 +484,27 @@ class PsmuxHost:
             # Absent user options must not be queried: psmux may reject them.
             effective=self.command('show-options',*flags,'-v','-t',target,name).removesuffix('\n') if name in explicit or not name.startswith('@') else ''
             result[name]=dict(explicit=name in explicit,value=effective if name in explicit else None,effective=effective)
-            if not session:
-                result[name]['parent']=self.command('show-options','-g','-w','-v','-t',target,name).removesuffix('\n')
+        return result
+
+    def _window_format_options(self, target):
+        # Queue only fixed read requests. Framing preserves native whitespace
+        # and multiline option values without parsing them as option records.
+        separator = 'wake-format-' + uuid4().hex
+        argv = ['show-options', '-w', '-t', target]
+        for name in FORMATTING_WINDOW_OPTIONS:
+            for scope in ((), ('-g',)):
+                argv.extend((';', 'display-message', '-p', '-t', target, separator,
+                             ';', 'show-options', *scope, '-w', '-v', '-t', target, name))
+        parts = self.command(*argv).split(separator + '\n')
+        if len(parts) != 1 + len(FORMATTING_WINDOW_OPTIONS) * 2:
+            raise BridgeError('formatting_mismatch', 'Native window option readback was incomplete')
+        explicit = {line.split(' ', 1)[0] for line in parts[0].splitlines()
+                    if line and not line[0].isspace()}
+        result = {}
+        for index, name in enumerate(FORMATTING_WINDOW_OPTIONS):
+            effective, parent = (part.removesuffix('\n') for part in parts[1+2*index:3+2*index])
+            result[name] = dict(explicit=name in explicit, value=effective if name in explicit else None,
+                                effective=effective, parent=parent)
         return result
 
     def _attach_saved(self, args, snapshot):
