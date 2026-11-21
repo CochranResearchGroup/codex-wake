@@ -113,3 +113,8 @@ The P253 catalog lane spelling is normalized to `ADJACENT-TABS-716` to match
 the existing auditor's uppercase plan metadata. This is the same planning lane,
 not a new runtime/session identity; its historical lower-case identifier is used
 when comparing inherited audit findings. No runtime target or permission changes.
+
+Final catalog comparison:499 initial findings become492, with7 resolved and0 new
+findings after the explicit same-lane spelling normalization. Remaining492 are
+held legacy metadata/custody debt, not a passing catalog verdict. The final added
+Markdown/JSON readback verifies14 local links and no executable source changes.

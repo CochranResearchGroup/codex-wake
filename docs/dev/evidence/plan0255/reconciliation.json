@@ -82,6 +82,10 @@
     "baseline_ref": "926dd512df46fc7f2ea4734ae2772f3e9ab3cd34",
     "legacy_findings": 499,
     "verdict": "not clean; inherited duplicate claims, absent custody metadata, stale plan refs/checkpoints and overlaps retained for evidence-based disposition",
-    "scope": "full catalog at original HEAD; not suppressed or called passing"
+    "scope": "full catalog at original HEAD; not suppressed or called passing",
+    "after_findings": 492,
+    "resolved_findings": 7,
+    "new_findings": 0,
+    "lane_alias_normalization": "ADJACENT-TABS-716 = historical adjacent-tabs-716"
   }
 }

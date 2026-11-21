@@ -46,6 +46,14 @@
     {
       "command": "scripts/check_ci_scope.py --event pull_request --base926dd512 --head748b5a82",
       "result": "full/path_requires_full: ROADMAP/plans/catalog are outside conservative evidence-only allowlist"
+    },
+    {
+      "command": "final whole-catalog comparison, same-lane ID normalized",
+      "result": "499\u2192492 findings;7 resolved;0 new; remaining492 are not claimed passing"
+    },
+    {
+      "command": "final committed added Markdown links/JSON/source-scope readback",
+      "result": "14 local links resolve; JSON parses;24 changed files, no executable source changes"
     }
   ],
   "nonpassing_audit": {

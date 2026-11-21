@@ -1636,8 +1636,8 @@ question/claim/reply remains separate.
 Native process churn and per-tab durable saves reproduced/fixed at source; private
 42tab refresh1.143s. Original production rollback/monitor stop preceded PR537 deployment and the
 later P214/P215 display evidence. P216 subsequently records monitor qualification;
-P223 later records disabled automation. The plan remains OPEN pending explicit
-remaining-scope disposition, not a new duplicate implementation chain.
+P223 later records disabled automation. P255 closes the delivered throughput
+packet; remaining monitor qualification stays with540/P216.
 
 
 ## P215 | Named muted tab palettes
