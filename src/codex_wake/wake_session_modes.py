@@ -15,8 +15,7 @@ def bind_mode(args, root, target):
     if mode is None:
         return  # Legacy CLI policy contract; new agent registrations require mode.
     if mode == "explicit_policy":
-        # Opt in to the existing independent policy fields, without migrating
-        # a legacy target or weakening a previously bound lifecycle mode.
+        # Reuse independent policy without migrating a frozen target lifecycle.
         if any(getattr(args, field, None) is None for field in
                ("wake_lifetime", "recipient_startup", "wake_routes")):
             raise WakeError("explicit_wake_policy_required")

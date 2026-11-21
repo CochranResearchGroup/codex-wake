@@ -113,9 +113,12 @@ def inspect_time(*, offline=False, collector=None):
                   decision=asdict(TimeDecision('uncertain',reason='acquisition_not_requested')), sources=sources)
     if offline:
         return report
+    if collector is None:
+        report['decision'] = asdict(TimeDecision('uncertain', reason='stable_time_acquisition_required'))
+        return report
     request = dict(request_id=str(uuid.uuid4()),guest_boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip())
     try:
-        data = (collector or windows_collect)([s for s in sources if s['scale']],request)
+        data = collector([s for s in sources if s['scale']],request)
         if data['request_id'] != request['request_id'] or data['guest_boot'] != request['guest_boot']:
             raise ValueError('collector_identity_mismatch')
         if not all(isinstance(data[k],str) and data[k] for k in ('host_boot','host_boot_end','generation')) or data['host_boot'] != data['host_boot_end']:
@@ -169,6 +172,8 @@ def add_time_parser(subparsers):
     parser = subparsers.add_parser('time', help='inspect external time without changing clocks')
     commands = parser.add_subparsers(dest='time_command', required=True)
     inspect = commands.add_parser('inspect')
+    inspect.add_argument('--allow-degraded', action='store_true',
+                         help='show lower-assurance StableTime evidence for inspection only')
     inspect.add_argument('--offline', action='store_true', help='show admission policy without network access')
 
 
@@ -181,14 +186,28 @@ def stable_time_config():
 
 def time_command(args):
     config = stable_time_config()
+    fallback = None
     if config:
-        from .stable_time import service_time_result
-        decision, observation = (TimeDecision('uncertain', reason='acquisition_not_requested'), None) if args.offline else service_time_result(config)
+        from .stable_time import service_time_inspection, service_time_result
+        if args.offline:
+            decision, observation = TimeDecision('uncertain', reason='acquisition_not_requested'), None
+        elif args.allow_degraded:
+            decision, observation, fallback = service_time_inspection(config)
+        else:
+            decision, observation = service_time_result(config, measurement_only=True)
+        measurement_decision = decision
         report = dict(schema=1, provider='stable-time', authentication='NTS-required',
-                      decision=asdict(decision), observation=observation, purpose='installed-service-consumer',
-                      note='Observation is diagnostic; only the validated decision supplies finite dispatch authority.')
+                      decision=asdict(decision), measurement_decision=asdict(measurement_decision),
+                      observation=observation, purpose='installed-service-consumer',
+                      basis='service_measurement', receipt_time_bound=False, production_ready=False,
+                      note='Bounds describe the service measurement instant, not receipt or print time. Inspection authorizes no dispatch.')
     else:
-        report = inspect_time(offline=args.offline)
+        report = inspect_time(offline=True)
+        if not args.offline:
+            report.update(provider='stable-time',
+                decision=asdict(TimeDecision('uncertain', reason='stable_time_configuration_required')))
+    if args.allow_degraded:
+        report['fallback'] = fallback
     print(json.dumps(report, sort_keys=True))
     return 0
 
@@ -199,6 +218,4 @@ def network_time_decision():
     if config:
         from .stable_time import service_time_decision
         return service_time_decision(config)
-    report = inspect_time()
-    decision = report['decision']
-    return TimeDecision(decision['status'],tuple(decision['sources']),decision['lower'],decision['upper'],decision['reason'])
+    return TimeDecision('uncertain', reason='stable_time_configuration_required')

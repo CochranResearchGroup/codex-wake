@@ -1,6 +1,105 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: ADJACENT-TABS-716
+    owner: root / ecochran76
+    objective: Reliable adjacent placement before Grok acceptance
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/716, https://github.com/CochranResearchGroup/codex-wake/issues/719, https://github.com/CochranResearchGroup/codex-wake/issues/720, https://github.com/CochranResearchGroup/codex-wake/issues/721]
+    plan: docs/dev/plans/0253-2026-11-20-adjacent-tabs-716.md
+    plan_ref: chore/status-custody-255
+    integration: squash
+    branch: fix/adjacent-tabs-716
+    worker_branches: [fix/same-session-placement-720]
+    target: origin/main
+    plan_state: BLOCKED
+    custody_state: REMOTE_PRESERVED
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-20
+    disposition: PR722 merged; children719-721 closed; dev44 working deployment awaits dedicated test-client setup and exact installed acceptance; working Python dev43; no credential-copy approval pending
+  - id: native-carry-713
+    owner: root / ecochran76
+    objective: Combine Grok and bounded expiry before Native cutover
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/713]
+    plan: docs/dev/plans/0252-2026-11-19-native-carry-713.md
+    branch: feat/native-carry-713
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: REMOTE_PRESERVED
+    dependencies: []
+    overlaps: [native-expiry-695, P250]
+    updated_at: 2026-11-19
+    disposition: PR717 cutover complete; qualified d907a42d retained by installed P254 native0.171; issue713 closed and parent628 explicitly closed by P255
+  - id: native-expiry-695
+    owner: root / ecochran76
+    objective: Enforce native queue expiry and qualified Stable Time migration
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/695]
+    plan: docs/dev/plans/0250-2026-11-17-stable-time-everywhere.md
+    branch: feat/native-expiry-695
+    target: origin/main
+    plan_state: OPEN
+    custody_state: REMOTE_PRESERVED
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-18
+    disposition: "#695 acceptance complete; exact Native package/UID1017 and both Python collections qualify. Final branch publication precedes normal integration-checkout removal; independent Plan0250 live-Grok tickets stay blocked with refs/checkpoint retained. No working daemon change."
+
+  - id: qualification-fixtures-695
+    owner: root / ecochran76 (worker reconcile_695_gates)
+    objective: Repair evidenced Python qualification fixtures without weakening production time guards
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/695]
+    plan: docs/dev/plans/0250-2026-11-17-stable-time-everywhere.md
+    branch: fix/qualification-fixtures-695
+    target: feat/native-expiry-695
+    plan_state: CLOSED
+    custody_state: REMOTE_PRESERVED
+    dependencies: []
+    overlaps: [native-expiry-695]
+    updated_at: 2026-11-18
+    disposition: Integrated2e48caad; exact worker eed6d40c pushed and verified. Clean checkout removed normally after ignored cache inventory; owned watcher processes0. No production guard relaxation.
+
+  - id: P250
+    owner: primary / ecochran76
+    objective: Upgrade retained native Wake governor and Grok mods to upstream0.169.0
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/707]
+    plan: docs/dev/plans/0250-2026-11-16-native-0169-upgrade.md
+    branch: feat/native-0169-upgrade
+    worker_branches: [feat/native-0169-upgrade]
+    target: origin/main
+    plan_state: IN_PROGRESS
+    custody_state: CHECKPOINTED
+    dependencies: []
+    overlaps: [P233, native-expiry-695]
+    updated_at: 2026-11-16
+    disposition: Retained native checkout reused;25 source conflicts resolved, schemas generating before native carry regression and exact package qualification. Working0.167 untouched; frontenddev41 preserved. No native push, paid CI or live inference.
+
+  - id: monitor-clock-702
+    owner: root / ecochran76
+    objective: Release qualified Stable Time monitor freshness
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/702]
+    plan: docs/dev/plans/0249-2026-11-16-monitor-clock-release.md
+    branch: fix/monitor-clock-release-702
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [native-expiry-695]
+    updated_at: 2026-11-16
+    disposition: PR704 merged and dev40 deployed; exact wheel and real-clock CLI qualified; temporary checkout retiring after evidence custody. Native expiry695 remains open.
+  - id: P233
+    owner: primary / ecochran76
+    objective: Use native Grok models inside the modded Codex tool and worker loop
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/628]
+    plan: docs/dev/plans/0233-grok-in-codex-spec.md
+    branch: feat/grok-native-provider
+    worker_branches: [feat/p233-release-qualification]
+    target: origin/main
+    plan_state: COMPLETE
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [P231, P234]
+    updated_at: 2026-11-15
+    disposition: PR700 merged; dev39 CLI and one independent modded native profile deployed/verified; all8 children closed and review1 remediation1 complete. Grok auth currently unavailable pending operator refresh; no inference submitted. Parent628 remains open; native source checkout retained under preservation instruction.
   - id: native-queue-694
     owner: root / ecochran76
     objective: Qualify native busy queue cancellation and expiry capability boundary
@@ -446,16 +545,17 @@ lanes:
     plan: docs/dev/plans/0173-agent-harness/goal-limit-ux-execution.md
     plan_ref: feat/goal-limit-ux-implementation
     branch: feat/goal-limit-ux-implementation
+    integration_receipt: ce1ad93eec437c1b4854dde2c9a174d5c5f94255
     target: origin/main
     plan_state: OPEN
-    custody_state: ACTIVE_WORKTREE
+    custody_state: INTEGRATED
     checkpoint: e181d28
     integration: squash_pr
     dependencies: [P173-NEXT-FRONTIER]
     overlaps: [P173-NEXT-FRONTIER]
     reconciled_overlaps: [P173-NEXT-FRONTIER]
     updated_at: 2026-10-25
-    disposition: Isolated source pinned at16c2501; independent UX files and primary-owned shared integration; no production effects
+    disposition: Isolated source pinned at16c2501; independent UX files and primary-owned shared integration; no production effects; P255 retired completed checkout after verified public custody and reference checks
   - id: P173-HF03
     owner: primary / ecochran76
     objective: Implement observation and ownership frontier issue 330
@@ -463,9 +563,10 @@ lanes:
     plan: docs/dev/plans/0173-agent-harness/hf-03-04-execution-ledger.md
     plan_ref: feat/harness-observation-ownership
     branch: feat/harness-observation-ownership
+    integration_receipt: ce1ad93eec437c1b4854dde2c9a174d5c5f94255
     target: origin/main
     plan_state: CLOSED
-    custody_state: OWNED
+    custody_state: INTEGRATED
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/333
     integration: squash_pr
     dependencies: []
@@ -1235,6 +1336,7 @@ lanes:
     branch: feat/harness-next-frontier
     pull_request: https://github.com/CochranResearchGroup/codex-wake/pull/341
     checkpoint: b674427
+    integration_receipt: ce1ad93eec437c1b4854dde2c9a174d5c5f94255
     target: origin/main
     integration: cumulative_squash_pr
     plan_state: SOURCE_ACCEPTED
@@ -1242,7 +1344,7 @@ lanes:
     dependencies: [HF02, HF03, HF04, HF06, HF07, HF13]
     overlaps: [feat/harness-observation-ownership, feat/harness-frontier]
     updated_at: 2026-10-31
-    disposition: Seven source tickets closed; one review and one TDD pass complete; validation repair342 complete; final1651-test full run passes with1skip; first failures retained; consolidated PR341 supersedes327/329/333; source families integrated cumulatively by PR349 at ce1ad93eec437c1b4854dde2c9a174d5c5f94255; historical isolated qualification retained; production activation remains separate
+    disposition: Seven source tickets closed; one review and one TDD pass complete; validation repair342 complete; final1651-test full run passes with1skip; first failures retained; consolidated PR341 supersedes327/329/333; source families integrated cumulatively by PR349 at ce1ad93eec437c1b4854dde2c9a174d5c5f94255; historical isolated qualification retained; production activation remains separate; P255 retired completed checkout after verified public custody and reference checks
 
   - id: P173-COMBINED-UX
     owner: primary / ecochran76
@@ -1574,13 +1676,14 @@ lanes:
     work_items: [LOCAL-P224, https://github.com/CochranResearchGroup/codex-wake/issues/570]
     plan: docs/dev/plans/0224-2026-11-11-governor-release.md
     branch: feat/governor-experience
+    integration_receipt: 995273bba30dc1f3724d0f1cb760e8a066bf8c13
     target: origin/main
     plan_state: CLOSED
     custody_state: INTEGRATED
     dependencies: []
     overlaps: [P220]
     updated_at: 2026-11-11
-    disposition: PR586 merged32eb90fb; exact dev11 and native4712 deployed; six future modded selections, two idle updates, controller/supervisor refreshed; stock and disabled automation preserved; rollback retained
+    disposition: PR586 merged32eb90fb; exact dev11 and native4712 deployed; six future modded selections, two idle updates, controller/supervisor refreshed; stock and disabled automation preserved; rollback retained; P255 retired completed checkout after verified public custody and reference checks
 
   - id: P221
     owner: primary / ecochran76
@@ -1589,7 +1692,7 @@ lanes:
     plan: docs/dev/plans/0221-2026-11-11-tab-format-reboot.md
     branch: fix/tab-format-reboot
     target: origin/main
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: INTEGRATED
     dependencies: []
     overlaps: [P210, P216]
@@ -1623,3 +1726,32 @@ lanes:
     overlaps: [P216, P222]
     updated_at: 2026-11-11
     disposition: PR587 merged e16bc4d2; dev10 installed; same43pane processes retained; formatting/startup remain disabled and unit pins fixed code
+
+  - id: accepted-wake-reconciliation
+    owner: root / ecochran76
+    objective: Proactively reconcile accepted native completion without replay
+    work_items: [LOCAL-WAKE-ACCEPTED-RECONCILIATION]
+    plan: docs/dev/plans/0248-2026-11-16-accepted-wake-reconciliation.md
+    branch: fix/accepted-wake-reconciliation
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [P247]
+    updated_at: 2026-11-16
+    disposition: PR703 merged96f85564; dev41 exact-wheel UID1017 qualification and working rollout accepted;40 completion receipts retained; task checkout retires after evidence custody
+
+  - id: P254
+    owner: primary / ecochran76
+    objective: Upgrade native Codex to 0.171 with Grok usage and Wake identity
+    work_items: [LOCAL-P254-UPGRADE-USAGE, '#628']
+    plan: docs/dev/plans/0254-2026-11-20-grok-usage-codex-0171.md
+    branch: feat/grok-usage-codex-0171
+    integration_receipt: 926dd512df46fc7f2ea4734ae2772f3e9ab3cd34
+    target: origin/main
+    plan_state: CLOSED
+    custody_state: INTEGRATED
+    dependencies: []
+    overlaps: [P233, P250, P253]
+    updated_at: 2026-11-21
+    disposition: PR724 merged; complete native0.171 package qualified UID1017 and installed selected modded profile; same Grok history resumed with Wake usage/status; old package retained; both P254 task checkouts normally removed with verified custody

@@ -7,7 +7,6 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
-from types import SimpleNamespace
 
 from codex_wake.cli import run
 from codex_wake.mcp_server import CommandRunner, SPECS
@@ -21,12 +20,15 @@ META = dict(threadId=THREAD, sessionId=THREAD, callId='call-315',
 class HarnessCallerTests(unittest.TestCase):
     def test_inventory_main_cli_and_mcp_share_suppression_and_identity(self):
         from codex_wake.managed_inventory import Observation
-        import time
-        with tempfile.TemporaryDirectory() as temporary:
+        from tests.test_measurements import observation
+        clock = observation(1000)
+        with tempfile.TemporaryDirectory() as temporary, patch(
+                "codex_wake.measurements.snapshot", return_value=clock):
             root = Path(temporary)
-            sample = Observation('codex', 'codex:fixture', THREAD, str(root), 'ready', time.time(),
+            sample = Observation('codex', 'codex:fixture', THREAD, str(root), 'ready', clock['utc']['upper'],
                                  'native_metadata', dict(pid=123, start_ticks=42, boot_id='boot-a'),
-                                 [dict(pane_id='%1', window_id='@1')], {'inspect': 'supported'})
+                                 [dict(pane_id='%1', window_id='@1')], {'inspect': 'supported'},
+                                 clock_observation=clock)
             output = io.StringIO()
             with patch('codex_wake.managed_inventory_commands.RuntimeObserver.__call__', return_value=sample), contextlib.redirect_stdout(output):
                 code = run(['--wake-root', str(root), 'agents', 'enroll', '--operator', '--conversation-id', THREAD, '--json'])
@@ -152,7 +154,7 @@ class HarnessCallerTests(unittest.TestCase):
             root = Path(temporary)
             runner = CommandRunner(wake_root=root)
             body = dict(caller_thread_id=THREAD, trigger='1m', prompt='Continue', idempotency_key='native-mcp', session_mode='background',
-                        wake_lifetime='conversation', owner_end='hold', recipient_startup='background_saved')
+                        wake_lifetime='conversation', owner_end='hold', recipient_startup='background_saved', busy_policy='queue')
             denied, failed = runner.call('wake_native_after', body)
             self.assertTrue(failed)
             self.assertFalse(all_records(root))
@@ -165,6 +167,39 @@ class HarnessCallerTests(unittest.TestCase):
             self.assertEqual(record['wake_policy']['owner'], dict(kind='conversation', id='codex:' + THREAD))
             self.assertEqual(record['wake_policy']['startup'], 'background_saved')
             self.assertEqual(record['target']['resume_policy'], 'same_thread')
+            self.assertEqual(record['target']['busy_policy'], 'queue')
+            with patch('codex_wake.sessions.observe', return_value={'complete':False,'sessions':[]}), patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+                    'codex_wake.native_clock.snapshot', return_value={'utc': None, 'counter': None}):
+                changed, failed = runner.call('wake_native_after', dict(body, busy_policy='wait'), native_context=META)
+            self.assertTrue(failed, changed)
+            self.assertEqual(all_records(root)[0].record['target']['busy_policy'], 'queue')
+
+    def test_native_registration_survives_detached_mcp_cwd_without_duplicate_wakes(self):
+        import errno
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            workspace = root / 'native-workspace'
+            workspace.mkdir()
+            runner = CommandRunner(wake_root=root / 'wake', app_server='unix:///fixture.sock')
+            body = dict(caller_thread_id=THREAD, trigger='1m', prompt='Read-only check',
+                idempotency_key='detached-cwd', session_mode='background',
+                wake_lifetime='persistent', recipient_startup='background_saved')
+            with patch('os.getcwd', side_effect=OSError(errno.ENODEV, 'No such device')), patch(
+                    'codex_wake.shared_app_server.SharedAppServerReader.read_thread',
+                    return_value=dict(id=THREAD, cwd=str(workspace))), patch(
+                    'codex_wake.shared_app_server.SharedAppServerReader.__enter__', lambda reader: reader), patch(
+                    'codex_wake.shared_app_server.SharedAppServerReader.__exit__', return_value=None), patch(
+                    'codex_wake.sessions.observe', return_value={'complete': False, 'sessions': []}), patch(
+                    'codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
+                    'codex_wake.native_clock.snapshot', return_value={'utc': None, 'counter': None}):
+                first, failed = runner.call('wake_native_after', body, native_context=META)
+                self.assertFalse(failed, first)
+                same, failed = runner.call('wake_native_after', body, native_context=META)
+                self.assertFalse(failed, same)
+                self.assertEqual(same['id'], first['id'])
+                self.assertTrue(same['deduplicated'])
+                denied, failed = runner.call('wake_native_after', body, native_context=None)
+                self.assertTrue(failed, denied)
 
     def test_future_wakes_expose_original_due_and_delivery_window_without_claiming_monitoring(self):
         from datetime import datetime, UTC, timedelta
@@ -195,7 +230,10 @@ class HarnessCallerTests(unittest.TestCase):
         from codex_wake.monitor import write_monitor_health
         clock = dict(utc=dict(status='network', sources=['fixture-a', 'fixture-b'],
             lower=1893456000, upper=1893456000.2), counter=None)
-        with tempfile.TemporaryDirectory() as temporary, patch.dict('os.environ', {'XDG_STATE_HOME': temporary}):
+        with tempfile.TemporaryDirectory() as temporary, patch.dict(
+                'os.environ', {'XDG_STATE_HOME': temporary}), patch(
+                'codex_wake.measurements.utc_bounds',
+                side_effect=lambda: (clock['utc']['lower'], clock['utc']['upper'])):
             root = Path(temporary) / 'wake'
             runner = CommandRunner(wake_root=root)
             body = dict(caller_thread_id=THREAD, trigger='3650d', ttl='24h', prompt='Read-only review',
@@ -203,15 +241,15 @@ class HarnessCallerTests(unittest.TestCase):
             write_monitor_health(wake_root=root, source='qualification-fixture', mode='once')
             with patch('codex_wake.sessions.observe', return_value={'complete':False,'sessions':[]}), patch('codex_wake.app_server.resolve_codex_cmd', return_value=sys.executable), patch(
                     'codex_wake.native_clock.snapshot', return_value=clock), patch(
-                    'codex_wake.signal_records.probe_managed_reader_capability', return_value=SimpleNamespace(schema_versions=[8])), patch(
-                    'codex_wake.wake_mode_runtime.registration_harness_readiness', return_value={'state':'ready','evidence':'synthetic fixture'}):
+                    'codex_wake.native_protocol.native_request', return_value={
+                        'thread': {'id': THREAD, 'status': {'type': 'idle'}}}):
                 first, failed = runner.call('wake_native_after', body, native_context=META)
                 self.assertFalse(failed, first)
                 self.assertFalse(first['armed'], 'a one-shot observation is not durable monitor ownership')
                 write_monitor_health(wake_root=root, source='qualification-fixture', mode='loop')
                 same, failed = runner.call('wake_native_after', body, native_context=META)
                 self.assertFalse(failed, same)
-            self.assertTrue(same['armed'],same)
+            self.assertTrue(same['armed'])
             self.assertTrue(same['deduplicated'])
             self.assertEqual(same['id'], first['id'])
             self.assertEqual(same['due_at'], first['due_at'])

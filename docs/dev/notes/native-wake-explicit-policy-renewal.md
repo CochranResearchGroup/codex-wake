@@ -1,7 +1,7 @@
 # Native wake explicit-policy renewal regression
 
 Work item: native-explicit-policy-renewal. Owner: primary agent. Priority: P1.
-State: source fixed and locally validated; not installed, production renewal open.
+State: reconciled source and UID1017 installed registration qualified; production renewal open.
 Request: operator invoked diagnosing-bugs after persistent monitor renewal failed.
 Scope: native registration compatibility only. No permission edits, trigger writes,
 existing record migration, daemon replacement, service restart or live dispatch.
@@ -40,28 +40,38 @@ Existing explicit-mode and route/uncertain-delivery tests continue passing.
 No debug instrumentation added to tracked implementation. Private tagged repro
 remains in a clearly marked diagnostic directory, outside this repository.
 
-## Validation and limits
+## Current-main qualification and limits
 
-Use PYTHONPATH=src with the installed dev38 Python interpreter to supply runtime
-dependencies; the generic python lacks websockets and uv is not on PATH. No
-hosted CI under cost policy. Source syntax/diff and focused tests are local only.
-The broader harness-caller fixture also failed on untouched origin/main because
-it wrote synthetic monitor health without a qualified managed-reader/harness
-observation. Fixture now supplies explicitly synthetic observation seams; it still
-asserts once is unarmed and loop is armed. Production readiness gates are unchanged.
+Reconciled against canonical7b9e9d96, retaining the original branch history and
+current busy-policy, detached-directory and transport behavior. The original
+positive test first failed on that main product code with invalid_argument.
+All four original explicit-policy tests pass after the narrow native-only fix.
 
-The source suite and injected fixture success are not installed acceptance. Before
-working-account installation, qualify the exact package in the separate Linux
-test user or disposable wsl-test per runtime policy, preserve active conversations,
-and obtain deployment authority. Reload this client's schema only through the
-approved lifecycle workflow. Then reconcile original monitor keys, use the same
-prompt/cadence/TTL/startup/routes plus explicit_policy, and verify two armed receipts
-and stable Codex binding. Do not invent a replacement key for an uncertain send.
-Until that readback, only the already-retained next wake is known; indefinite
-continuity is degraded. No extension of spam enforcement is implied.
+The seven focused modules discover52 tests. Selected48 pass on both Python3.11
+and3.12 using isolated HOME/XDG directories and an empty StableTime configuration.
+Four unchanged-baseline failures were reproduced against immutable7b9e9d96:
+three task-brief caller tests require qualified UTC, and the owner-completion
+policy fixture expects armed state without a qualified reader observation.
+Their precise IDs and raw3FAIL/1ERROR baseline result are retained privately.
+No fixture, clock or production readiness changes were made to hide those defects.
+Ruff undefined-name checks, policy wiring and scoped diff checks pass locally.
+Hosted CI was not run under the repository cost policy.
 
-Validation counts: native explicit-policy4, session modes5, route permissions11,
-harness callers9, recurring schedules10, wake policy8, launcher continuity3:50
-passing focused tests. The unchanged-baseline caller test failure was reproduced
-from a clean git archive before repairing its synthetic observation fixture.
-No tests dispatch to real sessions or use production wake records.
+Exact wheel0.22.0.dev44 SHA256
+4cdb753370ce656ebbc7d2711b2461b298cfebaf3a08f8de98203a38d6f04c08
+was installed only into a task-owned UID1017 target. Public CLI registration used
+an owned native0.171 server's actual metadata and synthetic actor capability.
+Actual stdio MCP then preserved the legacy ID, target, fingerprint and ordered
+routes, admitted a successor, and rejected missing explicit fields, removal of a
+bound lifecycle and a denied route. All353 installed Python files equal the wheel.
+Three synthetic records retained zero attempts; no monitor, dispatch, provider
+request or qualified-time gate was invoked. Awaiting qualified clock is retained
+registration state, not an armed or delivered receipt. The owned server exited0.
+Private evidence: reconcile-status-20261121/pr699, installed case p699-reg-r5.
+Earlier setup failures and their cleanup remain retained alongside the pass.
+
+This proves installed registration compatibility only. Production monitor renewal,
+working-account installation, schema reload and armed-receipt acceptance remain
+outside this change. Preserve original monitor keys and exact prompt/cadence/TTL/
+startup/routes when separately authorized; do not invent replacement keys for an
+uncertain send. No extension of spam enforcement is implied.

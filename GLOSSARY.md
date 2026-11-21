@@ -10,8 +10,20 @@ The point in time when a registered wake becomes due, including time spent aslee
 **Message expiration**:
 The deadline after which a message is no longer eligible for delivery, including time spent asleep.
 
+**Final native-send admission**:
+Authorization for one bounded input to be sent toward its model provider while
+fresh qualified StableTime evidence at its service measurement instant places
+the original expiration in the future, independent of earlier selection or
+preparation. This is best effort: delivery delay or suspension after measurement
+can permit late sending. It does not establish when the remote model starts.
+
 **Trusted time**:
-A bounded estimate of current time accepted under the configured source-selection rules.
+A bounded UTC estimate accepted under the configured source-selection rules at its documented measurement instant. It does not by itself bound delivery to another process.
+
+**Service measurement instant**:
+The instant described by StableTime's UTC bounds and host-counter evidence.
+Client receipt and provider send are separate instants. WSL clocks must not be
+used to extrapolate this trusted observation.
 
 **Time uncertainty**:
 The condition in which available evidence cannot establish whether a deadline has passed.
@@ -326,6 +338,19 @@ model selection is distinct from an observed model identity.
 The hosted service or local serving runtime through which a model is accessed.
 It is distinct from the coding harness, account profile and execution host.
 
+**Provider session**:
+An authenticated relationship with an inference-provider account. It is distinct
+from an agent conversation and may be shared by related conversations.
+
+**Inference selection**:
+The chosen model and provider account for a conversation or worker. It is distinct
+from the provider-reported model identity and verified execution readiness.
+
+**Provider handoff**:
+A logical agent's transition to another inference provider through a linked
+successor conversation, carrying portable context while preserving source history.
+_Avoid_: Model change when the inference provider also changes.
+
 **Runtime instance**:
 A particular running instance of a coding agent or app server. It is distinct
 from the durable conversations it can serve.
@@ -373,6 +398,14 @@ not establish another.
 **Tab activity**:
 The observed work state of a conversation associated with a tab, such as running,
 idle or waiting for input. It does not establish that the terminal interface is responsive.
+
+**Monitor observation freshness**:
+Whether a retained monitor frame remains within its allowed elapsed age. The
+default reader uses authenticated Stable Time counter evidence from the same
+epoch and frequency, including conservative rate and counter-resolution bounds.
+Missing evidence or lost continuity is stale; guest wall timestamps are display
+metadata and cannot qualify freshness. An authenticated counter can qualify
+elapsed age even when UTC is unavailable.
 
 **Tab responsiveness**:
 The observed ability of the exact terminal interface associated with a tab to
@@ -432,7 +465,7 @@ identifiers can locate observations, whose freshness and uncertainty remain visi
 **Upgrade recovery**:
 Continuing work paused by a specific daemon upgrade from its durable checkpoint,
 under the same authority, remaining allowance, deadline and conversation identity.
-It does not resume work that was already paused or grant new resources.
+It does not resume work that was already paused or grant new resources. Replacing an executable or receiving a successful updater exit does not establish recovery acceptance.
 
 **Recovery acceptance**:
 Durable evidence that one recovery continuation was admitted for an exact upgrade
@@ -527,9 +560,12 @@ The current intent's qualified CLI used only to observe an exact old native
 submission when its saved executable is gone. It never replaces the original
 binding, grants authority, or authorizes submission replay.
 
+**Codex Wake session**:
+A conversation running in the Codex Wake coding harness, independently of its
+inference provider and whether a Governor is active.
+_Avoid_: Grok session as a synonym for harness identity
+
 **Explicit policy registration**:
-The native registration selector `explicit_policy` requires an explicit wake
-lifetime, recipient-startup policy and ordered delivery routes. It selects the
-existing independent policy contract without introducing a session lifecycle
-mode into the persisted target. It can preserve legacy retry identity, but cannot
-remove an existing lifecycle binding or bypass identity and route permissions.
+A native wake registration whose lifetime, recipient startup and ordered delivery
+routes are chosen independently of a session lifecycle preset. A retry retains
+its original policy and permission boundaries.

@@ -7,9 +7,9 @@ import hashlib
 import json
 from pathlib import Path
 import re
-import time
 from uuid import uuid4
 
+from . import measurements
 from .grok_runtime import GrokRuntimeAdapter
 from .grok_terminal import GrokTerminalHost, digest
 from .session_permissions import PermissionDenied
@@ -155,11 +155,15 @@ def dispatch(root, found, *, time_provider=None):
                         record['status']='pending'
                         replace_record(root,current,record)
                         return DispatchResult('requeued','exact Grok recipient not ready')
+                    # Anchor before revalidation and durable intent writes; never renew their latency.
+                    timer=measurements.deadline(verdict['dispatch_window_seconds'])
                     verdict=dispatch_gate(record,provider())
                     if verdict['state']!='due':
                         record.update(status='failed' if verdict['state']=='missed_deadline' else 'pending',time_recovery=verdict)
                         replace_record(root,current,record)
                         return DispatchResult('failed' if record['status']=='failed' else 'requeued',verdict['reason'])
+                    timer.restrict(verdict['dispatch_window_seconds'])
+                    adapter.host.deadline=timer
                     if chosen_route:
                         from .permission_wake import check_route
                         record['permission_check']=check_route(root,record,chosen_route)
@@ -174,7 +178,7 @@ def dispatch(root, found, *, time_provider=None):
                     replace_record(root,current,record)
                     try:
                         if chosen_route:check_route(root,record,chosen_route)
-                        submitted=GrokRuntimeAdapter(adapter.host,deadline=time.monotonic()+verdict['dispatch_window_seconds'], preferred_method=record['target']['method']).submit(recipient,runtime_prompt(record))
+                        submitted=GrokRuntimeAdapter(adapter.host,deadline=timer, preferred_method=record['target']['method']).submit(recipient,runtime_prompt(record))
                     except Exception:
                         return DispatchResult('skipped','runtime submission uncertain; no resend')
                     if chosen_route and submitted.state=='not_sent' and submitted.pre_io is True:
@@ -212,6 +216,10 @@ def dispatch(root, found, *, time_provider=None):
 def add_grok_parser(subparsers):
     group=subparsers.add_parser('grok',help='structured Grok control and explicit legacy terminal wakes')
     commands=group.add_subparsers(dest='grok_command',required=True)
+    from .grok_provider_auth import register_parser as register_auth
+    register_auth(commands)
+    from .grok_model_catalog import register_parser as register_models
+    register_models(commands)
     from .grok_commands import register_verbs
     register_verbs(commands)
     from .grok_stdio_host import register_host
@@ -244,6 +252,12 @@ def add_grok_parser(subparsers):
 
 
 def command(args,root):
+    if args.grok_command == 'models':
+        from .grok_model_catalog import command as models_command
+        return models_command(args, root)
+    if args.grok_command == 'auth':
+        from .grok_provider_auth import command as auth_command
+        return auth_command(args,root)
     if args.grok_command == 'stdio-host':
         from .grok_stdio_host import command as host_command
         return host_command(args,root)

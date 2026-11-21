@@ -84,6 +84,7 @@ def tool_specs():
             'Schedule one exact-self native wake with frozen lifetime/startup policy. Delays may exceed 24 hours; time-wake TTL starts after due. Select persistent lifetime to survive creator completion. Inspect armed/monitor state: retention is not readiness or delivery.',
             dict(caller_thread_id=CALLER, trigger={'type': 'string', 'minLength': 1, 'maxLength': 1024},
                  prompt={'type': 'string', 'minLength': 1, 'maxLength': 32768},
+                 busy_policy={'enum': ['wait', 'queue'], 'default': 'wait'},
                  idempotency_key=TEXT, ttl=dict(TEXT, description='Delivery window after due for time wakes; from registration for file wakes.'), **{**POLICY, 'session_mode': {'enum': ['session_only', 'reopen_live', 'background', 'explicit_policy'], 'description': 'explicit_policy requires explicit wake_lifetime, recipient_startup and routes; preserves existing independent policy contracts.'}}),
             ['caller_thread_id', 'trigger', 'prompt', 'idempotency_key', 'session_mode'], False)
     for verb in ('register', 'list', 'show', 'revise', 'cancel'):
@@ -229,18 +230,29 @@ def call(runner, group, verb, arguments, native_context):
             raise WakeError('invalid_option_prefixed_argument')
         from .cli import run
         argv = ['--wake-root', str(root), 'native', verb, '--endpoint', runner.app_server,
-                '--json', '--idempotency-key', arguments['idempotency_key'], '--ttl', arguments.get('ttl', '24h')]
+                '--json', '--idempotency-key', arguments['idempotency_key'], '--ttl', arguments.get('ttl', '24h'),
+                '--busy-policy', arguments.get('busy_policy', 'wait')]
         for name in POLICY:
             if name=='routes':
                 for route in arguments.get('routes',[]):argv+=['--wake-route',route]
             elif name in arguments:
                 argv += ['--' + name.replace('_', '-'), arguments[name]]
         argv += [caller, arguments['trigger'], '--', arguments['prompt']]
+        # A long-lived MCP process can retain a detached mount as its cwd.
+        # Recover only from the already verified native caller, never tool input.
+        registration_cwd = None
+        try:
+            Path.cwd().resolve()
+        except OSError:
+            registration_cwd = native_workspace(runner, caller)
+            if not registration_cwd.is_dir():
+                raise WakeError('native_workspace_unavailable')
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             from .session_permissions import Principal
             tasks=controller_tasks(runner,caller)
-            code = run(argv,permission_principal=Principal(caller,'controller' if tasks else 'session',tasks=tuple(tasks)))
+            code = run(argv,permission_principal=Principal(caller,'controller' if tasks else 'session',tasks=tuple(tasks)),
+                       registration_cwd=registration_cwd)
         if code:
             raise WakeError('wake_registration_not_ready')
         return json.loads(output.getvalue())

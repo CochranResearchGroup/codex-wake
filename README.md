@@ -36,7 +36,7 @@ caller first-launch MCP bootstrap remains a separate documented limitation.
 The package provides:
 
 - `native after|at|file` for an exact thread, with expiry and explicit same-thread resume.
-- `native reconcile` for uncertain submission and `native migrate` for earlier candidate records.
+- `native reconcile` for uncertain submission or accepted completion evidence, and `native migrate` for earlier candidate records.
 - `sessions list|show|resolve|current|watch|open|close` for discovery and visible tab lifecycle.
 - `sessions configuration|spawn|refresh|handoff` for approved worker tasks, resource reloads and fresh-context continuation.
 - Durable records, installed polling, registered-root supervision, cancellation and archival.
@@ -249,6 +249,15 @@ codex-wake native at --resume-missing THREAD_UUID "2026-10-12T17:30:00-05:00" --
 codex-wake native reconcile WAKE_ID
 codex-wake sessions close thread:THREAD_UUID
 ```
+
+`native reconcile WAKE_ID` also checks accepted submissions for exact native
+terminal evidence. It saves a bound completion receipt that can clear
+`peer_history_reconciliation_required`, preserving the original wake record,
+deadline and acceptance. It never resubmits work. Unfinished or unavailable
+history remains unresolved; repeat with the same wake ID after recovery. When
+the saved historical executable has been removed, select an owned, executable,
+non-writable-by-others reader with `--read-codex-path /absolute/current/codex`.
+This replaces only the observation transport; original targets remain intact.
 
 ### Choose an agent lifecycle operation
 
@@ -1167,15 +1176,26 @@ a different recovery, or silently overwrites another canonical image.
 
 ### Inspect external time on WSL
 
-Run `codex-wake time inspect` to collect a bounded network-time report without
-changing the clock or mailbox. `codex-wake time inspect --offline` shows source
-admission policy without network access. Reports identify the accepted interval,
-its host-counter instant, and each source's exclusion reason. Windows PowerShell
-interop is required; unavailable acquisition returns uncertainty. Network rounds
-are limited to one per 64 seconds across processes, with a two-minute bounded
-cache. Cloudflare/NIST/Alastyr observations are explicitly unauthenticated; Netnod/PTB
-remain disabled pending time-scale qualification. This inspection command does
-not activate deadline effects. See Plan0123 qualification for policy and limits.
+Run `codex-wake time inspect` to read the configured StableTime service without
+changing the clock or mailbox. This service inspection uses its supported HTTP
+API and does not require Wake's separate counter helper or PowerShell interop.
+`measurement_decision` reports finite bounds at `basis: service_measurement`;
+they are not extrapolated with a WSL clock or relabeled as receipt-current bounds.
+`decision` uses the same service instant for Python selection and authorization;
+it does not claim receipt-time accuracy. Default Python clock clients consume
+these observations directly without the auxiliary counter helper. Inspection
+authorizes no dispatch or installed Native readiness. Client configuration,
+transport and invalid-response failures have distinct reasons and do not by
+themselves establish a service outage.
+
+`--offline` avoids acquisition. Without service configuration, the legacy
+external-time inspection path retains its separate admission/interop rules:
+network rounds are limited to one per64seconds with a bounded cache, and
+Cloudflare/NIST/Alastyr plain NTP is explicitly unauthenticated. Netnod/PTB
+admission in that legacy path is separate from StableTime's NTS source policy.
+See Plan0123 for legacy qualification and the
+[StableTime service contract](https://github.com/CochranResearchGroup/stable-time/blob/main/docs/specs/0001-stable-time-v1.md)
+for service measurement uncertainty and delivery-time limits.
 
 ### Opt-in network time (0.8.0)
 
