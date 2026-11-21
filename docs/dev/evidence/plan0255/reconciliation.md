@@ -108,3 +108,8 @@ outside its evidence-only allowlist. P255 explicitly selects bounded local
 documentation validation because the diff contains no executable/dependency/
 workflow changes. The classifier was not weakened and no full-suite pass is
 claimed. Checks, source base and environment differences are in validation.json.
+
+The P253 catalog lane spelling is normalized to `ADJACENT-TABS-716` to match
+the existing auditor's uppercase plan metadata. This is the same planning lane,
+not a new runtime/session identity; its historical lower-case identifier is used
+when comparing inherited audit findings. No runtime target or permission changes.

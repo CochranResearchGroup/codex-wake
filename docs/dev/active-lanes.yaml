@@ -1,7 +1,7 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
-  - id: adjacent-tabs-716
+  - id: ADJACENT-TABS-716
     owner: root / ecochran76
     objective: Reliable adjacent placement before Grok acceptance
     work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/716, https://github.com/CochranResearchGroup/codex-wake/issues/719, https://github.com/CochranResearchGroup/codex-wake/issues/720, https://github.com/CochranResearchGroup/codex-wake/issues/721]

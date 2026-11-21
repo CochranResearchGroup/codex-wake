@@ -1632,7 +1632,7 @@ question/claim/reply remains separate.
 
 ## P213 | Formatting throughput and STALE hardening
 
-[LOCAL-P213](docs/dev/plans/0213-2026-11-09-tab-formatting-throughput.md) OPEN.
+[LOCAL-P213](docs/dev/plans/0213-2026-11-09-tab-formatting-throughput.md) CLOSED by P255.
 Native process churn and per-tab durable saves reproduced/fixed at source; private
 42tab refresh1.143s. Original production rollback/monitor stop preceded PR537 deployment and the
 later P214/P215 display evidence. P216 subsequently records monitor qualification;
@@ -1808,7 +1808,8 @@ PR661 deployed as dev28; original ChatGPT round-trip result now reports complete
 
 ## P241 | External connector acceptance
 
-Status: COMPLETE. All nine childtickets #664–#672 closed from actual deployed acceptance. One final Standards/Spec review and one bounded TDD remediation pass completed; no blocking findings remain. Plan [0241](docs/dev/plans/0241-2026-11-14-connector-acceptance.md), review evidence [0241](docs/dev/evidence/0241-final-review.md). Product repairs merged/deployeddev34; PR676 publishes acceptance artifacts; parent663 unchanged.
+Status: COMPLETE. All nine childtickets #664–#672 closed from actual deployed acceptance. One final Standards/Spec review and one bounded TDD remediation pass completed; no blocking findings remain. Plan [0241](docs/dev/plans/0241-2026-11-14-connector-acceptance.md), review evidence [0241](docs/dev/evidence/0241-final-review.md). Product repairs merged/deployeddev34; PR676 publishes acceptance artifacts; P255 subsequently closes parent663 from
+that accepted evidence.
 
 
 ## P242 | Bounded native history reconciliation
