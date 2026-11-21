@@ -60,8 +60,8 @@ Completion requires equivalent outcomes on all three public surfaces, with backe
 | --- | --- | --- | --- |
 | #744 Create, rename, place, move, and focus | None | primary | validated, tracker closed |
 | #745 Inspect and read or write exact panes | None | pane745 | validated, tracker closed |
-| #746 Formatting overrides | None | format746 | running |
-| #747 Unlink and destroy | #745 | destroy747 | running |
+| #746 Formatting overrides | None | format746 | integrated |
+| #747 Unlink and destroy | #745 | destroy747 | validated |
 
 Primary owns placement, lifecycle and shared client contracts. Pane worker owns capture/input and operation readback. Formatting worker owns per-tab override storage and rendering. Coordinate any shared file hunks with primary and integrate serially. Tests use the existing public paths and dedicated real tabs only.
 
@@ -72,3 +72,11 @@ Primary implementation `37637250cbb3fb62a90a6da583b233a902657cd0`. Explicit shel
 The 31-test source selection passed on Python 3.11 and 3.12. Final installed wheel passed 28 tests over real tmux lifecycle, CLI/MCP, saved profiles, and terminal-session defaults. The existing native psmux acceptance runner passed all seven checks, including installed CLI relative create, MCP reorder without focus change, HTTP focus, native PowerShell access, explicit cross-server refusal, and empty final owned namespace. An initial broader run reached public parity before timing out during close. Its failure is retained with the passing fresh run.
 
 Pane worker source `a2846f18ec934939129d89bb49d7d2ec9151e46c` integrated as `58334e507cdfdfe744f7348f55cb5a7238c97ccf`. Installed parity passed on real tmux and native Windows psmux. The scoped runner verified CLI visible capture and literal paste, MCP exact capture and explicit Enter, and protected controller bounded scrollback. Split and stale pane refusal plus lost-result readback are covered by public regressions.
+
+## Format and destruction checkpoints
+
+Formatting source checkpoints `1d15484b`, `f35c7533`, `e895c89a`, and `0d2be796` are integrated. They add persistent overrides, exact linked appearances and a portable client correction. The current installed Windows frontend rerun is pending.
+
+The destruction worker's `44006a86905cffbafe5b761a2404cabe1944f526` integrated as `f0809ad1` after preserving both schema additions in the shared contract. Existing public tests on real tmux verified unlink with live pane survival, cross-session preview, stale membership refusal, explicit destroy, and lost-result readback without replay. Installed native psmux acceptance passed all eight checks with no remaining owned test sessions. Its native link operation creates an independent window, pane, and process, so a shared unlink is explicitly unavailable there. Exact standalone native destruction passed.
+
+The integrated affected selection (tab contract, controller tabs, lifecycle, CLI, profile create, terminal sessions, native psmux and formatting) passed 62 tests on Python 3.11 and 3.12. Generated unified contract and command coverage were regenerated.
