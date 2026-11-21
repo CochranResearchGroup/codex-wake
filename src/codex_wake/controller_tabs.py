@@ -105,8 +105,8 @@ class ControllerTabs:
             'tabs.preview': {'workspace','expected_target','mode','pins','criteria'},
             'tabs.apply': {'workspace','expected_target','plan_id'},
             'tabs.undo': {'workspace','expected_target','receipt_id'},
-            'tabs.capture': {'workspace','expected_target','pane','lines'},
-            'tabs.input': {'workspace','expected_target','pane','input','custody','transport'},
+            'tabs.capture': {'workspace','expected_target','window','pane','lines'},
+            'tabs.input': {'workspace','expected_target','window','pane','input','custody','transport','mode','keys'},
         }
         if operation not in allowed:
             raise InventoryError('unsupported_operation', 'unsupported attachment operation')
@@ -171,32 +171,28 @@ class ControllerTabs:
                                           observation_holds=rows['holds'],workspace_label=config.get('label',name)))
                 continue
             if operation in ('tabs.input', 'tabs.capture'):
+                pane = self._pane(snapshot, arguments.get('pane'), arguments.get('window'))
                 privacy = config.get('privacy')
-                if privacy is None or privacy(arguments.get('pane')) != 'safe':
+                if privacy is None or privacy(pane) != 'safe':
                     raise InventoryError('presentation_privacy_unknown', 'private input, draft or unqualified privacy prevents content access')
             if operation == 'tabs.input':
-                if not broker or not custody.get('available') or arguments.get('custody') != custody:
-                    raise InventoryError('input_custody_required', 'host broker ownership generation required')
-                mode = arguments.get('transport')
-                if mode not in ('structured', 'terminal') or mode != custody.get('transport'):
-                    raise InventoryError('unsupported_transport', 'fallback requires explicit owned transport selection')
-                text = arguments.get('input')
-                if not isinstance(text, str) or not text or len(text.encode()) > 16384:
-                    raise InventoryError('invalid_argument', 'input must be bounded text')
-                if mode == 'terminal' and ('\n' in text or '\r' in text or '\x1b' in text):
-                    raise InventoryError('invalid_argument', 'terminal fallback permits one literal line')
-                self._pane(snapshot, arguments.get('pane'))
-                return dict(target=target, transport=mode, fallback=mode == 'terminal',
-                            result=broker.send(arguments['pane'], text, expected_custody=custody))
+                result = self._input(broker, custody, pane, arguments)
+                mode = custody['transport']
+                return dict(target=target, pane=pane, transport=mode, fallback=mode == 'terminal', result=result)
             if operation == 'tabs.capture':
-                self._pane(snapshot, arguments.get('pane'))
-                lines = arguments.get('lines', 50)
-                if type(lines) is not int or not 1 <= lines <= 200:
-                    raise InventoryError('invalid_argument', 'capture must be between 1 and 200 lines')
-                if not hasattr(transport, 'capture'):
-                    raise InventoryError('unsupported_target', 'presentation has no bounded capture adapter')
-                text = transport.capture(arguments['pane'], lines, deadline)
-                return dict(target=target, text=text[-32768:], truncated=len(text) > 32768,
+                if 'lines' not in arguments:
+                    capture = getattr(transport, 'visible_screen', None)
+                    if capture is None:
+                        raise InventoryError('unsupported_target', 'presentation has no visible-screen capture adapter')
+                    text = capture(pane, deadline)
+                else:
+                    lines = arguments['lines']
+                    if type(lines) is not int or not 1 <= lines <= 200:
+                        raise InventoryError('invalid_argument', 'scrollback must be between 1 and 200 lines')
+                    if not hasattr(transport, 'capture'):
+                        raise InventoryError('unsupported_target', 'presentation has no bounded capture adapter')
+                    text = transport.capture(pane, lines, deadline)
+                return dict(target=target, pane=pane, text=text[-32768:], truncated=len(text) > 32768,
                             transport='terminal', fallback=True, input_custody=custody)
             owner = TabOrganization(self.root, transport=transport, observer=config.get('observer'),
                                     authorize=lambda action: None)
@@ -242,9 +238,52 @@ class ControllerTabs:
                     presentation='logical',generation=digest(TabViews(self.root)._read()))
 
     @staticmethod
-    def _pane(snapshot, pane):
-        if not any(p['pane_id'] == pane for w in snapshot['windows'] for p in w['panes']):
-            raise InventoryError('stale_target', 'pane is absent from pinned presentation')
+    def _pane(snapshot, pane, window):
+        windows = [row for row in snapshot['windows'] if window is None or row['window_id'] == window]
+        panes = {row['pane_id'] for tab in windows for row in tab['panes']}
+        if pane is not None:
+            if pane not in panes:
+                raise InventoryError('stale_target', 'pane is absent from pinned presentation')
+            return pane
+        if not windows:
+            raise InventoryError('stale_target', 'tab is absent from pinned presentation')
+        if len(windows) != 1 or len(panes) != 1:
+            raise InventoryError('ambiguous_target', 'select an exact pane for this presentation')
+        return next(iter(panes))
+
+    @staticmethod
+    def _input(broker, custody, pane, arguments):
+        from .unified_terminal import KEY_TOKENS
+
+        if not broker or not custody.get('available') or arguments.get('custody') != custody:
+            raise InventoryError('input_custody_required', 'host broker ownership generation required')
+        transport = arguments.get('transport')
+        if transport not in ('structured', 'terminal') or transport != custody.get('transport'):
+            raise InventoryError('unsupported_transport', 'fallback requires explicit owned transport selection')
+        mode = arguments.get('mode')
+        text = arguments.get('input')
+        if transport == 'structured' and mode is None:
+            if 'keys' in arguments or not isinstance(text, str) or not text or len(text.encode()) > 16384:
+                raise InventoryError('invalid_argument', 'input must be bounded text')
+            return broker.send(pane, text, expected_custody=custody)
+        if mode is None:
+            mode = 'paste'
+        if mode not in ('paste', 'keys'):
+            raise InventoryError('invalid_argument', 'input mode must be paste or keys')
+        if transport != 'terminal' or mode not in custody.get('input_modes', []):
+            raise InventoryError('unsupported_transport', 'broker does not support this explicit terminal action')
+        if mode == 'paste' and 'keys' not in arguments:
+            if (not isinstance(text, str) or not text or len(text.encode()) > 16384
+                    or any(ord(char) < 32 or 127 <= ord(char) <= 159 for char in text)):
+                raise InventoryError('invalid_argument', 'paste requires bounded literal text without control characters')
+            return broker.paste(pane, text, expected_custody=custody)
+        if mode == 'keys' and 'input' not in arguments:
+            keys = arguments.get('keys')
+            if (not isinstance(keys, list) or not 1 <= len(keys) <= 32
+                    or any(not isinstance(key, str) or key not in KEY_TOKENS for key in keys)):
+                raise InventoryError('invalid_argument', 'keys requires a bounded list of supported terminal key names')
+            return broker.keys(pane, keys, expected_custody=custody)
+        raise InventoryError('invalid_argument', 'input payload must match the explicit terminal mode')
 
 
 class AuthorizedTabs:

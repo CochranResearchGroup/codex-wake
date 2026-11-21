@@ -18,6 +18,7 @@ import re
 import subprocess
 import sys
 import time
+from uuid import uuid4
 
 
 # Immutable standalone vocabulary: the validator and reader/writer must expose
@@ -221,7 +222,7 @@ def check_private_manifest(path):
 
 
 class PsmuxHost:
-    ACTIONS = {'snapshot', 'discover', 'capture', 'visible_screen', 'swap', 'lifecycle', 'attach_saved', 'formatting', 'formatting_batch', 'session_rename'}
+    ACTIONS = {'snapshot', 'discover', 'capture', 'visible_screen', 'paste', 'keys', 'swap', 'lifecycle', 'attach_saved', 'formatting', 'formatting_batch', 'session_rename'}
 
     def __init__(self, *, namespace, session, server_pid=None, server_birth=None, attach_directory=None):
         if os.name != 'nt':
@@ -246,10 +247,10 @@ class PsmuxHost:
             raise BridgeError('invalid_argument', field + ' must be bounded single-line text')
         return value
 
-    def command(self, *argv, timeout=4):
+    def command(self, *argv, timeout=4, input_text=None):
         try:
             reply = subprocess.run([str(self.binary), '-L', self.namespace, *argv],
-                text=True, encoding='utf-8',capture_output=True, timeout=timeout, check=True)
+                text=True, encoding='utf-8', input=input_text, capture_output=True, timeout=timeout, check=True)
         except (OSError, subprocess.SubprocessError):
             raise BridgeError('attachment_unavailable', 'native psmux command failed; reconcile effects before retry') from None
         if len(reply.stdout.encode()) > 1048576:
@@ -357,15 +358,40 @@ class PsmuxHost:
                 allowed = {'pane', 'lines'} if action == 'capture' else {'pane'}
                 if set(args) != allowed or args.get('pane') not in panes:
                     raise BridgeError('stale_target', 'exact current pane is required')
-                row = next(r for r in rows if r['session_id'] == snapshot['session_id'] and r['pane_id'] == args['pane'])
-                exact_pane = self.session + ':' + row['window_index'] + '.' + row['pane_index']
-                command = ['capture-pane', '-p', '-t', exact_pane]
+                command = ['capture-pane', '-p', '-t', args['pane']]
                 if action == 'capture':
                     lines = args['lines']
                     if type(lines) is not int or not 1 <= lines <= 200:
                         raise BridgeError('invalid_argument', 'capture supports 1 through 200 lines')
                     command += ['-S', '-' + str(lines)]
                 result = self.command(*command)[-32768:]
+            elif action in ('paste', 'keys'):
+                field = 'text' if action == 'paste' else 'keys'
+                pane = args.get('pane')
+                if set(args) != {'pane', field} or not isinstance(pane, str) or pane not in panes:
+                    raise BridgeError('stale_target', 'exact current pane is required')
+                value = args[field]
+                if action == 'paste':
+                    if (not isinstance(value, str) or not value or len(value.encode()) > 16384
+                            or any(ord(char) < 32 or 127 <= ord(char) <= 159 for char in value)):
+                        raise BridgeError('invalid_argument', 'bounded literal text without control characters required')
+                    buffer = 'wake-paste-' + uuid4().hex
+                    try:
+                        self.command('load-buffer', '-b', buffer, '-', input_text=value)
+                        self._current()
+                        self.command('paste-buffer', '-r', '-d', '-b', buffer, '-t', pane)
+                    finally:
+                        try:
+                            self.command('delete-buffer', '-b', buffer)
+                        except BridgeError:
+                            pass
+                else:
+                    if (not isinstance(value, list) or not 1 <= len(value) <= 32 or any(
+                            not isinstance(key, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9-]{0,31}', key)
+                            for key in value)):
+                        raise BridgeError('invalid_argument', 'bounded named terminal keys required')
+                    self.command('send-keys', '-t', pane, '--', *value)
+                result = {'delivery': 'sent', 'semantic_execution': 'unknown'}
             elif action == 'swap':
                 if set(args) != {'first', 'second'} or args.get('first') not in windows or args.get('second') not in windows:
                     raise BridgeError('stale_target', 'exact current windows required')
