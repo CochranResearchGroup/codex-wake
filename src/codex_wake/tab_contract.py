@@ -405,6 +405,22 @@ for _verb in ('status','inspect','enable','pause','resume','rollback','reenable'
         'Inspect or control reversible owned-tab decoration; rollback restores original settings; reenable retains the baseline.',
         _fields,([] if _read else ['expected_target','_request']),_read)
 
+for _verb in ('set', 'inspect', 'clear'):
+    _read = _verb == 'inspect'
+    _fields = {'workspace': {'type': 'string'}, 'window': {'type': 'string'}}
+    _required = ['window']
+    if _verb == 'set':
+        _fields['style'] = {'type': 'object', 'properties': {
+            'foreground': {'type': 'string'}, 'background': {'type': 'string'},
+            'attributes': {'type': 'array', 'items': {'type': 'string', 'enum': ['bold', 'dim', 'underscore', 'reverse']}}},
+            'required': ['foreground', 'background', 'attributes'], 'additionalProperties': False}
+        _required.append('style')
+    if not _read:
+        _fields.update(expected_target={'type': 'object'}, _request={'type': 'object'})
+        _required += ['expected_target', '_request']
+    _SPECS['wake_tabs_format_override_' + _verb] = ('controller-tabs', 'tabs.format.override-' + _verb,
+        'Set, inspect, or clear the persistent style of one exact terminal tab.', _fields, _required, _read)
+
 from .terminal_session_contract import specs as _terminal_specs
 _SPECS.update(_terminal_specs())
 from .bot_family_contract import specs as _family_specs

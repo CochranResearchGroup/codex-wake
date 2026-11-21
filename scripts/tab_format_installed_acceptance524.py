@@ -143,6 +143,25 @@ def main():
                 assert status==200 and value['result']['operation']['reason']=='invalid_argument',value
                 assert command('tabs','format','status','--workspace','work')['policy']==policy_before
             checks.append('authenticated-http-api-and-oauth-mcp-exact-format-controls-and-error-reasons')
+            window=before_identity[0][0]
+            style=dict(foreground='yellow',background='blue',attributes=['bold','underscore'])
+            applied=command('tabs','format','override-set','--workspace','work',
+                            '--window',window,'--style',json.dumps(style))
+            assert result(applied)['override']==style,applied
+            reenabled=command('tabs','format','reenable','--workspace','work')
+            assert result(reenabled)['status']=='applied',reenabled
+            status,value=http('/operations',dict(operation='tabs.format.override-inspect',
+                arguments=dict(workspace='work',window=window)),token)
+            assert status==200 and result(value)['override']==style,value
+            assert result(value)['options']['window-status-style']['effective']=='fg=yellow,bg=blue,bold,underscore',value
+            payload=request('override-clear',dict(window=window))
+            status,value=http('/mcp',dict(jsonrpc='2.0',id=3,method='tools/call',
+                params=dict(name='wake_tabs_format_override_clear',arguments=payload)),token)
+            cleared=value['result']['structuredContent']
+            assert status==200 and result(cleared)['override'] is None,value
+            assert result(command('tabs','format','rollback','--workspace','work'))['status']=='rolled_back'
+            restored()
+            checks.append('installed-cli-api-mcp-tab-override-survives-automatic-style')
             if args.windows_python:
                 windows=qualify_windows(args.windows_python,args.wheel,endpoint,token,request,target)
                 restored();checks.append('actual-native-powershell-installed-cli-api-and-mcp-controls')

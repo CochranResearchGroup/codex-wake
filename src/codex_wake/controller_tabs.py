@@ -12,7 +12,7 @@ from .tab_organization import TabOrganization, TabError, digest
 
 
 class ControllerTabs:
-    READS = frozenset(('tabs.family.list','tabs.family.show','tabs.session.list','tabs.session.show','tabs.relocate.status','tabs.route.list','tabs.route.show','tabs.route.status','tabs.format.status','tabs.format.inspect','tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
+    READS = frozenset(('tabs.family.list','tabs.family.show','tabs.session.list','tabs.session.show','tabs.relocate.status','tabs.route.list','tabs.route.show','tabs.route.status','tabs.format.status','tabs.format.inspect','tabs.format.override-inspect','tabs.list','tabs.show','tabs.view-list','tabs.view-show','tabs.view-evaluate','tabs.group-list','tabs.group-show','tabs.monitor.status','tabs.monitor.refresh','tabs.policy.status','tabs.recovery.preview','tabs.recovery.status','tabs.reattach-status'))
     MUTATIONS = frozenset(('tabs.preview', 'tabs.apply', 'tabs.undo', 'tabs.capture', 'tabs.input'))
 
     def __init__(self, root, *, workspaces, host, environment, host_managed=False, observation_cache=None):
@@ -284,6 +284,18 @@ class AuthorizedTabs:
             return current
         def dispatch(operation,payload):
             if operation=='tabs.create':return self.tabs.create_tab(payload,defaults_resolved=True)
+            if operation in ('tabs.format.override-set', 'tabs.format.override-clear'):
+                from .tab_formatting import TabFormatting
+                def authorize_linked(appearances):
+                    current = authorize()
+                    if current.issuer.startswith('local://uid/'):
+                        return
+                    if any(not any(required <= scope.keys() and all(
+                            appearance.get(key) == value for key, value in scope.items())
+                            for scope in current.targets) for appearance in appearances):
+                        raise AuthError('insufficient_scope')
+                return TabFormatting(self.tabs.root, tabs=self.tabs).override(
+                    operation.removeprefix('tabs.format.'), payload, authorize_linked=authorize_linked)
             return self.tabs.execute(operation,payload)
         return self.runtime.execute(actor, operation, arguments, authorize=authorize, dispatch=dispatch)
 
