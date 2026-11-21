@@ -1,8 +1,12 @@
 # Plan 0262 | Autonomous upgrade owner port
 
-State: OPEN. Owner: primary / ecochran76. Work item: #737.
+State: OPEN
+Owner: primary / ecochran76
+Work item: #737
 Integration branch: feat/issue-737-upgrade-owner. Base: ec412b151f82b76a70bd993e488eacc7c1b602f3.
 Historical accepted source: PR #454 at ef156ba466f83e7adb692be248379f857c1157fe.
+
+## Current State
 
 Port the accepted durable upgrade owner to current controller authorization, release and package contracts. Preserve existing build operations and StableTime authority. The GitHub spec and ticket acceptance criteria govern scope. Working-host deployment and historical job replay are out of scope.
 
