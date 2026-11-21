@@ -76,6 +76,7 @@ def qualify_public(state,source,holding,windows_python):
     service=ControllerOperations(ManagedInventory(root),host=owner.host,environment=owner.environment,tabs=owner)
     server=ControllerHTTPServer(('127.0.0.1',0),authority,service)
     thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+    destroy_submitted = False
     try:
         target=next(r['target'] for r in cli('list')['resources'] if r['target']['workspace']=='source')
         focus=dict(workspace='source',window=wid,expected_target=target,
@@ -106,9 +107,36 @@ def qualify_public(state,source,holding,windows_python):
         assert values['api']['result']['resources']
         assert values['mcp']['result']['structuredContent']['result']['resources']
 
+        target = next(r['target'] for r in cli('list')['resources'] if r['target']['workspace'] == 'source')
+        payload = dict(workspace='source', window=wid, expected_target=target)
+        def intent(request_id):
+            return dict(operation_id=request_id, idempotency_key=request_id, correlation_id=request_id,
+                        binding='fixture', target=target)
+
+        preview, failed = CommandRunner(wake_root=root).call('wake_tabs_destroy',
+            dict(payload, preview=True, _request=intent('destroy-preview')))
+        operation = preview['result']['operation']
+        assert not failed and operation['execution'] == 'completed', preview
+        impact = operation['result']
+        assert impact['affected_sessions'] and impact['pane_ids'], impact
+        cli_preview = cli('destroy', '--workspace', 'source', '--window', wid, '--dry-run')
+        assert cli_preview['result']['operation']['result']['confirmation'] == impact['confirmation']
+        unlink, _ = CommandRunner(wake_root=root).call('wake_tabs_unlink',
+            dict(payload, _request=intent('native-unlink-unsupported')))
+        assert unlink['result']['operation']['reason'] == 'unsupported_target', unlink
+        body = json.dumps(dict(operation='tabs.destroy', arguments=dict(payload,
+            confirmation=impact['confirmation'], _request=intent('destroy-exact-native')))).encode()
+        request = Request('http://127.0.0.1:' + str(server.server_address[1]) + '/operations',
+                          data=body, headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + access})
+        destroy_submitted = True
+        with urlopen(request, timeout=25) as response:
+            result = json.load(response)
+        assert result['result']['operation']['execution'] == 'completed', result
+        assert not any(window['window_id'] == wid for window in source.snapshot(time.monotonic() + 15)['windows'])
     finally:
         server.shutdown();server.server_close();thread.join(timeout=5)
-        cli('close','--workspace','source','--window',wid,'--force')
+        if not destroy_submitted:
+            cli('close','--workspace','source','--window',wid,'--force')
     return True
 
 
@@ -199,6 +227,7 @@ def main():
         checks.append('unsupported-action-and-replaced-process-generation-refused')
         assert qualify_public(args.state,source,holding,python)
         checks.append('installed-wake-cli-http-native-mcp-and-actual-powershell')
+        checks.append('installed-confirmed-destroy-and-explicit-native-unlink-refusal')
         closed = invoke(source, 'close', dict(window=wid))
         assert not any(w['window_id'] == wid for w in closed['snapshot']['windows'])
         native('stop', namespace)

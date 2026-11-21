@@ -429,6 +429,20 @@ for _verb in ('set', 'inspect', 'clear'):
         _required += ['expected_target', '_request']
     _SPECS['wake_tabs_format_override_' + _verb] = ('controller-tabs', 'tabs.format.override-' + _verb,
         'Set, inspect, or clear the persistent style of one exact terminal tab.', _fields, _required, _read)
+for _verb, _summary in (
+    ('destroy', 'Preview and explicitly destroy all appearances and panes of an exact tab.'),
+    ('unlink', 'Remove only the selected appearance of a tab that remains linked elsewhere.'),
+):
+    _fields = {'workspace': {'type': 'string'}, 'window': {'type': 'string'},
+               'expected_target': {'type': 'object'}, '_request': {'type': 'object'}}
+    if _verb == 'destroy':
+        _fields.update(preview={'type': 'boolean'}, confirmation={'type': 'string',
+                       'description': 'Exact confirmation returned by the current destruction preview.'})
+    else:
+        _fields['index'] = {'type': 'integer', 'minimum': 0,
+                            'description': 'Exact index when a tab appears more than once in the selected session.'}
+    _SPECS['wake_tabs_' + _verb] = ('controller-tabs', 'tabs.' + _verb, _summary,
+                                     _fields, ['workspace', 'window', 'expected_target', '_request'], False)
 
 from .terminal_session_contract import specs as _terminal_specs
 _SPECS.update(_terminal_specs())
