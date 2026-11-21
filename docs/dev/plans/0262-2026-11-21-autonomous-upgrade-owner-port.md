@@ -13,8 +13,8 @@ Port the accepted durable upgrade owner to current controller authorization, rel
 | Ticket | Blocked by | Owner | State |
 | --- | --- | --- | --- |
 | #738 Durable upgrade lifecycle | None | primary | validated, tracker closed |
-| #739 Repair and qualification | #738 | repair739 + primary | validated |
-| #740 Future-launch selection and rollback | #739 | promotion740 | ready |
+| #739 Repair and qualification | #738 | repair739 + primary | validated, tracker closed |
+| #740 Future-launch selection and rollback | #739 | promotion740 | running |
 
 The primary owns lifecycle, discovery, public adapters and shared job schema. Repair owns source preparation, repair and qualification. Promotion owns selection, rollback and outcome reconciliation. Integrate serially. The integration worktree protects the existing primary edits and can retire after validated custody.
 
@@ -43,3 +43,5 @@ Wsl-test UID1000 consumed the existing Windows StableTime service. Retained 0.16
 Fresh independent package reads and probes are retained under the disposable `upgrade739-current-main` lab as `metadata-02.json` and `native-probe-02.json`. The designated A-B-A metadata journey observed distinct accounts and the original account after reconnect. All 11 installed native checks passed, including three-home visibility, reconnect, failed start, ownership and compatible rollback. Zero external provider or model requests, zero surviving owned processes. The earlier failed history receipt is retained. The harness now uses native turn completion and a metadata-only thread read for the older baseline.
 
 This qualification reused the exact previously built package and ran fresh installed checks against the current port. The old durable job and selected build were left alone. Public selection and outcome-only reconciliation belong to #740.
+
+The tracker readback confirmed #739 CLOSED. Worker `/root/promotion740` owns #740 from `97e030557968d51488b48d1048ba1759dad318bd`. Its disposable lane uses a new catalog and retained exact packages. Public owner reconciliation, installed selection, and tracker closure have separate evidence.
