@@ -506,10 +506,40 @@ class PsmuxHost:
         self._window_receipt(window).write_text(json.dumps(dict(intent=args['intent'], **result)))
         return result
 
+    @staticmethod
+    def _relative_placement(args, windows, moving):
+        position = args.get('position')
+        anchor = args.get('anchor')
+        if position is None and anchor is None:
+            return None
+        if position not in ('first', 'last', 'before', 'after'):
+            raise BridgeError('invalid_argument', 'valid relative placement is required')
+        remaining = sorted((window for window in windows.values() if window['window_id'] != moving),
+                           key=lambda window: window['index'])
+        if position in ('before', 'after'):
+            if anchor == moving and moving is not None:
+                raise BridgeError('invalid_argument', 'a tab cannot anchor its own move')
+            if not isinstance(anchor, str) or anchor not in windows:
+                raise BridgeError('stale_target', 'exact current anchor tab is required')
+            target = windows[anchor]
+        else:
+            if anchor is not None:
+                raise BridgeError('invalid_argument', 'first and last do not take an anchor')
+            if not remaining:
+                return None
+            target = remaining[0] if position == 'first' else remaining[-1]
+        after = position in ('last', 'after')
+        if moving is not None:
+            expected = remaining.copy()
+            expected.insert(remaining.index(target) + int(after), windows[moving])
+            if expected == sorted(windows.values(), key=lambda window: window['index']):
+                return None
+        return ('-a' if after else '-b', target['index'])
+
     def _lifecycle(self, args, snapshot, rows):
         allowed = {
-            'create': {'name', 'cwd'}, 'rename': {'window', 'name'}, 'focus': {'window'}, 'close': {'window'},
-            'move': {'window', 'destination_session', 'index'}, 'park': {'window', 'destination_session', 'index'},
+            'create': {'name', 'cwd', 'position', 'anchor'}, 'rename': {'window', 'name'}, 'focus': {'window'}, 'close': {'window'},
+            'move': {'window', 'destination_session', 'index', 'position', 'anchor'}, 'park': {'window', 'destination_session', 'index'},
             'restore': {'window', 'destination_session', 'index'},
         }
         action = args.get('action')
@@ -525,8 +555,15 @@ class PsmuxHost:
             if any(w['name'] == name and w['window_id'] != wid for w in windows.values()):
                 raise BridgeError('name_conflict', 'destination already has that tab name')
         if action == 'create':
-            command = ['new-window', '-d', '-P', '-F', '#{window_id}', '-t', destination + ':', '-n', name]
+            relative = self._relative_placement(args, windows, None)
+            flags = [relative[0], '-t', self.session + ':' + str(relative[1])] if relative else ['-t', destination + ':']
+            command = ['new-window', '-d', '-P', '-F', '#{window_id}', *flags, '-n', name]
             wid = self.command(*command, *_launch_arguments(args)).strip()
+        elif action == 'move' and 'position' in args and 'destination_session' not in args:
+            relative = self._relative_placement(args, windows, wid)
+            if relative:
+                self.command('move-window', '-d', relative[0], '-s', self.session + ':' + str(windows[wid]['index']),
+                             '-t', self.session + ':' + str(relative[1]))
         elif action == 'rename':
             self.command('rename-window', '-t', self.session + ':' + wid, name)
         elif action == 'focus':

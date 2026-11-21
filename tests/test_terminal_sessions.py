@@ -135,4 +135,8 @@ class TerminalSessionTests(unittest.TestCase):
                 self.assertEqual(actual_cwd,str(cwd))
                 pid=result['window']['panes'][0]['pid']
                 self.assertIn(b'/bin/sleep',(Path('/proc')/str(pid)/'cmdline').read_bytes())
+                shell = operator_execute('tabs.create', {'workspace': session['workspace'], 'name': 'shell',
+                    'shell': True}, root, owner=tabs, request_id='default-shell')['result']['operation']['result']
+                shell_pane = shell['window']['panes'][0]
+                self.assertNotIn(b'/bin/sleep', (Path('/proc') / str(shell_pane['pid']) / 'cmdline').read_bytes())
             finally:subprocess.run(['tmux','-S',sock,'kill-server'],capture_output=True)

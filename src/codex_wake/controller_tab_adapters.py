@@ -121,9 +121,9 @@ class PsmuxAttachmentTransport:
 
     def lifecycle(self, action, arguments, deadline):
         allowed = {
-            'create': {'name', 'cwd'}, 'rename': {'window', 'name'},
+            'create': {'name', 'cwd', 'position', 'anchor'}, 'rename': {'window', 'name'},
             'focus': {'window'}, 'close': {'window'},
-            'move': {'window', 'destination_session', 'index'},
+            'move': {'window', 'destination_session', 'index', 'position', 'anchor'},
             'park': {'window', 'destination_session', 'index'},
             'restore': {'window', 'destination_session', 'index'},
         }

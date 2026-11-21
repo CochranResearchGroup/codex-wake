@@ -45,7 +45,7 @@ def qualify_public(state,source,holding,windows_python):
         return json.loads(p.stdout)
     listing=cli('list')
     assert all(p['platform']=='windows' for r in listing['resources'] for p in r['traits']['panes'])
-    created=cli('create','--workspace','source','--name','public-509')['result']['operation']
+    created=cli('create','--workspace','source','--name','public-509','--position','first')['result']['operation']
     assert created['execution']=='completed',created
     wid=created['result']['window']['window_id']
     target=next(r['target'] for r in cli('list')['resources'] if r['target']['workspace']=='source')
@@ -53,6 +53,19 @@ def qualify_public(state,source,holding,windows_python):
     payload['_request']=dict(operation_id='public-rename',idempotency_key='public-rename',correlation_id='public-rename',binding='fixture',target=target)
     renamed,failed=CommandRunner(wake_root=root).call('wake_tabs_rename',payload)
     assert not failed and renamed['result']['operation']['execution']=='completed',renamed
+    before = source.snapshot(time.monotonic() + 15)
+    assert sorted(before['windows'], key=lambda window: window['index'])[0]['window_id'] == wid
+    expected_focus = next(window['window_id'] for window in before['windows'] if window['focused'])
+    target = next(r['target'] for r in cli('list')['resources'] if r['target']['workspace']=='source')
+    move = dict(workspace='source', destination='source', window=wid, position='last',
+                expected_target=target, expected_destination=target,
+                _request=dict(operation_id='public-order', idempotency_key='public-order',
+                              correlation_id='public-order', binding='fixture', target=target))
+    moved, failed = CommandRunner(wake_root=root).call('wake_tabs_move', move)
+    assert not failed and moved['result']['operation']['execution'] == 'completed', moved
+    after = source.snapshot(time.monotonic() + 15)
+    assert sorted(after['windows'], key=lambda window: window['index'])[-1]['window_id'] == wid
+    assert next(window['window_id'] for window in after['windows'] if window['focused']) == expected_focus
     owner=controller_tabs_from_root(root)
     authority=OAuthAuthority(root/'auth.sqlite',issuer='http://127.0.0.1',resource='http://127.0.0.1/controller')
     client=authority.register(dict(redirect_uris=['http://127.0.0.1/callback']))

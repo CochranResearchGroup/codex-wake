@@ -19,10 +19,10 @@ from .tab_identity import stable_snapshot, stable_panes
 class TabLifecycle:
     READS = frozenset()
     ARGUMENTS = {
-        'tabs.create': {'workspace', 'expected_target', 'name', 'cwd', 'profile', 'argv', 'preview'},
+        'tabs.create': {'workspace', 'expected_target', 'name', 'cwd', 'profile', 'argv', 'preview', 'position', 'anchor'},
         'tabs.rename': {'workspace', 'expected_target', 'window', 'name', 'preview'},
         'tabs.focus': {'workspace', 'expected_target', 'window', 'preview'},
-        'tabs.move': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'index', 'force', 'preview'},
+        'tabs.move': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'index', 'force', 'preview', 'position', 'anchor'},
         'tabs.park': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'force', 'preview'},
         'tabs.restore': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'receipt_id', 'force', 'preview'},
         'tabs.close': {'workspace', 'expected_target', 'window', 'force', 'preview'},
@@ -139,6 +139,35 @@ class TabLifecycle:
         with self.records.locked(deadline):
             return self._execute(operation, args, deadline)
 
+    def _placement(self, snapshot, args, *, moving=None):
+        """Resolve relative placement against the pinned destination roster."""
+        position = args.get('position')
+        anchor = args.get('anchor')
+        if position is None:
+            if anchor is not None:
+                raise InventoryError('invalid_argument', 'anchor requires before or after placement')
+            return None
+        if position not in ('first', 'last', 'before', 'after') or 'index' in args:
+            raise InventoryError('invalid_argument', 'choose one relative position or absolute index')
+        ordered = sorted(snapshot['windows'], key=lambda window: window['index'])
+        if position in ('before', 'after'):
+            target = self._window(snapshot, anchor)
+            if moving is not None and target['window_id'] == moving['window_id']:
+                raise InventoryError('invalid_argument', 'a tab cannot anchor its own move')
+        else:
+            if anchor is not None:
+                raise InventoryError('invalid_argument', 'first and last placement do not take an anchor')
+            target = ordered[0] if position == 'first' else ordered[-1]
+        after = position in ('last', 'after')
+        if moving is None:
+            return ('-a' if after else '-b', target['window_id'])
+        remaining = [window for window in ordered if window['window_id'] != moving['window_id']]
+        if position in ('first', 'last'):
+            offset = 0 if position == 'first' else len(remaining)
+        else:
+            offset = remaining.index(target) + int(after)
+        return ordered[offset]['index']
+
     def _execute(self, operation, args, deadline):
         workspace = args.get('workspace')
         before = self.inspect(workspace, deadline=deadline)
@@ -158,6 +187,7 @@ class TabLifecycle:
         name = self._name(args.get('name')) if operation in ('tabs.create', 'tabs.rename') else window['name']
         destination, after_destination = None, None
         placement = None
+        relative = self._placement(snapshot, args) if operation == 'tabs.create' else None
         reasons, affected = [], []
         if operation in ('tabs.create', 'tabs.rename'):
             self._collision(snapshot, name, except_window=window['window_id'] if window else None)
@@ -172,9 +202,7 @@ class TabLifecycle:
             reasons, affected = self._protection(config, window, deadline)
             if window.get('linked'):
                 raise InventoryError('tab_protected', 'linked tabs require explicit unlink ownership; refusing whole-tab operation')
-            already_placed = (operation == 'tabs.move' and args.get('destination') == workspace
-                              and args.get('index') == window['index'])
-            if reasons and not already_placed and not args.get('force') and not args.get('preview'):
+            if operation != 'tabs.move' and reasons and not args.get('force') and not args.get('preview'):
                 raise InventoryError('tab_protected', 'tab is protected: ' + ', '.join(reasons))
         if operation in ('tabs.move', 'tabs.park', 'tabs.restore'):
             destination = args.get('destination')
@@ -187,11 +215,17 @@ class TabLifecycle:
                     or getattr(other['transport'], 'socket', None) != transport.socket):
                 raise InventoryError('unsupported_target', 'whole-process moves require the same terminal server')
             same_session = destination == workspace
-            if same_session and (operation != 'tabs.move' or 'index' not in args):
+            if same_session and (operation != 'tabs.move' or ('index' not in args and 'position' not in args)):
                 raise InventoryError('invalid_argument', 'same-session placement requires tabs.move and an explicit index')
             if not same_session and len(snapshot['windows']) == 1:
                 raise InventoryError('tab_protected', 'moving the last tab would destroy its source session; retain another tab first')
             index = args.get('index')
+            if operation == 'tabs.move':
+                selected = self._placement(after_destination['snapshot'], args, moving=window if same_session else None)
+                if same_session and selected is not None:
+                    index = selected
+                elif not same_session:
+                    relative = selected
             if operation == 'tabs.restore':
                 original = self.records.read(args.get('receipt_id'))
                 if (original.get('action') != 'tabs.park' or original.get('status') != 'applied'
@@ -223,6 +257,9 @@ class TabLifecycle:
                     raise InventoryError('tab_protected', 'placement would displace protected tabs: ' + ', '.join(reasons))
             else:
                 self._collision(after_destination['snapshot'], name, index=index)
+            if operation == 'tabs.move' and reasons and not args.get('force') and not args.get('preview'):
+                if not same_session or index != window['index']:
+                    raise InventoryError('tab_protected', 'tab is protected: ' + ', '.join(reasons))
         profile_owner=None
         if operation=='tabs.create' and args.get('profile'):
             from .tab_profile_create import TabProfileCreate
@@ -259,13 +296,14 @@ class TabLifecycle:
                 def guard():
                     if self.inspect(workspace,deadline=deadline)['target']!=before['target']:
                         raise InventoryError('stale_target','Destination changed before profile launch.')
-                selected=profile_owner.create(args['profile'],transport=transport,name=name,cwd=str(cwd),deadline=deadline,guard=guard)
+                selected=profile_owner.create(args['profile'],transport=transport,name=name,cwd=str(cwd),deadline=deadline,guard=guard,placement=relative)
                 receipt.update(status=selected['status'],profile_target=selected.get('profile_target'),observed_window=selected.get('window'),profile_intent=selected.get('intent'))
                 self.records.save(receipt_id,receipt)
                 return dict(selected,target=before['target'],receipt_id=receipt_id,action=operation)
             if operation == 'tabs.create':
+                flags = [relative[0], '-t', transport.session + ':' + relative[1]] if relative else ['-t', transport.session + ':']
                 wid = transport.command(deadline, 'new-window', '-d', '-P', '-F', '#{window_id}',
-                    '-t', transport.session + ':', '-n', name, '-c', str(cwd), *(['--',*args['argv']] if args.get('argv') else [])).strip()
+                    *flags, '-n', name, '-c', str(cwd), *(['--',*args['argv']] if args.get('argv') else [])).strip()
             else:
                 wid = window['window_id']
                 if operation == 'tabs.rename':
@@ -282,7 +320,8 @@ class TabLifecycle:
                 else:
                     target_session = self.workspaces[destination]['transport'].session
                     position = str(index) if index is not None else ''
-                    transport.command(deadline, 'move-window', '-d', '-s', wid, '-t', target_session + ':' + position)
+                    flags = [relative[0], '-t', target_session + ':' + relative[1]] if relative else ['-t', target_session + ':' + position]
+                    transport.command(deadline, 'move-window', '-d', '-s', wid, *flags)
             if placement is not None:
                 focused = next((w['window_id'] for w in snapshot['windows'] if w['focused']), None)
                 if focused:
@@ -348,14 +387,21 @@ class TabLifecycle:
             destination=self.inspect(args.get('destination'),deadline=deadline)
             if args.get('expected_destination')!=destination['target']:
                 raise InventoryError('stale_target','Destination changed; refresh before moving.')
-            raise InventoryError('unsupported_target','psmux whole-window cross-session movement is unsupported; source preserved.')
+            if action != 'move' or args['destination'] != workspace or 'position' not in args:
+                raise InventoryError('unsupported_target','psmux supports relative moves within one terminal session.')
+            self._placement(snapshot, args, moving=window)
         if window and window.get('linked'):
             raise InventoryError('tab_protected','Linked native windows require explicit unlink ownership.')
         payload={} if window is None else dict(window=window['window_id'])
         if action in ('create','rename'):
             payload['name']=self._name(args.get('name'))
             self._collision(snapshot,payload['name'],except_window=window['window_id'] if window else None)
-        if action=='create' and 'cwd' in args:payload['cwd']=args['cwd']
+        if action == 'create':
+            self._placement(snapshot, args)
+            if 'cwd' in args:
+                payload['cwd'] = args['cwd']
+        if action in ('create', 'move'):
+            payload.update({key: args[key] for key in ('position', 'anchor') if key in args})
         reasons=['native_work_unknown'] if action=='close' else []
         if action=='close' and not args.get('force') and not args.get('preview'):
             raise InventoryError('tab_protected','Native Windows work state is unknown; explicit --force is required to close this tab.')
