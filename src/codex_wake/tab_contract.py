@@ -47,6 +47,7 @@ _SPECS = {'wake_tabs_apply': ('controller-tabs',
                        'name': {'type': 'string'},
                        'preview': {'type': 'boolean'},
                        'shell': {'type': 'boolean'},
+                       'saved_defaults': {'type': 'boolean'},
                        'position': {'type': 'string', 'enum': ['first', 'last', 'before', 'after']},
                        'anchor': {'type': 'string'},
                        'workspace': {'type': 'string'}},
@@ -451,7 +452,8 @@ _SPECS.update(_family_specs())
 _SPECS['wake_tabs_group_save'][3]['labels']={'type':'array','maxItems':32,'items':{'type':'string'}}
 
 _FIELD_HELP = {
-    'shell':'Use the destination default shell even when a saved launch default exists.',
+    'shell':'Launch the destination default shell explicitly.',
+    'saved_defaults':'Use a saved launch profile or command default when present.',
     'position':'First, last, before, or after placement in the destination session.',
     'anchor':'Exact native destination tab ID for before or after placement.',
     'destination':'Destination terminal session name or stable ID; compatible backend/server required.',

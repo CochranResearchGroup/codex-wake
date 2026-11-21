@@ -87,6 +87,18 @@ class FormattingScopeTests(unittest.TestCase):
                                       correlation_id=request_id, binding='scope-test', target=pin)))['result']['operation']
                 self.assertEqual(set_style('linked-source-only', scopes[:1])['reason'], 'insufficient_scope')
                 self.assertEqual(tmux('show-options', '-w', '-v', '-t', '@0', 'window-status-style'), '')
+                transport = workspaces['work']['transport']
+                original_formatting = transport.formatting
+                def change_links(action, arguments, deadline):
+                    value = original_formatting(action, arguments, deadline)
+                    if action == 'read':
+                        tmux('link-window', '-s', 'work:0', '-t', 'other:7')
+                    return value
+                transport.formatting = change_links
+                self.assertEqual(set_style('changed-links', scopes)['reason'], 'stale_target')
+                self.assertEqual(tmux('show-options', '-w', '-v', '-t', '@0', 'window-status-style'), '')
+                transport.formatting = original_formatting
+                tmux('unlink-window', '-t', 'other:7')
                 accepted = set_style('linked-all-scopes', scopes)
                 self.assertEqual(accepted['execution'], 'completed', accepted)
                 inspected = tabs.execute('tabs.format.override-inspect', dict(workspace='other', window='@0'))

@@ -123,7 +123,9 @@ def qualify_public(state,source,holding,windows_python):
         assert cli_preview['result']['operation']['result']['confirmation'] == impact['confirmation']
         unlink, _ = CommandRunner(wake_root=root).call('wake_tabs_unlink',
             dict(payload, _request=intent('native-unlink-unsupported')))
-        assert unlink['result']['operation']['reason'] == 'unsupported_target', unlink
+        declined = unlink['result']['operation']
+        assert declined['phase'] == 'terminal' and declined['result']['status'] == 'unsupported', unlink
+        assert declined['result']['reason'] == 'unsupported_target', unlink
         body = json.dumps(dict(operation='tabs.destroy', arguments=dict(payload,
             confirmation=impact['confirmation'], _request=intent('destroy-exact-native')))).encode()
         request = Request('http://127.0.0.1:' + str(server.server_address[1]) + '/operations',

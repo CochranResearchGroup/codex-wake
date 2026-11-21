@@ -2279,7 +2279,8 @@ usage: codex-wake tabs create [-h] [--arguments ARGUMENTS] [--json]
                               [--expected-target EXPECTED_TARGET]
                               [--name NAME]
                               [--position {first,last,before,after}]
-                              [--dry-run] [--profile PROFILE] [--shell]
+                              [--dry-run] [--profile PROFILE]
+                              [--saved-defaults] [--shell]
                               [--workspace WORKSPACE]
                               [--session SESSION_SELECTOR]
                               [--server SESSION_SERVER]
@@ -2313,8 +2314,9 @@ options:
   --profile PROFILE     Existing account/profile selector or alias; host
                         registry selects build and home. Unsupported backends
                         remain held; no shell fallback.
-  --shell               Use the destination default shell even when a saved
-                        launch default exists.
+  --saved-defaults      Use a saved launch profile or command default when
+                        present.
+  --shell               Launch the destination default shell explicitly.
   --workspace WORKSPACE
                         Workspace ID or unique label from tabs list; same-user
                         CLI can select its only workspace.
@@ -2336,6 +2338,7 @@ Examples:
 | `name` | yes | name. |
 | `preview` | no | Show/save the frozen selection without native copying or daemon starts. |
 | `shell` | no | shell. |
+| `saved_defaults` | no | saved defaults. |
 | `position` | no | position. |
 | `anchor` | no | anchor. |
 | `workspace` | yes | workspace. |

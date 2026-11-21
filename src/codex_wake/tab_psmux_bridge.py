@@ -596,7 +596,7 @@ class PsmuxHost:
             expected.insert(remaining.index(target) + int(after), windows[moving])
             if expected == sorted(windows.values(), key=lambda window: window['index']):
                 return None
-        return ('-a' if after else '-b', target['index'])
+        return ('-a' if after else '-b', target['window_id'])
 
     def _lifecycle(self, args, snapshot, rows):
         allowed = {
@@ -611,6 +611,7 @@ class PsmuxHost:
         wid = args.get('window')
         if action != 'create' and wid not in windows:
             raise BridgeError('stale_target', 'exact current source window is required')
+        relative = None
         destination = snapshot['session_id']
         if action in ('create', 'rename'):
             name = self._text(args.get('name'), 'name')
@@ -624,7 +625,7 @@ class PsmuxHost:
         elif action == 'move' and 'position' in args and 'destination_session' not in args:
             relative = self._relative_placement(args, windows, wid)
             if relative:
-                self.command('move-window', '-d', relative[0], '-s', self.session + ':' + str(windows[wid]['index']),
+                self.command('move-window', '-d', relative[0], '-s', self.session + ':' + wid,
                              '-t', self.session + ':' + str(relative[1]))
         elif action == 'rename':
             self.command('rename-window', '-t', self.session + ':' + wid, name)
@@ -648,6 +649,20 @@ class PsmuxHost:
                 raise BridgeError('effect_uncertain', 'closed tab remains visible')
         elif after is None or not any(w['window_id'] == wid for w in after['windows']):
             raise BridgeError('effect_uncertain', 'destination attachment was not observed')
+        if relative:
+            previous_order = [row['window_id'] for row in sorted(windows.values(), key=lambda row: row['index'])]
+            expected = [window for window in previous_order if window != wid]
+            expected.insert(expected.index(relative[1]) + int(relative[0] == '-a'), wid)
+            actual = sorted(after['windows'], key=lambda row: row['index'])
+            def pane_births(window):
+                return [(pane['pane_id'], pane.get('pid'), pane.get('windows_creation_filetime'))
+                        for pane in window['panes']]
+            if ([row['window_id'] for row in actual] != expected
+                    or {row['window_id'] for row in actual if row['focused']}
+                       != {row['window_id'] for row in windows.values() if row['focused']}
+                    or any(pane_births(row) != pane_births(windows[row['window_id']])
+                           for row in actual if row['window_id'] in windows)):
+                raise BridgeError('effect_uncertain', 'native placement, pane identity, or focus did not match readback')
         return dict(window_id=wid, workspace_state='present' if present else 'removed', snapshot=after)
 
 

@@ -188,7 +188,9 @@ class TabLifecycle:
         transport = config['transport']
         if config['kind'] == 'psmux':
             if operation == 'tabs.unlink' or window.get('linked'):
-                raise InventoryError('unsupported_target', 'native Windows shared terminal links are unavailable')
+                return dict(status='unsupported', reason='unsupported_target',
+                            message='Native Windows shared terminal links are unavailable.',
+                            target=before['target'], window=window['window_id'])
             appearances = [dict(session_id=before['snapshot']['session_id'], index=window['index'])]
         elif config['kind'] in ('tmux', 'byobu'):
             appearances = self._appearances(transport, window['window_id'], deadline)

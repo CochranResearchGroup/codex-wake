@@ -208,17 +208,23 @@ class TabFormatting:
                 raise InventoryError('stale_target', 'Exact tab was not found.')
             if verb != 'override-inspect' and arguments.get('expected_target') != target:
                 raise InventoryError('stale_target', 'Presentation changed before formatting.')
-            if verb != 'override-inspect' and selected.get('linked'):
-                appearances = self.linked_targets(lifecycle, selected, snapshot, target, deadline)
-                if appearances:
-                    if authorize_linked is None:
-                        raise InventoryError('insufficient_scope', 'Linked tab style requires control of every appearance.')
-                    authorize_linked(appearances)
             state = self.read()
             overrides = state.setdefault('tab_overrides', {})
             key = self.override_key(snapshot, window)
             saved = overrides.get(key)
             options = transport.formatting('read', dict(window=window), deadline)
+            if verb != 'override-inspect':
+                fresh = lifecycle.inspect(workspace, deadline=deadline)
+                current = next((row for row in fresh['snapshot']['windows'] if row['window_id'] == window), None)
+                if (current is None or self.presentation_target(fresh) != target
+                        or current.get('linked_appearances') != selected.get('linked_appearances')):
+                    raise InventoryError('stale_target', 'Tab identity or linked appearances changed before formatting.')
+                if current.get('linked'):
+                    appearances = self.linked_targets(lifecycle, current, fresh['snapshot'], target, deadline)
+                    if appearances:
+                        if authorize_linked is None:
+                            raise InventoryError('insufficient_scope', 'Linked tab style requires control of every appearance.')
+                        authorize_linked(appearances)
             if verb == 'override-set':
                 native_style = ','.join([f"fg={style['foreground']}", f"bg={style['background']}", *style['attributes']])
                 values = dict(zip(WINDOW_OPTIONS, (' #W ', ' #W ', native_style, native_style)))
