@@ -257,7 +257,7 @@ class PublicPromotionObservationTests(unittest.TestCase):
         from types import SimpleNamespace
         from unittest.mock import patch
         from codex_wake.upgrade_jobs import UpgradeJobs, policy_digest
-        for stopped in ('disabled', 'expired', 'interrupted', 'not_committed'):
+        for stopped in ('disabled', 'expired', 'interrupted', 'not_committed', 'guest_clock_ahead'):
             with self.subTest(stopped=stopped), tempfile.TemporaryDirectory() as directory:
                 root=Path(directory);job,config,home,manifest=promotion_fixture(root)
                 from codex_profiles.upgrades import select_future
@@ -267,7 +267,8 @@ class PublicPromotionObservationTests(unittest.TestCase):
                 config['recipes']={'release':job['recipe_path']}
                 config['limits']=dict(repair_attempts=3,total_seconds=100,compiler_jobs=2,temporary_bytes=24*1024**3)
                 _atomic(root/'upgrade-bot.json',config)
-                owner=UpgradeJobs(root,now=lambda:now[0],clock=lambda:time_observation(int(now[0]*1000)));clock=owner.clock()
+                guest_offset=job['deadline']-now[0]+1 if stopped=='guest_clock_ahead' else 0
+                owner=UpgradeJobs(root,now=lambda:now[0]+guest_offset,clock=lambda:time_observation(int(now[0]*1000)));clock=owner.clock()
                 job.update(recipe='release',last_seen=now[0],repair_attempts=1,limits=config['limits'],
                     policy_sha256=policy_digest(config),worker=None,
                     clock_anchor=dict(start=clock,latest=clock))
