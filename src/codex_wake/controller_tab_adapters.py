@@ -40,6 +40,9 @@ class TmuxAttachmentTransport(TmuxTransport):
     def capture(self, pane, lines, deadline):
         return self.command(deadline, 'capture-pane', '-p', '-t', pane, '-S', '-' + str(lines))
 
+    def visible_screen(self, pane, deadline):
+        return self.command(deadline, 'capture-pane', '-p', '-t', pane)
+
     def paste_literal(self, pane, text, deadline):
         import subprocess
         import time
@@ -100,6 +103,12 @@ class PsmuxAttachmentTransport:
 
     def visible_screen(self, pane, deadline):
         return self.request('visible_screen', dict(pane=pane), deadline)
+
+    def paste_literal(self, pane, text, deadline):
+        return self.request('paste', dict(pane=pane, text=text), deadline)
+
+    def send_key_tokens(self, pane, keys, deadline):
+        return self.request('keys', dict(pane=pane, keys=keys), deadline)
 
     def attach_saved(self, intent, manifest_sha256, deadline):
         return self.request('attach_saved', dict(intent=intent, manifest_sha256=manifest_sha256), deadline)
