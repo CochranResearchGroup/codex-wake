@@ -18,6 +18,7 @@ from .tab_identity import stable_snapshot, stable_panes
 
 class TabLifecycle:
     READS = frozenset()
+    DESTRUCTION = frozenset(("tabs.destroy", "tabs.unlink"))
     ARGUMENTS = {
         'tabs.create': {'workspace', 'expected_target', 'name', 'cwd', 'profile', 'argv', 'preview', 'position', 'anchor'},
         'tabs.rename': {'workspace', 'expected_target', 'window', 'name', 'preview'},
@@ -25,6 +26,8 @@ class TabLifecycle:
         'tabs.move': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'index', 'force', 'preview', 'position', 'anchor'},
         'tabs.park': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'force', 'preview'},
         'tabs.restore': {'workspace', 'expected_target', 'window', 'destination', 'expected_destination', 'receipt_id', 'force', 'preview'},
+        'tabs.destroy': {'workspace', 'expected_target', 'window', 'preview', 'confirmation'},
+        'tabs.unlink': {'workspace', 'expected_target', 'window', 'index'},
         'tabs.close': {'workspace', 'expected_target', 'window', 'force', 'preview'},
     }
 
@@ -121,7 +124,7 @@ class TabLifecycle:
                     reasons.append('pending_work')
         return sorted(set(reasons)), affected
 
-    def execute(self, operation, arguments):
+    def execute(self, operation, arguments, *, authorize_appearances=None):
         if operation not in self.ARGUMENTS:
             raise InventoryError('unsupported_operation', 'unsupported manual tab lifecycle operation')
         if not isinstance(arguments, dict) or set(arguments) - self.ARGUMENTS[operation]:
@@ -137,7 +140,126 @@ class TabLifecycle:
             raise InventoryError('invalid_argument','A bounded command argv is required.')
         deadline = time.monotonic() + 10
         with self.records.locked(deadline):
+            if operation in self.DESTRUCTION:
+                return self._destruction(operation, args, deadline, authorize_appearances)
             return self._execute(operation, args, deadline)
+
+    @staticmethod
+    def _appearances(transport, window, deadline):
+        raw = transport.command(deadline, 'list-windows', '-a', '-F', '#{session_id} #{window_id} #{window_index}')
+        appearances = []
+        for line in raw.splitlines():
+            match = re.fullmatch(r'(\$[0-9]+) (@[0-9]+) ([0-9]+)', line)
+            if match is None:
+                raise InventoryError('workspace_unavailable', 'incomplete terminal window membership')
+            session, window_id, index = match.groups()
+            if window_id == window:
+                appearances.append(dict(session_id=session, index=int(index)))
+        return sorted(appearances, key=lambda appearance: (appearance['session_id'], appearance['index']))
+
+    def _guarded_tab_effect(self, transport, window, appearances, current, operation, deadline):
+        target = transport.session + ':' + str(current['index'])
+        membership = '#{S:#{W:#{?#{==:#{window_id},' + window['window_id'] + '},#{session_id}:#{window_index};,}}}'
+        panes = '#{P:#{pane_id}:#{pane_pid};}'
+        marker = transport.command(deadline, 'display-message', '-p', '-t', target, membership + '|' + panes).strip()
+        linked, sep, live_panes = marker.partition('|')
+        expected_links = sorted(f"{a['session_id']}:{a['index']}" for a in appearances)
+        expected_panes = sorted({f"{p['pane_id']}:{p['pid']}" for p in window['panes']})
+        if (not sep or sorted(linked.rstrip(';').split(';')) != expected_links
+                or sorted(live_panes.rstrip(';').split(';')) != expected_panes):
+            raise InventoryError('stale_target', 'tab membership or panes changed before effect')
+        # tmux expands the condition and queues the finite command itself. The
+        # right operand contains only verified native IDs, indices and PIDs.
+        condition = '#{==:#{window_id}|' + membership + '|' + panes + ',' + window['window_id'] + '|' + marker + '}'
+        verb = 'unlink-window' if operation == 'tabs.unlink' else 'kill-window'
+        result = transport.command(deadline, 'if-shell', '-F', '-t', target, condition,
+                                   f"{verb} -t '{target}'", 'display-message -p stale_target')
+        if result.strip() == 'stale_target':
+            raise InventoryError('stale_target', 'tab membership or panes changed at dispatch')
+
+    def _destruction(self, operation, args, deadline, authorize_appearances):
+        workspace = args.get('workspace')
+        before = self.inspect(workspace, deadline=deadline)
+        legacy = dict(before['target'], generation=digest(before['snapshot']))
+        if args.get('expected_target') not in (before['target'], legacy):
+            raise InventoryError('stale_target', 'exact current workspace generation required')
+        window = self._window(before['snapshot'], args.get('window'))
+        config = self.workspaces[workspace]
+        transport = config['transport']
+        if config['kind'] == 'psmux':
+            if operation == 'tabs.unlink' or window.get('linked'):
+                raise InventoryError('unsupported_target', 'native Windows shared terminal links are unavailable')
+            appearances = [dict(session_id=before['snapshot']['session_id'], index=window['index'])]
+        elif config['kind'] in ('tmux', 'byobu'):
+            appearances = self._appearances(transport, window['window_id'], deadline)
+            selected_index = args.get('index', window['index'])
+            current = dict(session_id=transport.session, index=selected_index)
+            if current not in appearances:
+                raise InventoryError('stale_target', 'the selected tab appearance no longer exists')
+            if operation == 'tabs.unlink':
+                if len(appearances) < 2:
+                    raise InventoryError('tab_protected', 'unlink requires another surviving appearance')
+                if 'index' not in args and sum(a['session_id'] == transport.session for a in appearances) > 1:
+                    raise InventoryError('ambiguous_target', 'select an explicit index for multiple appearances in one session')
+        else:
+            raise InventoryError('unsupported_target', 'terminal destruction is unavailable on this backend')
+        targets = [before['target']]
+        if operation == 'tabs.destroy' and len(appearances) > 1:
+            enrolled = {}
+            for name, candidate in self.workspaces.items():
+                peer = candidate['transport']
+                if candidate['kind'] in ('tmux', 'byobu') and getattr(peer, 'socket', None) == transport.socket:
+                    enrolled.setdefault(peer.session, []).append(name)
+            seen = {transport.session}
+            for appearance in appearances:
+                session = appearance['session_id']
+                if session in seen:
+                    continue
+                names = enrolled.get(session, [])
+                if len(names) != 1:
+                    raise InventoryError('unsupported_target', 'every linked session must have an exact enrolled workspace')
+                targets.append(self.inspect(names[0], deadline=deadline)['target'])
+                seen.add(session)
+        if authorize_appearances is not None:
+            authorize_appearances(targets)
+        affected = appearances if operation == 'tabs.destroy' else [current]
+        impact = dict(target=before['target'], window_id=window['window_id'],
+                      affected_sessions=affected, pane_ids=sorted({pane['pane_id'] for pane in window['panes']}))
+        confirmation = digest(dict(impact=impact, affected_targets=targets))
+        if operation == 'tabs.destroy' and args.get('preview'):
+            return dict(status='preview', action=operation, confirmation=confirmation, **impact)
+        if operation == 'tabs.destroy' and args.get('confirmation') != confirmation:
+            raise InventoryError('stale_target', 'destroy requires confirmation from the current impact preview')
+        for target in targets:
+            if self.inspect(target['workspace'], deadline=deadline)['target'] != target:
+                raise InventoryError('stale_target', 'affected session changed before effect')
+        if authorize_appearances is not None:
+            authorize_appearances(targets)
+        if config['kind'] == 'psmux':
+            result = self._psmux('tabs.close', dict(args, force=True), before, config, deadline)
+            return dict(result, action=operation, affected_sessions=affected, pane_ids=impact['pane_ids'])
+        if self._appearances(transport, window['window_id'], deadline) != appearances:
+            raise InventoryError('stale_target', 'tab membership changed before effect')
+        if operation == 'tabs.unlink':
+            self._guarded_tab_effect(transport, window, appearances, current, operation, deadline)
+            remaining = self._appearances(transport, window['window_id'], deadline)
+            if remaining != [appearance for appearance in appearances if appearance != current]:
+                raise InventoryError('effect_uncertain', 'remaining appearances could not be verified')
+        else:
+            pid = int(before['snapshot']['server'])
+            identity = process_identity(pid)
+            if identity is None:
+                raise InventoryError('stale_target', 'terminal server identity unavailable')
+            self._guarded_tab_effect(transport, window, appearances, current, operation, deadline)
+            try:
+                remaining = self._appearances(transport, window['window_id'], deadline)
+            except (OSError, subprocess.CalledProcessError):
+                if process_identity(pid) == identity:
+                    raise
+                remaining = []
+            if remaining:
+                raise InventoryError('effect_uncertain', 'destroyed tab is still linked')
+        return dict(status='applied', action=operation, remaining_sessions=remaining, **impact)
 
     def _placement(self, snapshot, args, *, moving=None):
         """Resolve relative placement against the pinned destination roster."""

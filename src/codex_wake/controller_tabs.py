@@ -322,6 +322,21 @@ class AuthorizedTabs:
             if current != actor: raise AuthError()
             return current
         def dispatch(operation,payload):
+            if operation in ('tabs.destroy', 'tabs.unlink'):
+                from .tab_lifecycle import TabLifecycle
+                def authorize_appearances(affected):
+                    current = authorize()
+                    if 'control' not in current.scopes:
+                        raise AuthError('insufficient_scope')
+                    if current.issuer.startswith('local://uid/'):
+                        return
+                    for resource in affected:
+                        if not any(required <= scope.keys() and all(resource.get(k) == v for k, v in scope.items())
+                                   for scope in current.targets):
+                            raise AuthError('insufficient_scope')
+                owner = TabLifecycle(self.tabs.root, workspaces=self.tabs.workspaces,
+                                     host=self.tabs.host, environment=self.tabs.environment)
+                return owner.execute(operation, payload, authorize_appearances=authorize_appearances)
             if operation=='tabs.create':return self.tabs.create_tab(payload,defaults_resolved=True)
             return self.tabs.execute(operation,payload)
         return self.runtime.execute(actor, operation, arguments, authorize=authorize, dispatch=dispatch)
