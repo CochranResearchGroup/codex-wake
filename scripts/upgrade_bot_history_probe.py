@@ -299,13 +299,17 @@ def main(argv=None):
                     process.stdin.flush()
                     thread = rpc('thread/start', dict(cwd=str(root)))['thread']
                     tid = thread['id']
-                    rpc('turn/start', dict(threadId=tid, input=[dict(type='text', text=token)]))
+                    turn_id = rpc('turn/start', dict(threadId=tid, input=[dict(type='text', text=token)]))['turn']['id']
                     while True:
-                        check()
-                        value = rpc('thread/read', dict(threadId=tid, includeTurns=True))['thread']
-                        if value.get('turns') and value['turns'][-1].get('status') == 'completed':
+                        event = receive()
+                        params = event.get('params', {})
+                        completed = params.get('turn', {})
+                        if (event.get('method') == 'turn/completed' and params.get('threadId') == tid
+                                and completed.get('id') == turn_id):
+                            if completed.get('status') != 'completed':
+                                raise RuntimeError('owned seed turn did not complete successfully')
                             break
-                        time.sleep(.05)
+                    value = rpc('thread/read', dict(threadId=tid, includeTurns=False))['thread']
                     rollout = Path(value['path'])
                     sessions[profile].update(thread_id=tid, rollout=str(rollout), prefix=rollout.read_bytes().hex())
                 finally:
