@@ -102,3 +102,9 @@ branch and external artifact receipts remain. Thus13 existing Wake checkouts wer
 retired (12 completed,1 paused), plus2 missing registrations pruned. No branch
 was deleted and no pending release was marked deployed. The finished P255 lane
 is represented by its plan/receipt; it leaves no active implementation checkout.
+
+The CI path classifier conservatively requests `full` for ROADMAP/plans/catalog,
+outside its evidence-only allowlist. P255 explicitly selects bounded local
+documentation validation because the diff contains no executable/dependency/
+workflow changes. The classifier was not weakened and no full-suite pass is
+claimed. Checks, source base and environment differences are in validation.json.

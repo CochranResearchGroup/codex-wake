@@ -42,6 +42,10 @@
     {
       "command": "worktree postconditions",
       "result": "13 source checkouts absent;2 missing registrations pruned; source refs preserved; final lane retirement follows merge"
+    },
+    {
+      "command": "scripts/check_ci_scope.py --event pull_request --base926dd512 --head748b5a82",
+      "result": "full/path_requires_full: ROADMAP/plans/catalog are outside conservative evidence-only allowlist"
     }
   ],
   "nonpassing_audit": {
@@ -50,5 +54,6 @@
     "result": "499 inherited catalog metadata/custody findings; not hidden or claimed passing"
   },
   "first_setup_failure": "ruff not in shell PATH; declared0.14.2 checker invoked through existing uv instead; no product change",
-  "not_executed": "runtime, provider, native compilation, broad unit suite, hosted Python3.11/3.12 jobs; unchanged runtime code and no runtime acceptance claim"
+  "not_executed": "runtime, provider, native compilation, broad unit suite, hosted Python3.11/3.12 jobs; unchanged runtime code and no runtime acceptance claim",
+  "selection_disposition": "Manual documentation-only local validation selected: Git proves no executable Python/JavaScript/Rust/workflow/dependency source changed. Planning/link/schema/provenance/static checks passed; broad runtime suite intentionally not rerun and not claimed passing. Hosted conservative full-lane selection is recorded, not altered."
 }
