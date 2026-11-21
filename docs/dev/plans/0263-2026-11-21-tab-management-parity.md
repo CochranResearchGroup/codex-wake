@@ -58,9 +58,17 @@ Completion requires equivalent outcomes on all three public surfaces, with backe
 
 | Ticket | Dependencies | Owner | State |
 | --- | --- | --- | --- |
-| #744 Create, rename, place, move, and focus | None | primary | running |
-| #745 Inspect and read or write exact panes | None | pane745 | running |
+| #744 Create, rename, place, move, and focus | None | primary | validated |
+| #745 Inspect and read or write exact panes | None | pane745 | integrated |
 | #746 Formatting overrides | None | format746 | running |
 | #747 Unlink and destroy | #745 | pending dispatch | pending |
 
 Primary owns placement, lifecycle and shared client contracts. Pane worker owns capture/input and operation readback. Formatting worker owns per-tab override storage and rendering. Coordinate any shared file hunks with primary and integrate serially. Tests use the existing public paths and dedicated real tabs only.
+
+## Placement checkpoint
+
+Primary implementation `37637250cbb3fb62a90a6da583b233a902657cd0`. Explicit shell launch can bypass a saved profile or argv default. Existing callers that rely on saved launch defaults retain that behavior. An unsupported native profile is refused before creating a shell fallback.
+
+The 31-test source selection passed on Python 3.11 and 3.12. Final installed wheel passed 28 tests over real tmux lifecycle, CLI/MCP, saved profiles, and terminal-session defaults. The existing native psmux acceptance runner passed all seven checks, including installed CLI relative create, MCP reorder without focus change, HTTP focus, native PowerShell access, explicit cross-server refusal, and empty final owned namespace. An initial broader run reached public parity before timing out during close. Its failure is retained with the passing fresh run.
+
+Pane worker source `a2846f18ec934939129d89bb49d7d2ec9151e46c` integrated as `58334e507cdfdfe744f7348f55cb5a7238c97ccf`. Installed parity is pending.
