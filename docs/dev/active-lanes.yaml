@@ -9,12 +9,12 @@ lanes:
     branch: feat/issue-737-upgrade-owner
     worker_branches: [feat/issue-739-upgrade-repair]
     target: origin/main
-    plan_state: OPEN
+    plan_state: BLOCKED
     custody_state: REMOTE_PRESERVED
     dependencies: []
     overlaps: []
     updated_at: 2026-11-21
-    disposition: Lifecycle validated and closed. Repair and exact-package qualification active. Selection waits on qualification.
+    disposition: Lifecycle closed. Repair source integrated. Installed qualification awaits dedicated test setup. Selection remains blocked.
   - id: ADJACENT-TABS-716
     owner: root / ecochran76
     objective: Reliable adjacent placement before Grok acceptance
