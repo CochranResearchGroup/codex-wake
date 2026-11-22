@@ -28,6 +28,87 @@ class LiveWakeRestoreTests(unittest.TestCase):
         self.assertEqual(result['startup_policy'], 'active_tab')
         self.assertEqual(result['resume_policy'], 'hold')
 
+    def test_public_binding_pins_profile_and_retains_live_reuse_on_drift(self):
+        import contextlib
+        import io
+        from codex_wake.a2a_identity import RuntimeIdentity
+        from codex_wake.cli import run
+        from codex_wake.managed_inventory import ManagedInventory, Observation
+        from codex_wake.mcp_server import CommandRunner
+        from codex_wake.process import process_identity
+        from codex_wake.session_permissions import Principal
+        from codex_wake.unified_wakes import WakeControls
+        from test_recurring_schedules import request
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            home = root / 'account-home'
+            home.mkdir()
+            profile = dict(cwd=str(root), app_server='unix:///fixture',
+                           codex_path=sys.executable, codex_home=str(home),
+                           tmux_session='work', timeout=1)
+            profiles = root / 'profiles.json'
+            config = dict(version=1, profiles={'saved': profile})
+
+            def save_profile():
+                profiles.write_text(json.dumps(config))
+                profiles.chmod(0o600)
+
+            save_profile()
+            thread = dict(id=THREAD, cwd=str(root), modelProvider='openai')
+            metadata = dict(codexHome=str(home))
+            identity = RuntimeIdentity.from_metadata(thread, metadata)
+            process = process_identity(os.getpid())
+            agent = ManagedInventory(root, now=time.time).enroll(Observation(
+                'codex', identity.namespace, THREAD, str(root), 'ready', time.time(),
+                'native_metadata', dict(pid=os.getpid(), start_ticks=process['start_time_ticks'],
+                                        boot_id=process['boot_id']),
+                [dict(pane_id='%7')], {'inspect': 'supported'}, profile='saved-account'))['agent']
+            operator = Principal('local-operator', 'operator')
+            owner = WakeControls(root, principal=operator, codex_path=sys.executable,
+                                 endpoint='unix:///fixture')
+            with patch('codex_wake.sessions.observe', return_value=dict(complete=True, sessions=[])):
+                saved = owner.execute('wakes.schedules.register', {'request': request(session_mode='reopen_live')})
+            self.assertEqual(saved['restoration']['status'], 'blocked')
+            self.assertTrue(saved['persistence']['saved'])
+            self.assertFalse(saved['armed'])
+            self.assertFalse(saved['delivery']['uncertain'])
+
+            output = io.StringIO()
+            with (patch('codex_wake.permission_commands.verified_cli_principal', return_value=operator),
+                  patch('codex_wake.shared_app_server.SharedAppServerReader') as reader,
+                  contextlib.redirect_stdout(output)):
+                endpoint = reader.return_value.__enter__.return_value
+                endpoint.server_metadata = metadata
+                endpoint.read_thread.return_value = thread
+                self.assertEqual(run(['--wake-root', str(root), 'schedules', 'bind-restoration',
+                    saved['id'], '--profiles', str(profiles), '--profile', 'saved',
+                    '--managed-agent-id', agent['managed_agent_id']]), 0)
+            bound = json.loads(output.getvalue())['restoration']
+            self.assertEqual(bound['status'], 'configured')
+            self.assertEqual(bound['profile'], 'saved')
+            self.assertEqual(bound['account']['name'], 'saved-account')
+            self.assertEqual(bound['account']['provider_identity'], 'unverified')
+            lookup = dict(schedule_id=saved['id'])
+            self.assertEqual(owner.execute('wakes.schedules.show', lookup)['restoration'], bound)
+            meta = dict(threadId=THREAD, sessionId=THREAD, callId='restore-inspection',
+                        **{'x-codex-turn-metadata': dict(thread_id=THREAD, session_id=THREAD,
+                                                         turn_id='test-turn')})
+            result, failed = CommandRunner(wake_root=root).call('wake_schedules_show',
+                dict(lookup, caller_thread_id=THREAD), native_context=meta)
+            self.assertFalse(failed, result)
+            self.assertEqual(result['restoration'], bound)
+
+            profile['tmux_session'] = 'changed'
+            save_profile()
+            shown = owner.execute('wakes.schedules.show', lookup)['restoration']
+            self.assertEqual(shown, dict(status='blocked', reason='live_restore_pinned_profile_changed'))
+            row = dict(thread_id=THREAD, binding_status='metadata_matched', attachments=[{'pane_id': '%7'}])
+            with (patch('codex_wake.sessions.observe', return_value=dict(complete=True, sessions=[row])),
+                  patch('codex_wake.sessions.revalidate_attachment', return_value=True)):
+                self.assertEqual(LiveWakeRestorer(root).prepare(saved['target'])['startup_policy'],
+                                 'active_tab')
+
     def test_unknown_inventory_holds_without_launching(self):
         with tempfile.TemporaryDirectory() as directory, patch('codex_wake.sessions.observe', return_value=dict(complete=False, sessions=[])):
             with self.assertRaisesRegex(RuntimeTargetError, 'recipient_ownership_unknown'):
