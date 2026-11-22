@@ -384,6 +384,7 @@ PUBLIC_MCP_TOOLS = {'accounts.configuration.explain': 'wake_accounts_configurati
  'tabs.view-save': 'wake_tabs_view_save',
  'tabs.view-show': 'wake_tabs_view_show',
  'upgrades.advance': 'wake_upgrades_advance',
+ 'upgrades.approve_selection': 'wake_upgrades_approve_selection',
  'upgrades.cache_cleanup': 'wake_upgrades_cache_cleanup',
  'upgrades.cancel': 'wake_upgrades_cancel',
  'upgrades.disable': 'wake_upgrades_disable',

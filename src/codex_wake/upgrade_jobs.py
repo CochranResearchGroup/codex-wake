@@ -12,6 +12,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import signal
 import shutil
 import subprocess
@@ -172,7 +173,7 @@ class UpgradeJobs:
     def execute(self, actor, operation, arguments, *, authorize=None):
         verb = operation.removeprefix('upgrades.')
         allowed = dict(status=set(), list=set(), show={'job_id'}, enable=set(), disable=set(),
-                       start={'recipe', 'expected_recipe_sha256', 'upstream_version'}, advance={'job_id'}, cancel={'job_id'}, rollback={'job_id','operation_id'}, reconcile={'job_id','mode'}, cache_cleanup=set())
+                       start={'recipe', 'expected_recipe_sha256', 'upstream_version'}, advance={'job_id'}, approve_selection={'job_id','package_sha256'}, cancel={'job_id'}, rollback={'job_id','operation_id'}, reconcile={'job_id','mode'}, cache_cleanup=set())
         if not operation.startswith('upgrades.') or verb not in allowed or not isinstance(arguments, dict):
             raise InventoryError('invalid_argument', 'exact upgrade job arguments required')
         optional = {'expected_recipe_sha256', 'upstream_version'} if verb == 'start' else set()
@@ -212,6 +213,10 @@ class UpgradeJobs:
                     result=dict(compiler_cache=self.compiler_cache(config),reclaimed_bytes=cache['bytes'])
                 elif verb == 'list':
                     result = dict(jobs=list(state['jobs'].values()))
+                elif verb == 'approve_selection':
+                    job = self.job(state, arguments['job_id'])
+                    self.approve_selection(state, job, self.config(), actor, arguments['package_sha256'])
+                    result = dict(job=job)
                 elif verb in ('show', 'cancel'):
                     job = self.job(state, arguments['job_id'])
                     if verb == 'cancel' and job['state'] not in TERMINAL:
@@ -394,6 +399,36 @@ class UpgradeJobs:
             return 'temporary_storage_exhausted'
         return None
 
+    @staticmethod
+    def selection_binding(job):
+        qualification = job['results'].get('qualification', {})
+        package = qualification.get('package_sha256')
+        if (qualification.get('status') != 'qualified' or qualification.get('eligible_for_promotion') is not True
+                or not isinstance(package, str) or not re.fullmatch('[0-9a-f]{64}', package)):
+            return None
+        return dict(package_sha256=package, qualification_sha256=digest(qualification))
+
+    def approve_selection(self, state, job, config, actor, expected_package):
+        binding = self.selection_binding(job)
+        if not config.get('first_production_opt_in'):
+            raise InventoryError('invalid_configuration', 'selection approval is outside the configured upgrade policy')
+        if job.get('selection_intent') or job.get('active_phase') or job.get('worker'):
+            raise InventoryError('reconciliation_required', 'selection or worker outcome must be reconciled')
+        if job['state'] != 'promoting' or binding is None:
+            raise InventoryError('selection_not_ready', 'verified qualification is required before selection approval')
+        if (not state['enabled'] or state['generation'] != job['generation']
+                or policy_digest(config) != job['policy_sha256']):
+            raise InventoryError('selection_approval_refused', 'original upgrade authority changed')
+        if expected_package != binding['package_sha256']:
+            raise InventoryError('selection_approval_mismatch', 'approval must name the exact qualified package')
+        reason = self.budget_reason(job)
+        if reason:
+            raise InventoryError('selection_approval_refused', reason)
+        if job.get('selection_approval', {}).get('binding') != binding:
+            job['selection_approval'] = dict(binding=binding, subject=actor.subject)
+            job['reason'] = 'selection_approved'
+            self.event(state, 'selection_approved', job, package_sha256=expected_package)
+
     def advance(self, actor, arguments, authorize):
         with self.locked():
             state = self.load()
@@ -425,6 +460,23 @@ class UpgradeJobs:
                 raise InventoryError('stale_recipe', 'pinned upgrade recipe changed')
             phase = ('promote' if job['state']=='promoting' or job.get('active_phase')=='promote'
                 else 'qualify' if job['state']=='qualifying' else 'stage')
+            if phase == 'promote' and (policy_digest(config) != job.get('policy_sha256')
+                    or state['generation'] != job['generation']):
+                job.update(state='held', reason='upgrade_policy_changed')
+                self.event(state, 'held', job, reason=job['reason'])
+                self.save(state)
+                return dict(job=job)
+            if phase == 'promote' and config.get('first_production_opt_in'):
+                if job.get('selection_intent'):
+                    job.update(state='held', reason='selection_outcome_requires_reconciliation')
+                    self.event(state, 'held', job, reason=job['reason'])
+                    self.save(state)
+                    return dict(job=job)
+                binding = self.selection_binding(job)
+                if binding is None or job.get('selection_approval', {}).get('binding') != binding:
+                    job['reason'] = 'awaiting_selection_approval'
+                    self.save(state)
+                    return dict(job=job)
             job['active_phase'] = phase
             job['state'] = {'qualify':'qualifying','promote':'promoting','stage':'building'}[phase]
             self.event(state, job['state'], job)
@@ -443,6 +495,10 @@ class UpgradeJobs:
                     raise ValueError('upgrade_policy_changed')
                 if not current_state['enabled'] or current['state'] in TERMINAL or current_state['generation']!=frozen['generation'] or reason:
                     raise ValueError(reason or 'upgrade_policy_changed')
+                if frozen['active_phase'] == 'promote' and current_config.get('first_production_opt_in'):
+                    binding = self.selection_binding(current)
+                    if binding is None or current.get('selection_approval', {}).get('binding') != binding:
+                        raise ValueError('exact_selection_approval_required')
             def guard():
                 if committing[0]:
                     guard_locked()
@@ -530,7 +586,14 @@ class UpgradeJobs:
             elif result.get('status') == 'selected':
                 job.update(state='succeeded',reason='future_launch_selection_reconciled')
             elif result.get('status') == 'qualified':
-                job.update(state='promoting', reason='awaiting_qualified_selection')
+                if config.get('first_production_opt_in'):
+                    job.pop('selection_approval', None)
+                    if self.selection_binding(job) is None:
+                        job.update(state='held', reason='qualified_package_identity_missing')
+                    else:
+                        job.update(state='promoting', reason='awaiting_selection_approval')
+                else:
+                    job.update(state='promoting', reason='awaiting_qualified_selection')
             elif result.get('status') == 'staged':
                 job.update(state='qualifying', reason='awaiting_disposable_qualification')
             else:
@@ -563,6 +626,8 @@ class UpgradeJobs:
                 self.event(state,'promotion_observed',job,reason=observed.get('reason','committed_selection_observed'))
                 self.save(state)
                 return dict(job=job)
+            if job.get('selection_intent'):
+                raise InventoryError('reconciliation_required', 'use promotion_observe for an existing selection intent')
             evidence=self.store/job['id']/'repair'/'repair-state.json'
             if job['state']!='held' or not config.get('repair') or not evidence.is_file():
                 raise InventoryError('reconciliation_required','held repair evidence required')

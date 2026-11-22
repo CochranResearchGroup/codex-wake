@@ -11985,6 +11985,39 @@
         "supported_registration": true
       }
     },
+    "upgrades.approve_selection": {
+      "protected": {
+        "admission": "fresh_authenticated_actor_and_exact_target",
+        "delegated_required_scopes": [],
+        "mcp": "wake_upgrades_approve_selection",
+        "required_scope": null,
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "expected_target": {
+              "minProperties": 1,
+              "type": "object"
+            },
+            "job_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "package_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "expected_target",
+            "job_id",
+            "package_sha256"
+          ],
+          "type": "object"
+        },
+        "supported_registration": true
+      }
+    },
     "upgrades.cache_cleanup": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
