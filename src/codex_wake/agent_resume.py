@@ -71,7 +71,7 @@ class SavedRuntime:
             raise InventoryError('identity_unavailable', 'saved recovery requires native notLoaded evidence')
         return sample
 
-    def launch(self, record, profile, guard, name):
+    def launch(self, record, profile, guard, name, *, window_target=None):
         from .app_server import resolve_codex_cmd
         from .session_lifecycle import tmux_command
         from .sessions import explicit_terminal_absent
@@ -92,7 +92,7 @@ class SavedRuntime:
             return terminal(runtime, 'new-session', '-d', '-P', '-F', '#{window_id}\t#{pane_id}',
                             '-s', profile['tmux_session'], '-n', name, '-c', record['root'], shlex.join(argv))
         return terminal(runtime, 'new-window', '-d', '-P', '-F', '#{window_id}\t#{pane_id}',
-                        '-t', profile['tmux_session'] + ':', '-n', name, '-c', record['root'], shlex.join(argv))
+                        '-t', window_target or profile['tmux_session'] + ':', '-n', name, '-c', record['root'], shlex.join(argv))
 
 
 class AgentResume:
@@ -204,7 +204,10 @@ class AgentResume:
                 receipt.update(status='starting',reason='resume_binding_not_confirmed',effects_attempted=1)
                 _save(path,receipt)
                 try:
-                    self.runtime.launch(agent,profile,guard,'resume-'+key[:12])
+                    restoration = self.runtime.launch(agent,profile,guard,'resume-'+key[:12])
+                    if isinstance(restoration, dict):
+                        receipt['restoration'] = restoration
+                        _save(path,receipt)
                 except Exception:
                     receipt.update(status='uncertain',reason='resume_launch_outcome_unknown')
                     _save(path,receipt);return self._public(receipt)
@@ -223,4 +226,4 @@ class AgentResume:
     @staticmethod
     def _public(receipt):
         return {key:receipt[key] for key in ('status','managed_agent_id','conversation_id','record_sha256',
-                                            'effects_attempted','reason') if key in receipt}
+                                            'effects_attempted','reason','restoration') if key in receipt}

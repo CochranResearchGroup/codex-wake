@@ -12,6 +12,7 @@ from uuid import UUID
 from .agent_resume import SavedRuntime, fingerprint, resume_profile
 from .runtime_delivery import RuntimeTargetError
 from .records import WakeError
+from .wake_restore_placement import capture_placement, launch_placed, valid_placement
 
 
 PINNED_IDENTITY_FIELDS = {
@@ -69,7 +70,8 @@ class LiveWakeRestorer:
         try:
             binding = self._bindings()['bindings'][thread_id]
             required = {'profiles', 'managed_agent_id', 'profile'}
-            if type(binding) is not dict or set(binding) not in (required, required | {'identity'}):
+            if type(binding) is not dict or set(binding) not in (
+                    required, required | {'identity'}, required | {'identity', 'placement'}):
                 raise ValueError
             profiles = Path(binding['profiles'])
             if not profiles.is_absolute():
@@ -77,6 +79,8 @@ class LiveWakeRestorer:
             config = load_profiles(profiles)
         except (WakeError, OSError, ValueError, KeyError, TypeError):
             raise RuntimeTargetError('unavailable', 'live_restore_configuration_required') from None
+        if 'placement' in binding and not valid_placement(binding['placement']):
+            raise RuntimeTargetError('unavailable', 'live_restore_placement_invalid')
         if 'identity' in binding:
             profile = resume_profile(config, binding['profile'])
             identity = binding['identity']
@@ -113,7 +117,8 @@ class LiveWakeRestorer:
                                  name=identity['account'] if identity else None,
                                  provider_identity='unverified',
                                  codex_home=identity['codex_home'] if identity else profile.get('codex_home')),
-                    managed_agent_id=binding['managed_agent_id'])
+                    managed_agent_id=binding['managed_agent_id'],
+                    placement=binding.get('placement'))
 
     @staticmethod
     def _validate_binding(target, agent, profile):
@@ -153,8 +158,15 @@ class LiveWakeRestorer:
             if observed['namespace'] != agent['namespace']:
                 raise WakeError('live_restore_managed_identity_changed')
             observed['profile_sha256'] = fingerprint(selected)
-            saved['bindings'][target['thread_id']] = dict(profiles=str(profiles),
-                managed_agent_id=managed_agent_id, profile=profile, identity=observed)
+            entry = dict(profiles=str(profiles), managed_agent_id=managed_agent_id,
+                         profile=profile, identity=observed)
+            placement = capture_placement(target['thread_id'], selected)
+            previous = saved['bindings'].get(target['thread_id'], {})
+            if placement:
+                entry['placement'] = placement
+            elif previous.get('identity') == observed and valid_placement(previous.get('placement')):
+                entry['placement'] = previous['placement']
+            saved['bindings'][target['thread_id']] = entry
             authorize()
             _write(self.binding_path, saved)
 
@@ -203,7 +215,8 @@ class LiveWakeRestorer:
                 raise WakeError('live_restore_binding_changed')
             return current
 
-        owner = AgentResume(self.root, config, runtime=_RestoreRuntime(self.root, now=self.now, identity=pinned),
+        owner = AgentResume(self.root, config, runtime=_RestoreRuntime(self.root, now=self.now, identity=pinned,
+                                                                       placement=binding.get('placement')),
                             config_loader=current_config, **kwargs)
         arguments = dict(managed_agent_id=binding['managed_agent_id'], profile=binding['profile'],
                          intent='wake-live:' + occurrence, expires_at=expires)
@@ -261,10 +274,11 @@ class _RestoreRuntime(SavedRuntime):
     AgentResume journals the launch before entering this method, so lost session
     creation responses retain the same crash fence as lost tab creation responses.
     """
-    def __init__(self, root, *, now=None, identity=None):
+    def __init__(self, root, *, now=None, identity=None, placement=None):
         super().__init__(now=now)
         self.root = root
         self.pinned_identity = identity
+        self.placement = placement
 
     def identity(self, record, profile):
         if self.pinned_identity is None:
@@ -285,9 +299,12 @@ class _RestoreRuntime(SavedRuntime):
         from .session_lifecycle import tmux_command
         if self.pinned_identity is not None:
             profile = dict(profile, codex_home=self.pinned_identity['codex_home'])
+        if self.placement is not None:
+            profile = dict(profile, tmux_session=self.placement['session'])
         runtime = SimpleNamespace(**({'tmux_socket': None} | profile), effect_guard=guard)
+        recreated = False
         try:
-            tmux_command(runtime, 'has-session', '-t', profile['tmux_session'])
+            tmux_command(runtime, 'has-session', '-t', '=' + profile['tmux_session'])
         except WakeError:
             socket = profile.get('tmux_socket')
             if not isinstance(socket, str) or not Path(socket).is_absolute():
@@ -307,5 +324,11 @@ class _RestoreRuntime(SavedRuntime):
             tabs = controller_tabs_from_root(self.root)
             sessions = TerminalSessions(self.root, tabs=tabs)
             sessions.execute('tabs.session.ensure', dict(name=profile['tmux_session'], backend='byobu',
-                server=socket, start=True, defaults=dict(cwd=profile['cwd'])))
-        return super().launch(record, profile, guard, name)
+                server=socket, start=True, defaults=dict(cwd=profile['cwd'])), container_only=True)
+            recreated = True
+        if self.placement is None:
+            return super().launch(record, profile, guard, name)
+        launcher = super().launch
+        return launch_placed(tmux_command, runtime, self.placement, record['root'],
+                             lambda title, target: launcher(record, profile, guard, title,
+                                                            window_target=target), recreated=recreated)
