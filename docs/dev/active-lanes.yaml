@@ -1,6 +1,20 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: UPGRADE-OPT-IN-756
+    owner: primary / ecochran76
+    objective: Qualify the first autonomous upgrade from Native Codex 0.171
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/756, https://github.com/CochranResearchGroup/codex-wake/issues/757, https://github.com/CochranResearchGroup/codex-wake/issues/758, https://github.com/CochranResearchGroup/codex-wake/issues/759]
+    plan: docs/dev/plans/0265-2026-11-22-autonomous-upgrade-opt-in.md
+    branch: feat/issue-756-upgrade-opt-in
+    worker_branches: [feat/issue-758-approval]
+    target: origin/main
+    plan_state: OPEN
+    custody_state: REMOTE_PRESERVED
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-22
+    disposition: Release admission validated. Exact-package approval and dedicated qualification remain in scope.
   - id: WAKE-STARTUP-749
     owner: primary / ecochran76
     objective: Recover interrupted wake occurrences and restore exact live tabs

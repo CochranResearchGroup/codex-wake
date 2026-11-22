@@ -36,7 +36,10 @@ def occupies_upgrade_slot(job):
 
 
 def policy_digest(config):
-    return digest({key:config.get(key) for key in ('target','limits','repair','qualification','promotion')})
+    declarations = {key: config.get(key) for key in ('target', 'limits', 'repair', 'qualification', 'promotion')}
+    if config.get('first_production_opt_in'):
+        declarations['first_production_opt_in'] = True
+    return digest(declarations)
 
 
 def digest(value):
@@ -67,6 +70,8 @@ class UpgradeJobs:
         value = json.loads(path.read_text())
         if value.get('schema_version') != 1 or not isinstance(value.get('target'), dict) or not value['target']:
             raise InventoryError('invalid_configuration', 'versioned fixed upgrade target required')
+        if type(value.get('first_production_opt_in', False)) is not bool:
+            raise InventoryError('invalid_configuration', 'first production opt-in must be boolean')
         limits = dict(DEFAULT_LIMITS, **value.get('limits', {}))
         if set(limits) != set(DEFAULT_LIMITS) or any(type(v) is not int or v < (0 if k=='repair_attempts' else 1) for k,v in limits.items()):
             raise InventoryError('invalid_configuration', 'nonnegative repair attempts and positive integer upgrade limits required')
@@ -231,19 +236,33 @@ class UpgradeJobs:
                     if not isinstance(name, str) or name not in config.get('recipes', {}):
                         raise InventoryError('unauthorized_target', 'host-approved upgrade recipe required')
                     recipe_path = Path(config['recipes'][name]).resolve(strict=True)
-                    recipe = json.loads(recipe_path.read_text())
-                    if arguments.get('expected_recipe_sha256', hashlib.sha256(recipe_path.read_bytes()).hexdigest()) != hashlib.sha256(recipe_path.read_bytes()).hexdigest() or arguments.get('upstream_version', recipe.get('upstream_version')) != recipe.get('upstream_version'):
+                    raw = recipe_path.read_bytes()
+                    recipe = json.loads(raw)
+                    recipe_sha256 = hashlib.sha256(raw).hexdigest()
+                    version = recipe.get('upstream_version')
+                    if config.get('first_production_opt_in') and not all(
+                            isinstance(arguments.get(field), str) and arguments[field]
+                            for field in ('expected_recipe_sha256', 'upstream_version')):
+                        raise InventoryError('release_approval_required', 'select an exact release and recipe digest')
+                    if (arguments.get('expected_recipe_sha256', recipe_sha256) != recipe_sha256
+                            or arguments.get('upstream_version', version) != version):
                         raise InventoryError('stale_recipe', 'resolved release recipe changed before job admission')
                     key = digest(dict(recipe=recipe, target=config['target']))
                     existing = next((j for j in state['jobs'].values() if j['key'] == key), None)
+                    if config.get('first_production_opt_in'):
+                        prior = next((j for j in state['jobs'].values() if j['version'] == version), None)
+                        if prior and (prior['recipe_sha256'] != recipe_sha256
+                                      or prior['policy_sha256'] != policy_digest(config)):
+                            raise InventoryError('stale_recipe', 'release already admitted under different evidence or policy')
+                        existing = prior or existing
                     if existing:
                         result = dict(job=existing)
                     else:
                         if any(occupies_upgrade_slot(job) for job in state['jobs'].values()):
                             raise InventoryError('upgrade_busy', 'one upgrade candidate at a time')
                         job = dict(id=uuid.uuid4().hex, key=key, recipe=name,
-                            recipe_path=str(recipe_path), recipe_sha256=hashlib.sha256(recipe_path.read_bytes()).hexdigest(),
-                            version=recipe.get('upstream_version'), target=config['target'], state='queued',
+                            recipe_path=str(recipe_path), recipe_sha256=recipe_sha256,
+                            version=version, target=config['target'], state='queued',
                             created_at=self.now(), deadline=self.now()+config['limits']['total_seconds'],
                             last_seen=self.now(), repair_attempts=0, limits=config['limits'], generation=state['generation'],
                             stage_id=recipe.get('id'), worker=None, results={}, policy_sha256=policy_digest(config))

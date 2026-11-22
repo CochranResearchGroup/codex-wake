@@ -49,6 +49,39 @@ class UpgradeDiscoveryTests(unittest.TestCase):
             self.assertEqual(same['job_id'],job_id)
             self.assertEqual(len(jobs.execute(actor,'upgrades.list',dict(expected_target=target))['result']['jobs']),1)
 
+    def test_first_production_opt_in_discovers_then_waits_for_exact_release_admission(self):
+        import hashlib
+        from codex_wake.managed_inventory import InventoryError
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            clock = [100.0]
+            owner, jobs, actor, target, _ = self.fixture(root, clock)
+            config_path = root / 'upgrade-bot.json'
+            config = json.loads(config_path.read_text())
+            config['first_production_opt_in'] = True
+            config_path.write_text(json.dumps(config))
+            args = dict(expected_target=target)
+            jobs.execute(actor, 'upgrades.enable', args)
+            discovered = owner.poll(actor, authorize=lambda: actor)
+            self.assertEqual(discovered['status'], 'awaiting_release_approval')
+            self.assertEqual(jobs.execute(actor, 'upgrades.list', args)['result']['jobs'], [])
+            release = discovered['releases']['0.166.0']
+            recipe = Path(config['recipes'][release['recipe']])
+            self.assertEqual(release['recipe_sha256'], hashlib.sha256(recipe.read_bytes()).hexdigest())
+            with self.assertRaisesRegex(InventoryError, 'exact release'):
+                jobs.execute(actor, 'upgrades.start', dict(args, recipe=release['recipe']))
+            request = dict(args, recipe=release['recipe'], upstream_version='0.166.0',
+                           expected_recipe_sha256=release['recipe_sha256'])
+            started = jobs.execute(actor, 'upgrades.start', request)['result']['job']
+            clock[0] += 60
+            restarted = UpgradeJobs(root, now=lambda: clock[0], clock=lambda: observation(int(clock[0]*1000)))
+            self.assertEqual(restarted.execute(actor, 'upgrades.start', request)['result']['job'], started)
+            recipe.write_text(json.dumps(dict(id='changed', upstream_version='0.166.0')))
+            with self.assertRaises(InventoryError):
+                restarted.execute(actor, 'upgrades.start', dict(request,
+                    expected_recipe_sha256=hashlib.sha256(recipe.read_bytes()).hexdigest()))
+
     def test_persistent_tick_coalesces_new_releases_and_never_renews_failed_release(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);clock=[100.0]

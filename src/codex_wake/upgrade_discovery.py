@@ -209,9 +209,14 @@ class UpgradeDiscovery:
                     return self.save(state)
                 name, pin = self.recipe_for(config, version)
                 for old, observed in state['releases'].items():
-                    if old != version and observed['status'] in ('observed','pending'):
+                    if old != version and observed['status'] in ('observed','pending','awaiting_release_approval'):
                         observed.update(status='superseded', superseded_by=version)
                         if old not in state['skipped']:state['skipped'].append(old)
+                if config.get('first_production_opt_in'):
+                    state['releases'][version].update(status='awaiting_release_approval',
+                                                      recipe=name, recipe_sha256=pin)
+                    state.update(status='awaiting_release_approval', job_id=None)
+                    return self.save(state)
                 started = self.jobs.execute(actor, 'upgrades.start', dict(args,recipe=name,expected_recipe_sha256=pin,upstream_version=version), authorize=authorize)['result']['job']
                 state['releases'][version].update(status='dispatched', job_id=started['id'], recipe_sha256=pin)
                 state.update(status='dispatched', job_id=started['id'])
