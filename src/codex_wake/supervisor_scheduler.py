@@ -131,10 +131,13 @@ def recover_interrupted_root(config: SupervisorConfig, entry: dict[str, Any]) ->
             admission = json.loads(pending.read_text())
             if not isinstance(admission, dict) or admission.get('token') != token:
                 return
+        # A lifecycle entry that cannot be safely inspected is not evidence
+        # that work stayed pending. In particular, never open a FIFO here.
+        if any(path.is_symlink() or not path.is_file()
+               for status in ACTIVE_STATUS_DIRS for path in (root / status).glob('*.json')):
+            return
         legacy = []
         for path in (root / 'firing').glob('*.json'):
-            if path.is_symlink():
-                return
             record = json.loads(path.read_text())
             if not isinstance(record, dict) or record.get('status') != 'firing' or record.get('id') != path.stem:
                 return
