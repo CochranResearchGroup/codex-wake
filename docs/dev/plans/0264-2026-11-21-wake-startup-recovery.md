@@ -1,6 +1,6 @@
 # Plan 0264 | Wake startup recovery
 
-State: PLANNED
+State: IN_PROGRESS
 Owner: primary / ecochran76
 Work items: #723 and #742
 Spec: #749
@@ -83,9 +83,9 @@ Integration branch `feat/issue-749-wake-recovery`, base `a1dbceed656c4c906f87b28
 
 | Ticket | Blockers | Owner | State |
 | --- | --- | --- | --- |
-| #750 Startup recovery | None | primary | Implemented, acceptance in progress |
-| #751 Binding and readiness | None | readiness751 | Running in `feat/issue-751-readiness` from the integration base |
-| #752 Exact tab restoration | #750, #751 | Unassigned | Pending |
+| #750 Startup recovery | None | primary | Validated locally at `9beac576` |
+| #751 Binding and readiness | None | readiness751 | Source `97f1db94`, integrated and validated at `22eb8b9e` |
+| #752 Exact tab restoration | #750, #751 | restore752 | Running from `22eb8b9e` |
 | #753 First-focus marker | #752 | Unassigned | Pending |
 
 Startup recovery hands versioned poll evidence to the existing durable
@@ -98,3 +98,14 @@ Local Python 3.12 supervisor scheduling tests passed (7 tests). A public
 recurring schedule regression verified that an uncertain delivery retains its
 identity and reason across scheduler generations while an independent
 schedule materializes exactly once.
+
+The supervisor, recurring schedule, native intent and native delivery selection
+passed 66 tests on Python 3.12, including the disposable supervisor process
+qualification. The comparable Python 3.11 source selection passed 65 tests
+with the project dependencies installed in a disposable environment. A raw
+Python 3.11 attempt lacked websockets and was superseded by that run.
+
+The integrated binding, runtime mode and recurring schedule selection passed
+34 tests on Python 3.12. The #751 worker also passed 24 CLI, API, MCP and
+contract tests. Binding verifies the pinned account home and reports provider
+login identity as unverified. Real restored delivery is part of #752.
