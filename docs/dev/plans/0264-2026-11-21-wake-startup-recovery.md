@@ -85,8 +85,8 @@ Integration branch `feat/issue-749-wake-recovery`, base `a1dbceed656c4c906f87b28
 | --- | --- | --- | --- |
 | #750 Startup recovery | None | primary | Validated locally at `9beac576`, tracker closed |
 | #751 Binding and readiness | None | readiness751 | Source `97f1db94`, integrated and validated at `22eb8b9e`, tracker closed |
-| #752 Exact tab restoration | #750, #751 | restore752 | Running from `22eb8b9e` |
-| #753 First-focus marker | #752 | Unassigned | Pending |
+| #752 Exact tab restoration | #750, #751 | restore752 | Source `1d9fdda9`, integrated and validated at `b2aeccef`, tracker closed |
+| #753 First-focus marker | #752 | marker753 | Running from `b2aeccef` |
 
 Startup recovery hands versioned poll evidence to the existing durable
 record-level dispatcher. Unversioned poll holds still require exact-token
@@ -109,3 +109,23 @@ The integrated binding, runtime mode and recurring schedule selection passed
 34 tests on Python 3.12. The #751 worker also passed 24 CLI, API, MCP and
 contract tests. Binding verifies the pinned account home and reports provider
 login identity as unverified. Real restored delivery is part of #752.
+
+The restoration worker passed 32 focused tests per Python 3.11 and 3.12.
+The integration selection passed 51 tests on Python 3.12. It includes real
+isolated tmux placement checks for the exact slot, title drift with matching
+cwd, and a same-directory occupied slot. The placeholder shell kept its
+original window and pane identity when moved to the spare slot.
+
+A separate end-to-end run at `b2aeccef` used the exact previously qualified
+Native `d907a42df3` binary, its matching StableTime wire v2, a disposable
+native home and tmux server, the public supervisor, and loopback model
+responses. It saved the conversation, restarted the private native daemon and
+supervisor, verified the exact conversation and pinned home, and observed one
+additional native turn complete after the original occurrence was admitted.
+The restored window reclaimed slot 1 with a unique title, and the displaced
+shell survived. No owned processes remained. The retained passing receipt
+SHA-256 is `9c5800125d9f5cf80f50218b935ed9cc35ab6fb9582af20db2c0d54744d026c4`.
+Earlier attempts are retained. The older wire-v1 Native binary left an input
+queued when used with the wire-v2 time reader. That result was not counted as
+delivery. The matching-native run used a disposable provider and did not
+exercise a provider login.
