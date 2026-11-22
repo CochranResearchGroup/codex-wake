@@ -11988,7 +11988,9 @@
     "upgrades.approve_selection": {
       "protected": {
         "admission": "fresh_authenticated_actor_and_exact_target",
-        "delegated_required_scopes": [],
+        "delegated_required_scopes": [
+          "admin"
+        ],
         "mcp": "wake_upgrades_approve_selection",
         "required_scope": "admin",
         "schema": {
