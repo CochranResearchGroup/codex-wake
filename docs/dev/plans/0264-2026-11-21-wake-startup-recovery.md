@@ -83,8 +83,8 @@ Integration branch `feat/issue-749-wake-recovery`, base `a1dbceed656c4c906f87b28
 
 | Ticket | Blockers | Owner | State |
 | --- | --- | --- | --- |
-| #750 Startup recovery | None | primary | Validated locally at `9beac576` |
-| #751 Binding and readiness | None | readiness751 | Source `97f1db94`, integrated and validated at `22eb8b9e` |
+| #750 Startup recovery | None | primary | Validated locally at `9beac576`, tracker closed |
+| #751 Binding and readiness | None | readiness751 | Source `97f1db94`, integrated and validated at `22eb8b9e`, tracker closed |
 | #752 Exact tab restoration | #750, #751 | restore752 | Running from `22eb8b9e` |
 | #753 First-focus marker | #752 | Unassigned | Pending |
 
