@@ -56,6 +56,18 @@ class LiveWakeRestoreTests(unittest.TestCase):
                 profiles.chmod(0o600)
 
             save_profile()
+            from base64 import urlsafe_b64encode
+
+            def cache_account(account_id):
+                claims = {'https://api.openai.com/auth': {'chatgpt_account_id': account_id}}
+                payload = urlsafe_b64encode(json.dumps(claims).encode()).decode().rstrip('=')
+                cache = home / 'auth.json'
+                cache.write_text(json.dumps({'tokens': {'id_token': 'test.' + payload + '.test',
+                                                        'access_token': 'test'}}))
+                cache.chmod(0o600)
+
+            home.chmod(0o700)
+            cache_account('original-account')
             thread = dict(id=THREAD, cwd=str(root), modelProvider='openai')
             metadata = dict(codexHome=str(home))
             identity = RuntimeIdentity.from_metadata(thread, metadata)
@@ -89,7 +101,7 @@ class LiveWakeRestoreTests(unittest.TestCase):
             self.assertEqual(bound['status'], 'configured')
             self.assertEqual(bound['profile'], 'saved')
             self.assertEqual(bound['account']['name'], 'saved-account')
-            self.assertEqual(bound['account']['provider_identity'], 'unverified')
+            self.assertEqual(bound['account']['provider_identity'], 'cached_match')
             lookup = dict(schedule_id=saved['id'])
             self.assertEqual(owner.execute('wakes.schedules.show', lookup)['restoration'], bound)
             meta = dict(threadId=THREAD, sessionId=THREAD, callId='restore-inspection',
@@ -99,6 +111,12 @@ class LiveWakeRestoreTests(unittest.TestCase):
                 dict(lookup, caller_thread_id=THREAD), native_context=meta)
             self.assertFalse(failed, result)
             self.assertEqual(result['restoration'], bound)
+
+            cache_account('different-account')
+            blocked = owner.execute('wakes.schedules.show', lookup)['restoration']
+            self.assertEqual(blocked, dict(status='blocked', reason='live_restore_provider_account_changed'))
+            cache_account('original-account')
+            self.assertEqual(owner.execute('wakes.schedules.show', lookup)['restoration'], bound)
 
             profile['tmux_session'] = 'changed'
             save_profile()

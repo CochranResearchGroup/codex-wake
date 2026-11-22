@@ -296,8 +296,11 @@ class ScheduleStore:
             if wake_records is None:
                 wake_records = {item.record['id']: item.record for item in all_records(self.root, include_archive=True)}
             for wake_id, occurrence_id in identifiers.items():
-                if wake_records.get(wake_id, {}).get('native_delivery', {}).get('state') == 'uncertain':
-                    uncertain.append(dict(occurrence_id=occurrence_id, wake_id=wake_id))
+                delivery = wake_records.get(wake_id, {}).get('native_delivery', {})
+                if delivery.get('state') == 'uncertain':
+                    reason = delivery.get('reconciliation', {}).get('reason') or 'delivery_outcome_unknown'
+                    uncertain.append(dict(occurrence_id=occurrence_id, wake_id=wake_id,
+                        reconciliation=dict(reason=reason, command=['native', 'reconcile', wake_id])))
         return dict(value, session_mode=value['request']['session_mode'],
             persistence=dict(saved=True),
             restoration=LiveWakeRestorer(self.root).inspect(
@@ -399,7 +402,7 @@ def poll_schedules(root, clock, *, runtime_adapter=None):
             newly_due = []
             if value['state'] == 'attention':
                 store.save(value)
-                results.append(store.receipt(value))
+                results.append(store.receipt(value, wake_records=wakes))
                 continue
             for _ in range(MAX_POLL_OCCURRENCES):
                 due = timestamp(value['next_due_at'])
@@ -483,7 +486,7 @@ def poll_schedules(root, clock, *, runtime_adapter=None):
                     candidate['reason'] = str(exc)
                     value['attention'] = str(exc)
             store.save(value)
-            results.append(store.receipt(value))
+            results.append(store.receipt(value, wake_records=wakes))
     return results
 
 

@@ -70,6 +70,8 @@ class RecurringSchedules(unittest.TestCase):
             self.assertEqual(first_now['state'], 'enabled')
             self.assertEqual(first_now['occurrences'][0]['reconciliation_reason'], 'delivery_outcome_unknown')
             self.assertEqual(first_now['occurrences'][0]['wake_id'], wake.record['id'])
+            self.assertEqual(first_now['delivery']['uncertain_occurrences'][0]['reconciliation'],
+                {'reason': 'delivery_outcome_unknown', 'command': ['native', 'reconcile', wake.record['id']]})
             self.assertEqual(self.cli(root, 'show', second['id'])['occurrences'][0]['state'], 'pending')
             self.assertEqual(len(all_records(root)), 2)
 

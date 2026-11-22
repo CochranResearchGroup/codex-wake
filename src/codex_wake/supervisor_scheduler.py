@@ -13,7 +13,7 @@ import threading
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from .records import WakeError
 from .supervisor import (
@@ -103,8 +103,8 @@ def reconcile_root(config: SupervisorConfig, root_id: str, *, expected_token: st
         hold.unlink()
 
 
-def recover_interrupted_root(config: SupervisorConfig, entry: dict[str, Any]) -> None:
-    """Transfer a supervisor hold to record-level recovery under poll custody."""
+def recover_interrupted_root(config: SupervisorConfig, entry: dict[str, Any]) -> Literal['owner_busy'] | None:
+    """Transfer a supervisor hold under poll custody, reporting temporary contention."""
     from .monitor_ownership import MonitorOwnership
     from .records import ACTIVE_STATUS_DIRS, classify_record, WakePath
 
@@ -114,7 +114,7 @@ def recover_interrupted_root(config: SupervisorConfig, entry: dict[str, Any]) ->
         return
     with MonitorOwnership(root) as owner:
         if not owner.acquired:
-            return
+            return 'owner_busy'
         task = json.loads(marker.read_text())
         if not isinstance(task, dict) or task.get('recovery_schema') != 1:
             return
@@ -181,6 +181,7 @@ class SupervisorScheduler:
         self._closed = False
         self._entries: list[dict[str, Any]] = []
         self._refresh_at = 0.0
+        self._startup_recovery: set[str] = set()
 
     def __enter__(self):
         self.config.state_dir.mkdir(parents=True, exist_ok=True)
@@ -198,16 +199,21 @@ class SupervisorScheduler:
                 path.unlink()
             for entry in iter_registry_entries(self.config.registry_dir):
                 if entry.get('enabled') and entry.get('wake_root'):
-                    try:
-                        recover_interrupted_root(self.config, entry)
-                    except (OSError, RuntimeError, TypeError, ValueError, WakeError):
-                        # Retain the original marker for this root. Other roots
-                        # can start even when its recovery evidence is unreadable.
-                        continue
+                    self._recover_startup_entry(entry)
         except Exception:
             self.close()
             raise
         return self
+
+    def _recover_startup_entry(self, entry: dict[str, Any]) -> None:
+        root_id = entry['root_id']
+        self._startup_recovery.discard(root_id)
+        try:
+            if recover_interrupted_root(self.config, entry) == 'owner_busy':
+                self._startup_recovery.add(root_id)
+        except (OSError, RuntimeError, TypeError, ValueError, WakeError):
+            # Unreadable evidence keeps the original marker for this root.
+            return
 
     @property
     def running_count(self) -> int:
@@ -285,6 +291,10 @@ class SupervisorScheduler:
         if now >= self._refresh_at:
             self._entries = iter_registry_entries(self.config.registry_dir)
             self._refresh_at = now + min(self.config.interval, 1.0)
+            for entry in self._entries:
+                if (entry.get('root_id') in self._startup_recovery
+                        and entry.get('enabled') and entry.get('wake_root')):
+                    self._recover_startup_entry(entry)
         busy = {w.task['key'] for w in self.workers if w.task}
         due: dict[str, dict[str, Any]] = {}
         for entry in self._entries:

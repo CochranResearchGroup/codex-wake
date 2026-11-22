@@ -84,13 +84,17 @@ class LiveWakeRestorer:
         if 'identity' in binding:
             profile = resume_profile(config, binding['profile'])
             identity = binding['identity']
-            if (not isinstance(identity, dict) or set(identity) != PINNED_IDENTITY_FIELDS
+            if (not isinstance(identity, dict) or set(identity) not in (
+                        PINNED_IDENTITY_FIELDS, PINNED_IDENTITY_FIELDS | {'provider_account_sha256'})
                     or identity.get('profile_sha256') != fingerprint(profile)
                     or identity.get('conversation_id') != thread_id or identity.get('harness') != 'codex'
                     or identity.get('cwd') != profile['cwd']):
                 raise RuntimeTargetError('unavailable', 'live_restore_pinned_profile_changed')
             if _home_generation(identity['codex_home']) != identity['home_generation']:
                 raise RuntimeTargetError('unavailable', 'live_restore_account_home_changed')
+            if 'provider_account_sha256' in identity:
+                if _provider_account_fingerprint(identity) != identity['provider_account_sha256']:
+                    raise RuntimeTargetError('unavailable', 'live_restore_provider_account_changed')
         return binding, config
 
     def inspect(self, target):
@@ -115,7 +119,8 @@ class LiveWakeRestorer:
                     cwd=profile['cwd'], profile=binding['profile'],
                     account=dict(status='home_pinned' if identity else 'unpinned',
                                  name=identity['account'] if identity else None,
-                                 provider_identity='unverified',
+                                 provider_identity='cached_match' if identity and 'provider_account_sha256' in identity
+                                 else 'unverified',
                                  codex_home=identity['codex_home'] if identity else profile.get('codex_home')),
                     managed_agent_id=binding['managed_agent_id'],
                     placement=binding.get('placement'))
@@ -199,6 +204,9 @@ class LiveWakeRestorer:
         thread = read_codex_thread(latest)
         if thread.get('id') != target['thread_id'] or thread.get('cwd') != profile.get('cwd') or profile.get('cwd') != agent['root']:
             raise RuntimeTargetError('unavailable', 'live_restore_workspace_unverified')
+        if _requires_provider_account(thread, agent, profile) and not (
+                pinned and pinned.get('provider_account_sha256')):
+            raise RuntimeTargetError('unavailable', 'live_restore_provider_account_binding_required')
         state = thread.get('status', {}).get('type')
         if state == 'active':
             raise RuntimeTargetError('busy', 'live_restore_background_check_running')
@@ -262,10 +270,25 @@ def _saved_identity(agent, profile):
         if (identity.thread_id != agent['conversation_id'] or identity.cwd != profile['cwd']
                 or profile.get('codex_home', codex_home) != codex_home):
             raise RuntimeTargetError('unavailable', 'live_restore_saved_identity_changed')
-        return dict(conversation_id=identity.thread_id, harness='codex', cwd=identity.cwd,
-                    namespace=identity.namespace, codex_home=codex_home,
-                    home_generation=_home_generation(codex_home),
-                    account=agent.get('profile') or Path(codex_home).name)
+        saved = dict(conversation_id=identity.thread_id, harness='codex', cwd=identity.cwd,
+                     namespace=identity.namespace, codex_home=codex_home,
+                     home_generation=_home_generation(codex_home),
+                     account=agent.get('profile') or Path(codex_home).name)
+        if _requires_provider_account(thread, agent, profile):
+            saved['provider_account_sha256'] = _provider_account_fingerprint(saved)
+        return saved
+
+
+def _requires_provider_account(thread, agent, profile):
+    return thread.get('modelProvider') == 'openai' and bool(agent.get('profile') or profile.get('codex_home'))
+
+
+def _provider_account_fingerprint(identity):
+    from .account_observation import cached_account_fingerprint
+    observed = cached_account_fingerprint(Path(identity['codex_home']), identity['home_generation'])
+    if not observed:
+        raise RuntimeTargetError('unavailable', 'live_restore_provider_account_unavailable')
+    return observed
 
 
 class _RestoreRuntime(SavedRuntime):
