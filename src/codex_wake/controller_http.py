@@ -174,8 +174,8 @@ class ProtectedOperations:
         'grok_auth.revoke': ('account.revoke', None, None),
         'grok_models.list': ('account.observe', None, None),
         'grok_models.resolve': ('account.observe', None, None),
-        **{'upgrades.'+verb: ('observe' if verb in ('status','list','show','discovery') else 'admin',None,None)
-            for verb in ('status','list','show','enable','disable','start','advance','cancel','poll','discovery','rollback','reconcile','cache_cleanup')},
+        **{spec[1]: ('observe' if spec[5] else 'admin', None, None)
+           for spec in upgrade_specs().values()},
         **{'sessions.' + verb: ('observe' if verb in ('capabilities','wait','checkpoint') else 'control', None, None)
             for verb in ('capabilities','create','prompt','wait','cancel','checkpoint','fork')},
         'health.observe': ('observe', None, None),

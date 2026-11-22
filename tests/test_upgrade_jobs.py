@@ -420,7 +420,8 @@ class UpgradeJobsTests(unittest.TestCase):
                         expected=post('/operations',dict(operation='upgrades.'+verb,arguments=args))
                         self.assertFalse(called['result']['isError'],called)
                         self.assertEqual(called['result']['structuredContent'],expected)
-                for verb in ('show','advance','cancel','rollback','reconcile'):
+                for verb in ('show','advance','approve_selection','cancel','rollback','reconcile'):
                     self.assertIn('job_id',published['wake_upgrades_'+verb]['inputSchema']['required'])
+                self.assertIn('package_sha256', published['wake_upgrades_approve_selection']['inputSchema']['required'])
             finally:
                 server.shutdown();server.server_close();thread.join(timeout=2)
