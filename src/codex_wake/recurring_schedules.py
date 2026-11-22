@@ -338,6 +338,10 @@ def poll_schedules(root, clock, *, runtime_adapter=None):
                 if wake and item['state'] not in ('completed', 'turn_failed', 'turn_interrupted'):
                     item['state'] = wake['status']
                     delivery = wake.get('native_delivery', {})
+                    if delivery.get('state') == 'uncertain':
+                        item['reconciliation_reason'] = 'delivery_outcome_unknown'
+                        continue
+                    item.pop('reconciliation_reason', None)
                     execution = delivery.get('execution')
                     if delivery.get('state') == 'accepted' and execution not in ('turn_completed', 'turn_failed', 'turn_interrupted'):
                         try:

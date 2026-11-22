@@ -67,6 +67,25 @@ class SchedulingTests(unittest.TestCase):
             reconcile_root(config, 'one', expected_token='old-token')
             self.assertFalse((root / 'monitor-reconciliation.json').exists())
 
+    def test_startup_recovers_a_versioned_interrupted_poll(self):
+        from codex_wake.supervisor_scheduler import SupervisorScheduler
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            config = build_supervisor_config(registry_dir=base / 'registry',
+                state_dir=base / 'state/supervisor', validate_executable=False)
+            root = base / 'wake'
+            root.mkdir()
+            enroll_root(wake_root=root, registry_dir=config.registry_dir, root_id='one')
+            hold = root / 'monitor-reconciliation.json'
+            hold.write_text(json.dumps({'root_id': 'one', 'wake_root': str(root),
+                'token': 'old-token', 'recovery_schema': 1,
+                'reason': 'supervisor_stopped_with_inflight_poll'}))
+            with SupervisorScheduler(config, dispatch=False) as scheduler:
+                self.assertFalse(hold.exists())
+                self.assertTrue((config.state_dir / 'reconciled' / 'old-token.json').is_file())
+                scheduler.tick()
+                self.assertEqual(scheduler.running_count, 1)
+
     def test_hung_root_does_not_block_another_root_and_is_held(self):
         from codex_wake.supervisor_scheduler import SupervisorScheduler
         with tempfile.TemporaryDirectory() as tmp:

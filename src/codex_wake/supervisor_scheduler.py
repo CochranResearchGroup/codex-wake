@@ -103,6 +103,63 @@ def reconcile_root(config: SupervisorConfig, root_id: str, *, expected_token: st
         hold.unlink()
 
 
+def recover_interrupted_root(config: SupervisorConfig, entry: dict[str, Any]) -> None:
+    """Transfer a supervisor hold to record-level recovery under poll custody."""
+    from .monitor_ownership import MonitorOwnership
+    from .records import ACTIVE_STATUS_DIRS, classify_record, WakePath
+
+    root = Path(entry['wake_root']).expanduser().resolve()
+    marker = root / 'monitor-reconciliation.json'
+    if not marker.is_file() or marker.is_symlink():
+        return
+    with MonitorOwnership(root) as owner:
+        if not owner.acquired:
+            return
+        task = json.loads(marker.read_text())
+        if not isinstance(task, dict) or task.get('recovery_schema') != 1:
+            return
+        token = task.get('token')
+        if (not isinstance(token, str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', token)
+                or task.get('root_id') != entry['root_id'] or task.get('wake_root') != str(root)
+                or task.get('reason') not in ('supervisor_stopped_with_inflight_poll',
+                    'coordinator_restarted_with_inflight_poll', 'poll_failed_with_possible_effects',
+                    'worker_admission_outcome_unknown', 'worker_exited_with_inflight_poll',
+                    'poll_timeout_outcome_unknown')):
+            return
+        pending = config.state_dir / 'inflight' / (_key(str(root)) + '.json')
+        if pending.exists():
+            admission = json.loads(pending.read_text())
+            if not isinstance(admission, dict) or admission.get('token') != token:
+                return
+        legacy = []
+        for path in (root / 'firing').glob('*.json'):
+            if path.is_symlink():
+                return
+            record = json.loads(path.read_text())
+            if not isinstance(record, dict) or record.get('status') != 'firing' or record.get('id') != path.stem:
+                return
+            classification = classify_record(record)
+            if classification == 'hold':
+                return
+            if classification not in ('native_intent_v6', 'runtime_intent_v7'):
+                if any((root / status / path.name).exists() for status in ACTIVE_STATUS_DIRS if status != 'firing'):
+                    return
+                if record.get('target', {}).get('transport') == 'native':
+                    if record.get('native_delivery', {}).get('state') not in ('uncertain', 'accepted'):
+                        return
+                    continue
+                legacy.append(WakePath(path, record))
+        # Native dispatch retains its intent before submission and reconciles
+        # that intent without replay. Older transports lack that guarantee.
+        for item in legacy:
+            if not item.record.get('ack_wait_time_held'):
+                _atomic_write_json(item.path, dict(item.record, ack_wait_time_held=True))
+        _atomic_write_json(config.state_dir / 'reconciled' / (token + '.json'),
+                           {**task, 'recovery': 'record_scoped', 'legacy_holds': [w.record['id'] for w in legacy]})
+        pending.unlink(missing_ok=True)
+        marker.unlink()
+
+
 class SupervisorScheduler:
     """One coordinator, a bounded reusable pool, and independent root schedules.
 
@@ -136,6 +193,14 @@ class SupervisorScheduler:
                 task = json.loads(path.read_text())
                 _hold(task, 'coordinator_restarted_with_inflight_poll')
                 path.unlink()
+            for entry in iter_registry_entries(self.config.registry_dir):
+                if entry.get('enabled') and entry.get('wake_root'):
+                    try:
+                        recover_interrupted_root(self.config, entry)
+                    except (OSError, RuntimeError, TypeError, ValueError, WakeError):
+                        # Retain the original marker for this root. Other roots
+                        # can start even when its recovery evidence is unreadable.
+                        continue
         except Exception:
             self.close()
             raise
@@ -254,7 +319,8 @@ class SupervisorScheduler:
                 if len(self.workers) >= self.config.max_workers:
                     break
                 worker = self._new_worker()
-            task = {**item, 'token': uuid.uuid4().hex, 'coordinator_pid': os.getpid()}
+            task = {**item, 'token': uuid.uuid4().hex, 'coordinator_pid': os.getpid(),
+                    'recovery_schema': 1}
             _atomic_write_json(self._journal(task), task)
             worker.task = task
             worker.started = now
