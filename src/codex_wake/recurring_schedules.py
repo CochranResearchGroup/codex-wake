@@ -270,14 +270,39 @@ class ScheduleStore:
                 replace_record(self.root, found, record)
                 item['state'] = 'cancelled'
 
-    def receipt(self, value):
+    def bind_restoration(self, identifier, *, profiles, managed_agent_id, profile, principal, authorize=None):
+        from .wake_live_restore import LiveWakeRestorer
+        if principal is None or principal.role != 'operator':
+            raise WakeError('live_restore_operator_required')
+        with WakeLifecycleLock(self.root, 'recurring-schedules'):
+            value = self.read(identifier)
+            self.authorize(value, principal, authorize)
+            LiveWakeRestorer(self.root).bind(value['target'], profiles=profiles,
+                                            managed_agent_id=managed_agent_id, profile=profile,
+                                            authorize=lambda: self.authorize(value, principal, authorize))
+        return self.receipt(value)
+
+    def receipt(self, value, *, wake_records=None):
         from .monitor import read_monitor_health
         from .signal_records import probe_managed_reader_capability
         health = read_monitor_health(self.root) or {}
         reader = probe_managed_reader_capability(self.root)
         ready = bool(reader and 8 in reader.schema_versions and health.get('mode') == 'loop'
                      and all(c in health.get('reader_capabilities', []) for c in ('recurring_schedules_v1', 'wake_session_modes_v1')))
+        from .wake_live_restore import LiveWakeRestorer
+        identifiers = {item['wake_id']: item['id'] for item in value['occurrences'] if item.get('wake_id')}
+        uncertain = []
+        if identifiers:
+            if wake_records is None:
+                wake_records = {item.record['id']: item.record for item in all_records(self.root, include_archive=True)}
+            for wake_id, occurrence_id in identifiers.items():
+                if wake_records.get(wake_id, {}).get('native_delivery', {}).get('state') == 'uncertain':
+                    uncertain.append(dict(occurrence_id=occurrence_id, wake_id=wake_id))
         return dict(value, session_mode=value['request']['session_mode'],
+            persistence=dict(saved=True),
+            restoration=LiveWakeRestorer(self.root).inspect(
+                dict(value['target'], session_mode=value['request']['session_mode'])),
+            delivery=dict(uncertain=bool(uncertain), uncertain_occurrences=uncertain),
             armed=ready and value['state'] == 'enabled',
             scheduling_status='armed' if ready and value['state']=='enabled' else 'retained_unmonitored' if not ready and value['state']=='enabled' else value['state'],
             monitor=dict(ready=ready, wake_root=str(self.root)))

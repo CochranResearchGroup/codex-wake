@@ -24,6 +24,26 @@ def fingerprint(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
 
+def resume_profile(config, name):
+    try:
+        p = config['profiles'][name]
+        required = {'cwd', 'app_server', 'codex_path', 'tmux_session', 'timeout'}
+        if (config['version'] != 1 or not required <= set(p)
+                or set(p) - required - {'tmux_socket', 'codex_home', 'resources', 'strict_execution'}):
+            raise ValueError
+        for key in required - {'timeout'} | (set(p) & {'tmux_socket', 'codex_home'}):
+            if not isinstance(p[key], str) or not p[key] or any(ord(c)<32 for c in p[key]):raise ValueError
+        if (type(p['timeout']) not in (int,float) or not math.isfinite(p['timeout'])
+                or not 0 < p['timeout'] <= 30 or not p['app_server'].startswith('unix:///')
+                or not Path(p['codex_path']).is_absolute()
+                or Path(p['cwd']).resolve() != Path(p['cwd']) or not Path(p['cwd']).is_dir()):raise ValueError
+        if 'strict_execution' in p:
+            # Restarting a contained executor is a separate recovery operation.
+            raise ResumeError('resume_strict_executor_recovery_unqualified')
+        return p
+    except (KeyError, TypeError, ValueError):
+        raise ResumeError('resume_profile_unavailable') from None
+
 class SavedRuntime:
     """Existing owned Unix protocol plus exact terminal/process observation."""
     def __init__(self, *, binding_source=None, terminal=None, now=None):
@@ -88,24 +108,7 @@ class AgentResume:
         _private(self.directory, True)
 
     def _profile(self, name):
-        try:
-            p = self.config['profiles'][name]
-            required = {'cwd', 'app_server', 'codex_path', 'tmux_session', 'timeout'}
-            if (self.config['version'] != 1 or not required <= set(p)
-                    or set(p) - required - {'tmux_socket', 'codex_home', 'resources', 'strict_execution'}):
-                raise ValueError
-            for key in required - {'timeout'} | (set(p) & {'tmux_socket', 'codex_home'}):
-                if not isinstance(p[key], str) or not p[key] or any(ord(c)<32 for c in p[key]):raise ValueError
-            if (type(p['timeout']) not in (int,float) or not math.isfinite(p['timeout'])
-                    or not 0 < p['timeout'] <= 30 or not p['app_server'].startswith('unix:///')
-                    or not Path(p['codex_path']).is_absolute()
-                    or Path(p['cwd']).resolve() != Path(p['cwd']) or not Path(p['cwd']).is_dir()):raise ValueError
-            if 'strict_execution' in p:
-                # Restarting a contained executor is a separate recovery operation.
-                raise ResumeError('resume_strict_executor_recovery_unqualified')
-            return p
-        except (KeyError, TypeError, ValueError):
-            raise ResumeError('resume_profile_unavailable') from None
+        return resume_profile(self.config, name)
 
     def _permission(self, principal, agent, profile, intent):
         if not isinstance(principal, Principal):raise ResumeError('resume_identity_unverified')
