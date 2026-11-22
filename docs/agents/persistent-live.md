@@ -29,7 +29,10 @@ tool `wake_wakes_schedules_bind_restoration`. The operation pins the
 native conversation, Codex harness, working directory, and the profile's
 account home and filesystem identity in `WAKE_ROOT/wake-live-restore.json`.
 The account home identifies the selected Wake Codex account configuration.
-Provider login identity within that home remains unverified. The existing
+An OpenAI conversation tied to a named managed profile or explicit profile
+home also requires a matching local cached ChatGPT account claim. Binding
+stores only a digest. A changed or unavailable claim holds restoration.
+The cached claim does not verify a current provider login. The existing
 version 1 mappings without identity evidence still work and display
 `configured_legacy` with an unpinned account.
 

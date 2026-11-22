@@ -9,12 +9,12 @@ lanes:
     branch: feat/issue-749-wake-recovery
     worker_branches: [feat/issue-751-readiness, feat/issue-752-restore, feat/issue-753-restore-marker]
     target: origin/main
-    plan_state: OPEN
+    plan_state: CLOSED
     custody_state: REMOTE_PRESERVED
     dependencies: []
     overlaps: [TAB-MANAGEMENT-743]
     updated_at: 2026-11-21
-    disposition: Startup recovery, readiness, and exact tab restoration tickets closed. First-focus marker is in progress.
+    disposition: All four implementation tickets closed. One two-axis review and one remediation passed. Integration branch preserved.
   - id: TAB-MANAGEMENT-743
     owner: primary / ecochran76
     objective: Verify complete tab management across the controller, CLI, and MCP

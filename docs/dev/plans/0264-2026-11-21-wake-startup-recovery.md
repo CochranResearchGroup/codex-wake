@@ -1,6 +1,6 @@
 # Plan 0264 | Wake startup recovery
 
-State: IN_PROGRESS
+State: CLOSED
 Owner: primary / ecochran76
 Work items: #723 and #742
 Spec: #749
@@ -86,7 +86,7 @@ Integration branch `feat/issue-749-wake-recovery`, base `a1dbceed656c4c906f87b28
 | #750 Startup recovery | None | primary | Validated locally at `9beac576`, tracker closed |
 | #751 Binding and readiness | None | readiness751 | Source `97f1db94`, integrated and validated at `22eb8b9e`, tracker closed |
 | #752 Exact tab restoration | #750, #751 | restore752 | Source `1d9fdda9`, integrated and validated at `b2aeccef`, tracker closed |
-| #753 First-focus marker | #752 | marker753 | Running from `b2aeccef` |
+| #753 First-focus marker | #752 | marker753 | Source `c0808ce1`, integrated and validated at `0bc3925f`, tracker closed |
 
 Startup recovery hands versioned poll evidence to the existing durable
 record-level dispatcher. Unversioned poll holds still require exact-token
@@ -129,3 +129,44 @@ Earlier attempts are retained. The older wire-v1 Native binary left an input
 queued when used with the wire-v2 time reader. That result was not counted as
 delivery. The matching-native run used a disposable provider and did not
 exercise a provider login.
+
+The marker worker and integration both passed the 15 focused restoration and
+formatter-startup checks. A second integration selection passed 32 tests.
+The private tmux check verified explicit select, next, previous, and last
+window actions. Startup rendering shows the marker on the initial implicit
+selection. Focus clears the marker and preserves placement in inspection.
+
+## Final review and remediation
+
+The one Standards and Spec review compared `a1dbceed...0bc3925f` after all
+four implementation tickets closed.
+
+- Standards accepted two findings. Temporary startup lock contention stranded
+  a recoverable root. Schedule readback on the monitor hot path also reread
+  the wake archive for each schedule. The supervisor retries only contended
+  startup candidates on the registry cadence, and polling reuses its existing
+  wake snapshot.
+- Spec accepted three findings, including the same startup contention defect.
+  A changed account inside the same registered profile home could pass the
+  existing check. Affected OpenAI profiles now pin the local cached ChatGPT
+  account claim as a digest and hold restoration if it changes or becomes
+  unavailable. This is cached identity evidence. Verified live attachment reuse
+  remains available. Schedule readback now includes the original unresolved
+  reason when retained and the exact native reconciliation command.
+
+The single focused TDD pass at `2b7939fa` reproduced all three public
+behavior failures and passed 12 selected regression tests after the fix.
+
+The final affected source selections passed 140 tests on Python 3.11 and
+141 on Python 3.12, including the disposable supervisor qualification on
+3.12. Sixteen additional account and controller tests passed. Pinned Ruff
+and Git whitespace checks passed. Hosted CI was skipped.
+
+The final private native run repeated restoration and confirmed the
+first-focus marker and retained placement on the fixed source. Its
+receipt SHA-256 is
+`e1e4f811bc70591bc5221887fd4a5b96c708510ec43c5558c7807cda3d51fb3d`.
+The acceptance exercised the pinned profile home with loopback responses.
+Cached account drift is covered through the public API regression. The
+implementation tickets are closed and the integration branch is published.
+The parent spec remains open for integration and deployment tracking.
