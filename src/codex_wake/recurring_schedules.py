@@ -305,6 +305,8 @@ class ScheduleStore:
                     held.append(dict(occurrence_id=occurrence_id, wake_id=wake_id,
                         wake_status=wake.get('status'), reason=outcome.get('reason'),
                         recipient_state=observed.get('state'), recipient_reason=observed.get('reason'),
+                        native_status=observed.get('native_status'),
+                        observation_recorded_by=observed.get('recorded_by'),
                         next_check_at=wake.get('next_attempt_at'),
                         timing_reason=wake.get('time_recovery', {}).get('reason')))
                 if delivery.get('state') == 'uncertain':

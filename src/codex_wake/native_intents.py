@@ -425,6 +425,10 @@ def defer_recipient_check(record, clock):
     """Persist the next observation time without changing intent or expiry."""
     utc = clock.get('utc')
     if valid_utc(utc):
+        after_read = datetime.fromtimestamp(utc['upper'], UTC)
+        observation = record.get('runtime_observation')
+        if observation and observation.get('native_status'):
+            observation['recorded_by'] = after_read.isoformat().replace('+00:00', 'Z')
         record['next_attempt_at'] = datetime.fromtimestamp(utc['upper'] + 30, UTC).isoformat().replace('+00:00', 'Z')
 
 
