@@ -308,6 +308,62 @@ class UpgradeJobsTests(unittest.TestCase):
                 self.assertEqual(held['repair_attempts'],0)
                 self.assertEqual(calls,[])
 
+    def test_qualified_package_requires_exact_approval_within_original_deadline(self):
+        import hashlib
+        from codex_wake.managed_inventory import InventoryError
+        from codex_wake.controller_http import TOOLS
+
+        self.assertEqual(TOOLS['wake_upgrades_approve_selection'][0], 'upgrades.approve_selection')
+        for expire in (False, True):
+            with self.subTest(expire=expire), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                target = {'host': 'fixture'}
+                actor = SimpleNamespace(subject='owner', scopes={'admin', 'observe'}, targets=[target])
+                recipe = root / 'recipe.json'
+                recipe.write_text(json.dumps(dict(id='candidate', upstream_version='0.172')))
+                (root / 'upgrade-bot.json').write_text(json.dumps(dict(schema_version=1, target=target,
+                    recipes={'release': str(recipe)}, first_production_opt_in=True, limits={'total_seconds': 10})))
+                counter = [10000]
+                calls = []
+                package = 'a' * 64
+
+                def execute(job):
+                    phase = job['active_phase']
+                    calls.append(phase)
+                    return {'stage': dict(status='staged'),
+                            'qualify': dict(status='qualified', eligible_for_promotion=True, package_sha256=package),
+                            'promote': dict(status='selected')}[phase]
+
+                def call(verb, **arguments):
+                    owner = UpgradeJobs(root, clock=lambda: observation(counter[0]), executor=execute)
+                    return owner.execute(actor, 'upgrades.' + verb,
+                                         dict(expected_target=target, **arguments))['result']
+
+                call('enable')
+                job = call('start', recipe='release', upstream_version='0.172',
+                           expected_recipe_sha256=hashlib.sha256(recipe.read_bytes()).hexdigest())['job']
+                selector = dict(job_id=job['id'])
+                call('advance', **selector)
+                qualified = call('advance', **selector)['job']
+                self.assertEqual(qualified['reason'], 'awaiting_selection_approval')
+                self.assertEqual(call('advance', **selector)['job']['reason'], 'awaiting_selection_approval')
+                with self.assertRaisesRegex(InventoryError, 'exact qualified package'):
+                    call('approve_selection', **selector, package_sha256='b' * 64)
+                self.assertEqual(calls, ['stage', 'qualify'])
+
+                if expire:
+                    counter[0] += 11000
+                    with self.assertRaisesRegex(InventoryError, 'deadline_exhausted'):
+                        call('approve_selection', **selector, package_sha256=package)
+                    self.assertEqual(call('advance', **selector)['job']['reason'], 'deadline_exhausted')
+                    self.assertEqual(calls, ['stage', 'qualify'])
+                else:
+                    approved = call('approve_selection', **selector, package_sha256=package)['job']
+                    self.assertEqual(approved['deadline'], job['deadline'])
+                    self.assertEqual(approved['reason'], 'selection_approved')
+                    self.assertEqual(call('advance', **selector)['job']['state'], 'succeeded')
+                    self.assertEqual(calls, ['stage', 'qualify', 'promote'])
+
     def test_local_operator_can_disable_without_a_service_grant_ritual(self):
         import contextlib
         import io

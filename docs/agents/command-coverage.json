@@ -760,6 +760,7 @@
     "task-briefs.propose",
     "time.inspect",
     "upgrades.advance",
+    "upgrades.approve_selection",
     "upgrades.cache_cleanup",
     "upgrades.cancel",
     "upgrades.disable",
