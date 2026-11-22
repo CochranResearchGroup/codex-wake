@@ -54,7 +54,7 @@ Integration branch `feat/issue-756-upgrade-opt-in`, base
 | Ticket | Blocked by | Owner | State |
 | --- | --- | --- | --- |
 | #757 Exact release admission | None | primary | Validated and closed at `a089dc26` |
-| #758 Exact-package approval | None | approval758 | Source `d76196fb`, integrated and validated at `a57b8351` |
+| #758 Exact-package approval | None | approval758 | Source `d76196fb`, integrated, validated and tracker closed at `a57b8351` |
 | #759 Dedicated upgrade and rollback | #757, #758 | Unassigned | Blocked on a newer supported release |
 
 The host policy field `first_production_opt_in` selects these gates. It is
