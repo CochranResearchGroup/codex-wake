@@ -131,6 +131,51 @@ class LiveWakeRestoreTests(unittest.TestCase):
     def test_visible_restore_reconciles_one_launch_until_native_attachment_is_ready(self):
         self.exercise_restore(delayed_attachment=True)
 
+    def test_placement_reclaims_idle_shell_and_appends_when_slot_is_occupied(self):
+        from types import SimpleNamespace
+        from codex_wake.session_lifecycle import tmux_command
+        from codex_wake.wake_restore_placement import _idle_shell, _panes, launch_placed
+
+        for scenario in ('same_slot', 'moved_title', 'occupied'):
+            with self.subTest(scenario=scenario), tempfile.TemporaryDirectory() as cwd:
+                runtime = SimpleNamespace(tmux_socket=str(Path(cwd) / 'tmux.sock'), timeout=3)
+                slot = 11 if scenario == 'moved_title' else 13
+                saved = dict(session='main', title='wk-grok', index=13)
+                tmux_command(runtime, 'new-session', '-d', '-s', 'main', '-c', cwd)
+                try:
+                    command = 'sleep 30' if scenario == 'occupied' else '/bin/bash --noprofile --norc'
+                    output = tmux_command(runtime, 'new-window', '-dP', '-F', '#{pane_id}',
+                                          '-t', f'main:{slot}', '-c', cwd, '-n', saved['title'], command)
+                    limit = time.monotonic() + 3
+                    if scenario != 'occupied':
+                        while time.monotonic() < limit:
+                            candidate = next(row for row in _panes(tmux_command, runtime, '=main')
+                                             if row['pane_id'] == output)
+                            if _idle_shell(candidate):
+                                break
+                            time.sleep(0.02)
+                    before = next(row for row in _panes(tmux_command, runtime, '=main') if row['pane_id'] == output)
+
+                    def launch(title, target):
+                        return tmux_command(runtime, 'new-window', '-dP', '-F', '#{window_id}\t#{pane_id}',
+                                            '-t', target, '-n', title, '-c', cwd, 'sleep 30')
+
+                    actual = launch_placed(tmux_command, runtime, saved, cwd, launch)
+                    old = next(row for row in _panes(tmux_command, runtime, '=main') if row['pane_id'] == output)
+                    self.assertEqual(old['pane_pid'], before['pane_pid'])
+                    self.assertEqual(old['window_id'], before['window_id'])
+                    self.assertEqual(actual['title'], 'wk-grok-restored')
+                    if scenario == 'occupied':
+                        self.assertEqual(old['window_index'], '13')
+                        self.assertEqual(actual['index'], 14)
+                        self.assertIsNone(actual['placeholder'])
+                    else:
+                        self.assertEqual(actual['index'], slot)
+                        self.assertEqual(actual['placeholder']['pane_id'], output)
+                        self.assertEqual(int(old['window_index']), slot + 1)
+                finally:
+                    tmux_command(runtime, 'kill-server')
+
     def exercise_restore(self, missing_server=False, clock=time.time, delayed_attachment=False):
         from codex_wake.a2a_identity import RuntimeIdentity
         from codex_wake.managed_inventory import ManagedInventory, Observation
