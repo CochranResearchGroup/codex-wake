@@ -9,12 +9,12 @@ lanes:
     branch: feat/issue-756-upgrade-opt-in
     worker_branches: [feat/issue-758-approval]
     target: origin/main
-    plan_state: OPEN
+    plan_state: BLOCKED
     custody_state: REMOTE_PRESERVED
     dependencies: []
     overlaps: []
     updated_at: 2026-11-22
-    disposition: Release admission validated. Exact-package approval and dedicated qualification remain in scope.
+    disposition: Both implementation tickets validated. Dedicated qualification awaits a newer supported release.
   - id: WAKE-STARTUP-749
     owner: primary / ecochran76
     objective: Recover interrupted wake occurrences and restore exact live tabs

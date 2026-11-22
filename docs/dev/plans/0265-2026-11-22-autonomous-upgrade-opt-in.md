@@ -1,6 +1,6 @@
 # Plan 0265 | First autonomous upgrade opt-in
 
-State: OPEN
+State: BLOCKED
 Owner: primary / ecochran76
 Predecessor: #737 and Plan 0262
 Spec: https://github.com/CochranResearchGroup/codex-wake/issues/756
@@ -53,9 +53,9 @@ Integration branch `feat/issue-756-upgrade-opt-in`, base
 
 | Ticket | Blocked by | Owner | State |
 | --- | --- | --- | --- |
-| #757 Exact release admission | None | primary | Validated locally |
-| #758 Exact-package approval | None | approval758 | Running on `feat/issue-758-approval` |
-| #759 Dedicated upgrade and rollback | #757, #758 | Unassigned | Pending |
+| #757 Exact release admission | None | primary | Validated and closed at `a089dc26` |
+| #758 Exact-package approval | None | approval758 | Source `d76196fb`, integrated and validated at `a57b8351` |
+| #759 Dedicated upgrade and rollback | #757, #758 | Unassigned | Blocked on a newer supported release |
 
 The host policy field `first_production_opt_in` selects these gates. It is
 covered by the admitted job's policy digest. Existing policies retain
@@ -68,3 +68,18 @@ selection `PYTHONPATH=src:tests python -m unittest test_upgrade_discovery
 test_upgrade_jobs -q` passed 23 tests on Python 3.12 at deployed
 dependency versions. It exercised readback, immutable release admission,
 and deduplication after reopening the job owner.
+
+## Candidate check
+
+The installed Wake discovery path returned 0.171.0 from the official stable
+release feed. The six retained baseline package files match their manifest.
+Newer upstream tags are prereleases and fall outside the current discovery
+contract. No candidate job was started. #759 stays open with the release
+evidence. The single consolidated review and the one remediation pass remain
+pending ticket closure.
+
+For #758, the integrated public approval, discovery, and promotion selection
+passed 37 tests on each of Python 3.11 and 3.12. The initial broader
+87-test selections found one OAuth MCP catalog error on both runtimes.
+The controller catalog fix passed the focused reruns including that test.
+Pinned Ruff and whitespace checks passed. Hosted CI was skipped.
