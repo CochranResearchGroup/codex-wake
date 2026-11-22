@@ -7,6 +7,7 @@ import sys
 import time
 import tempfile
 import unittest
+import shutil
 from unittest.mock import patch
 
 from codex_wake.runtime_delivery import RuntimeTargetError
@@ -175,6 +176,57 @@ class LiveWakeRestoreTests(unittest.TestCase):
                         self.assertEqual(int(old['window_index']), slot + 1)
                 finally:
                     tmux_command(runtime, 'kill-server')
+
+    @unittest.skipUnless(shutil.which('tmux'), 'requires tmux')
+    def test_restored_window_visibly_marks_until_focus_and_retains_placement(self):
+        from types import SimpleNamespace
+        from codex_wake.session_lifecycle import tmux_command
+        from codex_wake.tab_format_projection import project
+        from codex_wake.tab_organization import TmuxTransport
+        from codex_wake.tab_restore_marker import mark_restored
+
+        with tempfile.TemporaryDirectory() as directory:
+            socket = str(Path(directory) / 'tmux.sock')
+            runtime = SimpleNamespace(tmux_socket=socket, timeout=3)
+            tmux_command(runtime, 'new-session', '-d', '-s', 'main', '-n', 'original')
+            try:
+                ids = tmux_command(runtime, 'new-window', '-dP', '-F', '#{window_id}\t#{pane_id}',
+                                   '-t', 'main:5', '-n', 'restored-title', 'sleep 30')
+                window, pane = ids.split('\t')
+                session = tmux_command(runtime, 'display-message', '-p', '-t', pane, '#{session_id}')
+                placement = dict(session='main', session_id=session, window_id=window, pane_id=pane,
+                                 index=5, title='restored-title', placeholder=None)
+                # Keep an existing user hook active on the same selection.
+                tmux_command(runtime, 'set-hook', '-g', 'after-select-window[7]',
+                             'set-option -wq @user_focus_seen 1')
+                mark_restored(tmux_command, runtime, placement)
+                transport = TmuxTransport(socket, session)
+
+                def inspect():
+                    windows = transport.snapshot(time.monotonic() + 3)['windows']
+                    return next(row for row in windows if row['window_id'] == window)
+
+                shown = project(dict(target=dict(presentation='byobu'), window=inspect(),
+                    bot_family=dict(root_bot_id='family', parent_bot_id='parent', parent_name='Parent')),
+                    dict(preset='slate'))
+                normal = shown['options']['window-status-format']
+                render = lambda: tmux_command(runtime, 'display-message', '-p', '-t', pane, normal)
+                self.assertIn('restored-title ↻', render())
+                self.assertIn('<Parent', render())
+                self.assertTrue(inspect()['restoration']['pending_focus'])
+                for command in (('select-window', '-t', window), ('next-window', '-t', session),
+                                ('previous-window', '-t', session), ('last-window', '-t', session)):
+                    with self.subTest(command=command[0]):
+                        tmux_command(runtime, *command)
+                        self.assertEqual(tmux_command(runtime, 'show-options', '-wv', '-t', window,
+                                                      '@user_focus_seen'), '1')
+                        self.assertNotIn('↻', render())
+                        self.assertEqual(inspect()['restoration'],
+                                         dict(label='Restored by Wake', pending_focus=False, placement=placement))
+                        tmux_command(runtime, 'select-window', '-t', session + ':0')
+                        mark_restored(tmux_command, runtime, placement)
+            finally:
+                tmux_command(runtime, 'kill-server')
 
     def exercise_restore(self, missing_server=False, clock=time.time, delayed_attachment=False):
         from codex_wake.a2a_identity import RuntimeIdentity
