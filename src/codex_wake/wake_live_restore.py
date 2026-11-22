@@ -326,9 +326,22 @@ class _RestoreRuntime(SavedRuntime):
             sessions.execute('tabs.session.ensure', dict(name=profile['tmux_session'], backend='byobu',
                 server=socket, start=True, defaults=dict(cwd=profile['cwd'])), container_only=True)
             recreated = True
-        if self.placement is None:
-            return super().launch(record, profile, guard, name)
+        from .tab_restore_marker import mark_restored, read_launched_placement
         launcher = super().launch
-        return launch_placed(tmux_command, runtime, self.placement, record['root'],
-                             lambda title, target: launcher(record, profile, guard, title,
-                                                            window_target=target), recreated=recreated)
+        if self.placement is None:
+            actual = launcher(record, profile, guard, name)
+            try:
+                actual = read_launched_placement(tmux_command, runtime, actual) or actual
+            except WakeError:
+                pass
+        else:
+            actual = launch_placed(tmux_command, runtime, self.placement, record['root'],
+                                   lambda title, target: launcher(record, profile, guard, title,
+                                                                  window_target=target), recreated=recreated)
+        if isinstance(actual, dict):
+            try:
+                mark_restored(tmux_command, runtime, actual)
+            except WakeError:
+                # Presentation failure must preserve the acknowledged launch receipt.
+                pass
+        return actual
