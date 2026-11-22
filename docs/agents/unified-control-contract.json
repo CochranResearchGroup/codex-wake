@@ -11990,7 +11990,7 @@
         "admission": "fresh_authenticated_actor_and_exact_target",
         "delegated_required_scopes": [],
         "mcp": "wake_upgrades_approve_selection",
-        "required_scope": null,
+        "required_scope": "admin",
         "schema": {
           "additionalProperties": false,
           "properties": {
