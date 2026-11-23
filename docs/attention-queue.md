@@ -18,11 +18,15 @@ A request packet contains `key`, `kind` (`notice` or `decision`), `question`,
 `permission_decision` and `context`. Notices have only `acknowledge`; decisions
 have `accept` and `decline`. Priority affects presentation only, not authority.
 
-Context fields are exact nonempty `owner` (verified principal conversation),
-`operation_id`, positive integer `attempt`, `task_id`, `allocation_id`, `runtime`,
+Context requires the exact fields `owner` (verified principal conversation),
+`operation_id`, `attempt`, `task_id`, `allocation_id`, `runtime`,
 `conversation_id`, `account`, `target`, `action`, `effect_scope`, `policy_root`,
-positive integer `policy_revision` and `operation_state`. Use explicit qualified
-sentinels for genuinely inapplicable account/allocation dimensions; omitting one
+`policy_revision` and `operation_state`. `attempt` and `policy_revision` are
+positive integers. `task_id` is a bounded nonempty string when a task applies,
+or JSON `null` when no task applies; retain the field and do not invent a task
+named `none`. Named tasks still require the caller's verified task scope.
+All other fields are bounded nonempty strings. Use explicit qualified sentinels
+for genuinely inapplicable account/allocation dimensions; omitting a field
 silently is unsupported. A host feature must qualify the meaning of those values.
 The fingerprint binds the entire request, including context, scope and expiry.
 
