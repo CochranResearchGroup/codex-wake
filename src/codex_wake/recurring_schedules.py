@@ -516,7 +516,7 @@ def publish_attention(store, value, occurrence, now):
             options=['acknowledge'], evidence=[value['id'], occurrence['id']], priority='normal',
             expires_at=timestamp(occurrence['expires_at']).timestamp(), permission_decision=False,
             context=dict(owner=principal.subject, operation_id=occurrence['id'], attempt=1,
-                task_id=context.get('task_id') or 'none', allocation_id='unchanged', runtime='codex',
+                task_id=context.get('task_id'), allocation_id='unchanged', runtime='codex',
                 conversation_id=value['request']['thread_id'], account='not_attested', target=value['request']['thread_id'],
                 action='wake.background' if value['request']['session_mode']=='background' else 'wake.new_tab',
                 effect_scope='resume_existing_scope', policy_root=str(permissions.root), policy_revision=revision, operation_state='blocked'))

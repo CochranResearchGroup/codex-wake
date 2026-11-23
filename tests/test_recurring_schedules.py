@@ -87,6 +87,35 @@ class RecurringSchedules(unittest.TestCase):
                              '2033-05-18T03:33:50Z')
 
 
+    def test_taskless_schedule_publishes_actionable_delivery_notice(self):
+        from codex_wake.recurring_schedules import poll_schedules
+        from codex_wake.records import replace_record
+        from codex_wake.attention_queue import AttentionQueue
+        from codex_wake.session_permissions import PermissionStore, Principal
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            spec = root / 'request.json'
+            spec.write_text(json.dumps(request()))
+            registered = self.cli(root, 'register', '--request', str(spec), '--codex-path', sys.executable)
+            PermissionStore(root).configure({'version': 1, 'global': {'profile': 'permissive'}},
+                Principal('operator', 'operator'), expected_revision=0)
+            clock = {'utc': {'lower': 2000000000, 'upper': 2000000000,
+                            'status': 'network', 'sources': ['a', 'b']}, 'counter': None}
+            poll_schedules(root, clock)
+            wake, = all_records(root)
+            replace_record(root, wake, dict(wake.record,
+                policy_outcome={'state': 'held', 'reason': 'wake_route_unavailable'},
+                runtime_observation={'state': 'unsupported', 'reason': 'route_unsupported'}))
+            poll_schedules(root, clock)
+            from codex_wake.recurring_schedules import ScheduleStore
+            store = ScheduleStore(root)
+            item = store.receipt(store.read(registered['id']))['occurrences'][0]
+            self.assertNotIn('attention_error', item)
+            notice = AttentionQueue(root, now=lambda: 2000000000).inspect(
+                Principal(THREAD), item['attention_id'])
+            self.assertEqual(notice['request']['kind'], 'notice')
+            self.assertIsNone(notice['request']['context']['task_id'])
+
     def test_missing_explicit_mode_rejected_without_creating_schedule(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d); spec=root/'request.json'; value=request();value.pop('session_mode');spec.write_text(json.dumps(value))

@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: TASKLESS-NOTICE-755
+    owner: primary / ecochran76
+    objective: Publish taskless recurring delivery notices without fabricated task scope
+    work_items: ['#755']
+    plan: docs/dev/plans/0266-2026-11-22-recurring-delivery-readiness.md
+    branch: fix/issue755-taskless-notice
+    target: origin/main
+    plan_state: OPEN
+    custody_state: ACTIVE_WORKTREE
+    dependencies: []
+    overlaps: [RECURRING-DELIVERY-755]
+    updated_at: 2026-11-22
+    disposition: Isolated source fix; no live schedule recovery or deployment
   - id: RECURRING-DELIVERY-755
     owner: primary / ecochran76
     objective: Show and bound recurring wake delivery holds

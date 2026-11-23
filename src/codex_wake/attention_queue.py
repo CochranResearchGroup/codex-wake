@@ -56,6 +56,8 @@ def _context(value):
     if type(value) is not dict or set(value) != CONTEXT_FIELDS:
         _fail('context_invalid', 'exact operation context required')
     for key in CONTEXT_FIELDS - {'attempt', 'policy_revision'}:
+        if key == 'task_id' and value[key] is None:
+            continue
         if type(value[key]) is not str or not value[key] or len(value[key]) > 2048:
             _fail('context_invalid', 'operation context fields must be bounded nonempty strings')
     for key in ('attempt', 'policy_revision'):

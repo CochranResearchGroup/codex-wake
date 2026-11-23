@@ -54,3 +54,23 @@ observation does not establish that the recipient is active now.
 The target regression failed when the approval flag was discarded. The
 native delivery, wake mode, and recurring schedule selection passed all 41
 tests after preserving it through the public receipt path.
+
+## Taskless attention correction
+
+Owner: primary / ecochran76. Refs #755. Branch `fix/issue755-taskless-notice`.
+Isolated from the stock-delivery lane; scope is notice publication only.
+The schedule poll/receipt and AttentionQueue inspection seams must expose an
+acknowledge-only notice for a schedule without a task. Nullable task identity
+must not fabricate scope or change named-task permission checks. Existing
+pending/failed wakes are not replayed, revised or deployed by this source fix.
+
+Red: `PYTHONPATH=src python -m unittest discover -s tests -p test_recurring_schedules.py -k taskless`
+using the installed dev44 Python with declared dependencies failed on
+`attention_error=permission_task_scope_unverified` before the fix. Initial system
+Python lacked websockets; that was a harness setup error, not the regression.
+Green: the same test passed after preserving null task_id in the notice context.
+Focused: `PYTHONPATH=src:tests python -m unittest test_recurring_schedules test_attention_queue test_session_permissions`
+passed all 33 tests on Python3.12 in22.696s. No hosted CI or provider effects.
+Source base f24f53b94f4acfacc1c665be306f41121edbe7ff. This is selected local
+coverage, not full CI or installed/live acceptance. Cleanup after integration
+and retained evidence; pending review point is source PR review.
