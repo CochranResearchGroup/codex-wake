@@ -297,6 +297,8 @@ class _RestoreRuntime(SavedRuntime):
     AgentResume journals the launch before entering this method, so lost session
     creation responses retain the same crash fence as lost tab creation responses.
     """
+    allow_idle_saved = True
+
     def __init__(self, root, *, now=None, identity=None, placement=None):
         super().__init__(now=now)
         self.root = root

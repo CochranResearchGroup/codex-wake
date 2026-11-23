@@ -141,6 +141,9 @@ class LiveWakeRestoreTests(unittest.TestCase):
     def test_absent_recipient_uses_latest_private_profile_through_existing_resume_owner(self):
         self.exercise_restore()
 
+    def test_idle_recipient_with_no_tab_is_restored_once(self):
+        self.exercise_restore(idle_detached=True)
+
     def test_missing_pinned_byobu_server_is_recreated_before_exact_resume(self):
         self.exercise_restore(missing_server=True)
 
@@ -246,7 +249,7 @@ class LiveWakeRestoreTests(unittest.TestCase):
             finally:
                 tmux_command(runtime, 'kill-server')
 
-    def exercise_restore(self, missing_server=False, clock=time.time, delayed_attachment=False):
+    def exercise_restore(self, missing_server=False, clock=time.time, delayed_attachment=False, idle_detached=False):
         from codex_wake.a2a_identity import RuntimeIdentity
         from codex_wake.managed_inventory import ManagedInventory, Observation
         from codex_wake.process import process_identity
@@ -327,13 +330,7 @@ class LiveWakeRestoreTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeTargetError, 'live_restore_runtime_state_unverified'):
                     LiveWakeRestorer(root, now=clock).prepare(target)
                 self.assertEqual(commands, [])
-                thread['status'] = {'type':'idle'}
-                with self.assertRaisesRegex(RuntimeTargetError, 'identity_unavailable'):
-                    LiveWakeRestorer(root, now=clock).prepare(target)
-                self.assertEqual(commands, [])
-                # An absent frontend is recoverable only with native saved-thread
-                # evidence; idle-without-attachment remains an ownership hold.
-                thread['status'] = {'type':'notLoaded'}
+                thread['status'] = {'type': 'idle' if idle_detached else 'notLoaded'}
                 prepared = LiveWakeRestorer(root, now=clock).prepare(target)
                 self.assertEqual(LiveWakeRestorer(root, now=clock).prepare(target)['thread_id'], THREAD)
             launches = [cmd for cmd in commands if 'new-window' in cmd]
