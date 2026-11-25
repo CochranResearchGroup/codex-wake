@@ -26,6 +26,50 @@ from .controller_auth import AuthError, OAuthAuthority, SCOPES
 from .external_connector_consent import BrowserConsent
 
 
+_OPERATION_CONTROLS = {'operations.send', 'operations.cancel', 'operations.rebind'}
+_OPERATION_METADATA = {
+    'operation', 'operation_id', 'idempotency_key', 'correlation_id', 'binding', 'original_binding',
+    'target', 'phase', 'execution', 'acceptance', 'delivery', 'cancellation', 'reason',
+    'admitted_at', 'updated_at',
+}
+_OPERATION_RECEIPT = {'kind', 'message_id', 'receipt_id', 'bus_id', 'job_id', 'turn_id'}
+
+
+def _check_content_scope(actor, operation):
+    from .unified_connectors import delegated_content_scope
+
+    scope = delegated_content_scope(operation)
+    if scope is not None and scope not in actor.scopes:
+        raise AuthError('insufficient_scope')
+
+
+def _control_arguments(operation, arguments, actor):
+    if operation == 'operations.send' and 'content.observe' not in actor.scopes:
+        # Core callers still default to waiting. External control alone may
+        # admit a request and receive its receipt without reading its response.
+        if arguments.get('response_requested', False) is not False or 'wait_timeout' in arguments:
+            raise AuthError('insufficient_scope')
+        return dict(arguments, response_requested=False)
+    return arguments
+
+
+def _control_result(operation, value, actor):
+    if operation not in _OPERATION_CONTROLS or 'content.observe' in actor.scopes:
+        return value
+    envelope = value.get('result')
+    record = envelope.get('operation') if isinstance(envelope, dict) else None
+    if not isinstance(record, dict):
+        return value
+    # A replay or cancellation can read an operation that already retained
+    # an answer. Reconstruct the metadata receipt instead of returning it.
+    visible = {key: record[key] for key in _OPERATION_METADATA if key in record}
+    handle = record.get('result')
+    if isinstance(handle, dict):
+        visible['result'] = {key: handle[key] for key in _OPERATION_RECEIPT
+                             if isinstance(handle.get(key), str)}
+    return {**value, 'result': {'operation': visible}}
+
+
 class ConnectorVerifier:
     def __init__(self, authority, config):
         self.authority, self.config = authority, config
@@ -73,12 +117,17 @@ def create_app(config, root, *, identify=None, operations=None):
     from .unified_contract import canonical, tool_name
     if operations.host != config['host'] or operations.environment != config['environment']:
         raise ValueError('connector policy does not match this host owner')
-    from .unified_connectors import check_action, check_legacy_content, delegated_content_scope
+    from .unified_connectors import check_action, delegated_content_scope
     from .mcp_server import SPECS
     protected = ProtectedOperations(authority, operations)
     verifier = ConnectorVerifier(authority, config)
     consent = BrowserConsent(authority, config, identify)
     entries = {tool_name(canonical(operation)): (operation, schema) for operation, schema in TOOLS.values()}
+    schedules = None
+    if 'windows_message_owner' in config:
+        from .external_owner_schedules import OwnerSchedules, TOOLS as owner_schedule_tools
+        schedules = OwnerSchedules(config['windows_message_owner'], operations.host, operations.environment)
+        entries.update(owner_schedule_tools)
 
     def current_actor():
         token = get_access_token()
@@ -92,23 +141,42 @@ def create_app(config, root, *, identify=None, operations=None):
         for name, (operation, schema) in sorted(entries.items()):
             try:
                 check_action(actor, operation)
-                check_legacy_content(actor, operation)
-                if ProtectedOperations.READ_POLICIES[operation][0] not in actor.scopes: continue
+                _check_content_scope(actor, operation)
+                policy = schedules.policy(operation) if schedules is not None else None
+                if policy:
+                    if not schedules.visible(actor, operation):
+                        continue
+                    from .external_owner_schedules import DESCRIPTIONS, STATUS
+                    description, readonly = DESCRIPTIONS[operation], operation == STATUS
+                else:
+                    policy = ProtectedOperations.READ_POLICIES[operation][0]
+                    if policy not in actor.scopes:
+                        continue
+                    description = describe_operation(operation)
+                    readonly = SPECS.get(name, (None,) * 6)[-1] is True
+                    if operation == 'operations.send':
+                        description += ' Waiting for its reply requires content.observe. Control-only calls receive a metadata receipt.'
             except AuthError:
                 continue
-            scopes = sorted(set(filter(None,(ProtectedOperations.READ_POLICIES[operation][0],delegated_content_scope(operation)))))
-            readonly = SPECS.get(name,(None,)*6)[-1] is True
-            tools.append(types.Tool(name=name, description=describe_operation(operation), input_schema=schema,
+            scopes = sorted(set(filter(None, (policy, delegated_content_scope(operation)))))
+            tools.append(types.Tool(name=name, description=description, input_schema=schema,
                 annotations=types.ToolAnnotations(read_only_hint=readonly,destructive_hint=not readonly,idempotent_hint=readonly,open_world_hint=True),
                 meta={'securitySchemes': [{'type':'oauth2', 'scopes':scopes}]}))
         return types.ListToolsResult(tools=tools)
 
     async def call_tool(context, params):
         try:
-            token, unused = current_actor()
+            token, actor = current_actor()
             if params.name not in entries: raise AuthError('insufficient_scope')
             operation = entries[params.name][0]
-            value = await anyio.to_thread.run_sync(partial(protected.execute, token, operation, params.arguments or {}))
+            _check_content_scope(actor, operation)
+            arguments = _control_arguments(operation, params.arguments or {}, actor)
+            if schedules is not None and schedules.policy(operation):
+                dispatch = partial(schedules.execute, verifier.actor, token, operation, arguments)
+            else:
+                dispatch = partial(protected.execute, token, operation, arguments)
+            value = await anyio.to_thread.run_sync(dispatch)
+            value = _control_result(operation, value, verifier.actor(token))
             failed = value.get('status') == 'failed'
         except AuthError as error:
             value, failed = {'error': error.code}, True
@@ -193,6 +261,9 @@ def validate_config(config):
     if not isinstance(targets,list) or not 1 <= len(targets) <= 64 or any(not isinstance(t,dict) or t.get('host') != config['host'] or t.get('environment') != config['environment'] for t in targets):
         raise ValueError('explicit host-owned target policy required')
     intersect_targets(targets,targets)
+    if 'windows_message_owner' in config:
+        from .external_owner_schedules import validate
+        validate(config['windows_message_owner'], config['host'], config['environment'])
     from .external_consent_delegation import validate_delegations
     validate_delegations(config)
     redirects = config['redirect_uris']

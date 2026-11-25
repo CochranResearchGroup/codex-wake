@@ -7,6 +7,7 @@ from hashlib import sha256
 import json
 from decimal import Decimal
 import math
+import re
 from pathlib import Path
 import sqlite3
 from uuid import UUID, uuid4
@@ -88,7 +89,7 @@ class MessageHandoff:
             conn.execute("""CREATE INDEX IF NOT EXISTS wake_owner_handoffs_destination_v1
                 ON wake_owner_handoffs_v1(destination,source,id)""")
 
-    def send(self, identifier, recipient, body, *, expires, due=None, in_reply_to=None):
+    def send(self, identifier, recipient, body, *, expires, due=None, in_reply_to=None, origin=None):
         identifier = str(UUID(identifier))
         recipient = str(UUID(recipient))
         if in_reply_to is not None:
@@ -100,7 +101,12 @@ class MessageHandoff:
         envelope = {key: getattr(message, key) for key in (
             'identifier', 'source', 'scope', 'recipient', 'expires_at_micros',
             'payload', 'sender', 'in_reply_to', 'not_before_micros')}
-        return self._request(identifier, dict(message=envelope))
+        request = dict(message=envelope)
+        if origin is not None:
+            if not isinstance(origin, str) or not re.fullmatch(r'[0-9a-f]{64}', origin):
+                raise ValueError('invalid message admission origin')
+            request['origin'] = origin
+        return self._request(identifier, request)
 
     def request_setting(self, identifier, recipient, *, revision, dnd):
         identifier, recipient = str(UUID(identifier)), str(UUID(recipient))
@@ -114,13 +120,25 @@ class MessageHandoff:
             self._put(db, identifier, 'out', request, _state('waiting_for_database'))
         return self.status(identifier, 'out')
 
-    def status(self, identifier, direction):
+    def status(self, identifier, direction, *, recipient=None, origin=None):
         with self._journal() as db:
-            row = db.execute('SELECT outcome FROM transfers WHERE id=? AND direction=?',
+            row = db.execute('SELECT request,outcome FROM transfers WHERE id=? AND direction=?',
                              (identifier, direction)).fetchone()
         if row is None:
             return dict(id=identifier, status='not_found')
-        return dict(id=identifier, **json.loads(row[0]))
+        outcome = json.loads(row[1])
+        if recipient is not None or origin is not None:
+            request = json.loads(row[0])
+            message = request.get('message', {})
+            if (origin is None or request.get('origin') != origin
+                    or recipient is None or message.get('recipient') != recipient):
+                return dict(id=identifier, status='not_found')
+            outcome = {key: outcome[key] for key in (
+                'status', 'attempt_id', 'receipt_id', 'reason', 'evidence_kind', 'execution', 'acknowledgment')
+                if key in outcome}
+            outcome.update(not_before_micros=message['not_before_micros'],
+                           expires_at_micros=message['expires_at_micros'])
+        return dict(id=identifier, **outcome)
 
     def settings(self, recipient):
         recipient = str(UUID(recipient))

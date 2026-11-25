@@ -11,7 +11,7 @@ import anyio
 from starlette.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 from .controller_auth import AuthError, digest
-from .unified_connectors import canonical_actions, intersect_targets
+from .unified_connectors import canonical_actions
 from .external_consent_delegation import permission,flow_binding,check_grant
 
 NO_STORE = {'Cache-Control': 'no-store', 'Pragma': 'no-cache'}
@@ -214,7 +214,9 @@ class BrowserConsent:
             try:
                 indexes = [int(i) for i in args.get('targets', '').split()]
                 if not indexes or any(i < 0 or i >= len(limits['targets']) for i in indexes): raise ValueError()
-                targets = intersect_targets(limits['targets'], [limits['targets'][i] for i in indexes])
+                # Indexes refer to the exact choices rendered for this flow.
+                # Selecting a broad target cannot also select another listed pin.
+                targets = [limits['targets'][i] for i in dict.fromkeys(indexes)]
             except (ValueError, IndexError): raise AuthError('invalid_target') from None
             actions = canonical_actions(args.get('actions', '').split()) if mode == 'subset' else None
             values['code'] = self.authority.authorize(subject=self.config['owner'], principal_kind='owner' if mode == 'operator' else 'service',

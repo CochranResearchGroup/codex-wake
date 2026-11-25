@@ -1,5 +1,6 @@
 """External connector behavior through its OAuth/HTTP interface."""
 import asyncio
+from contextlib import asynccontextmanager
 import base64
 import hashlib
 import json
@@ -195,3 +196,178 @@ class ExternalConnectorTests(unittest.TestCase):
                         response=await other.post('/mcp',headers={'Authorization':'Bearer '+token.json()['access_token'],'Accept':'application/json, text/event-stream'},json=dict(jsonrpc='2.0',id=1,method='initialize',params=dict(protocolVersion='2025-03-26',capabilities={},clientInfo={'name':'test','version':'1'})))
                         self.assertEqual(response.status_code,401)
         with tempfile.TemporaryDirectory() as root:asyncio.run(scenario(root))
+
+    @asynccontextmanager
+    async def external_client(self, app, config):
+        from mcp import ClientSession
+        from mcp.client.streamable_http import streamable_http_client
+
+        transport = httpx.ASGITransport(app)
+        async with httpx.AsyncClient(transport=transport, base_url=config['issuer']) as client:
+            registered = await client.post('/register', json=dict(redirect_uris=config['redirect_uris']))
+            self.assertEqual(registered.status_code, 201)
+            client_id = registered.json()['client_id']
+
+            async def grant(scope, targets='0'):
+                verifier = 'v' * 43
+                challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
+                auth = dict(client_id=client_id, redirect_uri=config['redirect_uris'][0],
+                            resource=config['issuer'] + '/mcp', response_type='code', code_challenge=challenge,
+                            code_challenge_method='S256', scope=scope)
+                landing = await client.get('/authorize', params=auth)
+                self.assertEqual(landing.status_code, 200, landing.text)
+                flow = re.search(r'name="flow" value="([^"]+)"', landing.text)[1]
+                approved = await client.post('/authorize',
+                    data=dict(flow=flow, decision='approve', mode='operator', scopes=scope, targets=targets),
+                    headers={'Origin': config['issuer']})
+                self.assertEqual(approved.status_code, 303)
+                code = parse_qs(urlsplit(approved.headers['location']).query)['code'][0]
+                token = await client.post('/token', data=dict(grant_type='authorization_code', code=code,
+                    client_id=client_id, redirect_uri=auth['redirect_uri'], resource=auth['resource'],
+                    code_verifier=verifier))
+                self.assertEqual(token.status_code, 200)
+                return token.json()['access_token']
+
+            @asynccontextmanager
+            async def connector(token):
+                async with httpx.AsyncClient(transport=transport, headers={
+                        'Authorization': 'Bearer ' + token}) as mcp_http:
+                    async with streamable_http_client(config['issuer'] + '/mcp', http_client=mcp_http) as streams:
+                        async with ClientSession(streams[0], streams[1]) as session:
+                            await session.initialize()
+                            yield session
+
+            async with app.router.lifespan_context(app):
+                yield client_id, grant, connector
+
+    def test_control_only_mailbox_send_does_not_wait_or_return_conversation_content(self):
+        from test_controller_runtime import RuntimeTests
+        from codex_wake.controller_operations import ControllerOperations
+        from codex_wake.external_connector import create_app
+        from codex_wake.managed_inventory import ManagedInventory
+
+        async def scenario(directory):
+            runtime, owner, arguments, mailbox, natives = RuntimeTests().fixture(directory)
+            root = runtime.root
+            config = dict(self.config(), owner=owner.subject, host='fixture', environment='linux',
+                          targets=owner.targets, scopes=['observe', 'control', 'content.observe'])
+            operations = ControllerOperations(ManagedInventory(root), host='fixture', environment='linux')
+            app = create_app(config, root, identify=lambda request: owner.subject, operations=operations)
+            async with self.external_client(app, config) as (client_id, grant, connector):
+                path = root / 'controller-messaging.json'
+                messaging = json.loads(path.read_text())
+                messaging['bindings']['native-sender']['client_id'] = client_id
+                path.write_text(json.dumps(messaging))
+                limited = await grant('observe control')
+                async with connector(limited) as session:
+                    tools = {tool.name for tool in (await session.list_tools()).tools}
+                    self.assertIn('wake_operations_send', tools)
+                    self.assertNotIn('wake_operations_result', tools)
+                    intent = dict(arguments)
+                    intent.pop('response_requested')
+                    denied = await session.call_tool('wake_operations_send',
+                                                     dict(intent, response_requested=True, wait_timeout=0))
+                    self.assertTrue(denied.is_error)
+                    self.assertEqual(denied.structured_content, {'error': 'insufficient_scope'})
+                    self.assertEqual(mailbox.list(natives[0], outbox=True)['messages'], [])
+                    sent = await session.call_tool('wake_operations_send', intent)
+                    self.assertFalse(sent.is_error, sent.structured_content)
+                    operation = sent.structured_content['result']['operation']
+                    self.assertNotIn('wait', sent.structured_content['result'])
+                    self.assertIn('message_id', operation['result'])
+                    self.assertNotIn('answer', operation)
+
+                full = await grant('observe control content.observe')
+                async with connector(full) as session:
+                    positive = dict(arguments,
+                        _request=dict(arguments['_request'], operation_id='permitted-reply',
+                                      idempotency_key='permitted-reply', correlation_id='permitted-reply'))
+                    sent = await session.call_tool('wake_operations_send', positive)
+                    self.assertFalse(sent.is_error, sent.structured_content)
+                    message = sent.structured_content['result']['operation']['result']['message_id']
+                    mailbox.reply(natives[1], message, body='Scoped synthetic reply',
+                                  idempotency_key='permitted-reply', kind='result', delivery='inbox')
+                    result = await session.call_tool('wake_operations_result',
+                                                     {'operation_id': 'permitted-reply'})
+                    self.assertFalse(result.is_error, result.structured_content)
+                    self.assertEqual(result.structured_content['result']['operation']['answer']['text'],
+                                     'Scoped synthetic reply')
+
+        with tempfile.TemporaryDirectory() as directory:
+            asyncio.run(scenario(directory))
+
+    def test_windows_schedule_is_grant_pinned_and_keeps_original_delivery_window(self):
+        import sqlite3
+        from uuid import uuid4
+        from codex_wake.controller_hosts import HostRegistry
+        from codex_wake.external_connector import create_app
+
+        async def scenario(directory):
+            root = Path(directory)
+            bridge = root / 'message-owner'
+            bridge.mkdir(mode=0o700)
+            registry = HostRegistry(root / 'hosts.sqlite')
+            local = registry.register('h', 'wsl', kind='wsl', authority='fixture-wsl',
+                                      destination='localhost', operator=True)['target']
+            peer = registry.register('h', 'windows', kind='windows', authority='fixture-windows',
+                                     destination='localhost', operator=True)['target']
+            owner_config = root / 'owner.json'
+            owner_config.write_text(json.dumps(dict(root=str(bridge), registry=str(registry.path),
+                                                    owner=local, peer=peer)))
+            owner_config.chmod(0o600)
+            target = dict(host='h', environment='e', presentation='psmux', conversation_id=str(uuid4()),
+                          namespace=peer['environment'], authority=peer['authority'], generation=peer['generation'])
+            config = dict(self.config(), scopes=['control', 'observe'],
+                          targets=[dict(host='h', environment='e'), target],
+                          windows_message_owner=dict(owner_config=str(owner_config), targets=[target]))
+            app = create_app(config, root, identify=lambda request: 'operator', operations=self.operations(root))
+            schedule = 'wake_wakes_messages_schedule'
+            status = 'wake_wakes_messages_status'
+            identifier = str(uuid4())
+            request = dict(expected_target=target, message_id=identifier, body='Private fixture message',
+                           due_at='2033-05-18T03:33:20.000001Z', expires_at='2033-05-18T03:33:40.000099Z')
+            selector = dict(expected_target=target, message_id=identifier)
+            async with self.external_client(app, config) as (_, grant, connector):
+                broad = await grant('observe control')
+                async with connector(broad) as session:
+                    names = {tool.name for tool in (await session.list_tools()).tools}
+                    self.assertFalse({schedule, status} & names)
+                    rejected = await session.call_tool(schedule, request)
+                    self.assertTrue(rejected.is_error)
+                    self.assertFalse((bridge / 'message-owner.sqlite3').exists())
+
+                exact = await grant('observe control', targets='1')
+                async with connector(exact) as session:
+                    self.assertTrue({schedule, status} <= {tool.name for tool in (await session.list_tools()).tools})
+                    refused = await session.call_tool(schedule, dict(request,
+                        expected_target=dict(target, generation='different-generation')))
+                    self.assertTrue(refused.is_error)
+                    admitted = await session.call_tool(schedule, request)
+                    self.assertFalse(admitted.is_error, admitted.structured_content)
+                    self.assertEqual(admitted.structured_content['result'], dict(
+                        id=identifier, status='waiting_for_database',
+                        not_before_micros=2000000000000001, expires_at_micros=2000000020000099))
+                    retry = await session.call_tool(schedule, request)
+                    self.assertEqual(retry.structured_content, admitted.structured_content)
+                    changed = await session.call_tool(schedule, dict(request, expires_at='2033-05-18T04:00:00Z'))
+                    self.assertTrue(changed.is_error)
+                    found = await session.call_tool(status, selector)
+                    self.assertEqual(found.structured_content['result'], admitted.structured_content['result'])
+                    self.assertNotIn(request['body'], json.dumps(found.structured_content))
+
+                peer_grant = await grant('observe', targets='1')
+                async with connector(peer_grant) as session:
+                    hidden = await session.call_tool(status, selector)
+                    self.assertEqual(hidden.structured_content['result'], dict(id=identifier, status='not_found'))
+
+            with sqlite3.connect(bridge / 'message-owner.sqlite3') as db:
+                raw, = db.execute('SELECT request FROM transfers WHERE direction=\'out\'').fetchone()
+                stored = json.loads(raw)
+                self.assertEqual(stored['message']['identifier'], identifier)
+                self.assertEqual(stored['message']['recipient'], target['conversation_id'])
+                self.assertEqual(stored['message']['not_before_micros'], 2000000000000001)
+                self.assertEqual(stored['message']['expires_at_micros'], 2000000020000099)
+                self.assertRegex(stored['origin'], r'^[0-9a-f]{64}$')
+
+        with tempfile.TemporaryDirectory() as directory:
+            asyncio.run(scenario(directory))
