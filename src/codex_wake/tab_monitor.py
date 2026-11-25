@@ -245,6 +245,7 @@ class TabMonitor:
                                   last_formatting=record.get('last_formatting') if record else None,
                                   last_routing=record.get('last_routing') if record else None,
                                   observer=snapshot.get('observer') if snapshot else None,
+                                  former_tab_history=record.get('former_tab_history') if record else None,
                                   capabilities=record.get('capabilities',[]) if record else []),
                     snapshot=snapshot,application_effects=False)
 
@@ -373,9 +374,10 @@ class TabMonitor:
                           observed_at_time_basis='guest_wall_display_only' if self.clock_provider is not None else 'injected_clock',
                           monitor_generation=owner_record.get('generation') if origin=='daemon' and owner_record else None,
                           unavailable=unavailable,workspaces=names,cursor=(cursor+attempted)%len(names) if names else 0,
-                          discovery=known.get('discovery'),
+                          discovery=known.get('discovery'),observation_scope=known.get('observation_scope'),
                           status='partial' if unavailable else 'complete' if names else 'not_found')
             _save(self.directory/'snapshot.json',snapshot)
+            self._remember_former_tabs(snapshot, resources)
         return self.status()
 
     def _policy_tick(self,record):
@@ -408,7 +410,18 @@ class TabMonitor:
             raise InventoryError('observation_unavailable','Routing requires observed resource rows.')
         return TerminalRouting(self.root,tabs=owner).tick(snapshot,deadline=deadline)
 
-    def publish_observation(self, snapshot, record, *, resources_loader=None, resources_serializer=None, settings=None):
+    def _remember_former_tabs(self, snapshot, resources):
+        from .former_tabs import FormerTabs
+        import sqlite3
+
+        try:
+            FormerTabs(self.root).observe(snapshot, resources)
+        except (OSError, ValueError, sqlite3.Error):
+            return False
+        return True
+
+    def publish_observation(self, snapshot, record, *, resources_loader=None, resources_serializer=None,
+                            history_resources=None, settings=None):
         """Persist changed evidence immediately, or a bounded liveness heartbeat.
 
         Only trusted producer revisions admit the quiet fast path. Legacy callers
@@ -453,6 +466,10 @@ class TabMonitor:
                 if not isinstance(snapshot.get('resources'),list):
                     raise InventoryError('observation_unavailable','Metadata-only frames cannot be persisted as inventory.')
                 _save(self.directory/'snapshot.json',snapshot)
+            historic_rows = history_resources() if history_resources is not None else snapshot.get('resources')
+            if historic_rows is not None:
+                record['former_tab_history'] = ('ready' if self._remember_former_tabs(snapshot, historic_rows)
+                                                else 'unavailable')
             self._published_revision=revision if qualified else None
             self._published_at=now
         record['last_snapshot_published_at']=self.clock() if publish else record.get('last_snapshot_published_at')
@@ -482,9 +499,11 @@ class TabMonitor:
                                 snapshot['resources']=observer.materialize_resources(snapshot['observed_at'])
                             return snapshot['resources']
                         snapshot.update(origin='daemon',monitor_generation=record['generation'],
-                                        clock_counter=counter, observed_at_time_basis='guest_wall_display_only')
+                                        clock_counter=counter, observed_at_time_basis='guest_wall_display_only',
+                                        observation_scope=dict(host=observer.owner.host,environment=observer.owner.environment))
                         self.publish_observation(snapshot,record,resources_loader=ensure_resources,
-                            resources_serializer=lambda:observer.serialize_resources(snapshot['observed_at']),settings=settings)
+                            resources_serializer=lambda:observer.serialize_resources(snapshot['observed_at']),
+                            history_resources=lambda:observer.resources,settings=settings)
                         observed=dict(snapshot=snapshot)
                         from .tab_format_monitor import refresh_formatting
                         record['last_formatting']=refresh_formatting(self.root,observed.get('snapshot') or {},
@@ -530,6 +549,7 @@ def main(argv=None):
         owner=controller_tabs_from_root(args.probe)
         if args.workspace is None:
             result=dict(status='completed',workspaces=sorted(owner.workspaces)[:65],
+                        observation_scope=dict(host=owner.host,environment=owner.environment),
                         discovery=getattr(owner,'discovery_diagnostics',[])[:32])
         elif args.workspace not in owner.workspaces:
             result=dict(status='unavailable',reason='workspace_disappeared')

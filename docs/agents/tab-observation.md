@@ -78,3 +78,32 @@ rollback/reenable remain documented in [tab formatting](tab-formatting.md).
 
 Qualification is recorded per exact source package. Private protocol tests do not
 prove live native broadcast support, installed transport parity or resource gates.
+
+## Inspect a destroyed tab
+
+Search for the exact tab name through history. A search result lists each
+retained binding separately when the name was reused. Use the owning account,
+workspace and last observed time to select the intended binding.
+
+```sh
+codex-wake --wake-root ROOT history search --former-tab "amazon ads" --owner work --json
+```
+
+Each binding shows the last observed pane directory and observation time.
+`last_known_presentation` records the last qualified observation of the tab.
+An unavailable workspace preserves the previous evidence. A guest wall
+timestamp is for display, as indicated by `observed_at_time_basis`.
+Only exact Codex bindings observed with a verified pane and owning account
+generation are retained. If the saved conversation becomes unavailable, the
+binding and its last observed directory remain available.
+
+For API and MCP, pass `former_tab` to `history.search` or
+`wake_controller_history_search`. Send the returned `history_locator` to the
+existing history read operation to retrieve saved activity. Search uses
+account-level history observation authority, and reading content uses the
+existing exact history read authority. Both operations leave a destroyed tab
+closed. The local operator can remove one binding by its exact ID.
+
+```sh
+codex-wake --wake-root ROOT history forget-tab BINDING --bus-root BUS --operator-capability FILE --json
+```

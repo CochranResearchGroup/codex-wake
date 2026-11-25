@@ -30,6 +30,7 @@
     "daemons.status",
     "daemons.stop",
     "daemons.update",
+    "history.forget-tab",
     "history.import",
     "history.import-recent",
     "history.read",
@@ -139,6 +140,7 @@
     "open",
     "resume",
     "configuration.default-root",
+    "history.forget-tab",
     "history.recent",
     "history.import-recent",
     "tabs.result",
@@ -263,6 +265,7 @@
     "environment.agents.wait",
     "environment.capabilities",
     "environment.conversations.connection",
+    "environment.conversations.history.forget-tab",
     "environment.conversations.history.import",
     "environment.conversations.history.import-recent",
     "environment.conversations.history.read",
@@ -711,6 +714,7 @@
     "resources.release",
     "resources.show",
     "resources.transfer",
+    "schedules.bind-restoration",
     "schedules.cancel",
     "schedules.list",
     "schedules.register",
@@ -780,6 +784,8 @@
     "wakes.intents.file",
     "wakes.intents.migrate",
     "wakes.intents.reconcile",
+    "wakes.schedules.bind-restoration",
+    "wakes.schedules.bind_restoration",
     "wakes.schedules.cancel",
     "wakes.schedules.list",
     "wakes.schedules.register",
@@ -2167,6 +2173,45 @@
           "required": [
             "schedule_id",
             "expected_revision"
+          ],
+          "additionalProperties": false
+        },
+        "readonly": false
+      },
+      "wakes.schedules.bind_restoration": {
+        "cli": [
+          "control",
+          "wakes",
+          "schedules",
+          "bind_restoration"
+        ],
+        "mcp_tool": "wake_wakes_schedules_bind_restoration",
+        "description": "Control exact durable schedules without changing their timing or permission rules.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "schedule_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "profiles": {
+              "type": "string",
+              "minLength": 1
+            },
+            "managed_agent_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "schedule_id",
+            "profiles",
+            "managed_agent_id",
+            "profile"
           ],
           "additionalProperties": false
         },

@@ -812,23 +812,27 @@ codex-wake --wake-root ROOT history search --owner work --query test
 
 ```text
 usage: codex-wake history search [-h] [--owner OWNERS] [--query QUERY]
-                                 [--sort {recent}] [--limit LIMIT] [--json]
+                                 [--former-tab FORMER_TAB] [--sort {recent}]
+                                 [--limit LIMIT] [--json]
 
 Search explicitly permitted saved conversation metadata.
 
 Read-only observation; no model turn.
 
 options:
-  -h, --help       show this help message and exit
-  --owner OWNERS   Limit search to these explicitly permitted owning accounts;
-                   repeat --owner.
-  --query QUERY    Filter permitted saved conversation metadata (default:
-                   all).
-  --sort {recent}  Order by recent activity when set to recent; default
-                   preserves existing discovery order.
-  --limit LIMIT    Maximum recent conversations, from1 to100 (default:10 for
-                   shortcuts).
-  --json           Emit structured results for this command.
+  -h, --help            show this help message and exit
+  --owner OWNERS        Limit search to these explicitly permitted owning
+                        accounts; repeat --owner.
+  --query QUERY         Filter permitted saved conversation metadata (default:
+                        all).
+  --former-tab FORMER_TAB
+                        Look up retained bindings for an exact tab name, case-
+                        insensitively. Cannot be combined with query.
+  --sort {recent}       Order by recent activity when set to recent; default
+                        preserves existing discovery order.
+  --limit LIMIT         Maximum recent conversations, from1 to100 (default:10
+                        for shortcuts).
+  --json                Emit structured results for this command.
 
 Examples:
   codex-wake --wake-root ROOT history search --owner work --query test
@@ -838,6 +842,7 @@ Examples:
 |---|---|---|
 | `owners` | no | Limit search to these explicitly permitted owning accounts; repeat --owner. |
 | `query` | no | Filter permitted saved conversation metadata (default: all). |
+| `former_tab` | no | Look up retained bindings for an exact tab name, case-insensitively. Cannot be combined with query. |
 | `limit` | no | Maximum recent conversations, from1 to100 (default:10 for shortcuts). |
 | `sort` | no | Order by recent activity when set to recent; default preserves existing discovery order. |
 
@@ -1407,6 +1412,46 @@ options:
 
 Examples:
   codex-wake --wake-root ROOT configuration default-root ROOT
+```
+
+## history forget-tab
+
+Forget one retained tab binding by its exact binding ID.
+
+Local operator only. Removes retained tab metadata and suppresses republishing the same binding. Saved conversations and live tabs remain intact.
+
+Transport: Local human CLI only.
+
+```sh
+codex-wake --wake-root ROOT history forget-tab BINDING --bus-root ROOT --operator-capability FILE
+```
+
+### CLI help
+
+```text
+usage: codex-wake history forget-tab [-h] --bus-root BUS_ROOT
+                                     --operator-capability OPERATOR_CAPABILITY
+                                     [--json]
+                                     binding_id
+
+Forget one retained tab binding by its exact binding ID.
+
+Local operator only. Removes retained tab metadata and suppresses republishing the same binding. Saved conversations and live tabs remain intact.
+
+positional arguments:
+  binding_id
+
+options:
+  -h, --help            show this help message and exit
+  --bus-root BUS_ROOT   Existing enrolled mailbox runtime root for caller
+                        verification.
+  --operator-capability OPERATOR_CAPABILITY
+                        Path to the private operator capability; never its
+                        secret contents.
+  --json                Emit structured results for this command.
+
+Examples:
+  codex-wake --wake-root ROOT history forget-tab BINDING --bus-root ROOT --operator-capability FILE
 ```
 
 ## history recent
@@ -7156,6 +7201,7 @@ See [workflow](local-session-control.md) and generated [transport contract](loca
 | `control wakes schedules show` | `wakes.schedules.show` | `wake_wakes_schedules_show` |
 | `control wakes schedules revise` | `wakes.schedules.revise` | `wake_wakes_schedules_revise` |
 | `control wakes schedules cancel` | `wakes.schedules.cancel` | `wake_wakes_schedules_cancel` |
+| `control wakes schedules bind_restoration` | `wakes.schedules.bind_restoration` | `wake_wakes_schedules_bind_restoration` |
 | `control wakes intents after` | `wakes.intents.after` | `wake_wakes_intents_after` |
 | `control wakes intents at` | `wakes.intents.at` | `wake_wakes_intents_at` |
 | `control wakes intents file` | `wakes.intents.file` | `wake_wakes_intents_file` |

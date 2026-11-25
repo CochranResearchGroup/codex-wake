@@ -46,9 +46,17 @@ def register_parser(subparsers):
     search = verbs.add_parser('search')
     search.add_argument('--owner', action='append', dest='owners')
     search.add_argument('--query', default='')
+    search.add_argument('--former-tab', help='look up retained bindings by exact former tab name')
     search.add_argument('--sort', choices=('recent',), help='sort by latest activity')
     search.add_argument('--limit', type=int, help='bound results to1–100 conversations before opening rollouts')
     search.add_argument('--json', dest='as_json', action='store_true')
+    forget = verbs.add_parser('forget-tab', help='forget an exact retained terminal binding')
+    forget.add_argument('binding_id')
+    forget.add_argument('--bus-root', required=True)
+    forget.add_argument('--operator-capability', required=True)
+    forget.set_defaults(actor_capability=None)
+    forget.set_defaults(app_server='unix://')
+    forget.add_argument('--json', dest='as_json', action='store_true')
     transfer = verbs.add_parser('import', help='copy a pinned saved conversation into another account through native fork')
     transfer.add_argument('thread_id')
     transfer.add_argument('--owner', required=True)
@@ -75,6 +83,8 @@ def register_parser(subparsers):
 
 
 def command(args, root, *, runtime=None, now=None):
+    if args.history_verb == 'forget-tab':
+        return forget_tab_command(args, root)
     if args.history_verb == 'import':
         return import_command(args, root)
     try:
@@ -84,7 +94,7 @@ def command(args, root, *, runtime=None, now=None):
             from .permission_commands import verified_cli_principal
             principal = verified_cli_principal(args)
         arguments = {key: value for key, value in vars(args).items()
-            if key in ('owners', 'query', 'owner', 'thread_id', 'expected_target', 'intent', 'expires_at', 'sort', 'limit') and value is not None}
+            if key in ('owners', 'query', 'former_tab', 'owner', 'thread_id', 'expected_target', 'intent', 'expires_at', 'sort', 'limit') and value is not None}
         value = execute('history.' + args.history_verb, arguments, root,
                         authorized_accounts=allowed, principal=principal, runtime=runtime, now=now)
     except (WakeError, ValueError, OSError) as error:
@@ -94,13 +104,35 @@ def command(args, root, *, runtime=None, now=None):
     return 0 if value['status'] == 'completed' else 2
 
 
+def forget_tab_command(args, root):
+    import sqlite3
+    from .former_tabs import FormerTabs
+    from .permission_commands import verified_cli_principal
+
+    value = dict(schema_version=1, operation='history.forget-tab', status='failed')
+    try:
+        principal = verified_cli_principal(args)
+        if principal.role != 'operator':
+            raise InventoryError('unauthorized_target', 'only the local operator can forget a tab binding')
+        if not FormerTabs(root).forget(args.binding_id):
+            raise InventoryError('target_not_found', 'former-tab binding not found')
+        value.update(status='completed', result=dict(binding_id=args.binding_id, forgotten=True))
+    except (OSError, ValueError, WakeError, sqlite3.Error) as error:
+        value['error'] = dict(code=getattr(error, 'code', 'history_unavailable'),
+                              message='former-tab binding could not be forgotten')
+    emit(value, args)
+    return 0 if value['status'] == 'completed' else 2
+
+
 def tool_specs():
     text = {'type': 'string', 'minLength': 1, 'maxLength': 1024}
     identity = {'caller_thread_id': text}
     return {
         'wake_controller_history_search': ('controller-history', 'search',
-            'Search explicitly permitted native history metadata without changing its ownership.',
-            dict(identity, owners={'type': 'array', 'items': text, 'maxItems': 256}, query=text), ['caller_thread_id'], True),
+            'Search permitted saved history or look up a former tab by name without reopening it.',
+            dict(identity, owners={'type': 'array', 'items': text, 'maxItems': 256}, query=text,
+                 former_tab=text, limit={'type': 'integer', 'minimum': 1, 'maximum': 100},
+                 sort={'type': 'string', 'enum': ['recent']}), ['caller_thread_id'], True),
         'wake_controller_history_read': ('controller-history', 'read',
             'Read bounded native JSONL from the exact permitted owning account.',
             dict(identity, owner=text, thread_id=text, expected_target={'type': 'object'}),

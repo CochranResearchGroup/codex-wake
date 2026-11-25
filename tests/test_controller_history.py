@@ -64,6 +64,87 @@ readable_accounts=["alice","bob"]
         only_alice = self.owner(('alice',)).execute('history.search', {})
         self.assertEqual([row['owner'] for row in only_alice['sessions']], ['codex-alice'])
 
+    def test_destroyed_tab_resolves_last_pane_directory_and_exact_saved_activity(self):
+        from codex_wake.tab_monitor import TabMonitor
+
+        root = self.root / 'wake'
+        monitor = TabMonitor(root, clock=lambda: 1000.)
+        home = self.root / 'homes' / 'codex-alice'
+        home_info = home.stat()
+        target = dict(host='local', environment='test', workspace='main',
+                      presentation='tmux', generation='current')
+        process = dict(pid=123, start_ticks=456, boot_id='boot')
+        pane = dict(pane_id='%1', pane_current_path='/work/last-observed')
+        binding = dict(runtime='codex', conversation_id=THREAD, process=process, fresh=True,
+                       observed_at=1000., source='native_metadata',
+                       native_source=dict(home=str(home), home_generation=f'{home_info.st_dev}:{home_info.st_ino}'))
+        evidence = dict(pane_id='%1', binding=binding)
+        resource = dict(target=target, window=dict(window_id='@1', index=9, name='sales', panes=[pane]),
+                        traits=dict(panes=[evidence]), monitor_observed_at=1000.)
+        frame = dict(observed_at=1000., workspaces=['main'], unavailable=[], resources=[resource],
+                     observation_scope=dict(host='local', environment='test'))
+        monitor.publish_observation(frame, {})
+        monitor.publish_observation(dict(frame, observed_at=1010.), {})
+        monitor.publish_observation(dict(frame, resources=[], observation_scope=dict(host='remote', environment='test')), {})
+        stale = dict(resource, monitor_unavailable=True)
+        stale['window'] = dict(resource['window'], panes=[dict(pane, pane_current_path='/stale')])
+        monitor.publish_observation(dict(frame, resources=[stale]), {})
+        monitor.publish_observation(dict(frame, resources=[], unavailable=[dict(workspace='main')]), {})
+        owner = self.owner()
+        remembered, = owner.execute('history.search', {'former_tab': 'sales'})['bindings']
+        self.assertEqual(remembered['last_known_presentation'], 'present')
+        self.assertEqual(remembered['last_observed_cwd'], '/work/last-observed')
+        self.assertEqual(remembered['last_observed_at'], 1000.)
+        monitor.publish_observation(dict(frame, resources=[]), {})
+
+        result = owner.execute('history.search', {'former_tab': 'sales'})
+        tab, = result['bindings']
+        self.assertEqual(tab['last_known_presentation'], 'absent')
+        self.assertEqual(tab['last_observed_cwd'], '/work/last-observed')
+        self.assertEqual(tab['last_observed_at'], 1000.)
+        self.assertEqual(tab['session']['thread_id'], THREAD)
+        self.assertEqual(tab['session']['owner'], 'codex-alice')
+        read = owner.execute('history.read', tab['history_locator'])
+        self.assertEqual(read['records'][1]['payload']['content'], 'alice evidence')
+        self.assertEqual(self.owner(('bob',)).execute('history.search', {'former_tab': 'sales'})['bindings'], [])
+
+        row_home = self.root / 'homes' / 'codex-bob'
+        info = row_home.stat()
+        second = dict(binding, process=dict(process, start_ticks=789),
+                      native_source=dict(home=str(row_home), home_generation=f'{info.st_dev}:{info.st_ino}'))
+        occupied = dict(resource, traits=dict(panes=[dict(evidence, binding=second)]))
+        monitor.publish_observation(dict(frame, resources=[occupied]), {})
+        reused = owner.execute('history.search', {'former_tab': 'sales'})['bindings']
+        self.assertEqual([(r['owner'], r['last_known_presentation']) for r in reused],
+                         [('codex-bob', 'present'), ('codex-alice', 'absent')])
+        self.assertNotEqual(reused[0]['binding_id'], reused[1]['binding_id'])
+        self.assertEqual(owner.execute('history.read', reused[0]['history_locator'])['records'][1]['payload']['content'],
+                         'bob evidence')
+        self.assertTrue(owner.execute('history.search', {'former_tab': 'sales', 'limit': 1})['truncated'])
+        (home / 'sessions' / 'saved.jsonl').unlink()
+        absent = self.owner(('alice',)).execute('history.search', {'former_tab': 'sales'})
+        self.assertEqual(absent['status'], 'partial')
+        last, = absent['bindings']
+        self.assertEqual(last['last_observed_cwd'], '/work/last-observed')
+        self.assertNotIn('history_locator', last)
+
+        import argparse
+        from contextlib import redirect_stdout
+        from io import StringIO
+        from codex_wake.a2a_bus import BusStore
+        from codex_wake.history_commands import command, register_parser
+        bus, cap = BusStore.configure(self.root / 'bus')
+        parser = argparse.ArgumentParser()
+        register_parser(parser.add_subparsers(dest='command', required=True))
+        args = parser.parse_args(['history', 'forget-tab', tab['binding_id'], '--bus-root', str(bus.root),
+                                  '--operator-capability', str(cap), '--json'])
+        out = StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(command(args, root), 0)
+        self.assertTrue(json.loads(out.getvalue())['result']['forgotten'])
+        monitor.publish_observation(frame, {})
+        self.assertEqual(self.owner(('alice',)).execute('history.search', {'former_tab': 'sales'})['bindings'], [])
+
     def test_resume_uses_existing_permission_and_durable_attachment_owner(self):
         from codex_wake.controller_history import ManagedHistoryResume
         from codex_wake.session_permissions import Principal

@@ -1229,6 +1229,45 @@
       },
       "readonly": false
     },
+    "wakes.schedules.bind_restoration": {
+      "cli": [
+        "control",
+        "wakes",
+        "schedules",
+        "bind_restoration"
+      ],
+      "mcp_tool": "wake_wakes_schedules_bind_restoration",
+      "description": "Control exact durable schedules without changing their timing or permission rules.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "schedule_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "profiles": {
+            "type": "string",
+            "minLength": 1
+          },
+          "managed_agent_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "profile": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "schedule_id",
+          "profiles",
+          "managed_agent_id",
+          "profile"
+        ],
+        "additionalProperties": false
+      },
+      "readonly": false
+    },
     "wakes.intents.after": {
       "cli": [
         "control",

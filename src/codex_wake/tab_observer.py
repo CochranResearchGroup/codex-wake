@@ -406,7 +406,8 @@ class TabObserver:
                     environment=self.owner.environment, observation_cache=self.owner.observation_cache)
                 value = scoped.execute('tabs.list', {},
                     deadline=time.monotonic()+max(0.,deadline-self.monotonic()))
-            rows.extend(value.get('resources', []))
+            captured_at = self.clock()
+            rows.extend(dict(row, monitor_observed_at=captured_at) for row in value.get('resources', []))
             unavailable.extend(value.get('unavailable', []))
         self.cursor = (start+1) % len(names) if names else 0
         represented = {v.get('target',{}).get('workspace') for v in rows}

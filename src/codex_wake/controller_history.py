@@ -38,7 +38,7 @@ class ControllerHistory:
         self.authorization_guard = authorization_guard
 
     def execute(self, operation, arguments):
-        schemas = {'history.search': {'owners', 'query', 'sort', 'limit'},
+        schemas = {'history.search': {'owners', 'query', 'sort', 'limit', 'former_tab'},
                    'history.read': {'owner', 'thread_id', 'expected_target'},
                    'history.resume': {'owner', 'thread_id', 'expected_target', 'intent', 'expires_at'}}
         if operation not in schemas:
@@ -75,8 +75,13 @@ class ControllerHistory:
             if not set(owners) <= allowed:
                 raise InventoryError('unauthorized_target', 'history owner is outside the permitted account scope')
             if not owners:
-                return dict(sessions=[], holds=[], status='complete')
+                result = dict(sessions=[], holds=[], status='complete')
+                if 'former_tab' in arguments:
+                    result['bindings'] = []
+                return result
             accounts = {name: account_owner.execute('accounts.resolve', {'selector': name})['account'] for name in owners}
+            if operation == 'history.search' and 'former_tab' in arguments:
+                return self._former_tabs(arguments, settings, accounts)
             if operation == 'history.search':
                 query = arguments.get('query', '')
                 if not isinstance(query, str) or len(query) > 1024:
@@ -134,6 +139,43 @@ class ControllerHistory:
             raise InventoryError('history_unavailable', 'native history is unavailable, unsupported or ambiguous') from None
         except (OSError, ValueError, KeyError, TypeError, AttributeError):
             raise InventoryError('history_unavailable', 'native history or host policy cannot be qualified') from None
+
+    def _former_tabs(self, arguments, settings, accounts):
+        from .former_tabs import FormerTabs, bounded_tab_text
+        import sqlite3
+
+        name = arguments['former_tab']
+        limit = arguments.get('limit', 100)
+        if (not bounded_tab_text(name, 1024) or arguments.get('query', '') != ''
+                or arguments.get('sort', 'recent') != 'recent'
+                or type(limit) is not int or not 1 <= limit <= 100):
+            raise InventoryError('invalid_argument', 'former tab needs an exact name and a limit of 1–100')
+        owners = {(v['target']['home'], v['target']['home_generation']): v for v in accounts.values()}
+        try:
+            retained, truncated = FormerTabs(self.root).find(
+                name, host=self.host, environment=self.environment, homes=owners, limit=limit)
+        except (OSError, ValueError, sqlite3.Error):
+            raise InventoryError('history_unavailable', 'former-tab bindings are unavailable') from None
+        bindings, holds = [], []
+        remaining = 8 * 1024 * 1024
+        for row in retained:
+            account = owners[(row['home'], row['home_generation'])]
+            result = {key: value for key, value in row.items() if key not in ('home', 'home_generation')}
+            result['owner'] = account['id']
+            try:
+                native = select_session(settings, row['conversation_id'], account['id'])
+                session = self._session(native, account, max_bytes=remaining)
+                remaining -= session['provenance']['byte_length']
+                result['session'] = session
+                result['history_locator'] = dict(owner=session['owner'], thread_id=session['thread_id'],
+                                                 expected_target=session['target'])
+                result['history_status'] = 'available'
+            except (HistoryError, InventoryError, OSError):
+                result['history_status'] = 'unavailable'
+                holds.append(dict(binding_id=row['binding_id'], reason='saved_history_unavailable'))
+            bindings.append(result)
+        return dict(status='partial' if holds else 'complete', bindings=bindings, holds=holds, truncated=truncated,
+                    sessions=[row['session'] for row in bindings if 'session' in row])
 
     def _rollout(self, path, home, max_bytes=8 * 1024 * 1024):
         if path.suffix != '.jsonl':
