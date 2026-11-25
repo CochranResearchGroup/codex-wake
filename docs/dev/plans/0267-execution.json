@@ -288,10 +288,23 @@
         775,
         776
       ],
-      "status": "running",
+      "status": "validated",
       "owner": "/root/busy_dnd",
       "branch": "feat/issue-777-elevated-recovery",
-      "base": "77de099a"
+      "base": "77de099a",
+      "tracker": "closed",
+      "worker_results": [
+        "08b0bf4e"
+      ],
+      "integration_results": [
+        "b0af40ed",
+        "6ef377ca"
+      ],
+      "evidence": [
+        "Actual normal and elevated Windows SSH tokens and isolated psmux/native Codex",
+        "Retained original timed message while elevated disabled, then one original-ID receipt in original elevated thread and slot",
+        "36 integration tests including exact OAuth owner and elevation crossover"
+      ]
     },
     {
       "issue": 778,
@@ -363,8 +376,10 @@
         773,
         774
       ],
-      "status": "pending"
+      "status": "blocked_by_773",
+      "tracker": "open",
+      "remaining": "Unblocks after the native Bastion acceptance in #773."
     }
   ],
-  "integration_tip_at_validation": "1fc1c064"
+  "integration_tip_at_validation": "6ef377ca"
 }
