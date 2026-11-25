@@ -236,10 +236,26 @@
       "blockers": [
         774
       ],
-      "status": "running",
+      "status": "validated",
       "owner": "/root/cutover",
       "base": "ea04c771",
-      "branch": "feat/issue-775-psmux-recovery"
+      "branch": "feat/issue-775-psmux-recovery",
+      "tracker": "closed",
+      "worker_results": [
+        "f6c1d11e",
+        "2a27b2c4",
+        "74efd814"
+      ],
+      "integration_results": [
+        "8fe341b9",
+        "320f0e3d",
+        "4f05652d"
+      ],
+      "evidence": [
+        "Native Windows psmux 3.4.0 and stock Codex 0.169.1",
+        "Five public scheduled placement and original conversation cases",
+        "Exact original Message UUID, deadline, receipt, and no duplicate delivery"
+      ]
     },
     {
       "issue": 776,
@@ -298,5 +314,5 @@
       "status": "pending"
     }
   ],
-  "integration_tip_at_validation": "56e3aa37"
+  "integration_tip_at_validation": "4f05652d"
 }
