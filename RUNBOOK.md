@@ -10874,3 +10874,17 @@ restart, preserved the shell, completed one correlated wake, and cleared the
 first-focus marker while retaining placement. Plan 0264 records the source
 commits, one Standards and Spec review, one red/green remediation pass,
 dual-Python validation and receipt hashes. No production restart or deployment.
+
+## Turn P267 | 2026-11-25 | Unified messages and terminal control checkpoint
+
+Closed #767–#772 and #774–#778 on `feat/plan0267-unified-messages`.
+The [execution ledger](docs/dev/plans/0267-execution.json) gives the exact
+test source, acceptance evidence, and restart sequence. The final local
+WSL run used the configured StableTime client and disposable PostgreSQL.
+It ran 2,975 tests, with three failures reproduced on the starting commit
+and one skip. Focused cross-backend, OAuth, and elevation checks passed.
+
+#773 still needs native Bastion startup and boot acceptance. #779 still
+needs the identified ChatGPT app and workspace and a reachable isolated
+candidate connector. #780 waits for #773. The single review and TDD
+remediation remain sequenced after ticket closure. No production deploy.

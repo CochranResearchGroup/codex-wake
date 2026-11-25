@@ -381,5 +381,53 @@
       "remaining": "Unblocks after the native Bastion acceptance in #773."
     }
   ],
-  "integration_tip_at_validation": "6ef377ca"
+  "integration_tip_at_validation": "6ef377ca",
+  "checkpoint": {
+    "recorded_at": "2026-11-25T00:56:48-06:00",
+    "state": "pending_live_acceptance",
+    "closed_issues": [
+      767,
+      768,
+      769,
+      770,
+      771,
+      772,
+      774,
+      775,
+      776,
+      777,
+      778
+    ],
+    "open_issues": [
+      773,
+      779,
+      780
+    ],
+    "next": [
+      "Authorize and qualify a native Bastion startup deployment and controlled boot for #773.",
+      "Identify the authorized ChatGPT app/workspace and approve temporary isolated candidate ingress for #779.",
+      "Start #780 when #773 is closed.",
+      "Run one code-review and one TDD remediation pass after ticket closure."
+    ],
+    "validation": {
+      "source": "5d5ad5eb5d2fec73f2064eaee103c6b7d1f01e1f",
+      "runner": "Python 3.12.13 on WSL, configured StableTime, isolated XDG roots and disposable PostgreSQL. No hosted Actions.",
+      "command": "PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py'",
+      "outcome": "2975 tests, 3 failures and 1 skip. All three failing cases independently reproduced on starting commit 70ff3585.",
+      "baseline_failures": [
+        "test_cli.CliTests.test_schema_command_reports_version_and_json",
+        "test_controller_defaults.ControllerDefaultTests.test_saved_default_explicit_override_and_project_wakes_remain_separate",
+        "test_local_validation.LocalValidationTests.test_real_planning_header_failure_then_corrected_fresh_receipt"
+      ],
+      "checks": [
+        "Ruff F821/F822/F823",
+        "compileall",
+        "policy wiring",
+        "native artifact provenance",
+        "command reference freshness",
+        "diff whitespace"
+      ]
+    },
+    "private_evidence_locator": "/tmp/wake766-active"
+  }
 }
