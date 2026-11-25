@@ -465,15 +465,19 @@ class Mailbox:
 
     def _admit(self, database, actor, recipient, *, body, kind, ttl, key, delivery,
                subject, selector, now, original=None, correlation=None, acknowledgement=None,
-               resume_missing=False, task_id=None):
+               resume_missing=False, task_id=None, busy_policy='wait'):
         if type(resume_missing) is not bool or (resume_missing and delivery != 'notify'):
             raise BusError('invalid_argument', 'explicit reopening requires notification delivery')
+        if busy_policy not in ('wait', 'idle-only') or (busy_policy != 'wait' and delivery != 'notify'):
+            raise BusError('invalid_argument', 'unsupported notification busy policy')
         body_digest = self._parameters(body, kind, ttl, key, delivery, subject, selector, correlation)
         recipient_key = thread_key(recipient)
         parent_id = original['message_id'] if original else None
         parameters = dict(recipient=recipient_key, body_digest=body_digest,
             kind=kind, ttl=ttl, delivery=delivery, subject=subject, in_reply_to=parent_id,
             correlation=correlation, acknowledgement=acknowledgement)
+        if busy_policy != 'wait':
+            parameters['busy_policy'] = busy_policy
         if task_id is not None:
             parameters['task_id']=task_id
         if resume_missing:
@@ -523,6 +527,7 @@ class Mailbox:
             idempotency_key=key, in_reply_to=parent_id, correlation=parent['correlation'] if parent else correlation,
             lineage=(parent['lineage'] + [parent_id]) if parent else [], hop_count=hop,
             selector_observation=selector, delivery=delivery)
+        if busy_policy != 'wait':envelope['busy_policy']=busy_policy
         if task_id is not None:envelope['task_id']=task_id
         if permission is not None:envelope['permission_admission']=permission
         if resume_missing:
@@ -544,13 +549,13 @@ class Mailbox:
         return dict(message=self._projection(database, self._row(database, identifier)), deduplicated=False, receipt_id=receipt)
 
     def send(self, actor, recipient, *, body, idempotency_key, kind='request', ttl=86400,
-             delivery='notify', subject=None, selector=None, correlation=None, resume_missing=False, task_id=None):
+             delivery='notify', subject=None, selector=None, correlation=None, resume_missing=False, task_id=None, busy_policy='wait'):
         with self.transaction(actor, permission='send') as database:
             now = self._now(database)
             value = self._admit(database, actor, recipient, body=body, kind=kind, ttl=float(ttl),
                                 key=idempotency_key, delivery=delivery, subject=subject,
                                 selector=selector or {}, correlation=correlation, now=now,
-                                resume_missing=resume_missing,task_id=task_id)
+                                resume_missing=resume_missing,task_id=task_id,busy_policy=busy_policy)
             self._finish(database, message_id=value['message']['message_id'], idempotency_key=idempotency_key,
                          receipt_id=value.get('receipt_id'))
             from .message_delivery import configured_store, direct_message, admission_status
@@ -577,6 +582,8 @@ class Mailbox:
             self._require_current_work(database, row)
             recipient = actor.key == row['recipient_key']
             if recipient:
+                if row['admission'] == 'bounced':
+                    raise BusError('not_processable', 'The original delivery was bounced')
                 self.bus.validate_actor(database, actor, permission='receive')
                 from .permission_a2a import check_message
                 check_message(self.bus,database,row)
@@ -599,6 +606,8 @@ class Mailbox:
             return value
 
     def _ack(self, database, actor, row, outcome, evidence, now):
+        if row['admission'] == 'bounced':
+            raise BusError('not_processable', 'The original delivery was bounced')
         if actor.key != row['recipient_key']:
             raise BusError('authorization_denied', 'only the exact recipient may acknowledge')
         self.bus.validate_actor(database, actor, permission='receive')
@@ -649,7 +658,7 @@ class Mailbox:
             return value
 
     def reply(self, actor, identifier, *, body, idempotency_key, kind='result', ttl=86400,
-              delivery='notify', subject=None, outcome=None, evidence=None, resume_missing=False, task_id=None):
+              delivery='notify', subject=None, outcome=None, evidence=None, resume_missing=False, task_id=None, busy_policy='wait'):
         with self.transaction(actor, permission='send') as database:
             original = self._row(database, identifier)
             self._require_current_work(database, original)
@@ -671,7 +680,7 @@ class Mailbox:
                                 delivery=delivery, subject=subject, selector=dict(reply_to=identifier),
                                 now=now, original=original,
                                 acknowledgement=dict(outcome=outcome, evidence=evidence) if outcome else None,
-                                resume_missing=resume_missing,task_id=task_id)
+                                resume_missing=resume_missing,task_id=task_id,busy_policy=busy_policy)
             if outcome:
                 value['acknowledgement'] = self._ack(database, actor, original, outcome, evidence, now)
             self._finish(database, message_id=value['message']['message_id'], idempotency_key=idempotency_key,
@@ -707,12 +716,15 @@ class Mailbox:
                                        dict(time_status='uncertain') if now is None else {}, signal=now is not None)
                 value = dict(message=self._projection(database, self._row(database, identifier)), receipt_id=receipt, deduplicated=False)
             self._finish(database, message_id=identifier, receipt_id=value.get('receipt_id'))
+            from .message_policy import note_terminal
+            value['shared_retirement'] = ('released' if note_terminal(self.bus.root, 'a2a:' + self.bus.bus_id, identifier)
+                                          else 'pending_shared_store')
             return value
 
     def list(self, actor, *, outbox=False, cursor=0, limit=100, state=None):
         if type(cursor) is not int or cursor < 0 or type(limit) is not int or not 1 <= limit <= 100:
             raise BusError('invalid_argument', 'page size must be 1 to 100 and cursor a nonnegative integer')
-        if state is not None and state not in ('unread','received','accepted','declined','completed','failed','cancelled','expired'):
+        if state is not None and state not in ('unread','received','accepted','declined','completed','failed','cancelled','expired','bounced'):
             raise BusError('invalid_argument', 'unsupported mailbox state filter')
         with self.transaction(actor) as database:
             now = None if self._network_mode(database) else self._now(database)
@@ -723,7 +735,7 @@ class Mailbox:
                 current = self._row(database, row['message_id'])
                 if now is not None:
                     current = self._expire(database,current,now)
-                if state is None or state == current['admission' if state in ('cancelled','expired') else 'recipient']:
+                if state is None or state == current['admission' if state in ('cancelled','expired','bounced') else 'recipient']:
                     values.append(self._projection(database, current))
             next_cursor = rows[limit - 1]['global_seq'] if len(rows) > limit else None
             database.execute('COMMIT')

@@ -276,6 +276,11 @@ class NotificationDispatcher:
                 database.execute('ROLLBACK')
             if paused:
                 return dict(status='paused', submitted=0, results=[], recovered=recovered)
+            from .message_delivery import configured_store, direct_message, deliver, DeliveryReceipt
+            from .message_policy import decide, interrupt_decision, recipient_policy
+            from .native_clock import snapshot
+
+            store = configured_store(scheduler.mailbox.bus.root)
             for job in scheduler.jobs(dispatcher, limit=limit):
                 with (self.receipt_gate.guard(job) if self.receipt_gate is not None else nullcontext(None)) as receipt:
                     if receipt is False:
@@ -285,6 +290,22 @@ class NotificationDispatcher:
                     dispatcher = scheduler.acquire()
                     if dispatcher is None:
                         raise BusError('stale_lease', 'dispatcher ownership changed')
+                    try:
+                        context = scheduler.notification_context(job, include_payload=store is not None)
+                        busy_policy = context.get('busy_policy', 'wait')
+                        message = direct_message(context, context['payload']) if store is not None else None
+                        policy, intervention = (recipient_policy(store, message, clock=snapshot(), busy_policy=busy_policy)
+                                                if message is not None else (decide('ready'), None))
+                        if policy.state != 'ready':
+                            if policy.state == 'bounce' and store.record_bounce(message, policy.reason):
+                                scheduler.bounce(dispatcher, job, policy.reason)
+                            else:
+                                scheduler.defer(dispatcher, job['job_id'], policy.reason)
+                            results.append(dict(message_id=job['message_id'], status='bounced' if policy.state == 'bounce' else 'deferred', reason=policy.reason))
+                            continue
+                    except BusError as error:
+                        results.append(dict(message_id=job['message_id'], status='denied', reason=error.code))
+                        continue
                     binding = bindings.get(job['recipient_key'])
                     try:
                         binding = self._current_binding(job, binding)
@@ -304,6 +325,31 @@ class NotificationDispatcher:
                         saved_probe = saved.probe()
                         if saved_probe.get('reason') != 'reopening_not_authorized':
                             binding, probe = saved, saved_probe
+                    if intervention and intervention[1] and intervention[3] not in ('interrupted', 'unavailable'):
+                        from functools import partial
+                        from .a2a_tmux_delivery import TmuxBinding
+                        from .native_protocol import exact_message_interrupt
+
+                        transport = None
+                        if isinstance(binding, TmuxBinding):
+                            transport = partial(exact_message_interrupt, 'unix://', 'codex',
+                                                job['recipient_key'], binding.thread_id)
+
+                        def authorize_interrupt():
+                            scheduler.notification_context(job)
+                            binding.locate()
+
+                        decision = interrupt_decision(store, message, intervention, transport,
+                                                      authorize_interrupt, snapshot)
+                        if decision.state != 'ready':
+                            scheduler.defer(dispatcher, job['job_id'], decision.reason)
+                            results.append(dict(message_id=job['message_id'], status='deferred', reason=decision.reason))
+                            continue
+                    if probe.get('reason') == 'busy' and busy_policy == 'idle-only':
+                        if message is None or store.record_bounce(message, 'recipient_busy'):
+                            scheduler.bounce(dispatcher, job, 'recipient_busy')
+                            results.append(dict(message_id=job['message_id'], status='bounced', reason='recipient_busy'))
+                            continue
                     if probe.get('status') != 'ready':
                         reason = probe.get('reason', 'capability_unavailable')
                         scheduler.defer(dispatcher, job['job_id'], reason if reason in
@@ -325,8 +371,6 @@ class NotificationDispatcher:
                         except BusError as error:
                             results.append(dict(message_id=job['message_id'], status='denied', reason=error.code))
                             continue
-                        from .message_delivery import configured_store, direct_message, deliver, DeliveryReceipt
-                        store = configured_store(scheduler.mailbox.bus.root)
                         try:
                             context = scheduler.notification_context(
                                 job, attempt_id=claim['attempt_id'], include_payload=store is not None)
@@ -351,6 +395,9 @@ class NotificationDispatcher:
                                     scheduler.notification_context(job, attempt_id=claim['attempt_id'])
                                 except BusError as error:
                                     return DeliveryReceipt('unsent', reason=error.code)
+                                latest, _ = recipient_policy(store, message, clock=snapshot(), busy_policy=busy_policy)
+                                if latest.state != 'ready':
+                                    return DeliveryReceipt('unsent', reason=latest.reason)
                                 raw = submit()
                                 return DeliveryReceipt(raw.get('status'), raw.get('receipt_id'), raw.get('reason'),
                                                        raw.get('evidence_kind'), raw.get('execution'),
@@ -368,7 +415,8 @@ class NotificationDispatcher:
                             for key in ('evidence_kind','execution','acknowledgment'):
                                 if key in result:evidence[key]=result[key]
                         elif outcome == 'unsent':
-                            evidence['reason'] = 'pre_io_failure' if result.get('reason') == 'pre_io_failure' else 'explicit_not_sent'
+                            reason = result.get('reason')
+                            evidence['reason'] = reason if reason in ('pre_io_failure', 'recipient_dnd', 'message_policy_unavailable', 'recipient_fifo_wait', 'recipient_effect_unresolved') else 'explicit_not_sent'
                         else:
                             outcome = 'uncertain'
                             evidence['reason'] = 'client_response_unqualified'

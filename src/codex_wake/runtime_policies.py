@@ -15,7 +15,7 @@ def require_wait_policy(policy='wait'):
 
 def require_native_policy(policy='wait'):
     """Queue is explicit intent; runtime qualification is checked at delivery."""
-    if policy not in ('wait', 'queue'):
+    if policy not in ('wait', 'queue', 'idle-only'):
         raise WakeError('busy_policy_unsupported')
 
 
@@ -36,7 +36,7 @@ def use_idle_native_submission(target, observation):
     """Use standard Codex submission only for an idle, wait-policy recipient."""
     capability = observation.capabilities.get('idle_submit')
     return (observation.state == 'ready'
-            and target.get('busy_policy', 'wait') == 'wait'
+            and target.get('busy_policy', 'wait') in ('wait', 'idle-only')
             and bounded_native_unqualified(observation)
             and capability is not None and capability.state == 'supported')
 

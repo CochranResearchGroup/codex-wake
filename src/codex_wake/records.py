@@ -692,6 +692,7 @@ def _cancel_found(
     if checkpoint is not None:
         checkpoint("after_cancel_source_unlink")
     _retire_signal_terminal(root, record, current)
+    _retire_message_waiting(root, record)
     return destination
 
 
@@ -732,7 +733,16 @@ def replace_record(root: Path, found: WakePath, record: dict[str, Any]) -> Path:
     destination = write_record(root, record)
     if found.path != destination and found.path.exists():
         found.path.unlink()
+    _retire_message_waiting(root, record)
     return destination
+
+
+def _retire_message_waiting(root, record):
+    if record.get('status') in ('cancelled', 'expired', 'failed', 'archived') and record.get('target', {}).get('transport') == 'native':
+        from .message_delivery import scope_for_wake
+        from .message_policy import note_terminal
+
+        note_terminal(root, scope_for_wake(root), record['id'])
 
 
 def _archive_time(schema,now):

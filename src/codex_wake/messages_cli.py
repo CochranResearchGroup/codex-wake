@@ -21,7 +21,7 @@ def add_messages_parser(subparsers):
     parser = subparsers.add_parser('messages', help='send and consume explicitly authorized local mailbox messages')
     commands = parser.add_subparsers(dest='messages_command', required=True)
     commands.add_parser('database-init', help='Initialize the configured PostgreSQL message schema')
-    for verb in ['send','inbox','outbox','show','read','ack','reply','cancel','wait','watch','reconcile','arm-reply']:
+    for verb in ['send','inbox','outbox','show','read','ack','reply','cancel','wait','watch','reconcile','arm-reply','dnd','intervene']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path, default=os.environ.get('CODEX_WAKE_A2A_BUS_ROOT'))
         command.add_argument('--bus-id', default='local')
@@ -36,6 +36,16 @@ def add_messages_parser(subparsers):
             command.add_argument('--operator-capability', type=Path)
         if verb in ('show','read','ack','reply','cancel','wait','reconcile','arm-reply'):
             command.add_argument('message_id')
+        if verb == 'dnd':
+            command.add_argument('mode', choices=['hold', 'bounce', 'clear'])
+            command.add_argument('--for', dest='dnd_duration')
+        if verb == 'intervene':
+            command.add_argument('message_id')
+            command.add_argument('--operator-capability', type=Path, required=True)
+            command.add_argument('--wake-root', type=Path)
+            command.add_argument('--override-dnd', action='store_true')
+            command.add_argument('--interrupt-turn')
+            command.add_argument('--status', action='store_true')
         if verb == 'arm-reply':
             command.add_argument('--wake-root', type=Path, default=os.environ.get('CODEX_WAKE_WAKE_ROOT'))
             command.add_argument('--sender-receipt-authority', type=Path,
@@ -53,6 +63,7 @@ def add_messages_parser(subparsers):
             command.add_argument('--delivery', choices=['inbox','notify'], default='notify')
             command.add_argument('--subject')
             command.add_argument('--task-id')
+            command.add_argument('--busy-policy', choices=['wait', 'idle-only'], default='wait')
         if verb == 'send':
             command.add_argument('--host-operator-capability', type=Path,
                 help='host delegation for verified recipients in existing enrolled roots')
@@ -158,6 +169,9 @@ def messages_command(args):
             print(json.dumps(dict(schema_version=1, event='intent_prepared', idempotency_key=intent_key)), file=sys.stderr, flush=True)
         bus = BusStore(args.bus_root or default_bus_root(args.bus_id))
         mailbox = Mailbox(bus)
+        if verb == 'intervene':
+            result(intervene(args, mailbox))
+            return 0
         if getattr(args, 'as_operator', False):
             if args.operator_capability is None:
                 raise BusError('authorization_denied', 'explicit operator capability is required')
@@ -173,7 +187,9 @@ def messages_command(args):
                 bus, capability, claimed_session=args.caller_session_id)
         else:
             actor = invoking_actor(bus, capability, endpoint=args.app_server)
-        if verb == 'arm-reply':
+        if verb == 'dnd':
+            value = set_dnd(args, mailbox, actor)
+        elif verb == 'arm-reply':
             from .a2a_reply_wake import arm_reply
             value = arm_reply(actor, args.message_id, args.wake_root,
                               args.sender_receipt_authority, args.idempotency_key, args.expires_at)
@@ -196,12 +212,12 @@ def messages_command(args):
             value = mailbox.send(actor, recipient, body=body_input(args.body_file), idempotency_key=intent_key,
                                  kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
                                  subject=args.subject, selector=dict(selector=args.to, identity=recipient.thread_id),
-                                 correlation=args.correlation, resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None))
+                                 correlation=args.correlation, resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None), busy_policy=args.busy_policy)
         elif verb == 'reply':
             value = mailbox.reply(actor, args.message_id, body=body_input(args.body_file), idempotency_key=intent_key,
                                   kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
                                   subject=args.subject, outcome=args.outcome, evidence=args.evidence,
-                                  resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None))
+                                  resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None), busy_policy=args.busy_policy)
         elif verb in ('inbox','outbox'):
             value = mailbox.list(actor, outbox=verb == 'outbox', cursor=args.cursor, limit=args.limit, state=args.state)
         elif verb == 'show':
@@ -247,3 +263,102 @@ def prepare_host_recipient(args, bus, actor, recipient):
             raise BusError('cross_root_denied', 'cross-root messaging requires explicit bus permission')
     from .native_mailbox_bootstrap import runtime_actor_context
     runtime_actor_context(bus, operator, recipient, permission='receive')
+
+
+
+def _required_message_store(root):
+    from .message_delivery import configured_store
+    store = configured_store(root)
+    if store is None:
+        raise BusError('message_store_unconfigured', 'A shared message store is required for this scope')
+    return store
+
+
+def set_dnd(args, mailbox, actor):
+    from .message_policy import stable_micros
+    from .native_clock import snapshot
+
+    store = _required_message_store(mailbox.bus.root)
+    from psycopg import Error
+
+    until = None
+    if args.dnd_duration:
+        if args.mode == 'clear':
+            raise BusError('invalid_argument', 'Clearing DND does not take a duration')
+        delta = parse_duration(args.dnd_duration)
+        duration = (delta.days * 86400 + delta.seconds) * 1_000_000 + delta.microseconds
+        now = stable_micros(snapshot(), upper=True)
+        if not 0 < duration <= 30 * 86400 * 1_000_000:
+            raise BusError('invalid_argument', 'DND duration must be positive and at most 30 days')
+        if now is None:
+            raise BusError('time_uncertain', 'StableTime is required for a DND deadline')
+        until = now + duration
+    with mailbox.bus.connection(read_only=True) as database:
+        mailbox.bus.validate_actor(database, actor, permission='receive')
+    try:
+        store.set_dnd(actor.key, actor.thread_id, args.mode, until)
+    except Error:
+        raise BusError('message_store_unavailable', 'Could not commit the DND setting') from None
+    return dict(recipient=actor.thread_id, dnd=args.mode, until_micros=until)
+
+
+def intervene(args, mailbox):
+    from .message_delivery import direct_message, scope_for_wake, wake_message
+    from .message_policy import native_identity, stable_micros
+    from .native_clock import snapshot
+    from .permission_a2a import binding
+    from .records import find_record
+    from .runtime_delivery import original_submission_expiry
+
+    if args.status and (args.override_dnd or args.interrupt_turn):
+        raise BusError('invalid_argument', 'Inspect an intervention separately from changing it')
+    if not args.status and not args.override_dnd and not args.interrupt_turn:
+        raise BusError('invalid_argument', 'Request a DND override, an exact turn interruption, or both')
+    if args.interrupt_turn and len(args.interrupt_turn) > 256:
+        raise BusError('invalid_argument', 'Exact turn ID is too long')
+    bus = mailbox.bus
+    store = _required_message_store(args.wake_root or bus.root)
+    from psycopg import Error
+    try:
+        with mailbox.transaction() as database:
+            bus.operator(database, args.operator_capability)
+            if args.wake_root:
+                configured = binding(bus, database)
+                root = args.wake_root.resolve()
+                if configured is None or root != Path(configured['root']):
+                    raise BusError('authorization_denied', 'Wake scope must match the bus-pinned permission root')
+                if args.status:
+                    return dict(message_id=args.message_id, policy=store.policy_status(scope_for_wake(root), args.message_id))
+                record = find_record(root, args.message_id).record
+                if record['status'] != 'pending' or record.get('native_delivery'):
+                    raise BusError('not_processable', 'Only a pending wake without unresolved effects may be escalated')
+                message = wake_message(root, record, original_submission_expiry(record))
+                exact = native_identity(record['target'])
+            else:
+                row = mailbox._row(database, args.message_id)
+                if args.status:
+                    return dict(message_id=args.message_id, policy=store.policy_status('a2a:' + bus.bus_id, args.message_id))
+                if row['admission'] != 'accepted' or row['notification'] not in ('pending', 'deferred', 'published'):
+                    raise BusError('not_processable', 'Only a pending notification may be escalated')
+                envelope = json.loads(row['envelope'])
+                payload = database.execute('SELECT body FROM mail_bodies WHERE message_id=?', (args.message_id,)).fetchone()
+                if payload is None:
+                    raise BusError('not_processable', 'The original payload is unavailable')
+                message = direct_message(envelope, payload[0])
+                exact = row['recipient_key']
+            now = stable_micros(snapshot(), upper=True)
+            if now is None or now >= message.expires_at_micros:
+                raise BusError('time_uncertain', 'The original deadline is expired or cannot be verified')
+            authorization = bus.event(database, 'operator', 'message_intervention_authorized',
+                                      dict(message_id=message.identifier, recipient=exact,
+                                           override_dnd=args.override_dnd, turn_id=args.interrupt_turn))
+            database.execute('COMMIT')
+        store.intervene(message, exact, override=args.override_dnd, turn_id=args.interrupt_turn,
+                        actor=authorization)
+    except ValueError as error:
+        raise BusError('intervention_denied', str(error)) from None
+    except Error:
+        raise BusError('message_store_unavailable', 'Could not commit the intervention') from None
+    return dict(message_id=message.identifier, recipient=exact, authorization=authorization,
+                delivery='pending', interruption='requested' if args.interrupt_turn else None,
+                override_dnd=args.override_dnd)

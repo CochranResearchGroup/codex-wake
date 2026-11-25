@@ -64,7 +64,7 @@ def _request(args, root):
     require_native_policy(busy_policy)
     # Absence is the historical immutable wait default. Preserve old request
     # fingerprints on replay; queue must be retained explicitly.
-    if busy_policy == 'queue':
+    if busy_policy != 'wait':
         target['busy_policy'] = busy_policy
     else:
         target.pop('busy_policy', None)
@@ -217,7 +217,9 @@ def _receipt(args, record, path, deduplicated):
         if projection['expires_at'] is None:
             value['shared_admission'] = 'awaiting_original_expiry'
         else:
-            message = wake_message(root, record, original_submission_expiry(record))
+            from .message_policy import discover_native_identity
+            message = wake_message(root, record, original_submission_expiry(record),
+                                   order_recipient=discover_native_identity(record['target']))
             value['shared_admission'] = admission_status(store, message)
     if getattr(args, "as_json", False):
         print(json.dumps(value, sort_keys=True))
@@ -297,7 +299,7 @@ def valid_record(record):
 
 def _valid_native_target(target):
     return (target['transport'] == 'native' and str(UUID(target['thread_id'])) == target['thread_id']
-            and target.get('busy_policy', 'wait') in ('wait', 'queue')
+            and target.get('busy_policy', 'wait') in ('wait', 'queue', 'idle-only')
             and target['endpoint'].startswith('unix://') and Path(target['codex_cmd']).is_absolute())
 
 

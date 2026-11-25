@@ -139,7 +139,9 @@ class MailScheduler:
     def defer(self, lease, job_id, reason, *, seconds=5):
         if reason not in {'paused','busy','offline','capability_unavailable','rate_limit','authorization_denied',
                           'identity_changed','composer_protected','runtime_unavailable','client_offline',
-                          'reply_arm_unavailable'} or not 1 <= seconds <= 300:
+                          'reply_arm_unavailable','recipient_dnd','message_policy_unavailable',
+                          'interrupt_unavailable','interrupt_uncertain','interrupt_requested',
+                          'interrupt_observed','interrupt_turn_changed'} or not 1 <= seconds <= 300:
             raise BusError('invalid_argument', 'unsupported bounded deferral')
         with self.mailbox.transaction() as database:
             self._operator(database)
@@ -156,6 +158,24 @@ class MailScheduler:
                 previous = database.execute("SELECT details FROM mail_receipts WHERE message_id=? AND kind='deferred' ORDER BY receipt_seq DESC LIMIT 1", (row['message_id'],)).fetchone()
                 if not previous or json.loads(previous['details']).get('reason') != reason:
                     self.mailbox._record(database, row['message_id'], 'deferred', 'scheduler', now, dict(reason=reason))
+            database.execute('COMMIT')
+
+    def bounce(self, lease, job, reason):
+        with self.mailbox.transaction() as database:
+            self._operator(database)
+            now = self.mailbox._now(database)
+            self._fence(database, lease, now)
+            row = self.mailbox._expire(database, self.mailbox._row(database, job['message_id']), now)
+            self.mailbox._deadline_clear(database, row, now)
+            if row['admission'] != 'accepted' or not self._authorized(database, row):
+                raise BusError('authorization_denied', 'original notification authority is unavailable')
+            updated = database.execute(
+                """UPDATE mail_outbox SET status='failed' WHERE outbox_id=? AND message_id=?
+                   AND status IN ('pending','published','deferred')""", (job['job_id'], row['message_id']))
+            if updated.rowcount != 1:
+                raise BusError('not_processable', 'notification is not pending')
+            database.execute("UPDATE mail_state SET notification='failed',admission='bounced' WHERE message_id=?", (row['message_id'],))
+            self.mailbox._record(database, row['message_id'], 'bounced', 'scheduler', now, dict(reason=reason))
             database.execute('COMMIT')
 
     def notification_context(self, job, *, attempt_id=None, include_payload=False):
@@ -265,12 +285,15 @@ class MailScheduler:
                     not isinstance(evidence.get('transport'), str) or not evidence['transport'] or
                     not isinstance(evidence.get('receipt_id'), str) or not evidence['receipt_id']):
                 raise BusError('transport_evidence_invalid', 'submission requires an exact-thread transport receipt')
-            if outcome == 'unsent' and evidence.get('reason') not in {'pre_io_failure','explicit_not_sent','fixture_pre_io'}:
+            if outcome == 'unsent' and evidence.get('reason') not in {'pre_io_failure','explicit_not_sent','fixture_pre_io', 'recipient_dnd', 'message_policy_unavailable', 'recipient_fifo_wait', 'recipient_effect_unresolved'}:
                 raise BusError('transport_evidence_invalid', 'only qualified provably-unsent evidence permits retry')
             database.execute('UPDATE mail_attempts SET state=?,evidence=? WHERE attempt_id=?', (outcome, encoded(evidence), attempt_id))
             for message_id in json.loads(attempt['message_ids']):
                 intent = database.execute("SELECT * FROM mail_outbox WHERE message_id=? AND kind='notification'", (message_id,)).fetchone()
-                if outcome == 'unsent':
+                if outcome == 'unsent' and evidence.get('reason') in ('recipient_dnd', 'message_policy_unavailable', 'recipient_fifo_wait', 'recipient_effect_unresolved'):
+                    state, next_attempt = 'deferred', now + 5
+                    database.execute('UPDATE mail_outbox SET attempts=attempts-1 WHERE outbox_id=?', (intent['outbox_id'],))
+                elif outcome == 'unsent':
                     state = 'failed' if intent['attempts'] >= 3 else 'deferred'
                     next_attempt = now + (5, 30, 120)[intent['attempts'] - 1]
                 else:

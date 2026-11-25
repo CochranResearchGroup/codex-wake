@@ -169,3 +169,54 @@ def _protective_interrupt(row,scope):
                 return 'requested'
         finally:
             os.write(stopped_w,b'1');watcher.join();sock.close();os.close(stopped_r);os.close(stopped_w)
+
+
+def exact_message_interrupt(endpoint, codex, exact_recipient, thread, turn, begin):
+    """Qualify the same local native connection and exact active turn before effect."""
+    from .a2a_identity import RuntimeIdentity
+    from .message_policy import recipient_key
+
+    if endpoint == 'unix://':
+        from .shared_app_server import locate_shared_endpoint
+        endpoint = locate_shared_endpoint(codex_cmd=codex, timeout=5)
+    observed = {}
+
+    def verify(connection, metadata):
+        request_id = 'wake-interrupt-observe'
+        connection.send(json.dumps(dict(id=request_id, method='thread/read',
+                                        params=dict(threadId=thread, includeTurns=True))))
+        stop = time.monotonic() + 2
+        for _ in range(256):
+            reply = json.loads(connection.recv(timeout=max(0, stop - time.monotonic())))
+            if reply.get('id') != request_id:
+                continue
+            if 'error' in reply:
+                raise WakeError('interrupt observation unavailable')
+            conversation = reply['result']['thread']
+            identity = RuntimeIdentity.from_metadata(conversation, metadata)
+            if recipient_key(identity.namespace, identity.thread_id) != exact_recipient:
+                raise WakeError('interrupt recipient changed')
+            turns = conversation.get('turns', [])
+            active = [item.get('id') for item in turns if item.get('status') == 'inProgress']
+            interrupted = any(item.get('id') == turn and item.get('status') == 'interrupted' for item in turns)
+            if begin is None:
+                observed['state'] = 'interrupted' if interrupted else 'pending'
+                raise ObservationComplete
+            if conversation.get('status', {}).get('type') != 'active' or active != [turn]:
+                observed['state'] = 'turn_changed'
+                raise ObservationComplete
+            if not begin():
+                observed['state'] = 'held'
+                raise ObservationComplete
+            return
+        raise WakeError('interrupt observation capacity')
+
+    class ObservationComplete(Exception):
+        pass
+
+    try:
+        native_request(endpoint, codex, 'turn/interrupt', dict(threadId=thread, turnId=turn),
+                       5, verify_connection=verify)
+    except ObservationComplete:
+        return observed['state']
+    return 'requested'

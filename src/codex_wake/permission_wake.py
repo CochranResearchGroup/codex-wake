@@ -169,6 +169,7 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
     start=progress.get('next',0)
     if type(start) is not int or not 0<=start<=len(routes):
         return DispatchResult('skipped','wake route progress invalid')
+    from .message_policy import native_preflight, persist_native_decision
     reasons=[]
     for index in range(start,len(routes)):
         route=routes[index]
@@ -179,6 +180,10 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
                 record.update(status='failed' if verdict['state']=='missed_deadline' else 'pending',time_recovery=verdict)
                 replace_record(root,found,record)
                 return DispatchResult('failed' if record['status']=='failed' else 'requeued',verdict['reason'])
+            policy = native_preflight(root, record, clock_provider,
+                                      authorize=lambda: check_route(root, record, route))
+            if policy.state != 'ready':
+                return persist_native_decision(root, found, record, policy, now, clock_provider)
             selected=RouteAdapter(adapter,route)
             recipient=selected.resolve(record['target'])
             if recipient.version!=1 or recipient.runtime!='codex' or recipient.session_id!=record['target']['thread_id']:
@@ -186,6 +191,9 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
             # Permission precedes even observation, so an adapter cannot use a
             # denied route to resume/load a recipient as a side effect.
             observation=selected.observe(recipient)
+            if record['target'].get('busy_policy') == 'idle-only' and observation.state == 'busy':
+                policy = native_preflight(root, record, clock_provider, observation='busy')
+                return persist_native_decision(root, found, record, policy, now, clock_provider)
             record['runtime_observation']=observation.summary(recipient)
             if not supported(route,observation):
                 reasons.append(route+':unsupported');continue
@@ -235,6 +243,9 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
                     record['permission_check'] = check_route(root, record, route)
                 except PermissionDenied as exc:
                     return RuntimeSubmission('not_sent', reason=exc.code, pre_io=True)
+                current = native_preflight(root, record, clock_provider, record_bounce=False)
+                if current.state != 'ready':
+                    return RuntimeSubmission('not_sent', reason=current.reason, pre_io=True)
                 if idle_submit:
                     result = selected.submit(recipient, prompt)
                 else:
@@ -254,6 +265,13 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
             submitted=RuntimeSubmission('not_sent',reason=exc.code,pre_io=True)
         except Exception:
             submitted=RuntimeSubmission('uncertain',reason='adapter_outcome_unknown')
+        if submitted.state == 'not_sent' and submitted.pre_io is True and submitted.reason in (
+                'recipient_dnd', 'message_policy_unavailable', 'recipient_fifo_wait', 'recipient_effect_unresolved'):
+            from .message_policy import Decision
+            record.pop('native_delivery', None)
+            record['attempts'] -= 1
+            return persist_native_decision(root, found, record, Decision('hold', submitted.reason),
+                                           now, clock_provider)
         if submitted.state=='not_sent' and submitted.pre_io is True and submitted.reason == 'bounded_native_backend_not_qualified':
             record.pop('native_delivery', None)
             record.update(status='pending', policy_outcome=dict(state='held', reason=submitted.reason))

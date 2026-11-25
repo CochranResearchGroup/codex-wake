@@ -40,7 +40,7 @@ def add_native_parser(subparsers):
         command.add_argument('--time-tolerance', help='maximum admitted clock interval, at most 5m')
         command.add_argument('--stop-at', help='absolute UTC stop; requires qualified UTC before any dispatch')
         command.add_argument('--json', dest='as_json', action='store_true', help='structured native intent receipt')
-        command.add_argument('--busy-policy',choices=['wait','queue','interrupt'],default='wait')
+        command.add_argument('--busy-policy',choices=['wait','queue','idle-only','interrupt'],default='wait')
         command.add_argument('--require-monitor', action='store_true', help='require an active worker compatible with this record')
         command.add_argument('--resume-missing', action='store_true',
                              help='explicitly resume the same saved thread when it is not loaded')
@@ -174,6 +174,10 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
         record = append_event(record, 'expired', 'native recipient deadline elapsed', now)
         replace_record(root, found, record)
         return DispatchResult('failed', 'native recipient deadline elapsed')
+    from .message_policy import native_preflight, persist_native_decision
+    verdict = native_preflight(root, record, clock_provider)
+    if verdict.state != 'ready':
+        return persist_native_decision(root, found, record, verdict, now, clock_provider)
     adapter = runtime_adapter if runtime_adapter is not None else _codex_adapter()
     try:
         recipient = adapter.resolve(target)
@@ -182,6 +186,9 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
         if recipient.runtime != 'codex' or recipient.session_id != target['thread_id']:
             raise RuntimeTargetError('unavailable', 'resolved_recipient_changed')
         observation = adapter.observe(recipient)
+        if target.get('busy_policy') == 'idle-only' and observation.state == 'busy':
+            verdict = native_preflight(root, record, clock_provider, observation='busy')
+            return persist_native_decision(root, found, record, verdict, now, clock_provider)
         record['runtime_observation'] = observation.summary(recipient)
         from .wake_policy import startup_reason
         policy_reason = startup_reason(record, observation)
@@ -271,6 +278,9 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
         from .runtime_delivery import validate_native_submission
 
         def submit():
+            current = native_preflight(root, record, clock_provider, record_bounce=False)
+            if current.state != 'ready':
+                return RuntimeSubmission('not_sent', reason=current.reason, pre_io=True)
             if idle_submit:
                 result = adapter.submit(recipient, prompt)
             else:
@@ -292,6 +302,11 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
         )
     if submitted.state == 'not_sent' and submitted.pre_io is True:
         record.pop('native_delivery', None)
+        if submitted.reason in ('recipient_dnd', 'message_policy_unavailable', 'recipient_fifo_wait', 'recipient_effect_unresolved'):
+            from .message_policy import Decision
+            record['attempts'] -= 1
+            return persist_native_decision(root, found, record, Decision('hold', submitted.reason),
+                                           now, clock_provider)
         record.update(status='cancelled' if submitted.reason == 'session_closed' else 'pending',
                       policy_outcome=dict(state='retired' if submitted.reason == 'session_closed' else 'held', reason=submitted.reason))
         if intent and record['status'] == 'pending':
