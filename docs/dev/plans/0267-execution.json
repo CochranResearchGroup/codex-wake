@@ -336,10 +336,25 @@
         772,
         775
       ],
-      "status": "running",
+      "status": "isolated_validated_live_gate_open",
       "owner": "/root/cutover",
       "base": "5aebe9e1",
-      "branch": "feat/issue-779-connected-chatgpt"
+      "branch": "feat/issue-779-connected-chatgpt",
+      "tracker": "open",
+      "worker_results": [
+        "f44a25c7",
+        "7d38a9b2"
+      ],
+      "integration_results": [
+        "6780bc1d",
+        "1fc1c064"
+      ],
+      "evidence": [
+        "Actual OAuth PKCE and MCP SDK, isolated tmux and native Windows psmux restoration",
+        "Exact grant separates control, metadata history and content scope",
+        "42 matched and 29 repeated integration tests passed using disposable PostgreSQL"
+      ],
+      "remaining": "Connected ChatGPT journey through a reachable isolated candidate endpoint, identified app and workspace, and fixture-only consent grant"
     },
     {
       "issue": 780,
@@ -351,5 +366,5 @@
       "status": "pending"
     }
   ],
-  "integration_tip_at_validation": "0bbb432b"
+  "integration_tip_at_validation": "1fc1c064"
 }
