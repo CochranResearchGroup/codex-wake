@@ -257,6 +257,10 @@ class NotificationDispatcher:
         return load_bindings(self.bindings_file).get(job['recipient_key'])
 
     def tick(self, *, limit=10):
+        from .message_cutover import database_unready
+
+        if reason := database_unready(self.scheduler.mailbox.bus.root):
+            return dict(status='held', reason=reason, submitted=0, results=[])
         if self.receipt_gate is not None:
             self.receipt_gate.tick()
         # An opted-in worker can start before its first recipient is discovered.

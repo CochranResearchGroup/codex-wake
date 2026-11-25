@@ -134,6 +134,11 @@ def health_is_recent(
 ) -> bool:
     if not health:
         return False
+    from .message_cutover import DATABASE_UNAVAILABLE
+
+    poll = health.get("poll_result")
+    if isinstance(poll, dict) and poll.get("skip_reason") == DATABASE_UNAVAILABLE:
+        return False
     checked_at = parse_health_time(health.get("checked_at"))
     if checked_at is None:
         return False
@@ -266,8 +271,11 @@ def monitor_readiness(
     signals = signal_readiness(resolved_root, health=health)
     recent_health = health_is_recent(health, stale_after_seconds=stale_after_seconds, now=now)
     persistent_health = bool(health and health.get("mode") == "loop")
-    service_ready = service_active == "active" and service_matches_root
-    health_ready = recent_health and persistent_health
+    from .message_cutover import database_unready
+
+    database_reason = database_unready(resolved_root)
+    service_ready = service_active == "active" and service_matches_root and not database_reason
+    health_ready = recent_health and persistent_health and not database_reason
     monitor_ready = service_ready or health_ready
     source = ""
     health_source = str(health.get("source") or "health") if health else ""
@@ -304,6 +312,7 @@ def monitor_readiness(
         "repo_root": str(resolved_repo),
         "monitor_ready": monitor_ready,
         "monitor_source": source,
+        **({"reason": database_reason} if database_reason else {}),
         "service": service,
         "health": {
             "path": str(monitor_health_path(resolved_root, state_dir)),
@@ -323,6 +332,8 @@ def monitor_readiness(
 def require_monitor_ready(readiness: dict[str, Any]) -> None:
     if readiness.get("monitor_ready"):
         return
+    if reason := readiness.get("reason"):
+        raise WakeError(f"{reason}: the activated scope is waiting for PostgreSQL")
     service = readiness.get("service") if isinstance(readiness.get("service"), dict) else {}
     health = readiness.get("health") if isinstance(readiness.get("health"), dict) else {}
     raise WakeError(

@@ -355,6 +355,12 @@ def poll_once(
     time_provider=None,
     lifecycle_supervision=None,
 ) -> PollResult:
+    from .message_cutover import database_unready
+
+    database_error = database_unready(root)
+    if database_error:
+        return PollResult(skip_reason=database_error)
+
     from .wake_cancellation import reconcile_cancellations
     reconcile_cancellations(root)
     from .agent_handoff import poll_handoffs
@@ -697,10 +703,12 @@ def run(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     root = (args.wake_root or default_wake_root()).resolve()
+    from .message_cutover import DATABASE_UNAVAILABLE
+
     if args.once:
         result = poll_once(root, dispatch=not args.no_dispatch, ack_timeout_override=args.ack_timeout,
                            receipt_authority_path=args.a2a_receipt_authority)
-        if not getattr(result, "skip_reason", None):
+        if result.skip_reason in (None, DATABASE_UNAVAILABLE):
             write_monitor_health(
                 wake_root=root,
                 repo_root=Path.cwd(),
@@ -709,7 +717,7 @@ def run(argv: list[str] | None = None) -> int:
                 poll_result=poll_result_dict(result),
             )
         print(format_poll_result(result))
-        return 0
+        return 2 if result.skip_reason == DATABASE_UNAVAILABLE else 0
     if args.interval <= 0:
         raise WakeError("--interval must be greater than zero")
     with MonitorOwnership(root) as owner:
@@ -720,6 +728,7 @@ def run(argv: list[str] | None = None) -> int:
             print("skipped=reconciliation_required", flush=True)
             return 2
         signal_reconcile_reason: Literal["startup", "periodic"] = "startup"
+        waiting_for_database = False
         try:
             while True:
                 if reconciliation_required(root):
@@ -736,10 +745,9 @@ def run(argv: list[str] | None = None) -> int:
                     receipt_authority_path=args.a2a_receipt_authority,
                     lifecycle_supervision={'interval':args.interval} if args.no_dispatch else None,
                 )
-                if getattr(result, "skip_reason", None):
+                if result.skip_reason and result.skip_reason != DATABASE_UNAVAILABLE:
                     print(format_poll_result(result), flush=True)
                     return 2
-                signal_reconcile_reason = "periodic"
                 write_monitor_health(
                     wake_root=root,
                     repo_root=Path.cwd(),
@@ -747,8 +755,17 @@ def run(argv: list[str] | None = None) -> int:
                     mode="loop",
                     poll_result=poll_result_dict(result),
                 )
-                if poll_result_has_activity(result):
-                    print(format_poll_result(result), flush=True)
+                if result.skip_reason == DATABASE_UNAVAILABLE:
+                    if not waiting_for_database:
+                        print(format_poll_result(result), flush=True)
+                    waiting_for_database = True
+                else:
+                    if waiting_for_database:
+                        print("activated_message_database_ready", flush=True)
+                    waiting_for_database = False
+                    signal_reconcile_reason = "periodic"
+                    if poll_result_has_activity(result):
+                        print(format_poll_result(result), flush=True)
                 time.sleep(args.interval)
         finally:
             if not reconciliation_required(root):

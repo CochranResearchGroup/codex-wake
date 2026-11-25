@@ -62,6 +62,33 @@ def activated_store(root):
     return PostgresMessages(dsn, cutover_id=active['cutover_id'])
 
 
+
+DATABASE_UNAVAILABLE = 'activated_message_database_unavailable'
+
+
+def database_unready(root):
+    """An activated scope is ready only when its original journal is readable."""
+    try:
+        store = activated_store(root)
+    except (WakeError, OSError, TypeError, ValueError):
+        return DATABASE_UNAVAILABLE
+    if store is None:
+        return None
+    try:
+        from psycopg import Error
+    except ImportError:
+        return DATABASE_UNAVAILABLE
+    try:
+        with store._connect() as connection:
+            connection.execute('SELECT order_recipient FROM wake_messages_v1 LIMIT 0')
+            connection.execute('SELECT 1 FROM wake_message_attempts_v1 LIMIT 0')
+            connection.execute('SELECT 1 FROM wake_recipient_dnd_v1 LIMIT 0')
+            connection.execute('SELECT 1 FROM wake_message_interventions_v1 LIMIT 0')
+    except (Error, OSError, ValueError):
+        return DATABASE_UNAVAILABLE
+    return None
+
+
 def _mail_snapshot(db):
     def rows(query):
         return [dict(row) for row in db.execute(query)]

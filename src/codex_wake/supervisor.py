@@ -448,6 +448,14 @@ def poll_registered_root(
             signal_reconcile_reason=signal_reconcile_reason,
         )
         summary = poll_result_dict(result)
+        from .message_cutover import DATABASE_UNAVAILABLE
+
+        if summary.get("skip_reason") == DATABASE_UNAVAILABLE:
+            write_monitor_health(
+                wake_root=wake_root, repo_root=repo_root, source="supervisor", mode=mode,
+                poll_result=summary, state_dir=monitor_dir,
+                extra={"root_id": entry.get("root_id", ""), "transports": transports},
+            )
         if summary.get("skip_reason"):
             return {"root_id": entry.get("root_id", ""), "wake_root": str(wake_root),
                     "ok": True, "activity": False, "result": summary,

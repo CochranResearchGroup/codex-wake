@@ -71,6 +71,16 @@ class MessageCutoverTests(unittest.TestCase):
             self.assertIsNone(configured_store(fixture.repo))
             store = configured_store(wake)
             self.assertIsNotNone(configured_store(fixture.bus.root))
+            from codex_wake.daemon import poll_once
+            from codex_wake.message_cutover import DATABASE_UNAVAILABLE, database_unready
+
+            with patch.dict(os.environ, {'CODEX_WAKE_CUTOVER_DB_DSN': ''}), \
+                    patch('codex_wake.wake_cancellation.reconcile_cancellations') as reconcile:
+                self.assertEqual(poll_once(wake).skip_reason, DATABASE_UNAVAILABLE)
+                reconcile.assert_not_called()
+                self.assertEqual(database_unready(fixture.bus.root), DATABASE_UNAVAILABLE)
+                self.assertIsNone(database_unready(fixture.repo))
+            self.assertIsNone(database_unready(wake))
             message = wake_message(wake, uncertain, original_submission_expiry(uncertain))
             result = deliver(store, message, 'retry-that-must-not-run',
                              lambda: self.fail('original uncertain Wake was replayed'), clock=lambda: CLOCK)

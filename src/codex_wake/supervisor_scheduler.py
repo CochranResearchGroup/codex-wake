@@ -280,6 +280,8 @@ class SupervisorScheduler:
                 self._journal(task).unlink(missing_ok=True)
                 result['poll_wall_seconds'] = now - worker.started
                 completed.append(result)
+                if result['ok'] and not result.get('skipped'):
+                    self.started_roots.add(task['key'])
                 # Match prior post-pass sleep; never catch up missed intervals.
                 self.next_due[task['key']] = now + task['interval']
                 worker.task = None
@@ -343,7 +345,6 @@ class SupervisorScheduler:
             except (BrokenPipeError, OSError):
                 completed.append(self._uncertain(worker, 'worker_admission_outcome_unknown'))
                 continue
-            self.started_roots.add(key)
         return completed
 
     def wait_seconds(self) -> float:

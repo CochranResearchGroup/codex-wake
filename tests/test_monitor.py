@@ -18,6 +18,7 @@ from codex_wake.monitor import (
     write_monitor_health,
 )
 from codex_wake.signal_records import probe_managed_reader_capability
+from codex_wake.records import schema_summary
 from codex_wake.service import build_service_config, render_unit
 from codex_wake.supervisor import (
     build_supervisor_config,
@@ -91,7 +92,7 @@ class MonitorTests(unittest.TestCase):
             self.assertIsNotNone(capability)
             self.assertEqual(capability.wake_root, root)
             self.assertIn(2, capability.schema_versions)
-            self.assertEqual(set(capability.schema_versions), {1, 2, 3, 4, 5, 6, 7, 8})
+            self.assertEqual(set(capability.schema_versions), set(schema_summary()['read_versions']))
             self.assertGreater(capability.generation, 0)
             self.assertIsNone(
                 probe_managed_reader_capability(
