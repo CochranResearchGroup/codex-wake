@@ -145,6 +145,20 @@ readable_accounts=["alice","bob"]
         monitor.publish_observation(frame, {})
         self.assertEqual(self.owner(('alice',)).execute('history.search', {'former_tab': 'sales'})['bindings'], [])
 
+        from unittest.mock import patch
+        latest = dict(occupied, traits=dict(panes=[
+            dict(evidence, binding=dict(second, process=dict(process, start_ticks=999)))]))
+        with patch.dict('os.environ', {'CODEX_WAKE_FORMER_TAB_RETENTION_LIMIT': '1'}):
+            monitor.publish_observation(dict(frame, resources=[latest]), {})
+            candidates = owner.execute('history.search', {'former_tab': 'sales'})['bindings']
+            self.assertEqual(len(candidates), 2)  # Live binding does not count toward the limit.
+            monitor.publish_observation(dict(frame, resources=[]), {})
+            retained, = owner.execute('history.search', {'former_tab': 'sales'})['bindings']
+        self.assertEqual(retained['binding_id'], candidates[0]['binding_id'])
+        self.assertEqual(retained['last_known_presentation'], 'absent')
+        self.assertEqual(owner.execute('history.read', retained['history_locator'])['records'][1]['payload']['content'],
+                         'bob evidence')
+
     def test_resume_uses_existing_permission_and_durable_attachment_owner(self):
         from codex_wake.controller_history import ManagedHistoryResume
         from codex_wake.session_permissions import Principal

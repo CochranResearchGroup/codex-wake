@@ -95,7 +95,13 @@ An unavailable workspace preserves the previous evidence. A guest wall
 timestamp is for display, as indicated by `observed_at_time_basis`.
 Only exact Codex bindings observed with a verified pane and owning account
 generation are retained. If the saved conversation becomes unavailable, the
-binding and its last observed directory remain available.
+binding and its last observed directory remain available. The monitor keeps
+former bindings by default. To cap retained metadata, set
+`CODEX_WAKE_FORMER_TAB_RETENTION_LIMIT` to an integer from 0 to 1000000 in the
+monitor's environment before starting it. On qualified observations, it keeps
+that many of the most recently observed absent bindings per host and
+environment. Live bindings stay eligible for lookup. This setting does not
+delete saved conversations.
 
 For API and MCP, pass `former_tab` to `history.search` or
 `wake_controller_history_search`. Send the returned `history_locator` to the

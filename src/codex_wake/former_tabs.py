@@ -12,6 +12,9 @@ from uuid import UUID
 from .shortcut_store import private_directory
 
 
+_RETENTION_SETTING = 'CODEX_WAKE_FORMER_TAB_RETENTION_LIMIT'
+
+
 def bounded_tab_text(value, limit=4096):
     return isinstance(value, str) and 0 < len(value) <= limit and not any(ord(c) < 32 for c in value)
 
@@ -125,7 +128,14 @@ class FormerTabs:
                 verified.add((workspace, row['window_id'], row['name'], row['position']))
         if not bindings and not self.path.exists():
             return
+        configured = os.environ.get(_RETENTION_SETTING)
+        retention = None if configured is None else int(configured)
+        if retention is not None and not 0 <= retention <= 1_000_000:
+            raise ValueError('former-tab retention limit must be 0–1000000')
         with self._connection(create=True) as db:
+            if retention is not None:
+                db.execute('PRAGMA secure_delete=ON')
+            db.execute('BEGIN IMMEDIATE')
             for binding_id, payload in db.execute('''SELECT binding_id, payload FROM bindings
                     WHERE present=1 AND host=? AND environment=?''', (host, environment)):
                 row = json.loads(payload)
@@ -144,6 +154,10 @@ class FormerTabs:
                     WHERE present=0 OR bindings.payload<>excluded.payload''',
                     (binding_id, row['name'].casefold(), json.dumps(row), row['host'],
                      row['environment'], row['home'], row['home_generation'], binding_id))
+            if retention is not None and complete:
+                db.execute('''DELETE FROM bindings WHERE sequence IN (
+                    SELECT sequence FROM bindings WHERE present=0 AND host=? AND environment=?
+                    ORDER BY sequence DESC LIMIT -1 OFFSET ?)''', (host, environment, retention))
 
     def find(self, selector, *, host, environment, homes, limit):
         """Return bounded name matches within authorized owning account generations."""
