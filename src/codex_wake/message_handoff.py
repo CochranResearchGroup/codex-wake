@@ -46,6 +46,7 @@ class MessageHandoff:
         self.local_key, self.peer_key = _owner_key(local), _owner_key(peer)
         self.store = PostgresMessages(dsn) if dsn else None
         self.clock = clock
+        self._schema_ready = False
         with self._journal() as db:
             db.executescript("""
                 CREATE TABLE IF NOT EXISTS transfers (
@@ -385,6 +386,7 @@ class MessageHandoff:
                         with db:
                             self._save(db, identifier, 'in', outcome)
             except (Error, OSError):
+                self._schema_ready = False
                 return _state('waiting_for_database', shared_ingress=False)
             if activate is not None and self.kind == 'windows':
                 clock = self.clock() if kicks else {}
@@ -394,7 +396,8 @@ class MessageHandoff:
             return _state('ready', shared_ingress=True)
 
     def _initialize_if_needed(self):
-        with self.store._connect() as conn:
-            exists = conn.execute("SELECT to_regclass('wake_owner_handoffs_v1')").fetchone()[0]
-        if exists is None:
+        if not self._schema_ready:
+            # The handoff tables can survive an upgrade of the common Message
+            # tables. Always initialize both on first contact or reconnection.
             self.initialize()
+            self._schema_ready = True
