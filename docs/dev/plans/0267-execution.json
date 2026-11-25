@@ -177,7 +177,7 @@
         770,
         772
       ],
-      "status": "disposable_validated_live_gate_open",
+      "status": "deferred_by_operator",
       "tracker": "open",
       "owner": "/root/busy_dnd",
       "branch": "feat/issue-773-linux-recovery",
@@ -190,7 +190,7 @@
         "Exact original tab and one retained wake after PostgreSQL, Wake and tmux restart on disposable Linux",
         "32 integration tests with disposable PostgreSQL"
       ],
-      "remaining": "Live boot test authorized. Bastion preflight found an active foreground service. Wait for a maintenance window, then verify native startup, PostgreSQL readiness, journal convergence and one retained delivery.",
+      "remaining": "Native Bastion deployment and boot acceptance deferred by operator. Controlled restart was authorized; remote administrator authentication and a verified Minecraft recovery path were unavailable.",
       "integration_results": [
         "1d7372d6"
       ]
@@ -376,15 +376,18 @@
         773,
         774
       ],
-      "status": "blocked_by_773",
+      "status": "running",
       "tracker": "open",
-      "remaining": "Unblocks after the native Bastion acceptance in #773."
+      "remaining": "Implement and verify independent Wake server handoff with isolated owners. Native Linux-to-Linux acceptance remains tied to #773.",
+      "owner": "/root/busy_dnd",
+      "base": "c231ea60",
+      "branch": "feat/issue-780-cross-server"
     }
   ],
   "integration_tip_at_validation": "6ef377ca",
   "checkpoint": {
     "recorded_at": "2026-11-25T00:56:48-06:00",
-    "state": "pending_bastion_window_and_chatgpt_workspace",
+    "state": "cross_server_implementation_active",
     "closed_issues": [
       767,
       768,
@@ -404,9 +407,9 @@
       780
     ],
     "next": [
-      "Use the authorized maintenance window and recheck Bastion activity before deploying and rebooting for #773.",
-      "Identify the authorized ChatGPT app and workspace before publishing temporary isolated candidate ingress for #779.",
-      "Start #780 when #773 is closed.",
+      "Implement and qualify cross-server delivery in isolation under #780.",
+      "Identify the authorized ChatGPT app and workspace for #779.",
+      "Resume native Bastion boot acceptance only when the operator lifts the #773 deferral.",
       "Run one code-review and one TDD remediation pass after ticket closure."
     ],
     "validation": {
