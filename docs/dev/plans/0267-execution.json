@@ -50,7 +50,13 @@
       "blockers": [
         767
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/former_tab",
+      "branch": "feat/issue-769-reply-cancel",
+      "base": "87a7df91",
+      "owned_paths": [
+        "reply and cancellation lifecycle"
+      ]
     },
     {
       "issue": 770,
@@ -76,7 +82,8 @@
       "evidence": [
         "62 integrated tests against isolated PostgreSQL",
         "exact lost receipt reconciled without replay through native reconcile"
-      ]
+      ],
+      "tracker": "closed"
     },
     {
       "issue": 771,
@@ -112,12 +119,25 @@
       "blockers": [
         767
       ],
-      "status": "running",
+      "status": "validated",
       "owner": "/root/former_tab",
       "branch": "feat/issue-772-postgres-tmux-recovery",
       "base": "8243e614",
       "owned_paths": [
         "tmux/Byobu recovery qualification"
+      ],
+      "worker_results": [
+        "a72f97ea5b4658dec236a52e85e308f4310c3a30",
+        "2170834f0e12cb6336b0d8c8872a412d5a46b1b2"
+      ],
+      "integration_results": [
+        "05893397",
+        "87a7df91"
+      ],
+      "evidence": [
+        "63 worker and 70 integration tests",
+        "installed stock Codex public CLI tab loss and full tmux/native server loss",
+        "PostgreSQL single effect receipt and placement matrix"
       ]
     },
     {
