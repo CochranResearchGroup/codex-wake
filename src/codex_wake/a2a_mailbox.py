@@ -465,7 +465,7 @@ class Mailbox:
 
     def _admit(self, database, actor, recipient, *, body, kind, ttl, key, delivery,
                subject, selector, now, original=None, correlation=None, acknowledgement=None,
-               resume_missing=False, task_id=None, busy_policy='wait'):
+               resume_missing=False, task_id=None, busy_policy='wait', redirect=None):
         if type(resume_missing) is not bool or (resume_missing and delivery != 'notify'):
             raise BusError('invalid_argument', 'explicit reopening requires notification delivery')
         if busy_policy not in ('wait', 'queue', 'idle-only') or (busy_policy != 'wait' and delivery != 'notify'):
@@ -478,6 +478,8 @@ class Mailbox:
             correlation=correlation, acknowledgement=acknowledgement)
         if busy_policy != 'wait':
             parameters['busy_policy'] = busy_policy
+        if redirect is not None:
+            parameters['redirected_from'] = redirect['message_id']
         if task_id is not None:
             parameters['task_id']=task_id
         if resume_missing:
@@ -496,6 +498,10 @@ class Mailbox:
         if database.execute('SELECT 1 FROM mail_retired_keys WHERE key_digest=?',
                 (retired_key_digest(actor.key, key),)).fetchone():
             raise BusError('idempotency_horizon', 'retired intent requires an explicitly new idempotency key')
+        if redirect is not None:
+            self._deadline_clear(database, redirect, now)
+            if redirect['expires'] <= self._time_upper(database, now):
+                raise BusError('message_expired', 'redirect must retain the original delivery window')
         if original is not None and json.loads(original['envelope']).get('compacted'):
             raise BusError('message_compacted', 'new replies require a retained full envelope')
         target = self.bus.authorize_pair(database, actor, recipient)
@@ -519,15 +525,18 @@ class Mailbox:
         database.execute('INSERT INTO mail_sequences VALUES (?,?) ON CONFLICT(recipient_key) DO UPDATE SET next_sequence=excluded.next_sequence', (recipient_key, sequence + 1))
         identifier = 'msg_' + uuid.uuid4().hex
         created = self._time_upper(database,now)
+        expires = redirect['expires'] if redirect is not None else created + ttl
         envelope = dict(schema_version=1, bus_id=self.bus.bus_id, message_id=identifier,
             conversation_id=parent['conversation_id'] if parent else 'conversation_' + uuid.uuid4().hex,
             sender=dict(namespace=actor.namespace, thread_id=actor.thread_id, root=actor.root),
             recipient=dict(namespace=target.namespace, thread_id=target.thread_id, root=target.root),
-            kind=kind, subject=subject, body_digest=body_digest, created_at=created, expires_at=created + ttl,
+            kind=kind, subject=subject, body_digest=body_digest, created_at=created, expires_at=expires,
             idempotency_key=key, in_reply_to=parent_id, correlation=parent['correlation'] if parent else correlation,
             lineage=(parent['lineage'] + [parent_id]) if parent else [], hop_count=hop,
             selector_observation=selector, delivery=delivery)
         if busy_policy != 'wait':envelope['busy_policy']=busy_policy
+        if redirect is not None:
+            envelope['redirected_from'] = redirect['message_id']
         if task_id is not None:envelope['task_id']=task_id
         if permission is not None:envelope['permission_admission']=permission
         if resume_missing:
@@ -537,7 +546,7 @@ class Mailbox:
                 recipient=dict(actor_id=target.actor_id, generation=target.generation, root=target.root))
         database.execute('INSERT INTO mail_identities VALUES (?)', (identifier,))
         database.execute('INSERT INTO mail_envelopes(message_id,sender_key,recipient_key,idempotency_key,fingerprint,created,expires,envelope,in_reply_to) VALUES (?,?,?,?,?,?,?,?,?)',
-                         (identifier, actor.key, recipient_key, key, fingerprint, created, created + ttl, encoded(envelope), parent_id))
+                         (identifier, actor.key, recipient_key, key, fingerprint, created, expires, encoded(envelope), parent_id))
         database.execute('INSERT INTO mail_bodies VALUES (?,?)', (identifier, body))
         database.execute('INSERT INTO mail_state(message_id,recipient_seq,admission,notification,recipient) VALUES (?,?,?,?,?)',
                          (identifier, sequence, 'accepted', 'pending' if delivery == 'notify' else 'suppressed', 'unread'))
@@ -556,6 +565,34 @@ class Mailbox:
                                 key=idempotency_key, delivery=delivery, subject=subject,
                                 selector=selector or {}, correlation=correlation, now=now,
                                 resume_missing=resume_missing,task_id=task_id,busy_policy=busy_policy)
+            self._finish(database, message_id=value['message']['message_id'], idempotency_key=idempotency_key,
+                         receipt_id=value.get('receipt_id'))
+            self._share_admission(database, value, body)
+            return value
+
+    def redirect(self, actor, identifier, recipient, *, idempotency_key):
+        with self.transaction(actor, permission='send') as database:
+            original = self._row(database, identifier)
+            self._require_current_work(database, original)
+            if actor.key != original['sender_key']:
+                raise BusError('authorization_denied', 'only the original sender may redirect')
+            if original['admission'] != 'bounced' or not database.execute(
+                    "SELECT 1 FROM mail_receipts WHERE message_id=? AND kind='bounced'", (identifier,)).fetchone():
+                raise BusError('not_bounced', 'redirect requires a proven bounce of the original message')
+            if original['recipient_key'] == thread_key(recipient):
+                raise BusError('invalid_argument', 'redirect requires a distinct recipient')
+            stored_body = database.execute('SELECT body FROM mail_bodies WHERE message_id=?', (identifier,)).fetchone()
+            if stored_body is None:
+                raise BusError('message_compacted', 'redirect requires the retained original body')
+            envelope = json.loads(original['envelope'])
+            body = stored_body['body']
+            now = self._now(database)
+            value = self._admit(database, actor, recipient, body=body, kind=envelope['kind'],
+                                ttl=original['expires'] - original['created'], key=idempotency_key,
+                                delivery=envelope['delivery'], subject=envelope['subject'],
+                                selector=dict(redirected_from=identifier), correlation=envelope['correlation'],
+                                now=now, task_id=envelope.get('task_id'),
+                                busy_policy=envelope.get('busy_policy', 'wait'), redirect=original)
             self._finish(database, message_id=value['message']['message_id'], idempotency_key=idempotency_key,
                          receipt_id=value.get('receipt_id'))
             self._share_admission(database, value, body)

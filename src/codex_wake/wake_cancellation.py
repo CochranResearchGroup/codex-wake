@@ -65,26 +65,49 @@ def _store(root, value):
     _write(root, value, name=_name(value['wake_id']))
 
 
+def _terminal_result(record):
+    identifier = record['id']
+    native = record.get('native_delivery', {})
+    policy = record.get('policy_outcome', {})
+    if policy.get('state') == 'bounced':
+        return dict(wake_id=identifier, state='bounced', reason=policy.get('reason'))
+    reason = native.get('reconciliation', {}).get('reason')
+    if reason in ('bounded_native_canceled', 'bounded_native_expired'):
+        cancelled = reason == 'bounded_native_canceled'
+        result = dict(wake_id=identifier, state='cancelled' if cancelled else 'expired',
+                      phase='native_queue_removed' if cancelled else 'native_queue_expired')
+        if native.get('queue_id'):
+            result['queue_id'] = native['queue_id']
+        return result
+    if record['status'] == 'cancelled':
+        return dict(wake_id=identifier, state='cancelled', phase='before_admission')
+    if native.get('state') == 'accepted' and native.get('turn_id'):
+        return dict(wake_id=identifier, state='started', phase='native_turn_started',
+                    turn_id=native['turn_id'])
+    return None
+
+
 def _apply(root, value):
     identifier = value['wake_id']
     current = find_record(root, identifier).record
     if not _owned_by(current, value['subject']) or _identity(current) != value['identity_sha256']:
         return dict(wake_id=identifier, state='held', reason='cancellation_identity_changed'), True
-    if current.get('status') == 'cancelled':
-        return dict(wake_id=identifier, state='cancelled'), True
+    known = _terminal_result(current)
+    if known is not None:
+        return known, True
     if current.get('native_delivery', {}).get('state') == 'uncertain':
         from .native_delivery import cancel_native_pending
         from .records import WakeLifecycleLock
         with WakeLifecycleLock(root, identifier):
-            state = cancel_native_pending(root, find_record(root, identifier))
-        return dict(wake_id=identifier, state=state), True
+            result = cancel_native_pending(root, find_record(root, identifier))
+        return dict(wake_id=identifier, **result), True
     if current.get('app_server_delivery', {}).get('state') == 'uncertain':
         return dict(wake_id=identifier, state='held',
                     reason='submission uncertain; reconcile original effect before cancellation'), False
     if current.get('status') not in ('pending', 'firing'):
         return dict(wake_id=identifier, state='skipped', reason='delivery_already_terminal'), True
     cancel_record(root, identifier)
-    return dict(wake_id=identifier, state='cancelled'), True
+    return dict(wake_id=identifier, state='cancelled', phase='before_admission'), True
 
 
 def reconcile_cancellations(root):
@@ -124,13 +147,12 @@ def request_cancellation(root, args):
                 if not args.all:
                     raise WakeError('wake outside verified caller scope')
                 continue
-            if current.get('status') == 'cancelled' and not args.all:
-                results.append(dict(wake_id=identifier, state='cancelled'))
-                continue
-            if current.get('status') not in ('pending', 'firing'):
-                results.append(dict(wake_id=identifier, state='skipped' if args.all else 'held', reason='not_cancellable'))
-                continue
             path = _directory(root) / _name(identifier)
+            if current.get('status') not in ('pending', 'firing'):
+                known = _terminal_result(current) if not args.all else None
+                results.append(known or dict(wake_id=identifier, state='skipped' if args.all else 'held',
+                                             reason='not_cancellable'))
+                continue
             if path.exists() or path.is_symlink():
                 value = _read(path)
                 if value['identity_sha256'] != _identity(current) or value['subject'] != subject:

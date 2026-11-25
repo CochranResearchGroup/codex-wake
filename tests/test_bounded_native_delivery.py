@@ -83,7 +83,10 @@ class BoundedNativeDeliveryTests(unittest.TestCase):
     def test_lost_cancel_reply_holds_until_exact_tombstone_reconciles(self):
         self.scenario_public_cancel(lose_reply=True)
 
-    def scenario_public_cancel(self, lose_reply=False):
+    def test_public_cancel_reports_original_started_turn_without_deleting_it(self):
+        self.scenario_public_cancel(admitted=True)
+
+    def scenario_public_cancel(self, lose_reply=False, admitted=False):
         from datetime import UTC, datetime
         from pathlib import Path
         from copy import deepcopy
@@ -112,6 +115,11 @@ class BoundedNativeDeliveryTests(unittest.TestCase):
                 deleted = True
                 if lose_reply:raise TimeoutError('synthetic lost delete reply')
                 return dict(deleted=True, inspection=dict(state='canceled', queuedSubmission=row))
+            if admitted:
+                return dict(inspection=dict(state='admitted', queuedSubmission=row, turnId='turn-original',
+                    clockEvidence=dict(lower=1, upper=2, authority=dict(contract_version=1, state='qualified',
+                        lower=1, upper=2, counter=dict(epoch='4d18e29e-9c05-45e7-a387-e50459dd3498',
+                            counter=1, frequency=10000000, rate_ppm=5000)))))
             return dict(inspection=dict(state='canceled' if deleted else 'pending', queuedSubmission=row))
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -147,7 +155,15 @@ class BoundedNativeDeliveryTests(unittest.TestCase):
             with patch('codex_wake.native_delivery._codex_adapter', return_value=adapter), contextlib.redirect_stdout(output):
                 code = main(['--wake-root', str(root), 'cancel', record['id'], '--json'])
             result = json.loads(output.getvalue())['roots'][0]['results'][0]
-            self.assertEqual((code, result['state']), (0, 'cancelled'))
+            if admitted:
+                self.assertEqual((code, result['state'], result['phase'], result['turn_id']),
+                                 (0, 'started', 'native_turn_started', 'turn-original'))
+                self.assertEqual(pending.path.read_bytes(), before_bytes)
+                self.assertEqual([method for method, _ in calls],
+                                 ['thread/queue/bounded/add', 'thread/queue/bounded/read'])
+                return
+            self.assertEqual((code, result['state'], result['phase'], result['queue_id']),
+                             (0, 'cancelled', 'native_queue_removed', row['id']))
             saved = all_records(root)[0].record
             self.assertEqual(saved['status'], 'cancelled')
             self.assertEqual(saved['native_delivery']['submission_id'], before['submission_id'])
@@ -178,7 +194,11 @@ class BoundedNativeDeliveryTests(unittest.TestCase):
                     return dict(inspection=admission if state == 'admitted' else dict(state=state, queuedSubmission=row))
                 observed = BoundedNativeAdapter(request=request).cancel_bounded(recipient, 'wake', envelope, row['id'])
                 self.assertEqual(observed.reason, 'bounded_native_' + state)
-                self.assertIsNone(observed.evidence)
+                if state in ('admitted', 'canceled', 'expired'):
+                    self.assertEqual(observed.evidence['queue_id'], row['id'])
+                    self.assertEqual(observed.evidence['client_message_id'], envelope.client_user_message_id)
+                else:
+                    self.assertIsNone(observed.evidence)
                 self.assertEqual(calls, ['thread/queue/bounded/read'])
         for defect in ('queue_identity', 'deadline', 'input', 'delete_timeout', 'delete_malformed'):
             with self.subTest(defect=defect):

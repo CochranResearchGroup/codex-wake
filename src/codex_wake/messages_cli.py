@@ -22,7 +22,7 @@ def add_messages_parser(subparsers):
     commands = parser.add_subparsers(dest='messages_command', required=True)
     init = commands.add_parser('database-init', help='Initialize the configured PostgreSQL message schema')
     init.add_argument('--root', type=Path, help='Select an activated Wake or mailbox scope')
-    for verb in ['send','inbox','outbox','show','read','ack','reply','cancel','wait','watch','reconcile','arm-reply','dnd','intervene']:
+    for verb in ['send','inbox','outbox','show','read','ack','reply','replies','redirect','cancel','wait','watch','reconcile','arm-reply','dnd','intervene']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path, default=os.environ.get('CODEX_WAKE_A2A_BUS_ROOT'))
         command.add_argument('--bus-id', default='local')
@@ -35,7 +35,7 @@ def add_messages_parser(subparsers):
         if verb in ('show','read','reconcile'):
             command.add_argument('--as-operator', action='store_true')
             command.add_argument('--operator-capability', type=Path)
-        if verb in ('show','read','ack','reply','cancel','wait','reconcile','arm-reply'):
+        if verb in ('show','read','ack','reply','replies','redirect','cancel','wait','reconcile','arm-reply'):
             command.add_argument('message_id')
         if verb == 'dnd':
             command.add_argument('mode', choices=['hold', 'bounce', 'clear'])
@@ -47,6 +47,11 @@ def add_messages_parser(subparsers):
             command.add_argument('--override-dnd', action='store_true')
             command.add_argument('--interrupt-turn')
             command.add_argument('--status', action='store_true')
+        if verb == 'redirect':
+            command.add_argument('--to', required=True)
+            command.add_argument('--idempotency-key', required=True)
+            command.add_argument('--tmux-socket')
+            command.add_argument('--tmux-session')
         if verb == 'arm-reply':
             command.add_argument('--wake-root', type=Path, default=os.environ.get('CODEX_WAKE_WAKE_ROOT'))
             command.add_argument('--sender-receipt-authority', type=Path,
@@ -219,6 +224,20 @@ def messages_command(args):
                                   kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
                                   subject=args.subject, outcome=args.outcome, evidence=args.evidence,
                                   resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None), busy_policy=getattr(args, 'busy_policy', 'wait'))
+        elif verb == 'replies':
+            value = dict(message_id=args.message_id, replies=mailbox.replies(actor, args.message_id))
+        elif verb == 'redirect':
+            if not args.to.startswith(('thread:', 'grok:')):
+                raise BusError('invalid_argument', 'redirect needs an exact thread: or grok: recipient')
+            if args.to.startswith('grok:'):
+                from .runtime_a2a import GrokMailboxRuntime
+                if args.runtime_root is None:
+                    raise BusError('identity_unavailable', 'host runtime root is required')
+                recipient, _ = GrokMailboxRuntime(args.runtime_root).resolve(args.to[5:])
+            else:
+                recipient = resolve_identity(args.to, endpoint=args.app_server, socket_path=args.tmux_socket,
+                                             session=args.tmux_session, allow_offline=True)
+            value = mailbox.redirect(actor, args.message_id, recipient, idempotency_key=intent_key)
         elif verb in ('inbox','outbox'):
             value = mailbox.list(actor, outbox=verb == 'outbox', cursor=args.cursor, limit=args.limit, state=args.state)
         elif verb == 'show':

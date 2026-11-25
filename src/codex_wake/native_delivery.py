@@ -371,16 +371,36 @@ def cancel_native_pending(root, found, *, runtime_adapter=None):
         observed = method(recipient, prompt, submission_envelope(record), delivery.get('queue_id'))
     except Exception as exc:
         raise WakeError('native cancellation evidence unavailable: ' + type(exc).__name__) from exc
-    if (not isinstance(observed, RuntimeReconciliation) or observed.evidence is not None
-            or observed.reason not in ('bounded_native_canceled', 'bounded_native_expired')):
+    evidence = observed.evidence if isinstance(observed, RuntimeReconciliation) else None
+    if (isinstance(evidence, dict) and evidence.get('source') == 'bounded_native_admission'
+            and evidence.get('client_message_id') == delivery['submission_id']
+            and (not delivery.get('queue_id') or evidence.get('queue_id') == delivery['queue_id'])
+            and isinstance(evidence.get('turn_id'), str) and evidence['turn_id']):
+        return dict(state='started', phase='native_turn_started', turn_id=evidence['turn_id'])
+    if (not isinstance(observed, RuntimeReconciliation)
+            or observed.reason not in ('bounded_native_canceled', 'bounded_native_expired')
+            or not isinstance(evidence, dict) or evidence.get('source') != 'bounded_native_queue_terminal'
+            or evidence.get('client_message_id') != delivery['submission_id']
+            or not isinstance(evidence.get('queue_id'), str) or not evidence['queue_id']
+            or (delivery.get('queue_id') and evidence['queue_id'] != delivery['queue_id'])):
         reason = observed.reason if isinstance(observed, RuntimeReconciliation) else 'invalid cancellation outcome'
         raise WakeError('submission uncertain; reconcile original effect before cancellation: ' + str(reason))
+    queue_id = evidence['queue_id']
+    from .message_delivery import configured_store, wake_message
+    store = configured_store(root)
+    if store is not None:
+        try:
+            message = wake_message(root, record, delivery['expires_at_unix_micros'])
+            store.reconcile_queue_removal(message, delivery['submission_id'], queue_id, observed.reason)
+        except Exception as exc:
+            raise WakeError('shared cancellation evidence could not be committed') from exc
     record['status'] = 'cancelled' if observed.reason == 'bounded_native_canceled' else 'expired'
-    delivery['reconciliation'] = dict(state='resolved', reason=observed.reason)
+    delivery.update(queue_id=queue_id, reconciliation=dict(state='resolved', reason=observed.reason))
     record['native_delivery'] = delivery
     record = append_event(record, 'native_bounded_terminal', observed.reason + '; no replay', None)
     replace_record(root, found, record)
-    return record['status']
+    return dict(state=record['status'], queue_id=queue_id,
+                phase='native_queue_removed' if record['status'] == 'cancelled' else 'native_queue_expired')
 
 
 def reconcile_native(root, found, now, *, force=False, runtime_adapter: RuntimeAdapter | None = None):

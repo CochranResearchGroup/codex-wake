@@ -25,6 +25,7 @@ class Message:
     not_before_micros: int | None = None
     busy_policy: str = 'wait'
     order_recipient: str | None = None
+    redirected_from: str | None = None
 
     def __post_init__(self):
         if self.busy_policy not in ('wait', 'queue', 'idle-only'):
@@ -57,9 +58,10 @@ _SCHEMA = (
     """CREATE TABLE IF NOT EXISTS wake_messages_v1 (
        scope text NOT NULL, message_id text NOT NULL, source text NOT NULL,
        recipient text NOT NULL, expires_at_micros bigint NOT NULL CHECK (expires_at_micros > 0),
-       payload text NOT NULL, sender text, in_reply_to text, not_before_micros bigint,
+       payload text NOT NULL, sender text, in_reply_to text, not_before_micros bigint, redirected_from text,
        PRIMARY KEY (scope, message_id))""",
     'ALTER TABLE wake_messages_v1 ADD COLUMN IF NOT EXISTS not_before_micros bigint',
+    'ALTER TABLE wake_messages_v1 ADD COLUMN IF NOT EXISTS redirected_from text',
     """CREATE TABLE IF NOT EXISTS wake_message_attempts_v1 (
        scope text NOT NULL, message_id text NOT NULL, attempt_id text NOT NULL,
        state text NOT NULL CHECK (state IN ('submitting','submitted','unsent','uncertain')),
@@ -130,14 +132,15 @@ class PostgresMessages:
             self._lock_recipient(conn, message.order_recipient)
         identity = self._identity(message)
         values = (message.source, message.recipient, message.expires_at_micros,
-                  message.payload, message.sender, message.in_reply_to, message.not_before_micros, message.busy_policy)
+                  message.payload, message.sender, message.in_reply_to, message.not_before_micros,
+                  message.busy_policy, message.redirected_from)
         conn.execute(
             """INSERT INTO wake_messages_v1
-               (scope,message_id,source,recipient,expires_at_micros,payload,sender,in_reply_to,not_before_micros,busy_policy)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING""",
+               (scope,message_id,source,recipient,expires_at_micros,payload,sender,in_reply_to,not_before_micros,busy_policy,redirected_from)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING""",
             (*identity, *values))
         original = conn.execute(
-            """SELECT source,recipient,expires_at_micros,payload,sender,in_reply_to,not_before_micros,busy_policy
+            """SELECT source,recipient,expires_at_micros,payload,sender,in_reply_to,not_before_micros,busy_policy,redirected_from
                FROM wake_messages_v1 WHERE scope=%s AND message_id=%s FOR UPDATE""",
             identity).fetchone()
         if original != values:
@@ -382,6 +385,24 @@ class PostgresMessages:
             if row != expected[:2]:
                 raise ValueError('original delivery evidence could not be reconciled')
 
+    def reconcile_queue_removal(self, message, attempt_id, queue_id, reason):
+        execution = {'bounded_native_canceled': 'queue_cancelled',
+                     'bounded_native_expired': 'queue_expired'}[reason]
+        with self._connect() as conn:
+            self._admit(conn, message)
+            row = conn.execute(
+                """UPDATE wake_message_attempts_v1
+                   SET state='submitted',receipt_id=%s,evidence_kind='native_queue_acceptance',
+                       reason=%s,execution=%s
+                   WHERE scope=%s AND message_id=%s AND attempt_id=%s
+                     AND (state IN ('submitting','uncertain')
+                          OR (state='submitted' AND receipt_id=%s AND evidence_kind='native_queue_acceptance'
+                              AND (execution IS NULL OR execution IN ('not_observed',%s))))
+                   RETURNING receipt_id""",
+                (queue_id, reason, execution, *self._identity(message), attempt_id, queue_id, execution)).fetchone()
+            if row is None:
+                raise ValueError('original queue receipt does not permit terminal removal')
+
     def finish(self, message: Message, attempt_id: str, receipt: DeliveryReceipt):
         with self._connect() as conn:
             cursor = conn.execute(
@@ -475,7 +496,8 @@ def direct_message(envelope, payload):
                    int(Decimal(str(envelope['expires_at'])) * 1_000_000), payload,
                    json.dumps([sender['namespace'], sender['thread_id']], separators=(',', ':')),
                    envelope.get('in_reply_to'), busy_policy=envelope.get('busy_policy', 'wait'),
-                   order_recipient=exact if envelope.get('delivery') == 'notify' else None)
+                   order_recipient=exact if envelope.get('delivery') == 'notify' else None,
+                   redirected_from=envelope.get('redirected_from'))
 
 
 def admission_status(store, message):
