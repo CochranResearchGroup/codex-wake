@@ -614,6 +614,7 @@
     "jobs.profile",
     "jobs.show",
     "list",
+    "message-owner.receive-forward",
     "message-owner.request-setting",
     "message-owner.run",
     "message-owner.send",

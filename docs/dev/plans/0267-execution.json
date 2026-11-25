@@ -376,18 +376,31 @@
         773,
         774
       ],
-      "status": "running",
-      "tracker": "open",
-      "remaining": "Implement and verify independent Wake server handoff with isolated owners. Native Linux-to-Linux acceptance remains tied to #773.",
+      "status": "validated",
+      "tracker": "closed",
       "owner": "/root/busy_dnd",
       "base": "c231ea60",
-      "branch": "feat/issue-780-cross-server"
+      "branch": "feat/issue-780-cross-server",
+      "worker_results": [
+        "d26ab5da"
+      ],
+      "integration_results": [
+        "0707ee7e"
+      ],
+      "evidence": [
+        "Two restricted OpenSSH listeners and independent PostgreSQL databases",
+        "Public CLI preserved original ID, due, expiry, recipient receipt and correlated reverse reply through lost acknowledgments",
+        "35 worker regressions plus one exact receipt regression; 10 integration tests"
+      ],
+      "broader_spec_gates": [
+        "Native Linux-to-Linux deployment acceptance remains deferred with #773."
+      ]
     }
   ],
-  "integration_tip_at_validation": "6ef377ca",
+  "integration_tip_at_validation": "0707ee7e",
   "checkpoint": {
     "recorded_at": "2026-11-25T00:56:48-06:00",
-    "state": "cross_server_implementation_active",
+    "state": "pending_deferred_bastion_and_chatgpt",
     "closed_issues": [
       767,
       768,
@@ -399,15 +412,14 @@
       775,
       776,
       777,
-      778
+      778,
+      780
     ],
     "open_issues": [
       773,
-      779,
-      780
+      779
     ],
     "next": [
-      "Implement and qualify cross-server delivery in isolation under #780.",
       "Identify the authorized ChatGPT app and workspace for #779.",
       "Resume native Bastion boot acceptance only when the operator lifts the #773 deferral.",
       "Run one code-review and one TDD remediation pass after ticket closure."
