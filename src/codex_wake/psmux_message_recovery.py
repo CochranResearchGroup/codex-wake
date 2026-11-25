@@ -20,6 +20,7 @@ from uuid import UUID, uuid4
 from .message_delivery import Message
 from .message_handoff import MessageHandoff
 from .native_clock import snapshot as stable_time
+from .windows_scope import ScopeError, executor_enabled, require_elevated_path, require_scope, scope_identity, set_created_owner
 from .tab_psmux_bridge import (
     PsmuxHost, check_private_manifest, current_sid, process_birth, process_image,
 )
@@ -82,11 +83,12 @@ def _read(path):
     return result
 
 
-def _write(path, value):
+def _write(path, value, *, identity=None):
     with Path(path).open('x', encoding='utf-8') as stream:
         stream.write(_json(value))
         stream.flush()
         os.fsync(stream.fileno())
+    set_created_owner(path, identity)
 
 
 def _binary():
@@ -138,12 +140,15 @@ class Runtime:
     def __init__(self, spec):
         self.spec = spec
         self.endpoint = 'ws://127.0.0.1:' + str(spec['port'])
+        require_elevated_path(spec['token_file'], spec.get('execution_scope'), no_read_up=True)
         self.token = _token(spec['token_file'])
 
     def identify_process(self):
         pid = self.spec['server_pid']
         if _loopback_listener(self.spec['port']) != pid or not _same_path(process_image(pid), self.spec['codex']):
             raise Unavailable('restore_app_server_image_changed')
+        if 'execution_scope' in self.spec:
+            _authorize_scope(self.spec, pid=pid)
         return process_birth(pid)
 
     @contextmanager
@@ -220,8 +225,14 @@ class Runtime:
 
 
 def _spec(raw):
-    if set(raw) != _FIELDS or str(UUID(raw['thread'])) != raw['thread']:
+    if not _FIELDS <= set(raw) <= _FIELDS | {'execution_scope', 'executor_activation'} or str(UUID(raw['thread'])) != raw['thread']:
         raise Unavailable('restore_exact_binding_required')
+    identity = raw.get('execution_scope')
+    if identity is not None:
+        scope_identity(identity)
+    if 'executor_activation' in raw and (not identity or not identity['elevated']
+                                         or not Path(raw['executor_activation']).is_absolute()):
+        raise Unavailable('restore_invalid_elevated_activation_path')
     if (not _NAMESPACE.fullmatch(raw['namespace']) or not _SESSION.fullmatch(raw['session'])
             or not isinstance(raw['title'], str) or not 0 < len(raw['title'].encode()) <= 192
             or any(ord(c) < 32 for c in raw['title'])
@@ -232,8 +243,23 @@ def _spec(raw):
                 cwd=str(_absolute(raw['cwd'], directory=True)), home=str(_absolute(raw['home'], directory=True)))
 
 
+def _authorize_scope(spec, *, execute=False, pid=None):
+    identity = spec.get('execution_scope')
+    try:
+        actual = require_scope(identity, pid=pid)
+        if execute and not executor_enabled(spec.get('executor_activation'), identity):
+            raise Unavailable('restore_elevated_executor_disabled')
+    except ScopeError as exc:
+        raise Unavailable(str(exc)) from None
+    return actual
+
+
 def _pins(spec):
+    _authorize_scope(spec)
+    identity = spec.get('execution_scope')
+    require_elevated_path(spec['token_file'], identity, no_read_up=True)
     home = Path(spec['home'])
+    require_elevated_path(home, identity)
     check_private_manifest(home)
     st = home.stat()
     return dict(sid=_digest(current_sid()), home_identity=[st.st_dev, st.st_ino],
@@ -242,10 +268,15 @@ def _pins(spec):
 
 def enroll(binding, request):
     spec = _spec(_read(request))
+    _authorize_scope(spec)
+    identity = spec.get('execution_scope')
+    require_elevated_path(binding.parent, identity)
+    require_elevated_path(request, identity)
     runtime, readiness = Runtime(spec).observe()
     if readiness['type'] not in ('idle', 'notLoaded'):
         raise Unavailable('restore_binding_requires_idle_thread')
-    _write(binding, {'version': 1, 'spec': spec, 'pins': _pins(spec), 'runtime': runtime})
+    _write(binding, {'version': 1, 'spec': spec, 'pins': _pins(spec), 'runtime': runtime},
+           identity=spec.get('execution_scope'))
     return {'status': 'bound', 'thread': spec['thread'], 'namespace': spec['namespace'],
             'session': spec['session'], 'index': spec['index']}
 
@@ -255,10 +286,22 @@ class Presentation:
         self.binding, self.value, self.spec = binding, value, value['spec']
         self.state_path = binding.with_suffix('.sqlite3')
 
+    def _state_file(self, path):
+        identity = self.spec.get('execution_scope')
+        if identity and identity['elevated']:
+            try:
+                with path.open('xb'):
+                    pass
+                set_created_owner(path, identity)
+            except FileExistsError:
+                pass
+        if path.exists() or path.is_symlink():
+            _absolute(path, private=True)
+            require_elevated_path(path, identity)
+
     @contextmanager
     def custody(self):
-        if self.state_path.exists() or self.state_path.is_symlink():
-            _absolute(self.state_path, private=True)
+        self._state_file(self.state_path)
         with closing(sqlite3.connect(self.state_path, timeout=1, isolation_level=None)) as db:
             db.execute('''CREATE TABLE IF NOT EXISTS placement(
                 id integer PRIMARY KEY CHECK(id=1), binding text NOT NULL, creation text)''')
@@ -269,8 +312,7 @@ class Presentation:
             # A second database owns the OS-backed exclusive lock while
             # placement state commits independently before terminal commands.
             control = self.state_path.with_suffix('.lock.sqlite3')
-            if control.exists() or control.is_symlink():
-                _absolute(control, private=True)
+            self._state_file(control)
             with closing(sqlite3.connect(control, timeout=.5)) as lock:
                 lock.execute('BEGIN EXCLUSIVE')
                 creation = db.execute('SELECT creation FROM placement WHERE id=1').fetchone()[0]
@@ -293,6 +335,8 @@ class Presentation:
         host = PsmuxHost(namespace=self.spec['namespace'], session=self.spec['session'])
         if host.identity['executable_sha256'] != self.value['pins']['psmux_sha256']:
             raise Unavailable('restore_psmux_executable_changed')
+        if 'execution_scope' in self.spec:
+            _authorize_scope(self.spec, pid=host.identity['pid'])
         return host
 
     @staticmethod
@@ -305,7 +349,9 @@ class Presentation:
 
     def _find(self, windows, creation):
         try:
-            marker = _read(_absolute(self._marker(creation['nonce']), private=True))
+            marker_path = _absolute(self._marker(creation['nonce']), private=True)
+            require_elevated_path(marker_path, self.spec.get('execution_scope'))
+            marker = _read(marker_path)
         except FileNotFoundError:
             return None
         if marker['nonce'] != creation['nonce'] or marker['thread'] != self.spec['thread']:
@@ -341,6 +387,7 @@ class Presentation:
         return None
 
     def open(self):
+        _authorize_scope(self.spec, execute=True)
         with self.custody() as (db, existing):
             host = self._host()
             windows = self._windows(host) if host else []
@@ -369,6 +416,7 @@ class Presentation:
             creation = dict(nonce=nonce, name=title, index=chosen, pending=True,
                             generation=host.generation if host else None, placeholder=placeholder,
                             unaffected=unaffected)
+            _authorize_scope(self.spec, execute=True)
             db.execute('UPDATE placement SET creation=? WHERE id=1', (_json(creation),))
             launch = self._launch_argv(nonce)
             if host is None:
@@ -396,6 +444,7 @@ class Presentation:
                 str(self.binding), nonce]
 
     def _swap_preserving_focus(self, host, windows, first, second):
+        _authorize_scope(self.spec, execute=True)
         focused = next((item for item in windows if item['focused']), None)
         host._current()
         host.command('swap-window', '-d', '-s', self.spec['session'] + ':' + first,
@@ -426,6 +475,7 @@ class Presentation:
         if creation['pending'] and current['index'] != expected and not placeholder:
             if expected in {item['index'] for item in windows if item['window_id'] != window}:
                 raise Unavailable('restore_target_slot_changed')
+            _authorize_scope(self.spec, execute=True)
             host._current()
             host.command('move-window', '-d', '-s', self.spec['session'] + ':' + window,
                          '-t', self.spec['session'] + ':' + str(expected))
@@ -448,7 +498,8 @@ class Presentation:
         return {'status': 'placed', 'namespace': self.spec['namespace'], 'session': self.spec['session'],
                 'thread': self.spec['thread'], 'index': window['index'], 'title': window['name'],
                 'window': window['window_id'], 'pane': window['panes'][0]['pane_id'],
-                'server_birth': host.identity['creation_filetime']}
+                'server_birth': host.identity['creation_filetime'],
+                **({'execution_scope': self.spec['execution_scope']} if 'execution_scope' in self.spec else {})}
 
     def status(self):
         with self.custody() as (_, creation):
@@ -462,6 +513,10 @@ class Presentation:
 
 def _load(binding):
     value = _read(_absolute(binding, private=True))
+    identity = value['spec'].get('execution_scope')
+    _authorize_scope(value['spec'])
+    require_elevated_path(binding.parent, identity)
+    require_elevated_path(binding, identity)
     if value.get('version') != 1 or _pins(value['spec']) != value['pins']:
         raise Unavailable('restore_original_account_or_harness_changed')
     return value
@@ -474,6 +529,7 @@ def _delivery(binding, message):
     try:
         value = _load(binding)
         spec = value['spec']
+        _authorize_scope(spec, execute=True)
         if message.recipient != spec['thread']:
             raise Unavailable('restore_recipient_changed')
         if MessageHandoff._window(message, stable_time()) != 'eligible':
@@ -492,6 +548,7 @@ def _delivery(binding, message):
                 return dict(result, status='unsent', reason='busy')
             if MessageHandoff._window(message, stable_time()) != 'eligible':
                 return dict(result, status='unsent', reason='expired')
+            _authorize_scope(spec, execute=True)
             entered = True
             receipt = runtime.queue(rpc, message)
         return dict(result, status='submitted', receipt_id=receipt)
@@ -513,8 +570,8 @@ def main(argv=None):
     operation.add_parser('deliver')
     args = parser.parse_args(argv)
     try:
-        if os.name != 'nt' or ctypes.windll.shell32.IsUserAnAdmin():
-            raise Unavailable('restore_normal_windows_owner_required')
+        if os.name != 'nt':
+            raise Unavailable('native_windows_executor_required')
         root = _absolute(args.binding.parent, directory=True, private=True)
         binding = root / args.binding.name
         if args.verb == 'enroll':
@@ -523,6 +580,7 @@ def main(argv=None):
             result = Presentation(binding, _load(binding)).status()
         elif args.verb == 'present':
             value = _load(binding)
+            _authorize_scope(value['spec'], execute=True)
             pin, status = Runtime(value['spec']).observe()
             if pin != value['runtime'] or status['type'] not in ('idle', 'notLoaded') or status.get('activeFlags'):
                 raise Unavailable('restore_original_recipient_not_idle')
@@ -535,7 +593,7 @@ def main(argv=None):
         print(_json(result))
         return 0
     except Exception as error:
-        reason = str(error) if isinstance(error, Unavailable) else 'restore_owner_unavailable'
+        reason = str(error) if isinstance(error, (Unavailable, ScopeError)) else 'restore_owner_unavailable'
         print(_json({'status': 'held', 'reason': reason}))
         return 2
 

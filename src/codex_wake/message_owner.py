@@ -17,6 +17,8 @@ from uuid import UUID
 
 from .message_delivery import DeliveryReceipt
 from .message_handoff import MessageHandoff
+from .message_owner_registry import resolve_owner_records
+from .windows_scope import executor_enabled, require_elevated_path, require_scope, set_created_owner
 
 
 def _private(path, *, directory=False):
@@ -134,14 +136,27 @@ def _activate_wsl(setting, peer):
 def _worker(config_path, *, clock=None):
     config = _object(_private(config_path))
     if not {'root', 'registry', 'owner', 'peer'} <= set(config) or set(config) - {
-            'root', 'registry', 'owner', 'peer', 'bindings', 'wsl_auto_start', 'db_dsn_file'}:
+            'root', 'registry', 'owner', 'peer', 'bindings', 'wsl_auto_start', 'db_dsn_file', 'executor_activation'}:
         raise ValueError('invalid message owner configuration')
     root = _private(config['root'], directory=True)
     registry = _private(config['registry'])
+    local, peer = resolve_owner_records(registry, config['owner'], config['peer'])
+    identity = local.get('windows_identity')
     if os.name == 'nt':
-        import ctypes
-        if ctypes.windll.shell32.IsUserAnAdmin() != 0:
-            raise ValueError('native Windows message owner requires a normal Windows execution account')
+        if local['kind'] not in ('windows', 'windows-elevated'):
+            raise ValueError('the WSL owner must execute inside WSL')
+        require_scope(identity)
+    elif identity is not None:
+        raise ValueError('pinned Windows executor must execute in native Windows')
+    for path in (config_path, root, registry):
+        require_elevated_path(path, identity)
+    activation_path = config.get('executor_activation')
+    if activation_path is not None and (local['kind'] != 'windows-elevated' or not Path(activation_path).is_absolute()):
+        raise ValueError('executor activation file requires a pinned elevated Windows executor')
+
+    def ready():
+        return executor_enabled(activation_path, identity)
+
     for name in ('message-owner.sqlite3', 'message-owner-pump.sqlite3', 'message-owner-service.sqlite3'):
         file = root / name
         if file.exists() or file.is_symlink():
@@ -150,19 +165,21 @@ def _worker(config_path, *, clock=None):
             try:
                 handle = os.open(file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
                 os.close(handle)
+                set_created_owner(file, identity)
             except FileExistsError:
                 _private(file)
+        require_elevated_path(file, identity)
     options = {'clock': clock} if clock is not None else {}
     dsn = os.environ.get('CODEX_WAKE_OWNER_DB_DSN')
     if 'db_dsn_file' in config:
-        with _private(config['db_dsn_file']).open(encoding='utf-8-sig') as stream:
+        dsn_path = _private(config['db_dsn_file'])
+        require_elevated_path(dsn_path, identity)
+        with dsn_path.open(encoding='utf-8-sig') as stream:
             text = stream.read(16385)
         if len(text) > 16384 or not text.strip():
             raise ValueError('owner database configuration is empty or oversized')
         dsn = text.strip()
     worker = MessageHandoff(root, registry, config['owner'], config['peer'], dsn, **options)
-    if os.name == 'nt' and worker.kind != 'windows':
-        raise ValueError('the WSL owner must execute inside its registered Linux environment')
     bindings = {}
     for recipient, command in config.get('bindings', {}).items():
         key = str(UUID(recipient))
@@ -171,6 +188,8 @@ def _worker(config_path, *, clock=None):
         bindings[key] = _driver(command, key, worker.clock)
 
     def dispatch(message):
+        if not ready():
+            return DeliveryReceipt('unsent', reason='offline')
         binding = bindings.get(message.recipient)
         if binding is None:
             return DeliveryReceipt('unsent', reason='recipient_binding_unavailable')
@@ -178,10 +197,10 @@ def _worker(config_path, *, clock=None):
 
     activate = None
     if config.get('wsl_auto_start') is not None:
-        if worker.kind != 'windows':
-            raise ValueError('only Windows may own optional WSL activation')
+        if worker.kind != 'windows' or peer['kind'] != 'wsl':
+            raise ValueError('only the normal Windows owner of a WSL peer may enable WSL activation')
         activate = _activate_wsl(config['wsl_auto_start'], config['peer'])
-    return worker, dispatch if bindings else None, activate
+    return worker, dispatch if bindings else None, activate, ready
 
 
 def add_arguments(parser):
@@ -206,7 +225,13 @@ def register_parser(subparsers):
 
 def command(args, *, clock=None):
     try:
-        owner, driver, activate = _worker(args.config, clock=clock)
+        owner, driver, activate, ready = _worker(args.config, clock=clock)
+
+        def tick():
+            if not ready():
+                return dict(status='executor_disabled', shared_ingress=False)
+            return owner.tick(driver, activate)
+
         verb = args.owner_verb
         if verb == 'send':
             result = owner.send(**_object(args.request))
@@ -219,7 +244,7 @@ def command(args, *, clock=None):
         elif verb == 'settings':
             result = owner.settings(str(args.recipient))
         elif verb == 'tick':
-            result = owner.tick(driver, activate)
+            result = tick()
         else:
             if not math.isfinite(args.interval) or not .25 <= args.interval <= 60:
                 raise ValueError('owner poll interval must be between 0.25 and 60 seconds')
@@ -231,7 +256,7 @@ def command(args, *, clock=None):
                     return 0
                 previous = None
                 while True:
-                    current = owner.tick(driver, activate)
+                    current = tick()
                     if current != previous:
                         print(json.dumps(current, sort_keys=True), flush=True)
                         previous = current

@@ -1,3 +1,4 @@
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -26,6 +27,62 @@ class HostTests(unittest.TestCase):
                 registry.register('host-one', 'windows', kind='windows', authority='new-authority', destination='different', operator=True)
             self.assertEqual(error.exception.code, 'authority_conflict')
             with self.assertRaises(InventoryError): registry.register('unauthorized', 'linux', kind='remote', authority='other', destination='other')
+
+    def test_windows_recovery_pair_requires_immutable_scope_pins(self):
+        from codex_wake.controller_hosts import HostRegistry
+        from codex_wake.message_owner_registry import resolve_owner_records
+
+        with tempfile.TemporaryDirectory() as directory:
+            registry = HostRegistry(Path(directory) / 'hosts.sqlite')
+            sid = 'S-1-5-21-100-200-300-1001'
+
+            def register(environment, kind, identity=None):
+                return registry.register('host', environment, kind=kind, authority=environment,
+                                         destination=environment, windows_identity=identity, operator=True)
+
+            with self.assertRaises(InventoryError):
+                register('admin', 'windows-elevated')
+            normal = register('normal', 'windows', dict(sid=sid, elevated=False))
+            elevated = register('admin', 'windows-elevated', dict(sid=sid, elevated=True))
+            pair = resolve_owner_records(registry.path, normal['target'], elevated['target'])
+            self.assertEqual([row['windows_identity']['elevated'] for row in pair], [False, True])
+            unpinned = register('legacy', 'windows')
+            with self.assertRaises(ValueError):
+                resolve_owner_records(registry.path, unpinned['target'], elevated['target'])
+            with self.assertRaises(InventoryError) as conflict:
+                register('admin', 'windows-elevated', dict(sid='S-1-5-21-100-200-300-1002', elevated=True))
+            self.assertEqual(conflict.exception.code, 'authority_conflict')
+
+    @unittest.skipIf(os.name == 'nt', 'requires a non-Windows process')
+    def test_pinned_windows_owner_cannot_start_outside_native_windows(self):
+        import argparse
+        from contextlib import redirect_stdout
+        import io
+        import json
+        from codex_wake.controller_hosts import HostRegistry
+        from codex_wake.message_owner import add_arguments, command
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            registry = HostRegistry(root / 'hosts.sqlite')
+            sid = 'S-1-5-21-100-200-300-1001'
+            records = [registry.register('host', role, kind=kind, authority=role, destination=role,
+                        windows_identity=dict(sid=sid, elevated=elevated), operator=True)['target']
+                       for role, kind, elevated in (('normal', 'windows', False), ('admin', 'windows-elevated', True))]
+            registry.path.chmod(0o600)
+            config = root / 'owner.json'
+            config.write_text(json.dumps(dict(root=str(root), registry=str(registry.path),
+                                              owner=records[0], peer=records[1])))
+            config.chmod(0o600)
+            parser = argparse.ArgumentParser()
+            add_arguments(parser)
+            output = io.StringIO()
+            with redirect_stdout(output):
+                result = command(parser.parse_args(['--config', str(config), 'tick']))
+            self.assertNotEqual(result, 0)
+            self.assertEqual(json.loads(output.getvalue()),
+                             dict(status='error', reason='owner_configuration_or_state_invalid'))
+            self.assertFalse((root / 'message-owner.sqlite3').exists())
 
     def test_registered_ssh_principal_uses_common_read_admission_without_owner_privilege(self):
         from codex_wake.controller_hosts import HostRegistry, SSHReceiver

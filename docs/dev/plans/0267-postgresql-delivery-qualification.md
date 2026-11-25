@@ -171,3 +171,30 @@ message and get a metadata receipt. Waiting synchronously for a reply
 requires `content.observe`. Former-tab history metadata requires
 `history.observe`. Reading its saved records also requires
 `content.observe` and the exact saved account scope.
+
+## Elevated Windows recipient
+
+Register the normal and elevated Windows owners as two exact execution
+environments. Run `codex-wake windows-scope` from each native Windows
+execution account and register its JSON with `hosts register --windows-identity`.
+Use kind `windows` for the normal owner and `windows-elevated` for the
+elevated owner. Two scopes can have the same account SID. The explicit
+elevation field distinguishes them. Pair their registrations directly for
+local Windows forwarding and keep separate owner journals.
+
+Provision the elevated owner and its PSMux recovery in dedicated private
+directories with the elevated account SID as owner and a High mandatory
+label with no-write-up. Apply the label to the directories and protected
+files. Give the elevated app-server token file a High label with both
+no-write-up and no-read-up. Supply the owner config with an absolute `executor_activation` path.
+Its exact JSON is `{"version":1,"scope":{"sid":"S-1-5-21-100-200-300-1001","elevated":true},"enabled":false}`
+using the SID returned by `windows-scope`. An authorized high-integrity
+executor enables recovery by setting `enabled` to true. An absent or disabled
+record keeps the original message pending for that executor. The normal
+owner continues operating independently.
+
+Add the elevated owner's exact `execution_scope` and `executor_activation`
+path to the PSMux enrollment request. Run enrollment, the Codex app server,
+and the PSMux presentation from that same native scope. Recovery verifies
+the process token and the saved conversation before restoring its view. A
+normal owner with a matching tab title or position cannot claim the message.

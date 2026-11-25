@@ -61,10 +61,10 @@ class HostRegistry:
     def connect(self):
         return sqlite3.connect(self.path, timeout=5)
 
-    def register(self, host, environment, *, kind, authority, destination, command='codex-wake hosts ssh-serve', capabilities=READ_OPERATIONS, ssh_executable='ssh', generation=None, operator=False):
+    def register(self, host, environment, *, kind, authority, destination, command='codex-wake hosts ssh-serve', capabilities=READ_OPERATIONS, ssh_executable='ssh', generation=None, windows_identity=None, operator=False):
         if not operator: raise InventoryError('unauthorized_target', 'host registration requires local operator authority')
         host, environment, authority = identifier(host), identifier(environment), identifier(authority)
-        if kind not in ('windows', 'wsl', 'linux', 'remote'):
+        if kind not in ('windows', 'windows-elevated', 'wsl', 'linux', 'remote'):
             raise InventoryError('unsupported_target', 'unsupported execution environment kind')
         if not isinstance(destination, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.@:\[\]-]{0,254}', destination):
             raise InventoryError('invalid_argument', 'invalid registered SSH destination')
@@ -76,15 +76,27 @@ class HostRegistry:
             raise InventoryError('invalid_argument', 'invalid local SSH executable')
         if generation is not None and (not isinstance(generation, str) or not re.fullmatch(r'[A-Za-z0-9_-]{8,128}', generation)):
             raise InventoryError('invalid_argument', 'invalid imported authority generation')
+        from .windows_scope import ScopeError, scope_identity
+        try:
+            if windows_identity is not None:
+                scope_identity(windows_identity)
+                if kind not in ('windows', 'windows-elevated') or windows_identity['elevated'] != (kind == 'windows-elevated'):
+                    raise ScopeError('windows_execution_kind_changed')
+            elif kind == 'windows-elevated':
+                raise ScopeError('exact_elevated_windows_identity_required')
+        except ScopeError as exc:
+            raise InventoryError('invalid_argument', str(exc)) from None
         record = dict(target=dict(host=host, environment=environment, authority=authority, generation=generation or secrets.token_urlsafe(18)),
             kind=kind, transport=dict(kind='ssh', destination=destination, command=command, executable=ssh_executable),
             capabilities=sorted(capabilities), observed_at=self.now(), online=True)
+        if windows_identity is not None:
+            record['windows_identity'] = windows_identity
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             row = db.execute('SELECT record FROM environments WHERE host=? AND environment=?', (host, environment)).fetchone()
             if row:
                 previous = json.loads(row[0])
-                if (generation is not None and previous['target']['generation'] != generation) or any(previous[key] != record[key] for key in ('kind', 'transport', 'capabilities')) or previous['target']['authority'] != authority:
+                if (generation is not None and previous['target']['generation'] != generation) or any(previous[key] != record[key] for key in ('kind', 'transport', 'capabilities')) or previous['target']['authority'] != authority or previous.get('windows_identity') != windows_identity:
                     raise InventoryError('authority_conflict', 'environment already has a distinct pinned authority')
                 return self.public(previous)
             db.execute('INSERT INTO environments VALUES(?,?,?)', (host, environment, json.dumps(record)))
@@ -94,7 +106,8 @@ class HostRegistry:
         return dict(target=record['target'], kind=record['kind'], transport=record['transport'], capabilities=record['capabilities'],
             observation=dict(observed_at=record['observed_at'], age_seconds=max(0, self.now() - record['observed_at']),
                 freshness='current' if 0 <= self.now() - record['observed_at'] <= 30 else 'stale', online=record['online']),
-            grants_operations=False)
+            grants_operations=False,
+            **({'windows_identity': record['windows_identity']} if 'windows_identity' in record else {}))
 
     def list(self):
         with self.connect() as db:

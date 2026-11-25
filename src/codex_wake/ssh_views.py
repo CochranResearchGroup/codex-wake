@@ -59,6 +59,8 @@ def _config(path, role):
     source, destination = config['source'], config['destination']
     registry = _private(Path(config['registry']))
     source_kind, destination_kind = resolve_owner_pair(registry, source, destination)
+    if {source_kind, destination_kind} != {'windows', 'wsl'}:
+        raise ViewError('ssh_view_normal_windows_wsl_scope_required')
     with sqlite3.connect(registry.as_uri() + '?mode=ro', uri=True) as db:
         registered = environment_record(db, destination['host'], destination['environment'])
     identity = config['conversation']

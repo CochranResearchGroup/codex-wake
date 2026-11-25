@@ -9,6 +9,9 @@ def main(argv=None):
         from .ssh_views import main as run
         return run(args[1:])
     if os.name=='nt':
+        if args and args[0] == 'windows-scope':
+            from .windows_scope import main as run
+            return run(args[1:])
         if args and args[0]=='message-owner':
             from .message_owner import main as run
             return run(args[1:])

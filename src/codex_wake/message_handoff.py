@@ -13,7 +13,7 @@ import sqlite3
 from uuid import UUID, uuid4
 
 from .message_delivery import DeliveryReceipt, Message, PostgresMessages, deliver
-from .message_owner_registry import resolve_owner_pair
+from .message_owner_registry import resolve_owner_records
 from .native_clock import snapshot, valid_utc
 
 
@@ -29,7 +29,10 @@ def _encode(value):
     return json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False)
 
 
-def _owner_key(target):
+def _owner_key(record):
+    target = record['target']
+    if 'windows_identity' in record:
+        target = dict(target, windows_identity=record['windows_identity'])
     return 'owner:' + sha256(_encode(target).encode()).hexdigest()
 
 
@@ -43,8 +46,9 @@ class MessageHandoff:
     def __init__(self, root, registry, local, peer, dsn, *, clock=snapshot):
         self.root = Path(root)
         self.registry, self.local, self.peer = registry, local, peer
-        self.kind, self.peer_kind = resolve_owner_pair(registry, local, peer)
-        self.local_key, self.peer_key = _owner_key(local), _owner_key(peer)
+        local_record, peer_record = resolve_owner_records(registry, local, peer)
+        self.kind, self.peer_kind = local_record['kind'], peer_record['kind']
+        self.local_key, self.peer_key = _owner_key(local_record), _owner_key(peer_record)
         self.store = PostgresMessages(dsn) if dsn else None
         self.clock = clock
         self._schema_ready = False
@@ -74,7 +78,9 @@ class MessageHandoff:
         return self._database('message-owner-service.sqlite3')
 
     def _check_pins(self):
-        resolve_owner_pair(self.registry, self.local, self.peer)
+        records = resolve_owner_records(self.registry, self.local, self.peer)
+        if tuple(map(_owner_key, records)) != (self.local_key, self.peer_key):
+            raise ValueError('pinned execution owner scope changed')
 
     def initialize(self):
         if self.store is None:
@@ -282,10 +288,11 @@ class MessageHandoff:
                 with self.store._connect() as conn:
                     remote = self._publish(conn, identifier, self.local_key, self.peer_key, request)
                 saved = json.loads(saved)
-                if remote is None and saved['status'] not in {'waiting_for_database', 'waiting_for_' + self.peer_kind}:
+                waiting = 'waiting_for_' + self.peer_kind.replace('-', '_')
+                if remote is None and saved['status'] not in {'waiting_for_database', waiting}:
                     # Retain an already observed receipt during PG restore.
                     continue
-                outcome = remote or _state('waiting_for_' + self.peer_kind)
+                outcome = remote or _state(waiting)
                 with db:
                     self._save(db, identifier, 'out', outcome)
                 if remote is None and 'message' in request:

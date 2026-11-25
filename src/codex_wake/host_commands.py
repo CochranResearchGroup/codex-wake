@@ -28,8 +28,9 @@ def register_parser(subparsers):
     resolve.add_argument('--expected-target', type=json.loads)
     register = commands.add_parser('register')
     register.add_argument('host'); register.add_argument('environment')
-    register.add_argument('--kind', choices=['windows', 'wsl', 'linux', 'remote'], required=True)
+    register.add_argument('--kind', choices=['windows', 'windows-elevated', 'wsl', 'linux', 'remote'], required=True)
     register.add_argument('--authority', required=True)
+    register.add_argument('--windows-identity', type=json.loads)
     register.add_argument('--destination', required=True)
     register.add_argument('--command', dest='ssh_command', default='codex-wake hosts ssh-serve')
     register.add_argument('--ssh-executable', default='ssh', help='local operator-controlled transport executable; fixture paths must be labeled')
@@ -89,7 +90,8 @@ def command(args, root=None):
         verb = args.host_verb
         if verb == 'register':
             options = dict(kind=args.kind, authority=args.authority, destination=args.destination, command=args.ssh_command,
-                ssh_executable=args.ssh_executable, generation=args.generation, operator=True)
+                ssh_executable=args.ssh_executable, generation=args.generation,
+                windows_identity=getattr(args, 'windows_identity', None), operator=True)
             if args.capability: options['capabilities'] = args.capability
             value = {'environment': registry.register(args.host, args.environment, **options)}
         elif verb == 'observe': value = {'environment': registry.observe(args.target, online=args.online == 'true', operator=True)}
