@@ -138,3 +138,36 @@ This owner binding covers managed Windows Codex presentations. Enrollment
 creates and tracks the client's process receipt. Existing untracked panes
 require explicit selection or migration. The Codex app-server process
 remains pinned across the two psmux recovery cases.
+
+## External OAuth MCP scheduled recovery
+
+The protected tmux owner uses `wake_wakes_schedules_register` and
+`wake_wakes_schedules_bind_restoration` with the exact conversation and
+the host’s existing managed restoration profile. Retained registration
+and a configured restoration binding are separate from a running
+monitor and a submitted wake.
+
+For Windows psmux, the external connector can expose
+`wake_wakes_messages_schedule` and `wake_wakes_messages_status` when
+its private policy includes `windows_message_owner`. Set its
+`owner_config` to the absolute private WSL MessageOwner config for the
+pinned Windows peer. Set `targets` to exact psmux conversation entries.
+Each entry has the connector’s local `host` and `environment`,
+`presentation` set to `psmux`, the exact `conversation_id`, and the
+Windows peer’s `namespace` (registered environment), `authority` and
+`generation`. Include those exact targets in the available OAuth
+consent choices.
+
+A control grant bound to one of those exact targets can admit a
+`message_id`, body, original `due_at` and original `expires_at`. Use the
+same request and UUID to reconcile a lost admission receipt. The WSL
+owner retains the message and the Windows owner performs recipient
+recovery when eligible. The original grant can include observe to read
+its own admission’s metadata, including the original delivery window and receipt. Reading a
+receipt preserves both terminal owners’ current activation state.
+
+For ordinary external mailbox send, a control-only grant can retain a
+message and get a metadata receipt. Waiting synchronously for a reply
+requires `content.observe`. Former-tab history metadata requires
+`history.observe`. Reading its saved records also requires
+`content.observe` and the exact saved account scope.
