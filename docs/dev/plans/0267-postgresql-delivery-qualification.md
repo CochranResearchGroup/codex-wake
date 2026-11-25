@@ -104,3 +104,37 @@ The opt-in `test_message_owner` verification uses disposable PostgreSQL and
 owning transport doubles. It exercises both directions, original reply and
 expiry, missing transport receipt, offline settings, stale edits and journal
 restoration.
+
+## Native Windows psmux recipient
+
+Use the normal Windows message owner with a Codex app server bound to
+IPv4 loopback and a private capability-token file. Enroll the exact
+conversation while it is idle. The enrollment request JSON contains
+`thread`, `namespace`, `session`, `title`, `index`, `cwd`, `home`,
+`codex`, `port`, `server_pid`, and `token_file`. Use a private directory
+for the binding and its placement journal.
+
+```powershell
+python -m codex_wake.psmux_message_recovery --binding C:\WakeBindings\BINDING.json enroll --request REQUEST.json
+python -m codex_wake.psmux_message_recovery --binding C:\WakeBindings\BINDING.json present
+python -m codex_wake.psmux_message_recovery --binding C:\WakeBindings\BINDING.json status
+```
+
+Give the Windows owner's exact recipient UUID an absolute Python binding
+that invokes `-m codex_wake.psmux_message_recovery --binding C:\WakeBindings\BINDING.json deliver`. The retained message controls original eligibility and expiry.
+The adapter verifies the pinned Windows owner, original Codex home,
+application process, provider and conversation before restoring its view.
+A busy detached turn holds both the presentation and delivery.
+
+After tab loss, recovery first tries the saved vacant slot. A same-title
+idle shell in that slot and directory can move to a spare slot with its
+process intact. A different occupant retains its pane and placement. After
+psmux server loss, the adapter opens the original named session and places
+the new client in the saved slot. Status reads inspect the tracked
+presentation without opening a client. An exact stock Codex queue receipt
+confirms acceptance by the original thread.
+
+This owner binding covers managed Windows Codex presentations. Enrollment
+creates and tracks the client's process receipt. Existing untracked panes
+require explicit selection or migration. The Codex app-server process
+remains pinned across the two psmux recovery cases.
