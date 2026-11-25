@@ -554,7 +554,7 @@ class Mailbox:
             self._finish(database, message_id=value['message']['message_id'], idempotency_key=idempotency_key,
                          receipt_id=value.get('receipt_id'))
             from .message_delivery import configured_store, direct_message, admission_status
-            store = configured_store()
+            store = configured_store(self.bus.root)
             if store is not None:
                 envelope = json.loads(self._row(database, value['message']['message_id'])['envelope'])
                 value['shared_admission'] = admission_status(store, direct_message(envelope, body))

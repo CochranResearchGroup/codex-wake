@@ -326,7 +326,7 @@ class NotificationDispatcher:
                             results.append(dict(message_id=job['message_id'], status='denied', reason=error.code))
                             continue
                         from .message_delivery import configured_store, direct_message, deliver, DeliveryReceipt
-                        store = configured_store()
+                        store = configured_store(scheduler.mailbox.bus.root)
                         try:
                             context = scheduler.notification_context(
                                 job, attempt_id=claim['attempt_id'], include_payload=store is not None)

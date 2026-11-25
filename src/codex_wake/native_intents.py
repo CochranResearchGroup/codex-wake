@@ -211,7 +211,7 @@ def _receipt(args, record, path, deduplicated):
             'Enroll a compatible monitor for this exact wake root; then reconcile this retained ID, do not create a duplicate.'
             if not monitored else 'Inspect retained time/owner state; preserve the original origin and deadline.'))
     from .message_delivery import admission_status, configured_store, wake_message
-    store = configured_store()
+    store = configured_store(root)
     if store is not None:
         from .runtime_delivery import original_submission_expiry
         if projection['expires_at'] is None:

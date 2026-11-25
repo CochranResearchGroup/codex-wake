@@ -244,7 +244,7 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
                 return result
 
             from .message_delivery import configured_store, submit_native_message, wake_message
-            store = configured_store()
+            store = configured_store(root)
             submitted = (submit_native_message(store, wake_message(root, record, original_expiry),
                                               delivery['submission_id'], submit, clock=clock_provider)
                          if store is not None else submit())

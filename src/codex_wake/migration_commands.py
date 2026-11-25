@@ -68,9 +68,28 @@ def register_parser(subparsers):
         item = verbs.add_parser(verb)
         item.add_argument('--arguments', type=json.loads, default={})
         item.add_argument('--json', dest='as_json', action='store_true')
+    cutover = verbs.add_parser('message-cutover', help='Preview or activate one isolated PostgreSQL message cutover')
+    cutover.add_argument('--bus-root', type=Path, required=True)
+    cutover.add_argument('--isolated-root', type=Path, required=True)
+    cutover.add_argument('--operator-capability', type=Path, required=True)
+    cutover.add_argument('--expected-source')
+    cutover.add_argument('--json', dest='as_json', action='store_true')
 
 
 def command(args, root, *, writer_probe=None):
+    if args.migration_verb == 'message-cutover':
+        from .message_cutover import cutover
+        from .records import WakeError
+        try:
+            value = cutover(root, args.bus_root, args.isolated_root, args.operator_capability,
+                            expected_source=args.expected_source)
+        except Exception as error:
+            # Database exceptions can include connection endpoints. Only emit
+            # diagnostics from the controlled local validation surface.
+            value = dict(status='failed', error=str(error) if isinstance(error, WakeError)
+                         else 'message cutover could not verify the selected stores')
+        emit(value, args)
+        return 0 if value['status'] in ('previewed', 'activated') else 2
     try:
         value = operator_execute('migration.' + args.migration_verb, args.arguments, root, writer_probe=writer_probe)
     except (ValueError, OSError, InventoryError) as error:

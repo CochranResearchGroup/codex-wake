@@ -68,14 +68,26 @@ _SCHEMA = (
 class PostgresMessages:
     """The owner commits before external I/O and cannot replay uncertain effects."""
 
-    def __init__(self, dsn: str):
+    def __init__(self, dsn: str, *, cutover_id: str | None = None):
         self._dsn = dsn
+        self._cutover_id = cutover_id
 
     def _connect(self):
         import psycopg
 
-        return psycopg.connect(self._dsn, connect_timeout=3,
+        conn = psycopg.connect(self._dsn, connect_timeout=3,
                                options='-c statement_timeout=3000 -c lock_timeout=2000')
+        if self._cutover_id is not None:
+            try:
+                verified = conn.execute(
+                    'SELECT 1 FROM wake_message_cutovers_v1 WHERE cutover_id=%s',
+                    (self._cutover_id,)).fetchone()
+                if verified is None:
+                    raise ValueError('active message cutover is unavailable in the configured database')
+            except BaseException:
+                conn.close()
+                raise
+        return conn
 
     def initialize(self):
         with self._connect() as conn:
@@ -126,6 +138,28 @@ class PostgresMessages:
                    VALUES (%s,%s,%s,'submitting')""", (*identity, attempt_id))
         return None
 
+    def reconcile_acceptance(self, message: Message, attempt_id: str, receipt: DeliveryReceipt):
+        """Record a positive observation for the original attempt without submitting."""
+        identity = self._identity(message)
+        expected = (receipt.state, receipt.receipt_id, receipt.reason, receipt.evidence_kind,
+                    receipt.execution, receipt.acknowledgment)
+        if receipt.state != 'submitted' or not receipt.receipt_id:
+            raise ValueError('reconciliation requires positive transport evidence')
+        with self._connect() as conn:
+            self._admit(conn, message)
+            conn.execute(
+                """UPDATE wake_message_attempts_v1
+                   SET state=%s,receipt_id=%s,reason=%s,evidence_kind=%s,execution=%s,acknowledgment=%s
+                   WHERE scope=%s AND message_id=%s AND attempt_id=%s
+                         AND state IN ('submitting','uncertain')""",
+                (*expected, *identity, attempt_id))
+            row = conn.execute(
+                """SELECT state,receipt_id FROM wake_message_attempts_v1
+                   WHERE scope=%s AND message_id=%s AND attempt_id=%s""",
+                (*identity, attempt_id)).fetchone()
+            if row != expected[:2]:
+                raise ValueError('original delivery evidence could not be reconciled')
+
     def finish(self, message: Message, attempt_id: str, receipt: DeliveryReceipt):
         with self._connect() as conn:
             cursor = conn.execute(
@@ -138,7 +172,12 @@ class PostgresMessages:
                 raise ValueError('message delivery attempt changed')
 
 
-def configured_store() -> PostgresMessages | None:
+def configured_store(root=None) -> PostgresMessages | None:
+    if root is not None:
+        from .message_cutover import activated_store
+        active = activated_store(root)
+        if active is not None:
+            return active
     dsn = os.environ.get('CODEX_WAKE_MESSAGE_DB_DSN')
     return PostgresMessages(dsn) if dsn else None
 

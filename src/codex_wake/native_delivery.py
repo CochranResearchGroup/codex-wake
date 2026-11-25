@@ -279,7 +279,7 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
             return result
 
         from .message_delivery import configured_store, submit_native_message, wake_message
-        store = configured_store()
+        store = configured_store(root)
         submitted = (submit_native_message(store, wake_message(root, record, original_expiry),
                                           record['native_delivery']['submission_id'], submit,
                                           clock=clock_provider if intent else None)
@@ -422,6 +422,22 @@ def reconcile_native(root, found, now, *, force=False, runtime_adapter: RuntimeA
                 record['events'][-1].update(at=None, time_status='not_observed')
         replace_record(root, found, record)
         return DispatchResult('skipped', 'native submission unresolved; no resend')
+    from .message_cutover import activated_store
+    try:
+        shared = activated_store(root)
+        if shared is not None:
+            from .message_delivery import DeliveryReceipt, wake_message
+            from .runtime_delivery import original_submission_expiry
+
+            message = wake_message(root, record, original_submission_expiry(record))
+            attempt = delivery.get('submission_id') or 'legacy-disposition:' + message.identifier
+            receipt = DeliveryReceipt(
+                'submitted', evidence.get('queue_id') or evidence.get('turn_id'),
+                evidence_kind=evidence['source'] + '_acceptance', execution=evidence['execution'],
+                acknowledgment='not_observed')
+            shared.reconcile_acceptance(message, attempt, receipt)
+    except Exception:
+        return DispatchResult('skipped', 'shared native reconciliation unavailable; no resend')
     delivery.update(state='accepted', reconciled=True, evidence=evidence,
                     execution=evidence['execution'], acknowledgment='not_observed',
                     reconciliation=dict(state='resolved', checked_at=format_utc(now) if now else None))
