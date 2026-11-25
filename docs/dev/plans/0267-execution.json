@@ -288,7 +288,10 @@
         775,
         776
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/busy_dnd",
+      "branch": "feat/issue-777-elevated-recovery",
+      "base": "77de099a"
     },
     {
       "issue": 778,
@@ -299,10 +302,29 @@
         771,
         772
       ],
-      "status": "running",
+      "status": "validated",
       "owner": "/root/former_tab",
       "base": "a6b90326",
-      "branch": "feat/issue-778-harness-commands"
+      "branch": "feat/issue-778-harness-commands",
+      "tracker": "closed",
+      "worker_results": [
+        "e6fff98e",
+        "23d4cd20",
+        "ef6f1166"
+      ],
+      "integration_results": [
+        "1856ab57",
+        "2625db37",
+        "0bbb432b"
+      ],
+      "evidence": [
+        "Fresh stock Codex 0.171 and actual Wake MCP send, read, restore, and ambiguity",
+        "Exact isolated Wake Codex TUI package send, inbox, read, reply and DND through socket alias",
+        "Native source ca0782cfc0d8a0f2008b2f6d8eb727557e5ed664 with verified patch and bundle"
+      ],
+      "broader_spec_gates": [
+        "Deployment and updater rollback"
+      ]
     },
     {
       "issue": 779,
@@ -316,7 +338,8 @@
       ],
       "status": "running",
       "owner": "/root/cutover",
-      "base": "5aebe9e1"
+      "base": "5aebe9e1",
+      "branch": "feat/issue-779-connected-chatgpt"
     },
     {
       "issue": 780,
@@ -328,5 +351,5 @@
       "status": "pending"
     }
   ],
-  "integration_tip_at_validation": "48989b6d"
+  "integration_tip_at_validation": "0bbb432b"
 }
