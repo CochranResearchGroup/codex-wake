@@ -228,12 +228,26 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
         record=append_event(record,'native_submission_started','wake route '+route+' submission intent',now)
         replace_record(root,found,record)
         try:
-            record['permission_check']=check_route(root,record,route)
-            if idle_submit:
-                submitted = selected.submit(recipient, prompt)
-            else:
-                submitted = submit_bounded(selected, recipient, prompt, submission_envelope(record))
             from .runtime_delivery import validate_native_submission
+
+            def submit():
+                try:
+                    record['permission_check'] = check_route(root, record, route)
+                except PermissionDenied as exc:
+                    return RuntimeSubmission('not_sent', reason=exc.code, pre_io=True)
+                if idle_submit:
+                    result = selected.submit(recipient, prompt)
+                else:
+                    result = submit_bounded(selected, recipient, prompt, submission_envelope(record))
+                validate_native_submission(result, record['target']['thread_id'],
+                    allow_background=route == 'background' and record['target'].get('session_mode') == 'background')
+                return result
+
+            from .message_delivery import configured_store, submit_native_message, wake_message
+            store = configured_store()
+            submitted = (submit_native_message(store, wake_message(root, record, original_expiry),
+                                              delivery['submission_id'], submit, clock=clock_provider)
+                         if store is not None else submit())
             validate_native_submission(submitted, record['target']['thread_id'],
                 allow_background=route == 'background' and record['target'].get('session_mode') == 'background')
         except PermissionDenied as exc:

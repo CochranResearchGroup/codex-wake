@@ -82,7 +82,7 @@ def create_native(args, root):
     if existing is not None:
         return existing
     from .native_clock import configuration
-    if getattr(args, 'wake_policy_enabled', False) or configuration() or any(getattr(args, name, None) for name in ('idempotency_key', 'time_tolerance', 'stop_at', 'as_json')):
+    if getattr(args, 'wake_policy_enabled', False) or configuration() or os.environ.get('CODEX_WAKE_MESSAGE_DB_DSN') or any(getattr(args, name, None) for name in ('idempotency_key', 'time_tolerance', 'stop_at', 'as_json')):
         return retain(args, root)
     try:
         observation = read_time()
@@ -268,11 +268,22 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
     record = append_event(record, 'native_submission_started', 'native queue submission started', now)
     replace_record(root, found, record)
     try:
-        if idle_submit:
-            submitted = adapter.submit(recipient, prompt)
-        else:
-            submitted = submit_bounded(adapter, recipient, prompt, submission_envelope(record))
         from .runtime_delivery import validate_native_submission
+
+        def submit():
+            if idle_submit:
+                result = adapter.submit(recipient, prompt)
+            else:
+                result = submit_bounded(adapter, recipient, prompt, submission_envelope(record))
+            validate_native_submission(result, target['thread_id'], allow_background=target.get('session_mode') == 'background')
+            return result
+
+        from .message_delivery import configured_store, submit_native_message, wake_message
+        store = configured_store()
+        submitted = (submit_native_message(store, wake_message(root, record, original_expiry),
+                                          record['native_delivery']['submission_id'], submit,
+                                          clock=clock_provider if intent else None)
+                     if store is not None else submit())
         validate_native_submission(submitted, target['thread_id'], allow_background=target.get('session_mode') == 'background')
     except Exception as exc:
         submitted = RuntimeSubmission(

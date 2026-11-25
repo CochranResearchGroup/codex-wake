@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: UNIFIED-MESSAGES-0267
+    owner: primary / ecochran76
+    objective: Deliver one shared durable message contract across Wake entry points
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/766, https://github.com/CochranResearchGroup/codex-wake/issues/767]
+    plan: docs/dev/plans/0267-2026-11-23-unified-messages-and-terminal-control.md
+    branch: feat/plan0267-unified-messages
+    target: origin/main
+    plan_state: OPEN
+    custody_state: REMOTE_PRESERVED
+    dependencies: []
+    overlaps: []
+    updated_at: 2026-11-24
+    disposition: Integration branch. Isolated PostgreSQL validation only.
   - id: RECURRING-DELIVERY-755
     owner: primary / ecochran76
     objective: Show and bound recurring wake delivery holds

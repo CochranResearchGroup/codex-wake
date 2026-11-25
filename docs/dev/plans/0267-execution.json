@@ -1,0 +1,150 @@
+{
+  "spec": "https://github.com/CochranResearchGroup/codex-wake/issues/766",
+  "branch": "feat/plan0267-unified-messages",
+  "base": "70ff358598738c5ab1343e0a03133f41c71a4312",
+  "implementation_stop": "2026-11-25T01:50:00-06:00",
+  "hard_stop": "2026-11-25T02:00:00-06:00",
+  "review_passes": 0,
+  "tdd_remediation_passes": 0,
+  "tickets": [
+    {
+      "issue": 767,
+      "title": "Unify one direct message and one timed wake",
+      "blockers": [],
+      "status": "validated",
+      "owner": "primary",
+      "owned_paths": [
+        "runtime message delivery",
+        "wake dispatch",
+        "A2A dispatcher",
+        "PostgreSQL store"
+      ],
+      "evidence": [
+        "91 focused tests including opt-in PostgreSQL CLI and duplicate recovery",
+        "installed stock Codex timed wake completed one exact turn",
+        "final PostgreSQL eligibility projection regression passed"
+      ],
+      "local_evidence": "/tmp/wake766.b5mChY/evidence"
+    },
+    {
+      "issue": 768,
+      "title": "Deliver messages to busy and DND recipients",
+      "blockers": [
+        767
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 769,
+      "title": "Complete the reply and cancellation lifecycle",
+      "blockers": [
+        767
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 770,
+      "title": "Cut over one existing execution scope",
+      "blockers": [
+        767
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 771,
+      "title": "Inspect a destroyed tab by its former name",
+      "blockers": [],
+      "status": "running",
+      "owner": "/root/former_tab",
+      "branch": "feat/issue-771-former-tabs",
+      "worktree": "/home/ecochran76/workspace.local/.worktrees/codex-wake/issue-771-former-tabs",
+      "owned_paths": [
+        "former tab inventory",
+        "history reads"
+      ]
+    },
+    {
+      "issue": 772,
+      "title": "Recover a tmux or Byobu recipient through shared delivery",
+      "blockers": [
+        767
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 773,
+      "title": "Qualify Linux-only boot recovery",
+      "blockers": [
+        770,
+        772
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 774,
+      "title": "Deliver across normal Windows and WSL",
+      "blockers": [
+        770
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 775,
+      "title": "Restore Windows psmux recipients",
+      "blockers": [
+        774
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 776,
+      "title": "Recover SSH views in both directions",
+      "blockers": [
+        772,
+        774
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 777,
+      "title": "Qualify elevated Windows recovery",
+      "blockers": [
+        775,
+        776
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 778,
+      "title": "Expose the shared workflow in Codex",
+      "blockers": [
+        768,
+        769,
+        771,
+        772
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 779,
+      "title": "Qualify ChatGPT through external OAuth MCP",
+      "blockers": [
+        768,
+        769,
+        771,
+        772,
+        775
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 780,
+      "title": "Deliver through another Wake server",
+      "blockers": [
+        773,
+        774
+      ],
+      "status": "pending"
+    }
+  ]
+}

@@ -158,7 +158,7 @@ class MailScheduler:
                     self.mailbox._record(database, row['message_id'], 'deferred', 'scheduler', now, dict(reason=reason))
             database.execute('COMMIT')
 
-    def notification_context(self, job, *, attempt_id=None):
+    def notification_context(self, job, *, attempt_id=None, include_payload=False):
         """Revalidate original notification authority immediately before effects."""
         with self.mailbox.transaction() as database:
             self._operator(database)
@@ -197,6 +197,12 @@ class MailScheduler:
             window=row['expires']-upper
             if attempt_id is not None:window=min(window,intent['lease_until']-upper)
             envelope['dispatch_window_seconds']=max(0,window)
+            if include_payload:
+                payload = database.execute('SELECT body FROM mail_bodies WHERE message_id=?',
+                                           (row['message_id'],)).fetchone()
+                if payload is None:
+                    raise BusError('authorization_denied', 'original message payload is unavailable')
+                envelope['payload'] = payload[0]
             database.execute('COMMIT')
             return envelope
 

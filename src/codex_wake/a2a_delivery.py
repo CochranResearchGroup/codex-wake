@@ -325,8 +325,11 @@ class NotificationDispatcher:
                         except BusError as error:
                             results.append(dict(message_id=job['message_id'], status='denied', reason=error.code))
                             continue
+                        from .message_delivery import configured_store, direct_message, deliver, DeliveryReceipt
+                        store = configured_store()
                         try:
-                            scheduler.notification_context(job,attempt_id=claim['attempt_id'])
+                            context = scheduler.notification_context(
+                                job, attempt_id=claim['attempt_id'], include_payload=store is not None)
                         except BusError as error:
                             scheduler.finish(dispatcher,recipient,claim['attempt_id'],outcome='unsent',
                                 evidence=dict(reason='explicit_not_sent'))
@@ -334,10 +337,29 @@ class NotificationDispatcher:
                             continue
                         from .a2a_tmux_delivery import TmuxBinding
                         from .runtime_a2a import GrokNotificationBinding
-                        if isinstance(binding, (TmuxBinding,GrokNotificationBinding)):
-                            result = binding.deliver(claim, job, scheduler.mailbox.bus.root, scheduler=scheduler)
+
+                        def submit():
+                            if isinstance(binding, (TmuxBinding, GrokNotificationBinding)):
+                                return binding.deliver(claim, job, scheduler.mailbox.bus.root, scheduler=scheduler)
+                            return binding.deliver(claim, job, scheduler.mailbox.bus.root)
+
+                        if store is None:
+                            result = submit()
                         else:
-                            result = binding.deliver(claim, job, scheduler.mailbox.bus.root)
+                            def effect():
+                                try:
+                                    scheduler.notification_context(job, attempt_id=claim['attempt_id'])
+                                except BusError as error:
+                                    return DeliveryReceipt('unsent', reason=error.code)
+                                raw = submit()
+                                return DeliveryReceipt(raw.get('status'), raw.get('receipt_id'), raw.get('reason'),
+                                                       raw.get('evidence_kind'), raw.get('execution'),
+                                                       raw.get('acknowledgment'))
+
+                            message = direct_message(context, context['payload'])
+                            shared = deliver(store, message, claim['attempt_id'], effect)
+                            result = {key: value for key, value in vars(shared).items() if value is not None}
+                            result['status'] = shared.state
                         outcome = result.get('status')
                         evidence = dict(transport=getattr(binding, 'delivery_transport', binding.transport), exact_thread_id=binding.thread_id,
                                         daemon_generation=binding.generation)

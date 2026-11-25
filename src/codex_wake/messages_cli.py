@@ -20,6 +20,7 @@ from .shared_app_server import SharedSourceError
 def add_messages_parser(subparsers):
     parser = subparsers.add_parser('messages', help='send and consume explicitly authorized local mailbox messages')
     commands = parser.add_subparsers(dest='messages_command', required=True)
+    commands.add_parser('database-init', help='Initialize the configured PostgreSQL message schema')
     for verb in ['send','inbox','outbox','show','read','ack','reply','cancel','wait','watch','reconcile','arm-reply']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path, default=os.environ.get('CODEX_WAKE_A2A_BUS_ROOT'))
@@ -139,6 +140,17 @@ def messages_command(args):
     intent_key = getattr(args, 'idempotency_key', None)
     try:
         verb = args.messages_command
+        if verb == 'database-init':
+            from .message_delivery import configured_store
+            store = configured_store()
+            if store is None:
+                raise BusError('message_store_unconfigured', 'Configure CODEX_WAKE_MESSAGE_DB_DSN first')
+            try:
+                store.initialize()
+            except Exception:
+                raise BusError('message_store_unavailable', 'PostgreSQL schema initialization failed') from None
+            result(dict(status='ready', message_store='postgresql'))
+            return 0
         if verb in ('send','reply') and not intent_key:
             if not args.human:
                 raise BusError('invalid_argument', 'machine send/reply requires an explicit idempotency key')

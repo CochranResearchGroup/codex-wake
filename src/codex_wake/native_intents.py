@@ -210,6 +210,15 @@ def _receipt(args, record, path, deduplicated):
             'Monitor owns this intent; inspect delivery separately.' if armed else
             'Enroll a compatible monitor for this exact wake root; then reconcile this retained ID, do not create a duplicate.'
             if not monitored else 'Inspect retained time/owner state; preserve the original origin and deadline.'))
+    from .message_delivery import admission_status, configured_store, wake_message
+    store = configured_store()
+    if store is not None:
+        from .runtime_delivery import original_submission_expiry
+        if projection['expires_at'] is None:
+            value['shared_admission'] = 'awaiting_original_expiry'
+        else:
+            message = wake_message(root, record, original_submission_expiry(record))
+            value['shared_admission'] = admission_status(store, message)
     if getattr(args, "as_json", False):
         print(json.dumps(value, sort_keys=True))
     else:

@@ -31,6 +31,7 @@ codex-wake-github-webhook = "codex_wake.webhook_listener:main"
 codex-wake-mcp = "codex_wake.mcp_server:main"
 
 [project.optional-dependencies]
+postgres = ["psycopg[binary]>=3.2,<4"]
 mcp = ["mcp>=2.2,<2.3"]
 dev = ["ruff==0.14.2"]
 
