@@ -228,7 +228,7 @@ def messages_command(args):
             value = dict(message_id=args.message_id, replies=mailbox.replies(actor, args.message_id))
         elif verb == 'redirect':
             if args.message_id.startswith(('wake_', 'schedule_')):
-                raise BusError('redirect_source_unavailable', 'this redirect requires a bounced mailbox message')
+                raise BusError('redirect_source_unavailable', 'use native redirect for an exact bounced timed wake')
             if not args.to.startswith(('thread:', 'grok:')):
                 raise BusError('invalid_argument', 'redirect needs an exact thread: or grok: recipient')
             if args.to.startswith('grok:'):

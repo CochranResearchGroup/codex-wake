@@ -21,8 +21,14 @@ cancellation and redirecting a bounce.
   distinct, currently authorized recipient. It creates a new ID with
   `redirected_from`, retains the original absolute expiry and requested busy
   policy, and applies current authorization and DND to the new recipient.
-  The original bounce stays in history. Timed wake and schedule IDs return
-  `redirect_source_unavailable` on this mailbox command.
+  The original bounce stays in history. For a bounced timed wake or a timed
+  occurrence of a recurring schedule, use `native redirect WAKE_ID --to UUID
+  --idempotency-key KEY` with the receiving harness and endpoint options.
+  If the permission store is active, use a verified operator capability. The
+  existing registration path applies current permissions and recipient policy.
+  A durable timed bounce is required, and a new redirect must fit the original
+  absolute deadline. Replaying an admitted key returns its existing receipt.
+  A recurring schedule's ID itself is outside the redirect surface.
 - `messages cancel` retires a mailbox message before an effect is admitted.
   Once notification is in flight or its outcome is uncertain, the mailbox
   retains the original evidence. `codex-wake cancel WAKE_ID --json` reports
@@ -41,9 +47,29 @@ that records the terminal evidence on the original attempt.
 The disposable PostgreSQL regression crosses public CLI parsing, verified
 mailbox participant authority, scheduler bounce, durable correlation and shared
 admission readback. A fixture transport produces the tagged busy observation.
+The timed path also checks durable DND bounce in the local journal and
+PostgreSQL, linked ID and exact original expiry, old-record preservation,
+idempotent readback after expiry, and refusal of a new expired redirect.
 The bounded cancellation regression crosses the wake cancellation CLI using the
 real adapter and synthetic exact transport protocol evidence, including a lost
-delete response. Its typed evidence distinguishes a verified deletion from
-a started turn. Existing reply-wake tests exercise the independently delegated
-sender arm and owning-client worker. No production provider or external
-ChatGPT OAuth connector was used for this qualification.
+delete response. Existing reply-wake tests exercise the independently delegated
+sender arm and owning-client worker.
+
+A separate actual native qualification ran the public scheduling and cancel
+CLI and the native MCP `wake_cancel` command runner under UID1017. The runner
+used an exact host grant and invoked the real cancel CLI against the private
+app-server. The Wake package came from `08bb54f9cc10cb283d6a96b6441dff4986dc2cfe`,
+wheel SHA-256 `8ce1302ac5d9c195ca1bff877eda5c85a7062cc4308de2243b6fd1a785de32ed`.
+The daemon used the #695 GNU package built from
+`9af0e8e48d0c2dcfe1800a3deaadfcec7e2c0bd7`, executable SHA-256
+`6bc59c44a04dcf1c1a36f9754397b26994ccf6a3a932c7e872560a8016bac978`.
+A private StableTime configuration qualified the backend. The CLI and MCP
+runner each matched the original accepted queue ID to a real canceled
+tombstone. A queued input that had already started returned the exact native
+turn ID. Two loopback model requests ran, and the owned daemon stopped
+successfully. The receipt is `/tmp/cw769mcp.53XzDzmJ/receipt.json`, SHA-256
+`821e58b1eded0ad8685b53c37f340b9dbb6476ac8936b6198b1a6072618f0a88`.
+No production provider or external ChatGPT OAuth connector was used.
+
+The focused local suite passed 135 tests with the disposable PostgreSQL
+scope. Log: `/tmp/issue769-pg.0fkj5yvQ/final-focused.log`.

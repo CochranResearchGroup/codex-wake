@@ -493,7 +493,7 @@ def wake_message(root, record, expires_at_micros, *, order_recipient=None):
         not_before = None
     return Message(record['id'], 'wake', scope, record['target']['thread_id'],
                    expires_at_micros, record['prompt'], not_before_micros=not_before,
-                   redirected_from=record.get('redirected_from'),
+                   redirected_from=record['target'].get('redirected_from'),
                    busy_policy=record['target'].get('busy_policy', 'wait'), order_recipient=order_recipient)
 
 

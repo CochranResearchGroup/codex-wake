@@ -19,6 +19,16 @@ from .records import WakeError, append_event, format_utc, parse_duration, parse_
 def add_native_parser(subparsers):
     native = subparsers.add_parser('native', help='schedule an exact-thread native Codex wake')
     commands = native.add_subparsers(dest='native_command', required=True)
+    redirect = commands.add_parser('redirect', help='redirect a confirmed timed bounce to a distinct exact recipient')
+    from .wake_policy import add_options
+    add_options(redirect)
+    redirect.add_argument('wake_id')
+    redirect.add_argument('--to', required=True)
+    redirect.add_argument('--idempotency-key', required=True)
+    redirect.add_argument('--codex-path', default='codex')
+    redirect.add_argument('--endpoint', default='unix://')
+    redirect.add_argument('--json', dest='as_json', action='store_true')
+    redirect.set_defaults(resume_missing=False)
     reconcile = commands.add_parser('reconcile', help='inspect native evidence without resubmitting')
     reconcile.add_argument('wake_id')
     reconcile.add_argument('--read-codex-path', help='qualified read-only replacement for a removed historical executable; accepted completion only')
@@ -27,7 +37,6 @@ def add_native_parser(subparsers):
     migrate.add_argument('--apply', action='store_true', help='save original and promote schema1 native record to schema4')
     for verb in ('after', 'at', 'file'):
         command = commands.add_parser(verb)
-        from .wake_policy import add_options
         add_options(command)
         from .wake_session_modes import REGISTRATION_MODES
         command.add_argument('--session-mode', choices=REGISTRATION_MODES, help='session lifecycle mode, or explicit_policy with explicit lifetime/startup/routes')

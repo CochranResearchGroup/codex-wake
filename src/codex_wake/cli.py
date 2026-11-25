@@ -3016,6 +3016,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None, registratio
         from .runtime_wakes import command
         return command(args, root)
     if args.command == "native":
+        if args.native_command == 'redirect':
+            from .native_redirect import redirect
+            return redirect(args, root)
         if args.native_command == 'migrate':
             from .native_delivery import migrate_command
             return migrate_command(args, root)

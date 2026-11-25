@@ -73,6 +73,9 @@ def _request(args, root):
     content = {"root": str(root), "cwd": str(cwd), "target": target,
                "schedule": schedule, "ttl_seconds": ttl, "prompt": prompt,
                "tolerance_seconds": tolerance, "stop_at": stop}
+    redirected_from = getattr(args, '_redirected_from', None)
+    if redirected_from is not None:
+        target['redirected_from'] = redirected_from
     from .wake_policy import request_policy
     policy = (args._schedule_wake_policy if hasattr(args, "_schedule_wake_policy")
               else request_policy(root, args, "codex:" + args.thread_id))
@@ -211,6 +214,8 @@ def _receipt(args, record, path, deduplicated):
             'Monitor owns this intent; inspect delivery separately.' if armed else
             'Enroll a compatible monitor for this exact wake root; then reconcile this retained ID, do not create a duplicate.'
             if not monitored else 'Inspect retained time/owner state; preserve the original origin and deadline.'))
+    if record['target'].get('redirected_from'):
+        value['redirected_from'] = record['target']['redirected_from']
     from .message_delivery import admission_status, configured_store, wake_message
     store = configured_store(root)
     if store is not None:
@@ -289,7 +294,10 @@ def valid_record(record):
 
 
 def _valid_native_target(target):
-    return (target['transport'] == 'native' and str(UUID(target['thread_id'])) == target['thread_id']
+    redirected_from = target.get('redirected_from')
+    return ((redirected_from is None or (isinstance(redirected_from, str)
+                and re.fullmatch(r'wake_intent_[0-9a-f]{32}', redirected_from)))
+            and target['transport'] == 'native' and str(UUID(target['thread_id'])) == target['thread_id']
             and target.get('busy_policy', 'wait') in ('wait', 'queue', 'idle-only')
             and target['endpoint'].startswith('unix://') and Path(target['codex_cmd']).is_absolute())
 

@@ -410,6 +410,35 @@ print("Queued message {uuid4()} for thread {thread}.")
             self.assertEqual(find_record(root, held['id']).record['policy_outcome'],
                              dict(state='bounced', reason='recipient_dnd'))
             self.assertEqual(calls.read_text(), 'queued\nqueued\n')
+            redirected_thread = str(uuid4())
+            from codex_wake.records import WakeError
+            from codex_wake.runtime_delivery import original_submission_expiry
+            original = find_record(root, held['id']).record
+            args = ['--wake-root', str(root), 'native', 'redirect', held['id'],
+                    '--to', redirected_thread, '--idempotency-key', 'timed-bounce-redirect',
+                    '--codex-path', sys.executable, '--json']
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(run(args), 0)
+            redirected = json.loads(output.getvalue())
+            self.assertEqual(redirected['redirected_from'], held['id'])
+            self.assertNotEqual(redirected['id'], held['id'])
+            new_wake = find_record(root, redirected['id']).record
+            self.assertEqual(new_wake['target']['thread_id'], redirected_thread)
+            self.assertEqual(original_submission_expiry(new_wake), original_submission_expiry(original))
+            self.assertEqual(find_record(root, held['id']).record, original)
+            fixture.wall_clock = original_submission_expiry(original) / 1_000_000 + 1
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(run(args), 0)
+            self.assertEqual(json.loads(output.getvalue())['id'], redirected['id'])
+            args[args.index('timed-bounce-redirect')] = 'expired-redirect'
+            with self.assertRaisesRegex(WakeError, 'native_redirect_original_window_closed'):
+                run(args)
+            with self.store._connect() as db:
+                self.assertEqual(db.execute(
+                    'SELECT redirected_from,recipient FROM wake_messages_v1 WHERE message_id=%s',
+                    (redirected['id'],)).fetchone(), (held['id'], redirected_thread))
 
     def test_operator_interrupts_only_the_exact_turn_then_delivers(self):
         from threading import Thread
