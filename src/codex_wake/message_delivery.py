@@ -408,9 +408,8 @@ def deliver(store: PostgresMessages, message: Message, attempt_id: str,
             effect: Callable[[], DeliveryReceipt], *, clock=None) -> DeliveryReceipt:
     """Persist a single effect intent and retain exact transport evidence."""
     from psycopg import Error
-    from .native_clock import snapshot
-    from .native_intents import valid_utc
     from .message_policy import stable_micros
+    from .native_clock import snapshot, valid_utc
 
     clock = clock or snapshot
     try:

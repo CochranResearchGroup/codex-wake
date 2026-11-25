@@ -55,3 +55,52 @@ Run `test_message_cutover` with `CODEX_WAKE_TEST_MESSAGE_DB_DSN` and
 `PYTHONPATH=src:tests` to verify the public cutover and reconciliation
 commands against disposable PostgreSQL. The test uses an isolated legacy
 mailbox, a recurring schedule and a transport evidence double.
+
+## Normal Windows and WSL message owners
+
+Each owner uses a private local state directory and an exact pair of
+registrations from the host registry. Create one operator-owned JSON config
+per account. The config includes `root`, `registry`, `owner`, `peer` and,
+for workers started without an operator shell, `db_dsn_file`. The owner and
+peer values are the full host registration targets, including authority and
+generation. Point both owners to the same PostgreSQL instance. Keep the
+local owner state directories in their respective filesystems.
+
+Run `codex-wake message-owner --config OWNER.json run` for an owning worker.
+The Windows package includes `windows_message_owner.ps1`. Invoke it with the
+native Python executable, owner config, and the preconfigured native PostgreSQL
+service name. It waits for that service, then the worker verifies PostgreSQL
+and restores its local journal before reporting shared ingress ready. For an
+isolated native PostgreSQL foreground process, omit the service name. The
+same SQL readiness check still runs. Register a production service or task
+separately under the normal Windows owner.
+
+The Windows owner can optionally configure `wsl_auto_start` with the pinned
+peer `environment`, registered `distribution`, absolute WSL `python`
+executable and `config` path. An eligible WSL-bound message can start that
+owner using `wsl.exe --exec`. The source keeps forwarding custody until it
+reads the destination's durable outcome. Status reads use the local journal
+and do not activate the peer. Ordinary SSH tabs do not start this worker or
+either side's multiplexer.
+
+Use `send --request FILE` with a JSON object containing `identifier`,
+`recipient`, `body` and absolute UTC `expires` in microseconds. `due` and
+`in_reply_to` are optional. `status ID` returns cached outbound custody, and
+`--inbound` reads the recipient owner's journal. A local `set-local` or
+forwarded `request-setting` carries `recipient`, expected `revision` and
+Boolean `dnd`. A forwarded edit also needs an `identifier`. On a revision
+conflict, the owner returns its current revision and keeps its own setting.
+
+An owner can configure `bindings` from exact recipient UUIDs to absolute
+local transport argv. This is an owning adapter boundary. Each adapter gets
+one Message JSON frame on stdin after the owner checks the original expiry
+and its current local DND setting. A submitted receipt must echo the message
+ID, recipient and original expiry. The adapter owns any final idle check and
+harness operation. A recipient without a binding remains held. The worker
+reconstructs original submitted and uncertain effect records after a database
+restore. An uncertain effect is held under its original ID.
+
+The opt-in `test_message_owner` verification uses disposable PostgreSQL and
+owning transport doubles. It exercises both directions, original reply and
+expiry, missing transport receipt, offline settings, stale edits and journal
+restoration.

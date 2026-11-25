@@ -39,5 +39,5 @@ dev = ["ruff==0.14.2"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-codex_wake = ["time_collect.ps1"]
+codex_wake = ["time_collect.ps1", "windows_message_owner.ps1"]
 codex_profiles = ["LICENSE"]

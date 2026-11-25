@@ -15,6 +15,7 @@ import sqlite3
 import time
 
 from .managed_inventory import InventoryError
+from .message_owner_registry import environment_record
 
 READ_OPERATIONS = frozenset({'inventory.list', 'inventory.resolve', 'accounts.list', 'accounts.resolve', 'configuration.explain'})
 CAPABILITIES = {'inventory.list': 'observe', 'inventory.resolve': 'observe',
@@ -102,9 +103,9 @@ class HostRegistry:
     def resolve(self, host, environment, *, expected_target=None, require_online=False):
         identifier(host); identifier(environment)
         with self.connect() as db:
-            row = db.execute('SELECT record FROM environments WHERE host=? AND environment=?', (host, environment)).fetchone()
-        if not row: raise InventoryError('target_not_found', 'host/environment is not registered')
-        public = self.public(json.loads(row[0]))
+            record = environment_record(db, host, environment)
+        if record is None: raise InventoryError('target_not_found', 'host/environment is not registered')
+        public = self.public(record)
         if expected_target is not None and public['target'] != expected_target:
             raise InventoryError('stale_target', 'pinned host/environment authority generation changed')
         if require_online:

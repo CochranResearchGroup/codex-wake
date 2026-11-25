@@ -35,7 +35,7 @@ def recipient_key(namespace, thread):
 
 
 def stable_micros(clock, *, upper=False):
-    from .native_intents import valid_utc
+    from .native_clock import valid_utc
     utc = (clock or {}).get('utc')
     if not valid_utc(utc):
         return None

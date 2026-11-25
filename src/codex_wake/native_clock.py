@@ -134,3 +134,13 @@ def from_response(response, *, counter, frequency, measurement_only=False):
     consumed_ns = int((elapsed * 1000000000).to_integral_value(rounding=ROUND_CEILING)) + 1
     return {"utc": utc, "counter": host, "reason": "authenticated_utc",
             "valid_for_ns": max(0, max_age - age - consumed_ns), **basis}
+
+
+def valid_utc(value):
+    return (isinstance(value, dict) and value.get("status") in {"network", "windows"}
+            and isinstance(value.get("sources"), (tuple, list))
+            and all(isinstance(x, str) and x for x in value["sources"])
+            and len(set(value["sources"])) == len(value["sources"])
+            and len(value["sources"]) >= (2 if value["status"] == "network" else 1)
+            and all(type(value.get(key)) in (int, float) and math.isfinite(value[key]) for key in ("lower", "upper"))
+            and 0 < value["lower"] <= value["upper"] and value["upper"] - value["lower"] <= 300)

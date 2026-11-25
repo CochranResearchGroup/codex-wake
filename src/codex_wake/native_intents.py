@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 import math
 import re
 
+from .native_clock import valid_utc
 from .records import WakeError, WakeLifecycleLock, all_records, parse_duration, parse_timestamp, write_record
 
 SCHEMA_VERSION = 6
@@ -272,16 +273,6 @@ def retain(args, root):
         project_schedule(record)
         path = _save(root, record)
         return _receipt(args, record, path, False)
-
-
-def valid_utc(value):
-    return (isinstance(value, dict) and value.get("status") in {"network", "windows"}
-            and isinstance(value.get("sources"), (tuple, list))
-            and all(isinstance(x, str) and x for x in value["sources"])
-            and len(set(value["sources"])) == len(value["sources"])
-            and len(value["sources"]) >= (2 if value["status"] == "network" else 1)
-            and all(type(value.get(key)) in (int, float) and math.isfinite(value[key]) for key in ("lower", "upper"))
-            and 0 < value["lower"] <= value["upper"] and value["upper"] - value["lower"] <= 300)
 
 
 def valid_counter(value):

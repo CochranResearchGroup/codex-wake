@@ -179,6 +179,8 @@ def build_parser() -> argparse.ArgumentParser:
     add_a2a_parser(subparsers)
     from .messages_cli import add_messages_parser
     add_messages_parser(subparsers)
+    from .message_owner import register_parser as register_message_owner
+    register_message_owner(subparsers)
     from .goal_limits_cli import add_goal_limits_parser
     add_goal_limits_parser(subparsers)
     from .permission_commands import register_parser as register_permissions
@@ -2907,6 +2909,9 @@ def run(argv: list[str] | None = None, *, permission_principal=None, registratio
         from .wake_control import control_command
         return control_command(args, root)
 
+    if args.command == "message-owner":
+        from .message_owner import command
+        return command(args)
     if args.command == "messages":
         from .messages_cli import messages_command
         return messages_command(args)

@@ -1,9 +1,14 @@
 """Published CLI bootstrap: Windows callers never import POSIX execution owners."""
 import os
+import sys
 
 
 def main(argv=None):
     if os.name=='nt':
+        args = sys.argv[1:] if argv is None else argv
+        if args and args[0]=='message-owner':
+            from .message_owner import main as run
+            return run(args[1:])
         from .controller_client import main as run
     else:
         from .cli import main as run
