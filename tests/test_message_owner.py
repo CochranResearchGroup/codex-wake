@@ -18,6 +18,26 @@ from codex_wake.message_owner import add_arguments, command
 DSN = os.environ.get('CODEX_WAKE_TEST_MESSAGE_DB_DSN')
 
 
+class CrossServerReceiptTests(unittest.TestCase):
+    def test_qualified_receipt_must_echo_original_envelope(self):
+        from codex_wake.message_relay import forwarded_outcome
+
+        message = dict(identifier=str(uuid4()), recipient=str(uuid4()), in_reply_to=str(uuid4()),
+                       expires_at_micros=123, not_before_micros=100)
+        frame = dict(source='owner:sender', destination='owner:recipient', request=dict(message=message))
+        submitted = dict(status='submitted', attempt_id=str(uuid4()), receipt_id='recipient-receipt')
+        response = dict(id=message['identifier'], recipient=message['recipient'], in_reply_to=message['in_reply_to'],
+                        expires_at_micros=123, not_before_micros=100,
+                        source='owner:recipient', destination='owner:sender', outcome=submitted)
+        self.assertEqual(forwarded_outcome(frame, response), submitted)
+        for field, impostor in (('source', 'owner:other'), ('destination', 'owner:other'),
+                                ('id', str(uuid4())), ('recipient', str(uuid4())), ('in_reply_to', None),
+                                ('expires_at_micros', 124), ('not_before_micros', None)):
+            with self.subTest(field=field):
+                self.assertIsNone(forwarded_outcome(frame, dict(response, **{field: impostor})))
+        self.assertIsNone(forwarded_outcome(frame, dict(response, outcome=dict(submitted, receipt_id=''))))
+
+
 @unittest.skipUnless(DSN, 'requires disposable PostgreSQL')
 class MessageOwnerTests(unittest.TestCase):
     def test_bidirectional_message_custody_settings_revision_and_restore(self):

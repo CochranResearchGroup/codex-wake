@@ -12,13 +12,13 @@ def environment_record(db, host, environment):
     return json.loads(row[0]) if row else None
 
 
-def resolve_owner_records(registry, local, peer):
+def resolve_owner_records(registry, local, peer, *, cross_server=False):
     required = {'host', 'environment', 'authority', 'generation'}
     for target in (local, peer):
         if (not isinstance(target, dict) or set(target) != required
                 or any(not isinstance(v, str) or not 0 < len(v) <= 128 for v in target.values())):
             raise ValueError('exact registered owner pins are required')
-    if local['host'] != peer['host'] or local['environment'] == peer['environment']:
+    if not cross_server and (local['host'] != peer['host'] or local['environment'] == peer['environment']):
         raise ValueError('owners must be distinct execution environments on the same host')
     path = Path(registry).resolve(strict=True)
     with sqlite3.connect(path.as_uri() + '?mode=ro', uri=True) as db:
@@ -26,7 +26,10 @@ def resolve_owner_records(registry, local, peer):
     if any(not row or row['target'] != target for row, target in zip(rows, (local, peer))):
         raise ValueError('pinned execution-owner registration changed')
     kinds = {row['kind'] for row in rows}
-    if kinds not in ({'windows', 'wsl'}, {'windows', 'windows-elevated'}):
+    if cross_server:
+        if local['host'] == peer['host'] or not kinds <= {'windows', 'wsl', 'linux'}:
+            raise ValueError('cross-server forwarding requires distinct concrete hosts')
+    elif kinds not in ({'windows', 'wsl'}, {'windows', 'windows-elevated'}):
         raise ValueError('unsupported execution owner pair')
     for row in rows:
         pin = row.get('windows_identity')

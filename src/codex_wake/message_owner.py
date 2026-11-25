@@ -18,6 +18,7 @@ from uuid import UUID
 from .message_delivery import DeliveryReceipt
 from .message_handoff import MessageHandoff
 from .message_owner_registry import resolve_owner_records
+from .message_relay import read_forward, ssh_relay
 from .windows_scope import executor_enabled, require_elevated_path, require_scope, set_created_owner
 
 
@@ -136,11 +137,13 @@ def _activate_wsl(setting, peer):
 def _worker(config_path, *, clock=None):
     config = _object(_private(config_path))
     if not {'root', 'registry', 'owner', 'peer'} <= set(config) or set(config) - {
-            'root', 'registry', 'owner', 'peer', 'bindings', 'wsl_auto_start', 'db_dsn_file', 'executor_activation'}:
+            'root', 'registry', 'owner', 'peer', 'bindings', 'wsl_auto_start', 'db_dsn_file',
+            'executor_activation', 'cross_server'}:
         raise ValueError('invalid message owner configuration')
     root = _private(config['root'], directory=True)
     registry = _private(config['registry'])
-    local, peer = resolve_owner_records(registry, config['owner'], config['peer'])
+    cross_server = 'cross_server' in config
+    local, peer = resolve_owner_records(registry, config['owner'], config['peer'], cross_server=cross_server)
     identity = local.get('windows_identity')
     if os.name == 'nt':
         if local['kind'] not in ('windows', 'windows-elevated'):
@@ -179,6 +182,8 @@ def _worker(config_path, *, clock=None):
         if len(text) > 16384 or not text.strip():
             raise ValueError('owner database configuration is empty or oversized')
         dsn = text.strip()
+    if cross_server:
+        options['relay'] = ssh_relay(config['cross_server'], peer, _private)
     worker = MessageHandoff(root, registry, config['owner'], config['peer'], dsn, **options)
     bindings = {}
     for recipient, command in config.get('bindings', {}).items():
@@ -215,12 +220,13 @@ def add_arguments(parser):
     settings = verbs.add_parser('settings')
     settings.add_argument('recipient', type=UUID)
     verbs.add_parser('tick')
+    verbs.add_parser('receive-forward', help='Admit one pinned peer envelope on stdin')
     service = verbs.add_parser('run')
     service.add_argument('--interval', type=float, default=2.0)
 
 
 def register_parser(subparsers):
-    add_arguments(subparsers.add_parser('message-owner', help='Operate one pinned Windows/WSL message owner'))
+    add_arguments(subparsers.add_parser('message-owner', help='Operate one pinned message owner'))
 
 
 def command(args, *, clock=None):
@@ -233,7 +239,9 @@ def command(args, *, clock=None):
             return owner.tick(driver, activate)
 
         verb = args.owner_verb
-        if verb == 'send':
+        if verb == 'receive-forward':
+            result = owner.accept_forward(read_forward(sys.stdin.buffer))
+        elif verb == 'send':
             result = owner.send(**_object(args.request))
         elif verb == 'set-local':
             result = owner.set_local(**_object(args.request))

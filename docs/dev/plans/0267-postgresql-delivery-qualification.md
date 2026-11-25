@@ -198,3 +198,44 @@ path to the PSMux enrollment request. Run enrollment, the Codex app server,
 and the PSMux presentation from that same native scope. Recovery verifies
 the process token and the saved conversation before restoring its view. A
 normal owner with a matching tab title or position cannot claim the message.
+
+## Separately operated Wake servers
+
+Configure one exact owner pair on each server with `message-owner`. Each
+server uses its own private owner journal and PostgreSQL database. Register
+both exact owners in both local host registries with matching authorities
+and generations. Use different host identifiers and a concrete execution
+kind. Set each peer's SSH destination to a literal host or `user@host` and
+set its SSH executable to an absolute path.
+
+Add the following object to each private owner configuration. Pin the
+corresponding SSH server host key in the private `known_hosts` file.
+
+```json
+{
+  "cross_server": {
+    "identity_file": "/private/wake/peer-ed25519",
+    "known_hosts": "/private/wake/peer-known-hosts",
+    "port": 22
+  }
+}
+```
+
+Authorize only that peer key on the receiving account. Use a restricted SSH
+key and a forced command that accepts the fixed original command
+`codex-wake-message-relay-v1` and runs
+`codex-wake message-owner --config /private/wake/owner.json receive-forward`.
+This command accepts one protocol frame on stdin, saves it to the receiving
+owner journal, and returns that owner's current disposition. It does not
+invoke the harness or modify recipient settings. Start the `message-owner
+run` worker on each server to forward and process retained messages.
+
+Use the existing `message-owner send` and `status` commands. A sender's
+`waiting_for_peer` means it has retained its original request without a
+confirmed peer disposition. A lost transport response leaves the current
+sender status intact. The worker retries the original immutable envelope
+and accepts a response only for that owner pair, recipient, message ID,
+reply correlation and original eligibility window. The recipient's local
+journal arbitrates delivery and retains the original harness receipt. A
+received `uncertain` outcome remains fenced and status never treats it as
+submitted.

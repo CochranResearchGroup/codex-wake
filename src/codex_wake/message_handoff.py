@@ -17,6 +17,8 @@ from .message_owner_registry import resolve_owner_records
 from .native_clock import snapshot, valid_utc
 
 
+_ENVELOPE_FIELDS = ('identifier', 'source', 'scope', 'recipient', 'expires_at_micros',
+                    'payload', 'sender', 'in_reply_to', 'not_before_micros')
 _FINAL = {'submitted', 'uncertain', 'expired', 'applied', 'revision_conflict'}
 _WAITING = {'owner_admitted', 'held_dnd', 'held_policy', 'held_recipient', 'waiting_for_time'}
 _SCHEMA = """CREATE TABLE IF NOT EXISTS wake_owner_handoffs_v1 (
@@ -43,10 +45,11 @@ def _state(status, **evidence):
 class MessageHandoff:
     """Only the destination owns dispatch and settings. SQLite survives a stale PG restore."""
 
-    def __init__(self, root, registry, local, peer, dsn, *, clock=snapshot):
+    def __init__(self, root, registry, local, peer, dsn, *, clock=snapshot, relay=None):
         self.root = Path(root)
         self.registry, self.local, self.peer = registry, local, peer
-        local_record, peer_record = resolve_owner_records(registry, local, peer)
+        self.relay = relay
+        local_record, peer_record = resolve_owner_records(registry, local, peer, cross_server=relay is not None)
         self.kind, self.peer_kind = local_record['kind'], peer_record['kind']
         self.local_key, self.peer_key = _owner_key(local_record), _owner_key(peer_record)
         self.store = PostgresMessages(dsn) if dsn else None
@@ -78,7 +81,7 @@ class MessageHandoff:
         return self._database('message-owner-service.sqlite3')
 
     def _check_pins(self):
-        records = resolve_owner_records(self.registry, self.local, self.peer)
+        records = resolve_owner_records(self.registry, self.local, self.peer, cross_server=self.relay is not None)
         if tuple(map(_owner_key, records)) != (self.local_key, self.peer_key):
             raise ValueError('pinned execution owner scope changed')
 
@@ -104,9 +107,7 @@ class MessageHandoff:
             raise ValueError('handoff body requires 1–65536 UTF-8 bytes')
         message = Message(identifier, 'direct', self.peer_key, recipient, expires, body,
                           self.local_key, in_reply_to, due)
-        envelope = {key: getattr(message, key) for key in (
-            'identifier', 'source', 'scope', 'recipient', 'expires_at_micros',
-            'payload', 'sender', 'in_reply_to', 'not_before_micros')}
+        envelope = {key: getattr(message, key) for key in _ENVELOPE_FIELDS}
         request = dict(message=envelope)
         if origin is not None:
             if not isinstance(origin, str) or not re.fullmatch(r'[0-9a-f]{64}', origin):
@@ -115,6 +116,8 @@ class MessageHandoff:
         return self._request(identifier, request)
 
     def request_setting(self, identifier, recipient, *, revision, dnd):
+        if self.relay is not None:
+            raise ValueError('cross-server forwarding does not grant remote settings authority')
         identifier, recipient = str(UUID(identifier)), str(UUID(recipient))
         if type(revision) is not int or revision < 0 or type(dnd) is not bool:
             raise ValueError('remote settings require the original owner revision and a Boolean value')
@@ -122,9 +125,56 @@ class MessageHandoff:
 
     def _request(self, identifier, request):
         self._check_pins()
+        status = 'waiting_for_peer' if self.relay is not None else 'waiting_for_database'
         with self._journal() as db, db:
-            self._put(db, identifier, 'out', request, _state('waiting_for_database'))
+            self._put(db, identifier, 'out', request, _state(status))
         return self.status(identifier, 'out')
+
+    def accept_forward(self, frame):
+        """Admit transport retries to the recipient journal without running the harness."""
+        self._check_pins()
+        if self.relay is None or set(frame) != {'source', 'destination', 'request'}:
+            raise ValueError('cross-server message ingress is not configured')
+        if (frame['source'], frame['destination']) != (self.peer_key, self.local_key):
+            raise ValueError('forwarded message belongs to a different owner pair')
+        request = frame['request']
+        if (not isinstance(request, dict) or not {'message'} <= set(request) <= {'message', 'origin'}
+                or not isinstance(request['message'], dict) or set(request['message']) != set(_ENVELOPE_FIELDS)):
+            raise ValueError('only original message envelopes can be forwarded')
+        message = Message(**request['message'])
+        if (message.scope, message.sender, message.source) != (self.local_key, self.peer_key, 'direct'):
+            raise ValueError('forwarded message does not match pinned custody')
+        for value in (message.identifier, message.recipient, message.in_reply_to):
+            if value is not None and str(UUID(value)) != value:
+                raise ValueError('forwarded identifier must be a canonical UUID')
+        if not message.payload.strip() or len(message.payload.encode()) > 65536 or '\x00' in message.payload:
+            raise ValueError('invalid forwarded body')
+        if 'origin' in request and not re.fullmatch(r'[0-9a-f]{64}', request['origin']):
+            raise ValueError('invalid forwarded origin')
+        with self._journal() as db, db:
+            outcome = self._put(db, message.identifier, 'in', request, _state('owner_admitted'))
+        # A committed local fence can still be in flight. Only return verified
+        # evidence after the recipient worker has reconciled the attempt.
+        if outcome['status'] == 'submitting':
+            outcome = _state('owner_admitted')
+        return dict(id=message.identifier, recipient=message.recipient, source=self.local_key,
+                    destination=self.peer_key, expires_at_micros=message.expires_at_micros,
+                    not_before_micros=message.not_before_micros, in_reply_to=message.in_reply_to,
+                    outcome=outcome)
+
+    def _forward(self):
+        with self._journal() as db:
+            pending = db.execute("SELECT id,request,outcome FROM transfers WHERE direction='out' ORDER BY rowid").fetchall()
+        for identifier, request, saved in pending:
+            if json.loads(saved)['status'] in _FINAL:
+                continue
+            request = json.loads(request)
+            reply = self.relay(dict(source=self.local_key, destination=self.peer_key, request=request))
+            if reply is None:
+                return 'peer_unavailable'
+            with self._journal() as db, db:
+                self._save(db, identifier, 'out', reply)
+        return 'connected'
 
     def status(self, identifier, direction, *, recipient=None, origin=None):
         with self._journal() as db:
@@ -144,6 +194,10 @@ class MessageHandoff:
                 if key in outcome}
             outcome.update(not_before_micros=message['not_before_micros'],
                            expires_at_micros=message['expires_at_micros'])
+        if self.relay is not None and recipient is None and origin is None:
+            message = json.loads(row[0])['message']
+            outcome.update({field: message[field] for field in (
+                'recipient', 'expires_at_micros', 'not_before_micros', 'in_reply_to')})
         return dict(id=identifier, **outcome)
 
     def settings(self, recipient):
@@ -282,6 +336,9 @@ class MessageHandoff:
                 with db:
                     self._save(db, identifier, 'in', outcome)
 
+            if self.relay is not None:
+                return kicks
+
             for identifier, raw, saved in db.execute(
                     "SELECT id,request,outcome FROM transfers WHERE direction='out' ORDER BY id"):
                 request = json.loads(raw)
@@ -413,6 +470,8 @@ class MessageHandoff:
             except (Error, OSError):
                 self._schema_ready = False
                 return _state('waiting_for_database', shared_ingress=False)
+            if self.relay is not None:
+                return _state('ready', shared_ingress=True, peer_transport=self._forward())
             if activate is not None and self.kind == 'windows':
                 clock = self.clock() if kicks else {}
                 if any(self._window(message, clock) == 'eligible' for message in kicks):
