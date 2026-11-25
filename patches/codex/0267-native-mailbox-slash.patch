@@ -1,0 +1,337 @@
+diff --git a/codex-rs/tui/src/chatwidget.rs b/codex-rs/tui/src/chatwidget.rs
+index 56af8e383b..afcdeec32b 100644
+--- a/codex-rs/tui/src/chatwidget.rs
++++ b/codex-rs/tui/src/chatwidget.rs
+@@ -281,0 +282 @@ pub(crate) mod wake_governor;
++mod wake_mailbox;
+diff --git a/codex-rs/tui/src/chatwidget/slash_dispatch.rs b/codex-rs/tui/src/chatwidget/slash_dispatch.rs
+index 20d9becf66..d649706d84 100644
+--- a/codex-rs/tui/src/chatwidget/slash_dispatch.rs
++++ b/codex-rs/tui/src/chatwidget/slash_dispatch.rs
+@@ -208,0 +209,3 @@ impl ChatWidget {
++            SlashCommand::Message | SlashCommand::Reply | SlashCommand::Dnd => {
++                self.handle_wake_mailbox(cmd, "");
++            }
+@@ -810,0 +814,3 @@ impl ChatWidget {
++            SlashCommand::Message | SlashCommand::Reply | SlashCommand::Dnd => {
++                self.handle_wake_mailbox(cmd, trimmed);
++            }
+@@ -1384,0 +1391,3 @@ impl ChatWidget {
++            | SlashCommand::Message
++            | SlashCommand::Reply
++            | SlashCommand::Dnd
+diff --git a/codex-rs/tui/src/chatwidget/wake_governor.rs b/codex-rs/tui/src/chatwidget/wake_governor.rs
+index 884f680065..b2222018e0 100644
+--- a/codex-rs/tui/src/chatwidget/wake_governor.rs
++++ b/codex-rs/tui/src/chatwidget/wake_governor.rs
+@@ -565,0 +566,4 @@ impl ChatWidget {
++                if value.get("_native_mailbox").and_then(Value::as_bool) == Some(true) {
++                    self.show_wake_mailbox_result(&value);
++                    return;
++                }
+diff --git a/codex-rs/tui/src/chatwidget/wake_mailbox.rs b/codex-rs/tui/src/chatwidget/wake_mailbox.rs
+new file mode 100644
+index 0000000000..84ead9d71b
+--- /dev/null
++++ b/codex-rs/tui/src/chatwidget/wake_mailbox.rs
+@@ -0,0 +1,280 @@
++//! Native terminal commands delegate to the authenticated Wake mailbox.
++use super::*;
++use crate::slash_command::SlashCommand;
++use serde_json::Value;
++use std::process::Stdio;
++use tokio::io::AsyncWriteExt;
++
++const MESSAGE_USAGE: &str =
++    "Use /message [inbox|read MESSAGE_ID|replies MESSAGE_ID] or /message [--key KEY] TAB -- text";
++const REPLY_USAGE: &str = "Use /reply [--key KEY] MESSAGE_ID -- text";
++const DND_USAGE: &str = "Use /dnd hold [DURATION], /dnd bounce [DURATION], or /dnd clear";
++
++struct MailboxRequest {
++    args: Vec<String>,
++    body: Option<String>,
++    key: Option<String>,
++}
++
++fn mailbox_request(command: SlashCommand, input: &str) -> Result<MailboxRequest, &'static str> {
++    let input = input.trim();
++    let mut request = MailboxRequest {
++        args: vec!["messages".into()],
++        body: None,
++        key: None,
++    };
++    if command == SlashCommand::Dnd {
++        let parts: Vec<&str> = input.split_whitespace().collect();
++        match parts.as_slice() {
++            [mode @ ("clear" | "hold" | "bounce")] => {
++                request.args.extend(["dnd".into(), (*mode).into()])
++            }
++            [mode @ ("hold" | "bounce"), duration] => {
++                request
++                    .args
++                    .extend(["dnd".into(), (*mode).into(), format!("--for={duration}")]);
++            }
++            _ => return Err(DND_USAGE),
++        }
++        return Ok(request);
++    }
++    if command == SlashCommand::Message {
++        if input.is_empty() || input == "inbox" {
++            request.args.extend(["inbox".into(), "--limit=12".into()]);
++            return Ok(request);
++        }
++        if let Some((verb @ ("read" | "replies"), id)) = input.split_once(' ')
++            && is_message_id(id.trim())
++        {
++            request.args.extend([verb.into(), id.trim().into()]);
++            return Ok(request);
++        }
++    }
++    let usage = if command == SlashCommand::Message {
++        MESSAGE_USAGE
++    } else {
++        REPLY_USAGE
++    };
++    let (target, body) = input.split_once(" -- ").ok_or(usage)?;
++    let (key, target) = if let Some(with_key) = target.strip_prefix("--key ") {
++        let (key, target) = with_key
++            .trim()
++            .split_once(char::is_whitespace)
++            .ok_or(usage)?;
++        if key.is_empty()
++            || key.len() > 200
++            || !key
++                .bytes()
++                .all(|c| c.is_ascii_alphanumeric() || c == b'-' || c == b'_')
++        {
++            return Err(usage);
++        }
++        (key.into(), target.trim())
++    } else {
++        (uuid::Uuid::new_v4().to_string(), target.trim())
++    };
++    if target.is_empty()
++        || target.len() > 1024
++        || target.chars().any(char::is_control)
++        || body.trim().is_empty()
++        || body.len() > 32768
++    {
++        return Err(usage);
++    }
++    if command == SlashCommand::Message {
++        request
++            .args
++            .extend(["send".into(), format!("--to={target}")]);
++    } else if is_message_id(target) {
++        request.args.extend(["reply".into(), target.into()]);
++    } else {
++        return Err(usage);
++    }
++    request
++        .args
++        .extend(["--body-file=-".into(), format!("--idempotency-key={key}")]);
++    request.body = Some(body.into());
++    request.key = Some(key);
++    Ok(request)
++}
++
++fn is_message_id(value: &str) -> bool {
++    value
++        .strip_prefix("msg_")
++        .is_some_and(|key| key.len() == 32 && key.bytes().all(|byte| byte.is_ascii_hexdigit()))
++}
++
++impl ChatWidget {
++    pub(super) fn handle_wake_mailbox(&mut self, command: SlashCommand, input: &str) {
++        let Some(thread_id) = self.thread_id else {
++            self.add_error_message("Wake mailbox requires a current conversation.".into());
++            return;
++        };
++        let endpoint = if let Some(remote) = self.remote_connection.as_ref() {
++            let Some(socket) = remote.address.strip_prefix("unix://") else {
++                self.add_error_message("Wake mailbox requires the local Unix app-server.".into());
++                return;
++            };
++            // The launcher may expose the native daemon through its control alias.
++            // Wake authenticates the physical Unix peer for the current thread.
++            let Ok(socket) = std::fs::canonicalize(socket) else {
++                self.add_error_message("Wake mailbox app-server endpoint is unavailable.".into());
++                return;
++            };
++            format!("unix://{}", socket.display())
++        } else {
++            "unix://".into()
++        };
++        let mut request = match mailbox_request(command, input) {
++            Ok(request) => request,
++            Err(usage) => {
++                self.add_error_message(usage.into());
++                return;
++            }
++        };
++        request
++            .args
++            .extend([format!("--app-server={endpoint}"), "--json".into()]);
++        let cwd = self.config.cwd.to_path_buf();
++        let home = self.local_settings.codex_home.to_path_buf();
++        let tx = self.app_event_tx.clone();
++        tokio::spawn(async move {
++            let hint = request
++                .key
++                .as_ref()
++                .map(|key| format!(" · reconcile using key {key} before retrying"))
++                .unwrap_or_default();
++            let call = async {
++                let mut process = tokio::process::Command::new("codex-wake");
++                process
++                    .args(request.args)
++                    .current_dir(cwd)
++                    .env("CODEX_THREAD_ID", thread_id.to_string())
++                    .env("CODEX_HOME", home)
++                    .kill_on_drop(true)
++                    .stdout(Stdio::piped())
++                    .stderr(Stdio::null())
++                    .stdin(if request.body.is_some() {
++                        Stdio::piped()
++                    } else {
++                        Stdio::null()
++                    });
++                let mut child = process
++                    .spawn()
++                    .map_err(|_| "Wake mailbox CLI unavailable")?;
++                if let Some(body) = request.body {
++                    child
++                        .stdin
++                        .take()
++                        .ok_or("Wake mailbox input unavailable")?
++                        .write_all(body.as_bytes())
++                        .await
++                        .map_err(|_| "Wake mailbox input not confirmed")?;
++                }
++                let output = child
++                    .wait_with_output()
++                    .await
++                    .map_err(|_| "Wake mailbox result unavailable")?;
++                let mut value: Value = serde_json::from_slice(&output.stdout)
++                    .map_err(|_| "Wake mailbox returned no receipt")?;
++                let object = value
++                    .as_object_mut()
++                    .ok_or("Wake mailbox returned no receipt")?;
++                if object.get("success").and_then(Value::as_bool).is_none() {
++                    return Err("Wake mailbox returned no receipt");
++                }
++                object.insert("_native_mailbox".into(), true.into());
++                Ok(value)
++            };
++            let result = match tokio::time::timeout(Duration::from_secs(45), call).await {
++                Ok(value) => value.map_err(|error| format!("{error}{hint}")),
++                Err(_) => Err(format!("Wake mailbox outcome unknown{hint}")),
++            };
++            tx.send(AppEvent::WakeResult {
++                thread_id,
++                result,
++                operation: true,
++            });
++        });
++    }
++
++    pub(super) fn show_wake_mailbox_result(&mut self, value: &Value) {
++        // Preserve the typed receipt and ambiguity candidates in the local
++        // transcript. Do not treat returned content as terminal control input.
++        let mut receipt = value.clone();
++        if let Some(fields) = receipt.as_object_mut() {
++            fields.remove("_native_mailbox");
++        }
++        let text = serde_json::to_string_pretty(&receipt).unwrap_or_default();
++        let state = [
++            "/message/state/admission",
++            "/error/code",
++            "/target/status",
++            "/mode",
++            "/status",
++        ]
++        .into_iter()
++        .find_map(|pointer| receipt.pointer(pointer).and_then(Value::as_str));
++        let summary = state.map_or_else(
++            || "Wake mailbox receipt".to_string(),
++            |state| format!("Wake mailbox receipt · {state}"),
++        );
++        let mut lines = vec![Line::from(summary)];
++        lines.extend(text.lines().take(72).map(|line| {
++            Line::from(
++                line.chars()
++                    .filter(|c| !c.is_control())
++                    .take(512)
++                    .collect::<String>(),
++            )
++        }));
++        if text.lines().count() > 72 || text.lines().any(|line| line.chars().count() > 512) {
++            lines.push(Line::from(
++                "Receipt display truncated. Use the matching Wake CLI for complete details.",
++            ));
++        }
++        self.add_plain_history_lines(lines);
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn mailbox_command_preserves_tab_and_keeps_body_out_of_arguments() {
++        let request = mailbox_request(
++            SlashCommand::Message,
++            "--key retained amazon ads -- @report -also literal -- punctuation",
++        )
++        .unwrap();
++        assert_eq!(request.key.as_deref(), Some("retained"));
++        assert_eq!(
++            request.body.as_deref(),
++            Some("@report -also literal -- punctuation")
++        );
++        assert!(request.args.contains(&"--to=amazon ads".to_owned()));
++        assert!(request.args.contains(&"--body-file=-".to_owned()));
++        assert!(
++            !request
++                .args
++                .iter()
++                .any(|argument| argument.contains("@report"))
++        );
++    }
++
++    #[test]
++    fn reply_requires_exact_message_and_dnd_accepts_only_defined_verbs() {
++        assert!(mailbox_request(SlashCommand::Reply, "amazon ads -- hi").is_err());
++        assert!(
++            mailbox_request(
++                SlashCommand::Reply,
++                "msg_0123456789abcdef0123456789abcdef -- reply"
++            )
++            .is_ok()
++        );
++        let request = mailbox_request(SlashCommand::Dnd, "bounce 15m").unwrap();
++        assert_eq!(request.args, ["messages", "dnd", "bounce", "--for=15m"]);
++        assert!(mailbox_request(SlashCommand::Dnd, "clear 15m").is_err());
++    }
++}
+diff --git a/codex-rs/tui/src/slash_command.rs b/codex-rs/tui/src/slash_command.rs
+index 93f129646c..e99854313b 100644
+--- a/codex-rs/tui/src/slash_command.rs
++++ b/codex-rs/tui/src/slash_command.rs
+@@ -47,0 +48,3 @@ pub enum SlashCommand {
++    Message,
++    Reply,
++    Dnd,
+@@ -147,0 +151,3 @@ impl SlashCommand {
++            SlashCommand::Message => "send or read a durable Wake mailbox message",
++            SlashCommand::Reply => "reply to a tracked Wake mailbox message",
++            SlashCommand::Dnd => "set this conversation's Wake do not disturb policy",
+@@ -180,0 +187,3 @@ impl SlashCommand {
++                | SlashCommand::Message
++                | SlashCommand::Reply
++                | SlashCommand::Dnd
+@@ -285,0 +295,3 @@ impl SlashCommand {
++            | SlashCommand::Message
++            | SlashCommand::Reply
++            | SlashCommand::Dnd

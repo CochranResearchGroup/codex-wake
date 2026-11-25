@@ -151,11 +151,13 @@ rules, native/Wake distinction, third-party limits and no-reply-loop rules.
 Use Wake for requests such as “what is happening in my tabs?”, “which tab is
 amazon ads?”, and “tell the agent in the reviews tab to report back.” Keep the
 operator's descriptor (`amazon ads`, `tab 18`, `18:policies`, `poicys`) when
-calling Wake. For a tab overview, read the Wake tab inventory. For a named
-target's status, call `wake_sessions_target`. For a tracked prompt or message,
-call `wake_messages_send` with the descriptor and a stable idempotency key.
+calling Wake. For a tab overview, call `wake_tabs_list` or run
+`codex-wake tabs list --json`. For a named target's status, call
+`wake_sessions_target`. For a tracked prompt or message, call
+`wake_messages_send` with the descriptor and a stable idempotency key.
 Pass your own current conversation UUID as `caller_thread_id`. The service owns
-lookup and spelling correction. Ask which of the returned candidates the operator means when Wake reports ambiguity.
+lookup and spelling correction. When Wake reports ambiguity, ask the operator
+which candidate they mean.
 
 If the operator asks what happened in a destroyed tab, use the authorized
 history search with `former_tab`, then read the exact returned history locator

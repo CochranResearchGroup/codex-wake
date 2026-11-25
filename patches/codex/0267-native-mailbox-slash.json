@@ -1,0 +1,16 @@
+{
+  "issue": 778,
+  "source": "ca0782cfc0d8a0f2008b2f6d8eb727557e5ed664",
+  "tree": "c317f402d3f6352746ee35fd6f05dd7500afb2ef",
+  "base": "691605707cb31e41d1082230d70e3449ee9cf526",
+  "base_custody": "patches/codex/0254-native-0171.json",
+  "patch": "patches/codex/0267-native-mailbox-slash.patch",
+  "patch_sha256": "fa4769d00c32ae92cbd92e77eb18edafeae1e543180379745ab1be208e9b577a",
+  "bundle": "runtime/native-mailbox-slash-778/native-message-slash-source.bundle",
+  "bundle_sha256": "f63568f937d3be84f437db1c21bedc9cb3685e5316e17e011da6e8667d7cf815",
+  "bundle_prerequisites": [
+    "691605707cb31e41d1082230d70e3449ee9cf526"
+  ],
+  "patch_reconstructed_tree": "c317f402d3f6352746ee35fd6f05dd7500afb2ef",
+  "qualification": "docs/dev/plans/0267-harness-commands-qualification.md"
+}
