@@ -2,11 +2,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import hashlib
 import json
-from pathlib import Path
 
 from .records import WakeError
+from .runtime_identity_key import codex_identity
 
 
 class BusError(WakeError):
@@ -23,15 +22,10 @@ class RuntimeIdentity:
 
     @classmethod
     def from_metadata(cls, thread: dict, server: dict) -> RuntimeIdentity:
-        home, provider = server.get('codexHome'), thread.get('modelProvider')
-        identifier, cwd = thread.get('id'), thread.get('cwd')
-        if not all(isinstance(value, str) and value for value in [home, provider, identifier, cwd]):
-            raise BusError('identity_unavailable', 'runtime identity metadata is incomplete')
-        if not Path(home).is_absolute() or not Path(cwd).is_absolute():
-            raise BusError('identity_unavailable', 'runtime identity paths must be absolute')
-        key = json.dumps([str(Path(home).resolve()), provider], separators=(',', ':'))
-        namespace = 'codex:' + hashlib.sha256(key.encode()).hexdigest()
-        return cls(namespace, identifier, str(Path(cwd).resolve()))
+        try:
+            return cls(*codex_identity(thread, server))
+        except ValueError as exc:
+            raise BusError('identity_unavailable', str(exc)) from None
 
 
 @dataclass(frozen=True)

@@ -21,8 +21,11 @@ def check_private_file(path):
     from .controller_client import ClientError
     executable=Path(os.environ.get('SystemRoot',r'C:\Windows'))/'System32/WindowsPowerShell/v1.0/powershell.exe'
     try:
+        # Windows OpenSSH can inherit a module path for a different PowerShell
+        # installation. This check belongs to the fixed system PowerShell.
+        env = dict(os.environ, PSModulePath=str(executable.parent / 'Modules'))
         process=subprocess.run([str(executable),'-NoLogo','-NoProfile','-NonInteractive','-Command',ACL_SCRIPT],
-            input=json.dumps(str(path)),text=True,capture_output=True,timeout=10,check=True)
+            input=json.dumps(str(path)),text=True,capture_output=True,timeout=10,check=True,env=env)
         value=json.loads(process.stdout)
         current=value['current_sid']
         if not isinstance(current,str) or not current.startswith('S-1-') or value['owner_sid']!=current or value['dacl_present'] is not True:
