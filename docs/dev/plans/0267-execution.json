@@ -24,7 +24,8 @@
         "installed stock Codex timed wake completed one exact turn",
         "final PostgreSQL eligibility projection regression passed"
       ],
-      "local_evidence": "/tmp/wake766.b5mChY/evidence"
+      "local_evidence": "/tmp/wake766.b5mChY/evidence",
+      "result_sha": "46b0476f8a28d3b35ab075400c0005b81dd6d468"
     },
     {
       "issue": 768,
@@ -32,7 +33,15 @@
       "blockers": [
         767
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/busy_dnd",
+      "branch": "feat/issue-768-busy-dnd",
+      "base": "46b0476f8a28d3b35ab075400c0005b81dd6d468",
+      "owned_paths": [
+        "delivery policy",
+        "DND settings",
+        "qualified interrupt"
+      ]
     },
     {
       "issue": 769,
@@ -48,7 +57,15 @@
       "blockers": [
         767
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/cutover",
+      "branch": "feat/issue-770-message-cutover",
+      "base": "46b0476f8a28d3b35ab075400c0005b81dd6d468",
+      "owned_paths": [
+        "migration CLI",
+        "legacy scope import",
+        "activation guard"
+      ]
     },
     {
       "issue": 771,
@@ -146,5 +163,6 @@
       ],
       "status": "pending"
     }
-  ]
+  ],
+  "integration_tip_at_validation": "46b0476f8a28d3b35ab075400c0005b81dd6d468"
 }
