@@ -63,12 +63,28 @@
       "blockers": [
         767
       ],
-      "status": "running",
+      "status": "validated",
       "owner": "/root/former_tab",
       "branch": "feat/issue-769-reply-cancel",
-      "base": "87a7df91",
+      "base": "6f248955",
       "owned_paths": [
         "reply and cancellation lifecycle"
+      ],
+      "tracker": "closed",
+      "worker_results": [
+        "da5018b7",
+        "08bb54f9",
+        "31141f43"
+      ],
+      "integration_results": [
+        "45a0735a",
+        "235f1e6e",
+        "56e3aa37"
+      ],
+      "evidence": [
+        "66 integration tests with disposable PostgreSQL",
+        "Public CLI and native MCP runner against installed bounded Codex app-server",
+        "Correlated reply, exact sender wake, linked direct and timed redirect, exact cancellation and started-turn evidence"
       ]
     },
     {
@@ -171,9 +187,13 @@
       ],
       "evidence": [
         "90 focused and six in-container tests",
-        "Exact original tab and one retained wake after PostgreSQL, Wake and tmux restart on disposable Linux"
+        "Exact original tab and one retained wake after PostgreSQL, Wake and tmux restart on disposable Linux",
+        "32 integration tests with disposable PostgreSQL"
       ],
-      "remaining": "Native Bastion service startup, PostgreSQL readiness, boot without desktop login, journal convergence and one retained delivery. Separate live acceptance authorization pending."
+      "remaining": "Native Bastion service startup, PostgreSQL readiness, boot without desktop login, journal convergence and one retained delivery. Separate live acceptance authorization pending.",
+      "integration_results": [
+        "1d7372d6"
+      ]
     },
     {
       "issue": 774,
@@ -216,7 +236,9 @@
       "blockers": [
         774
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/cutover",
+      "base": "ea04c771"
     },
     {
       "issue": 776,
@@ -225,7 +247,9 @@
         772,
         774
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/busy_dnd",
+      "base": "ea04c771"
     },
     {
       "issue": 777,
@@ -269,5 +293,5 @@
       "status": "pending"
     }
   ],
-  "integration_tip_at_validation": "46d80dc2"
+  "integration_tip_at_validation": "56e3aa37"
 }
