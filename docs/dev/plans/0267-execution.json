@@ -161,7 +161,19 @@
         770,
         772
       ],
-      "status": "pending"
+      "status": "disposable_validated_live_gate_open",
+      "tracker": "open",
+      "owner": "/root/busy_dnd",
+      "branch": "feat/issue-773-linux-recovery",
+      "base": "6f248955",
+      "worker_results": [
+        "2da43e7e"
+      ],
+      "evidence": [
+        "90 focused and six in-container tests",
+        "Exact original tab and one retained wake after PostgreSQL, Wake and tmux restart on disposable Linux"
+      ],
+      "remaining": "Native Bastion service startup, PostgreSQL readiness, boot without desktop login, journal convergence and one retained delivery. Separate live acceptance authorization pending."
     },
     {
       "issue": 774,
@@ -169,13 +181,33 @@
       "blockers": [
         770
       ],
-      "status": "running",
+      "status": "validated",
       "owner": "/root/cutover",
       "branch": "feat/issue-774-windows-wsl-messages",
       "base": "b42fe03d",
       "owned_paths": [
         "Windows/WSL ownership and handoff",
         "Windows startup and isolated qualification"
+      ],
+      "tracker": "closed",
+      "worker_results": [
+        "175bfde3",
+        "91da2097",
+        "bc642345"
+      ],
+      "integration_results": [
+        "99b9ccab",
+        "5f7a31f6",
+        "46d80dc2"
+      ],
+      "evidence": [
+        "29 passing integration tests with fresh isolated PostgreSQL schema",
+        "Native Windows PostgreSQL and normal owner plus WSL CLI in both directions",
+        "PowerShell readiness, optional WSL startup, physical restore, and WSL-only continuity during outage"
+      ],
+      "broader_spec_gates": [
+        "Native cold boot and SCM deployment",
+        "Real Codex harness transport under Windows"
       ]
     },
     {
@@ -237,5 +269,5 @@
       "status": "pending"
     }
   ],
-  "integration_tip_at_validation": "46b0476f8a28d3b35ab075400c0005b81dd6d468"
+  "integration_tip_at_validation": "46d80dc2"
 }
