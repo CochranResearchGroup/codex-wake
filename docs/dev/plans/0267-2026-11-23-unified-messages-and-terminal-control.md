@@ -1,8 +1,17 @@
-# Unified messages and terminal control
+# Plan 0267 | Unified messages and terminal control
 
-Status: agreed specification. Implementation pending. Source audit baseline: Codex Wake main at
-`70ff3585`. This specification grants no runtime or deployment authority.
-Tracker: [GitHub specification #766](https://github.com/CochranResearchGroup/codex-wake/issues/766).
+State: OPEN
+Owner: primary integration agent
+Spec: [GitHub #766](https://github.com/CochranResearchGroup/codex-wake/issues/766)
+Work items: #767 through #780
+Source audit baseline: `70ff3585`
+
+## Current State
+
+The agreed specification is in implementation on `feat/plan0267-unified-messages`.
+The [execution ledger](0267-execution.json) records ticket ownership, integration
+commits, validation receipts, and remaining gates. Live acceptance and deployment
+require their own authorization.
 
 ## Goal
 
