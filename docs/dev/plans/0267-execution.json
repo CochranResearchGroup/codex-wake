@@ -25,7 +25,8 @@
         "final PostgreSQL eligibility projection regression passed"
       ],
       "local_evidence": "/tmp/wake766.b5mChY/evidence",
-      "result_sha": "46b0476f8a28d3b35ab075400c0005b81dd6d468"
+      "result_sha": "46b0476f8a28d3b35ab075400c0005b81dd6d468",
+      "tracker": "closed"
     },
     {
       "issue": 768,
@@ -71,14 +72,28 @@
       "issue": 771,
       "title": "Inspect a destroyed tab by its former name",
       "blockers": [],
-      "status": "running",
+      "status": "validated",
       "owner": "/root/former_tab",
       "branch": "feat/issue-771-former-tabs",
       "worktree": "/home/ecochran76/workspace.local/.worktrees/codex-wake/issue-771-former-tabs",
       "owned_paths": [
         "former tab inventory",
         "history reads"
-      ]
+      ],
+      "worker_results": [
+        "0943a45c722c1ff4f7a0faef15f35a70bf584ea6",
+        "d6c9baddd9e684cc9d1cda9d8e21bdf4a342dbb6"
+      ],
+      "integration_results": [
+        "d6cdad32",
+        "3ebde7cb"
+      ],
+      "evidence": [
+        "49 integrated history/terminal/command tests",
+        "worker 50 focused tests",
+        "disposable stock Codex tmux tab loss retained exact authorized history without reopening"
+      ],
+      "local_evidence": "/tmp/wake766.b5mChY/evidence/771-native-tab-loss.json"
     },
     {
       "issue": 772,
@@ -86,7 +101,13 @@
       "blockers": [
         767
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/former_tab",
+      "branch": "feat/issue-772-postgres-tmux-recovery",
+      "base": "8243e614",
+      "owned_paths": [
+        "tmux/Byobu recovery qualification"
+      ]
     },
     {
       "issue": 773,

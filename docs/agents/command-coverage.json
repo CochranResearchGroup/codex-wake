@@ -617,6 +617,7 @@
     "messages.ack",
     "messages.arm-reply",
     "messages.cancel",
+    "messages.database-init",
     "messages.inbox",
     "messages.outbox",
     "messages.read",
