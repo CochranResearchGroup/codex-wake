@@ -12,7 +12,7 @@ from uuid import UUID
 from .agent_resume import SavedRuntime, fingerprint, resume_profile
 from .runtime_delivery import RuntimeTargetError
 from .records import WakeError
-from .wake_restore_placement import capture_placement, launch_placed, valid_placement
+from .wake_restore_placement import capture_terminal_binding, launch_placed, valid_placement
 
 
 PINNED_IDENTITY_FIELDS = {
@@ -25,6 +25,29 @@ class LiveWakeRestorer:
     def __init__(self, root, *, now=None):
         self.root = Path(root)
         self.now = now
+
+    def observation_target(self, target):
+        """Use the pinned profile socket when admission had no terminal context."""
+        if target.get('tmux_socket') or not self.binding_path.is_file():
+            return target
+        from .app_server import resolve_codex_cmd
+        try:
+            binding, config = self._configuration(target['thread_id'])
+            profile = resume_profile(config, binding['profile'])
+            command = resolve_codex_cmd(profile['codex_path'], required=True, preserve_launcher=True)
+        except (RuntimeTargetError, WakeError, KeyError):
+            # Existing exact live ownership can still be observed without a recovery binding.
+            return target
+        socket = profile.get('tmux_socket')
+        if (not binding.get('identity') or not isinstance(socket, str) or not Path(socket).is_absolute()
+                or target['endpoint'] not in ('unix://', profile['app_server'])
+                or target.get('codex_cmd') != command):
+            return target
+        result = dict(target, endpoint=profile['app_server'], tmux_socket=socket)
+        origin = binding.get('terminal_origin')
+        if isinstance(origin, dict) and origin.get('socket') == socket:
+            result.setdefault('session_origin', origin)
+        return result
 
     def prepare(self, target):
         from .sessions import observe, revalidate_attachment
@@ -71,7 +94,8 @@ class LiveWakeRestorer:
             binding = self._bindings()['bindings'][thread_id]
             required = {'profiles', 'managed_agent_id', 'profile'}
             if type(binding) is not dict or set(binding) not in (
-                    required, required | {'identity'}, required | {'identity', 'placement'}):
+                    required, required | {'identity'}, required | {'identity', 'placement'},
+                    required | {'identity', 'placement', 'terminal_origin'}):
                 raise ValueError
             profiles = Path(binding['profiles'])
             if not profiles.is_absolute():
@@ -165,12 +189,14 @@ class LiveWakeRestorer:
             observed['profile_sha256'] = fingerprint(selected)
             entry = dict(profiles=str(profiles), managed_agent_id=managed_agent_id,
                          profile=profile, identity=observed)
-            placement = capture_placement(target['thread_id'], selected)
+            terminal = capture_terminal_binding(target['thread_id'], selected)
             previous = saved['bindings'].get(target['thread_id'], {})
-            if placement:
-                entry['placement'] = placement
+            if terminal:
+                entry.update(terminal)
             elif previous.get('identity') == observed and valid_placement(previous.get('placement')):
                 entry['placement'] = previous['placement']
+                if previous.get('terminal_origin'):
+                    entry['terminal_origin'] = previous['terminal_origin']
             saved['bindings'][target['thread_id']] = entry
             authorize()
             _write(self.binding_path, saved)
@@ -244,6 +270,8 @@ class LiveWakeRestorer:
             raise RuntimeTargetError('unavailable', 'live_restore_recipient_changed')
         # AgentResume re-reads profiles and checks common permissions before every
         # terminal command; it keeps uncertain launches fenced across restarts.
+        if profile.get('tmux_socket'):
+            latest['tmux_socket'] = profile['tmux_socket']
         return dict(latest, startup_policy='active_tab', resume_policy='hold')
 
 

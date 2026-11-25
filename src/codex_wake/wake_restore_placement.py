@@ -13,7 +13,7 @@ def valid_placement(saved):
                     and all(ord(char) >= 32 for char in saved[key]) for key in ('session', 'title')))
 
 
-def capture_placement(thread_id, profile):
+def capture_terminal_binding(thread_id, profile):
     from .sessions import observe, revalidate_attachment
 
     socket = profile.get('tmux_socket')
@@ -34,7 +34,16 @@ def capture_placement(thread_id, profile):
         return None
     saved = dict(session=attachment['session_name'], title=attachment['window_name'],
                  index=int(attachment['window_index']))
-    return saved if valid_placement(saved) else None
+    if not valid_placement(saved):
+        return None
+    result = {'placement': saved}
+    from .process import process_identity
+    pid = attachment['client_pid']
+    identity = process_identity(pid)
+    if (identity and identity.get('boot_id')
+            and identity['start_time_ticks'] == attachment['client_start_time_ticks']):
+        result['terminal_origin'] = dict(pid=pid, identity=identity, pane_id=attachment['pane_id'], socket=socket)
+    return result
 
 
 _FIELDS = ('session_id', 'window_id', 'window_index', 'window_name', 'pane_id',

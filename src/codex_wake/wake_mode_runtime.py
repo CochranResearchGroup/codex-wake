@@ -90,6 +90,10 @@ class ModeRuntimeAdapter:
         if mode is None:
             return self.adapter.observe(recipient)
         try:
+            if mode == 'reopen_live':
+                from .wake_live_restore import LiveWakeRestorer
+                restorer = LiveWakeRestorer(self.root)
+                target = restorer.observation_target(target)
             route = self._presence(target)
             requested = target.get('wake_route')
             # Common permission dispatch tries each declared route independently.
@@ -98,11 +102,10 @@ class ModeRuntimeAdapter:
             if route == 'background' and mode == 'session_only':
                 raise RuntimeTargetError('unavailable', 'active_attachment_unavailable')
             if mode == 'reopen_live' and route == 'background':
-                from .wake_live_restore import LiveWakeRestorer
                 target.update(_wake_permission_context=self.permission_context,
                               _wake_expires_at=self.expires_at,
                               _wake_occurrence_id=self.occurrence_id)
-                restored = LiveWakeRestorer(self.root).prepare(target)
+                restored = restorer.prepare(target)
                 if restored.get('thread_id') != recipient.session_id:
                     raise RuntimeTargetError('unavailable', 'restoration_recipient_changed')
                 target = dict(restored)

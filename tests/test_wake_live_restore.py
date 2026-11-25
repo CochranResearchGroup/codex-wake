@@ -45,8 +45,9 @@ class LiveWakeRestoreTests(unittest.TestCase):
             root = Path(directory)
             home = root / 'account-home'
             home.mkdir()
+            socket = str(root / 'terminal.sock')
             profile = dict(cwd=str(root), app_server='unix:///fixture',
-                           codex_path=sys.executable, codex_home=str(home),
+                           tmux_socket=socket, codex_path=sys.executable, codex_home=str(home),
                            tmux_session='work', timeout=1)
             profiles = root / 'profiles.json'
             config = dict(version=1, profiles={'saved': profile})
@@ -87,8 +88,14 @@ class LiveWakeRestoreTests(unittest.TestCase):
             self.assertFalse(saved['armed'])
             self.assertFalse(saved['delivery']['uncertain'])
 
+            attachment = dict(socket=socket, pane_id='%7', pane_current_path=str(root),
+                session_name='work', window_name='qualified', window_index=1,
+                client_pid=os.getpid(), client_start_time_ticks=process['start_time_ticks'])
+            row = dict(thread_id=THREAD, binding_status='metadata_matched', attachments=[attachment])
             output = io.StringIO()
-            with (patch('codex_wake.permission_commands.verified_cli_principal', return_value=operator),
+            with (patch('codex_wake.sessions.observe', return_value=dict(complete=True, sessions=[row])),
+                  patch('codex_wake.sessions.revalidate_attachment', return_value=True),
+                  patch('codex_wake.permission_commands.verified_cli_principal', return_value=operator),
                   patch('codex_wake.shared_app_server.SharedAppServerReader') as reader,
                   contextlib.redirect_stdout(output)):
                 endpoint = reader.return_value.__enter__.return_value
@@ -102,6 +109,24 @@ class LiveWakeRestoreTests(unittest.TestCase):
             self.assertEqual(bound['profile'], 'saved')
             self.assertEqual(bound['account']['name'], 'saved-account')
             self.assertEqual(bound['account']['provider_identity'], 'cached_match')
+            # Host-side schedule admission had no ambient tmux or live attachment.
+            from unittest.mock import Mock
+            from codex_wake.runtime_delivery import RuntimeObservation, RuntimeRecipient
+            from codex_wake.wake_mode_runtime import ModeRuntimeAdapter
+            self.assertNotIn('tmux_socket', saved['target'])
+            runtime = Mock()
+            runtime.resolve.side_effect = lambda target: RuntimeRecipient('codex', THREAD, target)
+            runtime.observe.return_value = RuntimeObservation('ready', 'idle', {})
+            adapter = ModeRuntimeAdapter(root, runtime)
+            with patch('codex_wake.sessions.observe', return_value=dict(complete=True, sessions=[row])) as observe:
+                recipient = adapter.resolve(saved['target'])
+                self.assertEqual(adapter.observe(recipient).state, 'ready')
+                adapter.submit(recipient, 'wake')
+            self.assertEqual([call.kwargs['socket_path'] for call in observe.call_args_list],
+                             [socket, socket])
+            sent = runtime.submit.call_args.args[0].binding
+            self.assertEqual(sent['session_origin']['identity'], process_identity(os.getpid()))
+            self.assertEqual(sent['session_origin']['socket'], socket)
             lookup = dict(schedule_id=saved['id'])
             self.assertEqual(owner.execute('wakes.schedules.show', lookup)['restoration'], bound)
             meta = dict(threadId=THREAD, sessionId=THREAD, callId='restore-inspection',
