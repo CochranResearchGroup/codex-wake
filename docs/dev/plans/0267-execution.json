@@ -190,7 +190,7 @@
         "Exact original tab and one retained wake after PostgreSQL, Wake and tmux restart on disposable Linux",
         "32 integration tests with disposable PostgreSQL"
       ],
-      "remaining": "Native Bastion service startup, PostgreSQL readiness, boot without desktop login, journal convergence and one retained delivery. Separate live acceptance authorization pending.",
+      "remaining": "Live boot test authorized. Bastion preflight found an active foreground service. Wait for a maintenance window, then verify native startup, PostgreSQL readiness, journal convergence and one retained delivery.",
       "integration_results": [
         "1d7372d6"
       ]
@@ -367,7 +367,7 @@
         "Exact grant separates control, metadata history and content scope",
         "42 matched and 29 repeated integration tests passed using disposable PostgreSQL"
       ],
-      "remaining": "Connected ChatGPT journey through a reachable isolated candidate endpoint, identified app and workspace, and fixture-only consent grant"
+      "remaining": "Temporary fixture endpoint authorized. Verify the exact ChatGPT app and workspace before publication and run the connected OAuth MCP journey using fixture-only consent."
     },
     {
       "issue": 780,
@@ -384,7 +384,7 @@
   "integration_tip_at_validation": "6ef377ca",
   "checkpoint": {
     "recorded_at": "2026-11-25T00:56:48-06:00",
-    "state": "pending_live_acceptance",
+    "state": "pending_bastion_window_and_chatgpt_workspace",
     "closed_issues": [
       767,
       768,
@@ -404,8 +404,8 @@
       780
     ],
     "next": [
-      "Authorize and qualify a native Bastion startup deployment and controlled boot for #773.",
-      "Identify the authorized ChatGPT app/workspace and approve temporary isolated candidate ingress for #779.",
+      "Use the authorized maintenance window and recheck Bastion activity before deploying and rebooting for #773.",
+      "Identify the authorized ChatGPT app and workspace before publishing temporary isolated candidate ingress for #779.",
       "Start #780 when #773 is closed.",
       "Run one code-review and one TDD remediation pass after ticket closure."
     ],
