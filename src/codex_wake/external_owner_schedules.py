@@ -101,7 +101,7 @@ class OwnerSchedules:
             raise InventoryError('invalid_argument', 'exact message identity and original delivery window required') from None
 
         try:
-            owner, _, _ = _worker(Path(self.config['owner_config']))
+            owner, _, _, _ = _worker(Path(self.config['owner_config']))
         except (AttributeError, KeyError, OSError, sqlite3.Error, TypeError, ValueError):
             raise InventoryError('owner_unavailable', 'configured MessageOwner is unavailable') from None
         observed = dict(host=owner.local['host'], namespace=owner.peer['environment'],
