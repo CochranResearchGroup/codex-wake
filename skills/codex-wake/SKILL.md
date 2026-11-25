@@ -1,6 +1,6 @@
 ---
 name: codex-wake
-description: Use Codex Wake for resource allowances and optional existing-native-goal supervision. Honor numeric ceilings and the operator-selected manual or supervised mode; reading a handoff continues already-authorized work without reset, repeated approval or optional enrollment. When external supervision is selected, register token/time limits through MCP; an independent watcher requests checkpoint then pauses the goal and interrupts its exact active turn. Dedicated host-approved executors provide separate memory/CPU controls. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, self-refresh of MCP resources through an approved selected-thread reload, or skill/MCP resources through approved client replacement or shared reload after idle checks, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
+description: Use Codex Wake for resource allowances and optional existing-native-goal supervision. Honor numeric ceilings and the operator-selected manual or supervised mode; reading a handoff continues already-authorized work without reset, repeated approval or optional enrollment. When external supervision is selected, register token/time limits through MCP; an independent watcher requests checkpoint then pauses the goal and interrupts its exact active turn. Dedicated host-approved executors provide separate memory/CPU controls. Also use it for durable agent-to-agent requests, correlated replies, exclusive work claims, suspended reply wakes, ordinary operator questions about their tabs or agents in named tabs, session/tab lookup, wake listing/cancellation and persistent emergency pause, host-approved worker spawn, self-refresh of MCP resources through an approved selected-thread reload, or skill/MCP resources through approved client replacement or shared reload after idle checks, fresh-context handoff, and scheduled follow-ups. Prefer its MCP tools for tracked exchanges when configured; use the CLI otherwise.
 ---
 
 # Codex Wake
@@ -8,6 +8,12 @@ description: Use Codex Wake for resource allowances and optional existing-native
 Use durable triggers when work must resume after a defined event. Load the
 matching reference before acting; inspect the returned receipt before claiming
 registration, delivery, enforcement or refresh.
+
+In stock Codex or Wake Codex, an operator asking about “my tabs,” naming a tab
+such as “amazon ads,” or asking you to tell an agent in a named tab to do
+something is referring to the host's Codex Wake service. Use the human tab
+target workflow below with the operator's words and your existing authority.
+Ask which target they mean if Wake reports multiple candidates.
 
 | Request | Required reference |
 | --- | --- |

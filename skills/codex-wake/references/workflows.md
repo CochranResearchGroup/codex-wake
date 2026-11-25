@@ -148,10 +148,20 @@ rules, native/Wake distinction, third-party limits and no-reply-loop rules.
 
 ## Human tab targets through MCP
 
-When a TUI is mentioned by tab name/index, use `wake_messages_send` directly with
-that descriptor (`tab 18`, `18:policies`, `poicys`). The service owns lookup and
-spelling correction. Ambiguity and incomplete inventory return structured holds.
-Use `wake_sessions_target` to inspect or prepare a target without sending.
+Use Wake for requests such as “what is happening in my tabs?”, “which tab is
+amazon ads?”, and “tell the agent in the reviews tab to report back.” Keep the
+operator's descriptor (`amazon ads`, `tab 18`, `18:policies`, `poicys`) when
+calling Wake. For a tab overview, read the Wake tab inventory. For a named
+target's status, call `wake_sessions_target`. For a tracked prompt or message,
+call `wake_messages_send` with the descriptor and a stable idempotency key.
+Pass your own current conversation UUID as `caller_thread_id`. The service owns
+lookup and spelling correction. Ask which of the returned candidates the operator means when Wake reports ambiguity.
+
+If the operator asks what happened in a destroyed tab, use the authorized
+history search with `former_tab`, then read the exact returned history locator
+when saved content is requested. This read leaves the tab closed. Report the
+last observed CWD and timestamp as historical evidence. When the user asks to
+recover a tab, use the authorized preparation or scheduled recovery path.
 Default `on_missing`/`on_inactive` is `error`; explicitly choose `tab_only`, `fresh`
 or `resume` with approved host `profile`, stable intent/key and fixed expiry.
 Do not infer CWD from a name: inspect observed CWD or supply `expected_cwd`.
@@ -161,6 +171,28 @@ tab. Retain the returned exact pane/thread; split-window ambiguity is intentiona
 `starting` requires the same intent again; `effect_uncertain` requires reconciliation,
 never a new key. Preparation does not enroll an actor or prove message delivery.
 No caller-side CLI inventory, typo repair or arbitrary launch commands are needed.
+
+### Wake Codex mailbox commands
+
+In Wake Codex builds with native mailbox commands, use these from the current
+conversation's composer. They invoke Wake without starting a model turn.
+The current conversation needs its existing Wake mailbox capability.
+
+```text
+/message project reviews -- Please send a progress update.
+/message inbox
+/message read MESSAGE_ID
+/message replies MESSAGE_ID
+/reply MESSAGE_ID -- Here is the update.
+/dnd hold 30m
+/dnd bounce 15m
+/dnd clear
+```
+
+An ambiguous descriptor returns candidate details. Use the operator's selected
+target on a new send. If a transport result is uncertain, reconcile the returned
+intent key first. `/message --key KEY TAB -- text` and
+`/reply --key KEY MESSAGE_ID -- text` can preserve that exact key.
 
 ## Native workflow first
 
