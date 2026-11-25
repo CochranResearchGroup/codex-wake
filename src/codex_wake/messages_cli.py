@@ -20,7 +20,8 @@ from .shared_app_server import SharedSourceError
 def add_messages_parser(subparsers):
     parser = subparsers.add_parser('messages', help='send and consume explicitly authorized local mailbox messages')
     commands = parser.add_subparsers(dest='messages_command', required=True)
-    commands.add_parser('database-init', help='Initialize the configured PostgreSQL message schema')
+    init = commands.add_parser('database-init', help='Initialize the configured PostgreSQL message schema')
+    init.add_argument('--root', type=Path, help='Select an activated Wake or mailbox scope')
     for verb in ['send','inbox','outbox','show','read','ack','reply','cancel','wait','watch','reconcile','arm-reply','dnd','intervene']:
         command = commands.add_parser(verb)
         command.add_argument('--bus-root', type=Path, default=os.environ.get('CODEX_WAKE_A2A_BUS_ROOT'))
@@ -63,7 +64,7 @@ def add_messages_parser(subparsers):
             command.add_argument('--delivery', choices=['inbox','notify'], default='notify')
             command.add_argument('--subject')
             command.add_argument('--task-id')
-            command.add_argument('--busy-policy', choices=['wait', 'idle-only'], default='wait')
+            command.add_argument('--busy-policy', choices=['wait', 'queue', 'idle-only'], default='wait')
         if verb == 'send':
             command.add_argument('--host-operator-capability', type=Path,
                 help='host delegation for verified recipients in existing enrolled roots')
@@ -153,9 +154,9 @@ def messages_command(args):
         verb = args.messages_command
         if verb == 'database-init':
             from .message_delivery import configured_store
-            store = configured_store()
+            store = configured_store(args.root)
             if store is None:
-                raise BusError('message_store_unconfigured', 'Configure CODEX_WAKE_MESSAGE_DB_DSN first')
+                raise BusError('message_store_unconfigured', 'Select an activated scope or configure the test message database')
             try:
                 store.initialize()
             except Exception:
@@ -212,12 +213,12 @@ def messages_command(args):
             value = mailbox.send(actor, recipient, body=body_input(args.body_file), idempotency_key=intent_key,
                                  kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
                                  subject=args.subject, selector=dict(selector=args.to, identity=recipient.thread_id),
-                                 correlation=args.correlation, resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None), busy_policy=args.busy_policy)
+                                 correlation=args.correlation, resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None), busy_policy=getattr(args, 'busy_policy', 'wait'))
         elif verb == 'reply':
             value = mailbox.reply(actor, args.message_id, body=body_input(args.body_file), idempotency_key=intent_key,
                                   kind=args.kind, ttl=parse_duration(args.ttl).total_seconds(), delivery=args.delivery,
                                   subject=args.subject, outcome=args.outcome, evidence=args.evidence,
-                                  resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None), busy_policy=args.busy_policy)
+                                  resume_missing=args.resume_missing,task_id=getattr(args,'task_id',None), busy_policy=getattr(args, 'busy_policy', 'wait'))
         elif verb in ('inbox','outbox'):
             value = mailbox.list(actor, outbox=verb == 'outbox', cursor=args.cursor, limit=args.limit, state=args.state)
         elif verb == 'show':

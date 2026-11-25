@@ -169,7 +169,7 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
     start=progress.get('next',0)
     if type(start) is not int or not 0<=start<=len(routes):
         return DispatchResult('skipped','wake route progress invalid')
-    from .message_policy import native_preflight, persist_native_decision
+    from .message_policy import DELIVERY_HOLD_REASONS, Decision, native_preflight, persist_native_decision
     reasons=[]
     for index in range(start,len(routes)):
         route=routes[index]
@@ -265,9 +265,7 @@ def dispatch_native(root,found,now,*,clock_provider,adapter):
             submitted=RuntimeSubmission('not_sent',reason=exc.code,pre_io=True)
         except Exception:
             submitted=RuntimeSubmission('uncertain',reason='adapter_outcome_unknown')
-        if submitted.state == 'not_sent' and submitted.pre_io is True and submitted.reason in (
-                'recipient_dnd', 'message_policy_unavailable', 'recipient_fifo_wait', 'recipient_effect_unresolved'):
-            from .message_policy import Decision
+        if submitted.state == 'not_sent' and submitted.pre_io is True and submitted.reason in DELIVERY_HOLD_REASONS:
             record.pop('native_delivery', None)
             record['attempts'] -= 1
             return persist_native_decision(root, found, record, Decision('hold', submitted.reason),

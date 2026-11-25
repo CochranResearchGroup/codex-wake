@@ -468,7 +468,7 @@ class Mailbox:
                resume_missing=False, task_id=None, busy_policy='wait'):
         if type(resume_missing) is not bool or (resume_missing and delivery != 'notify'):
             raise BusError('invalid_argument', 'explicit reopening requires notification delivery')
-        if busy_policy not in ('wait', 'idle-only') or (busy_policy != 'wait' and delivery != 'notify'):
+        if busy_policy not in ('wait', 'queue', 'idle-only') or (busy_policy != 'wait' and delivery != 'notify'):
             raise BusError('invalid_argument', 'unsupported notification busy policy')
         body_digest = self._parameters(body, kind, ttl, key, delivery, subject, selector, correlation)
         recipient_key = thread_key(recipient)
@@ -558,12 +558,15 @@ class Mailbox:
                                 resume_missing=resume_missing,task_id=task_id,busy_policy=busy_policy)
             self._finish(database, message_id=value['message']['message_id'], idempotency_key=idempotency_key,
                          receipt_id=value.get('receipt_id'))
-            from .message_delivery import configured_store, direct_message, admission_status
-            store = configured_store(self.bus.root)
-            if store is not None:
-                envelope = json.loads(self._row(database, value['message']['message_id'])['envelope'])
-                value['shared_admission'] = admission_status(store, direct_message(envelope, body))
+            self._share_admission(database, value, body)
             return value
+
+    def _share_admission(self, database, value, body):
+        from .message_delivery import configured_store, direct_message, admission_status
+        store = configured_store(self.bus.root)
+        if store is not None:
+            envelope = json.loads(self._row(database, value['message']['message_id'])['envelope'])
+            value['shared_admission'] = admission_status(store, direct_message(envelope, body))
 
     def show(self, actor, identifier):
         with self.transaction(actor) as database:
@@ -685,6 +688,7 @@ class Mailbox:
                 value['acknowledgement'] = self._ack(database, actor, original, outcome, evidence, now)
             self._finish(database, message_id=value['message']['message_id'], idempotency_key=idempotency_key,
                          receipt_id=value.get('receipt_id'))
+            self._share_admission(database, value, body)
             return value
 
     def cancel(self, actor, identifier):
@@ -717,8 +721,9 @@ class Mailbox:
                 value = dict(message=self._projection(database, self._row(database, identifier)), receipt_id=receipt, deduplicated=False)
             self._finish(database, message_id=identifier, receipt_id=value.get('receipt_id'))
             from .message_policy import note_terminal
-            value['shared_retirement'] = ('released' if note_terminal(self.bus.root, 'a2a:' + self.bus.bus_id, identifier)
-                                          else 'pending_shared_store')
+            retirement = note_terminal(self.bus.root, 'a2a:' + self.bus.bus_id, identifier)
+            if retirement is not None:
+                value['shared_retirement'] = 'released' if retirement else 'pending_shared_store'
             return value
 
     def list(self, actor, *, outbox=False, cursor=0, limit=100, state=None):

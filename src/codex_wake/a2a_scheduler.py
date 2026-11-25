@@ -9,6 +9,7 @@ import uuid
 
 from .a2a_identity import BusError
 from .a2a_mailbox import Mailbox, encoded
+from .message_policy import DELIVERY_HOLD_REASONS
 
 
 @dataclass(frozen=True)
@@ -226,7 +227,7 @@ class MailScheduler:
             database.execute('COMMIT')
             return envelope
 
-    def claim(self, dispatcher, recipient_lease, job_ids):
+    def claim(self, dispatcher, recipient_lease, job_ids, *, ordered_in_shared_store=False):
         if not isinstance(job_ids, list) or not 1 <= len(job_ids) <= 20 or len(set(job_ids)) != len(job_ids):
             raise BusError('invalid_argument', 'notification batch requires one to twenty distinct intent IDs')
         with self.mailbox.transaction() as database:
@@ -255,8 +256,8 @@ class MailScheduler:
             if count >= 10:
                 raise BusError('rate_limit', 'recipient notification hourly limit reached')
             # Prevent overtaking any earlier still-pending message to this recipient.
-            earlier = database.execute("SELECT o.outbox_id FROM mail_outbox o JOIN mail_envelopes e USING(message_id) JOIN mail_state s USING(message_id) WHERE o.kind='notification' AND e.recipient_key=? AND s.admission='accepted' AND o.status IN ('pending','published','deferred','dispatching','uncertain') ORDER BY e.global_seq LIMIT ?", (recipient_key, len(job_ids))).fetchall()
-            if [r[0] for r in earlier] != job_ids:
+            earlier = database.execute("SELECT o.outbox_id FROM mail_outbox o JOIN mail_envelopes e USING(message_id) JOIN mail_state s USING(message_id) WHERE o.kind='notification' AND e.recipient_key=? AND s.admission='accepted' AND (e.expires>? OR o.status IN ('dispatching','uncertain')) AND o.status IN ('pending','published','deferred','dispatching','uncertain') ORDER BY e.global_seq LIMIT ?", (recipient_key, now, len(job_ids))).fetchall()
+            if not ordered_in_shared_store and [r[0] for r in earlier] != job_ids:
                 raise BusError('fifo_conflict', 'notification batch would overtake earlier intent')
             attempt = 'attempt_' + uuid.uuid4().hex
             database.execute('INSERT INTO mail_attempts VALUES (?,?,?,?,?,?,?,?)', (attempt, recipient_key, encoded([r['message_id'] for _, r in rows]), self.owner, recipient_lease.generation, now, 'dispatching', encoded(dict(dispatcher_generation=dispatcher.generation))))
@@ -285,12 +286,12 @@ class MailScheduler:
                     not isinstance(evidence.get('transport'), str) or not evidence['transport'] or
                     not isinstance(evidence.get('receipt_id'), str) or not evidence['receipt_id']):
                 raise BusError('transport_evidence_invalid', 'submission requires an exact-thread transport receipt')
-            if outcome == 'unsent' and evidence.get('reason') not in {'pre_io_failure','explicit_not_sent','fixture_pre_io', 'recipient_dnd', 'message_policy_unavailable', 'recipient_fifo_wait', 'recipient_effect_unresolved'}:
+            if outcome == 'unsent' and evidence.get('reason') not in ({'pre_io_failure', 'explicit_not_sent', 'fixture_pre_io'} | DELIVERY_HOLD_REASONS):
                 raise BusError('transport_evidence_invalid', 'only qualified provably-unsent evidence permits retry')
             database.execute('UPDATE mail_attempts SET state=?,evidence=? WHERE attempt_id=?', (outcome, encoded(evidence), attempt_id))
             for message_id in json.loads(attempt['message_ids']):
                 intent = database.execute("SELECT * FROM mail_outbox WHERE message_id=? AND kind='notification'", (message_id,)).fetchone()
-                if outcome == 'unsent' and evidence.get('reason') in ('recipient_dnd', 'message_policy_unavailable', 'recipient_fifo_wait', 'recipient_effect_unresolved'):
+                if outcome == 'unsent' and evidence.get('reason') in DELIVERY_HOLD_REASONS:
                     state, next_attempt = 'deferred', now + 5
                     database.execute('UPDATE mail_outbox SET attempts=attempts-1 WHERE outbox_id=?', (intent['outbox_id'],))
                 elif outcome == 'unsent':

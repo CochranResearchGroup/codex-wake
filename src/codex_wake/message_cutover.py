@@ -151,13 +151,17 @@ def _project(source, wake):
                 state, receipt, None if state == 'submitted' else 'original_wake_requires_reconciliation',
                 ('native_queue_acceptance' if queue else 'native_turn_acceptance') if receipt else None,
                 delivery.get('execution'), delivery.get('acknowledgment'))
-    return messages, attempts
+    terminal = {row['message_id'] for row in source['mail']
+                if row['admission'] != 'accepted' or row['notification'] in ('suppressed', 'failed')}
+    terminal.update(record['id'] for record in source['wakes']
+                    if record['status'] in ('cancelled', 'expired', 'failed', 'archived'))
+    return messages, attempts, terminal
 
 
 def _import_verified(store, source, wake, digest, cutover):
     from psycopg.types.json import Jsonb
 
-    messages, attempts = _project(source, wake)
+    messages, attempts, terminal = _project(source, wake)
     with store._connect() as conn:
         conn.execute("SELECT pg_advisory_xact_lock(hashtext('wake_message_cutovers_v1'))")
         conn.execute("""CREATE TABLE IF NOT EXISTS wake_message_cutovers_v1 (
@@ -166,6 +170,9 @@ def _import_verified(store, source, wake, digest, cutover):
                         ON CONFLICT DO NOTHING""", (cutover, digest, Jsonb(source)))
         for message in messages.values():
             store._admit(conn, message)
+            if message.identifier in terminal:
+                conn.execute('UPDATE wake_messages_v1 SET local_terminal=true WHERE scope=%s AND message_id=%s',
+                             (message.scope, message.identifier))
         for (identifier, attempt), expected in attempts.items():
             message = messages[identifier]
             key = (message.scope, message.identifier, attempt)

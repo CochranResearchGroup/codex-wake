@@ -69,8 +69,8 @@ def native_request(endpoint, codex, method, params, timeout, *, verify_connectio
         initialization = request(1, 'initialize', {'clientInfo': {'name': 'codex_wake_lifecycle', 'version': __version__},
                                   'capabilities': {'experimentalApi': True}})
         ws.send(json.dumps({'method': 'initialized'}))
-        if verify_connection is not None:
-            verify_connection(ws, initialization)
+        if verify_connection is not None and verify_connection(ws, initialization) is False:
+            return None
         result=request(2, method, params)
         if observe_result is not None:observe_result(ws,result)
         return result
@@ -201,22 +201,16 @@ def exact_message_interrupt(endpoint, codex, exact_recipient, thread, turn, begi
             interrupted = any(item.get('id') == turn and item.get('status') == 'interrupted' for item in turns)
             if begin is None:
                 observed['state'] = 'interrupted' if interrupted else 'pending'
-                raise ObservationComplete
+                return False
             if conversation.get('status', {}).get('type') != 'active' or active != [turn]:
                 observed['state'] = 'turn_changed'
-                raise ObservationComplete
+                return False
             if not begin():
                 observed['state'] = 'held'
-                raise ObservationComplete
+                return False
             return
         raise WakeError('interrupt observation capacity')
 
-    class ObservationComplete(Exception):
-        pass
-
-    try:
-        native_request(endpoint, codex, 'turn/interrupt', dict(threadId=thread, turnId=turn),
-                       5, verify_connection=verify)
-    except ObservationComplete:
-        return observed['state']
-    return 'requested'
+    native_request(endpoint, codex, 'turn/interrupt', dict(threadId=thread, turnId=turn),
+                   5, verify_connection=verify)
+    return observed.get('state', 'requested')

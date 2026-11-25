@@ -15,6 +15,8 @@ from codex_wake.a2a_scheduler import MailScheduler
 
 
 class OwningClientDeliveryTests(unittest.TestCase):
+    namespace = 'fixture'
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
@@ -23,7 +25,7 @@ class OwningClientDeliveryTests(unittest.TestCase):
         self.private = self.root / 'client'; self.private.mkdir(mode=0o700)
         self.bus, self.operator = BusStore.configure(self.root / 'bus')
         self.bus.enroll(self.repo, self.operator, notify=True)
-        self.identities = [RuntimeIdentity('fixture', x, str(self.repo)) for x in ('sender', 'recipient')]
+        self.identities = [RuntimeIdentity(self.namespace, x, str(self.repo)) for x in ('sender', 'recipient')]
         self.actors = []
         for identity in self.identities:
             capability, _ = self.bus.issue_actor(identity, self.repo, self.operator)
@@ -65,7 +67,7 @@ class OwningClientDeliveryTests(unittest.TestCase):
             with connection:
                 with connection.makefile('rb') as stream:
                     request = json.loads(stream.readline())
-                identity = dict(thread_id=self.thread_id, root=str(self.repo), namespace='fixture')
+                identity = dict(thread_id=self.thread_id, root=str(self.repo), namespace=self.namespace)
                 reply = dict(protocol=1, pid=os.getpid(), generation=self.generation, identity=identity)
                 if request['action'] == 'probe':
                     reply.update(status=self.status, reason='busy' if self.status != 'ready' else None,

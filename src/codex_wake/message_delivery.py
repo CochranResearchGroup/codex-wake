@@ -126,6 +126,8 @@ class PostgresMessages:
             self._admit(conn, message)
 
     def _admit(self, conn, message):
+        if message.order_recipient is not None:
+            self._lock_recipient(conn, message.order_recipient)
         identity = self._identity(message)
         values = (message.source, message.recipient, message.expires_at_micros,
                   message.payload, message.sender, message.in_reply_to, message.not_before_micros, message.busy_policy)
@@ -155,6 +157,10 @@ class PostgresMessages:
                 'SELECT order_recipient FROM wake_messages_v1 WHERE scope=%s AND message_id=%s',
                 self._identity(message)).fetchone()
 
+    @staticmethod
+    def _lock_recipient(conn, recipient):
+        conn.execute('SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))', (recipient,))
+
     def waiting_reason(self, message, lower, upper):
         with self._connect() as conn:
             row = conn.execute(
@@ -171,18 +177,6 @@ class PostgresMessages:
     def _waiting_reason(self, conn, message, lower, upper, recipient, ordinal):
         if recipient is None or lower is None or upper is None:
             return None
-        earlier = conn.execute(
-            """SELECT 1 FROM wake_messages_v1 m
-               WHERE m.order_recipient=%s AND m.delivery_ordinal<%s
-                 AND NOT m.local_terminal AND m.bounce_reason IS NULL
-                 AND m.expires_at_micros>%s
-                 AND (m.not_before_micros IS NULL OR m.not_before_micros<=%s)
-                 AND NOT EXISTS (
-                     SELECT 1 FROM wake_message_attempts_v1 a
-                     WHERE a.scope=m.scope AND a.message_id=m.message_id AND a.state='submitted')
-               LIMIT 1""", (recipient, ordinal, upper, lower)).fetchone()
-        if earlier:
-            return 'recipient_fifo_wait'
         # An unknown effect can still have reached a stock harness. It must
         # resolve before this recipient accepts another message.
         uncertain = conn.execute(
@@ -190,7 +184,34 @@ class PostgresMessages:
                WHERE m.order_recipient=%s AND (m.scope,m.message_id)<>(%s,%s)
                  AND a.state IN ('submitting','uncertain') LIMIT 1""",
             (recipient, *self._identity(message))).fetchone()
-        return 'recipient_effect_unresolved' if uncertain else None
+        if uncertain:
+            return 'recipient_effect_unresolved'
+        interrupted = conn.execute(
+            """SELECT 1 FROM wake_message_interventions_v1
+               WHERE scope=%s AND message_id=%s AND namespace_recipient=%s AND interrupt_state='interrupted'""",
+            (*self._identity(message), recipient)).fetchone()
+        if interrupted:
+            return None
+        earlier = conn.execute(
+            """SELECT 1 FROM wake_messages_v1 m
+               WHERE m.order_recipient=%s AND m.delivery_ordinal<%s
+                 AND NOT m.local_terminal AND m.bounce_reason IS NULL
+                 AND m.expires_at_micros>%s
+                 AND (m.not_before_micros IS NULL OR m.not_before_micros<=%s)
+                 AND (
+                     NOT EXISTS (
+                         SELECT 1 FROM wake_recipient_dnd_v1 d WHERE d.recipient=m.order_recipient
+                         AND (d.until_micros IS NULL OR d.until_micros>%s))
+                     OR EXISTS (
+                         SELECT 1 FROM wake_message_interventions_v1 i
+                         WHERE i.scope=m.scope AND i.message_id=m.message_id
+                         AND i.namespace_recipient=m.order_recipient AND i.override_dnd
+                         AND i.interrupt_state IS DISTINCT FROM 'unavailable'))
+                 AND NOT EXISTS (
+                     SELECT 1 FROM wake_message_attempts_v1 a
+                     WHERE a.scope=m.scope AND a.message_id=m.message_id AND a.state='submitted')
+               LIMIT 1""", (recipient, ordinal, upper, lower, lower)).fetchone()
+        return 'recipient_fifo_wait' if earlier else None
 
     def set_dnd(self, recipient, thread_id, mode, until_micros=None):
         with self._connect() as conn:
@@ -310,14 +331,18 @@ class PostgresMessages:
     def prepare(self, message: Message, attempt_id: str, *, lower=None, upper=None) -> DeliveryReceipt | None:
         identity = self._identity(message)
         with self._connect() as conn:
+            if message.order_recipient is None:
+                row = conn.execute(
+                    'SELECT order_recipient FROM wake_messages_v1 WHERE scope=%s AND message_id=%s',
+                    identity).fetchone()
+                if row is not None and row[0] is not None:
+                    self._lock_recipient(conn, row[0])
             self._admit(conn, message)
             bounced, retired, recipient, ordinal = conn.execute(
                 """SELECT bounce_reason,local_terminal,order_recipient,delivery_ordinal
                    FROM wake_messages_v1 WHERE scope=%s AND message_id=%s""", identity).fetchone()
             if bounced or retired:
                 return DeliveryReceipt('unsent', reason=bounced or 'message_retired')
-            if recipient is not None:
-                conn.execute('SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))', (recipient,))
             for saved_attempt, *columns in conn.execute(
                     """SELECT attempt_id,state,receipt_id,reason,evidence_kind,execution,acknowledgment
                        FROM wake_message_attempts_v1 WHERE scope=%s AND message_id=%s""",

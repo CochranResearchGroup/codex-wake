@@ -277,11 +277,14 @@ class NotificationDispatcher:
             if paused:
                 return dict(status='paused', submitted=0, results=[], recovered=recovered)
             from .message_delivery import configured_store, direct_message, deliver, DeliveryReceipt
-            from .message_policy import decide, interrupt_decision, recipient_policy
+            from .message_policy import DELIVERY_HOLD_REASONS, decide, interrupt_decision, recipient_policy
             from .native_clock import snapshot
 
             store = configured_store(scheduler.mailbox.bus.root)
+            submitted_recipients = set()
             for job in scheduler.jobs(dispatcher, limit=limit):
+                if store is not None and job['recipient_key'] in submitted_recipients:
+                    continue
                 with (self.receipt_gate.guard(job) if self.receipt_gate is not None else nullcontext(None)) as receipt:
                     if receipt is False:
                         scheduler.defer(dispatcher, job['job_id'], 'capability_unavailable')
@@ -297,11 +300,13 @@ class NotificationDispatcher:
                         policy, intervention = (recipient_policy(store, message, clock=snapshot(), busy_policy=busy_policy)
                                                 if message is not None else (decide('ready'), None))
                         if policy.state != 'ready':
-                            if policy.state == 'bounce' and store.record_bounce(message, policy.reason):
+                            bounced = policy.state == 'bounce' and store.record_bounce(message, policy.reason)
+                            if bounced:
                                 scheduler.bounce(dispatcher, job, policy.reason)
                             else:
                                 scheduler.defer(dispatcher, job['job_id'], policy.reason)
-                            results.append(dict(message_id=job['message_id'], status='bounced' if policy.state == 'bounce' else 'deferred', reason=policy.reason))
+                            results.append(dict(message_id=job['message_id'],
+                                                status='bounced' if bounced else 'deferred', reason=policy.reason))
                             continue
                     except BusError as error:
                         results.append(dict(message_id=job['message_id'], status='denied', reason=error.code))
@@ -367,7 +372,11 @@ class NotificationDispatcher:
                         continue
                     try:
                         try:
-                            claim = scheduler.claim(dispatcher, recipient, [job['job_id']])
+                            shared_order = bool(intervention and (
+                                intervention[3] == 'interrupted' or
+                                intervention[0] and intervention[3] != 'unavailable'))
+                            claim = scheduler.claim(dispatcher, recipient, [job['job_id']],
+                                                    ordered_in_shared_store=shared_order)
                         except BusError as error:
                             results.append(dict(message_id=job['message_id'], status='denied', reason=error.code))
                             continue
@@ -416,15 +425,18 @@ class NotificationDispatcher:
                                 if key in result:evidence[key]=result[key]
                         elif outcome == 'unsent':
                             reason = result.get('reason')
-                            evidence['reason'] = reason if reason in ('pre_io_failure', 'recipient_dnd', 'message_policy_unavailable', 'recipient_fifo_wait', 'recipient_effect_unresolved') else 'explicit_not_sent'
+                            evidence['reason'] = reason if reason in ({'pre_io_failure'} | DELIVERY_HOLD_REASONS) else 'explicit_not_sent'
                         else:
                             outcome = 'uncertain'
                             evidence['reason'] = 'client_response_unqualified'
                         scheduler.finish(dispatcher, recipient, claim['attempt_id'], outcome=outcome, evidence=evidence)
                         results.append(dict(message_id=job['message_id'], attempt_id=claim['attempt_id'],
                             status=outcome, reason=result.get('reason'), receipt_id=result.get('receipt_id')))
-                        if outcome == 'submitted' and self.receipt_gate is not None:
-                            self.receipt_gate.submitted(receipt, job, claim['attempt_id'], result['receipt_id'], transport=evidence['transport'])
+                        if outcome == 'submitted':
+                            submitted_recipients.add(job['recipient_key'])
+                            if self.receipt_gate is not None:
+                                self.receipt_gate.submitted(receipt, job, claim['attempt_id'], result['receipt_id'],
+                                                            transport=evidence['transport'])
                         if outcome == 'uncertain':
                             break
                     finally:

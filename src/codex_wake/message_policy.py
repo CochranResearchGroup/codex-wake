@@ -13,6 +13,9 @@ class Decision:
 
 
 READY = Decision('ready', 'recipient_ready')
+DELIVERY_HOLD_REASONS = frozenset({
+    'recipient_dnd', 'message_policy_unavailable', 'recipient_fifo_wait', 'recipient_effect_unresolved',
+})
 
 
 def decide(observation, *, busy_policy='wait', dnd=None, override=False):
@@ -91,7 +94,10 @@ def native_preflight(root, record, clock_provider, *, observation='ready', autho
     from .shared_app_server import SharedSourceError
 
     policy = record['target'].get('busy_policy', 'wait')
-    store = configured_store(root)
+    try:
+        store = configured_store(root)
+    except (WakeError, ValueError, OSError):
+        return Decision('hold', 'message_policy_unavailable')
     if store is None:
         return decide(observation, busy_policy=policy)
     from psycopg import Error
@@ -209,4 +215,4 @@ def note_terminal(root, scope, identifier):
                 return False
     except (WakeError, ValueError, OSError):
         return False
-    return True
+    return True if store is not None else None

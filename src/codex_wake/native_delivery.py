@@ -174,7 +174,7 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
         record = append_event(record, 'expired', 'native recipient deadline elapsed', now)
         replace_record(root, found, record)
         return DispatchResult('failed', 'native recipient deadline elapsed')
-    from .message_policy import native_preflight, persist_native_decision
+    from .message_policy import DELIVERY_HOLD_REASONS, Decision, native_preflight, persist_native_decision
     verdict = native_preflight(root, record, clock_provider)
     if verdict.state != 'ready':
         return persist_native_decision(root, found, record, verdict, now, clock_provider)
@@ -302,8 +302,7 @@ def dispatch_native(root, found, now, *, clock_provider=None, runtime_adapter: R
         )
     if submitted.state == 'not_sent' and submitted.pre_io is True:
         record.pop('native_delivery', None)
-        if submitted.reason in ('recipient_dnd', 'message_policy_unavailable', 'recipient_fifo_wait', 'recipient_effect_unresolved'):
-            from .message_policy import Decision
+        if submitted.reason in DELIVERY_HOLD_REASONS:
             record['attempts'] -= 1
             return persist_native_decision(root, found, record, Decision('hold', submitted.reason),
                                            now, clock_provider)
