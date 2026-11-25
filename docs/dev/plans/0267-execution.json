@@ -34,7 +34,7 @@
       "blockers": [
         767
       ],
-      "status": "running",
+      "status": "validated",
       "owner": "/root/busy_dnd",
       "branch": "feat/issue-768-busy-dnd",
       "base": "46b0476f8a28d3b35ab075400c0005b81dd6d468",
@@ -42,6 +42,19 @@
         "delivery policy",
         "DND settings",
         "qualified interrupt"
+      ],
+      "worker_results": [
+        "bbf2c095",
+        "2f26c8ed3a598a1800a546e6c2c7e68ff294b2e8"
+      ],
+      "integration_results": [
+        "664aea69",
+        "914093d7"
+      ],
+      "evidence": [
+        "63 integrated PostgreSQL and terminal tests",
+        "36 worker focused tests including exact turn/interrupt on private WebSocket",
+        "both orders of direct/wake FIFO verified"
       ]
     },
     {
@@ -138,7 +151,8 @@
         "63 worker and 70 integration tests",
         "installed stock Codex public CLI tab loss and full tmux/native server loss",
         "PostgreSQL single effect receipt and placement matrix"
-      ]
+      ],
+      "tracker": "closed"
     },
     {
       "issue": 773,
