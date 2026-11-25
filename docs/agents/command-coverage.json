@@ -627,6 +627,7 @@
     "messages.show",
     "messages.wait",
     "messages.watch",
+    "migration.message-cutover",
     "monitor.check",
     "native.after",
     "native.at",
