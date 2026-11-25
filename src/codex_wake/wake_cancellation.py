@@ -80,7 +80,7 @@ def _terminal_result(record):
             result['queue_id'] = native['queue_id']
         return result
     if record['status'] == 'cancelled':
-        return dict(wake_id=identifier, state='cancelled', phase='before_admission')
+        return dict(wake_id=identifier, state='cancelled')
     if native.get('state') == 'accepted' and native.get('turn_id'):
         return dict(wake_id=identifier, state='started', phase='native_turn_started',
                     turn_id=native['turn_id'])
@@ -107,7 +107,7 @@ def _apply(root, value):
     if current.get('status') not in ('pending', 'firing'):
         return dict(wake_id=identifier, state='skipped', reason='delivery_already_terminal'), True
     cancel_record(root, identifier)
-    return dict(wake_id=identifier, state='cancelled', phase='before_admission'), True
+    return dict(wake_id=identifier, state='cancelled'), True
 
 
 def reconcile_cancellations(root):

@@ -13,6 +13,7 @@ from tests import test_a2a_delivery as delivery_fixture
 
 
 class ReplyWakeTests(unittest.TestCase):
+    namespace = delivery_fixture.OwningClientDeliveryTests.namespace
     setUp = delivery_fixture.OwningClientDeliveryTests.setUp
     serve = delivery_fixture.OwningClientDeliveryTests.serve
     close = delivery_fixture.OwningClientDeliveryTests.close

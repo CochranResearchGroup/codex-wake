@@ -42,6 +42,11 @@ class Message:
             raise ValueError('invalid message eligibility')
         if not isinstance(self.payload, str):
             raise ValueError('invalid message payload')
+        if self.redirected_from is not None and (
+                not isinstance(self.redirected_from, str)
+                or not 0 < len(self.redirected_from) <= 1024
+                or self.redirected_from == self.identifier):
+            raise ValueError('invalid redirect origin')
 
 
 @dataclass(frozen=True)
@@ -402,6 +407,9 @@ class PostgresMessages:
                 (queue_id, reason, execution, *self._identity(message), attempt_id, queue_id, execution)).fetchone()
             if row is None:
                 raise ValueError('original queue receipt does not permit terminal removal')
+            conn.execute(
+                'UPDATE wake_messages_v1 SET local_terminal=true WHERE scope=%s AND message_id=%s',
+                self._identity(message))
 
     def finish(self, message: Message, attempt_id: str, receipt: DeliveryReceipt):
         with self._connect() as conn:
@@ -485,6 +493,7 @@ def wake_message(root, record, expires_at_micros, *, order_recipient=None):
         not_before = None
     return Message(record['id'], 'wake', scope, record['target']['thread_id'],
                    expires_at_micros, record['prompt'], not_before_micros=not_before,
+                   redirected_from=record.get('redirected_from'),
                    busy_policy=record['target'].get('busy_policy', 'wait'), order_recipient=order_recipient)
 
 

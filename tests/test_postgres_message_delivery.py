@@ -106,6 +106,107 @@ print("Queued message {queue} for thread {thread}.")
             ('wake', thread, NOW*1_000_000, (NOW + 600)*1_000_000, 'submitted', queue),
         ])
 
+    def test_public_reply_inbox_and_bounce_redirect_keep_exact_shared_links(self):
+        from codex_wake.a2a_identity import RuntimeIdentity
+        from test_a2a_delivery import OwningClientDeliveryTests
+
+        fixture = OwningClientDeliveryTests()
+        self.addCleanup(fixture.doCleanups)
+        fixture.setUp()
+        fixture.wall_clock = NOW
+        third = RuntimeIdentity('fixture', 'other-recipient', str(fixture.repo))
+        capability, _ = fixture.bus.issue_actor(third, fixture.repo, fixture.operator)
+        other = fixture.bus.authenticate(capability, third, invoking_cwd=fixture.repo)
+        sender, recipient = fixture.actors
+        body = fixture.root / 'body.txt'
+        body.write_text('Retained private fixture text')
+
+        def command(actor, verb, *args, expected=0):
+            output = io.StringIO()
+            with (patch('codex_wake.messages_cli.invoking_actor', return_value=actor),
+                  patch('codex_wake.a2a_mailbox.Mailbox._now', return_value=NOW),
+                  patch('codex_wake.messages_cli.resolve_identity',
+                        side_effect=lambda selector, **kwargs: {
+                            'thread:recipient': fixture.identities[1],
+                            'thread:other-recipient': third,
+                        }[selector]),
+                  contextlib.redirect_stdout(output)):
+                code = run(['messages', verb, '--bus-root', str(fixture.bus.root),
+                            '--capability', 'test-enrollment', '--json', *args])
+            value = json.loads(output.getvalue())
+            self.assertEqual(code, expected, value)
+            return value
+
+        with (patch.dict(os.environ, {'CODEX_WAKE_MESSAGE_DB_DSN': DSN}),
+              patch('codex_wake.native_clock.snapshot', return_value=CLOCK)):
+            original = command(sender, 'send', '--to', 'thread:recipient', '--body-file',
+                               str(body), '--idempotency-key', 'question', '--delivery', 'inbox')['message']
+            reply = command(recipient, 'reply', original['message_id'], '--body-file',
+                            str(body), '--idempotency-key', 'answer', '--delivery', 'inbox')
+            self.assertEqual(reply['shared_admission'], 'recorded')
+            reply_id = reply['message']['message_id']
+            listed = command(sender, 'replies', original['message_id'])['replies']
+            self.assertEqual([(r['message_id'], r['in_reply_to']) for r in listed],
+                             [(reply_id, original['message_id'])])
+            self.assertEqual(command(sender, 'read', reply_id)['body'], 'Retained private fixture text')
+            command(other, 'replies', original['message_id'], expected=7)
+
+            bounced = command(sender, 'send', '--to', 'thread:recipient', '--body-file',
+                              str(body), '--idempotency-key', 'bounce', '--busy-policy', 'idle-only',
+                              '--ttl', '12m')['message']
+            args = (bounced['message_id'], '--to', 'thread:other-recipient',
+                    '--idempotency-key', 'redirect-bounce')
+            self.assertEqual(command(sender, 'redirect', *args, expected=8)['error']['code'], 'not_bounced')
+            fixture.status = 'deferred'
+            outcomes = fixture.dispatcher.tick()['results']
+            self.assertTrue(any(row['message_id'] == bounced['message_id'] and row['status'] == 'bounced'
+                                for row in outcomes), outcomes)
+
+            redirect = command(sender, 'redirect', *args)
+            self.assertEqual(redirect['shared_admission'], 'recorded')
+            redirected = redirect['message']
+            self.assertNotEqual(redirected['message_id'], bounced['message_id'])
+            self.assertEqual(redirected['redirected_from'], bounced['message_id'])
+            self.assertEqual(redirected['expires_at'], bounced['expires_at'])
+            self.assertEqual(redirected['busy_policy'], 'idle-only')
+            self.assertEqual(redirected['recipient']['thread_id'], third.thread_id)
+            self.assertTrue(command(sender, 'redirect', *args)['deduplicated'])
+            self.assertEqual(command(sender, 'show', bounced['message_id'])['message']['state']['admission'],
+                             'bounced')
+            command(recipient, 'redirect', *args, expected=7)
+            cancelled = command(sender, 'cancel', redirected['message_id'])['message']
+            self.assertEqual(cancelled['state']['admission'], 'cancelled')
+
+        with self.store._connect() as db:
+            result = db.execute(
+                """SELECT in_reply_to,redirected_from,local_terminal FROM wake_messages_v1
+                   WHERE message_id=%s""", (reply_id,)).fetchone()
+            self.assertEqual(result, (original['message_id'], None, False))
+            result = db.execute(
+                """SELECT in_reply_to,redirected_from,local_terminal FROM wake_messages_v1
+                   WHERE message_id=%s""", (redirected['message_id'],)).fetchone()
+            self.assertEqual(result, (None, bounced['message_id'], True))
+
+    def test_positive_queue_removal_retires_original_shared_attempt(self):
+        message = Message('wake_' + uuid4().hex, 'wake', 'fixture', 'recipient',
+                          (NOW + 90) * 1_000_000, 'Do once')
+        attempt, queue = str(uuid4()), str(uuid4())
+        self.assertIsNone(self.store.prepare(message, attempt))
+        self.store.finish(message, attempt, DeliveryReceipt(
+            'submitted', queue, evidence_kind='native_queue_acceptance'))
+        with self.assertRaises(ValueError):
+            self.store.reconcile_queue_removal(message, attempt, str(uuid4()), 'bounded_native_canceled')
+        self.store.reconcile_queue_removal(message, attempt, queue, 'bounded_native_canceled')
+        self.store.reconcile_queue_removal(message, attempt, queue, 'bounded_native_canceled')
+        self.assertEqual(self.store.prepare(message, 'new-attempt'),
+                         DeliveryReceipt('unsent', reason='message_retired'))
+        with self.store._connect() as db:
+            result = db.execute(
+                """SELECT attempt_id,state,receipt_id,execution,reason FROM wake_message_attempts_v1
+                   WHERE scope=%s AND message_id=%s""", (message.scope, message.identifier)).fetchall()
+            self.assertEqual(result, [(attempt, 'submitted', queue, 'queue_cancelled',
+                                       'bounded_native_canceled')])
+
     def test_unfinalized_effect_cannot_be_replayed_by_a_new_worker(self):
         message = Message('wake_'+uuid4().hex, 'wake', 'fixture', 'recipient',
                           (NOW + 90)*1_000_000, 'Do once')

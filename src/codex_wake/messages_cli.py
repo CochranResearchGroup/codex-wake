@@ -227,6 +227,8 @@ def messages_command(args):
         elif verb == 'replies':
             value = dict(message_id=args.message_id, replies=mailbox.replies(actor, args.message_id))
         elif verb == 'redirect':
+            if args.message_id.startswith(('wake_', 'schedule_')):
+                raise BusError('redirect_source_unavailable', 'this redirect requires a bounced mailbox message')
             if not args.to.startswith(('thread:', 'grok:')):
                 raise BusError('invalid_argument', 'redirect needs an exact thread: or grok: recipient')
             if args.to.startswith('grok:'):
