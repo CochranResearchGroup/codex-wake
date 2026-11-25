@@ -264,10 +264,22 @@
         772,
         774
       ],
-      "status": "running",
+      "status": "validated",
       "owner": "/root/busy_dnd",
       "base": "ea04c771",
-      "branch": "feat/issue-776-ssh-views"
+      "branch": "feat/issue-776-ssh-views",
+      "tracker": "closed",
+      "worker_results": [
+        "25ff18b7"
+      ],
+      "integration_results": [
+        "48989b6d"
+      ],
+      "evidence": [
+        "Actual bidirectional Windows OpenSSH and psmux, WSL OpenSSH and tmux",
+        "Saved and active original remote turn survived source tab loss",
+        "Both views stayed closed during actual PostgreSQL handoff and one original-ID native turn each way"
+      ]
     },
     {
       "issue": 777,
@@ -302,7 +314,9 @@
         772,
         775
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/cutover",
+      "base": "5aebe9e1"
     },
     {
       "issue": 780,
@@ -314,5 +328,5 @@
       "status": "pending"
     }
   ],
-  "integration_tip_at_validation": "4f05652d"
+  "integration_tip_at_validation": "48989b6d"
 }
