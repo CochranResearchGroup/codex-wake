@@ -395,16 +395,32 @@ class Presentation:
         return ['--', sys.executable, str(Path(__file__).with_name('psmux_message_launch.py').resolve()),
                 str(self.binding), nonce]
 
+    def _swap_preserving_focus(self, host, windows, first, second):
+        focused = next((item for item in windows if item['focused']), None)
+        host._current()
+        host.command('swap-window', '-d', '-s', self.spec['session'] + ':' + first,
+                     '-t', self.spec['session'] + ':' + second)
+        after = self._windows(host)
+        if focused is not None:
+            selected = next((item for item in after if item['focused']), None)
+            original = next((item for item in after if item['window_id'] == focused['window_id']), None)
+            # psmux can focus a swap participant even with -d. Restore only
+            # the previous exact pane, and leave an unrelated focus change alone.
+            if (selected and selected['window_id'] in (first, second) and original
+                    and not original['focused']
+                    and self._window_identity(original) == self._window_identity(focused)):
+                host._current()
+                host.command('select-window', '-t', self.spec['session'] + ':' + original['window_id'])
+                after = self._windows(host)
+        return after
+
     def _confirm(self, db, host, windows, current, creation):
         placeholder = creation.get('placeholder')
         window = current['window_id']
         if creation['pending'] and placeholder:
             live = self._placeholder(windows)
             if live and self._window_identity(live) == self._window_identity(placeholder):
-                host._current()
-                host.command('swap-window', '-d', '-s', self.spec['session'] + ':' + window,
-                             '-t', self.spec['session'] + ':' + live['window_id'])
-                windows = self._windows(host)
+                windows = self._swap_preserving_focus(host, windows, window, live['window_id'])
                 current = next(item for item in windows if item['window_id'] == window)
         expected = self.spec['index'] if placeholder else creation['index']
         if creation['pending'] and current['index'] != expected and not placeholder:
@@ -419,6 +435,9 @@ class Presentation:
         if creation['pending']:
             observed = {item['window_id']: [item['index'], item['name'], item['focused'], self._window_identity(item)]
                         for item in self._windows(host)}
+            if placeholder and observed.get(placeholder['window_id']) != [
+                    creation['index'], placeholder['name'], placeholder['focused'], self._window_identity(placeholder)]:
+                raise Unavailable('restore_idle_placeholder_changed')
             if any(observed.get(identifier) != saved for identifier, saved in creation['unaffected'].items()):
                 raise Unavailable('restore_unrelated_placement_changed')
         creation['pending'] = False
