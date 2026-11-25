@@ -238,7 +238,8 @@
       ],
       "status": "running",
       "owner": "/root/cutover",
-      "base": "ea04c771"
+      "base": "ea04c771",
+      "branch": "feat/issue-775-psmux-recovery"
     },
     {
       "issue": 776,
@@ -249,7 +250,8 @@
       ],
       "status": "running",
       "owner": "/root/busy_dnd",
-      "base": "ea04c771"
+      "base": "ea04c771",
+      "branch": "feat/issue-776-ssh-views"
     },
     {
       "issue": 777,
@@ -269,7 +271,10 @@
         771,
         772
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/former_tab",
+      "base": "a6b90326",
+      "branch": "feat/issue-778-harness-commands"
     },
     {
       "issue": 779,
