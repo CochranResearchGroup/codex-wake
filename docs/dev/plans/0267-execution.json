@@ -4,8 +4,8 @@
   "base": "70ff358598738c5ab1343e0a03133f41c71a4312",
   "implementation_stop": "2026-11-25T01:50:00-06:00",
   "hard_stop": "2026-11-25T02:00:00-06:00",
-  "review_passes": 0,
-  "tdd_remediation_passes": 0,
+  "review_passes": 1,
+  "tdd_remediation_passes": 1,
   "tickets": [
     {
       "issue": 767,
@@ -401,10 +401,10 @@
       ]
     }
   ],
-  "integration_tip_at_validation": "0707ee7e",
+  "integration_tip_at_validation": "7a4deb38341db49c759b9723e332603325a32d50",
   "checkpoint": {
     "recorded_at": "2026-11-25T00:56:48-06:00",
-    "state": "tickets_closed_review_pending",
+    "state": "ticket_batch_reviewed",
     "closed_issues": [
       767,
       768,
@@ -422,9 +422,7 @@
       780
     ],
     "open_issues": [],
-    "next": [
-      "Run one code review and one TDD remediation pass."
-    ],
+    "next": [],
     "validation": {
       "source": "5d5ad5eb5d2fec73f2064eaee103c6b7d1f01e1f",
       "runner": "Python 3.12.13 on WSL, configured StableTime, isolated XDG roots and disposable PostgreSQL. No hosted Actions.",
@@ -445,5 +443,17 @@
       ]
     },
     "private_evidence_locator": "/tmp/wake766-active"
+  },
+  "review": {
+    "base": "70ff358598738c5ab1343e0a03133f41c71a4312",
+    "reviewed_head": "f95850cd",
+    "standards": [
+      "Existing intervention tables lacked additive migration for two authorization columns."
+    ],
+    "spec": [
+      "The same upgrade gap violated the requirement to preserve existing message and intervention custody."
+    ],
+    "remediation_sha": "7a4deb38341db49c759b9723e332603325a32d50",
+    "validation": "Disposable PostgreSQL 17: existing table reproduced UndefinedColumn before fix; preservation and new authorization receipts passed after fix; 25 focused tests passed."
   }
 }

@@ -10888,3 +10888,16 @@ and one skip. Focused cross-backend, OAuth, and elevation checks passed.
 needs the identified ChatGPT app and workspace and a reachable isolated
 candidate connector. #780 waits for #773. The single review and TDD
 remediation remain sequenced after ticket closure. No production deploy.
+
+## Turn P267 | 2026-11-26 | Bastion acceptance and ticket batch review
+
+Closed #773 after the second operator reboot. A retained wake completed once
+in the original stock Codex conversation before the first SSH login. The
+isolated native PostgreSQL, Wake, stock Codex, and tmux fixture was removed
+after verification. Evidence is in `docs/dev/evidence/plan0267/773-bastion-boot.md`.
+
+All fourteen implementation tickets are closed. Reviewed the integration
+diff from `70ff3585` to `f95850cd` once and ran one TDD remediation pass.
+Added the missing PostgreSQL upgrade for intervention authorization columns.
+The regression verified existing rows and new DND/interrupt receipts. The
+focused PostgreSQL, OAuth, owner, and controller run passed 25 tests.
