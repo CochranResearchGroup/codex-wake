@@ -177,8 +177,8 @@
         770,
         772
       ],
-      "status": "deferred_by_operator",
-      "tracker": "open",
+      "status": "validated",
+      "tracker": "closed",
       "owner": "/root/busy_dnd",
       "branch": "feat/issue-773-linux-recovery",
       "base": "6f248955",
@@ -188,9 +188,9 @@
       "evidence": [
         "90 focused and six in-container tests",
         "Exact original tab and one retained wake after PostgreSQL, Wake and tmux restart on disposable Linux",
-        "32 integration tests with disposable PostgreSQL"
+        "32 integration tests with disposable PostgreSQL",
+        "Native Bastion boot completed one original retained wake before the first SSH authentication; docs/dev/evidence/plan0267/773-bastion-boot.md."
       ],
-      "remaining": "Native Bastion deployment and boot acceptance deferred by operator. Controlled restart was authorized; remote administrator authentication and a verified Minecraft recovery path were unavailable.",
       "integration_results": [
         "1d7372d6"
       ]
@@ -404,7 +404,7 @@
   "integration_tip_at_validation": "0707ee7e",
   "checkpoint": {
     "recorded_at": "2026-11-25T00:56:48-06:00",
-    "state": "pending_deferred_bastion",
+    "state": "tickets_closed_review_pending",
     "closed_issues": [
       767,
       768,
@@ -412,6 +412,7 @@
       770,
       771,
       772,
+      773,
       774,
       775,
       776,
@@ -420,12 +421,9 @@
       779,
       780
     ],
-    "open_issues": [
-      773
-    ],
+    "open_issues": [],
     "next": [
-      "Resume native Bastion boot acceptance only when the operator lifts the #773 deferral.",
-      "Run one code-review and one TDD remediation pass after ticket closure."
+      "Run one code review and one TDD remediation pass."
     ],
     "validation": {
       "source": "5d5ad5eb5d2fec73f2064eaee103c6b7d1f01e1f",
