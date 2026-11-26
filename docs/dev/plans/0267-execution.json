@@ -349,11 +349,11 @@
         772,
         775
       ],
-      "status": "isolated_validated_live_gate_open",
+      "status": "validated",
       "owner": "/root/cutover",
       "base": "5aebe9e1",
       "branch": "feat/issue-779-connected-chatgpt",
-      "tracker": "open",
+      "tracker": "closed",
       "worker_results": [
         "f44a25c7",
         "7d38a9b2"
@@ -365,9 +365,13 @@
       "evidence": [
         "Actual OAuth PKCE and MCP SDK, isolated tmux and native Windows psmux restoration",
         "Exact grant separates control, metadata history and content scope",
-        "42 matched and 29 repeated integration tests passed using disposable PostgreSQL"
+        "42 matched and 29 repeated integration tests passed using disposable PostgreSQL",
+        "23 fresh connector, consent, history and psmux regression tests on da34a065. Public ingress metadata returned 200 and anonymous MCP returned 401."
       ],
-      "remaining": "Temporary fixture endpoint authorized. Verify the exact ChatGPT app and workspace before publication and run the connected OAuth MCP journey using fixture-only consent."
+      "acceptance_client": "External MCP SDK client over OAuth and Streamable HTTP, approved as the acceptance client by the operator.",
+      "broader_spec_gates": [
+        "ChatGPT-specific installation and authenticated use of the deployed production connector remain unverified."
+      ]
     },
     {
       "issue": 780,
@@ -400,7 +404,7 @@
   "integration_tip_at_validation": "0707ee7e",
   "checkpoint": {
     "recorded_at": "2026-11-25T00:56:48-06:00",
-    "state": "pending_deferred_bastion_and_chatgpt",
+    "state": "pending_deferred_bastion",
     "closed_issues": [
       767,
       768,
@@ -413,14 +417,13 @@
       776,
       777,
       778,
+      779,
       780
     ],
     "open_issues": [
-      773,
-      779
+      773
     ],
     "next": [
-      "Identify the authorized ChatGPT app and workspace for #779.",
       "Resume native Bastion boot acceptance only when the operator lifts the #773 deferral.",
       "Run one code-review and one TDD remediation pass after ticket closure."
     ],

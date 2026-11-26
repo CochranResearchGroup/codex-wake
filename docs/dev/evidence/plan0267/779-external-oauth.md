@@ -41,3 +41,13 @@ acceptance still requires a reachable candidate endpoint, an identified
 ChatGPT app and workspace, and a consent grant restricted to the isolated
 target. No live grant, ingress setting, real tab content, or real agent
 message was changed or used in qualification.
+
+## Acceptance client decision
+
+The operator accepted the external MCP SDK client as the verification client
+for #779. The OAuth and Streamable HTTP journeys above exercised the connector
+against isolated native tmux and psmux owners. A fresh run on `da34a065` passed
+23 connector, consent, former-tab history, and psmux tests. Public discovery
+returned HTTP 200 and anonymous MCP returned HTTP 401. Authenticated fixture
+calls ran against the isolated candidate. ChatGPT installation and authenticated
+calls against the deployed production connector remain unverified.
