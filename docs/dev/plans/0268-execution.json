@@ -49,9 +49,18 @@
       "blockers": [
         784
       ],
-      "status": "running",
+      "status": "validated",
       "owner": "/root/cutover",
-      "base": "6f5f2526"
+      "base": "6f5f2526",
+      "tracker": "closed",
+      "worker_result": "841f0289",
+      "result": "766c2cc5",
+      "evidence": [
+        "OAuth HTTP and MCP returned saved history under distinct scopes",
+        "Private tmux rename verified, then reversed",
+        "PostgreSQL enrolled peer, offline and uncertain operations never replayed",
+        "Two integration tests passed using the opt-in database"
+      ]
     },
     {
       "issue": 789,
