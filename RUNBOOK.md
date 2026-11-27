@@ -10901,3 +10901,23 @@ diff from `70ff3585` to `f95850cd` once and ran one TDD remediation pass.
 Added the missing PostgreSQL upgrade for intervention authorization columns.
 The regression verified existing rows and new DND/interrupt receipts. The
 focused PostgreSQL, OAuth, owner, and controller run passed 25 tests.
+
+## Upgrade build cache retention
+
+The autonomous upgrade owner retains Cargo intermediates under its private
+compiler-cache root. The working job and compiler cache share the configured
+temporary byte budget. Once the owner is idle, it retains at most half that
+budget in compiler output. A cache above the idle limit is dropped as a unit
+so the next upgrade starts with room for source, review, and package output.
+
+The upgrade job owner sweeps at terminal completion, cancel or disable, before
+admitting another job, and on each authorized discovery tick. It also removes
+retired job-local Cargo scratch for known terminal jobs. A worker or unresolved
+phase holds cleanup. The sweep preserves staged packages, rollback state,
+historical receipts, and unknown directories. Operator cache cleanup still
+requires exact host write authority and idle ownership.
+
+Live migration and other Cargo target roots are separate. Verify producer
+custody, live references, and Cargo locks before retiring those outputs. Measure
+single-link allocated bytes separately from observed filesystem free-space
+change.
