@@ -33,7 +33,7 @@ class WakeNetworkTests(unittest.TestCase):
                 self.assertEqual(enroll_main(['--dsn-file', str(dsn), '--peer-id', identity,
                                               '--credential-file', str(credentials)]), 0)
             config['wake_network'] = dict(dsn_file=str(dsn), stale_seconds=10)
-            config['targets'] = [dict(config['targets'][0], peer_id=peer)]
+            config['targets'].append(dict(config['targets'][0], peer_id=peer))
             now = 2_000_000_000
 
             def clock():
@@ -42,7 +42,8 @@ class WakeNetworkTests(unittest.TestCase):
             with patch('codex_wake.wake_network.snapshot', clock):
                 app = create_app(config, root, identify=lambda request: 'operator', operations=fixture.operations(root))
             async with fixture.external_client(app, config) as (_, grant, connector):
-                access = await grant('observe')
+                local_access = await grant('observe')
+                access = await grant('observe', targets='1')
                 async with httpx.AsyncClient(transport=httpx.ASGITransport(app), base_url=config['issuer']) as client:
                     first = dict(revision=1, recipients=[dict(conversation_id='stable-a', name='Pilot'),
                                                          dict(conversation_id='stable-b', name='Pilot')])
@@ -60,6 +61,8 @@ class WakeNetworkTests(unittest.TestCase):
                     self.assertEqual((await client.put(route, headers=header, json=first)).status_code, 409)
                     public = '/network/v1/recipients'
                     self.assertEqual((await client.post(public, headers=header, json={})).status_code, 401)
+                    local = await client.post(public, headers={'Authorization': 'Bearer ' + local_access}, json={})
+                    self.assertEqual(local.json(), {'status': 'ok', 'recipients': []})
                     result = await client.post(public, headers={'Authorization': 'Bearer ' + access},
                                                json={'name': 'renamed'})
                     self.assertEqual(result.status_code, 200, result.text)

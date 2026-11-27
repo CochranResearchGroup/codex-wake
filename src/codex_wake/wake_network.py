@@ -13,7 +13,7 @@ from .controller_auth import AuthError
 from .managed_inventory import InventoryError
 from .message_policy import stable_micros
 from .native_clock import snapshot
-from .unified_connectors import check_action, permits
+from .unified_connectors import check_action
 
 LIST = 'network.recipients'
 _IDENTIFIER = r'^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$'
@@ -128,6 +128,13 @@ class WakeNetwork:
                        (revision, json.dumps(directory), now, peer_id))
         return {'peer_id': peer_id, 'revision': revision, 'status': 'accepted'}
 
+    def permits_recipient(self, actor, peer_id, conversation_id):
+        target = dict(host=self.host, environment=self.environment,
+                      peer_id=peer_id, conversation_id=conversation_id)
+        return any(scope.get('peer_id') == peer_id and
+                   all(target.get(key) == value for key, value in scope.items())
+                   for scope in actor.targets)
+
     def discover(self, actor, arguments):
         check_action(actor, LIST)
         if 'observe' not in actor.scopes:
@@ -141,8 +148,7 @@ class WakeNetwork:
         result = []
         for peer, enabled, directory, verified_at in peers:
             for item in directory:
-                if not permits(actor, dict(host=self.host, environment=self.environment,
-                                           peer_id=peer, conversation_id=item['conversation_id'])):
+                if not self.permits_recipient(actor, peer, item['conversation_id']):
                     continue
                 if 'conversation_id' in arguments and arguments['conversation_id'] != item['conversation_id']:
                     continue

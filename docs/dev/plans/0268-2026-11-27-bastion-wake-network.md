@@ -36,7 +36,7 @@ can refresh the current directory. To rename or remove a recipient, publish a
 new revision while retaining its stable conversation ID for a rename. The
 payload has `revision` and `recipients` containing `conversation_id` and
 `name`. Clients separately grant OAuth `observe` for authorized targets. An
-explicit `peer_id` in the target restricts the grant to that peer, and a
-`conversation_id` can narrow it further. Query with OAuth
+explicit `peer_id` in the target grants that peer, and a `conversation_id`
+can narrow it further. An existing local-only target grants no network access. Query with OAuth
 `POST /network/v1/recipients` or MCP `wake_network_recipients`. Optional
 filters are `peer_id`, `conversation_id`, and `name`.
