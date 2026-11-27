@@ -313,13 +313,18 @@ class ScheduleStore:
                     reason = delivery.get('reconciliation', {}).get('reason') or 'delivery_outcome_unknown'
                     uncertain.append(dict(occurrence_id=occurrence_id, wake_id=wake_id,
                         reconciliation=dict(reason=reason, command=['native', 'reconcile', wake_id])))
+        restoration = LiveWakeRestorer(self.root).inspect(
+            dict(value['target'], session_mode=value['request']['session_mode']))
+        restoration_ready = restoration.get('status') != 'blocked'
+        armed = ready and restoration_ready and value['state'] == 'enabled'
+        status = ('armed' if armed else 'held_restoration' if ready and not restoration_ready
+                  and value['state'] == 'enabled' else 'retained_unmonitored'
+                  if not ready and value['state'] == 'enabled' else value['state'])
         return dict(value, session_mode=value['request']['session_mode'],
             persistence=dict(saved=True),
-            restoration=LiveWakeRestorer(self.root).inspect(
-                dict(value['target'], session_mode=value['request']['session_mode'])),
+            restoration=restoration,
             delivery=dict(uncertain=bool(uncertain), uncertain_occurrences=uncertain, held_occurrences=held),
-            armed=ready and value['state'] == 'enabled',
-            scheduling_status='armed' if ready and value['state']=='enabled' else 'retained_unmonitored' if not ready and value['state']=='enabled' else value['state'],
+            armed=armed, scheduling_status=status,
             monitor=dict(ready=ready, wake_root=str(self.root)))
 
     def emit(self, value, occurrence, clock):

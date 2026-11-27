@@ -19,6 +19,7 @@ registration, delivery, enforcement or refresh.
 | List/cancel wakes or emergency pause/interrupt/resume | [Wake controls](references/wake-controls.md) |
 | Durable peer request, claim, reply or suspended reply wake | [Tracked work](references/workflows.md#tracked-agent-to-agent-work) and [mailbox workflow](references/workflows.md#local-agent-mailbox-workflow) |
 | Find a session/tab or address a human tab target | [Human targets](references/workflows.md#human-tab-targets-through-mcp) |
+| Repeated clock/interval monitoring | [Durable recurring schedules](references/workflows.md#durable-recurring-schedules) |
 | Scheduled follow-up, transport choice or host readiness | [Native workflow and preconditions](references/workflows.md#native-workflow-first) and [patterns](references/workflows.md#common-patterns) |
 
 Use your actual native caller identity and existing objective allocation.
