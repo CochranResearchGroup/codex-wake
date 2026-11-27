@@ -53,7 +53,8 @@ _RECEIPT = _schema(dict(
         acknowledgment={'type': 'string', 'minLength': 1, 'maxLength': 256}), ('status',))),
     ('id', 'conversation_id', 'expires_at_micros', 'not_before_micros', 'in_reply_to', 'outcome'))
 _PULL = _schema(dict(limit={'type': 'integer', 'minimum': 1, 'maximum': 64},
-                     after={'type': 'integer', 'minimum': 0, 'maximum': 2**63-1}))
+                     after={'type': 'integer', 'minimum': 0, 'maximum': 2**63-1},
+                     restore_allowlist={'const': True}))
 _SELECT = """SELECT ordinal,id,source,source_conversation,destination,conversation,
                      envelope,outcome FROM wake_network_messages_v1"""
 
@@ -97,6 +98,8 @@ class NetworkMessages:
                 destination text NOT NULL, conversation text NOT NULL,
                 envelope jsonb NOT NULL, outcome jsonb,
                 in_reply_to text REFERENCES wake_network_messages_v1(id))''')
+            db.execute('CREATE TABLE IF NOT EXISTS wake_network_restore_holds_v1 (id text PRIMARY KEY)')
+            db.execute('CREATE TABLE IF NOT EXISTS wake_network_restore_mode_v1 (singleton boolean PRIMARY KEY CHECK (singleton))')
             db.execute('''CREATE INDEX IF NOT EXISTS wake_network_message_pull_v1
                 ON wake_network_messages_v1(destination,ordinal)''')
             db.execute('''CREATE INDEX IF NOT EXISTS wake_network_message_replies_v1
@@ -137,6 +140,12 @@ class NetworkMessages:
     def _row(db, identifier):
         return db.execute(_SELECT + ' WHERE id=%s', (identifier,)).fetchone()
 
+    @staticmethod
+    def _restore_view(db, row):
+        if db.execute('SELECT 1 FROM wake_network_restore_holds_v1 WHERE id=%s', (row[1],)).fetchone():
+            return (*row[:-1], {'status': 'restore_held', 'reason': 'owner_receipt_requires_reconciliation'})
+        return row
+
     def _admit(self, db, source, sender, value):
         from psycopg.types.json import Jsonb
 
@@ -172,7 +181,9 @@ class NetworkMessages:
         if previous is not None:
             if previous[2:7] != (source, sender, destination, conversation, envelope):
                 raise _error('message_conflict', 'message identity already has a different owner or envelope')
-            return self._summary(previous)
+            return self._summary(self._restore_view(db, previous))
+        if db.execute('SELECT 1 FROM wake_network_restore_holds_v1 WHERE id=%s', (identifier,)).fetchone():
+            raise _error('restore_held', 'original admission is held for recovery')
         if peer is not None:
             self._directory_target(db, peer, conversation)
         if sender is not None:
@@ -202,6 +213,7 @@ class NetworkMessages:
             self._authorize_client(actor, STATUS, row[4][5:], row[5])
             replies = db.execute(_SELECT + ''' WHERE in_reply_to=%s AND destination=%s
                                               ORDER BY ordinal LIMIT 128''', (row[1], source)).fetchall()
+            row = self._restore_view(db, row)
             availability = self.network.peer_availability(db, row[4][5:])
         return dict(self._summary(row), recipient_availability=availability,
                     replies=[self._summary(item, include_body='content.observe' in actor.scopes)
@@ -222,6 +234,7 @@ class NetworkMessages:
                 raise AuthError('insufficient_scope')
             replies = db.execute(_SELECT + ''' WHERE in_reply_to=%s AND destination=%s
                                               ORDER BY ordinal LIMIT 128''', (row[1], _peer(peer))).fetchall()
+            row = self._restore_view(db, row)
             availability = self.network.peer_availability(db, row[4][5:]) if row[4].startswith('peer:') else 'current'
         return dict(self._summary(row), recipient_availability=availability,
                     replies=[self._summary(item) for item in replies])
@@ -230,11 +243,19 @@ class NetworkMessages:
         _check(_PULL, value)
         with self._connect() as db:
             self.network.authorize_peer(db, peer, authorization)
+            restored = db.execute('SELECT 1 FROM wake_network_restore_mode_v1').fetchone()
+            if restored and value.get('restore_allowlist') is not True:
+                raise _error('restore_held', 'spoke does not enforce restored custody')
             rows = db.execute(_SELECT + """ WHERE destination=%s AND ordinal>%s
+                AND NOT EXISTS (SELECT 1 FROM wake_network_restore_holds_v1 h
+                                WHERE h.id=wake_network_messages_v1.id)
                 AND coalesce(outcome->>'status','') <> ALL(%s)
                 ORDER BY ordinal LIMIT %s""", (_peer(peer), value.get('after', 0), sorted(_TERMINAL), value.get('limit', 16))).fetchall()
-        return dict(deliveries=[dict(sequence=row[0], message=row[6], sender=self._summary(row))
-                                for row in rows])
+        result = dict(deliveries=[dict(sequence=row[0], message=row[6], sender=self._summary(row))
+                                  for row in rows])
+        if restored:
+            result['restore_allowlist'] = True
+        return result
 
     def receipt(self, peer, authorization, value):
         from psycopg.types.json import Jsonb
@@ -253,6 +274,8 @@ class NetworkMessages:
             row = db.execute(_SELECT + ' WHERE id=%s FOR UPDATE', (value['id'],)).fetchone()
             if not row or row[4] != _peer(peer):
                 raise AuthError('insufficient_scope')
+            if db.execute('SELECT 1 FROM wake_network_restore_holds_v1 WHERE id=%s', (row[1],)).fetchone():
+                raise _error('restore_held', 'original owner journal must resolve restored custody')
             expected = self._summary(row)
             if any(value[key] != expected[key] for key in (
                     'conversation_id', 'expires_at_micros', 'not_before_micros', 'in_reply_to')):

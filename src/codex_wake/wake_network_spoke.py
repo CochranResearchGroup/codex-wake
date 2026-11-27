@@ -25,7 +25,7 @@ from .wake_network_messages import _PEER_SEND, _RECEIPT
 
 
 _FINAL = {'submitted', 'uncertain', 'expired', 'bounced'}
-_MESSAGE_REFUSALS = {'message_conflict', 'invalid_argument', 'unknown_recipient', 'insufficient_scope'}
+_MESSAGE_REFUSALS = {'message_conflict', 'invalid_argument', 'unknown_recipient', 'insufficient_scope', 'restore_held'}
 
 
 class ExchangeUnavailable(OSError):
@@ -173,7 +173,17 @@ class NetworkSpoke:
     def _pull(self):
         with self._db() as db:
             after = db.execute('SELECT pull_after FROM owner').fetchone()[0]
-        replies = self.exchange('pull', {'limit': 16, 'after': after}).get('deliveries')
+        frame = {'limit': 16, 'after': after}
+        try:
+            pull = self.exchange('pull', dict(frame, restore_allowlist=True))
+        except ExchangeUnavailable as exc:
+            if str(exc) != 'invalid_argument':
+                raise
+            # Healthy earlier hubs reject the capability field before
+            # returning work. A restored hub refuses capability-free pulls.
+            pull = self.exchange('pull', frame)
+        replies = pull.get('deliveries')
+        authorized = set() if pull.get('restore_allowlist') else None
         if not isinstance(replies, list) or len(replies) > 16:
             raise ExchangeUnavailable('network_response_invalid')
         try:
@@ -188,9 +198,12 @@ class NetworkSpoke:
                     if message.scope != 'peer:' + self.peer or message.source != 'direct':
                         raise ValueError('hub delivery is addressed to another owner')
                     self._retain(db, message.identifier, 'in', envelope, {'status': 'owner_admitted'})
+                    if authorized is not None:
+                        authorized.add(message.identifier)
                 db.execute('UPDATE owner SET pull_after=?', (after if len(replies) == 16 else 0,))
         except (KeyError, TypeError, ValueError):
             raise ExchangeUnavailable('network_response_invalid') from None
+        return authorized
 
     def _outgoing(self):
         with self._db() as db:
@@ -198,13 +211,18 @@ class NetworkSpoke:
         refusal = None
         for identifier, value, raw in rows:
             previous = json.loads(raw)
-            if previous.get('outcome', {}).get('status') in _FINAL | {'reply_available'}:
+            if previous.get('outcome', {}).get('status') in _FINAL | {'reply_available', 'restore_held'}:
                 continue
             original = json.loads(value)
             try:
                 reply = self.exchange('send', original)
                 self._check_summary(original, reply)
             except ExchangeUnavailable as exc:
+                if str(exc) == 'restore_held':
+                    with self._db() as db, db:
+                        self._save(db, identifier, 'out',
+                                   dict(status='restore_held', outcome={'status': 'restore_held'}))
+                    continue
                 if str(exc) not in _MESSAGE_REFUSALS:
                     raise
                 refusal = exc
@@ -259,13 +277,13 @@ class NetworkSpoke:
             return dict(status='uncertain', attempt_id=attempt, reason='owner_receipt_unverified')
         return MessageHandoff._outcome(attempt, receipt)
 
-    def _incoming(self):
+    def _incoming(self, authorized=None):
         with self._db() as db:
             rows = db.execute("SELECT id,request,outcome FROM transfers WHERE direction='in' ORDER BY rowid").fetchall()
             pending = []
             for identifier, raw, saved in rows:
                 saved = json.loads(saved)
-                if saved['status'] in _FINAL:
+                if saved['status'] in _FINAL or authorized is not None and identifier not in authorized:
                     continue
                 message = Message(**json.loads(raw))
                 message = replace(message, order_recipient=self.recipient_keys.get(message.recipient, message.recipient))
@@ -323,9 +341,12 @@ class NetworkSpoke:
             stages = {'outgoing': self._outgoing, 'pull': self._pull}
             if directory is not None:
                 stages = {'directory': lambda: self.exchange('directory', directory), **stages}
+            authorized = None
             for name, stage in stages.items():
                 try:
-                    stage()
+                    result = stage()
+                    if name == 'pull':
+                        authorized = result
                 except ExchangeUnavailable as exc:
                     failures[name] = str(exc)
             # A fresh authenticated pull proves the hub still entrusts this
@@ -333,7 +354,7 @@ class NetworkSpoke:
             # disconnect or revocation, alongside untouched non-network work.
             if 'pull' not in failures:
                 try:
-                    self._incoming()
+                    self._incoming(authorized)
                 except (Error, OSError):
                     self._schema_ready = False
                     failures['owner'] = 'network_owner_database_unavailable'
