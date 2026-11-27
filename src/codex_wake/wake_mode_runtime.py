@@ -55,6 +55,22 @@ def observe_mode_presence(target, *, resumed=False):
     return 'existing_tab'
 
 
+def submit_background_turn(request, recipient, prompt):
+    """Use stock Codex background turn acceptance for the exact saved thread."""
+    try:
+        binding = recipient.binding
+        response = request(binding['endpoint'], binding['codex_cmd'], 'turn/start',
+            {'threadId': recipient.session_id, 'input': [{'type': 'text', 'text': prompt, 'text_elements': []}]}, 30)
+        turn_id = response.get('turn', {}).get('id')
+        if (not isinstance(turn_id, str) or not turn_id or len(turn_id) > 256
+                or response.get('threadId', recipient.session_id) != recipient.session_id):
+            raise RuntimeTargetError('unavailable', 'background_turn_acceptance_unverified')
+        return RuntimeSubmission('accepted', receipt_id=turn_id, evidence_kind='native_turn_acceptance',
+            evidence=dict(source='native_turn', thread_id=recipient.session_id, turn_id=turn_id))
+    except Exception:
+        return RuntimeSubmission('uncertain', reason='background_turn_acceptance_unverified')
+
+
 class ModeRuntimeAdapter:
     """Choose a verified attachment or saved-thread route without creating identity."""
 
@@ -150,19 +166,7 @@ class ModeRuntimeAdapter:
             return RuntimeSubmission('not_sent', reason='recipient_ownership_unknown', pre_io=True)
         if route == 'background':
             from .native_protocol import native_request
-            try:
-                response = native_request(routed.binding['endpoint'], routed.binding['codex_cmd'],
-                    'turn/start', {'threadId': recipient.session_id,
-                                   'input': [{'type': 'text', 'text': prompt, 'text_elements': []}]}, 30)
-                turn = response.get('turn', {})
-                turn_id = turn.get('id')
-                if (not isinstance(turn_id, str) or not turn_id or len(turn_id) > 256
-                        or response.get('threadId', recipient.session_id) != recipient.session_id):
-                    raise RuntimeTargetError('unavailable', 'background_turn_acceptance_unverified')
-                return RuntimeSubmission('accepted', receipt_id=turn_id,
-                    evidence_kind='native_turn_acceptance', evidence=dict(source='native_turn', thread_id=recipient.session_id, turn_id=turn_id))
-            except Exception:
-                return RuntimeSubmission('uncertain', reason='background_turn_acceptance_unverified')
+            return submit_background_turn(native_request, routed, prompt)
         return self.adapter.submit(routed, prompt)
 
     def submit_bounded(self, recipient, prompt, envelope):
