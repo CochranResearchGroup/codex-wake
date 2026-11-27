@@ -91,7 +91,7 @@
       ],
       "status": "blocked",
       "owner": "/root/busy_dnd",
-      "remaining": "Configure a supported independent qualified time source on Bastion and a private HTTPS ingress with working OAuth consent, then schedule the controlled reboot.",
+      "remaining": "Configure private HTTPS ingress and working OAuth consent, then run the persistent pilot and coordinated reboot. Native Bastion UTC is qualified.",
       "tracker": "open",
       "worker_result": "14b92580",
       "result": "413f48e3",
@@ -102,7 +102,7 @@
       ],
       "rollout_authorized": true,
       "live_staging": {
-        "candidate": "343608cc",
+        "candidate": "cefac52b staged side-by-side; existing inactive hub and spoke not switched.",
         "origin_candidate": "https://bastion.tail3548d2.ts.net:8443",
         "peers": [
           "bastion",
@@ -111,8 +111,9 @@
         "bastion": "Native PostgreSQL and private stock pilot active; hub and spoke boot units present and guarded inactive.",
         "cooper": "WSL stock and private database active; network spoke disabled. Local wake completed exactly once with network unavailable.",
         "ingress": "Tailscale Serve route creation denied to SSH user; no route applied.",
-        "time": "Bastion candidate reported stable_time_configuration_required. Current StableTime native server requires Windows.",
-        "reboot": "Pending; existing Minecraft listener observed, no change."
+        "time": "Installed cefac52b obtained native Linux adjtimex UTC bounds on Bastion without StableTime. WSL still used StableTime. 13 local clock/adapter tests passed.",
+        "reboot": "Pending; existing Minecraft listener observed, no change.",
+        "fleet": "Installed Fleet Receipts 0.1.0 does not have Serve maintenance. Local Fleet plan 0019 records broker acceptance and Fleet dependencies #180 and #203."
       }
     },
     {
@@ -136,7 +137,7 @@
   },
   "checkpoint": {
     "at": "2026-11-27T14:06:07-06:00",
-    "status": "live_staged_waiting_for_ingress_and_independent_time",
+    "status": "live_staged_waiting_for_private_ingress_and_oauth",
     "closed_issues": [
       784,
       785,
@@ -151,6 +152,6 @@
     "review_and_tdd": "Pending until #789 acceptance and closure.",
     "private_evidence_dir": "/tmp/wake783.reIAEp",
     "full_suite": "Attempt on c77a981c stopped under host contention before it finished; no passing full-suite claim.",
-    "next": "Qualify Bastion private ingress, OAuth consent and independent time. Run and prove the persistent pilot before closing #789."
+    "next": "Qualify private ingress and OAuth consent. Switch the dedicated pilot units to the reviewed candidate and run the persistent pilot."
   }
 }
