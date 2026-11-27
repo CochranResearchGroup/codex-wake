@@ -124,6 +124,9 @@ def create_app(config, root, *, identify=None, operations=None):
     consent = BrowserConsent(authority, config, identify)
     entries = {tool_name(canonical(operation)): (operation, schema) for operation, schema in TOOLS.values()}
     network = management = None
+    network_messages = None
+    network_message_operations = {}
+    network_message_policies = {}
     if 'wake_network' in config:
         from .wake_network import WakeNetwork, TOOLS as network_tools
         network = WakeNetwork(config['wake_network'], operations.host, operations.environment)
@@ -131,6 +134,11 @@ def create_app(config, root, *, identify=None, operations=None):
         from .wake_network_management import ACTIONS as management_actions, LiveManagement, TOOLS as management_tools
         management = LiveManagement(network)
         entries.update(management_tools)
+        from .wake_network_messages import NetworkMessages, POLICIES, SEND, STATUS, TOOLS as network_message_tools
+        network_messages = NetworkMessages(network)
+        network_message_operations = {SEND: network_messages.client_send, STATUS: network_messages.client_status}
+        network_message_policies = POLICIES
+        entries.update(network_message_tools)
     schedules = None
     if 'windows_message_owner' in config:
         from .external_owner_schedules import OwnerSchedules, TOOLS as owner_schedule_tools
@@ -151,7 +159,11 @@ def create_app(config, root, *, identify=None, operations=None):
                 check_action(actor, operation)
                 _check_content_scope(actor, operation)
                 policy = schedules.policy(operation) if schedules is not None else None
-                if network is not None and operation == 'network.recipients':
+                if operation in network_message_policies:
+                    policy, description, readonly = network_message_policies[operation]
+                    if policy not in actor.scopes or not any(target.get('peer_id') for target in actor.targets):
+                        continue
+                elif network is not None and operation == 'network.recipients':
                     policy, description, readonly = 'observe', 'Find authorized Wake network recipients.', True
                     if policy not in actor.scopes:
                         continue
@@ -181,7 +193,7 @@ def create_app(config, root, *, identify=None, operations=None):
             if management is not None and operation in management_actions:
                 scopes = sorted(management_actions[operation][1])
             tools.append(types.Tool(name=name, description=description, input_schema=schema,
-                annotations=types.ToolAnnotations(read_only_hint=readonly,destructive_hint=not readonly,idempotent_hint=readonly,open_world_hint=True),
+                annotations=types.ToolAnnotations(read_only_hint=readonly,destructive_hint=not readonly,idempotent_hint=readonly or operation == 'network.messages.send',open_world_hint=True),
                 meta={'securitySchemes': [{'type':'oauth2', 'scopes':scopes}]}))
         return types.ListToolsResult(tools=tools)
 
@@ -192,7 +204,9 @@ def create_app(config, root, *, identify=None, operations=None):
             operation = entries[params.name][0]
             _check_content_scope(actor, operation)
             arguments = _control_arguments(operation, params.arguments or {}, actor)
-            if network is not None and operation == 'network.recipients':
+            if operation in network_message_operations:
+                dispatch = partial(network_message_operations[operation], actor, arguments)
+            elif network is not None and operation == 'network.recipients':
                 dispatch = partial(network.discover, actor, arguments)
             elif management is not None and operation in management_actions:
                 dispatch = partial(management.submit, actor, operation, arguments, partial(verifier.actor, token))
@@ -221,6 +235,8 @@ def create_app(config, root, *, identify=None, operations=None):
     async def lifespan(app):
         if network is not None:
             await anyio.to_thread.run_sync(network.initialize)
+        if network_messages is not None:
+            await anyio.to_thread.run_sync(network_messages.initialize)
         async with manager.run():
             yield
 
@@ -255,6 +271,8 @@ def create_app(config, root, *, identify=None, operations=None):
         network_routes = routes(network, verifier, url.netloc)
         from .wake_network_management import routes as management_routes
         network_routes += management_routes(management, verifier, url.netloc)
+        from .wake_network_messages_http import message_routes
+        network_routes += message_routes(network_messages, verifier, url.netloc)
     return Starlette(routes=network_routes + [Route('/register', guarded(consent.register), methods=['POST']),
         Route('/token', guarded(consent.token), methods=['POST']),
         Route('/revoke', guarded(consent.revoke), methods=['POST']),

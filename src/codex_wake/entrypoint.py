@@ -5,6 +5,9 @@ import sys
 
 def main(argv=None):
     args = sys.argv[1:] if argv is None else argv
+    if args and args[0] == 'wake-network-spoke':
+        from .wake_network_spoke import main as run
+        return run(args[1:])
     if args and args[0] == 'ssh-views':
         from .ssh_views import main as run
         return run(args[1:])
