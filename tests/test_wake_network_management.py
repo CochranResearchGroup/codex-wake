@@ -75,13 +75,15 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                     async with connect(broad) as broad_session:
                         visible = {tool.name for tool in (await broad_session.list_tools()).tools}
                         self.assertNotIn('wake_network_history_search', visible)
+                        self.assertNotIn('wake_network_management_catalog', visible)
+                        self.assertNotIn('wake_network_management_execute', visible)
                     denied = await client.post(route.replace('search', 'read'), headers=headers, json=address)
                     self.assertEqual(denied.status_code, 403)
                     bad_peer = await client.post(base + '/management/pull', headers=headers, json={})
                     self.assertEqual(bad_peer.status_code, 401)
 
-                    async def pull():
-                        waiting = asyncio.create_task(client.post(base + '/management/pull', headers=peer_headers, json={}))
+                    async def pull(advertisement=None):
+                        waiting = asyncio.create_task(client.post(base + '/management/pull', headers=peer_headers, json=advertisement or {}))
                         for _ in range(250):
                             if peer in live.polls:
                                 return waiting
@@ -235,6 +237,124 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                         json={'id': original['id'], 'result': {'status': 'completed'}})
                     self.assertEqual(stale.json(), {'status': 'expired'})
                     self.assertEqual(await start(original), {'status': 'expired'})
+
+                    from codex_wake.unified_contract import canonical
+                    from codex_wake.controller_http import TOOLS
+                    from codex_wake.wake_network_catalog import contract
+
+                    catalog_path = '/network/v1/management/catalog'
+                    execute_path = '/network/v1/management/execute'
+                    control_headers = {'Authorization': 'Bearer ' + control}
+                    rename_op = canonical('tabs.rename')
+                    fixed = dict(terminal_owner.bindings[thread]['network.tabs.rename'])
+                    fixed['expected_target'] = lifecycle.inspect('pilot')['target']
+                    terminal_owner.capabilities = {thread: {rename_op: {
+                        'fixed': fixed, 'target': fixed['expected_target']}}}
+                    self.assertEqual((await client.post(catalog_path, headers=control_headers,
+                        json=address)).json(), {'status': 'offline', 'operations': []})
+                    waiting = await pull(terminal_owner.advertisement())
+                    catalog_response = (await client.post(catalog_path, headers=control_headers,
+                                                          json=address)).json()
+                    entry, = catalog_response['operations']
+                    self.assertEqual(entry['operation'], rename_op)
+                    _, original_schema = TOOLS['wake_environment_tabs_rename']
+                    self.assertEqual(entry['arguments']['properties'],
+                                     {key: value for key, value in original_schema['properties'].items()
+                                      if key not in fixed})
+                    self.assertEqual((await client.post(catalog_path, headers=headers,
+                        json=address)).json()['operations'], [])
+                    wrong_target = await client.post(catalog_path, headers=control_headers,
+                                                     json=dict(address, conversation_id=uuid4().hex))
+                    self.assertEqual(wrong_target.status_code, 403)
+
+                    request_id = str(uuid4())
+                    intent = dict(operation_id=request_id, idempotency_key=request_id, correlation_id=request_id,
+                                  binding='wake-network-qualification', target=fixed['expected_target'])
+                    call = dict(address, operation=rename_op, contract=entry['contract'],
+                                arguments=dict(name='catalog-renamed', _request=intent))
+                    wrong_args = await client.post(execute_path, headers=control_headers,
+                        json=dict(call, arguments=dict(call['arguments'], window='@other')))
+                    self.assertEqual(wrong_args.json(), {'error': 'invalid_argument'})
+                    wrong_contract = await client.post(execute_path, headers=control_headers,
+                                                       json=dict(call, contract=uuid4().hex))
+                    self.assertEqual(wrong_contract.json(), {'error': 'contract_changed'})
+                    async with connect(control) as session:
+                        mcp_catalog = await session.call_tool('wake_network_management_catalog', address)
+                        self.assertEqual(mcp_catalog.structured_content, catalog_response)
+                        scheduled = asyncio.create_task(session.call_tool('wake_network_management_execute', call))
+                        envelope = (await waiting).json()['request']
+                        self.assertEqual(await start(envelope), {'status': 'started'})
+                        effect = await asyncio.to_thread(terminal_owner.execute, envelope)
+                        self.assertEqual(effect['status'], 'completed', effect)
+                        self.assertEqual(tmux('display-message', '-p', '-t', window, '#{window_name}'), 'catalog-renamed')
+                        receipt = await client.post(base + '/management/complete', headers=peer_headers,
+                            json={'id': envelope['id'], 'result': effect})
+                        self.assertEqual(receipt.json()['status'], 'completed')
+                        self.assertEqual((await scheduled).structured_content['status'], 'completed')
+                    self.assertEqual((await client.post(execute_path, headers=control_headers,
+                                                        json=call)).json(), {'status': 'offline'})
+
+                    # A different peer's credential cannot start or complete this peer's operation.
+                    other_peer, other_secret = uuid4().hex, uuid4().hex
+                    hub.enroll(other_peer, other_secret)
+                    other_headers = {'Authorization': 'Bearer ' + other_secret}
+                    other = f'/network/v1/peers/{other_peer}/management'
+                    history_op = canonical('history.read')
+                    owner.capabilities = {thread: {history_op: {'target': account_target,
+                        'fixed': {'owner': 'pilot', 'thread_id': thread}}}}
+                    waiting = await pull(owner.advertisement())
+                    content_headers = {'Authorization': 'Bearer ' + content}
+                    history, = (await client.post(catalog_path, headers=content_headers,
+                                                  json=address)).json()['operations']
+                    call = dict(address, operation=history_op, contract=history['contract'], arguments={})
+                    self.assertEqual((await client.post(execute_path, headers=headers, json=call)).status_code, 403)
+                    scheduled = asyncio.create_task(client.post(execute_path, headers=content_headers, json=call))
+                    envelope = (await waiting).json()['request']
+                    foreign_start = await client.post(other + '/start', headers=other_headers,
+                                                      json={'id': envelope['id']})
+                    self.assertEqual(foreign_start.json(), {'status': 'expired'})
+                    self.assertEqual(await start(envelope), {'status': 'started'})
+                    value = await asyncio.to_thread(owner.execute, envelope)
+                    self.assertEqual(value['result']['records'][1]['payload']['content'], marker)
+                    foreign_completion = await client.post(other + '/complete', headers=other_headers,
+                        json={'id': envelope['id'], 'result': value})
+                    self.assertEqual(foreign_completion.json(), {'status': 'expired'})
+                    epoch += 9
+                    self.assertEqual((await scheduled).json()['status'], 'uncertain')
+                    stale = await client.post(base + '/management/complete', headers=peer_headers,
+                        json={'id': envelope['id'], 'result': value})
+                    self.assertEqual(stale.json(), {'status': 'expired'})
+
+                    from codex_wake.wake_network_management import spoke_tick
+
+                    loop = asyncio.get_running_loop()
+
+                    def exchange(verb, arguments):
+                        response = asyncio.run_coroutine_threadsafe(client.post(
+                            base + '/management/' + verb, headers=peer_headers, json=arguments), loop)
+                        return response.result(timeout=12).json()
+
+                    spoke = asyncio.create_task(asyncio.to_thread(spoke_tick, exchange, owner))
+                    try:
+                        for _ in range(250):
+                            if peer in live.polls:
+                                break
+                            if spoke.done():
+                                self.fail(await spoke)
+                            await asyncio.sleep(.01)
+                        result = await client.post(execute_path, headers=content_headers, json=call)
+                        self.assertEqual(result.json()['result']['records'][1]['payload']['content'], marker)
+                        self.assertEqual(await spoke, {'status': 'completed'})
+                    finally:
+                        if not spoke.done():
+                            spoke.cancel()
+
+                    build = canonical('builds.run')
+                    from jsonschema import Draft202012Validator
+                    _, schema, _ = contract(build, ['recipe'])
+                    self.assertFalse(Draft202012Validator(schema).is_valid({'run_id': 'different'}))
+                    self.assertTrue(Draft202012Validator(schema).is_valid(
+                        {'upstream': 'a' * 40, 'mod_revision': 'b' * 40}))
 
                     waiting = await pull()
                     withdrawn = asyncio.create_task(client.post(route, headers=headers, json=address))

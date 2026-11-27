@@ -127,6 +127,8 @@ def create_app(config, root, *, identify=None, operations=None):
     network_messages = None
     network_message_operations = {}
     network_message_policies = {}
+    from .wake_network_catalog import CATALOG, EXECUTE, TOOLS_PUBLIC
+    management_catalog = set()
     if 'wake_network' in config:
         from .wake_network import WakeNetwork, TOOLS as network_tools
         network = WakeNetwork(config['wake_network'], operations.host, operations.environment)
@@ -134,6 +136,8 @@ def create_app(config, root, *, identify=None, operations=None):
         from .wake_network_management import ACTIONS as management_actions, LiveManagement, TOOLS as management_tools
         management = LiveManagement(network)
         entries.update(management_tools)
+        entries.update(TOOLS_PUBLIC)
+        management_catalog = {CATALOG, EXECUTE}
         from .wake_network_messages import NetworkMessages, POLICIES, SEND, STATUS, TOOLS as network_message_tools
         network_messages = NetworkMessages(network)
         network_message_operations = {SEND: network_messages.client_send, STATUS: network_messages.client_status}
@@ -167,6 +171,13 @@ def create_app(config, root, *, identify=None, operations=None):
                     policy, description, readonly = 'observe', 'Find authorized Wake network recipients.', True
                     if policy not in actor.scopes:
                         continue
+                elif operation in management_catalog:
+                    if not management.has_target(actor):
+                        continue
+                    policy = None
+                    readonly = operation == CATALOG
+                    description = ('List the exact peer’s authorized live controller argument contracts.'
+                                   if readonly else 'Execute an operation on the exact peer using its current contract.')
                 elif management is not None and operation in management_actions:
                     controller_operation = management_actions[operation][0]
                     if not management.visible(actor, operation):
@@ -208,6 +219,10 @@ def create_app(config, root, *, identify=None, operations=None):
                 dispatch = partial(network_message_operations[operation], actor, arguments)
             elif network is not None and operation == 'network.recipients':
                 dispatch = partial(network.discover, actor, arguments)
+            elif operation == CATALOG and operation in management_catalog:
+                dispatch = partial(management.list_catalog, actor, arguments)
+            elif operation == EXECUTE and operation in management_catalog:
+                dispatch = partial(management.execute_catalog, actor, arguments, partial(verifier.actor, token))
             elif management is not None and operation in management_actions:
                 dispatch = partial(management.submit, actor, operation, arguments, partial(verifier.actor, token))
             elif schedules is not None and schedules.policy(operation):

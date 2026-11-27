@@ -26,7 +26,7 @@ TOOLS_PUBLIC = {
     'wake_network_management_execute': (EXECUTE, object_schema(EXECUTE_FIELDS)),
 }
 ENTRY = object_schema(dict(operation=_ID, fixed=dict(type='array', maxItems=100, uniqueItems=True, items=_ID),
-                           contract=_ID))
+                           contract=_ID, binding_revision=_ID))
 ADVERTISEMENT = dict(type='object', maxProperties=100, propertyNames=_ID,
                      additionalProperties=dict(type='array', maxItems=256, items=ENTRY))
 PULL = dict(type='object', properties={'catalog': ADVERTISEMENT}, additionalProperties=False)
@@ -40,6 +40,8 @@ def registered():
 
 def scopes(operation):
     required = ProtectedOperations.READ_POLICIES.get(operation, (None,))[0]
+    if required is None:
+        return frozenset()
     return frozenset(filter(None, (required, delegated_content_scope(operation))))
 
 
@@ -50,19 +52,36 @@ def authorized(actor, operation):
         raise AuthError('insufficient_scope')
 
 
-def contract(name, fixed):
+def fingerprint(value):
+    return sha256(dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+
+def contract(name, fixed, binding_revision=None):
     operation, schema = registered()[name]
     properties = schema.get('properties', {})
     if not set(fixed) <= properties.keys():
         raise ValueError('fixed arguments must be part of the controller schema')
-    public = dict(schema, properties={k: v for k, v in properties.items() if k not in fixed},
-                  required=[k for k in schema.get('required', []) if k not in fixed])
-    digest = sha256(dumps([name, sorted(fixed), schema], sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+    public = without_fixed_requirements(schema, fixed)
+    public.update(additionalProperties=False, properties={k: v for k, v in properties.items() if k not in fixed})
+    digest = fingerprint([name, sorted(fixed), schema, binding_revision])
     return operation, public, digest
 
 
+def without_fixed_requirements(schema, fixed):
+    """Project object-level required branches onto the caller's unpinned fields."""
+    projected = dict(schema)
+    if 'required' in schema:
+        projected['required'] = [name for name in schema['required'] if name not in fixed]
+    for keyword in ('allOf', 'anyOf', 'oneOf'):
+        if keyword in schema:
+            projected[keyword] = [without_fixed_requirements(part, fixed) for part in schema[keyword]]
+    if 'not' in schema:
+        projected['not'] = without_fixed_requirements(schema['not'], fixed)
+    return projected
+
+
 def local_binding(actor, name, binding, owner):
-    operation, public, digest = contract(name, binding['fixed'])
+    operation, public, digest = contract(name, binding['fixed'], fingerprint(binding))
     authorized(actor, operation)
     target = binding['target']
     if (not isinstance(target, dict) or target.get('host') != owner.host
@@ -71,13 +90,19 @@ def local_binding(actor, name, binding, owner):
     return replace(actor, actions=frozenset({canonical(operation)}), targets=[dict(target)]), public, digest
 
 
+def attenuate(actor, scopes_from_hub, operation):
+    actor = replace(actor, scopes=actor.scopes.intersection(scopes_from_hub), delegated=True)
+    authorized(actor, operation)
+    return actor
+
+
 def advertised(entries):
     """Resolve peer announcements against this deploy's known controller schemas."""
     result = {}
     for entry in entries:
         name = entry['operation']
         try:
-            operation, schema, digest = contract(name, entry['fixed'])
+            operation, schema, digest = contract(name, entry['fixed'], entry['binding_revision'])
         except (KeyError, ValueError):
             continue
         if digest == entry['contract']:

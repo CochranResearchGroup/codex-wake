@@ -55,11 +55,14 @@ class LiveManagement:
         self.polls = {}
         self.pending = {}
 
-    def visible(self, actor, action):
+    def has_target(self, actor):
         fields = {'host', 'environment', 'peer_id', 'conversation_id'}
-        return ACTIONS[action][1] <= actor.scopes and any(
+        return any(
             set(target) == fields and target['host'] == self.network.host
             and target['environment'] == self.network.environment for target in actor.targets)
+
+    def visible(self, actor, action):
+        return ACTIONS[action][1] <= actor.scopes and self.has_target(actor)
 
     def trusted_now(self):
         return stable_micros(self.network.clock(), upper=True)
@@ -119,7 +122,8 @@ class LiveManagement:
         peer, recipient, enabled = self.address(actor, arguments)
         return self.dispatch(actor, peer, enabled,
                              dict(action=catalog.EXECUTE, conversation_id=recipient, operation=name,
-                                  arguments=arguments['arguments'], contract=arguments['contract']), verify)
+                                  arguments=arguments['arguments'], contract=arguments['contract'],
+                                  scopes=sorted(actor.scopes)), verify)
 
     def dispatch(self, actor, peer, enabled, envelope, verify):
         now = self.trusted_now()
@@ -285,13 +289,18 @@ class SpokeManagement:
                     _, _, digest = catalog.local_binding(actor, name, binding, self.protected.operations)
                 except (AuthError, KeyError, ValueError):
                     continue
-                available.append(dict(operation=name, fixed=sorted(binding['fixed']), contract=digest))
+                available.append(dict(operation=name, fixed=sorted(binding['fixed']), contract=digest,
+                                      binding_revision=catalog.fingerprint(binding)))
             directory[recipient] = available
         _check(catalog.ADVERTISEMENT, directory)
         return {'catalog': directory}
 
     def execute_capability(self, envelope):
+        now = stable_micros(self.clock(), upper=True)
+        if now is None or now >= envelope['deadline']:
+            return {'status': 'expired'}
         name = envelope['operation']
+        entered = False
         try:
             binding = self.capabilities[envelope['conversation_id']][name]
             operation, _, _ = catalog.contract(name, binding['fixed'])
@@ -301,16 +310,22 @@ class SpokeManagement:
                 if digest != envelope['contract']:
                     raise InventoryError('contract_changed', 'spoke contract changed')
                 _check(schema, envelope['arguments'])
-                return exact
+                return catalog.attenuate(exact, envelope['scopes'], operation)
 
             authority = DeadlineAuthority(self.protected.authority, self.clock, envelope['deadline'],
                                           catalog.scopes(operation), narrow)
+            from .external_connector import _control_arguments, _control_result
+
+            actor = authority.authenticate(self.token)
             arguments = dict(envelope['arguments'], **binding['fixed'])
             _check(catalog.registered()[name][1], arguments)
-            return ProtectedOperations(authority, self.protected.operations).execute(
+            arguments = _control_arguments(operation, arguments, actor)
+            entered = True
+            value = ProtectedOperations(authority, self.protected.operations).execute(
                 self.token, operation, arguments)
-        except (AuthError, KeyError):
-            return {'status': 'denied'}
+            return _control_result(operation, value, authority.authenticate(self.token))
+        except (AuthError, KeyError, ValueError):
+            return {'status': 'uncertain' if entered else 'denied'}
         except InventoryError as error:
             return {'status': 'failed', 'error': error.code}
 
@@ -442,7 +457,7 @@ def main(argv=None):
 
     def request(operation, value):
         path = f'/network/v1/peers/{peer}/management/{operation}'
-        data = json.dumps(value).encode()
+        data = json.dumps(value, separators=(',', ':')).encode()
         if len(data) > 65536 and operation == 'complete':
             data = json.dumps({'id': value['id'], 'result': {'status': 'failed', 'error': 'response_too_large'}}).encode()
         call = Request(issuer + path, data=data, headers={
