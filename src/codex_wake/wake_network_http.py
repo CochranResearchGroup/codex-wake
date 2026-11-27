@@ -43,7 +43,10 @@ def guard(verifier, host):
             except AuthError as error:
                 value, status = {'error': error.code}, 403 if error.code == 'insufficient_scope' else 401
             except InventoryError as error:
-                status = {'directory_conflict': 409, 'trusted_time_unavailable': 503}.get(error.code, 400)
+                status = {
+                    'directory_conflict': 409, 'message_conflict': 409,
+                    'trusted_time_unavailable': 503, 'network_store_unavailable': 503,
+                }.get(error.code, 400)
                 value = {'error': error.code}
             except (ValueError, TypeError):
                 value, status = {'error': 'invalid_request'}, 400
