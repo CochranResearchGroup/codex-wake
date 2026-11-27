@@ -10,6 +10,7 @@ from .managed_inventory import InventoryError
 from .message_policy import stable_micros
 from .unified_connectors import check_action
 from .wake_network import _ID, _check
+from . import wake_network_catalog as catalog
 
 ACTIONS = {
     'network.history.search': ('history.search', {'history.observe'}),
@@ -32,6 +33,7 @@ _SLOT_LIMIT = 8
 @dataclass
 class Poll:
     envelope: dict | None = None
+    catalog: dict | None = None
 
 
 @dataclass
@@ -71,6 +73,11 @@ class LiveManagement:
         check_action(actor, action)
         if not ACTIONS[action][1] <= actor.scopes:
             raise AuthError('insufficient_scope')
+        peer, recipient, enabled = self.address(actor, arguments)
+        return self.dispatch(actor, peer, enabled, dict(action=action, conversation_id=recipient,
+                             name=arguments.get('name')), verify)
+
+    def address(self, actor, arguments):
         peer, recipient = arguments['peer_id'], arguments['conversation_id']
         scope = dict(host=self.network.host, environment=self.network.environment,
                      peer_id=peer, conversation_id=recipient)
@@ -81,6 +88,40 @@ class LiveManagement:
                              (peer,)).fetchone()
         if not row or not any(item['conversation_id'] == recipient for item in row[1]):
             raise AuthError('insufficient_scope')
+        return peer, recipient, row[0]
+
+    def list_catalog(self, actor, arguments):
+        catalog.validate_address(arguments)
+        check_action(actor, catalog.CATALOG)
+        peer, recipient, enabled = self.address(actor, arguments)
+        with self.ready:
+            slot = self.polls.get(peer)
+            if not enabled or slot is None or slot.catalog is None or slot.envelope is not None:
+                return {'status': 'offline', 'operations': []}
+            entries = slot.catalog.get(recipient, {})
+        visible = []
+        for name, (operation, schema, digest) in sorted(entries.items()):
+            try:
+                catalog.authorized(actor, operation)
+            except AuthError:
+                continue
+            visible.append(dict(operation=name, arguments=schema, contract=digest,
+                                scopes=sorted(catalog.scopes(operation))))
+        return {'status': 'current', 'operations': visible}
+
+    def execute_catalog(self, actor, arguments, verify):
+        catalog.validate_address(arguments, execute=True)
+        check_action(actor, catalog.EXECUTE)
+        name = arguments['operation']
+        if name not in catalog.registered():
+            raise AuthError('insufficient_scope')
+        catalog.authorized(actor, catalog.registered()[name][0])
+        peer, recipient, enabled = self.address(actor, arguments)
+        return self.dispatch(actor, peer, enabled,
+                             dict(action=catalog.EXECUTE, conversation_id=recipient, operation=name,
+                                  arguments=arguments['arguments'], contract=arguments['contract']), verify)
+
+    def dispatch(self, actor, peer, enabled, envelope, verify):
         now = self.trusted_now()
         if now is None:
             raise InventoryError('trusted_time_unavailable', 'live request needs trusted time')
@@ -92,8 +133,15 @@ class LiveManagement:
         reverify()
         with self.ready:
             poll = self.polls.get(peer)
-            if not row[0] or poll is None or poll.envelope is not None:
+            if not enabled or poll is None or poll.envelope is not None:
                 return {'status': 'offline'}
+            if envelope['action'] == catalog.EXECUTE:
+                entry = (poll.catalog or {}).get(envelope['conversation_id'], {}).get(envelope['operation'])
+                if entry is None:
+                    raise AuthError('insufficient_scope')
+                if entry[2] != envelope['contract']:
+                    raise InventoryError('contract_changed', 'refresh the exact peer catalog')
+                _check(entry[1], envelope['arguments'])
             if len(self.pending) >= _SLOT_LIMIT:
                 return {'status': 'capacity'}
             request = str(uuid4())
@@ -102,8 +150,7 @@ class LiveManagement:
                 raise AuthError()
             item = Pending(peer, deadline, reverify)
             self.pending[request] = item
-            poll.envelope = dict(id=request, action=action, deadline=item.deadline,
-                                         conversation_id=recipient, name=arguments.get('name'))
+            poll.envelope = dict(envelope, id=request, deadline=item.deadline)
             self.ready.notify_all()
         try:
             wait = self.timeout
@@ -128,14 +175,16 @@ class LiveManagement:
         return response
 
     def pull(self, peer, authorization, arguments):
-        _check({'type': 'object', 'maxProperties': 0}, arguments)
+        _check(catalog.PULL, arguments)
         self.peer(peer, authorization)
         with self.ready:
             if peer in self.polls:
                 return {'status': 'poll_in_progress'}
             if len(self.polls) >= _SLOT_LIMIT:
                 return {'status': 'capacity'}
-            slot = Poll()
+            announced = arguments.get('catalog')
+            slot = Poll(catalog={recipient: catalog.advertised(entries)
+                                 for recipient, entries in announced.items()} if announced is not None else None)
             self.polls[peer] = slot
             try:
                 self.ready.wait_for(lambda: slot.envelope is not None, timeout=self.timeout)
@@ -199,8 +248,9 @@ class LiveManagement:
 
 
 class DeadlineAuthority:
-    def __init__(self, authority, clock, deadline, scopes):
+    def __init__(self, authority, clock, deadline, scopes, narrow=None):
         self.authority, self.clock, self.deadline, self.scopes = authority, clock, deadline, scopes
+        self.narrow = narrow
 
     def __getattr__(self, name):
         return getattr(self.authority, name)
@@ -210,19 +260,66 @@ class DeadlineAuthority:
         now = stable_micros(self.clock(), upper=True)
         if now is None or now >= self.deadline or not self.scopes <= actor.scopes:
             raise AuthError('insufficient_scope')
-        return actor
+        return self.narrow(actor) if self.narrow else actor
 
 
 class SpokeManagement:
     """A local operator binds each network identity to existing controller arguments."""
-    def __init__(self, bindings, protected, token, clock):
+    def __init__(self, bindings, protected, token, clock, capabilities=None):
         self.bindings, self.protected = bindings, protected
         self.token, self.clock = token, clock
+        self.capabilities = capabilities or {}
+
+    def advertisement(self):
+        if not self.capabilities:
+            return {}
+        try:
+            actor = self.protected.authority.authenticate(self.token)
+        except AuthError:
+            return {'catalog': {}}
+        directory = {}
+        for recipient, bindings in self.capabilities.items():
+            available = []
+            for name, binding in bindings.items():
+                try:
+                    _, _, digest = catalog.local_binding(actor, name, binding, self.protected.operations)
+                except (AuthError, KeyError, ValueError):
+                    continue
+                available.append(dict(operation=name, fixed=sorted(binding['fixed']), contract=digest))
+            directory[recipient] = available
+        _check(catalog.ADVERTISEMENT, directory)
+        return {'catalog': directory}
+
+    def execute_capability(self, envelope):
+        name = envelope['operation']
+        try:
+            binding = self.capabilities[envelope['conversation_id']][name]
+            operation, _, _ = catalog.contract(name, binding['fixed'])
+
+            def narrow(actor):
+                exact, schema, digest = catalog.local_binding(actor, name, binding, self.protected.operations)
+                if digest != envelope['contract']:
+                    raise InventoryError('contract_changed', 'spoke contract changed')
+                _check(schema, envelope['arguments'])
+                return exact
+
+            authority = DeadlineAuthority(self.protected.authority, self.clock, envelope['deadline'],
+                                          catalog.scopes(operation), narrow)
+            arguments = dict(envelope['arguments'], **binding['fixed'])
+            _check(catalog.registered()[name][1], arguments)
+            return ProtectedOperations(authority, self.protected.operations).execute(
+                self.token, operation, arguments)
+        except (AuthError, KeyError):
+            return {'status': 'denied'}
+        except InventoryError as error:
+            return {'status': 'failed', 'error': error.code}
 
     def execute(self, envelope):
         from copy import deepcopy
 
         action = envelope['action']
+        if action == catalog.EXECUTE:
+            return self.execute_capability(envelope)
         try:
             arguments = deepcopy(self.bindings[envelope['conversation_id']][action])
             operation = ACTIONS[action][0]
@@ -270,6 +367,9 @@ def routes(management, verifier, host):
         Route('/network/v1/peers/{peer_id}/management/pull', endpoint(management.pull), methods=['POST']),
         Route('/network/v1/peers/{peer_id}/management/start', endpoint(management.start), methods=['POST']),
         Route('/network/v1/peers/{peer_id}/management/complete', endpoint(management.complete), methods=['POST']),
+        Route('/network/v1/management/catalog', endpoint(management.list_catalog, client=True), methods=['POST']),
+        Route('/network/v1/management/execute', endpoint(management.execute_catalog, client=True, reverify=True),
+              methods=['POST']),
     ] + [
         Route('/network/v1/management/' + action.removeprefix('network.').replace('.', '/'),
               endpoint(partial(_submit, management, action), client=True, reverify=True), methods=['POST'])
@@ -283,7 +383,7 @@ def _submit(management, action, actor, arguments, verify):
 
 def spoke_tick(request, local):
     """Poll once through a peer-authenticated client. A lost claim is never repulled."""
-    answer = request('pull', {})
+    answer = request('pull', local.advertisement())
     if answer['status'] != 'claimed':
         return answer
     envelope = answer['request']
@@ -330,7 +430,8 @@ def main(argv=None):
     auth = OAuthAuthority(authority / 'authority.sqlite', issuer=auth_config['issuer'],
                           resource=auth_config['resource'], on_revoke=operation_owner(root).revoke_grant)
     protected = ProtectedOperations(auth, operations_from_root(root))
-    local = SpokeManagement(config['bindings'], protected, secret('controller_token_file'), snapshot)
+    local = SpokeManagement(config['bindings'], protected, secret('controller_token_file'), snapshot,
+                            config.get('capabilities'))
     credential = secret('peer_token_file')
 
     class NoRedirect(HTTPRedirectHandler):
