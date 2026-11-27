@@ -43,16 +43,24 @@
       "blockers": [
         785
       ],
-      "status": "running",
-      "owner": "/root/busy_dnd"
+      "status": "validated",
+      "owner": "/root/busy_dnd",
+      "tracker": "closed",
+      "worker_result": "33a17724",
+      "result": "3dc7abb1",
+      "evidence": "TLS outage, local native wake during outage, exact-peer revocation and re-enrollment with preserved receipts."
     },
     {
       "issue": 787,
       "blockers": [
         785
       ],
-      "status": "running",
-      "owner": "/root/cutover"
+      "status": "validated",
+      "owner": "/root/cutover",
+      "tracker": "closed",
+      "worker_result": "019ad859",
+      "result": "3fba62af",
+      "evidence": "Actual PostgreSQL dump and restore with credential quarantine, exact receipt recovery, preserved uncertainty, zero replay."
     },
     {
       "issue": 788,
@@ -80,15 +88,27 @@
         787,
         788
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/busy_dnd",
+      "remaining": "Prepare and qualify staged installation; persistent live rollout needs separate user authorization."
     },
     {
       "issue": 790,
       "blockers": [
         788
       ],
-      "status": "running",
-      "owner": "/root/former_tab"
+      "status": "validated",
+      "owner": "/root/former_tab",
+      "tracker": "closed",
+      "worker_result": "9e8b73fb",
+      "result": "2e52e5f6",
+      "evidence": "All controller contracts map to existing scopes. API/MCP catalog and live local history and reversible tmux action."
     }
-  ]
+  ],
+  "integration_tests": {
+    "source": "3fba62af",
+    "result": "4 passed",
+    "command": "PYTHONPATH=src:tests python -m unittest test_wake_network_restore test_wake_network_messages test_wake_network.WakeNetworkTests test_wake_network_management -q",
+    "environment": "isolated PostgreSQL, real loopback TLS, OAuth MCP and private tmux"
+  }
 }
