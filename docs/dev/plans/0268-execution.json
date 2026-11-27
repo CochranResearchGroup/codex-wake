@@ -89,31 +89,33 @@
         787,
         788
       ],
-      "status": "blocked",
+      "status": "in_progress",
       "owner": "/root/busy_dnd",
-      "remaining": "Configure private HTTPS ingress and working OAuth consent, then run the persistent pilot and coordinated reboot. Native Bastion UTC is qualified.",
+      "remaining": "Complete the isolated restore and native boot receipts. Qualify consent and gateway management using the live OAuth surface.",
       "tracker": "open",
       "worker_result": "14b92580",
       "result": "413f48e3",
       "evidence": [
         "Exact installed wheel staged and verified; four stock turns over HTTPS and two replies",
         "Linux recipient resumed original conversation after stock app-server restart",
-        "29 focused integrated tests passed"
+        "29 focused integrated tests passed",
+        "Persistent Cooper and Bastion peers exchanged one request and linked reply each via HTTPS. Each receiving native session recorded one input and completion per delivery.",
+        "While only the Cooper pilot spoke was stopped, Bastion accepted an undelivered canary and Cooper independently completed a local wake on its original thread. After reconnect, the original canary completed once with the same expiry and one PostgreSQL attempt."
       ],
       "rollout_authorized": true,
       "live_staging": {
-        "candidate": "cefac52b staged side-by-side; existing inactive hub and spoke not switched.",
+        "candidate": "Both spokes deployed on cefac52b. OAuth native UTC fix 5426e547 passed local qualification and is pending dedicated hub switch.",
         "origin_candidate": "https://bastion.tail3548d2.ts.net:8443",
         "peers": [
           "bastion",
           "cooper-wsl"
         ],
-        "bastion": "Native PostgreSQL and private stock pilot active; hub and spoke boot units present and guarded inactive.",
-        "cooper": "WSL stock and private database active; network spoke disabled. Local wake completed exactly once with network unavailable.",
-        "ingress": "Tailscale Serve route creation denied to SSH user; no route applied.",
+        "bastion": "Native PostgreSQL, private stock Codex, loopback responder, hub and spoke active and enabled.",
+        "cooper": "Dedicated WSL stock Codex, private database and spoke active. Local wake previously completed exactly once with the network inactive.",
+        "ingress": "Operator applied a Tailnet-only HTTPS Serve route to the dedicated Bastion loopback hub. Trusted TLS, OAuth discovery and 401 responses on anonymous MCP and peer requests verified from Cooper.",
         "time": "Installed cefac52b obtained native Linux adjtimex UTC bounds on Bastion without StableTime. WSL still used StableTime. 13 local clock/adapter tests passed.",
         "reboot": "Pending; existing Minecraft listener observed, no change.",
-        "fleet": "Installed Fleet Receipts 0.1.0 does not have Serve maintenance. Local Fleet plan 0019 records broker acceptance and Fleet dependencies #180 and #203."
+        "fleet": "Fleet Receipts #219 tracks broker-owned Serve maintenance and is blocked by Fleet #180 and #203."
       }
     },
     {
@@ -136,8 +138,8 @@
     "environment": "isolated PostgreSQL, real loopback TLS, OAuth MCP and private tmux"
   },
   "checkpoint": {
-    "at": "2026-11-27T14:06:07-06:00",
-    "status": "live_staged_waiting_for_private_ingress_and_oauth",
+    "at": "2026-11-27T17:58:00-06:00",
+    "status": "live_https_and_bidirectional_delivery_verified",
     "closed_issues": [
       784,
       785,
@@ -152,6 +154,6 @@
     "review_and_tdd": "Pending until #789 acceptance and closure.",
     "private_evidence_dir": "/tmp/wake783.reIAEp",
     "full_suite": "Attempt on c77a981c stopped under host contention before it finished; no passing full-suite claim.",
-    "next": "Qualify private ingress and OAuth consent. Switch the dedicated pilot units to the reviewed candidate and run the persistent pilot."
+    "next": "Confirm isolated scratch restore and qualified private OAuth gateway consent and management. Verify native boot following operator reboot."
   }
 }

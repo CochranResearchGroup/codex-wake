@@ -189,3 +189,23 @@ entries and keeping public Funnel disabled. Capture the exact host, endpoint,
 upstream, before/after state, and route-specific rollback receipt. Do not
 use unrestricted SSH or administrator execution as the managed maintenance
 implementation.
+
+The operator applied the dedicated Tailnet-only Serve route. From Cooper,
+the route passed certificate verification and served OAuth discovery for the
+exact issuer and resource. Anonymous MCP and peer requests returned 401.
+Fleet Receipts tracks the managed route operation in
+https://github.com/ecochran76/fleet-receipts/issues/219.
+
+The installed persistent spokes exchanged an original message and linked reply
+in each direction. Each incoming pilot delivery produced one native Codex
+input and completion on the allocated receiving thread. During a controlled
+Cooper spoke stop, the hub held a new message and Cooper's local wake completed
+independently. Restarting the same spoke delivered the held message exactly
+once with its original expiry.
+
+Native Bastion web OAuth initially rejected authorization because it required
+a StableTime elapsed counter. Commit `5426e547` uses bounded native UTC for
+external OAuth on synchronized native Linux without a StableTime configuration.
+An explicitly configured StableTime service and WSL keep their existing time
+paths. Ten focused OAuth tests passed. Live consent, gateway management, and
+reboot evidence remain open at this checkpoint.
