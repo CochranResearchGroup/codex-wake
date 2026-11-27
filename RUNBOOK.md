@@ -10921,3 +10921,18 @@ Live migration and other Cargo target roots are separate. Verify producer
 custody, live references, and Cargo locks before retiring those outputs. Measure
 single-link allocated bytes separately from observed filesystem free-space
 change.
+
+## Turn P268 | 2026-11-27 | HTTPS Wake network checkpoint
+
+Closed #784–#788 and #790 after local verification. Actual isolated HTTPS
+covered peer scoping, original message and reply custody, disconnect and
+revocation, and recipient receipt recovery after an older database restore.
+The OAuth gateway retrieved saved history and performed a reversible tmux
+rename. The installed pilot rehearsal used two stock Codex owners and
+completed one exact turn per message and reply. The Linux recipient adapter
+resumed its original conversation after app-server restart.
+
+#789 remains open for the persistent production pilot. The installed
+candidate, rehearsal evidence, and live gates are in Plan 0268. The broad
+local run was interrupted under host contention. The 29 focused tests and
+local static checks passed. Single review and TDD follow ticket closure.

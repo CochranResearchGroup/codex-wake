@@ -19,7 +19,8 @@
         "Certificate-verified HTTPS publish and wrong-peer credential refusal"
       ],
       "tracker": "closed",
-      "result": "6f5f2526"
+      "result": "6f5f2526",
+      "followup": "82714350 requires explicit peer OAuth target; regression passed."
     },
     {
       "issue": 785,
@@ -88,9 +89,17 @@
         787,
         788
       ],
-      "status": "running",
+      "status": "blocked",
       "owner": "/root/busy_dnd",
-      "remaining": "Prepare and qualify staged installation; persistent live rollout needs separate user authorization."
+      "remaining": "Separate authority for persistent Bastion and Cooper setup, selected private HTTPS origin, exact Cooper canary owner and Bastion maintenance window. Minecraft listener active at read-only preflight.",
+      "tracker": "open",
+      "worker_result": "14b92580",
+      "result": "413f48e3",
+      "evidence": [
+        "Exact installed wheel staged and verified; four stock turns over HTTPS and two replies",
+        "Linux recipient resumed original conversation after stock app-server restart",
+        "29 focused integrated tests passed"
+      ]
     },
     {
       "issue": 790,
@@ -110,5 +119,24 @@
     "result": "4 passed",
     "command": "PYTHONPATH=src:tests python -m unittest test_wake_network_restore test_wake_network_messages test_wake_network.WakeNetworkTests test_wake_network_management -q",
     "environment": "isolated PostgreSQL, real loopback TLS, OAuth MCP and private tmux"
+  },
+  "checkpoint": {
+    "at": "2026-11-27T14:06:07-06:00",
+    "status": "live_rollout_authority_pending",
+    "closed_issues": [
+      784,
+      785,
+      786,
+      787,
+      788,
+      790
+    ],
+    "open_issues": [
+      789
+    ],
+    "review_and_tdd": "Pending until #789 acceptance and closure.",
+    "private_evidence_dir": "/tmp/wake783.reIAEp",
+    "full_suite": "Attempt on c77a981c stopped under host contention before it finished; no passing full-suite claim.",
+    "next": "Approve and qualify the exact persistent pilot, then close #789 and perform one review and one TDD remediation."
   }
 }
