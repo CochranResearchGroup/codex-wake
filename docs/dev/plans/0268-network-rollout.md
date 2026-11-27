@@ -170,3 +170,22 @@ disable only the allocated private ingress. Confirm the pre-existing local
 Wake configuration and unrelated workloads by reading their startup and
 status records. Keep production rollout open until the independent boot,
 disconnect, bidirectional, restore, and gateway receipts are recorded.
+
+## Native time and managed private ingress
+
+Native Linux owners can use the synchronized kernel UTC interval for Wake
+network operations. They hold when synchronization is lost. WSL keeps
+using StableTime. An explicit StableTime configuration remains authoritative
+and a failed configured service holds the operation. Native UTC carries no
+StableTime elapsed-counter claim.
+
+The installed Fleet Receipts 0.1.0 catalog handles Tailscale sign-in and
+prerequisite inspection. It does not expose Tailscale Serve maintenance.
+Bastion protected Fleet enrollment is tracked in
+https://github.com/ecochran76/fleet-receipts/issues/203. The Serve
+maintenance follow-up needs a broker operation that inspects, plans, applies,
+and reads back one approved private route, preserving unrelated Serve
+entries and keeping public Funnel disabled. Capture the exact host, endpoint,
+upstream, before/after state, and route-specific rollback receipt. Do not
+use unrestricted SSH or administrator execution as the managed maintenance
+implementation.

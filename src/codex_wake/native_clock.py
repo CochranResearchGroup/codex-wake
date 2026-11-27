@@ -31,6 +31,10 @@ def snapshot():
     """Service-measurement evidence, never extrapolated to client receipt."""
     config_path = configuration()
     if not config_path:
+        from . import linux_clock
+
+        if "CODEX_WAKE_STABLE_TIME_CONFIG" not in os.environ and linux_clock.native_linux():
+            return linux_clock.snapshot()
         return {"utc": None, "counter": None, "reason": "stable_time_configuration_required"}
     failure = 'stable_time_client_configuration_invalid'
     try:
@@ -137,10 +141,11 @@ def from_response(response, *, counter, frequency, measurement_only=False):
 
 
 def valid_utc(value):
-    return (isinstance(value, dict) and value.get("status") in {"network", "windows"}
+    return (isinstance(value, dict) and value.get("status") in {"network", "windows", "native-linux"}
             and isinstance(value.get("sources"), (tuple, list))
             and all(isinstance(x, str) and x for x in value["sources"])
             and len(set(value["sources"])) == len(value["sources"])
+            and (value["status"] != "native-linux" or tuple(value["sources"]) == ("linux:adjtimex",))
             and len(value["sources"]) >= (2 if value["status"] == "network" else 1)
             and all(type(value.get(key)) in (int, float) and math.isfinite(value[key]) for key in ("lower", "upper"))
             and 0 < value["lower"] <= value["upper"] and value["upper"] - value["lower"] <= 300)
