@@ -14,14 +14,21 @@
       "blockers": [],
       "status": "validated",
       "owner": "primary",
-      "evidence": "Disposable PostgreSQL, public HTTP and OAuth MCP directory acceptance passed."
+      "evidence": [
+        "Disposable PostgreSQL HTTP/OAuth MCP acceptance",
+        "Certificate-verified HTTPS publish and wrong-peer credential refusal"
+      ],
+      "tracker": "closed",
+      "result": "6f5f2526"
     },
     {
       "issue": 785,
       "blockers": [
         784
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/busy_dnd",
+      "base": "6f5f2526"
     },
     {
       "issue": 786,
@@ -42,7 +49,9 @@
       "blockers": [
         784
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/cutover",
+      "base": "6f5f2526"
     },
     {
       "issue": 789,
