@@ -27,9 +27,12 @@ owner's existing OAuth procedure.
 Live slots exist only in the hub process, while the authorized caller
 and a peer poll can rendezvous. PostgreSQL continues to own enrollment
 and the directory. A missing poll yields `offline` and creates no
-work. Claims are one-use. An unanswered claim yields `uncertain` and
-its original operation ID for owner inspection. When the hub expires
-a request, a late completion is rejected. A hub restart loses the
+work. Claims and start acknowledgments are one-use. A spoke must receive a
+start acknowledgment before entering its local controller. The hub
+withholds start after caller withdrawal, while a missing completion
+after start yields `uncertain` and the original operation ID for owner
+inspection. Timed OS waits schedule checks, and trusted time determines
+expiry. An expired request cannot start or accept a completion. A hub restart loses the
 live slots. No restore process replays them.
 
 The integration test exercises OAuth code and PKCE, public HTTP routes

@@ -38,8 +38,11 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                           targets=[dict(config['targets'][0], peer_id=peer, conversation_id=thread), config['targets'][0]])
 
             epoch = 2_000_000_000
+            trusted = True
 
             def clock():
+                if not trusted:
+                    return {}
                 return {'utc': {'status': 'network', 'sources': ['a', 'b'], 'lower': epoch, 'upper': epoch}}
 
             hub = WakeNetwork(config['wake_network'], 'h', 'e', clock=clock)
@@ -137,10 +140,16 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                         'network.history.read': {'thread_id': thread, 'owner': 'pilot'},
                     }}, ProtectedOperations(HistoryAuthority(), fixture.operations(root)), 'local-test', clock)
 
+                    async def start(envelope):
+                        result = await client.post(base + '/management/start', headers=peer_headers,
+                                                   json={'id': envelope['id']})
+                        return result.json()
+
                     async def complete(waiting):
                         claim = (await waiting).json()
                         self.assertEqual(claim['status'], 'claimed', claim)
                         envelope = claim['request']
+                        self.assertEqual(await start(envelope), {'status': 'started'})
                         response = await client.post(base + '/management/complete', headers=peer_headers,
                             json={'id': envelope['id'], 'result': owner.execute(envelope)})
                         self.assertEqual(response.json()['status'], 'completed')
@@ -199,6 +208,8 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                         claim = (await waiting).json()
                         self.assertEqual(claim['status'], 'claimed', claim)
                         envelope = claim['request']
+                        self.assertEqual(await start(envelope), {'status': 'started'})
+                        self.assertEqual(await start(envelope), {'status': 'expired'})
                         expired = await asyncio.to_thread(terminal_owner.execute, dict(
                             envelope, deadline=epoch * 1_000_000))
                         self.assertEqual(expired, {'status': 'expired'})
@@ -223,4 +234,13 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                     stale = await client.post(base + '/management/complete', headers=peer_headers,
                         json={'id': original['id'], 'result': {'status': 'completed'}})
                     self.assertEqual(stale.json(), {'status': 'expired'})
+                    self.assertEqual(await start(original), {'status': 'expired'})
+
+                    waiting = await pull()
+                    withdrawn = asyncio.create_task(client.post(route, headers=headers, json=address))
+                    unopened = (await waiting).json()['request']
+                    trusted = False
+                    self.assertEqual((await withdrawn).json()['status'], 'offline')
+                    trusted = True
+                    self.assertEqual(await start(unopened), {'status': 'expired'})
                     tmux('kill-server')

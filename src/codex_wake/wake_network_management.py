@@ -40,6 +40,7 @@ class Pending:
     deadline: int
     verify: Callable[[], None]
     claimed: bool = False
+    started: bool = False
     result: dict | None = None
 
 
@@ -114,7 +115,8 @@ class LiveManagement:
                 lower = stable_micros(self.network.clock())
                 if lower is None or lower >= item.deadline:
                     with self.ready:
-                        response = item.result or {'id': request, 'status': 'uncertain' if item.claimed else 'offline'}
+                        self.pending.pop(request, None)
+                        response = item.result or {'id': request, 'status': 'uncertain' if item.started else 'offline'}
                     break
                 # The OS wait schedules the next check. Trusted time alone
                 # tells us whether the spoke's admission window elapsed.
@@ -158,6 +160,27 @@ class LiveManagement:
             item.claimed = True
             return {'status': 'claimed', 'request': slot.envelope}
 
+    def start(self, peer, authorization, arguments):
+        self.peer(peer, authorization)
+        _check({'type': 'object', 'required': ['id'], 'additionalProperties': False,
+                'properties': {'id': _ID}}, arguments)
+        identifier = arguments['id']
+        with self.ready:
+            item = self.pending.get(identifier)
+        if not item or item.peer != peer:
+            return {'status': 'expired'}
+        try:
+            item.verify()
+        except AuthError:
+            return {'status': 'expired'}
+        now = self.trusted_now()
+        with self.ready:
+            if (self.pending.get(identifier) is not item or not item.claimed or item.started
+                    or now is None or now >= item.deadline):
+                return {'status': 'expired'}
+            item.started = True
+            return {'status': 'started'}
+
     def complete(self, peer, authorization, arguments):
         self.peer(peer, authorization)
         _check({'type': 'object', 'required': ['id', 'result'], 'additionalProperties': False,
@@ -165,7 +188,7 @@ class LiveManagement:
         now = self.trusted_now()
         with self.ready:
             item = self.pending.get(arguments['id'])
-            if not item or item.peer != peer or not item.claimed or now is None or now >= item.deadline:
+            if not item or item.peer != peer or not item.started or now is None or now >= item.deadline:
                 return {'status': 'expired'}
             if item.result is not None:
                 return {'status': 'already_completed'}
@@ -245,6 +268,7 @@ def routes(management, verifier, host):
     endpoint = guard(verifier, host)
     return [
         Route('/network/v1/peers/{peer_id}/management/pull', endpoint(management.pull), methods=['POST']),
+        Route('/network/v1/peers/{peer_id}/management/start', endpoint(management.start), methods=['POST']),
         Route('/network/v1/peers/{peer_id}/management/complete', endpoint(management.complete), methods=['POST']),
     ] + [
         Route('/network/v1/management/' + action.removeprefix('network.').replace('.', '/'),
@@ -263,6 +287,9 @@ def spoke_tick(request, local):
     if answer['status'] != 'claimed':
         return answer
     envelope = answer['request']
+    started = request('start', {'id': envelope['id']})
+    if started['status'] != 'started':
+        return started
     result = local.execute(envelope)
     return request('complete', {'id': envelope['id'], 'result': result})
 
