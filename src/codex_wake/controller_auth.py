@@ -54,7 +54,7 @@ class Actor:
 
 
 class OAuthAuthority:
-    def __init__(self, path, *, issuer, resource, now=None, on_revoke=None):
+    def __init__(self, path, *, issuer, resource, now=None, on_revoke=None, utc_bounds=None):
         self.on_revoke = on_revoke
         if urlsplit(issuer).path:
             raise ValueError('issuer must be a canonical origin without path or trailing slash')
@@ -64,8 +64,12 @@ class OAuthAuthority:
             url = urlsplit(value)
             if (url.scheme != 'https' and not (url.scheme == 'http' and url.hostname in ('127.0.0.1', '::1', 'localhost'))) or url.query or url.fragment or url.username or url.password or not url.netloc:
                 raise ValueError('canonical HTTPS issuer/resource required (loopback HTTP fixtures allowed)')
-        self._injected_clock=now is not None
-        self.path, self.issuer, self.resource, self.now = Path(path), issuer, resource, now if now is not None else _qualified_upper
+        self._injected_now = now
+        self._utc_bounds = utc_bounds
+        self.path, self.issuer, self.resource = Path(path), issuer, resource
+        self.now = now if now is not None else _qualified_upper
+        if now is None and utc_bounds is not None:
+            self.now = self._bounded_upper
         self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         fd = os.open(self.path, os.O_CREAT | os.O_RDWR, 0o600)
         os.close(fd)
@@ -97,14 +101,17 @@ class OAuthAuthority:
     def connect(self):
         return sqlite3.connect(self.path, timeout=10)
 
+    def _bounded_upper(self):
+        return self._issuance_bounds()[1]
+
     def _issuance_bounds(self):
         try:
-            if self._injected_clock:
-                point=self.now()
+            if self._injected_now is not None:
+                point=self._injected_now()
                 if type(point) not in (int,float) or not math.isfinite(point):
                     raise measurements.TimeUnavailable('invalid_injected_time')
                 return point,point
-            return measurements.utc_bounds()
+            return (self._utc_bounds or measurements.utc_bounds)()
         except measurements.TimeUnavailable:
             raise AuthError('qualified_time_unavailable') from None
 

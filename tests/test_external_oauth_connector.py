@@ -4,11 +4,13 @@ from contextlib import asynccontextmanager
 import base64
 import hashlib
 import json
+import os
 import re
 from urllib.parse import urlsplit,parse_qs,urlencode
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import httpx2 as httpx
 
@@ -25,6 +27,33 @@ class ExternalConnectorTests(unittest.TestCase):
         from codex_wake.managed_inventory import ManagedInventory
         from codex_wake.controller_tabs import ControllerTabs
         return ControllerOperations(ManagedInventory(root),host='h',environment='e',tabs=ControllerTabs(root,workspaces={},host='h',environment='e'))
+
+    def test_native_connector_uses_bounded_utc_without_a_stable_time_counter(self):
+        from codex_wake import measurements
+        from codex_wake.controller_auth import AuthError, OAuthAuthority
+        from codex_wake.external_connector import connector_utc_bounds
+
+        utc = dict(status='native-linux', sources=['linux:adjtimex'], lower=100, upper=101)
+        with tempfile.TemporaryDirectory() as root, patch.dict(os.environ, {}, clear=True), \
+                patch('codex_wake.linux_clock.native_linux', return_value=True), \
+                patch('codex_wake.native_clock.configuration', return_value=None), \
+                patch('codex_wake.linux_clock.snapshot', return_value={'utc': utc}) as native_clock, \
+                patch('codex_wake.measurements.utc_bounds', return_value=(200, 201)) as stable_time:
+            authority = OAuthAuthority(Path(root) / 'authority.sqlite', issuer='https://wake.example',
+                                       resource='https://wake.example/mcp', utc_bounds=connector_utc_bounds)
+            self.assertEqual(authority.now(), 101)
+            self.assertEqual(authority._expires_after(10), 110)
+            stable_time.assert_not_called()
+            native_clock.return_value = {'utc': None}
+            with self.assertRaisesRegex(AuthError, 'authorization denied') as fault:
+                authority.now()
+            self.assertEqual(fault.exception.code, 'qualified_time_unavailable')
+            with patch.dict(os.environ, {'CODEX_WAKE_STABLE_TIME_CONFIG': '/configured'}):
+                self.assertEqual(authority.now(), 201)
+            with patch('codex_wake.linux_clock.native_linux', return_value=False):
+                stable_time.side_effect = measurements.TimeUnavailable('missing')
+                with self.assertRaises(AuthError):
+                    authority.now()
 
     def test_discovery_and_anonymous_mcp_challenge_share_exact_resource(self):
         from codex_wake.external_connector import create_app

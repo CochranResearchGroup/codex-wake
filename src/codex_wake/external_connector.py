@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from functools import partial
 import json
+import os
 
 import anyio
 from mcp import types
@@ -95,6 +96,18 @@ class ConnectorVerifier:
             return None
 
 
+def connector_utc_bounds():
+    from . import linux_clock, measurements, native_clock
+
+    if (linux_clock.native_linux() and 'CODEX_WAKE_STABLE_TIME_CONFIG' not in os.environ
+            and not native_clock.configuration()):
+        utc = linux_clock.snapshot()['utc']
+        if not native_clock.valid_utc(utc):
+            raise measurements.TimeUnavailable('native_linux_clock_unqualified')
+        return utc['lower'], utc['upper']
+    return measurements.utc_bounds()
+
+
 def create_app(config, root, *, identify=None, operations=None):
     """Fixed host policy and owner identity; no request-selected executable/root."""
     validate_config(config)
@@ -109,7 +122,7 @@ def create_app(config, root, *, identify=None, operations=None):
         private_path(directory/'authority.sqlite')
     from .operation_commands import owner as operation_owner
     authority = OAuthAuthority(directory / 'authority.sqlite', issuer=issuer, resource=issuer + '/mcp',
-                               on_revoke=operation_owner(root).revoke_grant)
+                               on_revoke=operation_owner(root).revoke_grant, utc_bounds=connector_utc_bounds)
     if operations is None:
         from .controller_remote_commands import operations_from_root
         operations = operations_from_root(root)
