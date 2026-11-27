@@ -123,11 +123,14 @@ def create_app(config, root, *, identify=None, operations=None):
     verifier = ConnectorVerifier(authority, config)
     consent = BrowserConsent(authority, config, identify)
     entries = {tool_name(canonical(operation)): (operation, schema) for operation, schema in TOOLS.values()}
-    network = None
+    network = management = None
     if 'wake_network' in config:
         from .wake_network import WakeNetwork, TOOLS as network_tools
         network = WakeNetwork(config['wake_network'], operations.host, operations.environment)
         entries.update(network_tools)
+        from .wake_network_management import ACTIONS as management_actions, LiveManagement, TOOLS as management_tools
+        management = LiveManagement(network)
+        entries.update(management_tools)
     schedules = None
     if 'windows_message_owner' in config:
         from .external_owner_schedules import OwnerSchedules, TOOLS as owner_schedule_tools
@@ -152,6 +155,13 @@ def create_app(config, root, *, identify=None, operations=None):
                     policy, description, readonly = 'observe', 'Find authorized Wake network recipients.', True
                     if policy not in actor.scopes:
                         continue
+                elif management is not None and operation in management_actions:
+                    controller_operation, required = management_actions[operation]
+                    if not required <= actor.scopes:
+                        continue
+                    policy = 'history.observe' if controller_operation.startswith('history.') else 'control'
+                    description = 'Run one live authorized operation on the owning Wake peer: ' + controller_operation
+                    readonly = controller_operation.startswith('history.')
                 elif policy:
                     if not schedules.visible(actor, operation):
                         continue
@@ -168,6 +178,8 @@ def create_app(config, root, *, identify=None, operations=None):
             except AuthError:
                 continue
             scopes = sorted(set(filter(None, (policy, delegated_content_scope(operation)))))
+            if management is not None and operation in management_actions:
+                scopes = sorted(management_actions[operation][1])
             tools.append(types.Tool(name=name, description=description, input_schema=schema,
                 annotations=types.ToolAnnotations(read_only_hint=readonly,destructive_hint=not readonly,idempotent_hint=readonly,open_world_hint=True),
                 meta={'securitySchemes': [{'type':'oauth2', 'scopes':scopes}]}))
@@ -182,6 +194,8 @@ def create_app(config, root, *, identify=None, operations=None):
             arguments = _control_arguments(operation, params.arguments or {}, actor)
             if network is not None and operation == 'network.recipients':
                 dispatch = partial(network.discover, actor, arguments)
+            elif management is not None and operation in management_actions:
+                dispatch = partial(management.submit, actor, operation, arguments, partial(verifier.actor, token))
             elif schedules is not None and schedules.policy(operation):
                 dispatch = partial(schedules.execute, verifier.actor, token, operation, arguments)
             else:
@@ -239,6 +253,8 @@ def create_app(config, root, *, identify=None, operations=None):
     if network is not None:
         from .wake_network_http import routes
         network_routes = routes(network, verifier, url.netloc)
+        from .wake_network_management import routes as management_routes
+        network_routes += management_routes(management, verifier, url.netloc)
     return Starlette(routes=network_routes + [Route('/register', guarded(consent.register), methods=['POST']),
         Route('/token', guarded(consent.token), methods=['POST']),
         Route('/revoke', guarded(consent.revoke), methods=['POST']),
