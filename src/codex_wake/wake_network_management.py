@@ -123,7 +123,7 @@ class LiveManagement:
         return self.dispatch(actor, peer, enabled,
                              dict(action=catalog.EXECUTE, conversation_id=recipient, operation=name,
                                   arguments=arguments['arguments'], contract=arguments['contract'],
-                                  scopes=sorted(actor.scopes)), verify)
+                                  scopes=sorted(actor.scopes), owner=actor.principal_kind == 'owner'), verify)
 
     def dispatch(self, actor, peer, enabled, envelope, verify):
         now = self.trusted_now()
@@ -310,7 +310,7 @@ class SpokeManagement:
                 if digest != envelope['contract']:
                     raise InventoryError('contract_changed', 'spoke contract changed')
                 _check(schema, envelope['arguments'])
-                return catalog.attenuate(exact, envelope['scopes'], operation)
+                return catalog.attenuate(exact, envelope['scopes'], envelope['owner'], operation)
 
             authority = DeadlineAuthority(self.protected.authority, self.clock, envelope['deadline'],
                                           catalog.scopes(operation), narrow)

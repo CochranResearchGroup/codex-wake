@@ -90,8 +90,10 @@ def local_binding(actor, name, binding, owner):
     return replace(actor, actions=frozenset({canonical(operation)}), targets=[dict(target)]), public, digest
 
 
-def attenuate(actor, scopes_from_hub, operation):
-    actor = replace(actor, scopes=actor.scopes.intersection(scopes_from_hub), delegated=True)
+def attenuate(actor, scopes_from_hub, owner_from_hub, operation):
+    kind = 'service' if actor.principal_kind == 'owner' and not owner_from_hub else actor.principal_kind
+    actor = replace(actor, scopes=actor.scopes.intersection(scopes_from_hub),
+                    principal_kind=kind, delegated=True)
     authorized(actor, operation)
     return actor
 
