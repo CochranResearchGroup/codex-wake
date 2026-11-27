@@ -26,23 +26,33 @@
       "blockers": [
         784
       ],
-      "status": "running",
+      "status": "validated",
       "owner": "/root/busy_dnd",
-      "base": "6f5f2526"
+      "base": "6f5f2526",
+      "tracker": "closed",
+      "worker_result": "f23b9503",
+      "result": "76d1710d",
+      "evidence": [
+        "Real TLS with three PostgreSQL databases; recipient-only exact submission and correlated replies",
+        "Loss after commit and after receipt, original timing and IDs, client HTTP/MCP receipt parity",
+        "Three integrated tests passed across directory, messaging, and management."
+      ]
     },
     {
       "issue": 786,
       "blockers": [
         785
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/busy_dnd"
     },
     {
       "issue": 787,
       "blockers": [
         785
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/cutover"
     },
     {
       "issue": 788,
@@ -59,7 +69,8 @@
         "OAuth HTTP and MCP returned saved history under distinct scopes",
         "Private tmux rename verified, then reversed",
         "PostgreSQL enrolled peer, offline and uncertain operations never replayed",
-        "Two integration tests passed using the opt-in database"
+        "Two integration tests passed using the opt-in database",
+        "Trusted deadline and one-use start follow-up cf70e49f passed integration."
       ]
     },
     {
@@ -76,7 +87,8 @@
       "blockers": [
         788
       ],
-      "status": "pending"
+      "status": "running",
+      "owner": "/root/former_tab"
     }
   ]
 }
