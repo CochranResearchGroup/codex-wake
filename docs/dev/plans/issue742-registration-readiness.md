@@ -1,6 +1,6 @@
 # Issue 742: truthful route readiness
 
-Owner: ecochran76 / primary. State: IN_PROGRESS. Priority: high.
+Owner: ecochran76 / primary. State: SOURCE_VALIDATED. Priority: high.
 Tracker: https://github.com/CochranResearchGroup/codex-wake/issues/742
 Branch: fix/issue-742-registration-readiness. Base: cbd799b9.
 
@@ -39,3 +39,7 @@ Live monitor migration uses the existing installed durable scheduler, not this
 unreleased patch. Exactly one clock schedule is enabled; prior one-shot was
 cancelled after armed readback. Detailed tenant identities/prompts stay private.
 Live tab reconstruction remains unqualified and no daemon was replaced.
+
+Public control/MCP checks: 26 passed. Skill validator first exposed an existing
+1045-character description (limit1024); concise routing description now includes
+recurring monitoring and validates. Total selected behavioral tests:113 passed.
