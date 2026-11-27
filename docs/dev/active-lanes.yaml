@@ -1,6 +1,19 @@
 schema_version: 1
 work_item_tracking: required
 lanes:
+  - id: WAKE-NETWORK-0268
+    owner: primary / ecochran76
+    objective: Deliver the private Bastion HTTPS Wake hub and Cooper spoke
+    work_items: [https://github.com/CochranResearchGroup/codex-wake/issues/783]
+    plan: docs/dev/plans/0268-2026-11-27-bastion-wake-network.md
+    branch: feat/spec783-wake-network
+    target: origin/main
+    plan_state: OPEN
+    custody_state: REMOTE_PRESERVED
+    dependencies: [UNIFIED-MESSAGES-0267]
+    overlaps: []
+    updated_at: 2026-11-27
+    disposition: Isolated implementation. Persistent rollout requires separate live authorization.
   - id: UNIFIED-MESSAGES-0267
     owner: primary / ecochran76
     objective: Deliver one shared durable message contract across Wake entry points

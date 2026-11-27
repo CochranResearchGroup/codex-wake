@@ -1,5 +1,14 @@
 # Codex Wake Roadmap
 
+## P268 | Private HTTPS Wake network
+
+Status OPEN. [Spec #783](https://github.com/CochranResearchGroup/codex-wake/issues/783)
+and [Plan 0268](docs/dev/plans/0268-2026-11-27-bastion-wake-network.md).
+Bastion is the first hub. Cooper connects outbound over private HTTPS.
+Deliver durable messages and replies across the two peers, expose live
+spoke management through one API and MCP endpoint, then reach full catalog
+parity before dashboard work. Persistent rollout has a separate live gate.
+
 ## P261 | Worktree chaos tamed
 
 [Plan0261](docs/dev/plans/0261-2026-11-21-worktree-taming.md) preserves all26
