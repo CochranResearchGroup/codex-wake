@@ -202,8 +202,10 @@ class NetworkMessages:
             self._authorize_client(actor, STATUS, row[4][5:], row[5])
             replies = db.execute(_SELECT + ''' WHERE in_reply_to=%s AND destination=%s
                                               ORDER BY ordinal LIMIT 128''', (row[1], source)).fetchall()
-        return dict(self._summary(row), replies=[self._summary(item, include_body='content.observe' in actor.scopes)
-                                                for item in replies])
+            availability = self.network.peer_availability(db, row[4][5:])
+        return dict(self._summary(row), recipient_availability=availability,
+                    replies=[self._summary(item, include_body='content.observe' in actor.scopes)
+                             for item in replies])
 
     def peer_send(self, peer, authorization, value):
         _check(_PEER_SEND, value)
@@ -220,7 +222,9 @@ class NetworkMessages:
                 raise AuthError('insufficient_scope')
             replies = db.execute(_SELECT + ''' WHERE in_reply_to=%s AND destination=%s
                                               ORDER BY ordinal LIMIT 128''', (row[1], _peer(peer))).fetchall()
-        return dict(self._summary(row), replies=[self._summary(item) for item in replies])
+            availability = self.network.peer_availability(db, row[4][5:]) if row[4].startswith('peer:') else 'current'
+        return dict(self._summary(row), recipient_availability=availability,
+                    replies=[self._summary(item) for item in replies])
 
     def pull(self, peer, authorization, value):
         _check(_PULL, value)

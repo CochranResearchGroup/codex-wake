@@ -35,22 +35,31 @@ class ExchangeUnavailable(OSError):
 class PeerHTTPS:
     def __init__(self, origin, peer, credential_file, *, ca_file=None):
         url = parse.urlsplit(origin)
-        secret = _private(credential_file).read_text().strip()
+        self.credential_file = credential_file
         if (url.scheme != 'https' or not url.hostname or url.username or url.password
                 or url.path not in ('', '/') or url.query or url.fragment
-                or not re.fullmatch(_IDENTIFIER, peer) or not re.fullmatch(r'[A-Za-z0-9_-]{32,256}', secret)):
+                or not re.fullmatch(_IDENTIFIER, peer)):
             raise ValueError('explicit HTTPS Wake peer and private credential required')
         context = ssl.create_default_context(cafile=ca_file)
         self.opener = request.build_opener(request.ProxyHandler({}), NoRedirect(),
                                            request.HTTPSHandler(context=context))
         self.origin = origin.rstrip('/') + '/network/v1/peers/' + parse.quote(peer, safe='')
-        self.authorization = 'Bearer ' + secret
+    def _authorization(self):
+        try:
+            with _private(self.credential_file).open(encoding='utf-8') as stream:
+                raw = stream.read(258)
+            secret = raw.removesuffix('\n')
+            if len(raw) > 257 or not re.fullmatch(r'[A-Za-z0-9_-]{32,256}', secret):
+                raise ValueError('invalid peer credential')
+        except (OSError, ValueError):
+            raise ExchangeUnavailable('peer_credential_unavailable') from None
+        return 'Bearer ' + secret
 
     def __call__(self, verb, value):
         suffix = '/directory' if verb == 'directory' else '/messages/' + verb
         body = json.dumps(value, ensure_ascii=False).encode()
         req = request.Request(self.origin + suffix, data=body,
-            headers={'Authorization': self.authorization, 'Content-Type': 'application/json'},
+            headers={'Authorization': self._authorization(), 'Content-Type': 'application/json'},
             method='PUT' if verb == 'directory' else 'POST')
         try:
             with self.opener.open(req, timeout=5) as response:
@@ -332,7 +341,13 @@ class NetworkSpoke:
                 self._report()
             except ExchangeUnavailable as exc:
                 failures['receipt'] = str(exc)
-            return dict(status='network_attention' if failures else 'ready', failures=failures)
+            result = dict(status='network_attention' if failures else 'ready', failures=failures)
+            pull_failure = failures.get('pull')
+            if pull_failure == 'invalid_token':
+                result['peer_access'] = 'authorization_denied'
+            elif pull_failure is not None:
+                result['peer_access'] = 'unavailable'
+            return result
 
 
 def main(argv=None):

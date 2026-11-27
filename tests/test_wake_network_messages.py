@@ -1,6 +1,10 @@
 """Two independent Wake owners using public HTTPS and OAuth MCP custody."""
 import asyncio
 import base64
+import contextlib
+from datetime import UTC, datetime
+import io
+import json
 import hashlib
 import os
 from pathlib import Path
@@ -23,7 +27,7 @@ import test_external_oauth_connector
 
 from codex_wake.external_connector import create_app
 from codex_wake.message_delivery import DeliveryReceipt, PostgresMessages
-from codex_wake.wake_network import WakeNetwork
+from codex_wake.wake_network import WakeNetwork, enroll_main
 from codex_wake.wake_network_spoke import ExchangeUnavailable, NetworkSpoke, PeerHTTPS
 
 
@@ -77,10 +81,9 @@ class NetworkMessageTests(unittest.TestCase):
                         '-subj', '/CN=localhost', '-addext', 'subjectAltName=DNS:localhost',
                         '-keyout', str(key), '-out', str(cert)], check=True, capture_output=True)
         self.assertEqual(len(set(dsns)), 3)
-        sock = socket.socket()
-        self.addCleanup(sock.close)
-        sock.bind(('127.0.0.1', 0))
-        port = sock.getsockname()[1]
+        with socket.socket() as reservation:
+            reservation.bind(('127.0.0.1', 0))
+            port = reservation.getsockname()[1]
         origin = 'https://localhost:' + str(port)
         fixture = test_external_oauth_connector.ExternalConnectorTests()
         peer_a, peer_b = ('peer-' + uuid4().hex for _ in range(2))
@@ -94,8 +97,6 @@ class NetworkMessageTests(unittest.TestCase):
         def clock():
             return {'utc': {'status': 'network', 'sources': ['test-a', 'test-b'], 'lower': now, 'upper': now}}
 
-        with patch('codex_wake.wake_network.snapshot', clock):
-            app = create_app(config, root, identify=lambda request: 'operator', operations=fixture.operations(root))
         enrollment = WakeNetwork(config['wake_network'], 'h', 'e', clock=clock)
         enrollment.initialize()
         credentials = []
@@ -103,22 +104,35 @@ class NetworkMessageTests(unittest.TestCase):
             token = uuid4().hex
             enrollment.enroll(peer, token)
             credentials.append(private(root/(peer + '.key'), token))
-        server = uvicorn.Server(uvicorn.Config(app, log_level='error', ssl_certfile=str(cert),
-                                               ssl_keyfile=str(key), lifespan='on'))
-        thread = threading.Thread(target=server.run, kwargs={'sockets': [sock]}, daemon=True)
-        thread.start()
 
-        def stop():
-            server.should_exit = True
-            thread.join(5)
-        self.addCleanup(stop)
-        deadline = time.monotonic() + 6
-        while not server.started and thread.is_alive() and time.monotonic() < deadline:
-            time.sleep(.02)
-        self.assertTrue(server.started)
+        def start_hub():
+            with patch('codex_wake.wake_network.snapshot', clock):
+                app = create_app(config, root, identify=lambda request: 'operator', operations=fixture.operations(root))
+            sock = socket.socket()
+            self.addCleanup(sock.close)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(('127.0.0.1', port))
+            server = uvicorn.Server(uvicorn.Config(app, log_level='error', ssl_certfile=str(cert),
+                                                   ssl_keyfile=str(key), lifespan='on'))
+            thread = threading.Thread(target=server.run, kwargs={'sockets': [sock]}, daemon=True)
+            thread.start()
+
+            def stop():
+                server.should_exit = True
+                thread.join(7)
+                self.assertFalse(thread.is_alive())
+            self.addCleanup(stop)
+            deadline = time.monotonic() + 8
+            while not server.started and thread.is_alive() and time.monotonic() < deadline:
+                time.sleep(.02)
+            self.assertTrue(server.started)
+            return stop
+
+        stop_hub = start_hub()
 
         effects = []
         losses = set()
+        unsent = set()
 
         def driver(peer):
             def submit(message):
@@ -134,6 +148,9 @@ class NetworkMessageTests(unittest.TestCase):
             transport = PeerHTTPS(origin, peer, credentials[index], ca_file=str(cert))
 
             def exchange(verb, request, transport=transport, peer=peer):
+                if (peer, verb) in unsent:
+                    unsent.remove((peer, verb))
+                    raise ExchangeUnavailable('fixture_lost_request')
                 receipt = transport(verb, request)
                 if (peer, verb) in losses:
                     losses.remove((peer, verb))
@@ -243,3 +260,112 @@ class NetworkMessageTests(unittest.TestCase):
         self.assertEqual(a.status(bounced['id'], refresh=True)['outcome'],
                          {'status': 'bounced', 'reason': 'recipient_dnd'})
         self.assertEqual(len(effects), 3)
+
+        b.store.set_dnd(conv_b, conv_b, 'clear')
+        pending = dict(envelope(peer_b, conv_b, 'kept through revoked peer', due=now+8),
+                       sender_conversation_id=conv_a)
+        unreported = dict(envelope(peer_b, conv_b, 'unreported owner receipt'), sender_conversation_id=conv_a)
+        a.send(unreported)
+        a.send(pending)
+        self.assertEqual(a.tick()['status'], 'ready')
+        unsent.add((peer_b, 'receipt'))
+        self.assertEqual(b.tick()['failures']['receipt'], 'fixture_lost_request')
+        local_receipt = b.status(unreported['id'], inbound=True)
+        self.assertEqual(local_receipt['status'], 'submitted')
+        self.assertEqual(b.status(pending['id'], inbound=True)['status'], 'waiting_for_time')
+        self.assertEqual(a.status(unreported['id'], refresh=True)['status'], 'hub_accepted')
+        self.assertEqual(len(effects), 4)
+
+        stop_hub()
+        elapsed = dict(envelope(peer_b, conv_b, 'expiry during outage', expiry=now+3),
+                       sender_conversation_id=conv_a)
+        a.send(elapsed)
+        now += 9
+        self.assertEqual(a.tick()['peer_access'], 'unavailable')
+        self.assertEqual(a.status(elapsed['id'])['status'], 'waiting_for_hub')
+        self.assertEqual(b.tick()['peer_access'], 'unavailable')
+        self.assertEqual(b.status(pending['id'], inbound=True)['status'], 'waiting_for_time')
+        self.assertEqual(len(effects), 4)
+        self.local_wake_during_outage(root, dsns[2], clock, now)
+
+        enrollment_args = ['--dsn-file', config['wake_network']['dsn_file'], '--peer-id', peer_b]
+        data = io.StringIO()
+        with contextlib.redirect_stdout(data):
+            self.assertEqual(enroll_main(enrollment_args + ['--revoke']), 0)
+        self.assertEqual(json.loads(data.getvalue()), {'peer_id': peer_b, 'status': 'revoked'})
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as rejected:
+            enroll_main(enrollment_args + ['--credential-file', str(credentials[1])])
+        self.assertEqual(rejected.exception.code, 2)
+        with self.assertRaisesRegex(ValueError, 'different peer'):
+            enrollment.enroll(peer_a, credentials[1].read_text())
+
+        start_hub()
+        self.assertEqual(b.tick()['peer_access'], 'authorization_denied')
+        self.assertEqual(len(effects), 4)
+        blocked = a.status(pending['id'], refresh=True)
+        self.assertEqual((blocked['recipient_availability'], blocked['expires_at_micros']),
+                         ('offline', pending['expires_at_micros']))
+        with self.assertRaisesRegex(ExchangeUnavailable, 'invalid_token'):
+            PeerHTTPS(origin, peer_b, credentials[0], ca_file=str(cert))('pull', {})
+        self.assertTrue(all(delivery['message']['identifier'] != pending['id']
+                            for delivery in a.exchange('pull', {})['deliveries']))
+        self.assertEqual(a.tick()['status'], 'ready')
+        self.assertEqual(a.status(elapsed['id'])['status'], 'hub_accepted')
+
+        replacement = private(root/'rotated-key', uuid4().hex)
+        self.assertEqual(enroll_main(enrollment_args + ['--credential-file', str(replacement)]), 0)
+        self.assertEqual(a.status(pending['id'], refresh=True)['recipient_availability'], 'stale')
+        self.assertEqual(b.tick()['peer_access'], 'authorization_denied')
+        os.replace(replacement, credentials[1])
+        directory = dict(revision=1, recipients=[dict(conversation_id=conv_b, name='Pilot '+peer_b)])
+        self.assertEqual(b.tick(directory), {'status': 'ready', 'failures': {}})
+        self.assertEqual(b.tick(), {'status': 'ready', 'failures': {}})
+        self.assertEqual(a.tick(), {'status': 'ready', 'failures': {}})
+        recovered = a.status(pending['id'], refresh=True)
+        self.assertEqual((recovered['status'], recovered['recipient_availability'], recovered['not_before_micros'],
+                          recovered['expires_at_micros']),
+                         ('submitted', 'current', pending['not_before_micros'], pending['expires_at_micros']))
+        self.assertEqual(a.status(elapsed['id'], refresh=True)['status'], 'expired')
+        original = a.status(unreported['id'], refresh=True)
+        self.assertEqual(original['outcome']['receipt_id'], local_receipt['receipt_id'])
+        self.assertEqual(original['outcome']['attempt_id'], local_receipt['attempt_id'])
+        self.assertEqual([message.identifier for _,message in effects].count(unreported['id']), 1)
+        self.assertEqual([message.identifier for _,message in effects].count(pending['id']), 1)
+        self.assertEqual(len(effects), 5)
+
+    def local_wake_during_outage(self, root, dsn, clock, now):
+        from codex_wake.cli import run
+        from codex_wake.daemon import poll_once
+        from codex_wake.records import all_records
+        from codex_wake.time_provider import TimeDecision
+
+        local_root = root/'independent-local'
+        local_root.mkdir()
+        codex = local_root/'codex'
+        calls = local_root/'effects'
+        thread, receipt = str(uuid4()), str(uuid4())
+        codex.write_text(f"""#!/bin/sh
+test "$1" = queue || exit 2
+printf 'submitted\n' >> '{calls}'
+printf 'Queued message {receipt} for thread {thread}.\n'
+""")
+        codex.chmod(0o700)
+        due = datetime.fromtimestamp(now, UTC)
+        observation = lambda: TimeDecision('network', ('test-a', 'test-b'), now, now)
+        wake_root = local_root/'wake'
+        output = io.StringIO()
+        with patch.dict(os.environ, {'CODEX_WAKE_MESSAGE_DB_DSN': dsn}), patch(
+                'codex_wake.native_clock.snapshot', clock), patch(
+                'codex_wake.native_delivery.read_native_thread',
+                return_value={'id': thread, 'status': {'type': 'idle'}}):
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(run(['--wake-root', str(wake_root), 'native', 'at', '--json',
+                                      '--codex-path', str(codex), '--ttl', '10m', thread,
+                                      due.strftime('%Y-%m-%dT%H:%M:%SZ'), '--', 'local during hub outage']), 0)
+            admitted = json.loads(output.getvalue())
+            self.assertEqual(admitted['shared_admission'], 'recorded')
+            poll_once(wake_root, due, time_provider=observation)
+            poll_once(wake_root, due, time_provider=observation)
+        record, = all_records(wake_root)
+        self.assertEqual((record.record['id'], record.record['status']), (admitted['id'], 'submitted'))
+        self.assertEqual(calls.read_text().splitlines(), ['submitted'])

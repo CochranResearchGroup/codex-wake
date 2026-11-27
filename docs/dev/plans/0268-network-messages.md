@@ -78,3 +78,32 @@ local work continues. The spoke records local authority before invoking the
 recipient adapter, and records the exact outcome before reporting it. A
 dropped receipt response retries only the receipt. An unresolved effect
 keeps the original ID fenced.
+
+## Disconnect and peer revocation
+
+The peer worker holds undelivered network messages whenever an authenticated
+pull is unavailable. A failed network request reports `peer_access:
+unavailable`. A rejected peer credential reports `peer_access:
+authorization_denied`. Local Wake commands and supervisors use their own
+state and can proceed during either condition. The worker keeps its journal
+and confirms custody only with the original ID and deadline.
+
+Disable an exact enrolled peer from the hub host using its private DSN file.
+
+```sh
+python -m codex_wake.wake_network --dsn-file DSN_FILE --peer-id PEER_ID --revoke
+```
+
+This disables directory updates, pulls, new admissions and reports for the
+old credential. It leaves the exact directory revision and original
+messages in place. Authorized sender status can still inspect custody and
+shows the recipient as offline. A separate peer cannot pull or acknowledge
+those messages.
+
+Re-enroll the same peer with a new independently generated credential using
+the existing `--credential-file` command. Replace the spoke credential
+file atomically with the private replacement at the configured path. The
+running worker uses the new credential on its next exchange. The original
+directory remains stale until the peer republishes its current revision.
+Work whose original expiry has elapsed is recorded as expired. Previously
+submitted work reports the original owner receipt without executing again.

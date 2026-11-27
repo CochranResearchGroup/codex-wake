@@ -83,16 +83,51 @@ class WakeNetwork:
                 peer_id text PRIMARY KEY, credential text NOT NULL, enabled boolean NOT NULL,
                 revision bigint, directory jsonb NOT NULL DEFAULT '[]'::jsonb,
                 verified_at bigint)''')
+            db.execute('CREATE UNIQUE INDEX IF NOT EXISTS wake_network_unique_peer_credential_v1 '
+                       'ON wake_network_peers_v1(credential)')
 
     def enroll(self, peer_id, token):
         if (not isinstance(peer_id, str) or not re.fullmatch(_IDENTIFIER, peer_id)
                 or not isinstance(token, str) or not re.fullmatch(r'[A-Za-z0-9_-]{32,256}', token)):
             raise ValueError('invalid peer ID or credential')
+        from psycopg.errors import UniqueViolation
+
+        try:
+            with self.connect() as db:
+                registered = db.execute("""
+                    INSERT INTO wake_network_peers_v1 (peer_id,credential,enabled) VALUES (%s,%s,true)
+                    ON CONFLICT (peer_id) DO UPDATE SET credential=excluded.credential, enabled=true
+                    WHERE wake_network_peers_v1.enabled OR wake_network_peers_v1.credential<>excluded.credential
+                    RETURNING peer_id""", (peer_id, sha256(token.encode()).hexdigest())).fetchone()
+                if registered is None:
+                    raise ValueError('a revoked peer requires a replacement credential')
+        except UniqueViolation:
+            raise ValueError('credential is enrolled to a different peer') from None
+
+    def revoke(self, peer_id):
+        if not isinstance(peer_id, str) or not re.fullmatch(_IDENTIFIER, peer_id):
+            raise ValueError('invalid peer ID')
         with self.connect() as db:
-            db.execute('''INSERT INTO wake_network_peers_v1 (peer_id, credential, enabled)
-                          VALUES (%s,%s,true) ON CONFLICT (peer_id) DO UPDATE
-                          SET credential=excluded.credential, enabled=true''',
-                       (peer_id, sha256(token.encode()).hexdigest()))
+            peer = db.execute("""UPDATE wake_network_peers_v1
+                SET enabled=false, verified_at=NULL WHERE peer_id=%s RETURNING peer_id""",
+                (peer_id,)).fetchone()
+            if peer is None:
+                raise ValueError('unknown Wake network peer')
+        return {'peer_id': peer_id, 'status': 'revoked'}
+
+    def availability(self, enabled, verified_at, *, now):
+        if not enabled:
+            return 'offline'
+        if now is not None and verified_at is not None and 0 <= now - verified_at <= self.stale_micros:
+            return 'current'
+        return 'stale'
+
+    def peer_availability(self, db, peer_id):
+        row = db.execute('SELECT enabled,verified_at FROM wake_network_peers_v1 WHERE peer_id=%s',
+                         (peer_id,)).fetchone()
+        if row is None:
+            return 'offline'
+        return self.availability(*row, now=stable_micros(self.clock(), upper=True))
 
     def authorize_peer(self, db, peer_id, authorization):
         if not authorization or not authorization.startswith('Bearer '):
@@ -154,8 +189,7 @@ class WakeNetwork:
                     continue
                 if 'name' in arguments and arguments['name'].casefold() not in item['name'].casefold():
                     continue
-                available = now is not None and verified_at is not None and 0 <= now - verified_at <= self.stale_micros
-                status = 'offline' if not enabled else 'current' if available else 'stale'
+                status = self.availability(enabled, verified_at, now=now)
                 result.append(dict(item, peer_id=peer, availability=status, verified_at_micros=verified_at))
         return {'status': 'ambiguous' if len(result) > 1 and arguments else 'ok', 'recipients': result}
 
@@ -165,16 +199,24 @@ def enroll_main(argv=None):
 
     from .a2a_bus import private_path
 
-    parser = argparse.ArgumentParser(description='Enroll one operator-approved Wake network peer')
+    parser = argparse.ArgumentParser(description='Enroll or revoke one operator-approved Wake network peer')
     parser.add_argument('--dsn-file', required=True, type=Path)
     parser.add_argument('--peer-id', required=True)
-    parser.add_argument('--credential-file', required=True, type=Path)
+    action = parser.add_mutually_exclusive_group(required=True)
+    action.add_argument('--credential-file', type=Path)
+    action.add_argument('--revoke', action='store_true')
     args = parser.parse_args(argv)
-    private_path(args.credential_file)
-    network = WakeNetwork({'dsn_file': str(args.dsn_file), 'stale_seconds': 60}, '', '')
-    network.initialize()
-    network.enroll(args.peer_id, args.credential_file.read_text().strip())
-    return 0
+    try:
+        network = WakeNetwork({'dsn_file': str(args.dsn_file), 'stale_seconds': 60}, '', '')
+        network.initialize()
+        if args.revoke:
+            print(json.dumps(network.revoke(args.peer_id), sort_keys=True))
+        else:
+            private_path(args.credential_file)
+            network.enroll(args.peer_id, args.credential_file.read_text().strip())
+        return 0
+    except ValueError as error:
+        parser.exit(2, f'codex-wake network peer: {error}\n')
 
 
 if __name__ == '__main__':
