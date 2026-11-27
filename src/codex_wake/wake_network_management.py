@@ -26,6 +26,7 @@ TOOLS = {
     }) for action in ACTIONS
 }
 SCHEMAS = dict(TOOLS.values())
+_SLOT_LIMIT = 8
 
 
 @dataclass
@@ -92,6 +93,8 @@ class LiveManagement:
             poll = self.polls.get(peer)
             if not row[0] or poll is None or poll.envelope is not None:
                 return {'status': 'offline'}
+            if len(self.pending) >= _SLOT_LIMIT:
+                return {'status': 'capacity'}
             request = str(uuid4())
             deadline = min(now + int(self.timeout * 1_000_000), int(actor.expires_at * 1_000_000))
             if deadline <= now:
@@ -115,7 +118,7 @@ class LiveManagement:
         with self.ready:
             if peer in self.polls:
                 return {'status': 'poll_in_progress'}
-            if len(self.polls) >= 16:
+            if len(self.polls) >= _SLOT_LIMIT:
                 return {'status': 'capacity'}
             slot = Poll()
             self.polls[peer] = slot
@@ -298,7 +301,10 @@ def main(argv=None):
 
     def request(operation, value):
         path = f'/network/v1/peers/{peer}/management/{operation}'
-        call = Request(issuer + path, data=json.dumps(value).encode(), headers={
+        data = json.dumps(value).encode()
+        if len(data) > 65536 and operation == 'complete':
+            data = json.dumps({'id': value['id'], 'result': {'status': 'failed', 'error': 'response_too_large'}}).encode()
+        call = Request(issuer + path, data=data, headers={
             'Authorization': 'Bearer ' + credential, 'Content-Type': 'application/json'})
         with transport.open(call, timeout=12) as response:
             return json.loads(response.read(65537))
