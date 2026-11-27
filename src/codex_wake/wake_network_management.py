@@ -104,10 +104,23 @@ class LiveManagement:
             poll.envelope = dict(id=request, action=action, deadline=item.deadline,
                                          conversation_id=recipient, name=arguments.get('name'))
             self.ready.notify_all()
-            try:
-                self.ready.wait_for(lambda: item.result is not None, timeout=self.timeout)
-                response = item.result or {'id': request, 'status': 'uncertain' if item.claimed else 'offline'}
-            finally:
+        try:
+            wait = self.timeout
+            while True:
+                with self.ready:
+                    if self.ready.wait_for(lambda: item.result is not None, timeout=wait):
+                        response = item.result
+                        break
+                lower = stable_micros(self.network.clock())
+                if lower is None or lower >= item.deadline:
+                    with self.ready:
+                        response = item.result or {'id': request, 'status': 'uncertain' if item.claimed else 'offline'}
+                    break
+                # The OS wait schedules the next check. Trusted time alone
+                # tells us whether the spoke's admission window elapsed.
+                wait = min((item.deadline - lower) / 1_000_000, self.timeout)
+        finally:
+            with self.ready:
                 self.pending.pop(request, None)
         reverify()
         return response

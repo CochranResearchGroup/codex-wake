@@ -192,6 +192,7 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                         ProtectedOperations(TerminalAuthority(), operations), 'fixture-local-token', clock)
 
                     async def rename(name, *, send_receipt):
+                        nonlocal epoch
                         waiting = await pull()
                         scheduled = asyncio.create_task(client.post('/network/v1/management/tabs/rename',
                             headers={'Authorization': 'Bearer ' + control}, json=dict(address, name=name)))
@@ -209,6 +210,8 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                             receipt = await client.post(base + '/management/complete', headers=peer_headers,
                                 json={'id': envelope['id'], 'result': effect})
                             self.assertEqual(receipt.json()['status'], 'completed')
+                        else:
+                            epoch += 9
                         return (await scheduled).json(), envelope
 
                     uncertain, original = await rename('renamed', send_receipt=False)
