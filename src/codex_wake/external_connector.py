@@ -156,8 +156,8 @@ def create_app(config, root, *, identify=None, operations=None):
                     if policy not in actor.scopes:
                         continue
                 elif management is not None and operation in management_actions:
-                    controller_operation, required = management_actions[operation]
-                    if not required <= actor.scopes:
+                    controller_operation = management_actions[operation][0]
+                    if not management.visible(actor, operation):
                         continue
                     policy = 'history.observe' if controller_operation.startswith('history.') else 'control'
                     description = 'Run one live authorized operation on the owning Wake peer: ' + controller_operation

@@ -51,6 +51,12 @@ class LiveManagement:
         self.polls = {}
         self.pending = {}
 
+    def visible(self, actor, action):
+        fields = {'host', 'environment', 'peer_id', 'conversation_id'}
+        return ACTIONS[action][1] <= actor.scopes and any(
+            set(target) == fields and target['host'] == self.network.host
+            and target['environment'] == self.network.environment for target in actor.targets)
+
     def trusted_now(self):
         return stable_micros(self.network.clock(), upper=True)
 
@@ -76,9 +82,11 @@ class LiveManagement:
         now = self.trusted_now()
         if now is None:
             raise InventoryError('trusted_time_unavailable', 'live request needs trusted time')
+
         def reverify():
             if verify() != actor:
                 raise AuthError()
+
         reverify()
         with self.ready:
             poll = self.polls.get(peer)

@@ -20,6 +20,7 @@ import test_external_oauth_connector
 class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
     async def test_one_use_management_and_separate_content_grant(self):
         from codex_wake.external_connector import create_app
+        from codex_wake.controller_auth import OAuthAuthority
         from codex_wake.wake_network import WakeNetwork
         from codex_wake.wake_network_management import LiveManagement, SpokeManagement
 
@@ -47,7 +48,10 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
             peer_headers = {'Authorization': 'Bearer ' + credential}
             base = f'/network/v1/peers/{peer}'
             live = LiveManagement(hub)
-            with patch('codex_wake.controller_auth._qualified_upper', lambda: epoch), patch(
+            def fixture_authority(*args, **kwargs):
+                return OAuthAuthority(*args, **kwargs, now=lambda: epoch)
+
+            with patch('codex_wake.external_connector.OAuthAuthority', fixture_authority), patch(
                     'codex_wake.wake_network_management.LiveManagement', return_value=live):
                 app = create_app(config, root, identify=lambda _: 'operator', operations=fixture.operations(root))
             route = '/network/v1/management/history/search'
@@ -65,6 +69,9 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                     self.assertEqual(offline.json(), {'status': 'offline'})
                     refused = await client.post(route, headers={'Authorization': 'Bearer ' + broad}, json=address)
                     self.assertEqual(refused.status_code, 403)
+                    async with connect(broad) as broad_session:
+                        visible = {tool.name for tool in (await broad_session.list_tools()).tools}
+                        self.assertNotIn('wake_network_history_search', visible)
                     denied = await client.post(route.replace('search', 'read'), headers=headers, json=address)
                     self.assertEqual(denied.status_code, 403)
                     bad_peer = await client.post(base + '/management/pull', headers=headers, json={})
@@ -191,6 +198,9 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                         claim = (await waiting).json()
                         self.assertEqual(claim['status'], 'claimed', claim)
                         envelope = claim['request']
+                        expired = await asyncio.to_thread(terminal_owner.execute, dict(
+                            envelope, deadline=epoch * 1_000_000))
+                        self.assertEqual(expired, {'status': 'expired'})
                         effect = await asyncio.to_thread(terminal_owner.execute, envelope)
                         self.assertIn('result', effect, effect)
                         self.assertEqual(effect['result']['operation']['execution'], 'completed', effect)
