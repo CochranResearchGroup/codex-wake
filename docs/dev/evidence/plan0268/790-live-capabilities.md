@@ -28,7 +28,9 @@ a map from canonical controller operation names to a binding with
 owner-supplied controller arguments). Use the exact saved account, thread,
 window, or other controller resource for each binding. The public contract
 retains every unpinned controller argument and its validation rules. Fixed
-arguments are kept on the spoke and cannot be supplied by callers.
+arguments are kept on the spoke and cannot be supplied by callers. Required
+controller identity arguments such as an expected target, native thread,
+window, or pane must be pinned before an operation is advertised.
 
 For example, a saved-history binding can pin `owner` and `thread_id` for
 `environment.conversations.history.read`, with `target` set to the exact

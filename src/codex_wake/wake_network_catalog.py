@@ -30,6 +30,7 @@ ENTRY = object_schema(dict(operation=_ID, fixed=dict(type='array', maxItems=100,
 ADVERTISEMENT = dict(type='object', maxProperties=100, propertyNames=_ID,
                      additionalProperties=dict(type='array', maxItems=256, items=ENTRY))
 PULL = dict(type='object', properties={'catalog': ADVERTISEMENT}, additionalProperties=False)
+_REQUIRED_PINS = {'expected_target', 'thread_id', 'window', 'window_id', 'pane', 'pane_id'}
 
 
 @lru_cache(maxsize=1)
@@ -81,12 +82,20 @@ def without_fixed_requirements(schema, fixed):
 
 
 def local_binding(actor, name, binding, owner):
-    operation, public, digest = contract(name, binding['fixed'], fingerprint(binding))
+    fixed = binding['fixed']
+    operation, schema = registered()[name]
+    if not isinstance(fixed, dict) or not (_REQUIRED_PINS & set(schema.get('required', []))) <= fixed.keys():
+        raise ValueError('terminal and saved-conversation identity arguments require owner pins')
+    _, public, digest = contract(name, fixed, fingerprint(binding))
     authorized(actor, operation)
     target = binding['target']
     if (not isinstance(target, dict) or target.get('host') != owner.host
             or target.get('environment') != owner.environment or not permits(actor, target)):
         raise AuthError('insufficient_scope')
+    if 'expected_target' in fixed:
+        expected = fixed['expected_target']
+        if not isinstance(expected, dict) or any(expected.get(key) != value for key, value in target.items()):
+            raise AuthError('insufficient_scope')
     return replace(actor, actions=frozenset({canonical(operation)}), targets=[dict(target)]), public, digest
 
 
