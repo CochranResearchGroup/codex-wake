@@ -1,5 +1,7 @@
 """Wake management over OAuth HTTP and MCP with authenticated spoke polling."""
 import asyncio
+import json
+import sqlite3
 import os
 from pathlib import Path
 import tempfile
@@ -32,11 +34,12 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
             dsn.write_text(os.environ['CODEX_WAKE_TEST_NETWORK_DSN'])
             config.update(wake_network=dict(dsn_file=str(dsn), stale_seconds=60),
                           scopes=['observe', 'history.observe', 'content.observe', 'control'],
-                          targets=[dict(config['targets'][0], peer_id=peer, conversation_id=thread)])
+                          targets=[dict(config['targets'][0], peer_id=peer, conversation_id=thread), config['targets'][0]])
+
+            epoch = 2_000_000_000
 
             def clock():
-                now = time.time()
-                return {'utc': {'status': 'network', 'sources': ['a', 'b'], 'lower': now, 'upper': now}}
+                return {'utc': {'status': 'network', 'sources': ['a', 'b'], 'lower': epoch, 'upper': epoch}}
 
             hub = WakeNetwork(config['wake_network'], 'h', 'e', clock=clock)
             hub.initialize()
@@ -44,7 +47,7 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
             peer_headers = {'Authorization': 'Bearer ' + credential}
             base = f'/network/v1/peers/{peer}'
             live = LiveManagement(hub)
-            with patch('codex_wake.wake_network.snapshot', clock), patch(
+            with patch('codex_wake.controller_auth._qualified_upper', lambda: epoch), patch(
                     'codex_wake.wake_network_management.LiveManagement', return_value=live):
                 app = create_app(config, root, identify=lambda _: 'operator', operations=fixture.operations(root))
             route = '/network/v1/management/history/search'
@@ -53,12 +56,15 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                 metadata = await grant('history.observe')
                 content = await grant('history.observe content.observe')
                 control = await grant('control')
+                broad = await grant('history.observe', targets='1')
                 headers = {'Authorization': 'Bearer ' + metadata}
                 async with httpx.AsyncClient(transport=httpx.ASGITransport(app), base_url=config['issuer']) as client:
                     self.assertEqual((await client.put(base + '/directory', headers=peer_headers,
                         json={'revision': 1, 'recipients': [{'conversation_id': thread, 'name': 'fixture'}]})).status_code, 200)
                     offline = await client.post(route, headers=headers, json=address)
                     self.assertEqual(offline.json(), {'status': 'offline'})
+                    refused = await client.post(route, headers={'Authorization': 'Bearer ' + broad}, json=address)
+                    self.assertEqual(refused.status_code, 403)
                     denied = await client.post(route.replace('search', 'read'), headers=headers, json=address)
                     self.assertEqual(denied.status_code, 403)
                     bad_peer = await client.post(base + '/management/pull', headers=headers, json={})
@@ -66,27 +72,68 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
 
                     async def pull():
                         waiting = asyncio.create_task(client.post(base + '/management/pull', headers=peer_headers, json={}))
-                        for _ in range(100):
+                        for _ in range(250):
                             if peer in live.polls:
                                 return waiting
+                            if waiting.done():
+                                self.fail((await waiting).json())
                             await asyncio.sleep(.01)
+                        waiting.cancel()
                         self.fail('spoke poll never registered')
 
-                    class Protected:
-                        def execute(self, token, operation, arguments):
-                            if operation == 'history.search':
-                                return {'result': {'bindings': [
-                                    {'conversation_id': thread, 'last_known_presentation': 'absent'},
-                                    {'conversation_id': 'another', 'last_known_presentation': 'active'}]}}
-                            return {'result': {'records': ['withheld fixture content']}}
+                    from codex_wake.controller_accounts import ControllerAccounts
+                    from codex_wake.controller_auth import Actor
+                    from codex_wake.controller_http import ProtectedOperations
+                    from codex_wake.tab_monitor import TabMonitor
+
+                    accounts_path = root / 'controller-accounts.toml'
+                    accounts_path.write_text(f'[profiles]\nstate_root="{root / "homes"}"\nknown_profiles=["pilot"]\n'
+                                             '[history]\nreadable_accounts=["pilot"]\n')
+                    accounts_path.chmod(0o600)
+                    home = root / 'homes' / 'codex-pilot'
+                    sessions = home / 'sessions'
+                    sessions.mkdir(parents=True)
+                    rollout = sessions / 'saved.jsonl'
+                    marker = 'withheld fixture content'
+                    rollout.write_text(json.dumps({'type': 'session_meta', 'payload': {'id': thread}}) + '\n'
+                        + json.dumps({'type': 'response_item', 'payload': {'content': marker}}) + '\n')
+                    with sqlite3.connect(home / 'state_5.sqlite') as db:
+                        db.execute('CREATE TABLE threads (id text, cwd text, title text, rollout_path text)')
+                        db.execute('INSERT INTO threads VALUES (?,?,?,?)', (thread, '/original', 'fixture', str(rollout)))
+                    home_info = home.stat()
+                    account_target = ControllerAccounts(accounts_path, host='h', environment='e').execute(
+                        'accounts.resolve', {'selector': 'pilot'})['account']['target']
+                    monitor = TabMonitor(root, clock=time.time)
+                    pane = {'pane_id': '%1', 'pane_current_path': '/last-observed'}
+                    binding = dict(runtime='codex', conversation_id=thread,
+                        process=dict(pid=123, start_ticks=456, boot_id='fixture'), fresh=True,
+                        source='native_metadata', observed_at=time.time(),
+                        native_source=dict(home=str(home), home_generation=f'{home_info.st_dev}:{home_info.st_ino}'))
+                    resource = dict(target=dict(host='h', environment='e', workspace='old', presentation='tmux',
+                                                generation='fixture'),
+                        window=dict(window_id='@1', index=1, name='demo', panes=[pane]),
+                        traits=dict(panes=[dict(pane_id='%1', binding=binding)]))
+                    frame = dict(observed_at=time.time(), workspaces=['old'], unavailable=[], resources=[resource],
+                                 observation_scope=dict(host='h', environment='e'))
+                    monitor.publish_observation(frame, {})
+                    monitor.publish_observation(dict(frame, resources=[]), {})
+                    history_actor = Actor('local', 'service', 'local', 'history',
+                        'https://local.example', 'https://local.example/mcp',
+                        frozenset({'history.observe', 'content.observe'}), [account_target], epoch + 120)
+
+                    class HistoryAuthority:
+                        def authenticate(self, token):
+                            return history_actor
 
                     owner = SpokeManagement({thread: {
-                        'network.history.search': {'former_tab': 'demo'},
-                        'network.history.read': {'thread_id': thread},
-                    }}, Protected(), 'fixture-local-token', clock)
+                        'network.history.search': {'former_tab': 'demo', 'owners': ['pilot']},
+                        'network.history.read': {'thread_id': thread, 'owner': 'pilot'},
+                    }}, ProtectedOperations(HistoryAuthority(), fixture.operations(root)), 'local-test', clock)
 
                     async def complete(waiting):
-                        envelope = (await waiting).json()['request']
+                        claim = (await waiting).json()
+                        self.assertEqual(claim['status'], 'claimed', claim)
+                        envelope = claim['request']
                         response = await client.post(base + '/management/complete', headers=peer_headers,
                             json={'id': envelope['id'], 'result': owner.execute(envelope)})
                         self.assertEqual(response.json()['status'], 'completed')
@@ -94,18 +141,20 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                     waiting = await pull()
                     request = asyncio.create_task(client.post(route, headers=headers, json=address))
                     await complete(waiting)
-                    self.assertEqual((await request).json()['result']['bindings'],
-                                     [{'conversation_id': thread, 'last_known_presentation': 'absent'}])
+                    former = (await request).json()
+                    recorded, = former['result']['bindings']
+                    self.assertEqual(recorded['conversation_id'], thread)
+                    self.assertEqual(recorded['last_known_presentation'], 'absent')
+                    self.assertEqual(recorded['last_observed_cwd'], '/last-observed')
+                    self.assertNotIn(marker, json.dumps(former))
                     async with connect(content) as session:
                         waiting = await pull()
                         request = asyncio.create_task(session.call_tool('wake_network_history_read', address))
                         await complete(waiting)
                         result = await request
                         self.assertFalse(result.is_error, result.structured_content)
-                        self.assertEqual(result.structured_content['result']['records'], ['withheld fixture content'])
+                        self.assertEqual(result.structured_content['result']['records'][1]['payload']['content'], marker)
 
-                    from codex_wake.controller_auth import Actor
-                    from codex_wake.controller_http import ProtectedOperations
                     from codex_wake.controller_tab_adapters import TmuxAttachmentTransport
                     from codex_wake.tab_lifecycle import TabLifecycle
 
@@ -125,7 +174,7 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                     window = initial['snapshot']['windows'][0]['window_id']
                     terminal_actor = Actor('local', 'service', 'local', 'local',
                         'https://local.example', 'https://local.example/mcp', frozenset({'control'}),
-                        [{key: value for key, value in target.items() if key != 'generation'}], time.time() + 120)
+                        [{key: value for key, value in target.items() if key != 'generation'}], epoch + 120)
 
                     class TerminalAuthority:
                         def authenticate(self, token):
@@ -139,8 +188,11 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                         waiting = await pull()
                         scheduled = asyncio.create_task(client.post('/network/v1/management/tabs/rename',
                             headers={'Authorization': 'Bearer ' + control}, json=dict(address, name=name)))
-                        envelope = (await waiting).json()['request']
+                        claim = (await waiting).json()
+                        self.assertEqual(claim['status'], 'claimed', claim)
+                        envelope = claim['request']
                         effect = await asyncio.to_thread(terminal_owner.execute, envelope)
+                        self.assertIn('result', effect, effect)
                         self.assertEqual(effect['result']['operation']['execution'], 'completed', effect)
                         self.assertEqual(tmux('display-message', '-p', '-t', window, '#{window_name}'), name)
                         if send_receipt:

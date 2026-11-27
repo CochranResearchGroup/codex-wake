@@ -194,14 +194,9 @@ class SpokeManagement:
         if now is None or now >= envelope['deadline']:
             return {'status': 'expired'}
         try:
-            if isinstance(self.protected, ProtectedOperations):
-                from copy import copy
-
-                protected = copy(self.protected)
-                protected.authority = DeadlineAuthority(
-                    self.protected.authority, self.clock, envelope['deadline'], ACTIONS[action][1])
-            else:
-                protected = self.protected
+            authority = DeadlineAuthority(
+                self.protected.authority, self.clock, envelope['deadline'], ACTIONS[action][1])
+            protected = ProtectedOperations(authority, self.protected.operations)
             value = protected.execute(self.token, operation, arguments)
             if operation != 'history.search':
                 return value
