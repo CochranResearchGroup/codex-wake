@@ -43,3 +43,11 @@ Live tab reconstruction remains unqualified and no daemon was replaced.
 Public control/MCP checks: 26 passed. Skill validator first exposed an existing
 1045-character description (limit1024); concise routing description now includes
 recurring monitoring and validates. Total selected behavioral tests:113 passed.
+
+PR782 review (base cbd799b9, standards and spec axes):
+- Standards: one nonblocking readability finding accepted; replaced nested
+  conditional expressions in schedule status with an explicit decision chain.
+- Spec: no blocking findings for this bounded readiness/skill follow-up. Full
+  issue742 closed-tab placement acceptance belongs to the separate lane and is
+  not claimed. Registration inspection remains read-only and preserves peer
+  uncertainty holds. No daemon grants or route fallbacks are silently added.

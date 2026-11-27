@@ -317,9 +317,14 @@ class ScheduleStore:
             dict(value['target'], session_mode=value['request']['session_mode']))
         restoration_ready = restoration.get('status') != 'blocked'
         armed = ready and restoration_ready and value['state'] == 'enabled'
-        status = ('armed' if armed else 'held_restoration' if ready and not restoration_ready
-                  and value['state'] == 'enabled' else 'retained_unmonitored'
-                  if not ready and value['state'] == 'enabled' else value['state'])
+        status = value['state']
+        if status == 'enabled':
+            if not ready:
+                status = 'retained_unmonitored'
+            elif not restoration_ready:
+                status = 'held_restoration'
+            else:
+                status = 'armed'
         return dict(value, session_mode=value['request']['session_mode'],
             persistence=dict(saved=True),
             restoration=restoration,
