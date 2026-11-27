@@ -123,6 +123,11 @@ def create_app(config, root, *, identify=None, operations=None):
     verifier = ConnectorVerifier(authority, config)
     consent = BrowserConsent(authority, config, identify)
     entries = {tool_name(canonical(operation)): (operation, schema) for operation, schema in TOOLS.values()}
+    network = None
+    if 'wake_network' in config:
+        from .wake_network import WakeNetwork, TOOLS as network_tools
+        network = WakeNetwork(config['wake_network'], operations.host, operations.environment)
+        entries.update(network_tools)
     schedules = None
     if 'windows_message_owner' in config:
         from .external_owner_schedules import OwnerSchedules, TOOLS as owner_schedule_tools
@@ -143,7 +148,11 @@ def create_app(config, root, *, identify=None, operations=None):
                 check_action(actor, operation)
                 _check_content_scope(actor, operation)
                 policy = schedules.policy(operation) if schedules is not None else None
-                if policy:
+                if network is not None and operation == 'network.recipients':
+                    policy, description, readonly = 'observe', 'Find authorized Wake network recipients.', True
+                    if policy not in actor.scopes:
+                        continue
+                elif policy:
                     if not schedules.visible(actor, operation):
                         continue
                     from .external_owner_schedules import DESCRIPTIONS, STATUS
@@ -171,7 +180,9 @@ def create_app(config, root, *, identify=None, operations=None):
             operation = entries[params.name][0]
             _check_content_scope(actor, operation)
             arguments = _control_arguments(operation, params.arguments or {}, actor)
-            if schedules is not None and schedules.policy(operation):
+            if network is not None and operation == 'network.recipients':
+                dispatch = partial(network.discover, actor, arguments)
+            elif schedules is not None and schedules.policy(operation):
                 dispatch = partial(schedules.execute, verifier.actor, token, operation, arguments)
             else:
                 dispatch = partial(protected.execute, token, operation, arguments)
@@ -194,6 +205,8 @@ def create_app(config, root, *, identify=None, operations=None):
 
     @asynccontextmanager
     async def lifespan(app):
+        if network is not None:
+            await anyio.to_thread.run_sync(network.initialize)
         async with manager.run():
             yield
 
@@ -222,7 +235,11 @@ def create_app(config, root, *, identify=None, operations=None):
                 return JSONResponse({'error': 'invalid_request'}, status_code=400, headers={'Cache-Control': 'no-store'})
         return endpoint
 
-    return Starlette(routes=[Route('/register', guarded(consent.register), methods=['POST']),
+    network_routes = []
+    if network is not None:
+        from .wake_network_http import routes
+        network_routes = routes(network, verifier, url.netloc)
+    return Starlette(routes=network_routes + [Route('/register', guarded(consent.register), methods=['POST']),
         Route('/token', guarded(consent.token), methods=['POST']),
         Route('/revoke', guarded(consent.revoke), methods=['POST']),
         Route('/authorize', guarded(consent.authorize), methods=['GET','POST']),
@@ -261,6 +278,9 @@ def validate_config(config):
     if not isinstance(targets,list) or not 1 <= len(targets) <= 64 or any(not isinstance(t,dict) or t.get('host') != config['host'] or t.get('environment') != config['environment'] for t in targets):
         raise ValueError('explicit host-owned target policy required')
     intersect_targets(targets,targets)
+    if 'wake_network' in config:
+        from .wake_network import validate
+        validate(config['wake_network'])
     if 'windows_message_owner' in config:
         from .external_owner_schedules import validate
         validate(config['windows_message_owner'], config['host'], config['environment'])

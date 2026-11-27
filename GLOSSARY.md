@@ -4,6 +4,17 @@ Codex Wake records wake requests and agent messages whose deadlines must remain 
 
 ## Language
 
+**Wake network**:
+A group of Wake peers that exchange durable messages.
+
+**Wake peer**:
+A Wake deployment that owns delivery to its registered conversations and can
+exchange messages with other Wake deployments.
+
+**Wake hub**:
+The shared client entry point for a Wake network.
+
+
 **Wake deadline**:
 The point in time when a registered wake becomes due, including time spent asleep.
 

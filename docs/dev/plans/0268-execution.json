@@ -1,0 +1,64 @@
+{
+  "spec": 783,
+  "branch": "feat/spec783-wake-network",
+  "base": "9802311ae774296004e06caa19d9a2da739ba3c3",
+  "main_prerequisite": "d836db22",
+  "unified_delivery_prerequisite": "c5d0ca7d",
+  "hard_stop": "2026-11-27T15:37:58-06:00",
+  "checkpoint_target": "2026-11-27T15:27:58-06:00",
+  "review_passes": 0,
+  "tdd_remediation_passes": 0,
+  "tickets": [
+    {
+      "issue": 784,
+      "blockers": [],
+      "status": "validated",
+      "owner": "primary",
+      "evidence": "Disposable PostgreSQL, public HTTP and OAuth MCP directory acceptance passed."
+    },
+    {
+      "issue": 785,
+      "blockers": [
+        784
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 786,
+      "blockers": [
+        785
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 787,
+      "blockers": [
+        785
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 788,
+      "blockers": [
+        784
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 789,
+      "blockers": [
+        786,
+        787,
+        788
+      ],
+      "status": "pending"
+    },
+    {
+      "issue": 790,
+      "blockers": [
+        788
+      ],
+      "status": "pending"
+    }
+  ]
+}

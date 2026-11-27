@@ -152,7 +152,7 @@ class OAuthAuthority:
             raise AuthError('invalid_request')
         if not scopes or not set(scopes) <= SCOPES: raise AuthError('invalid_scope')
         def valid_target(target):
-            if not isinstance(target, dict) or not target or set(target) - {'host', 'environment', 'runtime', 'namespace', 'conversation_id', 'provider', 'account', 'home', 'home_generation', 'configuration_revision', 'rollout_revision', 'build_channel', 'build_sha256', 'build_revision', 'executable', 'recipe', 'recipe_sha256', 'authority', 'generation', 'workspace', 'presentation', 'fixture_id', 'migration_revision', 'migration_id', 'flow_id', 'backend_id', 'channel', 'connection_generation', 'process_pid', 'process_start_ticks', 'process_boot_id', 'registry', 'registry_revision', 'store_id', 'process', 'socket_generation', 'resource_id', 'pane_id', 'window_id', 'tab_id', 'terminal_session_id', 'bot_id'}:
+            if not isinstance(target, dict) or not target or set(target) - {'host', 'environment', 'runtime', 'namespace', 'conversation_id', 'provider', 'account', 'home', 'home_generation', 'configuration_revision', 'rollout_revision', 'build_channel', 'build_sha256', 'build_revision', 'executable', 'recipe', 'recipe_sha256', 'authority', 'generation', 'workspace', 'presentation', 'fixture_id', 'migration_revision', 'migration_id', 'flow_id', 'backend_id', 'channel', 'connection_generation', 'process_pid', 'process_start_ticks', 'process_boot_id', 'registry', 'registry_revision', 'store_id', 'process', 'socket_generation', 'resource_id', 'pane_id', 'window_id', 'tab_id', 'terminal_session_id', 'bot_id', 'peer_id'}:
                 return False
             for key, value in target.items():
                 if key == 'process':
