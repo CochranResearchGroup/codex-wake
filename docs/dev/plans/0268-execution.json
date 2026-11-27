@@ -91,7 +91,7 @@
       ],
       "status": "blocked",
       "owner": "/root/busy_dnd",
-      "remaining": "Separate authority for persistent Bastion and Cooper setup, selected private HTTPS origin, exact Cooper canary owner and Bastion maintenance window. Minecraft listener active at read-only preflight.",
+      "remaining": "Configure a supported independent qualified time source on Bastion and a private HTTPS ingress with working OAuth consent, then schedule the controlled reboot.",
       "tracker": "open",
       "worker_result": "14b92580",
       "result": "413f48e3",
@@ -99,7 +99,21 @@
         "Exact installed wheel staged and verified; four stock turns over HTTPS and two replies",
         "Linux recipient resumed original conversation after stock app-server restart",
         "29 focused integrated tests passed"
-      ]
+      ],
+      "rollout_authorized": true,
+      "live_staging": {
+        "candidate": "343608cc",
+        "origin_candidate": "https://bastion.tail3548d2.ts.net:8443",
+        "peers": [
+          "bastion",
+          "cooper-wsl"
+        ],
+        "bastion": "Native PostgreSQL and private stock pilot active; hub and spoke boot units present and guarded inactive.",
+        "cooper": "WSL stock and private database active; network spoke disabled. Local wake completed exactly once with network unavailable.",
+        "ingress": "Tailscale Serve route creation denied to SSH user; no route applied.",
+        "time": "Bastion candidate reported stable_time_configuration_required. Current StableTime native server requires Windows.",
+        "reboot": "Pending; existing Minecraft listener observed, no change."
+      }
     },
     {
       "issue": 790,
@@ -122,7 +136,7 @@
   },
   "checkpoint": {
     "at": "2026-11-27T14:06:07-06:00",
-    "status": "live_rollout_authority_pending",
+    "status": "live_staged_waiting_for_ingress_and_independent_time",
     "closed_issues": [
       784,
       785,
@@ -137,6 +151,6 @@
     "review_and_tdd": "Pending until #789 acceptance and closure.",
     "private_evidence_dir": "/tmp/wake783.reIAEp",
     "full_suite": "Attempt on c77a981c stopped under host contention before it finished; no passing full-suite claim.",
-    "next": "Approve and qualify the exact persistent pilot, then close #789 and perform one review and one TDD remediation."
+    "next": "Qualify Bastion private ingress, OAuth consent and independent time. Run and prove the persistent pilot before closing #789."
   }
 }
