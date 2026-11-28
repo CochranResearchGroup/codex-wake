@@ -28,6 +28,8 @@ TOOLS = {
 }
 SCHEMAS = dict(TOOLS.values())
 _SLOT_LIMIT = 8
+# Native history admits up to 8 MiB before its response metadata is added.
+_COMPLETION_BYTES = 10 * 1024 * 1024
 
 
 @dataclass
@@ -381,7 +383,7 @@ def routes(management, verifier, host):
     return [
         Route('/network/v1/peers/{peer_id}/management/pull', endpoint(management.pull), methods=['POST']),
         Route('/network/v1/peers/{peer_id}/management/start', endpoint(management.start), methods=['POST']),
-        Route('/network/v1/peers/{peer_id}/management/complete', endpoint(management.complete), methods=['POST']),
+        Route('/network/v1/peers/{peer_id}/management/complete', endpoint(management.complete, peer_body=(management.peer, _COMPLETION_BYTES)), methods=['POST']),
         Route('/network/v1/management/catalog', endpoint(management.list_catalog, client=True), methods=['POST']),
         Route('/network/v1/management/execute', endpoint(management.execute_catalog, client=True, reverify=True),
               methods=['POST']),
@@ -457,8 +459,8 @@ def main(argv=None):
 
     def request(operation, value):
         path = f'/network/v1/peers/{peer}/management/{operation}'
-        data = json.dumps(value, separators=(',', ':')).encode()
-        if len(data) > 65536 and operation == 'complete':
+        data = json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode()
+        if operation == 'complete' and len(data) > _COMPLETION_BYTES:
             data = json.dumps({'id': value['id'], 'result': {'status': 'failed', 'error': 'response_too_large'}}).encode()
         call = Request(issuer + path, data=data, headers={
             'Authorization': 'Bearer ' + credential, 'Content-Type': 'application/json'})

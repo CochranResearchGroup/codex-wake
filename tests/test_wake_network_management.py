@@ -106,7 +106,7 @@ class WakeNetworkManagementTests(unittest.IsolatedAsyncioTestCase):
                     sessions = home / 'sessions'
                     sessions.mkdir(parents=True)
                     rollout = sessions / 'saved.jsonl'
-                    marker = 'withheld fixture content'
+                    marker = 'saved history beyond the original completion limit ' * 1600
                     rollout.write_text(json.dumps({'type': 'session_meta', 'payload': {'id': thread}}) + '\n'
                         + json.dumps({'type': 'response_item', 'payload': {'content': marker}}) + '\n')
                     with sqlite3.connect(home / 'state_5.sqlite') as db:

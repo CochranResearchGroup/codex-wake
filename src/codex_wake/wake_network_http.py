@@ -12,24 +12,29 @@ from .controller_auth import AuthError
 from .managed_inventory import InventoryError
 
 
-async def read_json(request):
+async def read_json(request, *, limit=65536):
     body = bytearray()
     async for chunk in request.stream():
-        if len(body) + len(chunk) > 65536:
+        if len(body) + len(chunk) > limit:
             raise InventoryError('invalid_argument', 'request body exceeds limit')
         body.extend(chunk)
     return json.loads(body)
 
 
 def guard(verifier, host):
-    def guarded(function, *, client=False, reverify=False):
+    def guarded(function, *, client=False, reverify=False, peer_body=None):
         async def endpoint(request):
             status = 200
             try:
                 if request.headers.get('host', '').lower() != host.lower():
                     raise InventoryError('invalid_argument', 'unexpected request host')
-                value = await read_json(request)
                 authorization = request.headers.get('authorization', '')
+                if peer_body is None:
+                    value = await read_json(request)
+                else:
+                    authenticate, limit = peer_body
+                    await anyio.to_thread.run_sync(authenticate, request.path_params['peer_id'], authorization)
+                    value = await read_json(request, limit=limit)
                 if client:
                     if not authorization.startswith('Bearer '):
                         raise AuthError()
