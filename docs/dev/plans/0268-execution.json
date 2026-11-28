@@ -101,7 +101,8 @@
         "29 focused integrated tests passed",
         "Persistent Cooper and Bastion peers exchanged one request and linked reply each via HTTPS. Each receiving native session recorded one input and completion per delivery.",
         "While only the Cooper pilot spoke was stopped, Bastion accepted an undelivered canary and Cooper independently completed a local wake on its original thread. After reconnect, the original canary completed once with the same expiry and one PostgreSQL attempt.",
-        "Exact installed cefac52b wheel passed isolated PostgreSQL pg_dump and pg_restore with a held unavailable owner, two exact reconciliations and one tombstone."
+        "Exact installed cefac52b wheel passed isolated PostgreSQL pg_dump and pg_restore with a held unavailable owner, two exact reconciliations and one tombstone.",
+        "The installed Cooper controller used temporary exact-scope PKCE grants to read the original stock conversation and rename then restore a dedicated tmux window. Grants were revoked. The enrolled Cooper peer authenticated to the Bastion management poll endpoint and received 200 idle."
       ],
       "rollout_authorized": true,
       "live_staging": {
