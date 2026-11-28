@@ -91,7 +91,7 @@
       ],
       "status": "in_progress",
       "owner": "/root",
-      "remaining": "Verify authenticated history and reversible terminal management through the same-domain gateway, then verify pre-login delivery after the shared operator reboot.",
+      "remaining": "Verify one pre-login delivery after the shared operator reboot and confirm zero owner attempts for the expired canary.",
       "tracker": "open",
       "worker_result": "14b92580",
       "result": "413f48e3",
@@ -103,7 +103,8 @@
         "While only the Cooper pilot spoke was stopped, Bastion accepted an undelivered canary and Cooper independently completed a local wake on its original thread. After reconnect, the original canary completed once with the same expiry and one PostgreSQL attempt.",
         "Exact installed cefac52b wheel passed isolated PostgreSQL pg_dump and pg_restore with a held unavailable owner, two exact reconciliations and one tombstone.",
         "The installed Cooper controller used temporary exact-scope PKCE grants to read the original stock conversation and rename then restore a dedicated tmux window. Grants were revoked. The enrolled Cooper peer authenticated to the Bastion management poll endpoint and received 200 idle.",
-        "Bastion private same-domain issuer accepted browser consent through Bastion Authelia, completed PKCE exchange and authenticated MCP initialization; temporary grant revoked. Cooper used an exact browser resolver mapping; public endpoint returned 404."
+        "Bastion private same-domain issuer accepted browser consent through Bastion Authelia, completed PKCE exchange and authenticated MCP initialization; temporary grant revoked. Cooper used an exact browser resolver mapping; public endpoint returned 404.",
+        "The live Bastion private issuer on dc45aa5e returned 63 saved Cooper records via OAuth MCP. HTTPS API renamed and restored the dedicated tmux window. After the poller stopped, a rename returned offline and the exact window retained its baseline name. Temporary grants revoked."
       ],
       "rollout_authorized": true,
       "live_staging": {
@@ -142,7 +143,7 @@
   },
   "checkpoint": {
     "at": "2026-11-27T20:36:47-06:00",
-    "status": "private_oauth_consent_verified_waiting_for_gateway_operations_and_shared_reboot",
+    "status": "live_gateway_verified_waiting_for_shared_reboot",
     "closed_issues": [
       784,
       785,
@@ -157,6 +158,6 @@
     "review_and_tdd": "Pending until #789 acceptance and closure.",
     "private_evidence_dir": "/tmp/wake783.reIAEp",
     "full_suite": "Attempt on c77a981c stopped under host contention before it finished; no passing full-suite claim.",
-    "next": "Qualify live gateway history and terminal effects from Cooper, then finish the coordinated reboot proof."
+    "next": "Once Fleet and Wake are ready, stage a fresh preboot canary and verify original-thread delivery over HTTPS before Bastion SSH."
   }
 }
