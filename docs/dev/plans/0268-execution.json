@@ -91,7 +91,7 @@
       ],
       "status": "in_progress",
       "owner": "/root",
-      "remaining": "Verify native boot and pre-login delivery after operator reboot. Qualify live OAuth consent and gateway management.",
+      "remaining": "Verify authenticated history and reversible terminal management through the same-domain gateway, then verify pre-login delivery after the shared operator reboot.",
       "tracker": "open",
       "worker_result": "14b92580",
       "result": "413f48e3",
@@ -102,7 +102,8 @@
         "Persistent Cooper and Bastion peers exchanged one request and linked reply each via HTTPS. Each receiving native session recorded one input and completion per delivery.",
         "While only the Cooper pilot spoke was stopped, Bastion accepted an undelivered canary and Cooper independently completed a local wake on its original thread. After reconnect, the original canary completed once with the same expiry and one PostgreSQL attempt.",
         "Exact installed cefac52b wheel passed isolated PostgreSQL pg_dump and pg_restore with a held unavailable owner, two exact reconciliations and one tombstone.",
-        "The installed Cooper controller used temporary exact-scope PKCE grants to read the original stock conversation and rename then restore a dedicated tmux window. Grants were revoked. The enrolled Cooper peer authenticated to the Bastion management poll endpoint and received 200 idle."
+        "The installed Cooper controller used temporary exact-scope PKCE grants to read the original stock conversation and rename then restore a dedicated tmux window. Grants were revoked. The enrolled Cooper peer authenticated to the Bastion management poll endpoint and received 200 idle.",
+        "Bastion private same-domain issuer accepted browser consent through Bastion Authelia, completed PKCE exchange and authenticated MCP initialization; temporary grant revoked. Cooper used an exact browser resolver mapping; public endpoint returned 404."
       ],
       "rollout_authorized": true,
       "live_staging": {
@@ -141,7 +142,7 @@
   },
   "checkpoint": {
     "at": "2026-11-27T20:36:47-06:00",
-    "status": "waiting_for_shared_reboot_readiness_and_live_oauth_consent",
+    "status": "private_oauth_consent_verified_waiting_for_gateway_operations_and_shared_reboot",
     "closed_issues": [
       784,
       785,
@@ -156,6 +157,6 @@
     "review_and_tdd": "Pending until #789 acceptance and closure.",
     "private_evidence_dir": "/tmp/wake783.reIAEp",
     "full_suite": "Attempt on c77a981c stopped under host contention before it finished; no passing full-suite claim.",
-    "next": "Agree on the private OAuth consent path and qualify gateway actions. At the shared operator-led reboot, stage a fresh canary and verify delivery before Bastion login."
+    "next": "Qualify live gateway history and terminal effects from Cooper, then finish the coordinated reboot proof."
   }
 }
