@@ -225,3 +225,15 @@ For the boot check the dedicated native spoke is enabled and stopped with
 user linger enabled. The hub accepted a timed canary before reboot and the
 recipient had no inbound record. The operator was asked to reboot Bastion.
 Observe the new delivery over HTTPS before any SSH login.
+
+The current Cooper installation exposes separate pilot Codex, local Wake,
+provider and message spoke units. A live management poller is a separate
+entrypoint and has no installed Cooper pilot unit in that inventory. The
+gateway test needs both a client OAuth grant and a spoke-owned management
+poller with a current local controller grant. Stage the poller on a dedicated
+pilot root with exact history and window bindings. Record authenticated
+history for the original conversation, a rename and verified reverse rename
+on the dedicated window, and an offline request with zero owner effects.
+Check the expired canary through the owner after boot for zero attempts.
+Peer message delivery and OAuth discovery do not establish those management
+receipts.
