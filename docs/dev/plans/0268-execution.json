@@ -90,7 +90,7 @@
         788
       ],
       "status": "in_progress",
-      "owner": "/root/busy_dnd",
+      "owner": "/root",
       "remaining": "Verify native boot and pre-login delivery after operator reboot. Qualify live OAuth consent and gateway management.",
       "tracker": "open",
       "worker_result": "14b92580",
@@ -115,7 +115,7 @@
         "cooper": "Dedicated WSL stock Codex, private database and spoke active. Local wake previously completed exactly once with the network inactive.",
         "ingress": "Operator applied a Tailnet-only HTTPS Serve route to the dedicated Bastion loopback hub. Trusted TLS, OAuth discovery and 401 responses on anonymous MCP and peer requests verified from Cooper.",
         "time": "Installed cefac52b obtained native Linux adjtimex UTC bounds on Bastion without StableTime. WSL still used StableTime. 13 local clock/adapter tests passed.",
-        "reboot": "Operator asked to reboot after the timed message was hub_accepted with no Bastion recipient effect. Spoke inactive but enabled and user linger enabled before reboot.",
+        "reboot": "Original canary expiry passed with no delivery receipt in Cooper HTTPS readback. Stage a fresh canary only when Wake and Fleet are ready for the operator-led shared reboot. Keep SSH closed until Cooper verifies delivery.",
         "fleet": "Fleet Receipts #219 tracks broker-owned Serve maintenance and is blocked by Fleet #180 and #203."
       }
     },
@@ -139,8 +139,8 @@
     "environment": "isolated PostgreSQL, real loopback TLS, OAuth MCP and private tmux"
   },
   "checkpoint": {
-    "at": "2026-11-27T17:58:00-06:00",
-    "status": "waiting_for_operator_reboot_and_live_oauth_consent",
+    "at": "2026-11-27T20:36:47-06:00",
+    "status": "waiting_for_shared_reboot_readiness_and_live_oauth_consent",
     "closed_issues": [
       784,
       785,
@@ -155,6 +155,6 @@
     "review_and_tdd": "Pending until #789 acceptance and closure.",
     "private_evidence_dir": "/tmp/wake783.reIAEp",
     "full_suite": "Attempt on c77a981c stopped under host contention before it finished; no passing full-suite claim.",
-    "next": "Observe pre-login recovery over HTTPS after operator reboot and qualify live OAuth consent and gateway actions."
+    "next": "Agree on the private OAuth consent path and qualify gateway actions. At the shared operator-led reboot, stage a fresh canary and verify delivery before Bastion login."
   }
 }
