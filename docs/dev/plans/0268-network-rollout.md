@@ -209,3 +209,19 @@ external OAuth on synchronized native Linux without a StableTime configuration.
 An explicitly configured StableTime service and WSL keep their existing time
 paths. Ten focused OAuth tests passed. Live consent, gateway management, and
 reboot evidence remain open at this checkpoint.
+
+The installed spoke wheel passed an isolated PostgreSQL dump and restore
+exercise. The unavailable owner held work, the returning owner reconciled
+two exact effects, and the tombstone remained fenced. The production
+database and real conversation content were outside the scratch restore.
+
+The upgraded dedicated hub accepted client registration over HTTPS. The exact
+authorization request reached the configured identity verifier and returned
+`identity_provider_unavailable`. Bastion Authelia's cookie domain differs
+from the Tailnet issuer domain. Browser consent and authenticated gateway
+management remain open.
+
+For the boot check the dedicated native spoke is enabled and stopped with
+user linger enabled. The hub accepted a timed canary before reboot and the
+recipient had no inbound record. The operator was asked to reboot Bastion.
+Observe the new delivery over HTTPS before any SSH login.

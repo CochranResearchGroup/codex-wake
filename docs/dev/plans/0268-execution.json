@@ -91,7 +91,7 @@
       ],
       "status": "in_progress",
       "owner": "/root/busy_dnd",
-      "remaining": "Complete the isolated restore and native boot receipts. Qualify consent and gateway management using the live OAuth surface.",
+      "remaining": "Verify native boot and pre-login delivery after operator reboot. Qualify live OAuth consent and gateway management.",
       "tracker": "open",
       "worker_result": "14b92580",
       "result": "413f48e3",
@@ -100,11 +100,12 @@
         "Linux recipient resumed original conversation after stock app-server restart",
         "29 focused integrated tests passed",
         "Persistent Cooper and Bastion peers exchanged one request and linked reply each via HTTPS. Each receiving native session recorded one input and completion per delivery.",
-        "While only the Cooper pilot spoke was stopped, Bastion accepted an undelivered canary and Cooper independently completed a local wake on its original thread. After reconnect, the original canary completed once with the same expiry and one PostgreSQL attempt."
+        "While only the Cooper pilot spoke was stopped, Bastion accepted an undelivered canary and Cooper independently completed a local wake on its original thread. After reconnect, the original canary completed once with the same expiry and one PostgreSQL attempt.",
+        "Exact installed cefac52b wheel passed isolated PostgreSQL pg_dump and pg_restore with a held unavailable owner, two exact reconciliations and one tombstone."
       ],
       "rollout_authorized": true,
       "live_staging": {
-        "candidate": "Both spokes deployed on cefac52b. OAuth native UTC fix 5426e547 passed local qualification and is pending dedicated hub switch.",
+        "candidate": "Cooper and Bastion spokes use cefac52b. Dedicated Bastion hub uses exact 5426e547. Live DCR returns 201 and authorization reaches the identity provider, which returns 503 because the fixed verifier is unavailable.",
         "origin_candidate": "https://bastion.tail3548d2.ts.net:8443",
         "peers": [
           "bastion",
@@ -114,7 +115,7 @@
         "cooper": "Dedicated WSL stock Codex, private database and spoke active. Local wake previously completed exactly once with the network inactive.",
         "ingress": "Operator applied a Tailnet-only HTTPS Serve route to the dedicated Bastion loopback hub. Trusted TLS, OAuth discovery and 401 responses on anonymous MCP and peer requests verified from Cooper.",
         "time": "Installed cefac52b obtained native Linux adjtimex UTC bounds on Bastion without StableTime. WSL still used StableTime. 13 local clock/adapter tests passed.",
-        "reboot": "Pending; existing Minecraft listener observed, no change.",
+        "reboot": "Operator asked to reboot after the timed message was hub_accepted with no Bastion recipient effect. Spoke inactive but enabled and user linger enabled before reboot.",
         "fleet": "Fleet Receipts #219 tracks broker-owned Serve maintenance and is blocked by Fleet #180 and #203."
       }
     },
@@ -139,7 +140,7 @@
   },
   "checkpoint": {
     "at": "2026-11-27T17:58:00-06:00",
-    "status": "live_https_and_bidirectional_delivery_verified",
+    "status": "waiting_for_operator_reboot_and_live_oauth_consent",
     "closed_issues": [
       784,
       785,
@@ -154,6 +155,6 @@
     "review_and_tdd": "Pending until #789 acceptance and closure.",
     "private_evidence_dir": "/tmp/wake783.reIAEp",
     "full_suite": "Attempt on c77a981c stopped under host contention before it finished; no passing full-suite claim.",
-    "next": "Confirm isolated scratch restore and qualified private OAuth gateway consent and management. Verify native boot following operator reboot."
+    "next": "Observe pre-login recovery over HTTPS after operator reboot and qualify live OAuth consent and gateway actions."
   }
 }
